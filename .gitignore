@@ -25,6 +25,7 @@ out/
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
+local.properties
 
 # JVM error logs
 hs_err_pid*.log
