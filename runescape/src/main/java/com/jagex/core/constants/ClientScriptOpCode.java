@@ -85,6 +85,22 @@ public final class ClientScriptOpCode {
     public static final int BRANCH_IF_TRUE = 86;
 
     public static final int BRANCH_IF_FALSE = 87;
+    
+    public static final int PUSH_VARCLAN = 106;
+
+    public static final int PUSH_VARCLANBIT = 107;
+
+    public static final int PUSH_VARCLAN_LONG = 108;
+
+    public static final int PUSH_VARCLAN_STRING = 109;
+
+    public static final int PUSH_VARCLANSETTING = 112;
+
+    public static final int PUSH_VARCLANSETTINGBIT = 113;
+
+    public static final int PUSH_VARCLAN_SETTING_LONG = 114;
+
+    public static final int PUSH_VARCLANSETTING_STRING = 115;
 
     public static final int CC_CREATE = 150;
 

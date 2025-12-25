@@ -709,6 +709,14 @@ import static com.jagex.core.constants.ClientScriptOpCode.PUSH_STRING_LOCAL;
 import static com.jagex.core.constants.ClientScriptOpCode.PUSH_VAR;
 import static com.jagex.core.constants.ClientScriptOpCode.PUSH_VARBIT;
 import static com.jagex.core.constants.ClientScriptOpCode.PUSH_VARC;
+import static com.jagex.core.constants.ClientScriptOpCode.PUSH_VARCLAN;
+import static com.jagex.core.constants.ClientScriptOpCode.PUSH_VARCLANBIT;
+import static com.jagex.core.constants.ClientScriptOpCode.PUSH_VARCLANSETTING;
+import static com.jagex.core.constants.ClientScriptOpCode.PUSH_VARCLANSETTINGBIT;
+import static com.jagex.core.constants.ClientScriptOpCode.PUSH_VARCLANSETTING_STRING;
+import static com.jagex.core.constants.ClientScriptOpCode.PUSH_VARCLAN_LONG;
+import static com.jagex.core.constants.ClientScriptOpCode.PUSH_VARCLAN_SETTING_LONG;
+import static com.jagex.core.constants.ClientScriptOpCode.PUSH_VARCLAN_STRING;
 import static com.jagex.core.constants.ClientScriptOpCode.PUSH_VARCSTR;
 import static com.jagex.core.constants.ClientScriptOpCode.QUIT;
 import static com.jagex.core.constants.ClientScriptOpCode.RANDOM;
@@ -4962,7 +4970,7 @@ public final class ScriptRunner {
                     if (intStack[--intStackPointer] == 0) {
                         pc += operands[pc];
                     }
-                } else if (op == 106) {
+                } else if (op == PUSH_VARCLAN) {
                     @Pc(96) int id = operands[pc];
                     @Pc(1178) Integer varclan = (Integer) Static279.clanVars[id];
                     if (varclan == null) {
@@ -4975,7 +4983,7 @@ public final class ScriptRunner {
                     } else {
                         intStack[intStackPointer++] = varclan;
                     }
-                } else if (op == 107) {
+                } else if (op == PUSH_VARCLANBIT) {
                     @Pc(96) int id = operands[pc];
                     @Pc(1236) VarClanSettingType type = VarClanSettingTypeList.instance.list(id);
                     if (type.dataType != '\u0001') {
@@ -4988,7 +4996,7 @@ public final class ScriptRunner {
                         @Pc(1284) int local1284 = type.end == 31 ? -1 : (0x1 << type.end + 1) - 1;
                         intStack[intStackPointer++] = (varclan & local1284) >>> type.start;
                     }
-                } else if (op == 108) {
+                } else if (op == PUSH_VARCLAN_LONG) {
                     @Pc(96) int id = operands[pc];
                     @Pc(1311) Long varclan = (Long) Static279.clanVars[id];
                     if (varclan == null) {
@@ -4996,7 +5004,7 @@ public final class ScriptRunner {
                     } else {
                         longStack[longStackPointer++] = varclan;
                     }
-                } else if (op == 109) {
+                } else if (op == PUSH_VARCLAN_STRING) {
                     @Pc(96) int id = operands[pc];
                     @Pc(465) String varclan = (String) Static279.clanVars[id];
                     if (varclan == null) {
@@ -5004,13 +5012,13 @@ public final class ScriptRunner {
                     } else {
                         stringStack[stringStackPointer++] = varclan;
                     }
-                } else if (op == 112) {
+                } else if (op == PUSH_VARCLANSETTING) {
                     intStack[intStackPointer++] = getClanSettingInt(operands[pc]);
-                } else if (op == 113) {
+                } else if (op == PUSH_VARCLANSETTINGBIT) {
                     intStack[intStackPointer++] = getClanSettingVarbit(operands[pc]);
-                } else if (op == 114) {
+                } else if (op == PUSH_VARCLAN_SETTING_LONG) {
                     longStack[longStackPointer++] = getClanSettingLong(operands[pc]);
-                } else if (op == 115) {
+                } else if (op == PUSH_VARCLANSETTING_STRING) {
                     stringStack[stringStackPointer++] = getClanSettingString(operands[pc]);
                 }
             }
