@@ -7,9 +7,6 @@
 # Git
 !.git*
 
-# GitHub
-!/.github
-
 # EditorConfig
 !.editorconfig
 
