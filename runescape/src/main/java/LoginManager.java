@@ -6,6 +6,7 @@ import com.jagex.core.constants.LoginResponseCode;
 import com.jagex.core.constants.LoginStep;
 import com.jagex.core.constants.MainLogicStep;
 import com.jagex.core.constants.ModeWhere;
+import com.jagex.core.constants.Ports;
 import com.jagex.core.crypto.Isaac;
 import com.jagex.core.datastruct.key.Deque;
 import com.jagex.core.datastruct.key.IterableHashTable;
@@ -683,8 +684,8 @@ public final class LoginManager {
                         ConnectionInfo.auto.address = bitPacket.gjstr2();
 
                         if (ModeWhere.LIVE != Client.modeWhere) {
-                            ConnectionInfo.auto.defaultPort = ConnectionInfo.auto.world + 40000;
-                            ConnectionInfo.auto.alternatePort = ConnectionInfo.auto.world + 50000;
+                            ConnectionInfo.auto.defaultPort = ConnectionInfo.auto.world + Ports.DEFAULT_OFFSET;
+                            ConnectionInfo.auto.alternatePort = ConnectionInfo.auto.world + Ports.ALTERNATE_OFFSET;
                         }
 
                         if ((ModeWhere.LOCAL != Client.modeWhere) && ((Client.modeWhere != ModeWhere.WTQA) || (Client.staffModLevel < 2)) && ConnectionInfo.login.equalTo(ConnectionInfo.game)) {

@@ -1,5 +1,6 @@
 package com.jagex.core.io;
 
+import com.jagex.core.constants.Ports;
 import com.jagex.sign.SignLink;
 import com.jagex.sign.SignedResource;
 import org.openrs2.deob.annotation.OriginalArg;
@@ -31,10 +32,10 @@ public final class ConnectionInfo {
     public String address;
 
     @OriginalMember(owner = "client!lja", name = "m", descriptor = "I")
-    public int defaultPort = 43594;
+    public int defaultPort = Ports.DEFAULT;
 
     @OriginalMember(owner = "client!lja", name = "k", descriptor = "I")
-    public int alternatePort = 443;
+    public int alternatePort = Ports.HTTPS;
 
     @OriginalMember(owner = "client!lja", name = "d", descriptor = "Z")
     public boolean proxy = false;

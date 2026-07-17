@@ -1,5 +1,6 @@
 package com.jagex.core.io.socket;
 
+import com.jagex.core.constants.Ports;
 import org.openrs2.deob.annotation.OriginalArg;
 import org.openrs2.deob.annotation.OriginalClass;
 import org.openrs2.deob.annotation.OriginalMember;
@@ -24,8 +25,6 @@ import java.util.List;
 
 @OriginalClass("client!ob")
 public final class ProxySocketFactory extends SocketFactory {
-
-    private static final int HTTPS_PORT = 443;
 
     @OriginalMember(owner = "client!ob", name = "h", descriptor = "Ljava/net/ProxySelector;")
     private final ProxySelector selector = ProxySelector.getDefault();
@@ -155,7 +154,7 @@ public final class ProxySocketFactory extends SocketFactory {
             System.setProperty("java.net.useSystemProxies", "true");
         }
 
-        @Pc(26) boolean secure = this.port == HTTPS_PORT;
+        @Pc(26) boolean secure = this.port == Ports.HTTPS;
 
         @Pc(55) List primary;
         @Pc(84) List secondary;

@@ -6,6 +6,7 @@ import com.jagex.core.constants.MainLogicStep;
 import com.jagex.core.constants.ModeGame;
 import com.jagex.core.constants.ModeWhat;
 import com.jagex.core.constants.ModeWhere;
+import com.jagex.core.constants.Ports;
 import com.jagex.core.io.BufferedFile;
 import com.jagex.core.io.BufferedSocket;
 import com.jagex.core.io.ConnectionInfo;
@@ -301,8 +302,8 @@ public final class client extends GameShell {
             ConnectionInfo.login.address = address;
 
             if (Client.modeWhere != ModeWhere.LIVE) {
-                ConnectionInfo.login.defaultPort = ConnectionInfo.login.world + 40000;
-                ConnectionInfo.login.alternatePort = ConnectionInfo.login.world + 50000;
+                ConnectionInfo.login.defaultPort = ConnectionInfo.login.world + Ports.DEFAULT_OFFSET;
+                ConnectionInfo.login.alternatePort = ConnectionInfo.login.world + Ports.ALTERNATE_OFFSET;
             }
 
             for (@Pc(45) int i = 0; i < WorldList.activeWorlds.length; i++) {
@@ -315,7 +316,7 @@ public final class client extends GameShell {
 
         @Pc(73) String port = "";
         if (ModeWhere.LIVE != Client.modeWhere) {
-            port = ":" + (world + 7000);
+            port = ":" + (world + Ports.HTTP_OFFSET);
         }
 
         @Pc(88) String settings = "";
@@ -1054,17 +1055,17 @@ public final class client extends GameShell {
             ConnectionInfo.game.address = this.getCodeBase().getHost();
         } else if (ModeWhere.isPrivate(Client.modeWhere)) {
             ConnectionInfo.game.address = this.getCodeBase().getHost();
-            ConnectionInfo.game.defaultPort = ConnectionInfo.game.world + 40000;
-            ConnectionInfo.game.alternatePort = ConnectionInfo.game.world + 50000;
-            ConnectionInfo.lobby.defaultPort = ConnectionInfo.lobby.world + 40000;
-            ConnectionInfo.lobby.alternatePort = ConnectionInfo.lobby.world + 50000;
+            ConnectionInfo.game.defaultPort = ConnectionInfo.game.world + Ports.DEFAULT_OFFSET;
+            ConnectionInfo.game.alternatePort = ConnectionInfo.game.world + Ports.ALTERNATE_OFFSET;
+            ConnectionInfo.lobby.defaultPort = ConnectionInfo.lobby.world + Ports.DEFAULT_OFFSET;
+            ConnectionInfo.lobby.alternatePort = ConnectionInfo.lobby.world + Ports.ALTERNATE_OFFSET;
         } else if (ModeWhere.LOCAL == Client.modeWhere) {
             ConnectionInfo.game.address = "127.0.0.1";
-            ConnectionInfo.game.defaultPort = ConnectionInfo.game.world + 40000;
+            ConnectionInfo.game.defaultPort = ConnectionInfo.game.world + Ports.DEFAULT_OFFSET;
             ConnectionInfo.lobby.address = "127.0.0.1";
-            ConnectionInfo.game.alternatePort = ConnectionInfo.game.world + 50000;
-            ConnectionInfo.lobby.defaultPort = ConnectionInfo.lobby.world + 40000;
-            ConnectionInfo.lobby.alternatePort = ConnectionInfo.lobby.world + 50000;
+            ConnectionInfo.game.alternatePort = ConnectionInfo.game.world + Ports.ALTERNATE_OFFSET;
+            ConnectionInfo.lobby.defaultPort = ConnectionInfo.lobby.world + Ports.DEFAULT_OFFSET;
+            ConnectionInfo.lobby.alternatePort = ConnectionInfo.lobby.world + Ports.ALTERNATE_OFFSET;
         }
 
         ConnectionInfo.login = ConnectionInfo.game;

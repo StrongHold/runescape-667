@@ -4,6 +4,7 @@ import com.jagex.Client;
 import com.jagex.sign.SignedResource;
 import com.jagex.sign.SignedResourceStatus;
 import com.jagex.core.constants.ModeWhere;
+import com.jagex.core.constants.Ports;
 import com.jagex.core.datastruct.StringList;
 import com.jagex.core.io.ConnectionInfo;
 import com.jagex.game.news.NewsItem;
@@ -77,7 +78,7 @@ public final class NewsReader implements Runnable {
 
         if (this.resource == null) {
             try {
-                @Pc(23) int port = ModeWhere.LIVE == Client.modeWhere ? 80 : ConnectionInfo.game.world + 7000;
+                @Pc(23) int port = ModeWhere.LIVE == Client.modeWhere ? Ports.HTTP : ConnectionInfo.game.world + Ports.HTTP_OFFSET;
                 this.resource = GameShell.signLink.openStream(new URL("http://" + ConnectionInfo.game.address + ":" + port + "/news.ws?game=" + Client.modeGame.id));
             } catch (@Pc(54) MalformedURLException ignored) {
                 return true;
