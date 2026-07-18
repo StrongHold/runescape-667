@@ -37,12 +37,14 @@ enable debug commands for administrators.
 
 ### Ports
 
-Each `modewhere` specifies a different set of ports the client will use to connect:
+Each `modewhere` specifies a different set of ports the client will use to connect. The
+first port listed is the primary, dialled first; the client rotates to the secondary
+after a failed dial (see `ConnectionInfo.rotateMethods`):
 
 | ModeWhere                                  |                      Lobby&nbsp;server                      |                      Game&nbsp;server                       |      Web&nbsp;server       |
 |:-------------------------------------------|:-----------------------------------------------------------:|:-----------------------------------------------------------:|:--------------------------:|
-| LIVE                                       |                        43594,<br>443                        |                        43594,<br>443                        |             80             |
-| RC<br>QA<br>WIP<br>LOCAL<br>WTI<br>INTBETA | 40000&nbsp;+&nbsp;`worldid`,<br>50000&nbsp;+&nbsp;`worldid` | 40000&nbsp;+&nbsp;`worldid`,<br>50000&nbsp;+&nbsp;`worldid` | 7000&nbsp;+&nbsp;`worldid` |
+| LIVE                                       |                        443,<br>43594                        |                        443,<br>43594                        |             80             |
+| RC<br>QA<br>WIP<br>LOCAL<br>WTI<br>INTBETA | 50000&nbsp;+&nbsp;`worldid`,<br>40000&nbsp;+&nbsp;`worldid` | 50000&nbsp;+&nbsp;`worldid`,<br>40000&nbsp;+&nbsp;`worldid` | 7000&nbsp;+&nbsp;`worldid` |
 
 ### Domains
 

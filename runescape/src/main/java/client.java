@@ -302,8 +302,8 @@ public final class client extends GameShell {
             ConnectionInfo.login.address = address;
 
             if (Client.modeWhere != ModeWhere.LIVE) {
-                ConnectionInfo.login.defaultPort = ConnectionInfo.login.world + Ports.DEFAULT_OFFSET;
-                ConnectionInfo.login.alternatePort = ConnectionInfo.login.world + Ports.ALTERNATE_OFFSET;
+                ConnectionInfo.login.secondaryPort = ConnectionInfo.login.world + Ports.SECONDARY_OFFSET;
+                ConnectionInfo.login.primaryPort = ConnectionInfo.login.world + Ports.PRIMARY_OFFSET;
             }
 
             for (@Pc(45) int i = 0; i < WorldList.activeWorlds.length; i++) {
@@ -1055,17 +1055,17 @@ public final class client extends GameShell {
             ConnectionInfo.game.address = this.getCodeBase().getHost();
         } else if (ModeWhere.isPrivate(Client.modeWhere)) {
             ConnectionInfo.game.address = this.getCodeBase().getHost();
-            ConnectionInfo.game.defaultPort = ConnectionInfo.game.world + Ports.DEFAULT_OFFSET;
-            ConnectionInfo.game.alternatePort = ConnectionInfo.game.world + Ports.ALTERNATE_OFFSET;
-            ConnectionInfo.lobby.defaultPort = ConnectionInfo.lobby.world + Ports.DEFAULT_OFFSET;
-            ConnectionInfo.lobby.alternatePort = ConnectionInfo.lobby.world + Ports.ALTERNATE_OFFSET;
+            ConnectionInfo.game.secondaryPort = ConnectionInfo.game.world + Ports.SECONDARY_OFFSET;
+            ConnectionInfo.game.primaryPort = ConnectionInfo.game.world + Ports.PRIMARY_OFFSET;
+            ConnectionInfo.lobby.secondaryPort = ConnectionInfo.lobby.world + Ports.SECONDARY_OFFSET;
+            ConnectionInfo.lobby.primaryPort = ConnectionInfo.lobby.world + Ports.PRIMARY_OFFSET;
         } else if (ModeWhere.LOCAL == Client.modeWhere) {
             ConnectionInfo.game.address = "127.0.0.1";
-            ConnectionInfo.game.defaultPort = ConnectionInfo.game.world + Ports.DEFAULT_OFFSET;
+            ConnectionInfo.game.secondaryPort = ConnectionInfo.game.world + Ports.SECONDARY_OFFSET;
             ConnectionInfo.lobby.address = "127.0.0.1";
-            ConnectionInfo.game.alternatePort = ConnectionInfo.game.world + Ports.ALTERNATE_OFFSET;
-            ConnectionInfo.lobby.defaultPort = ConnectionInfo.lobby.world + Ports.DEFAULT_OFFSET;
-            ConnectionInfo.lobby.alternatePort = ConnectionInfo.lobby.world + Ports.ALTERNATE_OFFSET;
+            ConnectionInfo.game.primaryPort = ConnectionInfo.game.world + Ports.PRIMARY_OFFSET;
+            ConnectionInfo.lobby.secondaryPort = ConnectionInfo.lobby.world + Ports.SECONDARY_OFFSET;
+            ConnectionInfo.lobby.primaryPort = ConnectionInfo.lobby.world + Ports.PRIMARY_OFFSET;
         }
 
         ConnectionInfo.login = ConnectionInfo.game;

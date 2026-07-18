@@ -6,45 +6,45 @@ package com.jagex.core.constants;
 public final class Ports {
 
     /**
-     * The default port for game, lobby and js5 connections
-     * ({@link com.jagex.core.io.ConnectionInfo#defaultPort}). Outside LIVE mode the
-     * default port is instead derived from the world or lobby id via
-     * {@link #DEFAULT_OFFSET}.
-     */
-    public static final int DEFAULT = 43594;
-
-    /**
-     * The https port, serving two purposes: it is the alternate port for game, lobby and
-     * js5 connections ({@link com.jagex.core.io.ConnectionInfo#alternatePort}), chosen
-     * because networks
-     * that block arbitrary ports usually pass https traffic (the protocol spoken over it
-     * is still the game protocol, not TLS); and connecting to it through a proxy makes
-     * the client ask the system proxy selector for https proxies first. Outside LIVE mode
-     * the alternate port is instead derived from the world or lobby id via
-     * {@link #ALTERNATE_OFFSET}.
+     * The https port: the primary port for game, lobby and js5 connections
+     * ({@link com.jagex.core.io.ConnectionInfo#primaryPort}), dialled first because
+     * networks that block arbitrary ports usually pass https traffic (the protocol
+     * spoken over it is still the game protocol, not TLS). Connecting to it through a
+     * proxy also makes the client ask the system proxy selector for https proxies
+     * first. Outside LIVE mode the primary port is instead derived from the world or
+     * lobby id via {@link #PRIMARY_OFFSET}.
      */
     public static final int HTTPS = 443;
 
     /**
-     * The http port a LIVE world's website (loader page, news feed) is served on. Outside
-     * LIVE mode the website port is instead derived from the world id via
+     * The well-known RuneScape port: the secondary port for game, lobby and js5
+     * connections ({@link com.jagex.core.io.ConnectionInfo#secondaryPort}), dialled
+     * after a failed dial on the primary port. Outside LIVE mode the secondary port is
+     * instead derived from the world or lobby id via {@link #SECONDARY_OFFSET}.
+     */
+    public static final int SECONDARY = 43594;
+
+    /**
+     * The http port a LIVE world's website (loader page, news feed) is served on.
+     * Outside LIVE mode the website port is instead derived from the world id via
      * {@link #HTTP_OFFSET}.
      */
     public static final int HTTP = 80;
 
     /**
-     * Added to a world or lobby id to derive its default port outside LIVE mode: world 1
-     * listens on 40001 and lobby 1000 on 41000. Worlds and lobbies share one id space so
-     * that these derivations never collide.
+     * Added to a world or lobby id to derive its primary port outside LIVE mode,
+     * standing in for {@link #HTTPS}: world 1 is dialled first on 50001 and lobby 1000
+     * on 51000.
      */
-    public static final int DEFAULT_OFFSET = 40000;
+    public static final int PRIMARY_OFFSET = 50000;
 
     /**
-     * Added to a world or lobby id to derive its alternate port outside LIVE mode,
-     * standing in for {@link #HTTPS}: world 1 falls back to 50001 and lobby 1000 to
-     * 51000.
+     * Added to a world or lobby id to derive its secondary port outside LIVE mode,
+     * standing in for {@link #SECONDARY}: world 1 falls back to 40001 and lobby 1000 to
+     * 41000. Worlds and lobbies share one id space so that these derivations never
+     * collide.
      */
-    public static final int ALTERNATE_OFFSET = 50000;
+    public static final int SECONDARY_OFFSET = 40000;
 
     /**
      * Added to a world id to derive its website port outside LIVE mode, standing in for

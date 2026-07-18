@@ -684,8 +684,8 @@ public final class LoginManager {
                         ConnectionInfo.auto.address = bitPacket.gjstr2();
 
                         if (ModeWhere.LIVE != Client.modeWhere) {
-                            ConnectionInfo.auto.defaultPort = ConnectionInfo.auto.world + Ports.DEFAULT_OFFSET;
-                            ConnectionInfo.auto.alternatePort = ConnectionInfo.auto.world + Ports.ALTERNATE_OFFSET;
+                            ConnectionInfo.auto.secondaryPort = ConnectionInfo.auto.world + Ports.SECONDARY_OFFSET;
+                            ConnectionInfo.auto.primaryPort = ConnectionInfo.auto.world + Ports.PRIMARY_OFFSET;
                         }
 
                         if ((ModeWhere.LOCAL != Client.modeWhere) && ((Client.modeWhere != ModeWhere.WTQA) || (Client.staffModLevel < 2)) && ConnectionInfo.login.equalTo(ConnectionInfo.game)) {

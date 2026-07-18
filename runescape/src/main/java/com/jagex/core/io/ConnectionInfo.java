@@ -32,32 +32,37 @@ public final class ConnectionInfo {
     public String address;
 
     @OriginalMember(owner = "client!lja", name = "m", descriptor = "I")
-    public int defaultPort = Ports.DEFAULT;
+    public int secondaryPort = Ports.SECONDARY;
 
     @OriginalMember(owner = "client!lja", name = "k", descriptor = "I")
-    public int alternatePort = Ports.HTTPS;
+    public int primaryPort = Ports.HTTPS;
 
     @OriginalMember(owner = "client!lja", name = "d", descriptor = "Z")
     public boolean proxy = false;
 
     @OriginalMember(owner = "client!lja", name = "f", descriptor = "Z")
-    public boolean alternate = true;
+    public boolean primary = true;
 
+    /**
+     * Rotates the connection method after a failed dial: the primary port direct, then
+     * the secondary port direct, then the primary port through the system proxy, then
+     * round again.
+     */
     @OriginalMember(owner = "client!lja", name = "a", descriptor = "(I)V")
     public void rotateMethods() {
-        if (!this.alternate) {
+        if (!this.primary) {
             this.proxy = true;
-            this.alternate = true;
+            this.primary = true;
         } else if (this.proxy) {
             this.proxy = false;
         } else {
-            this.alternate = false;
+            this.primary = false;
         }
     }
 
     @OriginalMember(owner = "client!lja", name = "a", descriptor = "(BLclient!vq;)Lclient!oba;")
     public SignedResource openSocket(@OriginalArg(1) SignLink signLink) {
-        return signLink.openSocket(this.address, this.alternate ? this.alternatePort : this.defaultPort, this.proxy);
+        return signLink.openSocket(this.address, this.primary ? this.primaryPort : this.secondaryPort, this.proxy);
     }
 
     @OriginalMember(owner = "client!lja", name = "a", descriptor = "(ILclient!lja;)Z")
