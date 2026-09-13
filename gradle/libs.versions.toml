@@ -1,6 +1,6 @@
 [versions]
 openrs2 = "0.1.0-SNAPSHOT"
-bouncycastle = "1.79"
+bouncycastle = "1.86"
 jcommander = "2.0"
 
 [libraries]
