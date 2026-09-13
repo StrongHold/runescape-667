@@ -19,7 +19,7 @@ public final class ApplicationArgs {
         description = "The path to the JS5 public key file in PEM",
         required = true
     )
-    private Path js5PublicKeyPath = null;
+    private Path js5PublicKeyPath;
 
     public Path getJs5PublicKeyPath() {
         return js5PublicKeyPath;
@@ -41,9 +41,9 @@ public final class ApplicationArgs {
         help = true,
         description = "print this help message to the output stream"
     )
-    private boolean help = false;
+    private boolean help;
 
-    public boolean help() {
+    public boolean printHelp() {
         return help;
     }
 }

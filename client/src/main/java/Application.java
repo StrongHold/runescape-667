@@ -38,7 +38,7 @@ public final class Application implements AppletStub {
 
             jcommander.parse(args);
 
-            if (parsed.help()) {
+            if (parsed.printHelp()) {
                 jcommander.usage();
             } else {
                 var documentBase = new URL(parsed.getDocumentBase());
