@@ -11,21 +11,12 @@ import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.util.io.pem.PemReader;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers.rsaEncryption;
 
 public final class RsaPublicKeyReader {
-
-    public static RsaPublicKey readUnchecked(Path path) {
-        try {
-            return read(path);
-        } catch (IOException ex) {
-            throw new UncheckedIOException(ex);
-        }
-    }
 
     public static RsaPublicKey read(Path path) throws IOException {
         try (var reader = new PemReader(Files.newBufferedReader(path))) {
