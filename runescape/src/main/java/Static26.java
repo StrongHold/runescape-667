@@ -5,18 +5,18 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static26 {
 
     @OriginalMember(owner = "client!at", name = "a", descriptor = "(III)V")
-    public static void method717(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
-        @Pc(7) Tile local7 = Static334.activeTiles[arg0][arg1][arg2];
-        if (local7 == null) {
+    public static void method717(@OriginalArg(0) int level, @OriginalArg(1) int x, @OriginalArg(2) int z) {
+        @Pc(7) Tile tile = Static334.activeTiles[level][x][z];
+        if (tile == null) {
             return;
         }
-        Static109.hide(local7.wall);
-        Static109.hide(local7.adjacentWall);
-        if (local7.wall != null) {
-            local7.wall = null;
+        Static109.hide(tile.wall);
+        Static109.hide(tile.adjacentWall);
+        if (tile.wall != null) {
+            tile.wall = null;
         }
-        if (local7.adjacentWall != null) {
-            local7.adjacentWall = null;
+        if (tile.adjacentWall != null) {
+            tile.adjacentWall = null;
         }
     }
 }

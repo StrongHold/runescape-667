@@ -5,8 +5,13 @@ import org.openrs2.deob.annotation.Pc;
 
 public final class Static109 {
 
+    /**
+     * The third smallest feature point distance found by the cellular noise texture operation,
+     * held between {@link Static417#anInt6402} (the second smallest) and
+     * {@link Static162#anInt2798} (the fourth smallest).
+     */
     @OriginalMember(owner = "client!dh", name = "e", descriptor = "I")
-    public static int anInt2178;
+    public static int thirdNearestDistance;
 
     @OriginalMember(owner = "client!dh", name = "a", descriptor = "(Lclient!eo;)V")
     public static void hide(@OriginalArg(0) Entity entity) {

@@ -53,18 +53,18 @@ public final class Static173 {
     }
 
     @OriginalMember(owner = "client!fga", name = "a", descriptor = "(III)V")
-    public static void method2692(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
-        @Pc(7) Tile local7 = Static334.activeTiles[arg0][arg1][arg2];
-        if (local7 == null) {
+    public static void method2692(@OriginalArg(0) int level, @OriginalArg(1) int x, @OriginalArg(2) int z) {
+        @Pc(7) Tile tile = Static334.activeTiles[level][x][z];
+        if (tile == null) {
             return;
         }
-        Static109.hide(local7.wallDecor);
-        Static109.hide(local7.wallDecor2);
-        if (local7.wallDecor != null) {
-            local7.wallDecor = null;
+        Static109.hide(tile.wallDecor);
+        Static109.hide(tile.wallDecor2);
+        if (tile.wallDecor != null) {
+            tile.wallDecor = null;
         }
-        if (local7.wallDecor2 != null) {
-            local7.wallDecor2 = null;
+        if (tile.wallDecor2 != null) {
+            tile.wallDecor2 = null;
         }
     }
 }

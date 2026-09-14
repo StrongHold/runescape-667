@@ -13,10 +13,10 @@ public final class Static281 {
         for (@Pc(12) int index = 0; index < cylinderCount; index++) {
             pickable.pickingCylinders[index].aBoolean352 = false;
         }
-        @Pc(25) LinkedList[] pool = Class43.A_ENTITY_LIST_ARRAY_1;
-        synchronized (Class43.A_ENTITY_LIST_ARRAY_1) {
-            if (cylinderCount < Class43.A_ENTITY_LIST_ARRAY_1.length && Static159.anIntArray245[cylinderCount] < 200) {
-                Class43.A_ENTITY_LIST_ARRAY_1[cylinderCount].add(pickable);
+        @Pc(25) LinkedList[] lock = PickableEntityPool.FREE_LISTS;
+        synchronized (PickableEntityPool.FREE_LISTS) {
+            if (cylinderCount < PickableEntityPool.FREE_LISTS.length && Static159.anIntArray245[cylinderCount] < 200) {
+                PickableEntityPool.FREE_LISTS[cylinderCount].add(pickable);
                 @Pc(48) int pooled = Static159.anIntArray245[cylinderCount]++;
             }
         }

@@ -8,23 +8,23 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static642 {
 
     @OriginalMember(owner = "client!uea", name = "a", descriptor = "(ZBI)Lclient!pea;")
-    public static PickableEntity method8441(@OriginalArg(0) boolean interactive, @OriginalArg(2) int arg1) {
-        @Pc(7) LinkedList[] local7 = Class43.A_ENTITY_LIST_ARRAY_1;
-        synchronized (Class43.A_ENTITY_LIST_ARRAY_1) {
-            @Pc(37) PickableEntity local37;
-            if (Class43.A_ENTITY_LIST_ARRAY_1.length <= arg1 || Class43.A_ENTITY_LIST_ARRAY_1[arg1].isEmpty()) {
-                local37 = new PickableEntity();
-                local37.pickingCylinders = new PickingCylinder[arg1];
-                for (@Pc(43) int local43 = 0; local43 < arg1; local43++) {
-                    local37.pickingCylinders[local43] = new PickingCylinder();
+    public static PickableEntity method8441(@OriginalArg(0) boolean interactive, @OriginalArg(2) int cylinderCount) {
+        @Pc(7) LinkedList[] lock = PickableEntityPool.FREE_LISTS;
+        synchronized (PickableEntityPool.FREE_LISTS) {
+            @Pc(37) PickableEntity entity;
+            if (PickableEntityPool.FREE_LISTS.length <= cylinderCount || PickableEntityPool.FREE_LISTS[cylinderCount].isEmpty()) {
+                entity = new PickableEntity();
+                entity.pickingCylinders = new PickingCylinder[cylinderCount];
+                for (@Pc(43) int index = 0; index < cylinderCount; index++) {
+                    entity.pickingCylinders[index] = new PickingCylinder();
                 }
             } else {
-                local37 = (PickableEntity) Class43.A_ENTITY_LIST_ARRAY_1[arg1].last();
-                local37.unlink();
-                @Pc(78) int local78 = Static159.anIntArray245[arg1]--;
+                entity = (PickableEntity) PickableEntityPool.FREE_LISTS[cylinderCount].last();
+                entity.unlink();
+                @Pc(78) int pooled = Static159.anIntArray245[cylinderCount]--;
             }
-            local37.interactive = interactive;
-            return local37;
+            entity.interactive = interactive;
+            return entity;
         }
     }
 }
