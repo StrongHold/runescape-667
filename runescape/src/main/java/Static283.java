@@ -103,8 +103,8 @@ public final class Static283 {
             Static29.aBoolean60 = false;
         }
         Static497.method6623(Static665.aToolkit_15);
-        if (!Static514.aClass213_2.retained) {
-            @Pc(387) LinkedList local387 = Static514.aClass213_2.entities;
+        if (!Static514.activePickList.retained) {
+            @Pc(387) LinkedList local387 = Static514.activePickList.entities;
             for (@Pc(392) PickableEntity local392 = (PickableEntity) local387.first(); local392 != null; local392 = (PickableEntity) local387.next()) {
                 local392.unlink();
                 Static281.recycle(local392);

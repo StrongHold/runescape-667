@@ -11,7 +11,7 @@ public final class Static119 {
 
     @OriginalMember(owner = "client!dma", name = "a", descriptor = "(Lclient!kn;)V")
     public static void setActivePickList(@OriginalArg(0) PickList pickList) {
-        Static514.aClass213_2 = pickList;
+        Static514.activePickList = pickList;
     }
 
     @OriginalMember(owner = "client!dma", name = "b", descriptor = "(I)Lclient!fk;")

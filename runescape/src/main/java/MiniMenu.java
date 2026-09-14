@@ -357,7 +357,7 @@ public final class MiniMenu {
         }
         for (local140 = 0; local140 < (OrthoMode.toolkitActive ? 2 : 1); local140++) {
             @Pc(503) boolean local503 = local140 == 0;
-            @Pc(510) PickList local510 = local503 ? Static514.aClass213_2 : OrthoMode.orthoPickList;
+            @Pc(510) PickList local510 = local503 ? Static514.activePickList : OrthoMode.orthoPickList;
             local148 = mouseX;
             local177 = mouseY;
             if (OrthoMode.toolkitActive) {

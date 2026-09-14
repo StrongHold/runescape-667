@@ -13,7 +13,7 @@ public final class Static102 {
 
     @OriginalMember(owner = "client!dd", name = "a", descriptor = "()V")
     public static void method2021() {
-        Static514.aClass213_2 = Static514.aClass213_3;
+        Static514.activePickList = Static514.scenePickList;
     }
 
     @OriginalMember(owner = "client!dd", name = "d", descriptor = "(B)V")

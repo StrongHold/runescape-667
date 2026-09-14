@@ -41,7 +41,7 @@ public final class Static231 {
         if (OrthoMode.toolkitActive) {
             Static164.method2606();
         }
-        Static514.aClass213_2.method5010();
+        Static514.activePickList.clear();
         Static563.method7461();
         Minimap.reset();
         MiniMenu.resetSprites();

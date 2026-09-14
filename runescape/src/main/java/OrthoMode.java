@@ -244,7 +244,7 @@ public final class OrthoMode {
         cameraRotateX = -1;
         anOffscreenSurfaceArray1 = null;
         aMatrix_11 = null;
-        orthoPickList.method5010();
+        orthoPickList.clear();
     }
 
     @OriginalMember(owner = "client!pm", name = "b", descriptor = "(I)V")
@@ -603,7 +603,7 @@ public final class OrthoMode {
                 toolkit.DA(anInt5759, anInt6134, anInt6565, anInt9621);
             }
             aDouble13 = 0.0D;
-            orthoPickList.method5010();
+            orthoPickList.clear();
             Static119.setActivePickList(orthoPickList);
             Static283.renderScene(arg7, arg1, arg3, arg2, arg13, arg9, arg12, arg5, arg14, arg6, arg8, arg0, arg15, arg4, arg10, arg11, 1, false);
             Static102.method2021();

@@ -64,7 +64,7 @@ public final class PickList {
     }
 
     @OriginalMember(owner = "client!kn", name = "a", descriptor = "(B)V")
-    public void method5010() {
+    public void clear() {
         while (true) {
             @Pc(5) PickableEntity entity = (PickableEntity) this.entities.removeFirst();
             if (entity == null) {

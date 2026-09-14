@@ -72,7 +72,7 @@ public final class Static21 {
         Static258.aBooleanArrayArray3 = new boolean[Static35.anInt813 + Static35.anInt813 + 1][Static35.anInt813 + Static35.anInt813 + 1];
         Static142.aBooleanArrayArray1 = new boolean[Static35.anInt813 + Static35.anInt813 + 2][Static35.anInt813 + Static35.anInt813 + 2];
         Static102.anIntArray184 = new int[Static35.anInt813 + Static35.anInt813 + 2];
-        Static514.aClass213_2 = Static514.aClass213_3;
+        Static514.activePickList = Static514.scenePickList;
         if (Static661.aBoolean457) {
             Static433.aBooleanArrayArrayArray5 = new boolean[4][Static35.anInt813 + Static35.anInt813 + 1][Static35.anInt813 + Static35.anInt813 + 1];
             Static275.aBooleanArrayArrayArray4 = new boolean[4][][];

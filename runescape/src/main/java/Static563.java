@@ -84,8 +84,8 @@ public final class Static563 {
             Static319.anInt5080 = 0;
         }
         Static638.method8393();
-        Static514.aClass213_2 = Static514.aClass213_3;
-        Static514.aClass213_2.method5010();
+        Static514.activePickList = Static514.scenePickList;
+        Static514.activePickList.clear();
         Static421.waterBias = null;
         Static62.waterColour = null;
         Static272.waterDepth = null;

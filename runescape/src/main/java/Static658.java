@@ -46,13 +46,13 @@ public final class Static658 {
         if (local64.interactive) {
             local64.aEntity_18 = arg0;
             if (Static661.aBoolean457) {
-                @Pc(127) PickList local127 = Static514.aClass213_2;
-                synchronized (Static514.aClass213_2) {
-                    Static514.aClass213_2.add(local64);
+                @Pc(127) PickList local127 = Static514.activePickList;
+                synchronized (Static514.activePickList) {
+                    Static514.activePickList.add(local64);
                     return;
                 }
             }
-            Static514.aClass213_2.add(local64);
+            Static514.activePickList.add(local64);
             return;
         }
         Static281.recycle(local64);
