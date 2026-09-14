@@ -140,7 +140,7 @@ public abstract class NativeToolkit extends Toolkit {
     protected Class121[] aClass121Array6;
 
     @OriginalMember(owner = "client!am", name = "bc", descriptor = "Lclient!rc;")
-    public Class316 aClass316_3;
+    public NativeParticleRenderer particleRenderer;
 
     @OriginalMember(owner = "client!am", name = "Cd", descriptor = "I")
     protected int anInt9176;
@@ -1064,7 +1064,7 @@ public abstract class NativeToolkit extends Toolkit {
     @OriginalMember(owner = "client!am", name = "a", descriptor = "(Lclient!lk;I)V")
     @Override
     public final void renderOrtho(@OriginalArg(0) ParticleList particleList, @OriginalArg(1) int zoom) {
-        this.aClass316_3.method7210(particleList, zoom, this);
+        this.particleRenderer.render(particleList, zoom, this);
     }
 
     @OriginalMember(owner = "client!am", name = "k", descriptor = "()Z")
@@ -1295,7 +1295,7 @@ public abstract class NativeToolkit extends Toolkit {
         for (@Pc(46) int local46 = 0; local46 < 7; local46++) {
             this.aClass114_Sub1Array5[local46].method2550();
         }
-        this.aClass316_3.method7209();
+        this.particleRenderer.release();
         this.anInterface20_6.method8538();
     }
 
@@ -2019,7 +2019,7 @@ public abstract class NativeToolkit extends Toolkit {
         this.method8077();
         this.method8131();
         this.method8056();
-        this.aClass316_3.method7212(this);
+        this.particleRenderer.createVertexBuffer(this);
     }
 
     @OriginalMember(owner = "client!am", name = "s", descriptor = "()Z")
@@ -2460,7 +2460,7 @@ public abstract class NativeToolkit extends Toolkit {
     @OriginalMember(owner = "client!am", name = "a", descriptor = "(Lclient!lk;)V")
     @Override
     public final void render(@OriginalArg(0) ParticleList particleList) {
-        this.aClass316_3.method7210(particleList, -1, this);
+        this.particleRenderer.render(particleList, -1, this);
     }
 
     @OriginalMember(owner = "client!am", name = "W", descriptor = "(I)V")
@@ -2487,7 +2487,7 @@ public abstract class NativeToolkit extends Toolkit {
             this.aClass114_Sub1Array6[local203] = new Model_Sub1(this, 0, 0, false, false);
             this.aClass114_Sub1Array5[local203] = new Model_Sub1(this, 0, 0, true, true);
         }
-        this.aClass316_3 = new Class316(this);
+        this.particleRenderer = new NativeParticleRenderer(this);
         this.anInterface20_6 = this.method8122(true);
         this.method8101();
         this.aClass7_8 = new Class7(this);

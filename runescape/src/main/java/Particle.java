@@ -6,7 +6,7 @@ import org.openrs2.deob.annotation.OriginalMember;
 public class Particle extends Node2 {
 
     @OriginalMember(owner = "client!up", name = "w", descriptor = "Z")
-    public boolean aBoolean574;
+    public boolean preserveAmbient;
 
     @OriginalMember(owner = "client!up", name = "n", descriptor = "I")
     public int y;

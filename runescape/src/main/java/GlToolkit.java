@@ -296,7 +296,7 @@ public final class GlToolkit extends Toolkit {
     public int anInt7981 = 128;
 
     @OriginalMember(owner = "client!qha", name = "I", descriptor = "Lclient!bj;")
-    public final Class42 aClass42_1 = new Class42();
+    public final GlParticleRenderer particleRenderer = new GlParticleRenderer();
 
     @OriginalMember(owner = "client!qha", name = "Dd", descriptor = "Lclient!qr;")
     public final Matrix_Sub3 aClass73_Sub3_1 = new Matrix_Sub3();
@@ -1133,7 +1133,7 @@ public final class GlToolkit extends Toolkit {
     @OriginalMember(owner = "client!qha", name = "a", descriptor = "(Lclient!lk;I)V")
     @Override
     public void renderOrtho(@OriginalArg(0) ParticleList particleList, @OriginalArg(1) int zoom) {
-        this.aClass42_1.method1080(this, particleList, zoom);
+        this.particleRenderer.render(this, particleList, zoom);
     }
 
     @OriginalMember(owner = "client!qha", name = "w", descriptor = "()Z")
@@ -1516,7 +1516,7 @@ public final class GlToolkit extends Toolkit {
         this.anInterface12_7 = this.method7024(false, local16.pos, local16.data, 20);
         this.aClass94_15 = new Class94(this.anInterface12_7, 5126, 3, 0);
         this.aClass94_16 = new Class94(this.anInterface12_7, 5126, 2, 12);
-        this.aClass42_1.method1081(this);
+        this.particleRenderer.createVertexBuffer(this);
     }
 
     @OriginalMember(owner = "client!qha", name = "a", descriptor = "(FFF)V")
@@ -1646,7 +1646,7 @@ public final class GlToolkit extends Toolkit {
     @OriginalMember(owner = "client!qha", name = "a", descriptor = "(Lclient!lk;)V")
     @Override
     public void render(@OriginalArg(0) ParticleList particleList) {
-        this.aClass42_1.method1080(this, particleList, -1);
+        this.particleRenderer.render(this, particleList, -1);
     }
 
     @OriginalMember(owner = "client!qha", name = "a", descriptor = "(BFF)V")

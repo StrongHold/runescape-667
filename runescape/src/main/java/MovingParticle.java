@@ -52,7 +52,7 @@ public final class MovingParticle extends Particle {
         this.aShort93 = this.aShort96 = (short) arg8;
         super.size = arg10;
         super.texture = arg11;
-        super.aBoolean574 = arg13;
+        super.preserveAmbient = arg13;
         this.aShort92 = (short) arg4;
         this.aShort95 = (short) arg5;
         this.aShort94 = (short) arg6;
@@ -429,7 +429,7 @@ public final class MovingParticle extends Particle {
         this.aShort93 = this.aShort96 = (short) arg8;
         super.size = arg10;
         super.texture = arg11;
-        super.aBoolean574 = arg13;
+        super.preserveAmbient = arg13;
         this.aShort92 = (short) arg4;
         this.aShort95 = (short) arg5;
         this.aShort94 = (short) arg6;
