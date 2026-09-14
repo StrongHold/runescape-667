@@ -3,12 +3,17 @@ import org.openrs2.deob.annotation.OriginalMember;
 
 public final class Static297 {
 
+    /**
+     * Fills the pixels of row {@code y} between {@code x0} and {@code x1} with {@code rgb}. The two
+     * ends may arrive in either order. Nothing is clipped, so both ends must already lie inside the
+     * clip bounds.
+     */
     @OriginalMember(owner = "client!jha", name = "a", descriptor = "(IIIII)V")
-    public static void method4371(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(3) int arg2, @OriginalArg(4) int arg3) {
-        if (arg3 <= arg1) {
-            Static696.method9037(arg1, arg2, arg3, Static723.anIntArrayArray266[arg0]);
+    public static void drawHorizontalLineUnclipped(@OriginalArg(0) int y, @OriginalArg(1) int x1, @OriginalArg(3) int rgb, @OriginalArg(4) int x0) {
+        if (x0 <= x1) {
+            Static696.method9037(x1, rgb, x0, Static723.anIntArrayArray266[y]);
         } else {
-            Static696.method9037(arg3, arg2, arg1, Static723.anIntArrayArray266[arg0]);
+            Static696.method9037(x0, rgb, x1, Static723.anIntArrayArray266[y]);
         }
     }
 }

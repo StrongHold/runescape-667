@@ -18,6 +18,12 @@ public final class Static409 {
      * standing. The world space bounds of what was hidden are accumulated into slot
      * {@code boundsIndex} of the five bounds arrays the renderer reads.
      *
+     * <p>A queue entry is a pair of packed ints, one in each of the two queue arrays. The low 16
+     * bits hold the tile coordinate, and each remaining byte holds one roof edge loc packed as
+     * {@code shape | rotation << 6}, which {@link Static239#roofEdgeSideMask} turns back into a
+     * wall side mask. The three locs of an entry are the roof edges that would seal the step the
+     * entry came from, so a tile reached over any of them is left roofed.
+     *
      * @return whether any roof was hidden.
      */
     @OriginalMember(owner = "client!mt", name = "a", descriptor = "(II[[[Lclient!pha;IIZ)Z")
@@ -50,7 +56,7 @@ public final class Static409 {
                 @Pc(185) int local185;
                 @Pc(235) int local235;
                 if (tiles != null) {
-                    label237:
+                    nextLevel:
                     for (local139 = Camera.renderingLevel + 1; local139 <= 3; local139++) {
                         if (tiles[local139] != null && (Static280.tileFlags[local139][tileX][tileZ] & TileFlag.ZERO_LEVEL) == 0) {
                             @Pc(341) PositionEntity entity;
@@ -59,18 +65,18 @@ public final class Static409 {
                             @Pc(337) PositionEntityNode node;
                             if (outsideRoof && tiles[local139][tileX][tileZ] != null) {
                                 if (tiles[local139][tileX][tileZ].wall != null) {
-                                    local185 = Static239.method3474(edgeLoc0);
+                                    local185 = Static239.roofEdgeSideMask(edgeLoc0);
                                     if (tiles[local139][tileX][tileZ].wall.sideMask == local185 || tiles[local139][tileX][tileZ].adjacentWall != null && local185 == tiles[local139][tileX][tileZ].adjacentWall.sideMask) {
                                         continue;
                                     }
                                     if (edgeLoc1 != 0) {
-                                        local235 = Static239.method3474(edgeLoc1);
+                                        local235 = Static239.roofEdgeSideMask(edgeLoc1);
                                         if (tiles[local139][tileX][tileZ].wall.sideMask == local235 || tiles[local139][tileX][tileZ].adjacentWall != null && local235 == tiles[local139][tileX][tileZ].adjacentWall.sideMask) {
                                             continue;
                                         }
                                     }
                                     if (edgeLoc2 != 0) {
-                                        local235 = Static239.method3474(edgeLoc2);
+                                        local235 = Static239.roofEdgeSideMask(edgeLoc2);
                                         if (tiles[local139][tileX][tileZ].wall.sideMask == local235 || tiles[local139][tileX][tileZ].adjacentWall != null && tiles[local139][tileX][tileZ].adjacentWall.sideMask == local235) {
                                             continue;
                                         }
@@ -89,7 +95,7 @@ public final class Static409 {
                                             }
                                             @Pc(368) int locCode = local351 | rotation << 6;
                                             if (locCode == edgeLoc0 || edgeLoc1 != 0 && edgeLoc1 == locCode || edgeLoc2 != 0 && locCode == edgeLoc2) {
-                                                continue label237;
+                                                continue nextLevel;
                                             }
                                         }
                                     }
@@ -213,7 +219,7 @@ public final class Static409 {
                 Static87.method1692(y1, y0, rgb, x0);
             }
         } else if (dy == 0) {
-            Static297.method4371(y0, x1, rgb, x0);
+            Static297.drawHorizontalLineUnclipped(y0, x1, rgb, x0);
         } else {
             if (dx < 0) {
                 dx = -dx;
