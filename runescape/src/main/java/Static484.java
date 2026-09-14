@@ -4,7 +4,7 @@ public final class Static484 {
 
     // $FF: synthetic field
     @OriginalMember(owner = "client!pea", name = "n", descriptor = "Ljava/lang/Class;")
-    public static Class aClass19;
+    public static Class locClass;
 
     static Class getClass(String name) {
         Class instance;

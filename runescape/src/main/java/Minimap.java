@@ -57,7 +57,7 @@ public final class Minimap {
     public static final int[] locZ = new int[1000];
 
     @OriginalMember(owner = "client!gda", name = "e", descriptor = "I")
-    public static final int anInt3302 = 52;
+    public static final int BLOCK_SIZE = 52;
 
     @OriginalMember(owner = "client!sda", name = "g", descriptor = "I")
     public static int toggle = 0;
@@ -124,13 +124,13 @@ public final class Minimap {
         for (@Pc(171) IntNode node = (IntNode) elementCoords.first(); node != null; node = (IntNode) elementCoords.next()) {
             @Pc(178) int coord = node.value;
 
-            @Pc(190) int local190 = (elements.coords[coord] >> 14 & 0x3FFF) - WorldMap.areaBaseX;
-            @Pc(200) int local200 = (elements.coords[coord] & 0x3FFF) - WorldMap.areaBaseZ;
+            @Pc(190) int elementX = (elements.coords[coord] >> 14 & 0x3FFF) - WorldMap.areaBaseX;
+            @Pc(200) int elementZ = (elements.coords[coord] & 0x3FFF) - WorldMap.areaBaseZ;
 
-            @Pc(211) int local211 = ((local190 * 4) + 2) - (selfX / 128);
-            @Pc(222) int local222 = ((local200 * 4) + 2) - (selfZ / 128);
+            @Pc(211) int elementDrawX = ((elementX * 4) + 2) - (selfX / 128);
+            @Pc(222) int elementDrawZ = ((elementZ * 4) + 2) - (selfZ / 128);
 
-            drawMapElement(local222, screenX, clippingMask, toolkit, elements.elements[coord], screenY, local211, component);
+            drawMapElement(elementDrawZ, screenX, clippingMask, toolkit, elements.elements[coord], screenY, elementDrawX, component);
         }
 
         for (@Pc(190) int i = 0; i < locCount; i++) {
@@ -153,10 +153,10 @@ public final class Minimap {
             @Pc(211) int stackLevel = (int) (stack.key >> 28 & 0x3L);
 
             if (level == stackLevel) {
-                @Pc(222) int local222 = (int) (stack.key & 0x3FFFL) - WorldMap.areaBaseX;
-                @Pc(370) int local370 = (int) ((stack.key >> 14) & 0x3FFFL) - WorldMap.areaBaseZ;
-                @Pc(381) int stackX = ((local222 * 4) + 2) - (selfX / 128);
-                @Pc(392) int stackZ = ((local370 * 4) + 2) - (selfZ / 128);
+                @Pc(222) int objX = (int) (stack.key & 0x3FFFL) - WorldMap.areaBaseX;
+                @Pc(370) int objZ = (int) ((stack.key >> 14) & 0x3FFFL) - WorldMap.areaBaseZ;
+                @Pc(381) int stackX = ((objX * 4) + 2) - (selfX / 128);
+                @Pc(392) int stackZ = ((objZ * 4) + 2) - (selfZ / 128);
                 drawDot(screenY, clippingMask, Sprites.mapdots[0], stackZ, stackX, component, screenX);
             }
         }
@@ -285,17 +285,17 @@ public final class Minimap {
     }
 
     @OriginalMember(owner = "client!uga", name = "a", descriptor = "(Lclient!hda;III)V")
-    public static void drawCompass(@OriginalArg(0) Component component, @OriginalArg(1) int arg1, @OriginalArg(3) int arg2) {
+    public static void drawCompass(@OriginalArg(0) Component component, @OriginalArg(1) int screenX, @OriginalArg(3) int screenY) {
         @Pc(8) Graphic graphic = component.graphic(Toolkit.active);
         if (graphic == null) {
             return;
         }
 
-        Toolkit.active.KA(arg1, arg2, arg1 + component.width, arg2 + component.height);
+        Toolkit.active.KA(screenX, screenY, screenX + component.width, screenY + component.height);
         if (toggle >= 3) {
-            Toolkit.active.A(-16777216, graphic.clippingMask, arg1, arg2);
+            Toolkit.active.A(-16777216, graphic.clippingMask, screenX, screenY);
         } else {
-            Sprites.compass.renderRotated((float) component.width / 2.0F + (float) arg1, (float) component.height / 2.0F + (float) arg2, ((int) -Camera.playerCameraYaw & 0x3FFF) << 2, graphic.clippingMask, arg1, arg2);
+            Sprites.compass.renderRotated((float) component.width / 2.0F + (float) screenX, (float) component.height / 2.0F + (float) screenY, ((int) -Camera.playerCameraYaw & 0x3FFF) << 2, graphic.clippingMask, screenX, screenY);
         }
     }
 
@@ -306,8 +306,8 @@ public final class Minimap {
     }
 
     @OriginalMember(owner = "client!fn", name = "a", descriptor = "(Lclient!ha;IIIIIIII)V")
-    public static void drawLocs(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) int wallColour, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int drawX, @OriginalArg(5) int drawY, @OriginalArg(7) int arg6, @OriginalArg(8) int doorColour) {
-        @Pc(9) Location loc = (Location) Static302.getWall(arg6, arg2, arg3);
+    public static void drawLocs(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) int wallColour, @OriginalArg(2) int tileX, @OriginalArg(3) int tileZ, @OriginalArg(4) int drawX, @OriginalArg(5) int drawY, @OriginalArg(7) int level, @OriginalArg(8) int doorColour) {
+        @Pc(9) Location loc = (Location) Static302.getWall(level, tileX, tileZ);
 
         if (loc != null) {
             @Pc(20) LocType type = LocTypeList.instance.list(loc.getId());
@@ -360,7 +360,7 @@ public final class Minimap {
             }
         }
 
-        loc = (Location) Static578.getEntity(arg6, arg2, arg3, Static185.locClass == null ? (Static185.locClass = Static185.getClass("com.jagex.game.Location")) : Static185.locClass);
+        loc = (Location) Static578.getEntity(level, tileX, tileZ, Static185.locClass == null ? (Static185.locClass = Static185.getClass("com.jagex.game.Location")) : Static185.locClass);
         if (loc != null) {
             @Pc(20) LocType type = LocTypeList.instance.list(loc.getId());
             @Pc(26) int rotation = loc.getRotation() & 0x3;
@@ -382,7 +382,7 @@ public final class Minimap {
             }
         }
 
-        loc = (Location) Static687.getGroundDecor(arg6, arg2, arg3);
+        loc = (Location) Static687.getGroundDecor(level, tileX, tileZ);
         if (loc != null) {
             @Pc(20) LocType type = LocTypeList.instance.list(loc.getId());
             @Pc(26) int rotation = loc.getRotation() & 0x3;
@@ -394,7 +394,7 @@ public final class Minimap {
     }
 
     @OriginalMember(owner = "client!oea", name = "a", descriptor = "(Lclient!c;BILclient!ha;II)V")
-    public static void drawMsi(@OriginalArg(0) LocType locType, @OriginalArg(2) int rotation, @OriginalArg(3) Toolkit arg2, @OriginalArg(4) int drawX, @OriginalArg(5) int drawY) {
+    public static void drawMsi(@OriginalArg(0) LocType locType, @OriginalArg(2) int rotation, @OriginalArg(3) Toolkit toolkit, @OriginalArg(4) int drawX, @OriginalArg(5) int drawY) {
         @Pc(9) MSIType msiType = MSITypeList.instance.list(locType.msi);
         if (msiType.image == -1) {
             return;
@@ -407,7 +407,7 @@ public final class Minimap {
             rotation = 0;
         }
 
-        @Pc(39) Sprite sprite = msiType.sprite(rotation, arg2, locType.msiflip);
+        @Pc(39) Sprite sprite = msiType.sprite(rotation, toolkit, locType.msiflip);
         if (sprite == null) {
             return;
         }
@@ -441,9 +441,9 @@ public final class Minimap {
         }
 
         if (elementType.landmarkPolygons != null) {
-            @Pc(34) int[] local34 = new int[elementType.landmarkPolygons.length];
+            @Pc(34) int[] polygon = new int[elementType.landmarkPolygons.length];
 
-            for (@Pc(36) int i = 0; i < local34.length / 2; i++) {
+            for (@Pc(36) int i = 0; i < polygon.length / 2; i++) {
                 @Pc(51) int yaw;
                 if (Camera.mode == CameraMode.MODE_FOLLOWCOORD) {
                     yaw = (int) Camera.playerCameraYaw & 0x3FFF;
@@ -451,33 +451,33 @@ public final class Minimap {
                     yaw = (int) Camera.playerCameraYaw + Camera.yawOffset & 0x3FFF;
                 }
 
-                @Pc(62) int local62 = Trig1.SIN[yaw];
-                @Pc(66) int local66 = Trig1.COS[yaw];
+                @Pc(62) int sin = Trig1.SIN[yaw];
+                @Pc(66) int cos = Trig1.COS[yaw];
 
                 if (Camera.mode != CameraMode.MODE_FOLLOWCOORD) {
-                    local62 = local62 * 256 / (Camera.scaleOffset + 256);
-                    local66 = local66 * 256 / (Camera.scaleOffset + 256);
+                    sin = sin * 256 / (Camera.scaleOffset + 256);
+                    cos = cos * 256 / (Camera.scaleOffset + 256);
                 }
 
-                local34[i * 2] = component.width / 2 + screenX + (local66 * (elementType.landmarkPolygons[i * 2] * 4 + drawX) + local62 * (drawY + elementType.landmarkPolygons[i * 2 + 1] * 4) >> 14);
-                local34[(i * 2) + 1] = screenY + component.height / 2 - (local66 * (drawY + elementType.landmarkPolygons[i * 2 + 1] * 4) - local62 * (drawX + elementType.landmarkPolygons[i * 2] * 4) >> 14);
+                polygon[i * 2] = component.width / 2 + screenX + (cos * (elementType.landmarkPolygons[i * 2] * 4 + drawX) + sin * (drawY + elementType.landmarkPolygons[i * 2 + 1] * 4) >> 14);
+                polygon[(i * 2) + 1] = screenY + component.height / 2 - (cos * (drawY + elementType.landmarkPolygons[i * 2 + 1] * 4) - sin * (drawX + elementType.landmarkPolygons[i * 2] * 4) >> 14);
             }
 
             @Pc(187) Graphic graphic = component.graphic(toolkit);
             if (graphic != null) {
-                Static141.method2377(toolkit, local34, elementType.landmarkBackground, graphic.lineOffsets, graphic.lineWidths);
+                PolygonFiller.fillPolygon(toolkit, polygon, elementType.landmarkBackground, graphic.lineOffsets, graphic.lineWidths);
             }
 
             if (elementType.anInt2603 > 0) {
                 @Pc(250) int maxX;
                 @Pc(252) int maxY;
 
-                for (@Pc(62) int local62 = 0; local62 < local34.length / 2 - 1; local62++) {
-                    @Pc(66) int x1 = local34[local62 * 2];
-                    @Pc(223) int y1 = local34[(local62 * 2) + 1];
+                for (@Pc(62) int i = 0; i < polygon.length / 2 - 1; i++) {
+                    @Pc(66) int x1 = polygon[i * 2];
+                    @Pc(223) int y1 = polygon[(i * 2) + 1];
 
-                    @Pc(231) int x2 = local34[(local62 * 2) + 2];
-                    @Pc(241) int y2 = local34[(local62 * 2) + 2 + 1];
+                    @Pc(231) int x2 = polygon[(i * 2) + 2];
+                    @Pc(241) int y2 = polygon[(i * 2) + 2 + 1];
 
                     if (x1 > x2) {
                         maxX = x1;
@@ -492,14 +492,14 @@ public final class Minimap {
                         y2 = maxX;
                     }
 
-                    toolkit.method7942(x1, y1, x2, y2, elementType.landmarkPalette[elementType.landmarkColorIndices[local62] & 0xFF], 1, mask, screenX, screenY, elementType.anInt2603, elementType.anInt2587, elementType.anInt2607);
+                    toolkit.method7942(x1, y1, x2, y2, elementType.landmarkPalette[elementType.landmarkColorIndices[i] & 0xFF], 1, mask, screenX, screenY, elementType.anInt2603, elementType.anInt2587, elementType.anInt2607);
                 }
 
-                @Pc(66) int x1 = local34[local34.length - 2];
-                @Pc(223) int y1 = local34[local34.length - 1];
+                @Pc(66) int x1 = polygon[polygon.length - 2];
+                @Pc(223) int y1 = polygon[polygon.length - 1];
 
-                @Pc(231) int x2 = local34[0];
-                @Pc(241) int y2 = local34[1];
+                @Pc(231) int x2 = polygon[0];
+                @Pc(241) int y2 = polygon[1];
 
                 if (x2 < x1) {
                     maxX = x1;
@@ -516,11 +516,11 @@ public final class Minimap {
 
                 toolkit.method7942(x1, y1, x2, y2, elementType.landmarkPalette[elementType.landmarkColorIndices[elementType.landmarkColorIndices.length - 1] & 0xFF], 1, mask, screenX, screenY, elementType.anInt2603, elementType.anInt2587, elementType.anInt2607);
             } else {
-                for (@Pc(62) int i = 0; i < local34.length / 2 - 1; i++) {
-                    toolkit.line(local34[i * 2], local34[i * 2 + 1], local34[i * 2 + 2], local34[(i + 1) * 2 + 1], elementType.landmarkPalette[elementType.landmarkColorIndices[i] & 0xFF], 0, mask, screenX, screenY);
+                for (@Pc(62) int i = 0; i < polygon.length / 2 - 1; i++) {
+                    toolkit.line(polygon[i * 2], polygon[i * 2 + 1], polygon[i * 2 + 2], polygon[(i + 1) * 2 + 1], elementType.landmarkPalette[elementType.landmarkColorIndices[i] & 0xFF], 0, mask, screenX, screenY);
                 }
 
-                toolkit.line(local34[local34.length - 2], local34[local34.length - 1], local34[0], local34[1], elementType.landmarkPalette[elementType.landmarkColorIndices[elementType.landmarkColorIndices.length - 1] & 0xFF], 0, mask, screenX, screenY);
+                toolkit.line(polygon[polygon.length - 2], polygon[polygon.length - 1], polygon[0], polygon[1], elementType.landmarkPalette[elementType.landmarkColorIndices[elementType.landmarkColorIndices.length - 1] & 0xFF], 0, mask, screenX, screenY);
             }
         }
 
@@ -591,17 +591,17 @@ public final class Minimap {
         @Pc(37) int randomWallColour = (int) (Math.random() * 20.0D) + ((int) (Math.random() * 20.0D) + 238 - 10 << 8) + ((int) (Math.random() * 20.0D) + -10 + 238 << 16) + 238 - 10 | 0xFF000000;
         @Pc(177) int randomDoorColour = ((int) (Math.random() * 20.0D) + 238 - 10 | 0x9E04FF00) << 16;
         @Pc(196) int randomFloorColour = (int) (Math.random() * 8.0D) << 16 | (int) (Math.random() * 8.0D) << 8 | (int) (Math.random() * 8.0D);
-        @Pc(206) boolean[][] visibility = new boolean[anInt3302 + 1 + 2][anInt3302 + 3];
+        @Pc(206) boolean[][] visibility = new boolean[BLOCK_SIZE + 1 + 2][BLOCK_SIZE + 3];
 
-        for (@Pc(208) int x = mapX; x < mapX + 104; x += anInt3302) {
-            for (@Pc(211) int z = mapZ; z < mapZ + 104; z += anInt3302) {
-                @Pc(214) int local214 = 0;
-                @Pc(216) int local216 = 0;
+        for (@Pc(208) int x = mapX; x < mapX + 104; x += BLOCK_SIZE) {
+            for (@Pc(211) int z = mapZ; z < mapZ + 104; z += BLOCK_SIZE) {
+                @Pc(214) int padX = 0;
+                @Pc(216) int padZ = 0;
 
                 @Pc(218) int x1 = x;
                 if (x > 0) {
                     x1 = x - 1;
-                    local214 += 4;
+                    padX += 4;
                 }
 
                 @Pc(229) int z1 = z;
@@ -609,32 +609,32 @@ public final class Minimap {
                     z1 = z - 1;
                 }
 
-                @Pc(238) int x2 = x + anInt3302;
+                @Pc(238) int x2 = x + BLOCK_SIZE;
                 if (x2 < 104) {
                     x2++;
                 }
 
-                @Pc(249) int y2 = z + anInt3302;
-                if (y2 < 104) {
-                    y2++;
-                    local216 += 4;
+                @Pc(249) int z2 = z + BLOCK_SIZE;
+                if (z2 < 104) {
+                    z2++;
+                    padZ += 4;
                 }
 
-                toolkit.KA(0, 0, (anInt3302 * 4) + local214, local216 + (anInt3302 * 4));
+                toolkit.KA(0, 0, (BLOCK_SIZE * 4) + padX, padZ + (BLOCK_SIZE * 4));
                 toolkit.GA(0xFF000000);
 
                 for (@Pc(278) int level = mapLevel; level <= 3; level++) {
-                    for (@Pc(281) int offsetX = 0; offsetX <= anInt3302; offsetX++) {
-                        for (@Pc(284) int offsetZ = 0; offsetZ <= anInt3302; offsetZ++) {
+                    for (@Pc(281) int offsetX = 0; offsetX <= BLOCK_SIZE; offsetX++) {
+                        for (@Pc(284) int offsetZ = 0; offsetZ <= BLOCK_SIZE; offsetZ++) {
                             visibility[offsetX][offsetZ] = Static696.isTileVisibleFrom(offsetZ + z1, mapLevel, x1 + offsetX, level);
                         }
                     }
 
-                    Static706.floor[level].method7873(x1, z1, x2, y2, visibility);
+                    Static706.floor[level].method7873(x1, z1, x2, z2, visibility);
 
                     if (!drawCollisionMap) {
-                        for (@Pc(284) int offsetX = -4; offsetX < anInt3302; offsetX++) {
-                            for (@Pc(331) int offsetZ = -4; offsetZ < anInt3302; offsetZ++) {
+                        for (@Pc(284) int offsetX = -4; offsetX < BLOCK_SIZE; offsetX++) {
+                            for (@Pc(331) int offsetZ = -4; offsetZ < BLOCK_SIZE; offsetZ++) {
                                 @Pc(336) int tileX = offsetX + x;
                                 @Pc(340) int tileZ = offsetZ + z;
                                 if (mapX <= tileX && tileZ >= mapZ && Static696.isTileVisibleFrom(tileZ, mapLevel, tileX, level)) {
@@ -643,7 +643,7 @@ public final class Minimap {
                                         actualLevel = level - 1;
                                     }
                                     if (actualLevel >= 0) {
-                                        drawLocs(toolkit, randomWallColour, tileX, tileZ, local214 + offsetX * 4, (-offsetZ + anInt3302) * 4 + local216 + -4, actualLevel, randomDoorColour);
+                                        drawLocs(toolkit, randomWallColour, tileX, tileZ, padX + offsetX * 4, (-offsetZ + BLOCK_SIZE) * 4 + padZ + -4, actualLevel, randomDoorColour);
                                     }
                                 }
                             }
@@ -654,29 +654,29 @@ public final class Minimap {
                 if (drawCollisionMap) {
                     @Pc(435) CollisionMap map = Client.collisionMaps[mapLevel];
 
-                    for (@Pc(284) int offsetX = 0; offsetX < anInt3302; offsetX++) {
-                        for (@Pc(331) int offsetY = 0; offsetY < anInt3302; offsetY++) {
-                            @Pc(336) int local336 = x + offsetX;
-                            @Pc(340) int local340 = z + offsetY;
-                            @Pc(365) int local365 = map.flags[local336 - map.x][local340 - map.z];
+                    for (@Pc(284) int offsetX = 0; offsetX < BLOCK_SIZE; offsetX++) {
+                        for (@Pc(331) int offsetZ = 0; offsetZ < BLOCK_SIZE; offsetZ++) {
+                            @Pc(336) int tileX = x + offsetX;
+                            @Pc(340) int tileZ = z + offsetZ;
+                            @Pc(365) int flags = map.flags[tileX - map.x][tileZ - map.z];
 
-                            if ((local365 & (LOCATION_BREAKROUTEFINDING | BLOCKWALK | GROUND_DECOR)) != 0) {
-                                toolkit.fillRect(local214 + (offsetX * 4), (((anInt3302 - offsetY) * 4) + local216) - 4, 4, 4, 0x99DD00AA);
-                            } else if ((local365 & WALL_NORTH_BREAKROUTEFINDING) != 0) {
-                                toolkit.horizontalLine(local214 + (offsetX * 4), (((anInt3302 - offsetY) * 4) + local216) - 4, 4, 0x99DD00AA);
-                            } else if ((local365 & WALL_EAST_BREAKROUTEFINDING) != 0) {
-                                toolkit.verticalLine((offsetX * 4) + local214 + 3, (local216 + ((-offsetY + anInt3302) * 4)) - 4, 4, 0x99DD00AA);
-                            } else if ((local365 & WALL_SOUTH_BREAKROUTEFINDING) != 0) {
-                                toolkit.horizontalLine((offsetX * 4) + local214, (((anInt3302 - offsetY) * 4) + local216 + 3) - 4, 4, 0x99DD00AA);
-                            } else if ((local365 & WALL_WEST_BLOCK_BREAKROUTEFINDING) != 0) {
-                                toolkit.verticalLine((offsetX * 4) + local214, (((anInt3302 - offsetY) * 4) + local216) - 4, 4, 0x99DD00AA);
+                            if ((flags & (LOCATION_BREAKROUTEFINDING | BLOCKWALK | GROUND_DECOR)) != 0) {
+                                toolkit.fillRect(padX + (offsetX * 4), (((BLOCK_SIZE - offsetZ) * 4) + padZ) - 4, 4, 4, 0x99DD00AA);
+                            } else if ((flags & WALL_NORTH_BREAKROUTEFINDING) != 0) {
+                                toolkit.horizontalLine(padX + (offsetX * 4), (((BLOCK_SIZE - offsetZ) * 4) + padZ) - 4, 4, 0x99DD00AA);
+                            } else if ((flags & WALL_EAST_BREAKROUTEFINDING) != 0) {
+                                toolkit.verticalLine((offsetX * 4) + padX + 3, (padZ + ((-offsetZ + BLOCK_SIZE) * 4)) - 4, 4, 0x99DD00AA);
+                            } else if ((flags & WALL_SOUTH_BREAKROUTEFINDING) != 0) {
+                                toolkit.horizontalLine((offsetX * 4) + padX, (((BLOCK_SIZE - offsetZ) * 4) + padZ + 3) - 4, 4, 0x99DD00AA);
+                            } else if ((flags & WALL_WEST_BLOCK_BREAKROUTEFINDING) != 0) {
+                                toolkit.verticalLine((offsetX * 4) + padX, (((BLOCK_SIZE - offsetZ) * 4) + padZ) - 4, 4, 0x99DD00AA);
                             }
                         }
                     }
                 }
 
-                toolkit.aa(local214, local216, anInt3302 * 4, anInt3302 * 4, randomFloorColour, 2);
-                sprite.copyRect((x - mapX) * 4 + 48, -(anInt3302 * 4) + -((z + -mapZ) * 4) + 464, anInt3302 * 4, anInt3302 * 4, local214, local216);
+                toolkit.aa(padX, padZ, BLOCK_SIZE * 4, BLOCK_SIZE * 4, randomFloorColour, 2);
+                sprite.copyRect((x - mapX) * 4 + 48, -(BLOCK_SIZE * 4) + -((z + -mapZ) * 4) + 464, BLOCK_SIZE * 4, BLOCK_SIZE * 4, padX, padZ);
             }
         }
 
@@ -693,7 +693,7 @@ public final class Minimap {
                         if (Static696.isTileVisibleFrom(z, mapLevel, x, level)) {
                             @Pc(730) Location loc = (Location) Static687.getGroundDecor(level, x, z);
                             if (loc == null) {
-                                loc = (Location) Static578.getEntity(level, x, z, Static484.aClass19 == null ? (Static484.aClass19 = Static484.getClass("com.jagex.game.Location")) : Static484.aClass19);
+                                loc = (Location) Static578.getEntity(level, x, z, Static484.locClass == null ? (Static484.locClass = Static484.getClass("com.jagex.game.Location")) : Static484.locClass);
                             }
                             if (loc == null) {
                                 loc = (Location) Static302.getWall(level, x, z);
@@ -811,22 +811,22 @@ public final class Minimap {
             yaw = (int) Camera.playerCameraYaw + Camera.yawOffset & 0x3FFF;
         }
 
-        @Pc(37) int local37 = Math.max(component.width / 2, component.height / 2) + 10;
-        @Pc(45) int local45 = (drawY * drawY) + (drawX * drawX);
-        if ((local37 * local37) < local45) {
+        @Pc(37) int radius = Math.max(component.width / 2, component.height / 2) + 10;
+        @Pc(45) int distanceSquared = (drawY * drawY) + (drawX * drawX);
+        if ((radius * radius) < distanceSquared) {
             return;
         }
 
-        @Pc(60) int local60 = Trig1.SIN[yaw];
-        @Pc(64) int local64 = Trig1.COS[yaw];
+        @Pc(60) int sin = Trig1.SIN[yaw];
+        @Pc(64) int cos = Trig1.COS[yaw];
         if (Camera.mode != CameraMode.MODE_FOLLOWCOORD) {
-            local60 = (local60 * 256) / (Camera.scaleOffset + 256);
-            local64 = (local64 * 256) / (Camera.scaleOffset + 256);
+            sin = (sin * 256) / (Camera.scaleOffset + 256);
+            cos = (cos * 256) / (Camera.scaleOffset + 256);
         }
 
-        @Pc(98) int local98 = ((drawX * local64) + (drawY * local60)) >> 14;
-        @Pc(109) int local109 = ((drawY * local64) - (drawX * local60)) >> 14;
-        sprite.render((local98 + (component.width / 2) + offsetX) - (sprite.scaleWidth() / 2), ((component.height / 2) + offsetY) - local109 - (sprite.scaleHeight() / 2), mask, offsetX, offsetY);
+        @Pc(98) int rotatedX = ((drawX * cos) + (drawY * sin)) >> 14;
+        @Pc(109) int rotatedZ = ((drawY * cos) - (drawX * sin)) >> 14;
+        sprite.render((rotatedX + (component.width / 2) + offsetX) - (sprite.scaleWidth() / 2), ((component.height / 2) + offsetY) - rotatedZ - (sprite.scaleHeight() / 2), mask, offsetX, offsetY);
     }
 
     @OriginalMember(owner = "client!dk", name = "a", descriptor = "(IIBJLclient!aa;IIILclient!hda;)V")
@@ -836,13 +836,13 @@ public final class Minimap {
             return;
         }
 
-        @Pc(37) int local37 = Math.min(component.width / 2, component.height / 2);
-        if (distance <= (local37 * local37)) {
+        @Pc(37) int radius = Math.min(component.width / 2, component.height / 2);
+        if (distance <= (radius * radius)) {
             drawDot(offsetY, mask, Sprites.hintMapmarkers[sprite], arrowY, arrowX, component, offsetX);
             return;
         }
 
-        local37 -= 10;
+        radius -= 10;
 
         @Pc(64) int yaw;
         if (Camera.mode == CameraMode.MODE_FOLLOWCOORD) {
@@ -851,19 +851,19 @@ public final class Minimap {
             yaw = Camera.yawOffset + (int) Camera.playerCameraYaw & 0x3FFF;
         }
 
-        @Pc(77) int local77 = Trig1.SIN[yaw];
-        @Pc(81) int local81 = Trig1.COS[yaw];
+        @Pc(77) int sin = Trig1.SIN[yaw];
+        @Pc(81) int cos = Trig1.COS[yaw];
         if (Camera.mode != CameraMode.MODE_FOLLOWCOORD) {
-            local81 = local81 * 256 / (Camera.scaleOffset + 256);
-            local77 = local77 * 256 / (Camera.scaleOffset + 256);
+            cos = cos * 256 / (Camera.scaleOffset + 256);
+            sin = sin * 256 / (Camera.scaleOffset + 256);
         }
 
-        @Pc(112) int local112 = ((arrowX * local81) + (arrowY * local77)) >> 14;
-        @Pc(123) int local123 = ((arrowY * local81) - (arrowX * local77)) >> 14;
-        @Pc(129) double local129 = Math.atan2(local112, local123);
-        @Pc(136) int local136 = (int) ((double) local37 * Math.sin(local129));
-        @Pc(143) int local143 = (int) ((double) local37 * Math.cos(local129));
-        Sprites.hintMapedge[sprite].renderRotated((float) local136 + (float) component.width / 2.0F + (float) offsetX, (float) -local143 + (float) component.height / 2.0F + (float) offsetY, 4096, (int) ((-local129 / 6.283185307179586D) * 65535.0D));
+        @Pc(112) int rotatedX = ((arrowX * cos) + (arrowY * sin)) >> 14;
+        @Pc(123) int rotatedZ = ((arrowY * cos) - (arrowX * sin)) >> 14;
+        @Pc(129) double angle = Math.atan2(rotatedX, rotatedZ);
+        @Pc(136) int edgeX = (int) ((double) radius * Math.sin(angle));
+        @Pc(143) int edgeZ = (int) ((double) radius * Math.cos(angle));
+        Sprites.hintMapedge[sprite].renderRotated((float) edgeX + (float) component.width / 2.0F + (float) offsetX, (float) -edgeZ + (float) component.height / 2.0F + (float) offsetY, 4096, (int) ((-angle / 6.283185307179586D) * 65535.0D));
     }
 
     @OriginalMember(owner = "client!ns", name = "a", descriptor = "(B)V")
@@ -882,14 +882,14 @@ public final class Minimap {
     }
 
     @OriginalMember(owner = "client!dfa", name = "a", descriptor = "(ILclient!ha;)V")
-    public static void method2046(@OriginalArg(1) Toolkit arg0) {
-        if (level != PlayerEntity.self.level && (Static334.activeTiles != null && drawLevel(arg0, PlayerEntity.self.level))) {
+    public static void method2046(@OriginalArg(1) Toolkit toolkit) {
+        if (level != PlayerEntity.self.level && (Static334.activeTiles != null && drawLevel(toolkit, PlayerEntity.self.level))) {
             level = PlayerEntity.self.level;
         }
     }
 
     @OriginalMember(owner = "client!eh", name = "a", descriptor = "(Lclient!ha;[II)V")
-    public static void method2371(@OriginalArg(0) Toolkit arg0, @OriginalArg(1) int[] arg1, @OriginalArg(2) int arg2) {
-        Static141.method2376(arg0, arg1, arg1.length, arg2, null, null);
+    public static void method2371(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) int[] vertices, @OriginalArg(2) int colour) {
+        PolygonFiller.fillPolygon(toolkit, vertices, vertices.length, colour, null, null);
     }
 }
