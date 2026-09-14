@@ -6,7 +6,7 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static34 {
 
     @OriginalMember(owner = "client!bca", name = "a", descriptor = "(II[BLclient!tca;)Lclient!ns;")
-    public static Class265 method884(@OriginalArg(0) int shaderType, @OriginalArg(2) byte[] source, @OriginalArg(3) GlxToolkit toolkit) {
+    public static Class265 compileShader(@OriginalArg(0) int shaderType, @OriginalArg(2) byte[] source, @OriginalArg(3) GlxToolkit toolkit) {
         if (source == null || source.length == 0) {
             return null;
         }

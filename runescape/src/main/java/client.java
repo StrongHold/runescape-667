@@ -986,7 +986,7 @@ public final class client extends GameShell {
         }
 
         if (debugconsole.isOpen()) {
-            Static668.method8703();
+            Static668.updateDebugConsole();
         }
 
         if (MainLogicStep.isLoading(MainLogicManager.step)) {

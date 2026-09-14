@@ -62,7 +62,7 @@ public final class Static208 {
         }
         for (@Pc(39) int local39 = local9; local39 <= local11; local39++) {
             for (@Pc(42) int local42 = local16; local42 <= local18; local42++) {
-                if (arg0.virtualLevel < Static299.tileMaxLevel && local39 >= Static441.anInt6691 && local39 < Static77.anInt1613 && local42 >= Static220.anInt3562 && local42 < Static692.anInt10370) {
+                if (arg0.virtualLevel < Static299.tileMaxLevel && local39 >= Static441.anInt6691 && local39 < Static77.anInt1613 && local42 >= Static220.baseTileZ && local42 < Static692.anInt10370) {
                     if ((arg2 == null || arg0.level < arg3 || arg2[arg0.level][local39][local42] != arg4) && arg0.method9275() && !arg0.method9284((byte) 59, Static665.aToolkit_15)) {
                         return false;
                     }

@@ -6671,7 +6671,7 @@ public final class ScriptRunner {
 
             if (opcode == DETAIL_STEREO) {
                 ClientOptions.instance.update(intStack[--intStackPointer] == 1 ? 1 : 0, ClientOptions.instance.stereoSound);
-                Static150.method2455();
+                Static150.restartAudio();
                 ClientOptions.save();
                 Static503.sentPreferences = false;
                 return;

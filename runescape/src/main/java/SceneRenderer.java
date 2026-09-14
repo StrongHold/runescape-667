@@ -24,10 +24,10 @@ public final class SceneRenderer {
         } else {
             Static231.anInt3734 = 0;
         }
-        Static220.anInt3562 = Static550.anInt8271 - Static35.anInt813;
-        if (Static220.anInt3562 < 0) {
-            Static13.anInt148 = -Static220.anInt3562;
-            Static220.anInt3562 = 0;
+        Static220.baseTileZ = Static550.anInt8271 - Static35.anInt813;
+        if (Static220.baseTileZ < 0) {
+            Static13.anInt148 = -Static220.baseTileZ;
+            Static220.baseTileZ = 0;
         } else {
             Static13.anInt148 = 0;
         }
@@ -97,7 +97,7 @@ public final class SceneRenderer {
             Static142.aBooleanArrayArray1 = Static222.aBooleanArrayArray2;
             Static258.aBooleanArrayArray3 = Static222.aBooleanArrayArray2;
             Static441.anInt6691 = 0;
-            Static220.anInt3562 = 0;
+            Static220.baseTileZ = 0;
             Static77.anInt1613 = Static619.tileMaxX;
             Static692.anInt10370 = Static662.tileMaxZ;
             Static29.aBoolean60 = false;
@@ -132,14 +132,14 @@ public final class SceneRenderer {
             }
             Static379.method5355(true);
             Static665.aToolkit_15.ra(-1, 1583160, 40, 127);
-            Static517.method6823(true, roofStamps, levels, roofStamp, orthoZoom, entitySkipFlags, arg17);
+            Static517.renderScenePass(true, roofStamps, levels, roofStamp, orthoZoom, entitySkipFlags, arg17);
             if (Static661.aBoolean457) {
                 Static245.method8630();
             }
             Static665.aToolkit_15.pa();
             Static379.method5355(false);
         }
-        Static517.method6823(false, roofStamps, levels, roofStamp, orthoZoom, entitySkipFlags, arg17);
+        Static517.renderScenePass(false, roofStamps, levels, roofStamp, orthoZoom, entitySkipFlags, arg17);
         if (Static661.aBoolean457) {
             for (local85 = 0; local85 < Static299.tileMaxLevel; local85++) {
                 Static275.aBooleanArrayArrayArray4[local85] = Static433.aBooleanArrayArrayArray5[local85];

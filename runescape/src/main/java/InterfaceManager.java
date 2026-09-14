@@ -1092,7 +1092,7 @@ public final class InterfaceManager {
 
         Static115.method2136(cursor);
         @Pc(136) int size = PlayerEntity.self.getSize() << 8;
-        Static220.method3198(Static35.currentTick, size + PlayerEntity.self.z, PlayerEntity.self.x + size, PlayerEntity.self.level);
+        Static220.updatePositionedSounds(Static35.currentTick, size + PlayerEntity.self.z, PlayerEntity.self.x + size, PlayerEntity.self.level);
         Static35.currentTick = 0;
     }
 

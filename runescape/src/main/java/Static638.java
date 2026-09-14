@@ -38,10 +38,10 @@ public final class Static638 {
                     local41.anInt4097 = 16384;
                 }
                 local41.method3588(local41.anInt4097);
-                if (Static156.anInt2679 > 0 && Static232.pcmPlayerThread == null) {
+                if (Static156.soundThreadPriority > 0 && Static232.pcmPlayerThread == null) {
                     Static232.pcmPlayerThread = new PcmPlayerThread();
                     Static232.pcmPlayerThread.signLink = arg0;
-                    arg0.startThread(Static232.pcmPlayerThread, Static156.anInt2679);
+                    arg0.startThread(Static232.pcmPlayerThread, Static156.soundThreadPriority);
                 }
                 if (Static232.pcmPlayerThread != null) {
                     if (Static232.pcmPlayerThread.players[arg1] != null) {
@@ -58,10 +58,10 @@ public final class Static638 {
                     local141.method3593(arg3);
                     local141.anInt4097 = 16384;
                     local141.method3588(local141.anInt4097);
-                    if (Static156.anInt2679 > 0 && Static232.pcmPlayerThread == null) {
+                    if (Static156.soundThreadPriority > 0 && Static232.pcmPlayerThread == null) {
                         Static232.pcmPlayerThread = new PcmPlayerThread();
                         Static232.pcmPlayerThread.signLink = arg0;
-                        arg0.startThread(Static232.pcmPlayerThread, Static156.anInt2679);
+                        arg0.startThread(Static232.pcmPlayerThread, Static156.soundThreadPriority);
                     }
                     if (Static232.pcmPlayerThread != null) {
                         if (Static232.pcmPlayerThread.players[arg1] != null) {

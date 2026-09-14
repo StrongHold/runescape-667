@@ -34,7 +34,7 @@ public final class GlxToolkit extends NativeToolkit {
 
     @OriginalMember(owner = "client!hu", name = "a", descriptor = "(IILclient!sb;Lclient!d;Ljava/awt/Canvas;)Lclient!ha;")
     public static Toolkit create(@OriginalArg(2) js5 shaders, @OriginalArg(4) Canvas canvas, @OriginalArg(3) TextureSource textureSource, @OriginalArg(0) int antialiasing) {
-        if (!Static651.method8516()) {
+        if (!Static651.loadHardware3d()) {
             throw new RuntimeException("");
         } else if (Static14.loadNativeLibrary("jaggl")) {
             @Pc(28) OpenGL local28 = new OpenGL();

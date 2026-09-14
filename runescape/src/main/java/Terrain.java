@@ -183,14 +183,14 @@ public class Terrain {
     }
 
     @OriginalMember(owner = "client!qja", name = "a", descriptor = "(IIIII)V")
-    public final void method7880(@OriginalArg(2) int x, @OriginalArg(4) int z) {
+    public final void setMapSquareHeights(@OriginalArg(2) int x, @OriginalArg(4) int z) {
         for (@Pc(1) int level = 0; level < this.levels; level++) {
             this.setTileHeights(x, z, level, 64, 64);
         }
     }
 
     @OriginalMember(owner = "client!qja", name = "a", descriptor = "(I[[[ILclient!ha;[Lclient!eq;)V")
-    public final void method7881(@OriginalArg(1) int[][][] waterHeights, @OriginalArg(2) Toolkit toolkit, @OriginalArg(3) CollisionMap[] collisionMaps) {
+    public final void createGrounds(@OriginalArg(1) int[][][] waterHeights, @OriginalArg(2) Toolkit toolkit, @OriginalArg(3) CollisionMap[] collisionMaps) {
         @Pc(4) int level;
         @Pc(7) int groundFlags;
         @Pc(10) int featureFlags;
@@ -716,7 +716,7 @@ public class Terrain {
     }
 
     @OriginalMember(owner = "client!qja", name = "a", descriptor = "([[IBI)V")
-    public final void method7885(@OriginalArg(0) int[][] heightOffsets) {
+    public final void addHeightOffsets(@OriginalArg(0) int[][] heightOffsets) {
         @Pc(16) int[][] heights = this.tileHeights[0];
         for (@Pc(18) int x = 0; x < this.width + 1; x++) {
             for (@Pc(21) int z = 0; z < this.length + 1; z++) {
@@ -807,7 +807,7 @@ public class Terrain {
     }
 
     @OriginalMember(owner = "client!qja", name = "a", descriptor = "(BLclient!ha;Lclient!s;Lclient!s;)V")
-    public final void method7888(@OriginalArg(1) Toolkit toolkit, @OriginalArg(2) Ground underwaterGround, @OriginalArg(3) Ground surfaceGround) {
+    public final void load(@OriginalArg(1) Toolkit toolkit, @OriginalArg(2) Ground underwaterGround, @OriginalArg(3) Ground surfaceGround) {
         if (Static397.anIntArray482 == null || this.length != Static397.anIntArray482.length) {
             Static501.anIntArray606 = new int[this.length];
             Static418.anIntArray704 = new int[this.length];

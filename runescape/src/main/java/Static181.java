@@ -12,7 +12,7 @@ public final class Static181 {
     @OriginalMember(owner = "client!fl", name = "a", descriptor = "(IIIIIIIIII)V")
     public static void drawCurveUnclipped(@OriginalArg(0) int startY, @OriginalArg(1) int controlStartY, @OriginalArg(2) int lineColour, @OriginalArg(4) int controlEndX, @OriginalArg(5) int startX, @OriginalArg(6) int controlEndY, @OriginalArg(7) int endY, @OriginalArg(8) int controlStartX, @OriginalArg(9) int endX) {
         if (controlStartX == startX && controlStartY == startY && controlEndX == endX && endY == controlEndY) {
-            Static409.method5658(startX, endX, lineColour, endY, startY);
+            Static409.drawLineUnclipped(startX, endX, lineColour, endY, startY);
             return;
         }
         @Pc(51) int penX = startX;
@@ -40,7 +40,7 @@ public final class Static181 {
             @Pc(166) int linearTermY = t * linearY;
             @Pc(176) int x = startX + (cubicTermX + quadraticTermX + linearTermX >> 12);
             @Pc(188) int y = startY + (cubicTermY + quadraticTermY + linearTermY >> 12);
-            Static409.method5658(penX, x, lineColour, y, penY);
+            Static409.drawLineUnclipped(penX, x, lineColour, y, penY);
             penY = y;
             penX = x;
         }

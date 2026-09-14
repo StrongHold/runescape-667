@@ -15,7 +15,7 @@ public final class Static668 {
      * mouse wheel to the scrollback, and folds this frame's key events into the current entry.
      */
     @OriginalMember(owner = "client!vca", name = "c", descriptor = "(I)V")
-    public static void method8703() {
+    public static void updateDebugConsole() {
         if (debugconsole.anInt8472 < 102) {
             debugconsole.anInt8472 += 6;
         }

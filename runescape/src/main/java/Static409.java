@@ -21,7 +21,7 @@ public final class Static409 {
      * @return whether any roof was hidden.
      */
     @OriginalMember(owner = "client!mt", name = "a", descriptor = "(II[[[Lclient!pha;IIZ)Z")
-    public static boolean method5656(@OriginalArg(1) int z, @OriginalArg(2) Tile[][][] tiles, @OriginalArg(3) int boundsIndex, @OriginalArg(4) int x, @OriginalArg(5) boolean permanent) {
+    public static boolean hideRoofsFrom(@OriginalArg(1) int z, @OriginalArg(2) Tile[][][] tiles, @OriginalArg(3) int boundsIndex, @OriginalArg(4) int x, @OriginalArg(5) boolean permanent) {
         @Pc(21) byte roofStamp = permanent ? 1 : (byte) (Static198.anInt3276 & 0xFF);
         if (Static328.aByteArrayArrayArray4[Camera.renderingLevel][x][z] == roofStamp) {
             return false;
@@ -60,18 +60,18 @@ public final class Static409 {
                             if (outsideRoof && tiles[local139][tileX][tileZ] != null) {
                                 if (tiles[local139][tileX][tileZ].wall != null) {
                                     local185 = Static239.method3474(edgeLoc0);
-                                    if (tiles[local139][tileX][tileZ].wall.aShort58 == local185 || tiles[local139][tileX][tileZ].adjacentWall != null && local185 == tiles[local139][tileX][tileZ].adjacentWall.aShort58) {
+                                    if (tiles[local139][tileX][tileZ].wall.sideMask == local185 || tiles[local139][tileX][tileZ].adjacentWall != null && local185 == tiles[local139][tileX][tileZ].adjacentWall.sideMask) {
                                         continue;
                                     }
                                     if (edgeLoc1 != 0) {
                                         local235 = Static239.method3474(edgeLoc1);
-                                        if (tiles[local139][tileX][tileZ].wall.aShort58 == local235 || tiles[local139][tileX][tileZ].adjacentWall != null && local235 == tiles[local139][tileX][tileZ].adjacentWall.aShort58) {
+                                        if (tiles[local139][tileX][tileZ].wall.sideMask == local235 || tiles[local139][tileX][tileZ].adjacentWall != null && local235 == tiles[local139][tileX][tileZ].adjacentWall.sideMask) {
                                             continue;
                                         }
                                     }
                                     if (edgeLoc2 != 0) {
                                         local235 = Static239.method3474(edgeLoc2);
-                                        if (tiles[local139][tileX][tileZ].wall.aShort58 == local235 || tiles[local139][tileX][tileZ].adjacentWall != null && tiles[local139][tileX][tileZ].adjacentWall.aShort58 == local235) {
+                                        if (tiles[local139][tileX][tileZ].wall.sideMask == local235 || tiles[local139][tileX][tileZ].adjacentWall != null && tiles[local139][tileX][tileZ].adjacentWall.sideMask == local235) {
                                             continue;
                                         }
                                     }
@@ -205,7 +205,7 @@ public final class Static409 {
      * inside the clip bounds, because nothing here is clipped.
      */
     @OriginalMember(owner = "client!mt", name = "a", descriptor = "(IIIBII)V")
-    public static void method5658(@OriginalArg(0) int x0, @OriginalArg(1) int x1, @OriginalArg(2) int rgb, @OriginalArg(4) int y1, @OriginalArg(5) int y0) {
+    public static void drawLineUnclipped(@OriginalArg(0) int x0, @OriginalArg(1) int x1, @OriginalArg(2) int rgb, @OriginalArg(4) int y1, @OriginalArg(5) int y0) {
         @Pc(8) int dy = y1 - y0;
         @Pc(13) int dx = x1 - x0;
         if (dx == 0) {

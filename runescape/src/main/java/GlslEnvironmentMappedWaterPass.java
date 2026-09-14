@@ -55,8 +55,8 @@ public final class GlslEnvironmentMappedWaterPass extends RenderPass {
         super(toolkit);
         this.water = water;
         if (shaders != null && toolkit.aBoolean703 && toolkit.aBoolean707) {
-            @Pc(29) Class265 vertexShader = Static34.method884(GL_VERTEX_SHADER_ARB, shaders.getfile("gl", "environment_mapped_water_v"), toolkit);
-            @Pc(43) Class265 fragmentShader = Static34.method884(GL_FRAGMENT_SHADER_ARB, shaders.getfile("gl", "environment_mapped_water_f"), toolkit);
+            @Pc(29) Class265 vertexShader = Static34.compileShader(GL_VERTEX_SHADER_ARB, shaders.getfile("gl", "environment_mapped_water_v"), toolkit);
+            @Pc(43) Class265 fragmentShader = Static34.compileShader(GL_FRAGMENT_SHADER_ARB, shaders.getfile("gl", "environment_mapped_water_f"), toolkit);
             this.program = Static223.method9088(new Class265[]{vertexShader, fragmentShader}, toolkit);
             this.supported = this.program != null && this.water.method115();
         } else {

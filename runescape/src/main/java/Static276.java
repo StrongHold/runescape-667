@@ -11,7 +11,7 @@ public final class Static276 {
      * turns occlusion culling back on for every toolkit but the software one.
      */
     @OriginalMember(owner = "client!ila", name = "a", descriptor = "(I)V")
-    public static void method3986() {
+    public static void resetOccluders() {
         Static317.anInt5046 = 0;
         Static442.aBoolean499 = false;
         Static384.aLocOccluderArray2 = new LocOccluder[500];
@@ -38,7 +38,7 @@ public final class Static276 {
      * first roof the camera ray crosses on its way in.
      */
     @OriginalMember(owner = "client!ila", name = "b", descriptor = "(I)V")
-    public static void method3988() {
+    public static void hideRoofsForFrame() {
         if (ClientOptions.instance.removeRoofsOverride.getValue() != 2) {
             return;
         }
@@ -66,7 +66,7 @@ public final class Static276 {
         if (Camera.mode != CameraMode.MODE_DEFAULT && Camera.anInt10376 == -1) {
             local149 = Static102.averageHeight(Camera.renderingLevel, Camera.x, Camera.z);
             if (local149 - Camera.y < 3200 && (Static280.tileFlags[Camera.renderingLevel][Camera.x >> 9][Camera.z >> 9] & TileFlag.REMOVE_ROOF) != 0) {
-                Static409.method5656(Camera.z >> 9, Static334.activeTiles, 1, Camera.x >> 9, false);
+                Static409.hideRoofsFrom(Camera.z >> 9, Static334.activeTiles, 1, Camera.x >> 9, false);
                 return;
             }
             return;
@@ -76,7 +76,7 @@ public final class Static276 {
             targetZ = Camera.anInt10383;
         }
         if ((Static280.tileFlags[Camera.renderingLevel][targetX >> 9][targetZ >> 9] & TileFlag.REMOVE_ROOF) != 0) {
-            Static409.method5656(targetZ >> 9, Static334.activeTiles, 0, targetX >> 9, false);
+            Static409.hideRoofsFrom(targetZ >> 9, Static334.activeTiles, 0, targetX >> 9, false);
         }
         if (Camera.pitch >= 2560) {
             return;
@@ -110,7 +110,7 @@ public final class Static276 {
                         rayZ--;
                     }
                     if ((Static280.tileFlags[Camera.renderingLevel][local149][rayZ] & TileFlag.REMOVE_ROOF) != 0) {
-                        Static409.method5656(rayZ, Static334.activeTiles, 1, local149, false);
+                        Static409.hideRoofsFrom(rayZ, Static334.activeTiles, 1, local149, false);
                         return;
                     }
                     error += slope;
@@ -122,7 +122,7 @@ public final class Static276 {
                             local149--;
                         }
                         if ((Static280.tileFlags[Camera.renderingLevel][local149][rayZ] & TileFlag.REMOVE_ROOF) != 0) {
-                            Static409.method5656(rayZ, Static334.activeTiles, 1, local149, false);
+                            Static409.hideRoofsFrom(rayZ, Static334.activeTiles, 1, local149, false);
                             return;
                         }
                     }
@@ -138,7 +138,7 @@ public final class Static276 {
                     local149--;
                 }
                 if ((Static280.tileFlags[Camera.renderingLevel][local149][rayZ] & TileFlag.REMOVE_ROOF) != 0) {
-                    Static409.method5656(rayZ, Static334.activeTiles, 1, local149, false);
+                    Static409.hideRoofsFrom(rayZ, Static334.activeTiles, 1, local149, false);
                     return;
                 }
                 error += slope;
@@ -150,7 +150,7 @@ public final class Static276 {
                     }
                     error -= 65536;
                     if ((Static280.tileFlags[Camera.renderingLevel][local149][rayZ] & TileFlag.REMOVE_ROOF) != 0) {
-                        Static409.method5656(rayZ, Static334.activeTiles, 1, local149, false);
+                        Static409.hideRoofsFrom(rayZ, Static334.activeTiles, 1, local149, false);
                         return;
                     }
                 }

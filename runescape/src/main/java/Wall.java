@@ -11,11 +11,11 @@ import org.openrs2.deob.annotation.Pc;
 public abstract class Wall extends Entity {
 
     @OriginalMember(owner = "client!kp", name = "D", descriptor = "S")
-    public short aShort58;
+    public short sideMask;
 
     @OriginalMember(owner = "client!kp", name = "<init>", descriptor = "(IIIIII)V")
     protected Wall(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int level, @OriginalArg(4) int virtualLevel, @OriginalArg(5) int sideMask) {
-        this.aShort58 = (short) sideMask;
+        this.sideMask = (short) sideMask;
         super.y = y;
         super.level = (byte) level;
         super.z = z;
@@ -27,7 +27,7 @@ public abstract class Wall extends Entity {
     @Override
     public final boolean method9284(@OriginalArg(0) byte arg0, @OriginalArg(1) Toolkit toolkit) {
         if (arg0 != 59) {
-            this.aShort58 = -17;
+            this.sideMask = -17;
         }
         return Static73.isWallOccluded(super.x >> EnvironmentLight.anInt1066, super.z >> EnvironmentLight.anInt1066, this, super.virtualLevel);
     }
@@ -49,23 +49,23 @@ public abstract class Wall extends Entity {
             directionIndex += 6;
         }
         @Pc(71) int facingSides = Static4.anIntArray15[directionIndex];
-        if ((this.aShort58 & facingSides) != 0) {
+        if ((this.sideMask & facingSides) != 0) {
             return this.findLightsAt(lights, localZ, localX);
-        } else if (this.aShort58 == 1 && localX > 0) {
+        } else if (this.sideMask == 1 && localX > 0) {
             return this.findLightsAt(lights, localZ, localX - 1);
-        } else if (this.aShort58 == 4 && Static619.tileMaxX >= localX) {
+        } else if (this.sideMask == 4 && Static619.tileMaxX >= localX) {
             return this.findLightsAt(lights, localZ, localX + 1);
-        } else if (this.aShort58 == 8 && localZ > 0) {
+        } else if (this.sideMask == 8 && localZ > 0) {
             return this.findLightsAt(lights, localZ - 1, localX);
-        } else if (this.aShort58 == 2 && Static662.tileMaxZ >= localZ) {
+        } else if (this.sideMask == 2 && Static662.tileMaxZ >= localZ) {
             return this.findLightsAt(lights, localZ + 1, localX);
-        } else if (this.aShort58 == 16 && localX > 0 && localZ <= Static662.tileMaxZ) {
+        } else if (this.sideMask == 16 && localX > 0 && localZ <= Static662.tileMaxZ) {
             return this.findLightsAt(lights, localZ + 1, localX + -1);
-        } else if (this.aShort58 == 32 && localX <= Static619.tileMaxX && Static662.tileMaxZ >= localZ) {
+        } else if (this.sideMask == 32 && localX <= Static619.tileMaxX && Static662.tileMaxZ >= localZ) {
             return this.findLightsAt(lights, localZ + 1, localX + 1);
-        } else if (this.aShort58 == 128 && localX > 0 && localZ > 0) {
+        } else if (this.sideMask == 128 && localX > 0 && localZ > 0) {
             return this.findLightsAt(lights, localZ - 1, localX + -1);
-        } else if (this.aShort58 == 64 && Static619.tileMaxX >= localX && localZ > 0) {
+        } else if (this.sideMask == 64 && Static619.tileMaxX >= localX && localZ > 0) {
             return this.findLightsAt(lights, localZ - 1, localX + 1);
         } else {
             throw new RuntimeException("");

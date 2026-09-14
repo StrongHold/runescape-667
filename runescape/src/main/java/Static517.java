@@ -19,13 +19,13 @@ public final class Static517 {
         if (22050 > 48000) {
             throw new IllegalArgumentException();
         }
-        Static156.anInt2679 = 2;
+        Static156.soundThreadPriority = 2;
         Audio.sampleRate = 22050;
         QueueBuss.stereo = stereo;
     }
 
     @OriginalMember(owner = "client!qea", name = "a", descriptor = "(Z[[[BIBIIZ)V")
-    public static void method6823(@OriginalArg(0) boolean underwater, @OriginalArg(1) byte[][][] roofStamps, @OriginalArg(2) int levels, @OriginalArg(3) byte roofStamp, @OriginalArg(4) int orthoZoom, @OriginalArg(5) int entitySkipFlags, @OriginalArg(6) boolean trackOrthoTiles) {
+    public static void renderScenePass(@OriginalArg(0) boolean underwater, @OriginalArg(1) byte[][][] roofStamps, @OriginalArg(2) int levels, @OriginalArg(3) byte roofStamp, @OriginalArg(4) int orthoZoom, @OriginalArg(5) int entitySkipFlags, @OriginalArg(6) boolean trackOrthoTiles) {
         @Pc(6) int ground = underwater ? 1 : 0;
         Static546.onscreenOpaqueEntityCount = 0;
         Static645.onscreenTransparentEntityCount = 0;
@@ -104,8 +104,8 @@ public final class Static517 {
                         maxOffsetX -= Static441.anInt6691 + Static258.aBooleanArrayArray3.length - Static619.tileMaxX;
                     }
                     local157 = Static258.aBooleanArrayArray3[0].length;
-                    if (Static220.anInt3562 + Static258.aBooleanArrayArray3[0].length > Static662.tileMaxZ) {
-                        local157 -= Static220.anInt3562 + Static258.aBooleanArrayArray3[0].length - Static662.tileMaxZ;
+                    if (Static220.baseTileZ + Static258.aBooleanArrayArray3[0].length > Static662.tileMaxZ) {
+                        local157 -= Static220.baseTileZ + Static258.aBooleanArrayArray3[0].length - Static662.tileMaxZ;
                     }
                     visibleTiles = Static142.aBooleanArrayArray1;
                     if (Static581.aBoolean657) {
@@ -115,7 +115,7 @@ public final class Static517 {
                         for (local316 = Static231.anInt3734; local316 < maxOffsetX; local316++) {
                             tileX = local316 + Static441.anInt6691 - Static231.anInt3734;
                             for (offsetZ = Static13.anInt148; offsetZ < local157; offsetZ++) {
-                                if (Static258.aBooleanArrayArray3[local316][offsetZ] && !Static588.method7714(offsetZ + Static220.anInt3562 - Static13.anInt148, local225, tileX)) {
+                                if (Static258.aBooleanArrayArray3[local316][offsetZ] && !Static588.method7714(offsetZ + Static220.baseTileZ - Static13.anInt148, local225, tileX)) {
                                     visibleTiles[local316][offsetZ] = true;
                                 } else {
                                     visibleTiles[local316][offsetZ] = false;
@@ -143,8 +143,8 @@ public final class Static517 {
                         maxOffsetX -= Static441.anInt6691 + Static258.aBooleanArrayArray3.length - Static619.tileMaxX;
                     }
                     local157 = Static258.aBooleanArrayArray3[0].length;
-                    if (Static220.anInt3562 + Static258.aBooleanArrayArray3[0].length > Static662.tileMaxZ) {
-                        local157 -= Static220.anInt3562 + Static258.aBooleanArrayArray3[0].length - Static662.tileMaxZ;
+                    if (Static220.baseTileZ + Static258.aBooleanArrayArray3[0].length > Static662.tileMaxZ) {
+                        local157 -= Static220.baseTileZ + Static258.aBooleanArrayArray3[0].length - Static662.tileMaxZ;
                     }
                     visibleTiles = Static142.aBooleanArrayArray1;
                     if (Static581.aBoolean657) {
@@ -156,7 +156,7 @@ public final class Static517 {
                             for (offsetZ = Static13.anInt148; offsetZ < local157; offsetZ++) {
                                 visibleTiles[local316][offsetZ] = false;
                                 if (Static258.aBooleanArrayArray3[local316][offsetZ]) {
-                                    @Pc(344) int tileZ = offsetZ + Static220.anInt3562 - Static13.anInt148;
+                                    @Pc(344) int tileZ = offsetZ + Static220.baseTileZ - Static13.anInt148;
                                     for (@Pc(346) int searchLevel = local225; searchLevel >= 0; searchLevel--) {
                                         if (Static334.activeTiles[searchLevel][tileX][tileZ] != null && Static334.activeTiles[searchLevel][tileX][tileZ].level == local225) {
                                             if ((searchLevel < levels || roofStamps[searchLevel][tileX][tileZ] != roofStamp) && !Static588.method7714(tileZ, local225, tileX)) {

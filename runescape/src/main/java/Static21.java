@@ -32,7 +32,7 @@ public final class Static21 {
         Static662.tileMaxZ = mapLength;
         Static35.anInt813 = renderDistance;
         Static272.aClass13_1 = Static167.method2632();
-        Static276.method3986();
+        Static276.resetOccluders();
         Static478.aTileArrayArrayArray3 = new Tile[4][Static619.tileMaxX][Static662.tileMaxZ];
         Static706.floor = new Ground[4];
         if (underwater) {
@@ -109,7 +109,7 @@ public final class Static21 {
     }
 
     @OriginalMember(owner = "client!am", name = "a", descriptor = "(ILjava/io/File;Z)V")
-    public static void method8048(@OriginalArg(1) File file) {
+    public static void dumpHeap(@OriginalArg(1) File file) {
         if (Static210.anObject8 == null) {
             Static716.method9349();
         }

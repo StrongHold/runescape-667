@@ -135,7 +135,7 @@ public final class Static294 {
         if (Camera.z > (Static662.tileMaxZ << 9) - 1) {
             Camera.z = (Static662.tileMaxZ << 9) - 1;
         }
-        Static276.method3988();
+        Static276.hideRoofsForFrame();
         Toolkit.active.KA(viewportX, viewportY, viewportWidth + viewportX, viewportY + viewportHeight);
         Static501.method6716(true);
         local375 = Static251.anInt4037;

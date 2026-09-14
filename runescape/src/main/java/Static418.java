@@ -91,7 +91,7 @@ public final class Static418 {
                 local113 = (Static273.anInt4395 - local62 << 12) / local53;
                 local115 = Static273.anInt4395;
             }
-            Static409.method5658(local113, local81, arg3, local79, local115);
+            Static409.drawLineUnclipped(local113, local81, arg3, local79, local115);
         }
     }
 }

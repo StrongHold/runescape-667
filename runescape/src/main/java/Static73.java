@@ -19,7 +19,7 @@ public final class Static73 {
             @Pc(35) int worldZ = z << EnvironmentLight.anInt1066;
             @Pc(45) int baseY = Static246.ground[level].getHeight(x, z) - 1;
             @Pc(51) int topY = wall.getMinY(2) + baseY;
-            if (wall.aShort58 == 1) {
+            if (wall.sideMask == 1) {
                 if (!Static172.isTriangleOccluded(worldX, worldZ, topY, topY, baseY, worldZ, Static340.anInt5586 + worldZ, worldX, worldX)) {
                     return false;
                 } else if (Static172.isTriangleOccluded(worldX, worldZ, topY, baseY, baseY, worldZ + Static340.anInt5586, worldZ + Static340.anInt5586, worldX, worldX)) {
@@ -28,7 +28,7 @@ public final class Static73 {
                 } else {
                     return false;
                 }
-            } else if (wall.aShort58 == 2) {
+            } else if (wall.sideMask == 2) {
                 if (!Static172.isTriangleOccluded(worldX + Static340.anInt5586, worldZ - -Static340.anInt5586, topY, topY, baseY, worldZ + Static340.anInt5586, Static340.anInt5586 + worldZ, worldX, worldX)) {
                     return false;
                 } else if (Static172.isTriangleOccluded(worldX + Static340.anInt5586, worldZ - -Static340.anInt5586, baseY, topY, baseY, Static340.anInt5586 + worldZ, worldZ + Static340.anInt5586, worldX, worldX + Static340.anInt5586)) {
@@ -37,7 +37,7 @@ public final class Static73 {
                 } else {
                     return false;
                 }
-            } else if (wall.aShort58 == 4) {
+            } else if (wall.sideMask == 4) {
                 if (!Static172.isTriangleOccluded(Static340.anInt5586 + worldX, worldZ, topY, topY, baseY, worldZ, Static340.anInt5586 + worldZ, worldX - -Static340.anInt5586, Static340.anInt5586 + worldX)) {
                     return false;
                 } else if (Static172.isTriangleOccluded(worldX + Static340.anInt5586, worldZ, topY, baseY, baseY, Static340.anInt5586 + worldZ, Static340.anInt5586 + worldZ, worldX + Static340.anInt5586, Static340.anInt5586 + worldX)) {
@@ -46,7 +46,7 @@ public final class Static73 {
                 } else {
                     return false;
                 }
-            } else if (wall.aShort58 == 8) {
+            } else if (wall.sideMask == 8) {
                 if (!Static172.isTriangleOccluded(Static340.anInt5586 + worldX, worldZ, topY, topY, baseY, worldZ, worldZ, worldX, worldX)) {
                     return false;
                 } else if (Static172.isTriangleOccluded(Static340.anInt5586 + worldX, worldZ, baseY, topY, baseY, worldZ, worldZ, worldX, worldX + Static340.anInt5586)) {
@@ -55,28 +55,28 @@ public final class Static73 {
                 } else {
                     return false;
                 }
-            } else if (wall.aShort58 == 16) {
+            } else if (wall.sideMask == 16) {
                 if (Static318.method8557(EnvironmentLight.anInt3993, topY, worldX, EnvironmentLight.anInt3993 + worldZ, baseY, EnvironmentLight.anInt3993)) {
                     Static679.occludedWallCount++;
                     return true;
                 } else {
                     return false;
                 }
-            } else if (wall.aShort58 == 32) {
+            } else if (wall.sideMask == 32) {
                 if (Static318.method8557(EnvironmentLight.anInt3993, topY, worldX + EnvironmentLight.anInt3993, EnvironmentLight.anInt3993 + worldZ, baseY, EnvironmentLight.anInt3993)) {
                     Static679.occludedWallCount++;
                     return true;
                 } else {
                     return false;
                 }
-            } else if (wall.aShort58 == 64) {
+            } else if (wall.sideMask == 64) {
                 if (Static318.method8557(EnvironmentLight.anInt3993, topY, EnvironmentLight.anInt3993 + worldX, worldZ, baseY, EnvironmentLight.anInt3993)) {
                     Static679.occludedWallCount++;
                     return true;
                 } else {
                     return false;
                 }
-            } else if (wall.aShort58 != 128) {
+            } else if (wall.sideMask != 128) {
                 return true;
             } else if (Static318.method8557(EnvironmentLight.anInt3993, topY, worldX, worldZ, baseY, EnvironmentLight.anInt3993)) {
                 Static679.occludedWallCount++;
@@ -114,7 +114,7 @@ public final class Static73 {
             @Pc(105) byte[] chunkData = data[i];
             if (chunkData == null && Static525.areaCenterZ < 800) {
                 Static557.method7331();
-                region.method7880(x, z);
+                region.setMapSquareHeights(x, z);
             }
         }
     }

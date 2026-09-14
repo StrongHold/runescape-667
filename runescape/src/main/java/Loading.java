@@ -433,7 +433,7 @@ public final class Loading {
             }
             AudioDefaults.decode(data);
 
-            Static674.method8806();
+            Static674.startAudio();
             MainLogicManager.setStep(MainLogicStep.STEP_LOADING_2);
         }
 

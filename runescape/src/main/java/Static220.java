@@ -10,7 +10,7 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static220 {
 
     @OriginalMember(owner = "client!gq", name = "d", descriptor = "I")
-    public static int anInt3562;
+    public static int baseTileZ;
 
     @OriginalMember(owner = "client!gq", name = "a", descriptor = "(III)Z")
     public static boolean method3197(@OriginalArg(1) int arg0, @OriginalArg(2) int arg1) {
@@ -18,7 +18,7 @@ public final class Static220 {
     }
 
     @OriginalMember(owner = "client!gq", name = "a", descriptor = "(IBIII)V")
-    public static void method3198(@OriginalArg(0) int currentTick, @OriginalArg(2) int z, @OriginalArg(3) int x, @OriginalArg(4) int level) {
+    public static void updatePositionedSounds(@OriginalArg(0) int currentTick, @OriginalArg(2) int z, @OriginalArg(3) int x, @OriginalArg(4) int level) {
         for (@Pc(6) PositionedSound sound = (PositionedSound) SoundManager.locSounds.first(); sound != null; sound = (PositionedSound) SoundManager.locSounds.next()) {
             SoundManager.method8366(currentTick, sound, level, x, z);
         }
@@ -140,7 +140,7 @@ public final class Static220 {
     }
 
     @OriginalMember(owner = "client!gq", name = "a", descriptor = "(Lclient!cd;Lclient!sb;Lclient!sb;Lclient!sb;ILclient!bd;)Z")
-    public static boolean method3201(@OriginalArg(0) PcmPlayer pcmPlayer, @OriginalArg(1) js5 vorbis, @OriginalArg(2) js5 synthSounds, @OriginalArg(3) js5 js5_15, @OriginalArg(5) MixBuss mixBuss) {
+    public static boolean initSoundSystem(@OriginalArg(0) PcmPlayer pcmPlayer, @OriginalArg(1) js5 vorbis, @OriginalArg(2) js5 synthSounds, @OriginalArg(3) js5 js5_15, @OriginalArg(5) MixBuss mixBuss) {
         Static581.mixBuss = mixBuss;
         Static296.vorbisJs5 = vorbis;
         Static91.synthSoundsJs5 = synthSounds;

@@ -58,7 +58,7 @@ public final class TextureShapeCurve extends TextureShape {
         @Pc(50) int y2 = this.controlEndY * height >> 12;
         @Pc(57) int x3 = width * this.endX >> 12;
         @Pc(64) int y3 = this.endY * height >> 12;
-        Static316.method7478(x0, y1, y2, super.lineColour, x2, y3, y0, x3, x1);
+        Static316.drawCurve(x0, y1, y2, super.lineColour, x2, y3, y0, x3, x1);
     }
 
     @OriginalMember(owner = "client!pfa", name = "a", descriptor = "(III)V")

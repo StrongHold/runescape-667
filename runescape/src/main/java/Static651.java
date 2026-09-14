@@ -111,7 +111,7 @@ public final class Static651 {
     }
 
     @OriginalMember(owner = "client!uja", name = "a", descriptor = "(I)Z")
-    public static boolean method8516() {
+    public static boolean loadHardware3d() {
         return Static14.loadNativeLibrary("jaclib") ? Static14.loadNativeLibrary("hw3d") : false;
     }
 

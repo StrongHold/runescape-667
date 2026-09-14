@@ -41,7 +41,7 @@ public final class D3DToolkit extends NativeToolkit {
     @OriginalMember(owner = "client!sd", name = "a", descriptor = "(Lclient!sb;IILclient!d;Ljava/awt/Canvas;)Lclient!ha;")
     public static Toolkit create(@OriginalArg(0) js5 shaders, @OriginalArg(4) Canvas canvas, @OriginalArg(3) TextureSource textureSource, @OriginalArg(1) int antialiasing) {
         try {
-            if (!Static651.method8516()) {
+            if (!Static651.loadHardware3d()) {
                 throw new RuntimeException("");
             } else if (Static14.loadNativeLibrary("jagdx")) {
                 @Pc(26) Class local26 = Class.forName("D3DToolkit");

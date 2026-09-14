@@ -752,9 +752,9 @@ public final class debugconsole {
 
                 if (command.equals("heapdump")) {
                     if (SignLink.osNameLower.startsWith("win")) {
-                        Static21.method8048(new File("C:\\Temp\\heap.dump"));
+                        Static21.dumpHeap(new File("C:\\Temp\\heap.dump"));
                     } else {
-                        Static21.method8048(new File("/tmp/heap.dump"));
+                        Static21.dumpHeap(new File("/tmp/heap.dump"));
                     }
                     addline("Done");
                     return;

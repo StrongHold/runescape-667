@@ -12,7 +12,7 @@ public final class Static150 {
     public static int drawOrder = 0;
 
     @OriginalMember(owner = "client!en", name = "a", descriptor = "(B)V")
-    public static void method2455() {
+    public static void restartAudio() {
         Static173.method2690();
         Static517.configureAudio(ClientOptions.instance.stereoSound.getValue() == 1);
         Static719.aPcmPlayer_5 = Static638.method8394(GameShell.signLink, 0, 22050, GameShell.canvas);
