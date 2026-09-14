@@ -14,7 +14,7 @@ public final class Static396 {
     }
 
     @OriginalMember(owner = "client!mi", name = "a", descriptor = "(Lclient!ge;B)Lclient!pfa;")
-    public static Class154_Sub3 method5552(@OriginalArg(0) Packet arg0) {
-        return new Class154_Sub3(arg0.g2s(), arg0.g2s(), arg0.g2s(), arg0.g2s(), arg0.g2s(), arg0.g2s(), arg0.g2s(), arg0.g2s(), arg0.g3(), arg0.g1());
+    public static TextureShapeCurve readCurve(@OriginalArg(0) Packet packet) {
+        return new TextureShapeCurve(packet.g2s(), packet.g2s(), packet.g2s(), packet.g2s(), packet.g2s(), packet.g2s(), packet.g2s(), packet.g2s(), packet.g3(), packet.g1());
     }
 }

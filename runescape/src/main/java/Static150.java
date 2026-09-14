@@ -22,7 +22,7 @@ public final class Static150 {
     }
 
     @OriginalMember(owner = "client!en", name = "a", descriptor = "(BLclient!ge;)Lclient!hba;")
-    public static Class154_Sub1 method2456(@OriginalArg(1) Packet arg0) {
-        return new Class154_Sub1(arg0.g2s(), arg0.g2s(), arg0.g2s(), arg0.g2s(), arg0.g3(), arg0.g3(), arg0.g1());
+    public static TextureShapeRectangle readRectangle(@OriginalArg(1) Packet packet) {
+        return new TextureShapeRectangle(packet.g2s(), packet.g2s(), packet.g2s(), packet.g2s(), packet.g3(), packet.g3(), packet.g1());
     }
 }

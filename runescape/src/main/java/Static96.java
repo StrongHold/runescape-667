@@ -66,7 +66,7 @@ public final class Static96 {
         } else if (arg0 == 28) {
             return new Node_Sub1_Sub7();
         } else if (arg0 == 29) {
-            return new Node_Sub1_Sub24();
+            return new TextureOpShape();
         } else if (arg0 == 30) {
             return new Node_Sub1_Sub13();
         } else if (arg0 == 31) {
@@ -93,9 +93,9 @@ public final class Static96 {
     }
 
     @OriginalMember(owner = "client!da", name = "a", descriptor = "(IIIIB)V")
-    public static void method8835(@OriginalArg(0) int arg0, @OriginalArg(2) int arg1) {
-        Static111.anInt2219 = arg1;
-        Static273.anInt4395 = arg0;
+    public static void setClipBounds(@OriginalArg(0) int maxY, @OriginalArg(2) int maxX) {
+        Static111.anInt2219 = maxX;
+        Static273.anInt4395 = maxY;
         Static180.anInt2995 = 0;
         Static724.anInt10930 = 0;
     }
