@@ -56,123 +56,125 @@ public final class Class183 implements PcmDevice {
 
     @OriginalMember(owner = "client!ir", name = "<init>", descriptor = "()V")
     public Class183() throws Exception {
-        for (@Pc(41) int local41 = 0; local41 < 2; local41++) {
-            this.bufferDescs[local41] = new DSBufferDesc();
+        for (@Pc(41) int index = 0; index < 2; index++) {
+            this.bufferDescs[index] = new DSBufferDesc();
         }
-        for (@Pc(57) int local57 = 0; local57 < 2; local57++) {
-            this.cursors[local57] = new DSCursors();
+        for (@Pc(57) int index = 0; index < 2; index++) {
+            this.cursors[index] = new DSCursors();
         }
     }
 
     @OriginalMember(owner = "client!ir", name = "a", descriptor = "(I[I)V")
     @Override
-    public void write(@OriginalArg(0) int arg0, @OriginalArg(1) int[] arg1) {
-        @Pc(2) int local2 = arg1.length;
-        if (local2 != this.channels * 256) {
+    public void write(@OriginalArg(0) int index, @OriginalArg(1) int[] samples) {
+        @Pc(2) int count = samples.length;
+        if (count != this.channels * 256) {
             throw new IllegalArgumentException();
         }
-        @Pc(21) int local21 = this.writePositions[arg0] * this.frameBytes;
-        for (@Pc(23) int local23 = 0; local23 < local2; local23++) {
-            @Pc(28) int local28 = arg1[local23];
-            if ((local28 + 8388608 & 0xFF000000) != 0) {
-                local28 = local28 >> 31 ^ 0x7FFFFF;
+        @Pc(21) int offset = this.writePositions[index] * this.frameBytes;
+        for (@Pc(23) int sampleIndex = 0; sampleIndex < count; sampleIndex++) {
+            @Pc(28) int sample = samples[sampleIndex];
+            if ((sample + 8388608 & 0xFF000000) != 0) {
+                sample = sample >> 31 ^ 0x7FFFFF;
             }
-            this.bytes[arg0][local21 + local23 * 2] = (byte) (local28 >> 8);
-            this.bytes[arg0][local21 + local23 * 2 + 1] = (byte) (local28 >> 16);
+            this.bytes[index][offset + sampleIndex * 2] = (byte) (sample >> 8);
+            this.bytes[index][offset + sampleIndex * 2 + 1] = (byte) (sample >> 16);
         }
-        this.buffers[arg0].writeBuffer(local21, local2 * 2, this.bytes[arg0], 0);
-        this.writePositions[arg0] = this.writePositions[arg0] + local2 / this.channels & 0xFFFF;
-        if (!this.playing[arg0]) {
-            this.buffers[arg0].play(1);
-            this.playing[arg0] = true;
+        this.buffers[index].writeBuffer(offset, count * 2, this.bytes[index], 0);
+        this.writePositions[index] = this.writePositions[index] + count / this.channels & 0xFFFF;
+        if (!this.playing[index]) {
+            this.buffers[index].play(1);
+            this.playing[index] = true;
         }
     }
 
     @OriginalMember(owner = "client!ir", name = "a", descriptor = "(II)I")
     @Override
-    public int position(@OriginalArg(0) int arg0) {
-        if (!this.playing[arg0]) {
+    public int position(@OriginalArg(0) int index) {
+        if (!this.playing[index]) {
             return 0;
         }
-        this.buffers[arg0].getCurrentPosition(this.cursors[arg0]);
-        @Pc(25) int local25 = this.cursors[arg0].write / this.frameBytes;
-        @Pc(35) int local35 = this.writePositions[arg0] - local25 & 0xFFFF;
-        if (this.bufferSizes[arg0] < local35) {
-            @Pc(63) int local63 = local25 - this.writePositions[arg0] & 0xFFFF;
-            while (local63 > 0) {
-                local63 -= 256;
-                this.write(arg0, this.silence);
+        this.buffers[index].getCurrentPosition(this.cursors[index]);
+        @Pc(25) int playPosition = this.cursors[index].write / this.frameBytes;
+        @Pc(35) int queued = this.writePositions[index] - playPosition & 0xFFFF;
+        if (this.bufferSizes[index] < queued) {
+            @Pc(63) int gap = playPosition - this.writePositions[index] & 0xFFFF;
+            while (gap > 0) {
+                gap -= 256;
+                this.write(index, this.silence);
             }
-            local35 = this.writePositions[arg0] - local25 & 0xFFFF;
+            queued = this.writePositions[index] - playPosition & 0xFFFF;
         }
-        return local35;
+        return queued;
     }
 
     @OriginalMember(owner = "client!ir", name = "a", descriptor = "(IZLjava/awt/Component;B)V")
     @Override
-    public void init(@OriginalArg(0) int arg0, @OriginalArg(1) boolean arg1, @OriginalArg(2) Component arg2) throws Exception {
+    public void init(@OriginalArg(0) int sampleRate, @OriginalArg(1) boolean stereo, @OriginalArg(2) Component component) throws Exception {
         if (this.sampleRate != 0) {
             return;
         }
-        if (arg0 < 8000 || arg0 > 48000) {
+        if (sampleRate < 8000 || sampleRate > 48000) {
             throw new IllegalArgumentException();
         }
-        this.channels = arg1 ? 2 : 1;
-        this.frameBytes = arg1 ? 4 : 2;
+        this.channels = stereo ? 2 : 1;
+        this.frameBytes = stereo ? 4 : 2;
         this.silence = new int[this.channels * 256];
         this.directSound.initialize(null);
-        this.directSound.setCooperativeLevel(arg2, 2);
-        for (@Pc(60) int local60 = 0; local60 < 2; local60++) {
-            this.bufferDescs[local60].flags = 16384;
+        this.directSound.setCooperativeLevel(component, 2);
+        for (@Pc(60) int index = 0; index < 2; index++) {
+            this.bufferDescs[index].flags = 16384;
         }
-        this.waveFormat.avgBytesPerSec = arg0 * this.frameBytes;
+        this.waveFormat.avgBytesPerSec = sampleRate * this.frameBytes;
         this.waveFormat.formatTag = 1;
         this.waveFormat.channels = this.channels;
         this.waveFormat.blockAlign = this.frameBytes;
-        this.waveFormat.samplesPerSec = arg0;
-        this.sampleRate = arg0;
+        this.waveFormat.samplesPerSec = sampleRate;
+        this.sampleRate = sampleRate;
         this.waveFormat.bitsPerSample = 16;
     }
 
     @OriginalMember(owner = "client!ir", name = "a", descriptor = "(IZ)V")
     @Override
-    public void close(@OriginalArg(0) int arg0) {
-        if (this.buffers[arg0] == null) {
+    public void close(@OriginalArg(0) int index) {
+        if (this.buffers[index] == null) {
             return;
         }
         try {
-            this.buffers[arg0].stop();
-        } catch (@Pc(12) ComFailException local12) {
+            this.buffers[index].stop();
+        } catch (@Pc(12) ComFailException ignored) {
+            /* empty */
         }
-        this.buffers[arg0] = null;
+        this.buffers[index] = null;
     }
 
     @OriginalMember(owner = "client!ir", name = "a", descriptor = "(III)V")
     @Override
-    public void open(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) throws Exception {
-        if (this.sampleRate == 0 || this.buffers[arg1] != null) {
+    public void open(@OriginalArg(0) int bufferSize, @OriginalArg(1) int index) throws Exception {
+        if (this.sampleRate == 0 || this.buffers[index] != null) {
             throw new IllegalStateException();
         }
-        @Pc(22) int local22 = this.frameBytes * 65536;
-        if (this.bytes[arg1] == null || this.bytes[arg1].length != local22) {
-            this.bytes[arg1] = new byte[local22];
-            this.bufferDescs[arg1].bufferBytes = local22;
+        @Pc(22) int byteCount = this.frameBytes * 65536;
+        if (this.bytes[index] == null || this.bytes[index].length != byteCount) {
+            this.bytes[index] = new byte[byteCount];
+            this.bufferDescs[index].bufferBytes = byteCount;
         }
-        this.buffers[arg1] = this.directSound.createSoundBuffer(this.bufferDescs[arg1], this.waveFormat);
-        this.playing[arg1] = false;
-        this.writePositions[arg1] = 0;
-        this.bufferSizes[arg1] = arg0;
+        this.buffers[index] = this.directSound.createSoundBuffer(this.bufferDescs[index], this.waveFormat);
+        this.playing[index] = false;
+        this.writePositions[index] = 0;
+        this.bufferSizes[index] = bufferSize;
     }
 
     @OriginalMember(owner = "client!ir", name = "a", descriptor = "(IB)V")
     @Override
-    public void discardBuffer(@OriginalArg(0) int arg0) {
+    public void discardBuffer(@OriginalArg(0) int index) {
         try {
-            this.buffers[arg0].stop();
+            this.buffers[index].stop();
         } catch (@Pc(12) ComFailException ignored) {
+            /* empty */
         }
-        this.playing[arg0] = false;
-        this.buffers[arg0].setCurrentPosition(0);
-        this.writePositions[arg0] = 0;
+        this.playing[index] = false;
+        this.buffers[index].setCurrentPosition(0);
+        this.writePositions[index] = 0;
     }
 }

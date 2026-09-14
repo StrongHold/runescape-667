@@ -27,19 +27,19 @@ public final class PcmPlayerThread implements Runnable {
         this.running = true;
         try {
             while (!this.stopping) {
-                for (@Pc(12) int local12 = 0; local12 < 2; local12++) {
-                    @Pc(21) PcmPlayer local21 = this.players[local12];
-                    if (local21 != null) {
-                        local21.method3594();
+                for (@Pc(12) int index = 0; index < 2; index++) {
+                    @Pc(21) PcmPlayer player = this.players[index];
+                    if (player != null) {
+                        player.method3594();
                     }
                 }
                 TimeUtils.sleep(10L);
                 GameShell.waitForEvents(this.signLink, null);
             }
-        } catch (@Pc(49) Exception local49) {
-            JagException.sendTrace(local49, null);
+        } catch (@Pc(49) Exception exception) {
+            JagException.sendTrace(exception, null);
         } finally {
-            @Pc(59) Object local59 = null;
+            @Pc(59) Object unused = null;
             this.running = false;
         }
     }

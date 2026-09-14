@@ -17,68 +17,68 @@ import java.awt.Component;
 public final class PcmPlayer_Sub1 extends PcmPlayer {
 
     @OriginalMember(owner = "client!cb", name = "J", descriptor = "Ljavax/sound/sampled/SourceDataLine;")
-    public SourceDataLine aSourceDataLine1;
+    public SourceDataLine line;
 
     @OriginalMember(owner = "client!cb", name = "M", descriptor = "[B")
-    public byte[] aByteArray17;
+    public byte[] bytes;
 
     @OriginalMember(owner = "client!cb", name = "L", descriptor = "I")
-    public int anInt1519;
+    public int capacity;
 
     @OriginalMember(owner = "client!cb", name = "N", descriptor = "Ljavax/sound/sampled/AudioFormat;")
-    public AudioFormat anAudioFormat1;
+    public AudioFormat format;
 
     @OriginalMember(owner = "client!cb", name = "I", descriptor = "Z")
-    public boolean aBoolean134 = false;
+    public boolean soundMax = false;
 
     @OriginalMember(owner = "client!cb", name = "a", descriptor = "()V")
     @Override
-    protected void method3583() throws LineUnavailableException {
-        this.aSourceDataLine1.flush();
-        if (!this.aBoolean134) {
+    protected void discardBuffer() throws LineUnavailableException {
+        this.line.flush();
+        if (!this.soundMax) {
             return;
         }
-        this.aSourceDataLine1.close();
-        this.aSourceDataLine1 = null;
-        @Pc(38) Info local38 = new Info(Static64.aClass3 == null ? (Static64.aClass3 = getClass("javax.sound.sampled.SourceDataLine")) : Static64.aClass3, this.anAudioFormat1, this.anInt1519 << (QueueBuss.stereo ? 2 : 1));
-        this.aSourceDataLine1 = (SourceDataLine) AudioSystem.getLine(local38);
-        this.aSourceDataLine1.open();
-        this.aSourceDataLine1.start();
+        this.line.close();
+        this.line = null;
+        @Pc(38) Info info = new Info(Static64.aClass3 == null ? (Static64.aClass3 = getClass("javax.sound.sampled.SourceDataLine")) : Static64.aClass3, this.format, this.capacity << (QueueBuss.stereo ? 2 : 1));
+        this.line = (SourceDataLine) AudioSystem.getLine(info);
+        this.line.open();
+        this.line.start();
     }
 
     @OriginalMember(owner = "client!cb", name = "b", descriptor = "()V")
     @Override
-    protected void method3590() {
-        @Pc(1) short local1 = 256;
+    protected void write() {
+        @Pc(1) short count = 256;
         if (QueueBuss.stereo) {
-            local1 = 512;
+            count = 512;
         }
-        for (@Pc(9) int local9 = 0; local9 < local1; local9++) {
-            @Pc(17) int local17 = this.anIntArray315[local9];
-            if ((local17 + 8388608 & 0xFF000000) != 0) {
-                local17 = local17 >> 31 ^ 0x7FFFFF;
+        for (@Pc(9) int index = 0; index < count; index++) {
+            @Pc(17) int sample = this.anIntArray315[index];
+            if ((sample + 8388608 & 0xFF000000) != 0) {
+                sample = sample >> 31 ^ 0x7FFFFF;
             }
-            this.aByteArray17[local9 * 2] = (byte) (local17 >> 8);
-            this.aByteArray17[local9 * 2 + 1] = (byte) (local17 >> 16);
+            this.bytes[index * 2] = (byte) (sample >> 8);
+            this.bytes[index * 2 + 1] = (byte) (sample >> 16);
         }
-        this.aSourceDataLine1.write(this.aByteArray17, 0, local1 << 1);
+        this.line.write(this.bytes, 0, count << 1);
     }
 
     @OriginalMember(owner = "client!cb", name = "b", descriptor = "(I)V")
     @Override
-    public void method3588(@OriginalArg(0) int arg0) throws LineUnavailableException {
+    public void method3588(@OriginalArg(0) int capacity) throws LineUnavailableException {
         try {
-            @Pc(23) Info local23 = new Info(Static64.aClass3 == null ? (Static64.aClass3 = getClass("javax.sound.sampled.SourceDataLine")) : Static64.aClass3, this.anAudioFormat1, arg0 << (QueueBuss.stereo ? 2 : 1));
-            this.aSourceDataLine1 = (SourceDataLine) AudioSystem.getLine(local23);
-            this.aSourceDataLine1.open();
-            this.aSourceDataLine1.start();
-            this.anInt1519 = arg0;
-        } catch (@Pc(39) LineUnavailableException local39) {
-            if (Static171.method2670(arg0) == 1) {
-                this.aSourceDataLine1 = null;
-                throw local39;
+            @Pc(23) Info info = new Info(Static64.aClass3 == null ? (Static64.aClass3 = getClass("javax.sound.sampled.SourceDataLine")) : Static64.aClass3, this.format, capacity << (QueueBuss.stereo ? 2 : 1));
+            this.line = (SourceDataLine) AudioSystem.getLine(info);
+            this.line.open();
+            this.line.start();
+            this.capacity = capacity;
+        } catch (@Pc(39) LineUnavailableException exception) {
+            if (Static171.method2670(capacity) == 1) {
+                this.line = null;
+                throw exception;
             } else {
-                this.method3588(IntMath.nextPow2(arg0));
+                this.method3588(IntMath.nextPow2(capacity));
             }
         }
     }
@@ -95,35 +95,35 @@ public final class PcmPlayer_Sub1 extends PcmPlayer {
 
     @OriginalMember(owner = "client!cb", name = "c", descriptor = "()V")
     @Override
-    protected void method3596() {
-        if (this.aSourceDataLine1 != null) {
-            this.aSourceDataLine1.close();
-            this.aSourceDataLine1 = null;
+    protected void closeDevice() {
+        if (this.line != null) {
+            this.line.close();
+            this.line = null;
         }
     }
 
     @OriginalMember(owner = "client!cb", name = "d", descriptor = "()I")
     @Override
-    protected int method3587() {
-        return this.anInt1519 - (this.aSourceDataLine1.available() >> (QueueBuss.stereo ? 2 : 1));
+    protected int position() {
+        return this.capacity - (this.line.available() >> (QueueBuss.stereo ? 2 : 1));
     }
 
     @OriginalMember(owner = "client!cb", name = "a", descriptor = "(Ljava/awt/Component;)V")
     @Override
-    public void method3593(@OriginalArg(0) Component arg0) {
-        @Pc(1) javax.sound.sampled.Mixer.Info[] local1 = AudioSystem.getMixerInfo();
-        if (local1 != null) {
-            for (@Pc(8) int local8 = 0; local8 < local1.length; local8++) {
-                @Pc(20) javax.sound.sampled.Mixer.Info local20 = local1[local8];
-                if (local20 != null) {
-                    @Pc(28) String local28 = local20.getName();
-                    if (local28 != null && local28.toLowerCase().indexOf("soundmax") >= 0) {
-                        this.aBoolean134 = true;
+    public void method3593(@OriginalArg(0) Component component) {
+        @Pc(1) javax.sound.sampled.Mixer.Info[] mixers = AudioSystem.getMixerInfo();
+        if (mixers != null) {
+            for (@Pc(8) int index = 0; index < mixers.length; index++) {
+                @Pc(20) javax.sound.sampled.Mixer.Info mixer = mixers[index];
+                if (mixer != null) {
+                    @Pc(28) String name = mixer.getName();
+                    if (name != null && name.toLowerCase().indexOf("soundmax") >= 0) {
+                        this.soundMax = true;
                     }
                 }
             }
         }
-        this.anAudioFormat1 = new AudioFormat((float) Audio.sampleRate, 16, QueueBuss.stereo ? 2 : 1, true, false);
-        this.aByteArray17 = new byte[0x100 << (QueueBuss.stereo ? 2 : 1)];
+        this.format = new AudioFormat((float) Audio.sampleRate, 16, QueueBuss.stereo ? 2 : 1, true, false);
+        this.bytes = new byte[0x100 << (QueueBuss.stereo ? 2 : 1)];
     }
 }

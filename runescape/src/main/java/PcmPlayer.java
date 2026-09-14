@@ -21,7 +21,7 @@ public class PcmPlayer {
     public int[] anIntArray315;
 
     @OriginalMember(owner = "client!cd", name = "A", descriptor = "Lclient!dea;")
-    public AudioBuss aClass2_Sub6_6;
+    public AudioBuss mixBuss;
 
     @OriginalMember(owner = "client!cd", name = "B", descriptor = "I")
     public int anInt4097;
@@ -30,77 +30,78 @@ public class PcmPlayer {
     public int anInt4098;
 
     @OriginalMember(owner = "client!cd", name = "v", descriptor = "I")
-    public int anInt4103;
+    public int consumeMargin;
 
     @OriginalMember(owner = "client!cd", name = "b", descriptor = "I")
-    public final int anInt4087 = 32;
+    public final int mixBudget = 32;
 
     @OriginalMember(owner = "client!cd", name = "w", descriptor = "Z")
-    public boolean aBoolean319 = false;
+    public boolean closed = false;
 
     @OriginalMember(owner = "client!cd", name = "e", descriptor = "J")
-    public long aLong128 = SystemTimer.safetime();
+    public long lastFillTime = SystemTimer.safetime();
 
     @OriginalMember(owner = "client!cd", name = "h", descriptor = "J")
-    public long aLong129 = 0L;
+    public long retryTime = 0L;
 
     @OriginalMember(owner = "client!cd", name = "f", descriptor = "I")
-    public int anInt4099 = 0;
+    public int resortCountdown = 0;
 
     @OriginalMember(owner = "client!cd", name = "p", descriptor = "[Lclient!dea;")
-    public final AudioBuss[] aClass2_Sub6Array5 = new AudioBuss[8];
+    public final AudioBuss[] bucketTails = new AudioBuss[8];
 
     @OriginalMember(owner = "client!cd", name = "z", descriptor = "I")
-    public int anInt4101 = 0;
+    public int maxConsumed = 0;
 
     @OriginalMember(owner = "client!cd", name = "o", descriptor = "I")
-    public int anInt4100 = 0;
+    public int prevPosition = 0;
 
     @OriginalMember(owner = "client!cd", name = "m", descriptor = "J")
-    public long aLong130 = 0L;
+    public long nextCheckTime = 0L;
 
     @OriginalMember(owner = "client!cd", name = "y", descriptor = "Z")
-    public boolean aBoolean320 = true;
+    public boolean restarted = true;
 
     @OriginalMember(owner = "client!cd", name = "u", descriptor = "[Lclient!dea;")
-    public final AudioBuss[] aClass2_Sub6Array6 = new AudioBuss[8];
+    public final AudioBuss[] bucketHeads = new AudioBuss[8];
 
     @OriginalMember(owner = "client!cd", name = "G", descriptor = "I")
-    public int anInt4102 = 0;
+    public int lastMaxConsumed = 0;
 
     @OriginalMember(owner = "client!cd", name = "a", descriptor = "(ILclient!dea;)V")
-    public final synchronized void method3582(@OriginalArg(1) AudioBuss arg0) {
-        this.aClass2_Sub6_6 = arg0;
+    public final synchronized void method3582(@OriginalArg(1) AudioBuss buss) {
+        this.mixBuss = buss;
     }
 
     @OriginalMember(owner = "client!cd", name = "a", descriptor = "()V")
-    protected void method3583() throws Exception {
+    protected void discardBuffer() throws Exception {
+        /* empty */
     }
 
     @OriginalMember(owner = "client!cd", name = "a", descriptor = "(II)V")
-    public void method3584() {
-        this.anInt4099 -= 256;
-        if (this.anInt4099 < 0) {
-            this.anInt4099 = 0;
+    public void skipBlock() {
+        this.resortCountdown -= 256;
+        if (this.resortCountdown < 0) {
+            this.resortCountdown = 0;
         }
-        if (this.aClass2_Sub6_6 != null) {
-            this.aClass2_Sub6_6.skip(256);
+        if (this.mixBuss != null) {
+            this.mixBuss.skip(256);
         }
     }
 
     @OriginalMember(owner = "client!cd", name = "c", descriptor = "(I)V")
     public final synchronized void method3586() {
         if (Static232.pcmPlayerThread != null) {
-            @Pc(11) boolean local11 = true;
-            for (@Pc(13) int local13 = 0; local13 < 2; local13++) {
-                if (Static232.pcmPlayerThread.players[local13] == this) {
-                    Static232.pcmPlayerThread.players[local13] = null;
+            @Pc(11) boolean allStopped = true;
+            for (@Pc(13) int index = 0; index < 2; index++) {
+                if (Static232.pcmPlayerThread.players[index] == this) {
+                    Static232.pcmPlayerThread.players[index] = null;
                 }
-                if (Static232.pcmPlayerThread.players[local13] != null) {
-                    local11 = false;
+                if (Static232.pcmPlayerThread.players[index] != null) {
+                    allStopped = false;
                 }
             }
-            if (local11) {
+            if (allStopped) {
                 Static232.pcmPlayerThread.stopping = true;
                 while (Static232.pcmPlayerThread.running) {
                     TimeUtils.sleep(50L);
@@ -108,242 +109,246 @@ public class PcmPlayer {
                 Static232.pcmPlayerThread = null;
             }
         }
-        this.method3596();
+        this.closeDevice();
         this.anIntArray315 = null;
-        this.aBoolean319 = true;
+        this.closed = true;
     }
 
     @OriginalMember(owner = "client!cd", name = "d", descriptor = "()I")
-    protected int method3587() throws Exception {
+    protected int position() throws Exception {
         return this.anInt4097;
     }
 
     @OriginalMember(owner = "client!cd", name = "b", descriptor = "(I)V")
-    public void method3588(@OriginalArg(0) int arg0) throws Exception {
+    public void method3588(@OriginalArg(0) int capacity) throws Exception {
+        /* empty */
     }
 
     @OriginalMember(owner = "client!cd", name = "b", descriptor = "()V")
-    protected void method3590() throws Exception {
+    protected void write() throws Exception {
+        /* empty */
     }
 
     @OriginalMember(owner = "client!cd", name = "a", descriptor = "(ZILclient!dea;)V")
-    public void method3591(@OriginalArg(1) int arg0, @OriginalArg(2) AudioBuss arg1) {
-        @Pc(7) int local7 = arg0 >> 5;
-        @Pc(12) AudioBuss local12 = this.aClass2_Sub6Array5[local7];
-        if (local12 == null) {
-            this.aClass2_Sub6Array6[local7] = arg1;
+    public void addToBucket(@OriginalArg(1) int priority, @OriginalArg(2) AudioBuss buss) {
+        @Pc(7) int bucket = priority >> 5;
+        @Pc(12) AudioBuss tail = this.bucketTails[bucket];
+        if (tail == null) {
+            this.bucketHeads[bucket] = buss;
         } else {
-            local12.nextInBucket = arg1;
+            tail.nextInBucket = buss;
         }
-        this.aClass2_Sub6Array5[local7] = arg1;
-        arg1.priority = arg0;
+        this.bucketTails[bucket] = buss;
+        buss.priority = priority;
     }
 
     @OriginalMember(owner = "client!cd", name = "a", descriptor = "(B)V")
     public final synchronized void method3592() {
-        this.aBoolean320 = true;
+        this.restarted = true;
         try {
-            this.method3583();
+            this.discardBuffer();
         } catch (@Pc(19) Exception exception) {
             System.out.println("pcm_player - discardbuffer error: " + exception.getMessage());
-            this.method3596();
-            this.aLong129 = SystemTimer.safetime() + 2000L;
+            this.closeDevice();
+            this.retryTime = SystemTimer.safetime() + 2000L;
         }
     }
 
     @OriginalMember(owner = "client!cd", name = "a", descriptor = "(Ljava/awt/Component;)V")
-    public void method3593(@OriginalArg(0) Component arg0) throws Exception {
+    public void method3593(@OriginalArg(0) Component component) throws Exception {
+        /* empty */
     }
 
     @OriginalMember(owner = "client!cd", name = "b", descriptor = "(B)V")
     public final synchronized void method3594() {
-        if (this.aBoolean319) {
+        if (this.closed) {
             return;
         }
-        @Pc(11) long local11 = SystemTimer.safetime();
+        @Pc(11) long time = SystemTimer.safetime();
         try {
-            if (this.aLong128 + 6000L < local11) {
-                this.aLong128 = local11 - 6000L;
+            if (this.lastFillTime + 6000L < time) {
+                this.lastFillTime = time - 6000L;
             }
-            while (local11 > this.aLong128 + 5000L) {
-                this.method3584();
-                this.aLong128 += 256000 / Audio.sampleRate;
-                local11 = SystemTimer.safetime();
+            while (time > this.lastFillTime + 5000L) {
+                this.skipBlock();
+                this.lastFillTime += 256000 / Audio.sampleRate;
+                time = SystemTimer.safetime();
             }
         } catch (@Pc(54) Exception exception) {
             System.out.println("pcm_player - stalldetect error: " + exception.getMessage());
-            this.aLong128 = local11;
+            this.lastFillTime = time;
         }
 
         if (this.anIntArray315 == null) {
             return;
         }
         try {
-            if (this.aLong129 != 0L) {
-                if (this.aLong129 > local11) {
+            if (this.retryTime != 0L) {
+                if (this.retryTime > time) {
                     return;
                 }
                 this.method3588(this.anInt4097);
-                this.aLong129 = 0L;
-                this.aBoolean320 = true;
+                this.retryTime = 0L;
+                this.restarted = true;
             }
-            @Pc(95) int local95 = this.method3587();
-            if (this.anInt4100 - local95 > this.anInt4101) {
-                this.anInt4101 = this.anInt4100 - local95;
+            @Pc(95) int buffered = this.position();
+            if (this.prevPosition - buffered > this.maxConsumed) {
+                this.maxConsumed = this.prevPosition - buffered;
             }
-            @Pc(118) int local118 = this.anInt4098 + this.anInt4103;
-            if (local118 + 256 > 16384) {
-                local118 = 16128;
+            @Pc(118) int target = this.anInt4098 + this.consumeMargin;
+            if (target + 256 > 16384) {
+                target = 16128;
             }
-            if (this.anInt4097 < local118 + 256) {
+            if (this.anInt4097 < target + 256) {
                 this.anInt4097 += 1024;
                 if (this.anInt4097 > 16384) {
                     this.anInt4097 = 16384;
                 }
-                this.method3596();
+                this.closeDevice();
                 this.method3588(this.anInt4097);
-                local95 = 0;
-                if (this.anInt4097 < local118 + 256) {
-                    local118 = this.anInt4097 - 256;
-                    this.anInt4103 = local118 - this.anInt4098;
+                buffered = 0;
+                if (this.anInt4097 < target + 256) {
+                    target = this.anInt4097 - 256;
+                    this.consumeMargin = target - this.anInt4098;
                 }
-                this.aBoolean320 = true;
+                this.restarted = true;
             }
-            while (local118 > local95) {
-                this.method3595(this.anIntArray315);
-                local95 += 256;
-                this.method3590();
+            while (target > buffered) {
+                this.fill(this.anIntArray315);
+                buffered += 256;
+                this.write();
             }
-            if (local11 > this.aLong130) {
-                if (this.aBoolean320) {
-                    this.aBoolean320 = false;
-                } else if (this.anInt4101 == 0 && this.anInt4102 == 0) {
+            if (time > this.nextCheckTime) {
+                if (this.restarted) {
+                    this.restarted = false;
+                } else if (this.maxConsumed == 0 && this.lastMaxConsumed == 0) {
                     System.out.println("pcm_player - soundcard has stopped consuming!");
-                    this.method3596();
-                    this.aLong129 = local11 + 2000L;
+                    this.closeDevice();
+                    this.retryTime = time + 2000L;
                     return;
                 } else {
-                    this.anInt4103 = Math.min(this.anInt4102, this.anInt4101);
-                    this.anInt4102 = this.anInt4101;
+                    this.consumeMargin = Math.min(this.lastMaxConsumed, this.maxConsumed);
+                    this.lastMaxConsumed = this.maxConsumed;
                 }
-                this.aLong130 = local11 + 2000L;
-                this.anInt4101 = 0;
+                this.nextCheckTime = time + 2000L;
+                this.maxConsumed = 0;
             }
-            this.anInt4100 = local95;
+            this.prevPosition = buffered;
         } catch (@Pc(268) Exception exception) {
             System.out.println("pcm_player - error: " + exception.getMessage());
-            this.method3596();
-            this.aLong129 = local11 + 2000L;
+            this.closeDevice();
+            this.retryTime = time + 2000L;
         }
     }
 
     @OriginalMember(owner = "client!cd", name = "a", descriptor = "([II)V")
-    public void method3595(@OriginalArg(0) int[] arg0) {
-        @Pc(1) short local1 = 256;
+    public void fill(@OriginalArg(0) int[] samples) {
+        @Pc(1) short count = 256;
         if (QueueBuss.stereo) {
-            local1 = 512;
+            count = 512;
         }
-        Arrays.clear(arg0, 0, local1);
-        this.anInt4099 -= 256;
-        if (this.aClass2_Sub6_6 != null && this.anInt4099 <= 0) {
-            this.anInt4099 += Audio.sampleRate >> 4;
-            Static440.method5964(this.aClass2_Sub6_6);
-            this.method3591(this.aClass2_Sub6_6.method9136(), this.aClass2_Sub6_6);
-            @Pc(47) int local47 = 0;
-            @Pc(49) int local49 = 255;
-            @Pc(51) int local51 = 7;
-            @Pc(58) int local58;
+        Arrays.clear(samples, 0, count);
+        this.resortCountdown -= 256;
+        if (this.mixBuss != null && this.resortCountdown <= 0) {
+            this.resortCountdown += Audio.sampleRate >> 4;
+            Static440.method5964(this.mixBuss);
+            this.addToBucket(this.mixBuss.method9136(), this.mixBuss);
+            @Pc(47) int totalCost = 0;
+            @Pc(49) int pending = 255;
+            @Pc(51) int pass = 7;
+            @Pc(58) int bucket;
             label103:
-            while (local49 != 0) {
-                @Pc(63) int local63;
-                if (local51 < 0) {
-                    local58 = local51 & 0x3;
-                    local63 = -(local51 >> 2);
+            while (pending != 0) {
+                @Pc(63) int round;
+                if (pass < 0) {
+                    bucket = pass & 0x3;
+                    round = -(pass >> 2);
                 } else {
-                    local58 = local51;
-                    local63 = 0;
+                    bucket = pass;
+                    round = 0;
                 }
-                for (@Pc(74) int local74 = local49 >>> local58 & 0x11111111; local74 != 0; local74 >>>= 0x4) {
-                    if ((local74 & 0x1) != 0) {
-                        local49 &= ~(0x1 << local58);
-                        @Pc(92) AudioBuss local92 = null;
-                        @Pc(97) AudioBuss local97 = this.aClass2_Sub6Array6[local58];
+                for (@Pc(74) int bits = pending >>> bucket & 0x11111111; bits != 0; bits >>>= 0x4) {
+                    if ((bits & 0x1) != 0) {
+                        pending &= ~(0x1 << bucket);
+                        @Pc(92) AudioBuss prev = null;
+                        @Pc(97) AudioBuss buss = this.bucketHeads[bucket];
                         label97:
                         while (true) {
                             while (true) {
-                                if (local97 == null) {
+                                if (buss == null) {
                                     break label97;
                                 }
-                                @Pc(101) SoundPacket local101 = local97.aClass2_Sub49_6;
-                                if (local101 == null || local101.anInt8817 <= local63) {
-                                    local97.active = true;
-                                    @Pc(127) int local127 = local97.method9132();
-                                    local47 += local127;
-                                    if (local101 != null) {
-                                        local101.anInt8817 += local127;
+                                @Pc(101) SoundPacket packet = buss.aClass2_Sub49_6;
+                                if (packet == null || packet.anInt8817 <= round) {
+                                    buss.active = true;
+                                    @Pc(127) int cost = buss.method9132();
+                                    totalCost += cost;
+                                    if (packet != null) {
+                                        packet.anInt8817 += cost;
                                     }
-                                    if (local47 >= this.anInt4087) {
+                                    if (totalCost >= this.mixBudget) {
                                         break label103;
                                     }
-                                    @Pc(148) AudioBuss local148 = local97.firstSubStream();
-                                    if (local148 != null) {
-                                        if (debug && local101 != null && local97.firstSubStream() != null) {
+                                    @Pc(148) AudioBuss subBuss = buss.firstSubStream();
+                                    if (subBuss != null) {
+                                        if (debug && packet != null && buss.firstSubStream() != null) {
                                             System.out.println("Warning: a pcm_stream with substreams has set its \'w\' - this can cause");
                                             System.out.println("         parent duplicate demotion, and high-pri substreams will be lost!");
-                                            System.out.println("         Guilty class name: " + local97.getClass().getName());
+                                            System.out.println("         Guilty class name: " + buss.getClass().getName());
                                             debug = true;
                                         }
 
-                                        @Pc(153) int local153 = local97.priority;
-                                        while (local148 != null) {
-                                            this.method3591(local153 * local148.method9136() >> 8, local148);
-                                            local148 = local97.nextSubStream();
+                                        @Pc(153) int parentPriority = buss.priority;
+                                        while (subBuss != null) {
+                                            this.addToBucket(parentPriority * subBuss.method9136() >> 8, subBuss);
+                                            subBuss = buss.nextSubStream();
                                         }
                                     }
-                                    @Pc(172) AudioBuss local172 = local97.nextInBucket;
-                                    local97.nextInBucket = null;
-                                    if (local92 == null) {
-                                        this.aClass2_Sub6Array6[local58] = local172;
+                                    @Pc(172) AudioBuss next = buss.nextInBucket;
+                                    buss.nextInBucket = null;
+                                    if (prev == null) {
+                                        this.bucketHeads[bucket] = next;
                                     } else {
-                                        local92.nextInBucket = local172;
+                                        prev.nextInBucket = next;
                                     }
-                                    if (local172 == null) {
-                                        this.aClass2_Sub6Array5[local58] = local92;
+                                    if (next == null) {
+                                        this.bucketTails[bucket] = prev;
                                     }
-                                    local97 = local172;
+                                    buss = next;
                                 } else {
-                                    local49 |= 0x1 << local58;
-                                    local92 = local97;
-                                    local97 = local97.nextInBucket;
+                                    pending |= 0x1 << bucket;
+                                    prev = buss;
+                                    buss = buss.nextInBucket;
                                 }
                             }
                         }
                     }
-                    local58 += 4;
-                    local63++;
+                    bucket += 4;
+                    round++;
                 }
-                local51--;
+                pass--;
             }
-            for (local58 = 0; local58 < 8; local58++) {
-                @Pc(218) AudioBuss local218 = this.aClass2_Sub6Array6[local58];
-                this.aClass2_Sub6Array6[local58] = this.aClass2_Sub6Array5[local58] = null;
-                while (local218 != null) {
-                    @Pc(232) AudioBuss local232 = local218.nextInBucket;
-                    local218.nextInBucket = null;
-                    local218 = local232;
+            for (bucket = 0; bucket < 8; bucket++) {
+                @Pc(218) AudioBuss head = this.bucketHeads[bucket];
+                this.bucketHeads[bucket] = this.bucketTails[bucket] = null;
+                while (head != null) {
+                    @Pc(232) AudioBuss next = head.nextInBucket;
+                    head.nextInBucket = null;
+                    head = next;
                 }
             }
         }
-        if (this.anInt4099 < 0) {
-            this.anInt4099 = 0;
+        if (this.resortCountdown < 0) {
+            this.resortCountdown = 0;
         }
-        if (this.aClass2_Sub6_6 != null) {
-            this.aClass2_Sub6_6.fill(arg0, 0, 256);
+        if (this.mixBuss != null) {
+            this.mixBuss.fill(samples, 0, 256);
         }
-        this.aLong128 = SystemTimer.safetime();
+        this.lastFillTime = SystemTimer.safetime();
     }
 
     @OriginalMember(owner = "client!cd", name = "c", descriptor = "()V")
-    protected void method3596() {
+    protected void closeDevice() {
+        /* empty */
     }
 }
