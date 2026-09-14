@@ -37,38 +37,38 @@ public final class Class7 {
     public Interface2 anInterface2_2 = null;
 
     @OriginalMember(owner = "client!ae", name = "a", descriptor = "[Lclient!og;")
-    public Interface18[] anInterface18Array1 = null;
+    public Interface18[] flowTextures = null;
 
     @OriginalMember(owner = "client!ae", name = "f", descriptor = "Lclient!am;")
-    public final NativeToolkit aClass19_Sub1_1;
+    public final NativeToolkit toolkit;
 
     @OriginalMember(owner = "client!ae", name = "d", descriptor = "Z")
     public boolean aBoolean7;
 
     @OriginalMember(owner = "client!ae", name = "<init>", descriptor = "(Lclient!am;)V")
     public Class7(@OriginalArg(0) NativeToolkit toolkit) {
-        this.aClass19_Sub1_1 = toolkit;
-        this.aBoolean7 = this.aClass19_Sub1_1.aBoolean696;
-        if (this.aBoolean7 && !this.aClass19_Sub1_1.method8153(Static702.aClass397_16, Static482.aClass92_13)) {
+        this.toolkit = toolkit;
+        this.aBoolean7 = this.toolkit.aBoolean696;
+        if (this.aBoolean7 && !this.toolkit.method8153(Static702.aClass397_16, Static482.aClass92_13)) {
             this.aBoolean7 = false;
         }
-        if (this.aBoolean7 || this.aClass19_Sub1_1.method8071(Static482.aClass92_13, Static702.aClass397_16)) {
+        if (this.aBoolean7 || this.toolkit.method8071(Static482.aClass92_13, Static702.aClass397_16)) {
             NativeWaterNoise.ensureGenerated();
             if (this.aBoolean7) {
                 @Pc(60) byte[] rippleTexels = ByteArrayWrapper.unwrap(false, Static177.anObject6);
-                this.anInterface2_2 = this.aClass19_Sub1_1.method8038(Static482.aClass92_13, rippleTexels);
+                this.anInterface2_2 = this.toolkit.method8038(Static482.aClass92_13, rippleTexels);
                 @Pc(76) byte[] flowTexels = ByteArrayWrapper.unwrap(false, Static644.anObject18);
-                this.aClass19_Sub1_1.method8038(Static482.aClass92_13, flowTexels);
+                this.toolkit.method8038(Static482.aClass92_13, flowTexels);
             } else {
                 this.anInterface18Array2 = new Interface18[FRAME_COUNT];
                 for (@Pc(93) int frame = 0; frame < FRAME_COUNT; frame++) {
                     @Pc(104) byte[] rippleTexels = ByteArrayWrapper.unwrap(FRAME_SIZE, Static177.anObject6, frame * FRAME_SIZE);
-                    this.anInterface18Array2[frame] = this.aClass19_Sub1_1.method8028(TEXTURE_WIDTH, rippleTexels, Static482.aClass92_13, TEXTURE_HEIGHT, true);
+                    this.anInterface18Array2[frame] = this.toolkit.method8028(TEXTURE_WIDTH, rippleTexels, Static482.aClass92_13, TEXTURE_HEIGHT, true);
                 }
-                this.anInterface18Array1 = new Interface18[FRAME_COUNT];
+                this.flowTextures = new Interface18[FRAME_COUNT];
                 for (@Pc(129) int frame = 0; frame < FRAME_COUNT; frame++) {
                     @Pc(140) byte[] flowTexels = ByteArrayWrapper.unwrap(FRAME_SIZE, Static644.anObject18, frame * FRAME_SIZE);
-                    this.anInterface18Array1[frame] = this.aClass19_Sub1_1.method8028(TEXTURE_WIDTH, flowTexels, Static482.aClass92_13, TEXTURE_HEIGHT, true);
+                    this.flowTextures[frame] = this.toolkit.method8028(TEXTURE_WIDTH, flowTexels, Static482.aClass92_13, TEXTURE_HEIGHT, true);
                 }
             }
         }
@@ -79,7 +79,7 @@ public final class Class7 {
         if (this.anInterface2_1 == null) {
             @Pc(26) byte[] heights;
             if (Static186.anObject7 == null) {
-                heights = Static448.method6106(4.0F, 4.0F, 0.5F, 16.0F, 0.6F, new Class59_Sub1(419684));
+                heights = Static448.generateNoiseVolume(4.0F, 4.0F, 0.5F, 16.0F, 0.6F, new PerlinNoiseGenerator(419684));
                 Static186.anObject7 = ByteArrayWrapper.wrap(heights);
             }
             heights = ByteArrayWrapper.unwrap(false, Static186.anObject7);
@@ -103,7 +103,7 @@ public final class Class7 {
                     }
                 }
             }
-            this.anInterface2_1 = this.aClass19_Sub1_1.method8038(Static172.aClass92_8, normals);
+            this.anInterface2_1 = this.toolkit.method8038(Static172.aClass92_8, normals);
         }
         return this.anInterface2_1 != null;
     }

@@ -25,7 +25,7 @@ public final class GlWaterNoise {
         }
         @Pc(49) Class202 normalMapper = toolkit.aClass202_1;
         if (normalMapper.method4582() && Static71.anObject4 == null) {
-            texels = Static448.method6106(4.0F, 4.0F, 0.5F, 16.0F, 0.6F, new Class59_Sub1(419684));
+            texels = Static448.generateNoiseVolume(4.0F, 4.0F, 0.5F, 16.0F, 0.6F, new PerlinNoiseGenerator(419684));
             Static71.anObject4 = ByteArrayWrapper.wrap(texels);
         }
     }

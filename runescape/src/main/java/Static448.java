@@ -4,13 +4,15 @@ import org.openrs2.deob.annotation.Pc;
 
 public final class Static448 {
 
+    private static final int VOLUME_SIZE = 16 * 128 * 128;
+
     @OriginalMember(owner = "client!oc", name = "f", descriptor = "I")
     public static int anInt6801;
 
     @OriginalMember(owner = "client!oc", name = "a", descriptor = "(IIIFFFIIFFLclient!tk;)[B")
-    public static byte[] method6106(@OriginalArg(3) float arg0, @OriginalArg(4) float arg1, @OriginalArg(5) float arg2, @OriginalArg(8) float arg3, @OriginalArg(9) float arg4, @OriginalArg(10) Class59 arg5) {
-        @Pc(10) byte[] local10 = new byte[262144];
-        Static314.method4565(arg1, arg3, arg2, arg0, local10, 0, arg4, arg5);
-        return local10;
+    public static byte[] generateNoiseVolume(@OriginalArg(3) float xFrequency, @OriginalArg(4) float yFrequency, @OriginalArg(5) float amplitude, @OriginalArg(8) float zFrequency, @OriginalArg(9) float persistence, @OriginalArg(10) NoiseGenerator noise) {
+        @Pc(10) byte[] volume = new byte[VOLUME_SIZE];
+        Static314.generateNoiseFrames(yFrequency, zFrequency, amplitude, xFrequency, volume, 0, persistence, noise);
+        return volume;
     }
 }

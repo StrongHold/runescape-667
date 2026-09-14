@@ -11,6 +11,10 @@ import java.io.IOException;
 
 public final class Static314 {
 
+    private static final int FRAME_COUNT = 16;
+
+    private static final int FRAME_SIZE = 128 * 128;
+
     @OriginalMember(owner = "client!jw", name = "b", descriptor = "(B)V")
     public static void tbrefresh() {
         if (Client.modeWhere != ModeWhere.LOCAL) {
@@ -22,10 +26,10 @@ public final class Static314 {
     }
 
     @OriginalMember(owner = "client!jw", name = "a", descriptor = "(BFFFFI[BIIFILclient!tk;I)V")
-    public static void method4565(@OriginalArg(1) float arg0, @OriginalArg(2) float arg1, @OriginalArg(3) float arg2, @OriginalArg(4) float arg3, @OriginalArg(6) byte[] arg4, @OriginalArg(8) int arg5, @OriginalArg(9) float arg6, @OriginalArg(11) Class59 arg7) {
-        for (@Pc(5) int local5 = 0; local5 < 16; local5++) {
-            Static364.method5251(arg0, arg3, local5, arg7, arg4, arg6, arg1, arg5, arg2);
-            arg5 += 16384;
+    public static void generateNoiseFrames(@OriginalArg(1) float yFrequency, @OriginalArg(2) float zFrequency, @OriginalArg(3) float amplitude, @OriginalArg(4) float xFrequency, @OriginalArg(6) byte[] dest, @OriginalArg(8) int offset, @OriginalArg(9) float persistence, @OriginalArg(11) NoiseGenerator noise) {
+        for (@Pc(5) int frame = 0; frame < FRAME_COUNT; frame++) {
+            Static364.generateNoiseFrame(yFrequency, xFrequency, frame, noise, dest, persistence, zFrequency, offset, amplitude);
+            offset += FRAME_SIZE;
         }
     }
 
