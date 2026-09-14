@@ -5,41 +5,41 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static584 {
 
     @OriginalMember(owner = "client!sga", name = "a", descriptor = "(IIILclient!kp;Lclient!kp;)V")
-    public static void method7665(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) Wall arg3, @OriginalArg(4) Wall arg4) {
-        @Pc(4) Tile local4 = Static347.getTile(arg0, arg1, arg2);
-        if (local4 == null) {
+    public static void method7665(@OriginalArg(0) int level, @OriginalArg(1) int x, @OriginalArg(2) int z, @OriginalArg(3) Wall wall, @OriginalArg(4) Wall adjacentWall) {
+        @Pc(4) Tile tile = Static347.getTile(level, x, z);
+        if (tile == null) {
             return;
         }
-        local4.wall = arg3;
-        local4.adjacentWall = arg4;
-        @Pc(22) int local22 = Static246.ground == Static693.underwaterGround ? 1 : 0;
-        if (!arg3.isStationary()) {
-            arg3.nextEntity = Static468.dynamicEntities[local22];
-            Static468.dynamicEntities[local22] = arg3;
-        } else if (arg3.isTransparent(0)) {
-            arg3.nextEntity = Static398.transparentStationaryEntities[local22];
-            Static398.transparentStationaryEntities[local22] = arg3;
+        tile.wall = wall;
+        tile.adjacentWall = adjacentWall;
+        @Pc(22) int groundIndex = Static246.ground == Static693.underwaterGround ? 1 : 0;
+        if (!wall.isStationary()) {
+            wall.nextEntity = Static468.dynamicEntities[groundIndex];
+            Static468.dynamicEntities[groundIndex] = wall;
+        } else if (wall.isTransparent(0)) {
+            wall.nextEntity = Static398.transparentStationaryEntities[groundIndex];
+            Static398.transparentStationaryEntities[groundIndex] = wall;
         } else {
-            arg3.nextEntity = Static576.opaqueStationaryEntities[local22];
-            Static576.opaqueStationaryEntities[local22] = arg3;
+            wall.nextEntity = Static576.opaqueStationaryEntities[groundIndex];
+            Static576.opaqueStationaryEntities[groundIndex] = wall;
             Static75.hasOpaqueStationaryEntities = true;
         }
-        if (arg4 == null) {
+        if (adjacentWall == null) {
             return;
         }
-        if (arg4.isStationary()) {
-            if (arg4.isTransparent(0)) {
-                arg4.nextEntity = Static398.transparentStationaryEntities[local22];
-                Static398.transparentStationaryEntities[local22] = arg4;
+        if (adjacentWall.isStationary()) {
+            if (adjacentWall.isTransparent(0)) {
+                adjacentWall.nextEntity = Static398.transparentStationaryEntities[groundIndex];
+                Static398.transparentStationaryEntities[groundIndex] = adjacentWall;
                 return;
             }
-            arg4.nextEntity = Static576.opaqueStationaryEntities[local22];
-            Static576.opaqueStationaryEntities[local22] = arg4;
+            adjacentWall.nextEntity = Static576.opaqueStationaryEntities[groundIndex];
+            Static576.opaqueStationaryEntities[groundIndex] = adjacentWall;
             Static75.hasOpaqueStationaryEntities = true;
             return;
         }
-        arg4.nextEntity = Static468.dynamicEntities[local22];
-        Static468.dynamicEntities[local22] = arg4;
+        adjacentWall.nextEntity = Static468.dynamicEntities[groundIndex];
+        Static468.dynamicEntities[groundIndex] = adjacentWall;
     }
 
 }

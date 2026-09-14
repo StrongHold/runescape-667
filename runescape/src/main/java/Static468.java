@@ -11,30 +11,30 @@ public final class Static468 {
     public static Entity[] dynamicEntities;
 
     @OriginalMember(owner = "client!op", name = "a", descriptor = "(ZIII)V")
-    public static void updateObjCount(@OriginalArg(1) int level, @OriginalArg(3) int zoneX, @OriginalArg(2) int zoneZ) {
-        @Pc(8) int x = zoneX + WorldMap.areaBaseX;
-        @Pc(12) int z = zoneZ + WorldMap.areaBaseZ;
+    public static void updateObjCount(@OriginalArg(1) int level, @OriginalArg(3) int localX, @OriginalArg(2) int localZ) {
+        @Pc(8) int absoluteX = localX + WorldMap.areaBaseX;
+        @Pc(12) int absoluteZ = localZ + WorldMap.areaBaseZ;
 
-        if (Static334.activeTiles == null || zoneX < 0 || zoneZ < 0 || zoneX >= Static720.mapWidth || Static501.mapLength <= zoneZ || ClientOptions.instance.animateBackground.getValue() == 0 && level != PlayerEntity.self.level) {
+        if (Static334.activeTiles == null || localX < 0 || localZ < 0 || localX >= Static720.mapWidth || Static501.mapLength <= localZ || ClientOptions.instance.animateBackground.getValue() == 0 && level != PlayerEntity.self.level) {
             return;
         }
 
-        @Pc(67) long key = (level << 28) | (z << 14) | x;
+        @Pc(67) long key = (level << 28) | (absoluteZ << 14) | absoluteX;
         @Pc(73) ObjStack stack = (ObjStack) Static497.objStacks.get(key);
         if (stack == null) {
-            Static638.method8398(level, zoneX, zoneZ);
+            Static638.method8398(level, localX, localZ);
             return;
         }
 
         @Pc(88) ObjStackEntry firstEntry = (ObjStackEntry) stack.objs.first();
         if (firstEntry == null) {
-            Static638.method8398(level, zoneX, zoneZ);
+            Static638.method8398(level, localX, localZ);
             return;
         }
 
-        @Pc(103) ObjStackEntity entity = (ObjStackEntity) Static638.method8398(level, zoneX, zoneZ);
+        @Pc(103) ObjStackEntity entity = (ObjStackEntity) Static638.method8398(level, localX, localZ);
         if (entity == null) {
-            entity = new ObjStackEntity(zoneX << 9, Static246.ground[level].getHeight(zoneX, zoneZ), zoneZ << 9, level, level);
+            entity = new ObjStackEntity(localX << 9, Static246.ground[level].getHeight(localX, localZ), localZ << 9, level, level);
         } else {
             entity.secondId = entity.thirdId = -1;
         }
@@ -67,19 +67,19 @@ public final class Static468 {
             }
         }
 
-        @Pc(209) int averageHeight = Static102.averageHeight(level, (zoneX << 9) - -256, (zoneZ << 9) + 256);
+        @Pc(209) int averageHeight = Static102.averageHeight(level, (localX << 9) - -256, (localZ << 9) + 256);
         entity.level = (byte) level;
         entity.y = averageHeight;
         entity.virtualLevel = (byte) level;
-        entity.z = zoneZ << 9;
+        entity.z = localZ << 9;
         entity.anInt8885 = 0;
-        entity.x = zoneX << 9;
+        entity.x = localX << 9;
 
-        if (Static441.isBridgeAt(zoneZ, zoneX)) {
+        if (Static441.isBridgeAt(localZ, localX)) {
             entity.virtualLevel++;
         }
 
-        Static157.method2564(level, zoneX, zoneZ, averageHeight, entity);
+        Static157.setObjStack(level, localX, localZ, averageHeight, entity);
     }
 
     @OriginalMember(owner = "client!op", name = "a", descriptor = "(ZZ)V")
@@ -113,18 +113,18 @@ public final class Static468 {
     }
 
     @OriginalMember(owner = "client!op", name = "a", descriptor = "(BLclient!eba;)I")
-    public static int method7644(@OriginalArg(1) Class92 arg0) {
-        if (arg0 == Static685.aClass92_16) {
+    public static int method7644(@OriginalArg(1) Class92 format) {
+        if (format == Static685.aClass92_16) {
             return 6407;
-        } else if (arg0 == Static172.aClass92_8) {
+        } else if (format == Static172.aClass92_8) {
             return 6408;
-        } else if (arg0 == Static679.aClass92_15) {
+        } else if (format == Static679.aClass92_15) {
             return 6406;
-        } else if (arg0 == Static661.aClass92_10) {
+        } else if (format == Static661.aClass92_10) {
             return 6409;
-        } else if (arg0 == Static482.aClass92_13) {
+        } else if (format == Static482.aClass92_13) {
             return 6410;
-        } else if (arg0 == Static42.aClass92_3) {
+        } else if (format == Static42.aClass92_3) {
             return 6145;
         } else {
             throw new IllegalStateException();
@@ -132,13 +132,13 @@ public final class Static468 {
     }
 
     @OriginalMember(owner = "client!op", name = "a", descriptor = "(IIB)I")
-    public static int method7648(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) {
-        arg1 = (arg0 & 0x7F) * arg1 >> 7;
-        if (arg1 < 2) {
-            arg1 = 2;
-        } else if (arg1 > 126) {
-            arg1 = 126;
+    public static int method7648(@OriginalArg(0) int hsl, @OriginalArg(1) int lightness) {
+        lightness = (hsl & 0x7F) * lightness >> 7;
+        if (lightness < 2) {
+            lightness = 2;
+        } else if (lightness > 126) {
+            lightness = 126;
         }
-        return (arg0 & 0xFF80) + arg1;
+        return (hsl & 0xFF80) + lightness;
     }
 }

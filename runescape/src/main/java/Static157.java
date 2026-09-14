@@ -6,28 +6,28 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static157 {
 
     @OriginalMember(owner = "client!eu", name = "a", descriptor = "(IIIILclient!nda;)V")
-    public static void method2564(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) Class8_Sub2_Sub5 arg4) {
-        @Pc(4) Tile local4 = Static347.getTile(arg0, arg1, arg2);
-        if (local4 == null) {
+    public static void setObjStack(@OriginalArg(0) int level, @OriginalArg(1) int x, @OriginalArg(2) int z, @OriginalArg(3) int y, @OriginalArg(4) Class8_Sub2_Sub5 entity) {
+        @Pc(4) Tile tile = Static347.getTile(level, x, z);
+        if (tile == null) {
             return;
         }
-        arg4.x = (arg1 << EnvironmentLight.anInt1066) + EnvironmentLight.anInt3993;
-        arg4.y = arg3;
-        arg4.z = (arg2 << EnvironmentLight.anInt1066) + EnvironmentLight.anInt3993;
-        local4.aClass8_Sub2_Sub5_1 = arg4;
-        @Pc(36) int local36 = Static246.ground == Static693.underwaterGround ? 1 : 0;
-        if (arg4.isStationary()) {
-            if (arg4.isTransparent(0)) {
-                arg4.nextEntity = Static398.transparentStationaryEntities[local36];
-                Static398.transparentStationaryEntities[local36] = arg4;
+        entity.x = (x << EnvironmentLight.anInt1066) + EnvironmentLight.anInt3993;
+        entity.y = y;
+        entity.z = (z << EnvironmentLight.anInt1066) + EnvironmentLight.anInt3993;
+        tile.aClass8_Sub2_Sub5_1 = entity;
+        @Pc(36) int groundIndex = Static246.ground == Static693.underwaterGround ? 1 : 0;
+        if (entity.isStationary()) {
+            if (entity.isTransparent(0)) {
+                entity.nextEntity = Static398.transparentStationaryEntities[groundIndex];
+                Static398.transparentStationaryEntities[groundIndex] = entity;
                 return;
             }
-            arg4.nextEntity = Static576.opaqueStationaryEntities[local36];
-            Static576.opaqueStationaryEntities[local36] = arg4;
+            entity.nextEntity = Static576.opaqueStationaryEntities[groundIndex];
+            Static576.opaqueStationaryEntities[groundIndex] = entity;
             Static75.hasOpaqueStationaryEntities = true;
             return;
         }
-        arg4.nextEntity = Static468.dynamicEntities[local36];
-        Static468.dynamicEntities[local36] = arg4;
+        entity.nextEntity = Static468.dynamicEntities[groundIndex];
+        Static468.dynamicEntities[groundIndex] = entity;
     }
 }

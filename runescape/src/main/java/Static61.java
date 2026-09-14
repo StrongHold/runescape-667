@@ -5,31 +5,31 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static61 {
 
     @OriginalMember(owner = "client!c", name = "a", descriptor = "(IIILclient!eia;)V")
-    public static void method1299(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) GroundDecor arg3) {
-        @Pc(4) Tile local4 = Static347.getTile(arg0, arg1, arg2);
-        if (local4 == null) {
+    public static void method1299(@OriginalArg(0) int level, @OriginalArg(1) int x, @OriginalArg(2) int z, @OriginalArg(3) GroundDecor decor) {
+        @Pc(4) Tile tile = Static347.getTile(level, x, z);
+        if (tile == null) {
             return;
         }
-        local4.groundDecor = arg3;
-        @Pc(19) int local19 = Static246.ground == Static693.underwaterGround ? 1 : 0;
-        if (arg3.isStationary()) {
-            if (arg3.isTransparent(0)) {
-                arg3.nextEntity = Static398.transparentStationaryEntities[local19];
-                Static398.transparentStationaryEntities[local19] = arg3;
+        tile.groundDecor = decor;
+        @Pc(19) int groundIndex = Static246.ground == Static693.underwaterGround ? 1 : 0;
+        if (decor.isStationary()) {
+            if (decor.isTransparent(0)) {
+                decor.nextEntity = Static398.transparentStationaryEntities[groundIndex];
+                Static398.transparentStationaryEntities[groundIndex] = decor;
                 return;
             }
-            arg3.nextEntity = Static576.opaqueStationaryEntities[local19];
-            Static576.opaqueStationaryEntities[local19] = arg3;
+            decor.nextEntity = Static576.opaqueStationaryEntities[groundIndex];
+            Static576.opaqueStationaryEntities[groundIndex] = decor;
             Static75.hasOpaqueStationaryEntities = true;
             return;
         }
-        arg3.nextEntity = Static468.dynamicEntities[local19];
-        Static468.dynamicEntities[local19] = arg3;
+        decor.nextEntity = Static468.dynamicEntities[groundIndex];
+        Static468.dynamicEntities[groundIndex] = decor;
     }
 
     @OriginalMember(owner = "client!c", name = "a", descriptor = "([J[Ljava/lang/Object;Z)V")
-    public static void method1308(@OriginalArg(0) long[] arg0, @OriginalArg(1) Object[] arg1) {
-        Static542.method7200(arg1, arg0, 0, arg0.length - 1);
+    public static void method1308(@OriginalArg(0) long[] keys, @OriginalArg(1) Object[] values) {
+        Static542.method7200(values, keys, 0, keys.length - 1);
     }
 
 }

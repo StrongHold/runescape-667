@@ -104,17 +104,17 @@ public final class Static102 {
         if (dynamic) {
             Static679.aPositionEntity[Static125.dynamicEntityCount++] = entity;
         } else {
-            @Pc(48) int ground = Static246.ground == Static693.underwaterGround ? 1 : 0;
+            @Pc(48) int groundIndex = Static246.ground == Static693.underwaterGround ? 1 : 0;
 
             if (!entity.isStationary()) {
-                entity.nextEntity = Static468.dynamicEntities[ground];
-                Static468.dynamicEntities[ground] = entity;
+                entity.nextEntity = Static468.dynamicEntities[groundIndex];
+                Static468.dynamicEntities[groundIndex] = entity;
             } else if (entity.isTransparent(0)) {
-                entity.nextEntity = Static398.transparentStationaryEntities[ground];
-                Static398.transparentStationaryEntities[ground] = entity;
+                entity.nextEntity = Static398.transparentStationaryEntities[groundIndex];
+                Static398.transparentStationaryEntities[groundIndex] = entity;
             } else {
-                entity.nextEntity = Static576.opaqueStationaryEntities[ground];
-                Static576.opaqueStationaryEntities[ground] = entity;
+                entity.nextEntity = Static576.opaqueStationaryEntities[groundIndex];
+                Static576.opaqueStationaryEntities[groundIndex] = entity;
                 Static75.hasOpaqueStationaryEntities = true;
             }
         }
