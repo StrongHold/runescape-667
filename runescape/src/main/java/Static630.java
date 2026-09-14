@@ -41,7 +41,7 @@ public final class Static630 {
     @OriginalMember(owner = "client!tv", name = "b", descriptor = "(I)V")
     public static void method8358() {
         if (ClientOptions.instance.animateBackground.getValue() == 0 && Static164.areaLevel != Camera.renderingLevel) {
-            Static684.updateMapArea(false, Static62.areaCenterX, MainLogicStep.STEP_GAME_SCREEN_MAP_BUILD, Static525.areaCenterZ);
+            MapArea.updateMapArea(false, Static62.areaCenterX, MainLogicStep.STEP_GAME_SCREEN_MAP_BUILD, Static525.areaCenterZ);
         } else {
             Minimap.redrawIfLevelChanged(Toolkit.active);
             if (Static514.anInt7680 != Camera.renderingLevel) {

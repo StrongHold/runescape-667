@@ -9,10 +9,10 @@ import org.openrs2.deob.annotation.OriginalArg;
 import org.openrs2.deob.annotation.OriginalMember;
 import org.openrs2.deob.annotation.Pc;
 
-public final class Static684 {
+public final class MapArea {
 
     @OriginalMember(owner = "client!vla", name = "a", descriptor = "[Lclient!qe;")
-    public static RenderQueue[] aClass302Array1;
+    public static RenderQueue[] renderQueues;
 
     @OriginalMember(owner = "client!vla", name = "i", descriptor = "I")
     public static int w2debug = 0;

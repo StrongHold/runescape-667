@@ -91,8 +91,8 @@ public final class Scene {
             Static665.aToolkit_15.allocateThreads(1);
             Static665.aToolkit_15.linkThreads(0);
         }
-        if (Static684.aClass302Array1 != null) {
-            Static684.aClass302Array1 = null;
+        if (MapArea.renderQueues != null) {
+            MapArea.renderQueues = null;
         }
         Static665.aToolkit_15 = null;
     }

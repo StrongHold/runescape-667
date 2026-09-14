@@ -14,36 +14,36 @@ public final class Static483 {
 
     @OriginalMember(owner = "client!pe", name = "c", descriptor = "(I)V")
     public static void method6490(@OriginalArg(0) int w2debug) {
-        Static684.w2debug = w2debug;
+        MapArea.w2debug = w2debug;
     }
 
     @OriginalMember(owner = "client!pe", name = "a", descriptor = "(I[BIBII)V")
-    public static void method6491(@OriginalArg(0) int arg0, @OriginalArg(1) byte[] arg1, @OriginalArg(2) int arg2, @OriginalArg(5) int arg3) {
-        if (arg3 >= arg0) {
+    public static void method6491(@OriginalArg(0) int end, @OriginalArg(1) byte[] data, @OriginalArg(2) int offset, @OriginalArg(5) int start) {
+        if (start >= end) {
             return;
         }
-        arg2 += arg3;
-        @Pc(20) int local20 = arg0 - arg3 >> 2;
+        offset += start;
+        @Pc(20) int remaining = end - start >> 2;
         while (true) {
-            local20--;
-            if (local20 < 0) {
-                local20 = arg0 - arg3 & 0x3;
+            remaining--;
+            if (remaining < 0) {
+                remaining = end - start & 0x3;
                 while (true) {
-                    local20--;
-                    if (local20 < 0) {
+                    remaining--;
+                    if (remaining < 0) {
                         return;
                     }
-                    arg1[arg2++] = 1;
+                    data[offset++] = 1;
                 }
             }
-            @Pc(35) int local35 = arg2 + 1;
-            arg1[arg2] = 1;
-            @Pc(40) int local40 = local35 + 1;
-            arg1[local35] = 1;
-            @Pc(45) int local45 = local40 + 1;
-            arg1[local40] = 1;
-            arg2 = local45 + 1;
-            arg1[local45] = 1;
+            @Pc(35) int next1 = offset + 1;
+            data[offset] = 1;
+            @Pc(40) int next2 = next1 + 1;
+            data[next1] = 1;
+            @Pc(45) int next3 = next2 + 1;
+            data[next2] = 1;
+            offset = next3 + 1;
+            data[next3] = 1;
         }
     }
 }

@@ -68,7 +68,7 @@ public final class Static54 {
             throw new RuntimeException(String.valueOf(MainLogicManager.step));
         }
 
-        Static684.updateMapArea(false, centerX, buildStep, centerZ);
+        MapArea.updateMapArea(false, centerX, buildStep, centerZ);
     }
 
     @OriginalMember(owner = "client!bq", name = "a", descriptor = "(IBI)Z")

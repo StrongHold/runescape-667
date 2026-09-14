@@ -13,12 +13,12 @@ public final class Static632 {
     }
 
     @OriginalMember(owner = "client!u", name = "a", descriptor = "(Lclient!eo;ZZ)V")
-    public static void method8368(@OriginalArg(0) Entity arg0, @OriginalArg(2) boolean arg1) {
-        arg0.aBoolean813 = arg1;
+    public static void drawEntity(@OriginalArg(0) Entity entity, @OriginalArg(2) boolean trackOrthoTiles) {
+        entity.aBoolean813 = trackOrthoTiles;
         if (Static661.aBoolean457) {
-            Static684.aClass302Array1[Static684.aClass302Array1.length - 1].method6812(arg0);
+            MapArea.renderQueues[MapArea.renderQueues.length - 1].method6812(entity);
         } else {
-            Static658.method8591(arg0, Static501.aClass2_Sub7Array4);
+            Static658.method8591(entity, Static501.aClass2_Sub7Array4);
         }
     }
 }

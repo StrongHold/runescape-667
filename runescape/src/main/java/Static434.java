@@ -11,42 +11,42 @@ public final class Static434 {
     public static void rebuildNormal() {
         Static117.areaMode = AreaMode.STATIC_AREA;
         @Pc(8) BitPacket bitPacket = ServerConnection.GAME.bitPacket;
-        @Pc(12) int local12 = bitPacket.g1_alt2();
-        @Pc(24) boolean local24 = bitPacket.g1() == 1;
-        @Pc(28) int local28 = bitPacket.ig2();
-        @Pc(32) int local32 = bitPacket.g2();
+        @Pc(12) int buildArea = bitPacket.g1_alt2();
+        @Pc(24) boolean forceUpdate = bitPacket.g1() == 1;
+        @Pc(28) int centerX = bitPacket.ig2();
+        @Pc(32) int centerZ = bitPacket.g2();
         Static165.updateLastAreaMode();
-        Static342.setBuildArea(local12);
-        @Pc(46) int local46 = (ServerConnection.GAME.currentPacketSize - bitPacket.pos) / 16;
-        Static22.anIntArrayArray11 = new int[local46][4];
+        Static342.setBuildArea(buildArea);
+        @Pc(46) int mapsquares = (ServerConnection.GAME.currentPacketSize - bitPacket.pos) / 16;
+        Static22.anIntArrayArray11 = new int[mapsquares][4];
         @Pc(55) int local55;
-        for (@Pc(52) int local52 = 0; local52 < local46; local52++) {
+        for (@Pc(52) int mapsquare = 0; mapsquare < mapsquares; mapsquare++) {
             for (local55 = 0; local55 < 4; local55++) {
-                Static22.anIntArrayArray11[local52][local55] = bitPacket.g4();
+                Static22.anIntArrayArray11[mapsquare][local55] = bitPacket.g4();
             }
         }
         Static363.aByteArrayArray22 = null;
-        Static319.aByteArrayArray16 = new byte[local46][];
-        Static118.aByteArrayArray3 = new byte[local46][];
-        Static266.locationGroups = new int[local46];
-        Static177.aByteArrayArray5 = new byte[local46][];
-        Static267.mapGroups = new int[local46];
-        Static68.underwaterMapGroups = new int[local46];
-        Static298.underwaterLocationGroups = new int[local46];
+        Static319.aByteArrayArray16 = new byte[mapsquares][];
+        Static118.aByteArrayArray3 = new byte[mapsquares][];
+        Static266.locationGroups = new int[mapsquares];
+        Static177.aByteArrayArray5 = new byte[mapsquares][];
+        Static267.mapGroups = new int[mapsquares];
+        Static68.underwaterMapGroups = new int[mapsquares];
+        Static298.underwaterLocationGroups = new int[mapsquares];
         Static376.npcGroups = null;
-        Static89.zoneIds = new int[local46];
-        Static421.aByteArrayArray19 = new byte[local46][];
-        local46 = 0;
-        for (local55 = (local28 - (Static720.mapWidth >> 4)) / 8; local55 <= ((Static720.mapWidth >> 4) + local28) / 8; local55++) {
-            for (@Pc(137) int local137 = (local32 - (Static501.mapLength >> 4)) / 8; local137 <= (local32 + (Static501.mapLength >> 4)) / 8; local137++) {
-                Static89.zoneIds[local46] = (local55 << 8) + local137;
-                Static267.mapGroups[local46] = js5.MAPS.getgroupid("m" + local55 + "_" + local137);
-                Static266.locationGroups[local46] = js5.MAPS.getgroupid("l" + local55 + "_" + local137);
-                Static68.underwaterMapGroups[local46] = js5.MAPS.getgroupid("um" + local55 + "_" + local137);
-                Static298.underwaterLocationGroups[local46] = js5.MAPS.getgroupid("ul" + local55 + "_" + local137);
-                local46++;
+        Static89.zoneIds = new int[mapsquares];
+        Static421.aByteArrayArray19 = new byte[mapsquares][];
+        mapsquares = 0;
+        for (local55 = (centerX - (Static720.mapWidth >> 4)) / 8; local55 <= ((Static720.mapWidth >> 4) + centerX) / 8; local55++) {
+            for (@Pc(137) int local137 = (centerZ - (Static501.mapLength >> 4)) / 8; local137 <= (centerZ + (Static501.mapLength >> 4)) / 8; local137++) {
+                Static89.zoneIds[mapsquares] = (local55 << 8) + local137;
+                Static267.mapGroups[mapsquares] = js5.MAPS.getgroupid("m" + local55 + "_" + local137);
+                Static266.locationGroups[mapsquares] = js5.MAPS.getgroupid("l" + local55 + "_" + local137);
+                Static68.underwaterMapGroups[mapsquares] = js5.MAPS.getgroupid("um" + local55 + "_" + local137);
+                Static298.underwaterLocationGroups[mapsquares] = js5.MAPS.getgroupid("ul" + local55 + "_" + local137);
+                mapsquares++;
             }
         }
-        Static684.updateMapArea(local24, local28, MainLogicStep.STEP_GAME_SCREEN_MAP_BUILD, local32);
+        MapArea.updateMapArea(forceUpdate, centerX, MainLogicStep.STEP_GAME_SCREEN_MAP_BUILD, centerZ);
     }
 }

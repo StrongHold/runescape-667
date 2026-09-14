@@ -33,7 +33,7 @@ public final class Static517 {
         @Pc(22) Entity entity;
         if ((entitySkipFlags & 0x2) == 0) {
             for (entity = Static576.opaqueStationaryEntities[ground]; entity != null; entity = entity.nextEntity) {
-                if (!Static208.method3107(entity, underwater, roofStamps, levels, roofStamp)) {
+                if (!Static208.cullEntity(entity, underwater, roofStamps, levels, roofStamp)) {
                     projectToScreen(entity);
                     if (entity.anInt10697 != -1) {
                         Static48.aEntityArray3[Static546.onscreenOpaqueEntityCount++] = entity;
@@ -44,7 +44,7 @@ public final class Static517 {
         @Pc(157) int local157;
         if ((entitySkipFlags & 0x1) == 0) {
             for (entity = Static398.transparentStationaryEntities[ground]; entity != null; entity = entity.nextEntity) {
-                if (!Static208.method3107(entity, underwater, roofStamps, levels, roofStamp)) {
+                if (!Static208.cullEntity(entity, underwater, roofStamps, levels, roofStamp)) {
                     projectToScreen(entity);
                     if (entity.anInt10697 != -1) {
                         Static395.aEntityArray11[Static645.onscreenTransparentEntityCount++] = entity;
@@ -52,7 +52,7 @@ public final class Static517 {
                 }
             }
             for (@Pc(98) Entity dynamic = Static468.dynamicEntities[ground]; dynamic != null; dynamic = dynamic.nextEntity) {
-                if (!Static208.method3107(dynamic, underwater, roofStamps, levels, roofStamp)) {
+                if (!Static208.cullEntity(dynamic, underwater, roofStamps, levels, roofStamp)) {
                     if (dynamic.isTransparent(0)) {
                         projectToScreen(dynamic);
                         if (dynamic.anInt10697 != -1) {
@@ -68,7 +68,7 @@ public final class Static517 {
             }
             if (!underwater) {
                 for (local157 = 0; local157 < Static125.dynamicEntityCount; local157++) {
-                    if (!Static208.method3107(Static679.aPositionEntity[local157], underwater, roofStamps, levels, roofStamp)) {
+                    if (!Static208.cullEntity(Static679.aPositionEntity[local157], underwater, roofStamps, levels, roofStamp)) {
                         projectToScreen(Static679.aPositionEntity[local157]);
                         if (Static679.aPositionEntity[local157].anInt10697 != -1) {
                             if (Static679.aPositionEntity[local157].isTransparent(0)) {
@@ -85,7 +85,7 @@ public final class Static517 {
         if (Static546.onscreenOpaqueEntityCount > 0) {
             Quicksort.quicksort(Static48.aEntityArray3, 0, Static546.onscreenOpaqueEntityCount - 1);
             for (local225 = 0; local225 < Static546.onscreenOpaqueEntityCount; local225++) {
-                Static632.method8368(Static48.aEntityArray3[local225], trackOrthoTiles);
+                Static632.drawEntity(Static48.aEntityArray3[local225], trackOrthoTiles);
             }
         }
         if (Static442.aBoolean500) {
@@ -130,7 +130,7 @@ public final class Static517 {
                             Static246.ground[local225].renderTiles(0, 0, 0, null, false, entitySkipFlags);
                         }
                         for (local316 = 0; local316 < Static32.anInt772; local316++) {
-                            Static684.aClass302Array1[local316].addGround(new GroundRenderTask(local225 + 1));
+                            MapArea.renderQueues[local316].addGround(new GroundRenderTask(local225 + 1));
                         }
                     } else if (orthoZoom >= 0) {
                         Static246.ground[local225].renderTilesAtDepth(Static403.anInt6246, Static550.anInt8271, Static35.anInt813, Static142.aBooleanArrayArray1, true, orthoZoom, entitySkipFlags);
@@ -178,7 +178,7 @@ public final class Static517 {
                             Static246.ground[local225].renderTiles(0, 0, 0, null, false, entitySkipFlags);
                         }
                         for (local316 = 0; local316 < Static32.anInt772; local316++) {
-                            Static684.aClass302Array1[local316].addGround(new GroundRenderTask(local225 + 1));
+                            MapArea.renderQueues[local316].addGround(new GroundRenderTask(local225 + 1));
                         }
                     } else if (orthoZoom >= 0) {
                         Static246.ground[local225].renderTilesAtDepth(Static403.anInt6246, Static550.anInt8271, Static35.anInt813, Static142.aBooleanArrayArray1, false, orthoZoom, entitySkipFlags);
@@ -191,7 +191,7 @@ public final class Static517 {
         if (Static645.onscreenTransparentEntityCount > 0) {
             Static498.method6650(Static395.aEntityArray11, 0, Static645.onscreenTransparentEntityCount - 1);
             for (local225 = 0; local225 < Static645.onscreenTransparentEntityCount; local225++) {
-                Static632.method8368(Static395.aEntityArray11[local225], trackOrthoTiles);
+                Static632.drawEntity(Static395.aEntityArray11[local225], trackOrthoTiles);
             }
         }
     }

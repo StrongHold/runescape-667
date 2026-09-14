@@ -97,9 +97,9 @@ public final class Static21 {
                 queueCount = 8;
                 Static549.anInt9424 = 4;
             }
-            Static684.aClass302Array1 = new RenderQueue[queueCount];
+            MapArea.renderQueues = new RenderQueue[queueCount];
             for (@Pc(273) int i = 0; i < queueCount; i++) {
-                Static684.aClass302Array1[i] = new RenderQueue(Static515.renderingTaskNames[Static32.anInt772 - 2][i]);
+                MapArea.renderQueues[i] = new RenderQueue(Static515.renderingTaskNames[Static32.anInt772 - 2][i]);
             }
         } else {
             Static549.anInt9424 = 1;

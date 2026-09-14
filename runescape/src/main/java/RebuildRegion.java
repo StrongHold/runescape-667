@@ -84,7 +84,7 @@ public final class RebuildRegion {
                 }
             }
         }
-        Static684.updateMapArea(forceUpdate, zoneX, MainLogicStep.STEP_GAME_SCREEN_MAP_BUILD, zoneZ);
+        MapArea.updateMapArea(forceUpdate, zoneX, MainLogicStep.STEP_GAME_SCREEN_MAP_BUILD, zoneZ);
     }
 
 }
