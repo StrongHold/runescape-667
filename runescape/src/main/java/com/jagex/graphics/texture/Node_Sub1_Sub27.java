@@ -233,7 +233,7 @@ public final class Node_Sub1_Sub27 extends TextureOp {
 
     @OriginalMember(owner = "client!so", name = "c", descriptor = "(I)V")
     @Override
-    public void method9421() {
+    public void postDecode() {
         this.aByteArray97 = method9027(this.anInt8809);
         this.method7813(-1);
         @Pc(19) int local19 = this.anInt8803 - 1;

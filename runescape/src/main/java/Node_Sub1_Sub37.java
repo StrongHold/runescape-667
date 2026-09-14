@@ -41,7 +41,7 @@ public final class Node_Sub1_Sub37 extends TextureOp {
 
     @OriginalMember(owner = "client!wfa", name = "c", descriptor = "(I)V")
     @Override
-    public void method9421() {
+    public void postDecode() {
         if (this.anIntArrayArray259 == null) {
             this.anIntArrayArray259 = new int[][]{new int[2], {4096, 4096}};
         }

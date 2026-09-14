@@ -53,10 +53,10 @@ public final class Texture extends Node2 {
         @Pc(56) int local56;
         for (@Pc(20) int local20 = 0; local20 < local7; local20++) {
             @Pc(28) TextureOp local28 = Static294.method4341(arg0);
-            if (local28.method9412() >= 0) {
+            if (local28.getSpriteId() >= 0) {
                 local9++;
             }
-            if (local28.method9419() >= 0) {
+            if (local28.getTextureId() >= 0) {
                 local11++;
             }
             @Pc(49) int local49 = local28.ops.length;
@@ -76,8 +76,8 @@ public final class Texture extends Node2 {
             for (@Pc(120) int local120 = 0; local120 < local56; local120++) {
                 local114.ops[local120] = this.aClass2_Sub1Array39[local14[local105][local120]];
             }
-            @Pc(148) int local148 = local114.method9412();
-            @Pc(152) int local152 = local114.method9419();
+            @Pc(148) int local148 = local114.getSpriteId();
+            @Pc(152) int local152 = local114.getTextureId();
             if (local148 > 0) {
                 this.anIntArray824[local9++] = local148;
             }

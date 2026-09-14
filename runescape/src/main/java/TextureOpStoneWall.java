@@ -216,7 +216,7 @@ public final class TextureOpStoneWall extends TextureOp {
 
     @OriginalMember(owner = "client!dd", name = "c", descriptor = "(I)V")
     @Override
-    public void method9421() {
+    public void postDecode() {
         /* empty */
     }
 

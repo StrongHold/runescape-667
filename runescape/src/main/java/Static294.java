@@ -204,7 +204,7 @@ public final class Static294 {
             @Pc(40) int local40 = arg0.g1();
             local17.method9416(false, arg0, local40);
         }
-        local17.method9421();
+        local17.postDecode();
         return local17;
     }
 }

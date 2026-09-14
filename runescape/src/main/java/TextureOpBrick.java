@@ -128,7 +128,7 @@ public final class TextureOpBrick extends TextureOp {
 
     @OriginalMember(owner = "client!in", name = "c", descriptor = "(I)V")
     @Override
-    public void method9421() {
+    public void postDecode() {
         this.buildLayout(25428);
     }
 

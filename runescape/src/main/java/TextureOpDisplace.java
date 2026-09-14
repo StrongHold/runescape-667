@@ -87,7 +87,7 @@ public final class TextureOpDisplace extends TextureOp {
 
     @OriginalMember(owner = "client!gd", name = "c", descriptor = "(I)V")
     @Override
-    public void method9421() {
+    public void postDecode() {
         Static481.method6475();
     }
 }

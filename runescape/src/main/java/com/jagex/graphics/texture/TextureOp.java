@@ -55,7 +55,7 @@ public abstract class TextureOp extends Node {
     }
 
     @OriginalMember(owner = "client!pf", name = "b", descriptor = "(B)I")
-    public int method9412() {
+    public int getSpriteId() {
         return -1;
     }
 
@@ -92,12 +92,12 @@ public abstract class TextureOp extends Node {
     }
 
     @OriginalMember(owner = "client!pf", name = "d", descriptor = "(I)I")
-    public int method9419() {
+    public int getTextureId() {
         return -1;
     }
 
     @OriginalMember(owner = "client!pf", name = "c", descriptor = "(I)V")
-    public void method9421() {
+    public void postDecode() {
     }
 
     @OriginalMember(owner = "client!pf", name = "a", descriptor = "(III)[I")

@@ -67,7 +67,7 @@ public final class TextureOpWave extends TextureOp {
 
     @OriginalMember(owner = "client!bu", name = "c", descriptor = "(I)V")
     @Override
-    public void method9421() {
+    public void postDecode() {
         Static481.method6475();
     }
 

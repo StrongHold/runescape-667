@@ -15,7 +15,7 @@ public final class Static490 {
         local11.anInt8805 = 4;
         local11.anInt8810 = 4;
         local11.anInt8803 = 3;
-        local11.method9421();
+        local11.postDecode();
         EnvironmentLight.method2313(256, 64);
         for (@Pc(48) int local48 = 0; local48 < 256; local48++) {
             local11.method7809(local48, local7[local48]);

@@ -130,7 +130,7 @@ public final class Node_Sub1_Sub15 extends TextureOp {
 
     @OriginalMember(owner = "client!kga", name = "c", descriptor = "(I)V")
     @Override
-    public void method9421() {
+    public void postDecode() {
         Static481.method6475();
     }
 }

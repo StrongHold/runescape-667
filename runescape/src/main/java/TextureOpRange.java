@@ -28,7 +28,7 @@ public final class TextureOpRange extends TextureOp {
 
     @OriginalMember(owner = "client!jr", name = "c", descriptor = "(I)V")
     @Override
-    public void method9421() {
+    public void postDecode() {
         this.range = this.max - this.min;
     }
 
@@ -73,7 +73,7 @@ public final class TextureOpRange extends TextureOp {
     @Override
     public void method9416(@OriginalArg(0) boolean arg0, @OriginalArg(1) Packet arg1, @OriginalArg(2) int arg2) {
         if (arg0) {
-            this.method9421();
+            this.postDecode();
         }
         if (arg2 == 0) {
             this.min = arg1.g2();

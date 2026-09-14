@@ -116,7 +116,7 @@ public final class Node_Sub1_Sub28 extends TextureOp {
 
     @OriginalMember(owner = "client!tia", name = "c", descriptor = "(I)V")
     @Override
-    public void method9421() {
+    public void postDecode() {
         this.method8282();
     }
 }
