@@ -20,7 +20,8 @@ public final class Static314 {
         if (Client.modeWhere != ModeWhere.LOCAL) {
             try {
                 JavaScript.call("tbrefresh", client.aClient1);
-            } catch (@Pc(34) Throwable local34) {
+            } catch (@Pc(34) Throwable ignored) {
+                /* empty */
             }
         }
     }
@@ -38,7 +39,8 @@ public final class Static314 {
         if (debugconsole.output != null) {
             try {
                 debugconsole.output.close();
-            } catch (@Pc(10) IOException local10) {
+            } catch (@Pc(10) IOException ignored) {
+                /* empty */
             }
         }
         debugconsole.output = null;
@@ -46,7 +48,7 @@ public final class Static314 {
 
     @OriginalMember(owner = "client!jw", name = "a", descriptor = "(ZI)V")
     public static void noTimeout(@OriginalArg(0) boolean forceSend) {
-        Static557.method7331();
+        Static557.updatePcmPlayers();
 
         if (!MainLogicStep.isAtGameScreen(MainLogicManager.step)) {
             return;
@@ -76,6 +78,6 @@ public final class Static314 {
             }
         }
 
-        Static557.method7331();
+        Static557.updatePcmPlayers();
     }
 }

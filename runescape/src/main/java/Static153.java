@@ -8,23 +8,23 @@ public final class Static153 {
     public static int[] anIntArray235 = new int[2];
 
     @OriginalMember(owner = "client!eq", name = "a", descriptor = "(ILclient!uc;I)V")
-    public static void method2461(@OriginalArg(0) int arg0, @OriginalArg(1) Environment arg1) {
+    public static void method2461(@OriginalArg(0) int duration, @OriginalArg(1) Environment environment) {
         if (InterfaceManager.loginOpened) {
-            arg0 = 0;
+            duration = 0;
             InterfaceManager.loginOpened = false;
         }
-        if (Static346.aEnvironment_1 != null && Static346.aEnvironment_1.equalTo(arg1)) {
+        if (Static346.aEnvironment_1 != null && Static346.aEnvironment_1.equalTo(environment)) {
             return;
         }
-        Static346.aEnvironment_1 = arg1;
+        Static346.aEnvironment_1 = environment;
         Static344.aLong169 = SystemTimer.safetime();
-        Static173.anInt2913 = arg0;
-        Static587.anInt8673 = arg0;
+        Static173.anInt2913 = duration;
+        Static587.anInt8673 = duration;
         if (Static587.anInt8673 == 0) {
             Static506.method8313();
             return;
         }
-        Static74.aSkyBox_1 = Static456.aSkyBox_3;
+        Static74.aSkyBox_1 = Static456.activeSkyBox;
         Static600.aFloat179 = Static151.aFloat218;
         Static671.aFloat214 = Static683.aFloat215;
         Static386.anInt6062 = Static448.anInt6801;
@@ -35,15 +35,15 @@ public final class Static153 {
         Static659.aFloat213 = Static688.aFloat216;
         Static620.aFloat197 = Static318.aFloat210;
         Static679.anInt10273 = Static171.anInt2882;
-        if (Static456.aSkyBox_3 == null) {
+        if (Static456.activeSkyBox == null) {
             return;
         }
-        if (Static456.aSkyBox_3.method3165()) {
-            Static74.aSkyBox_1 = Static456.aSkyBox_3.method3167();
-            Static456.aSkyBox_3 = Static74.aSkyBox_1;
+        if (Static456.activeSkyBox.method3165()) {
+            Static74.aSkyBox_1 = Static456.activeSkyBox.method3167();
+            Static456.activeSkyBox = Static74.aSkyBox_1;
         }
-        if (Static456.aSkyBox_3 != null && Static346.aEnvironment_1.skyBox != Static456.aSkyBox_3) {
-            Static456.aSkyBox_3.method3163(Static346.aEnvironment_1.skyBox);
+        if (Static456.activeSkyBox != null && Static346.aEnvironment_1.skyBox != Static456.activeSkyBox) {
+            Static456.activeSkyBox.method3163(Static346.aEnvironment_1.skyBox);
         }
     }
 }

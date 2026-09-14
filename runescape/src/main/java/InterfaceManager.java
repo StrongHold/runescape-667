@@ -372,7 +372,7 @@ public final class InterfaceManager {
                         setOptions(offsetY, offsetX, child);
 
                         if (!OrthoMode.toolkitActive) {
-                            Static294.method4339(offsetY, child.clientcode == ComponentClientCode.LOGIN_SCENE, child.width, child.height, offsetX);
+                            Static294.drawScene(offsetY, child.clientcode == ComponentClientCode.LOGIN_SCENE, child.width, child.height, offsetX);
                             Toolkit.active.KA(x1, y1, x2, y2);
                         }
 
@@ -382,7 +382,7 @@ public final class InterfaceManager {
 
                     if (child.clientcode == ComponentClientCode.MINIMAP && CutsceneManager.state == 0) {
                         if (child.graphic(Toolkit.active) != null) {
-                            Static557.method7331();
+                            Static557.updatePcmPlayers();
                             Minimap.draw(child, Toolkit.active, offsetX, offsetY);
                             flipDirtyRect[rectangle] = true;
                             Toolkit.active.KA(x1, y1, x2, y2);
@@ -1076,7 +1076,7 @@ public final class InterfaceManager {
 
         if (topLevelInterface != -1) {
             rectangleCount = 0;
-            method3833();
+            drawInterfaces();
         }
 
         Toolkit.active.la();
@@ -1152,7 +1152,7 @@ public final class InterfaceManager {
         lastDrawCycle = TimeUtils.clock;
         if (topLevelInterface != -1) {
             rectangleCount = 0;
-            method3833();
+            drawInterfaces();
         }
         Toolkit.active.la();
         MiniMenu.draw(Toolkit.active);
@@ -1168,10 +1168,10 @@ public final class InterfaceManager {
     }
 
     @OriginalMember(owner = "client!ic", name = "a", descriptor = "(I)V")
-    public static void method3833() {
+    public static void drawInterfaces() {
         dragChildren = null;
         if (OrthoMode.toolkitActive && getWindowMode() != 1) {
-            Static294.method4339(0, MainLogicManager.step == 3 || MainLogicManager.step == 7, OrthoMode.method7779(), OrthoMode.method1260(), 0);
+            Static294.drawScene(0, MainLogicManager.step == 3 || MainLogicManager.step == 7, OrthoMode.method7779(), OrthoMode.method1260(), 0);
         }
 
         @Pc(46) int x1 = 0;
@@ -1422,8 +1422,8 @@ public final class InterfaceManager {
                             if (component.clientcode == ComponentClientCode.SCENE || component.clientcode == ComponentClientCode.LOGIN_SCENE) {
                                 scene = component;
 
-                                if (Static456.aSkyBox_3 != null) {
-                                    Static456.aSkyBox_3.method3168(ClientOptions.instance.skydetail.getValue(), component.height, Toolkit.active);
+                                if (Static456.activeSkyBox != null) {
+                                    Static456.activeSkyBox.method3168(ClientOptions.instance.skydetail.getValue(), component.height, Toolkit.active);
                                 }
 
                                 if (component.clientcode == ComponentClientCode.SCENE) {

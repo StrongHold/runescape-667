@@ -44,7 +44,7 @@ public final class Static65 {
         Environment.cacheReset();
         Static425.aClass67_6 = null;
         Static74.aSkyBox_1 = null;
-        Static456.aSkyBox_3 = null;
+        Static456.activeSkyBox = null;
         Static74.aClass67_3 = null;
         Static425.toolkit = null;
         Static226.aClass67_9 = null;

@@ -14,7 +14,7 @@ public final class Static693 {
     @OriginalMember(owner = "client!vu", name = "a", descriptor = "([[BBLclient!taa;)V")
     public static void decodeDynamicArea(@OriginalArg(0) byte[][] data, @OriginalArg(2) MapRegion region) {
         for (@Pc(5) int level = 0; level < region.levels; level++) {
-            Static557.method7331();
+            Static557.updatePcmPlayers();
 
             for (@Pc(10) int zoneX = 0; zoneX < Static720.mapWidth >> 3; zoneX++) {
                 for (@Pc(13) int zoneZ = 0; zoneZ < Static501.mapLength >> 3; zoneZ++) {
@@ -44,14 +44,14 @@ public final class Static693 {
             }
         }
 
-        for (@Pc(10) int local10 = 0; local10 < region.levels; local10++) {
-            Static557.method7331();
-            for (@Pc(13) int local13 = 0; local13 < Static720.mapWidth >> 3; local13++) {
-                for (@Pc(22) int local22 = 0; local22 < Static501.mapLength >> 3; local22++) {
-                    @Pc(32) int local32 = Static623.zonePointers[local10][local13][local22];
+        for (@Pc(10) int level = 0; level < region.levels; level++) {
+            Static557.updatePcmPlayers();
+            for (@Pc(13) int zoneX = 0; zoneX < Static720.mapWidth >> 3; zoneX++) {
+                for (@Pc(22) int zoneZ = 0; zoneZ < Static501.mapLength >> 3; zoneZ++) {
+                    @Pc(32) int pointer = Static623.zonePointers[level][zoneX][zoneZ];
 
-                    if (local32 == -1) {
-                        region.setTileHeights(local13 * 8, local22 * 8, local10, 8, 8);
+                    if (pointer == -1) {
+                        region.setTileHeights(zoneX * 8, zoneZ * 8, level, 8, 8);
                     }
                 }
             }

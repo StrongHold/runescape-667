@@ -118,7 +118,7 @@ public final class MapBuilder {
             MessageBox.draw(Toolkit.active, LocalisedText.LOADING.localise(Client.language) + "<br>(100%)", true, Fonts.p12Metrics, Fonts.p12);
         }
 
-        Static557.method7331();
+        Static557.updatePcmPlayers();
         client.cacheReset();
         VideoManager.stop();
 
@@ -158,7 +158,7 @@ public final class MapBuilder {
         SoundManager.removeActiveStreams(false);
         Static508.method6750();
         Static112.aBoolean197 = false;
-        Static557.method7331();
+        Static557.updatePcmPlayers();
         System.gc();
         Static314.noTimeout(true);
         Static699.method9139();
@@ -196,13 +196,13 @@ public final class MapBuilder {
         MapRegion.active.createGrounds(underwater ? Static134.aMapRegion_3.tileHeights : null, Toolkit.active, Client.collisionMaps);
         if (Static117.areaMode == AreaMode.STATIC_AREA) {
             Static314.noTimeout(true);
-            Static338.method4994(Static118.aByteArrayArray3, MapRegion.active);
+            Static338.loadStaticLocations(Static118.aByteArrayArray3, MapRegion.active);
             if (Static363.aByteArrayArray22 != null) {
                 Static369.method3847();
             }
         } else {
             Static314.noTimeout(true);
-            Static101.method2001(Static118.aByteArrayArray3, MapRegion.active);
+            Static101.loadDynamicLocations(Static118.aByteArrayArray3, MapRegion.active);
         }
         client.cacheReset();
         if (GameShell.maxmemory < 96) {
@@ -216,9 +216,9 @@ public final class MapBuilder {
             Static379.method5355(true);
             Static314.noTimeout(true);
             if (Static117.areaMode == AreaMode.STATIC_AREA) {
-                Static338.method4994(Static421.aByteArrayArray19, Static134.aMapRegion_3);
+                Static338.loadStaticLocations(Static421.aByteArrayArray19, Static134.aMapRegion_3);
             } else {
-                Static101.method2001(Static421.aByteArrayArray19, Static134.aMapRegion_3);
+                Static101.loadDynamicLocations(Static421.aByteArrayArray19, Static134.aMapRegion_3);
             }
             client.cacheReset();
             Static314.noTimeout(true);
@@ -248,7 +248,7 @@ public final class MapBuilder {
             }
         }
         Static77.method1561();
-        Static557.method7331();
+        Static557.updatePcmPlayers();
         Static197.method2949();
         client.cacheReset();
         Static442.method5969();
@@ -290,7 +290,7 @@ public final class MapBuilder {
         }
 
         WorldMap.restoreLastArea();
-        Static557.method7331();
+        Static557.updatePcmPlayers();
         Static199.doneslowupdate();
         Static75.hasOpaqueStationaryEntities = true;
         if (Static28.aBoolean43) {

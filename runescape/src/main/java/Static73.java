@@ -102,7 +102,7 @@ public final class Static73 {
                 @Pc(32) int zoneZ = Static89.zoneIds[i] & 0xFF;
                 @Pc(38) int absX = (zoneX * 64) - WorldMap.areaBaseX;
                 @Pc(45) int absZ = (zoneZ * 64) - WorldMap.areaBaseZ;
-                Static557.method7331();
+                Static557.updatePcmPlayers();
                 region.decodeMapSquare(packet, Client.collisionMaps, absX, absZ, WorldMap.areaBaseX, WorldMap.areaBaseZ);
                 region.decodeStaticEnvironment(absZ, packet, absX, Toolkit.active);
             }
@@ -113,7 +113,7 @@ public final class Static73 {
             @Pc(26) int z = (Static89.zoneIds[i] & 0xFF) * 64 - WorldMap.areaBaseZ;
             @Pc(105) byte[] chunkData = data[i];
             if (chunkData == null && Static525.areaCenterZ < 800) {
-                Static557.method7331();
+                Static557.updatePcmPlayers();
                 region.setMapSquareHeights(x, z);
             }
         }

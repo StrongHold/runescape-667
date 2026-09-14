@@ -8,6 +8,6 @@ public final class Static601 {
     @OriginalMember(owner = "client!sw", name = "b", descriptor = "(I)V")
     public static void method7865() {
         Static232.method3392();
-        Static557.method7331();
+        Static557.updatePcmPlayers();
     }
 }

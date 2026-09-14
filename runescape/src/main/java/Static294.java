@@ -34,7 +34,7 @@ public final class Static294 {
     }
 
     @OriginalMember(owner = "client!jg", name = "a", descriptor = "(IIZIII)V")
-    public static void method4339(@OriginalArg(1) int y, @OriginalArg(2) boolean login, @OriginalArg(3) int width, @OriginalArg(4) int height, @OriginalArg(5) int x) {
+    public static void drawScene(@OriginalArg(1) int y, @OriginalArg(2) boolean login, @OriginalArg(3) int width, @OriginalArg(4) int height, @OriginalArg(5) int x) {
         if (Static334.activeTiles == null) {
             Toolkit.active.fillRect(x, y, width, height, -16777216);
             return;
@@ -150,15 +150,15 @@ public final class Static294 {
             Static162.anInt2800 = OrthoMode.renderZoom;
             Toolkit.active.GA(local375);
             Toolkit.active.ya();
-        } else if (Static456.aSkyBox_3 == null) {
+        } else if (Static456.activeSkyBox == null) {
             Toolkit.active.GA(local375);
             Toolkit.active.ya();
         } else {
             Toolkit.active.xa(1.0F);
             Toolkit.active.ZA(0xFFFFFF, 0.0F, 0.0F, 1.0F, 0.0F, 0.0F);
-            Static456.aSkyBox_3.method3159(viewportY, Toolkit.active, Camera.yaw, viewportWidth, local375, Camera.roll, viewportHeight, viewportX, Static436.anInt3852 << 3, Camera.pitch);
+            Static456.activeSkyBox.method3159(viewportY, Toolkit.active, Camera.yaw, viewportWidth, local375, Camera.roll, viewportHeight, viewportX, Static436.anInt3852 << 3, Camera.pitch);
         }
-        Static557.method7331();
+        Static557.updatePcmPlayers();
         Static527.method7081(Static428.anInt6495 << 1, viewportHeight / 2 + viewportY, Static428.anInt6495 << 1, viewportX + viewportWidth / 2);
         Static620.method8324(-Camera.yaw & 0x3FFF, Camera.z, -Camera.roll & 0x3FFF, Camera.y, -Camera.pitch & 0x3FFF, Camera.x);
         Static159.method2575();
@@ -169,7 +169,7 @@ public final class Static294 {
         } else {
             SceneRenderer.renderScene(TimeUtils.clock, Camera.x, Camera.y, Camera.z, Static328.aByteArrayArrayArray4, Static482.anIntArray588, Static9.anIntArray18, Static457.anIntArray552, Static153.anIntArray235, Static682.anIntArray817, PlayerEntity.self.level + 1, roofStamp, PlayerEntity.self.x >> 9, PlayerEntity.self.z >> 9, ClientOptions.instance.flickeringEffects.getValue() == 0, OrthoMode.enabled ? OrthoMode.renderZoom : -1, 0, false);
         }
-        Static557.method7331();
+        Static557.updatePcmPlayers();
         if (MainLogicManager.step == 11) {
             Static205.method3091(viewportWidth, viewportHeight, viewportY, viewportX);
             OverlayManager.render(viewportY, viewportWidth, viewportX, viewportHeight);
