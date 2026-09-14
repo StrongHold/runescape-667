@@ -5,8 +5,8 @@ public final class Static345 {
 
     @OriginalMember(owner = "client!ks", name = "a", descriptor = "()V")
     public static void method5049() {
-        SkyBoxSphere.model = null;
-        SkyBoxSphere.aSprite_25 = null;
+        SkyBoxSphere.sphereModel = null;
+        SkyBoxSphere.maskSprite = null;
     }
 
 }
