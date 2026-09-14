@@ -8,17 +8,12 @@ dependencies {
     implementation(libs.jcommander)
 }
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
-    }
-}
-
-tasks.withType(JavaCompile::class) {
-    options.encoding = "UTF-8"
-}
-
 application {
     mainClass = "Application"
-    applicationDefaultJvmArgs = listOf("-Xmx256m", "-Dsun.java2d.noddraw=true")
+    applicationDefaultJvmArgs = listOf(
+        "-Xmx256m",
+        "-Dsun.java2d.noddraw=true",
+        "--add-opens",
+        "java.base/java.lang=ALL-UNNAMED",
+    )
 }
