@@ -7040,13 +7040,13 @@ public final class ScriptRunner {
         } else if (opcode < 6300) {
             if (opcode == VIEWPORT_SETFOV) {
                 intStackPointer -= 2;
-                Static640.aShort122 = (short) intStack[intStackPointer];
-                if (Static640.aShort122 <= 0) {
-                    Static640.aShort122 = 256;
+                Static640.fov = (short) intStack[intStackPointer];
+                if (Static640.fov <= 0) {
+                    Static640.fov = 256;
                 }
-                Static640.aShort121 = (short) intStack[intStackPointer + 1];
-                if (Static640.aShort121 <= 0) {
-                    Static640.aShort121 = 205;
+                Static640.wideFov = (short) intStack[intStackPointer + 1];
+                if (Static640.wideFov <= 0) {
+                    Static640.wideFov = 205;
                 }
                 return;
             }
@@ -7105,8 +7105,8 @@ public final class ScriptRunner {
             }
 
             if (opcode == VIEWPORT_GETFOV) {
-                intStack[intStackPointer++] = Static640.aShort122;
-                intStack[intStackPointer++] = Static640.aShort121;
+                intStack[intStackPointer++] = Static640.fov;
+                intStack[intStackPointer++] = Static640.wideFov;
                 return;
             }
         } else if (opcode < 6400) {

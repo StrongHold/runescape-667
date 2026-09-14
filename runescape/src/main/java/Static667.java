@@ -11,7 +11,7 @@ public final class Static667 {
     @OriginalMember(owner = "client!vc", name = "a", descriptor = "(ZZLjava/lang/String;I)V")
     public static void setToolkit(@OriginalArg(1) boolean inactive, @OriginalArg(2) String arg1, @OriginalArg(3) int toolkit) {
         Static419.method5757();
-        Static231.method3375();
+        Static231.freeToolkit();
         Static208.method3106();
         Static595.setToolkit(arg1, inactive, toolkit);
         FontTypeList.method2569();

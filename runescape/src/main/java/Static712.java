@@ -13,7 +13,7 @@ import java.awt.Insets;
 public final class Static712 {
 
     @OriginalMember(owner = "client!wj", name = "a", descriptor = "()V")
-    public static void method9323() {
+    public static void clearDynamicEntities() {
         for (@Pc(1) int i = 0; i < Static125.dynamicEntityCount; i++) {
             @Pc(6) PositionEntity entity = Static679.aPositionEntity[i];
             Static549.method8293(entity, true);
@@ -90,7 +90,7 @@ public final class Static712 {
             Static288.repaintMargins();
         }
         if (arg0 != 11) {
-            OrthoMode.aMatrix_11 = null;
+            OrthoMode.savedCamera = null;
         }
     }
 }

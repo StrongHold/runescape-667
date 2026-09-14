@@ -17,7 +17,7 @@ public final class Static172 {
     public static final int[] anIntArray251 = new int[8];
 
     @OriginalMember(owner = "client!ffa", name = "a", descriptor = "(IIIIIBIIII)Z")
-    public static boolean method2674(@OriginalArg(0) int xB, @OriginalArg(1) int zA, @OriginalArg(2) int yB, @OriginalArg(3) int yC, @OriginalArg(4) int yA, @OriginalArg(6) int zB, @OriginalArg(7) int zC, @OriginalArg(8) int xA, @OriginalArg(9) int xC) {
+    public static boolean isTriangleOccluded(@OriginalArg(0) int xB, @OriginalArg(1) int zA, @OriginalArg(2) int yB, @OriginalArg(3) int yC, @OriginalArg(4) int yA, @OriginalArg(6) int zB, @OriginalArg(7) int zC, @OriginalArg(8) int xA, @OriginalArg(9) int xC) {
         if (!Static706.method9224(zA, yA, xA)) {
             return false;
         }

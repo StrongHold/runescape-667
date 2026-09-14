@@ -10,7 +10,7 @@ public final class Static694 {
     public static final Class131 aClass131_6 = new Class131();
 
     @OriginalMember(owner = "client!vv", name = "c", descriptor = "(B)I")
-    public static int method9030() {
+    public static int advanceLoadState() {
         @Pc(9) int local9 = Loading.state.getStep();
         if (local9 < Loading.states.length - 1) {
             Loading.state = Loading.states[local9 + 1];

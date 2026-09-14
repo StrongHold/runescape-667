@@ -586,7 +586,7 @@ public final class Minimap {
         }
 
         sprite = toolkit.createSprite(512, 512, 512, colours);
-        Static104.method2033();
+        Static104.resetLighting();
 
         @Pc(37) int randomWallColour = (int) (Math.random() * 20.0D) + ((int) (Math.random() * 20.0D) + 238 - 10 << 8) + ((int) (Math.random() * 20.0D) + -10 + 238 << 16) + 238 - 10 | 0xFF000000;
         @Pc(177) int randomDoorColour = ((int) (Math.random() * 20.0D) + 238 - 10 | 0x9E04FF00) << 16;
@@ -882,14 +882,14 @@ public final class Minimap {
     }
 
     @OriginalMember(owner = "client!dfa", name = "a", descriptor = "(ILclient!ha;)V")
-    public static void method2046(@OriginalArg(1) Toolkit toolkit) {
+    public static void redrawIfLevelChanged(@OriginalArg(1) Toolkit toolkit) {
         if (level != PlayerEntity.self.level && (Static334.activeTiles != null && drawLevel(toolkit, PlayerEntity.self.level))) {
             level = PlayerEntity.self.level;
         }
     }
 
     @OriginalMember(owner = "client!eh", name = "a", descriptor = "(Lclient!ha;[II)V")
-    public static void method2371(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) int[] vertices, @OriginalArg(2) int colour) {
+    public static void fillLandmarkPolygon(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) int[] vertices, @OriginalArg(2) int colour) {
         PolygonFiller.fillPolygon(toolkit, vertices, vertices.length, colour, null, null);
     }
 }

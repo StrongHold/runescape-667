@@ -13,7 +13,7 @@ public final class Static153 {
             arg0 = 0;
             InterfaceManager.loginOpened = false;
         }
-        if (Static346.aEnvironment_1 != null && Static346.aEnvironment_1.method8388(arg1)) {
+        if (Static346.aEnvironment_1 != null && Static346.aEnvironment_1.equalTo(arg1)) {
             return;
         }
         Static346.aEnvironment_1 = arg1;
@@ -42,8 +42,8 @@ public final class Static153 {
             Static74.aSkyBox_1 = Static456.aSkyBox_3.method3167();
             Static456.aSkyBox_3 = Static74.aSkyBox_1;
         }
-        if (Static456.aSkyBox_3 != null && Static346.aEnvironment_1.aSkyBox_5 != Static456.aSkyBox_3) {
-            Static456.aSkyBox_3.method3163(Static346.aEnvironment_1.aSkyBox_5);
+        if (Static456.aSkyBox_3 != null && Static346.aEnvironment_1.skyBox != Static456.aSkyBox_3) {
+            Static456.aSkyBox_3.method3163(Static346.aEnvironment_1.skyBox);
         }
     }
 }

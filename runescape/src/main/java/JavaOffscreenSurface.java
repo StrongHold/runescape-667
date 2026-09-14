@@ -31,14 +31,14 @@ public final class JavaOffscreenSurface implements OffscreenSurface {
         this.toolkit = toolkit;
         if (sprite instanceof JavaRgbSprite) {
             @Pc(35) JavaRgbSprite rgb = (JavaRgbSprite) sprite;
-            this.width = rgb.anInt9302;
-            this.height = rgb.anInt9306;
-            this.raster = rgb.anIntArray32;
+            this.width = rgb.width;
+            this.height = rgb.height;
+            this.raster = rgb.pixels;
         } else if (sprite instanceof JavaArgbSprite) {
             @Pc(13) JavaArgbSprite argb = (JavaArgbSprite) sprite;
-            this.raster = argb.anIntArray528;
-            this.width = argb.anInt9302;
-            this.height = argb.anInt9306;
+            this.raster = argb.pixels;
+            this.width = argb.width;
+            this.height = argb.height;
         } else {
             throw new RuntimeException();
         }

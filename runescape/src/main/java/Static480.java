@@ -142,7 +142,7 @@ public final class Static480 {
 
     @OriginalMember(owner = "client!pca", name = "c", descriptor = "(B)V")
     public static void method6469() {
-        OrthoMode.toolkit.setCamera(OrthoMode.aMatrix_11);
-        OrthoMode.toolkit.DA(OrthoMode.anInt5563, OrthoMode.anInt9536, OrthoMode.anInt2888, OrthoMode.anInt9494);
+        OrthoMode.toolkit.setCamera(OrthoMode.savedCamera);
+        OrthoMode.toolkit.DA(OrthoMode.savedViewportX, OrthoMode.savedViewportY, OrthoMode.savedViewportWidth, OrthoMode.savedViewportHeight);
     }
 }

@@ -22,8 +22,8 @@ public final class Static720 {
     public static void method9397(@OriginalArg(1) Canvas arg0) {
         @Pc(14) Dimension local14 = arg0.getSize();
         OrthoMode.method5454(local14.height, local14.width);
-        if (OrthoMode.anInt6796 == 1) {
-            OrthoMode.toolkit.addCanvas(arg0, OrthoMode.anInt8534, OrthoMode.anInt8585);
+        if (OrthoMode.mode == 1) {
+            OrthoMode.toolkit.addCanvas(arg0, OrthoMode.surfaceWidth, OrthoMode.surfaceHeight);
         } else {
             OrthoMode.toolkit.addCanvas(arg0, OrthoMode.orthoWidth, OrthoMode.orthoHeight);
         }

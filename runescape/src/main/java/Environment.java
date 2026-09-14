@@ -30,7 +30,7 @@ public final class Environment {
     }
 
     @OriginalMember(owner = "client!lo", name = "a", descriptor = "(IIIIIII)Lclient!pu;")
-    public static Class67 method5301(@OriginalArg(0) int texture4, @OriginalArg(2) int texture1, @OriginalArg(3) int texture2, @OriginalArg(4) int texture3, @OriginalArg(5) int texture5, @OriginalArg(6) int texture0) {
+    public static Class67 cubeMap(@OriginalArg(0) int texture4, @OriginalArg(2) int texture1, @OriginalArg(3) int texture2, @OriginalArg(4) int texture3, @OriginalArg(5) int texture5, @OriginalArg(6) int texture0) {
         @Pc(33) long key = (long) texture0 * 67481L ^ (long) texture1 * 97549L ^ (long) texture2 * 475427L ^ (long) texture3 * 986053L ^ (long) texture4 * 32147369L ^ (long) texture5 * 76724863L;
         @Pc(39) Class67 cubeMap = (Class67) cubeMapCache.get(key);
         if (cubeMap == null) {
@@ -58,67 +58,67 @@ public final class Environment {
     public float aFloat200 = 0.25F;
 
     @OriginalMember(owner = "client!uc", name = "e", descriptor = "I")
-    public int anInt9533;
+    public int sunY;
 
     @OriginalMember(owner = "client!uc", name = "t", descriptor = "Lclient!pu;")
-    public Class67 aClass67_10;
+    public Class67 cubeMap;
 
     @OriginalMember(owner = "client!uc", name = "i", descriptor = "I")
-    public int anInt9535;
+    public int sunX;
 
     @OriginalMember(owner = "client!uc", name = "d", descriptor = "F")
-    public float aFloat202;
+    public float reverseSunIntensity;
 
     @OriginalMember(owner = "client!uc", name = "s", descriptor = "Lclient!gm;")
-    public SkyBox aSkyBox_5;
+    public SkyBox skyBox;
 
     @OriginalMember(owner = "client!uc", name = "p", descriptor = "I")
-    public int anInt9537;
+    public int sunColour;
 
     @OriginalMember(owner = "client!uc", name = "g", descriptor = "F")
-    public float aFloat205;
+    public float sunIntensity;
 
     @OriginalMember(owner = "client!uc", name = "v", descriptor = "F")
-    public float aFloat204;
+    public float ambient;
 
     @OriginalMember(owner = "client!uc", name = "a", descriptor = "I")
-    public int anInt9534;
+    public int sunZ;
 
     @OriginalMember(owner = "client!uc", name = "f", descriptor = "I")
-    public int anInt9538;
+    public int fogColour;
 
     @OriginalMember(owner = "client!uc", name = "c", descriptor = "I")
-    public int anInt9539;
+    public int fogRange;
 
     @OriginalMember(owner = "client!uc", name = "<init>", descriptor = "()V")
     public Environment() {
-        this.anInt9533 = -60;
-        this.aClass67_10 = Static226.aClass67_9;
-        this.anInt9535 = -50;
-        this.aFloat202 = 1.2F;
-        this.aSkyBox_5 = Static495.aSkyBox_4;
-        this.anInt9537 = Static68.anInt4096;
-        this.aFloat205 = 0.69921875F;
-        this.aFloat204 = 1.1523438F;
-        this.anInt9534 = -50;
-        this.anInt9538 = Scene.DEFAULT_FOG_COLOUR;
-        this.anInt9539 = 0;
+        this.sunY = -60;
+        this.cubeMap = Static226.aClass67_9;
+        this.sunX = -50;
+        this.reverseSunIntensity = 1.2F;
+        this.skyBox = Static495.aSkyBox_4;
+        this.sunColour = Static68.anInt4096;
+        this.sunIntensity = 0.69921875F;
+        this.ambient = 1.1523438F;
+        this.sunZ = -50;
+        this.fogColour = Scene.DEFAULT_FOG_COLOUR;
+        this.fogRange = 0;
     }
 
     @OriginalMember(owner = "client!uc", name = "<init>", descriptor = "(Lclient!ge;)V")
     public Environment(@OriginalArg(0) Packet packet) {
-        this.method8386(packet);
+        this.decodeLighting(packet);
     }
 
     @OriginalMember(owner = "client!uc", name = "a", descriptor = "(Lclient!ge;I)V")
-    public void method8384(@OriginalArg(0) Packet packet) {
+    public void decodeSkyBox(@OriginalArg(0) Packet packet) {
         @Pc(17) int id = packet.g2();
         @Pc(21) int sphereOffsetX = packet.g2s();
         @Pc(25) int sphereOffsetY = packet.g2s();
         @Pc(29) int sphereOffsetZ = packet.g2s();
         @Pc(33) int rotation = packet.g2();
         Static436.anInt3852 = rotation;
-        this.aSkyBox_5 = skyBox(sphereOffsetY, id, sphereOffsetX, sphereOffsetZ);
+        this.skyBox = skyBox(sphereOffsetY, id, sphereOffsetX, sphereOffsetZ);
     }
 
     @OriginalMember(owner = "client!uc", name = "a", descriptor = "(Lclient!ge;Z)V")
@@ -129,28 +129,28 @@ public final class Environment {
     }
 
     @OriginalMember(owner = "client!uc", name = "b", descriptor = "(Lclient!ge;I)V")
-    public void method8386(@OriginalArg(0) Packet packet) {
+    public void decodeLighting(@OriginalArg(0) Packet packet) {
         @Pc(7) int flags = packet.g1();
         if (ClientOptions.instance.lightDetail.getValue() == 1 && Static425.toolkit.getMaxLights() > 0) {
             if ((flags & 0x1) == 0) {
-                this.anInt9537 = Static68.anInt4096;
+                this.sunColour = Static68.anInt4096;
             } else {
-                this.anInt9537 = packet.g4();
+                this.sunColour = packet.g4();
             }
             if ((flags & 0x2) == 0) {
-                this.aFloat204 = 1.1523438F;
+                this.ambient = 1.1523438F;
             } else {
-                this.aFloat204 = (float) packet.g2() / 256.0F;
+                this.ambient = (float) packet.g2() / 256.0F;
             }
             if ((flags & 0x4) == 0) {
-                this.aFloat205 = 0.69921875F;
+                this.sunIntensity = 0.69921875F;
             } else {
-                this.aFloat205 = (float) packet.g2() / 256.0F;
+                this.sunIntensity = (float) packet.g2() / 256.0F;
             }
             if ((flags & 0x8) == 0) {
-                this.aFloat202 = 1.2F;
+                this.reverseSunIntensity = 1.2F;
             } else {
-                this.aFloat202 = (float) packet.g2() / 256.0F;
+                this.reverseSunIntensity = (float) packet.g2() / 256.0F;
             }
         } else {
             if ((flags & 0x1) != 0) {
@@ -165,32 +165,32 @@ public final class Environment {
             if ((flags & 0x8) != 0) {
                 packet.g2();
             }
-            this.aFloat202 = 1.2F;
-            this.aFloat204 = 1.1523438F;
-            this.aFloat205 = 0.69921875F;
-            this.anInt9537 = Static68.anInt4096;
+            this.reverseSunIntensity = 1.2F;
+            this.ambient = 1.1523438F;
+            this.sunIntensity = 0.69921875F;
+            this.sunColour = Static68.anInt4096;
         }
         if ((flags & 0x10) == 0) {
-            this.anInt9535 = -50;
-            this.anInt9534 = -50;
-            this.anInt9533 = -60;
+            this.sunX = -50;
+            this.sunZ = -50;
+            this.sunY = -60;
         } else {
-            this.anInt9535 = packet.g2s();
-            this.anInt9533 = packet.g2s();
-            this.anInt9534 = packet.g2s();
+            this.sunX = packet.g2s();
+            this.sunY = packet.g2s();
+            this.sunZ = packet.g2s();
         }
         if ((flags & 0x20) == 0) {
-            this.anInt9538 = Scene.DEFAULT_FOG_COLOUR;
+            this.fogColour = Scene.DEFAULT_FOG_COLOUR;
         } else {
-            this.anInt9538 = packet.g4();
+            this.fogColour = packet.g4();
         }
         if ((flags & 0x40) == 0) {
-            this.anInt9539 = 0;
+            this.fogRange = 0;
         } else {
-            this.anInt9539 = packet.g2();
+            this.fogRange = packet.g2();
         }
         if ((flags & 0x80) == 0) {
-            this.aClass67_10 = Static226.aClass67_9;
+            this.cubeMap = Static226.aClass67_9;
             return;
         }
         @Pc(251) int texture0 = packet.g2();
@@ -199,11 +199,11 @@ public final class Environment {
         @Pc(265) int texture3 = packet.g2();
         @Pc(271) int texture4 = packet.g2();
         @Pc(275) int texture5 = packet.g2();
-        this.aClass67_10 = method5301(texture4, texture1, texture2, texture3, texture5, texture0);
+        this.cubeMap = cubeMap(texture4, texture1, texture2, texture3, texture5, texture0);
     }
 
     @OriginalMember(owner = "client!uc", name = "a", descriptor = "(BLclient!uc;)Z")
-    public boolean method8388(@OriginalArg(1) Environment other) {
-        return this.anInt9537 == other.anInt9537 && other.aFloat204 == this.aFloat204 && this.aFloat205 == other.aFloat205 && this.aFloat202 == other.aFloat202 && other.aFloat200 == this.aFloat200 && this.aFloat201 == other.aFloat201 && this.aFloat203 == other.aFloat203 && this.anInt9538 == other.anInt9538 && other.anInt9539 == this.anInt9539 && other.aClass67_10 == this.aClass67_10 && other.aSkyBox_5 == this.aSkyBox_5;
+    public boolean equalTo(@OriginalArg(1) Environment other) {
+        return this.sunColour == other.sunColour && other.ambient == this.ambient && this.sunIntensity == other.sunIntensity && this.reverseSunIntensity == other.reverseSunIntensity && other.aFloat200 == this.aFloat200 && this.aFloat201 == other.aFloat201 && this.aFloat203 == other.aFloat203 && this.fogColour == other.fogColour && other.fogRange == this.fogRange && other.cubeMap == this.cubeMap && other.skyBox == this.skyBox;
     }
 }

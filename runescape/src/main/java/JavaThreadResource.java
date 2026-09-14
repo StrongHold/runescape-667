@@ -13,13 +13,13 @@ public final class JavaThreadResource {
     public Runnable thread;
 
     @OriginalMember(owner = "client!wf", name = "N", descriptor = "I")
-    public int anInt10606;
+    public int rasterMinX;
 
     @OriginalMember(owner = "client!wf", name = "l", descriptor = "I")
-    public int anInt10607;
+    public int rasterWidth;
 
     @OriginalMember(owner = "client!wf", name = "t", descriptor = "I")
-    public int anInt10608;
+    public int rasterMinY;
 
     @OriginalMember(owner = "client!wf", name = "k", descriptor = "I")
     public int fogColour = 0;
@@ -43,58 +43,58 @@ public final class JavaThreadResource {
     public final JavaMatrix scratchMatrix = new JavaMatrix();
 
     @OriginalMember(owner = "client!wf", name = "h", descriptor = "[I")
-    public final int[] anIntArray842 = new int[8];
+    public final int[] boundsCornerY = new int[8];
 
     @OriginalMember(owner = "client!wf", name = "f", descriptor = "[I")
-    public final int[] anIntArray838 = new int[Static567.anInt8484];
+    public final int[] vertexScreenZ = new int[Static567.anInt8484];
 
     @OriginalMember(owner = "client!wf", name = "O", descriptor = "[I")
     public final int[] screenX = new int[64];
 
     @OriginalMember(owner = "client!wf", name = "o", descriptor = "[I")
-    public final int[] anIntArray837 = new int[8];
+    public final int[] boundsCornerZ = new int[8];
 
     @OriginalMember(owner = "client!wf", name = "w", descriptor = "[I")
-    public final int[] anIntArray844 = new int[8];
+    public final int[] boundsCornerX = new int[8];
 
     @OriginalMember(owner = "client!wf", name = "C", descriptor = "[I")
-    public final int[] anIntArray835 = new int[10000];
+    public final int[] mergeStamps = new int[10000];
 
     @OriginalMember(owner = "client!wf", name = "i", descriptor = "[I")
-    public final int[] anIntArray845 = new int[Static567.anInt8484];
+    public final int[] worldY = new int[Static567.anInt8484];
 
     @OriginalMember(owner = "client!wf", name = "d", descriptor = "[F")
     public final float[] aFloatArray82 = new float[2];
 
     @OriginalMember(owner = "client!wf", name = "s", descriptor = "[I")
-    public final int[] anIntArray846 = new int[Static567.anInt8484];
+    public final int[] vertexScreenY = new int[Static567.anInt8484];
 
     @OriginalMember(owner = "client!wf", name = "e", descriptor = "[I")
-    public final int[] anIntArray836 = new int[10000];
+    public final int[] otherMergeStamps = new int[10000];
 
     @OriginalMember(owner = "client!wf", name = "F", descriptor = "[I")
     public final int[] screenY = new int[64];
 
     @OriginalMember(owner = "client!wf", name = "D", descriptor = "[I")
-    public final int[] anIntArray848 = new int[10];
+    public final int[] clippedColour = new int[10];
 
     @OriginalMember(owner = "client!wf", name = "E", descriptor = "[I")
-    public final int[] anIntArray847 = new int[10];
+    public final int[] clippedX = new int[10];
 
     @OriginalMember(owner = "client!wf", name = "A", descriptor = "[I")
-    public final int[] anIntArray850 = new int[10];
+    public final int[] clippedY = new int[10];
 
     @OriginalMember(owner = "client!wf", name = "m", descriptor = "[I")
-    public final int[] anIntArray849 = new int[Static567.anInt8484];
+    public final int[] cameraY = new int[Static567.anInt8484];
 
     @OriginalMember(owner = "client!wf", name = "n", descriptor = "[I")
-    public final int[] anIntArray851 = new int[Static567.anInt8484];
+    public final int[] vertexScreenX = new int[Static567.anInt8484];
 
     @OriginalMember(owner = "client!wf", name = "G", descriptor = "[I")
-    public final int[] anIntArray854 = new int[Static567.anInt8484];
+    public final int[] cameraX = new int[Static567.anInt8484];
 
     @OriginalMember(owner = "client!wf", name = "c", descriptor = "[I")
-    public final int[] anIntArray839 = new int[Static567.anInt8484];
+    public final int[] cameraZ = new int[Static567.anInt8484];
 
     @OriginalMember(owner = "client!wf", name = "r", descriptor = "[I")
     public final int[] fogLevels = new int[64];
@@ -103,7 +103,7 @@ public final class JavaThreadResource {
     public final int[] depths = new int[64];
 
     @OriginalMember(owner = "client!wf", name = "u", descriptor = "[I")
-    public final int[] anIntArray841 = new int[10];
+    public final int[] clippedZ = new int[10];
 
     @OriginalMember(owner = "client!wf", name = "g", descriptor = "[Lclient!rs;")
     public final JavaModel[] aClass114_Sub3Array4 = new JavaModel[7];
@@ -121,7 +121,7 @@ public final class JavaThreadResource {
     public Rasterizer rasterizer;
 
     @OriginalMember(owner = "client!wf", name = "B", descriptor = "[I")
-    public final int[] anIntArray853;
+    public final int[] faceBillboard;
 
     @OriginalMember(owner = "client!wf", name = "<init>", descriptor = "(Lclient!iaa;)V")
     public JavaThreadResource(@OriginalArg(0) JavaToolkit arg0) {
@@ -132,9 +132,9 @@ public final class JavaThreadResource {
             this.aClass114_Sub3Array4[local135] = new JavaModel(this.aClass19_Sub2_12);
             this.aClass114_Sub3Array3[local135] = new JavaModel(this.aClass19_Sub2_12);
         }
-        this.anIntArray853 = new int[Static567.anInt8486];
+        this.faceBillboard = new int[Static567.anInt8486];
         for (@Pc(166) int local166 = 0; local166 < Static567.anInt8486; local166++) {
-            this.anIntArray853[local166] = -1;
+            this.faceBillboard[local166] = -1;
         }
     }
 

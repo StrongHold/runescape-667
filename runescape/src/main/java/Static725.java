@@ -9,7 +9,7 @@ public final class Static725 {
     public static final Class121 aClass121_6 = new Class121();
 
     @OriginalMember(owner = "client!ww", name = "a", descriptor = "(Lclient!ha;IB)V")
-    public static void method9454(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) int level) {
+    public static void buildOcclusionBuffer(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) int level) {
         if (!Static18.occlude || !Static29.aBoolean60) {
             Static469.activeOccluderCount = 0;
             return;
@@ -74,7 +74,7 @@ public final class Static725 {
     }
 
     @OriginalMember(owner = "client!ww", name = "a", descriptor = "(ZD)V")
-    public static void method9455(@OriginalArg(1) double gamma) {
+    public static void setGamma(@OriginalArg(1) double gamma) {
         if (Static385.aDouble18 == gamma) {
             return;
         }

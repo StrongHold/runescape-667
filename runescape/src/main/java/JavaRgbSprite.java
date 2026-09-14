@@ -8,37 +8,37 @@ import org.openrs2.deob.annotation.Pc;
 public final class JavaRgbSprite extends JavaSprite {
 
     @OriginalMember(owner = "client!ap", name = "D", descriptor = "[I")
-    public final int[] anIntArray32;
+    public final int[] pixels;
 
     @OriginalMember(owner = "client!ap", name = "<init>", descriptor = "(Lclient!iaa;[III)V")
     public JavaRgbSprite(@OriginalArg(0) JavaToolkit toolkit, @OriginalArg(1) int[] pixels, @OriginalArg(2) int width, @OriginalArg(3) int height) {
         super(toolkit, width, height);
-        this.anIntArray32 = pixels;
+        this.pixels = pixels;
     }
 
     @OriginalMember(owner = "client!ap", name = "<init>", descriptor = "(Lclient!iaa;II)V")
     public JavaRgbSprite(@OriginalArg(0) JavaToolkit toolkit, @OriginalArg(1) int width, @OriginalArg(2) int height) {
         super(toolkit, width, height);
-        this.anIntArray32 = new int[width * height];
+        this.pixels = new int[width * height];
     }
 
     @OriginalMember(owner = "client!ap", name = "<init>", descriptor = "(Lclient!iaa;[IIIIIZ)V")
     public JavaRgbSprite(@OriginalArg(0) JavaToolkit toolkit, @OriginalArg(1) int[] pixels, @OriginalArg(2) int offset, @OriginalArg(3) int stride, @OriginalArg(4) int width, @OriginalArg(5) int height, @OriginalArg(6) boolean copy) {
         super(toolkit, width, height);
         if (copy) {
-            this.anIntArray32 = new int[width * height];
+            this.pixels = new int[width * height];
         } else {
-            this.anIntArray32 = pixels;
+            this.pixels = pixels;
         }
-        @Pc(21) int step = stride - super.anInt9302;
+        @Pc(21) int step = stride - super.width;
         @Pc(23) int index = 0;
         for (@Pc(25) int row = 0; row < height; row++) {
             for (@Pc(28) int column = 0; column < width; column++) {
                 @Pc(34) int argb = pixels[offset++];
                 if (argb >>> 24 == 255) {
-                    this.anIntArray32[index++] = (argb & 0xFFFFFF) == 0 ? -16777215 : argb;
+                    this.pixels[index++] = (argb & 0xFFFFFF) == 0 ? -16777215 : argb;
                 } else {
-                    this.anIntArray32[index++] = 0;
+                    this.pixels[index++] = 0;
                 }
             }
             offset += step;
@@ -50,10 +50,10 @@ public final class JavaRgbSprite extends JavaSprite {
     public void copyRect(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int width, @OriginalArg(3) int height, @OriginalArg(4) int srcX, @OriginalArg(5) int srcY) {
         @Pc(3) int[] raster = super.toolkit.surfaceRaster;
         for (@Pc(5) int row = 0; row < height; row++) {
-            @Pc(15) int dstIndex = (y + row) * super.anInt9302 + x;
+            @Pc(15) int dstIndex = (y + row) * super.width + x;
             @Pc(25) int srcIndex = (srcY + row) * super.toolkit.surfaceWidth + srcX;
             for (@Pc(27) int column = 0; column < width; column++) {
-                this.anIntArray32[dstIndex + column] = raster[srcIndex + column];
+                this.pixels[dstIndex + column] = raster[srcIndex + column];
             }
         }
     }
@@ -66,8 +66,8 @@ public final class JavaRgbSprite extends JavaSprite {
         }
         @Pc(9) int u = 0;
         @Pc(11) int v = 0;
-        @Pc(20) int scaleWidth = super.leftMargin + super.anInt9302 + super.rightMargin;
-        @Pc(29) int scaleHeight = super.topMargin + super.anInt9306 + super.bottomMargin;
+        @Pc(20) int scaleWidth = super.leftMargin + super.width + super.rightMargin;
+        @Pc(29) int scaleHeight = super.topMargin + super.height + super.bottomMargin;
         @Pc(35) int uStep = (scaleWidth << 16) / width;
         @Pc(41) int vStep = (scaleHeight << 16) / height;
         @Pc(55) int offset;
@@ -81,11 +81,11 @@ public final class JavaRgbSprite extends JavaSprite {
             y += offset;
             v = offset * vStep - (super.topMargin << 16);
         }
-        if (super.anInt9302 < scaleWidth) {
-            width = ((super.anInt9302 << 16) + uStep - u - 1) / uStep;
+        if (super.width < scaleWidth) {
+            width = ((super.width << 16) + uStep - u - 1) / uStep;
         }
-        if (super.anInt9306 < scaleHeight) {
-            height = ((super.anInt9306 << 16) + vStep - v - 1) / vStep;
+        if (super.height < scaleHeight) {
+            height = ((super.height << 16) + vStep - v - 1) / vStep;
         }
         offset = x + y * super.toolkit.surfaceWidth;
         @Pc(147) int dstStep = super.toolkit.surfaceWidth - width;
@@ -133,10 +133,10 @@ public final class JavaRgbSprite extends JavaSprite {
                 if (op == 1) {
                     local262 = u;
                     for (local265 = -height; local265 < 0; local265++) {
-                        local273 = (v >> 16) * super.anInt9302;
+                        local273 = (v >> 16) * super.width;
                         for (local276 = -width; local276 < 0; local276++) {
                             if ((float) z < depth[offset]) {
-                                local348 = this.anIntArray32[(u >> 16) + local273];
+                                local348 = this.pixels[(u >> 16) + local273];
                                 if (local348 != 0) {
                                     raster[offset] = local348;
                                     depth[offset] = (float) z;
@@ -155,10 +155,10 @@ public final class JavaRgbSprite extends JavaSprite {
                         local265 = colour >>> 24;
                         local273 = 256 - local265;
                         for (local276 = -height; local276 < 0; local276++) {
-                            local348 = (v >> 16) * super.anInt9302;
+                            local348 = (v >> 16) * super.width;
                             for (local356 = -width; local356 < 0; local356++) {
                                 if ((float) z < depth[offset]) {
-                                    local359 = this.anIntArray32[(u >> 16) + local348];
+                                    local359 = this.pixels[(u >> 16) + local348];
                                     if (local359 != 0) {
                                         local376 = raster[offset];
                                         raster[offset] = ((local359 & 0xFF00FF) * local265 + (local376 & 0xFF00FF) * local273 & 0xFF00FF00) + ((local359 & 0xFF00) * local265 + (local376 & 0xFF00) * local273 & 0xFF0000) >> 8;
@@ -179,10 +179,10 @@ public final class JavaRgbSprite extends JavaSprite {
                         local348 = colour >>> 24;
                         local356 = 256 - local348;
                         for (local359 = -height; local359 < 0; local359++) {
-                            local376 = (v >> 16) * super.anInt9302;
+                            local376 = (v >> 16) * super.width;
                             for (local384 = -width; local384 < 0; local384++) {
                                 if ((float) z < depth[offset]) {
-                                    local392 = this.anIntArray32[(u >> 16) + local376];
+                                    local392 = this.pixels[(u >> 16) + local376];
                                     if (local392 != 0) {
                                         if (local348 == 255) {
                                             local400 = (local392 & 0xFF0000) * local265 & 0xFF000000;
@@ -214,10 +214,10 @@ public final class JavaRgbSprite extends JavaSprite {
                     local265 = colour >>> 24;
                     local273 = 256 - local265;
                     for (local276 = -height; local276 < 0; local276++) {
-                        local348 = (v >> 16) * super.anInt9302;
+                        local348 = (v >> 16) * super.width;
                         for (local356 = -width; local356 < 0; local356++) {
                             if ((float) z < depth[offset]) {
-                                local359 = this.anIntArray32[(u >> 16) + local348];
+                                local359 = this.pixels[(u >> 16) + local348];
                                 local376 = local359 + colour;
                                 local384 = (local359 & 0xFF00FF) + (colour & 0xFF00FF);
                                 local392 = (local384 & 0x1000100) + (local376 - local384 & 0x10000);
@@ -245,10 +245,10 @@ public final class JavaRgbSprite extends JavaSprite {
                     lerpColour = (local273 | local276) >>> 8;
                     local348 = u;
                     for (local356 = -height; local356 < 0; local356++) {
-                        local359 = (v >> 16) * super.anInt9302;
+                        local359 = (v >> 16) * super.width;
                         for (local376 = -width; local376 < 0; local376++) {
                             if ((float) z < depth[offset]) {
-                                local384 = this.anIntArray32[(u >> 16) + local359];
+                                local384 = this.pixels[(u >> 16) + local359];
                                 if (local384 != 0) {
                                     local273 = (local384 & 0xFF00FF) * local262 & 0xFF00FF00;
                                     local276 = (local384 & 0xFF00) * local262 & 0xFF0000;
@@ -271,10 +271,10 @@ public final class JavaRgbSprite extends JavaSprite {
             } else if (op == 1) {
                 local262 = u;
                 for (local265 = -height; local265 < 0; local265++) {
-                    local273 = (v >> 16) * super.anInt9302;
+                    local273 = (v >> 16) * super.width;
                     for (local276 = -width; local276 < 0; local276++) {
                         if ((float) z < depth[offset]) {
-                            local348 = this.anIntArray32[(u >> 16) + local273];
+                            local348 = this.pixels[(u >> 16) + local273];
                             if (local348 != 0) {
                                 local356 = raster[offset];
                                 local359 = local348 + local356;
@@ -297,10 +297,10 @@ public final class JavaRgbSprite extends JavaSprite {
                 local273 = colour >> 8 & 0xFF;
                 local276 = colour & 0xFF;
                 for (local348 = -height; local348 < 0; local348++) {
-                    local356 = (v >> 16) * super.anInt9302;
+                    local356 = (v >> 16) * super.width;
                     for (local359 = -width; local359 < 0; local359++) {
                         if ((float) z < depth[offset]) {
-                            local376 = this.anIntArray32[(u >> 16) + local356];
+                            local376 = this.pixels[(u >> 16) + local356];
                             if (local376 != 0) {
                                 local384 = (local376 & 0xFF0000) * local265 & 0xFF000000;
                                 local392 = (local376 & 0xFF00) * local273 & 0xFF0000;
@@ -324,10 +324,10 @@ public final class JavaRgbSprite extends JavaSprite {
             } else if (op == 3) {
                 local262 = u;
                 for (local265 = -height; local265 < 0; local265++) {
-                    local273 = (v >> 16) * super.anInt9302;
+                    local273 = (v >> 16) * super.width;
                     for (local276 = -width; local276 < 0; local276++) {
                         if ((float) z < depth[offset]) {
-                            local348 = this.anIntArray32[(u >> 16) + local273];
+                            local348 = this.pixels[(u >> 16) + local273];
                             local356 = local348 + colour;
                             local359 = (local348 & 0xFF00FF) + (colour & 0xFF00FF);
                             local376 = (local359 & 0x1000100) + (local356 - local359 & 0x10000);
@@ -354,10 +354,10 @@ public final class JavaRgbSprite extends JavaSprite {
                 lerpColour = (local273 | local276) >>> 8;
                 local348 = u;
                 for (local356 = -height; local356 < 0; local356++) {
-                    local359 = (v >> 16) * super.anInt9302;
+                    local359 = (v >> 16) * super.width;
                     for (local376 = -width; local376 < 0; local376++) {
                         if ((float) z < depth[offset]) {
-                            local384 = this.anIntArray32[(u >> 16) + local359];
+                            local384 = this.pixels[(u >> 16) + local359];
                             if (local384 != 0) {
                                 local273 = (local384 & 0xFF00FF) * local262 & 0xFF00FF00;
                                 local276 = (local384 & 0xFF00) * local262 & 0xFF0000;
@@ -383,10 +383,10 @@ public final class JavaRgbSprite extends JavaSprite {
         } else if (op == 1) {
             local262 = u;
             for (local265 = -height; local265 < 0; local265++) {
-                local273 = (v >> 16) * super.anInt9302;
+                local273 = (v >> 16) * super.width;
                 for (local276 = -width; local276 < 0; local276++) {
                     if ((float) z < depth[offset]) {
-                        raster[offset] = this.anIntArray32[(u >> 16) + local273];
+                        raster[offset] = this.pixels[(u >> 16) + local273];
                         depth[offset] = (float) z;
                     }
                     u += uStep;
@@ -402,10 +402,10 @@ public final class JavaRgbSprite extends JavaSprite {
             local273 = colour & 0xFF;
             local276 = u;
             for (local348 = -height; local348 < 0; local348++) {
-                local356 = (v >> 16) * super.anInt9302;
+                local356 = (v >> 16) * super.width;
                 for (local359 = -width; local359 < 0; local359++) {
                     if ((float) z < depth[offset]) {
-                        local376 = this.anIntArray32[(u >> 16) + local356];
+                        local376 = this.pixels[(u >> 16) + local356];
                         local384 = (local376 & 0xFF0000) * local262 & 0xFF000000;
                         local392 = (local376 & 0xFF00) * local265 & 0xFF0000;
                         local400 = (local376 & 0xFF) * local273 & 0xFF00;
@@ -422,10 +422,10 @@ public final class JavaRgbSprite extends JavaSprite {
         } else if (op == 3) {
             local262 = u;
             for (local265 = -height; local265 < 0; local265++) {
-                local273 = (v >> 16) * super.anInt9302;
+                local273 = (v >> 16) * super.width;
                 for (local276 = -width; local276 < 0; local276++) {
                     if ((float) z < depth[offset]) {
-                        local348 = this.anIntArray32[(u >> 16) + local273];
+                        local348 = this.pixels[(u >> 16) + local273];
                         local356 = local348 + colour;
                         local359 = (local348 & 0xFF00FF) + (colour & 0xFF00FF);
                         local376 = (local359 & 0x1000100) + (local356 - local359 & 0x10000);
@@ -447,10 +447,10 @@ public final class JavaRgbSprite extends JavaSprite {
             lerpColour = (local273 | local276) >>> 8;
             local348 = u;
             for (local356 = -height; local356 < 0; local356++) {
-                local359 = (v >> 16) * super.anInt9302;
+                local359 = (v >> 16) * super.width;
                 for (local376 = -width; local376 < 0; local376++) {
                     if ((float) z < depth[offset]) {
-                        local384 = this.anIntArray32[(u >> 16) + local359];
+                        local384 = this.pixels[(u >> 16) + local359];
                         local273 = (local384 & 0xFF00FF) * local262 & 0xFF00FF00;
                         local276 = (local384 & 0xFF00) * local262 & 0xFF0000;
                         raster[offset] = ((local273 | local276) >>> 8) + lerpColour;
@@ -482,8 +482,8 @@ public final class JavaRgbSprite extends JavaSprite {
         }
         @Pc(9) int u = 0;
         @Pc(11) int v = 0;
-        @Pc(20) int scaleWidth = super.leftMargin + super.anInt9302 + super.rightMargin;
-        @Pc(29) int scaleHeight = super.topMargin + super.anInt9306 + super.bottomMargin;
+        @Pc(20) int scaleWidth = super.leftMargin + super.width + super.rightMargin;
+        @Pc(29) int scaleHeight = super.topMargin + super.height + super.bottomMargin;
         @Pc(35) int uStep = (scaleWidth << 16) / width;
         @Pc(41) int vStep = (scaleHeight << 16) / height;
         @Pc(55) int offset;
@@ -497,11 +497,11 @@ public final class JavaRgbSprite extends JavaSprite {
             y += offset;
             v = offset * vStep - (super.topMargin << 16);
         }
-        if (super.anInt9302 < scaleWidth) {
-            width = ((super.anInt9302 << 16) + uStep - u - 1) / uStep;
+        if (super.width < scaleWidth) {
+            width = ((super.width << 16) + uStep - u - 1) / uStep;
         }
-        if (super.anInt9306 < scaleHeight) {
-            height = ((super.anInt9306 << 16) + vStep - v - 1) / vStep;
+        if (super.height < scaleHeight) {
+            height = ((super.height << 16) + vStep - v - 1) / vStep;
         }
         offset = x + y * super.toolkit.surfaceWidth;
         @Pc(147) int dstStep = super.toolkit.surfaceWidth - width;
@@ -549,10 +549,10 @@ public final class JavaRgbSprite extends JavaSprite {
                 if (op == 1) {
                     local262 = u;
                     for (local265 = -height; local265 < 0; local265++) {
-                        local273 = (v >> 16) * super.anInt9302;
+                        local273 = (v >> 16) * super.width;
                         for (local276 = -width; local276 < 0; local276++) {
                             if ((float) z < depth[offset]) {
-                                local348 = this.anIntArray32[(u >> 16) + local273];
+                                local348 = this.pixels[(u >> 16) + local273];
                                 if (local348 != 0) {
                                     raster[offset] = local348;
                                     depth[offset] = (float) z;
@@ -571,10 +571,10 @@ public final class JavaRgbSprite extends JavaSprite {
                         local265 = colour >>> 24;
                         local273 = 256 - local265;
                         for (local276 = -height; local276 < 0; local276++) {
-                            local348 = (v >> 16) * super.anInt9302;
+                            local348 = (v >> 16) * super.width;
                             for (local356 = -width; local356 < 0; local356++) {
                                 if ((float) z < depth[offset]) {
-                                    local359 = this.anIntArray32[(u >> 16) + local348];
+                                    local359 = this.pixels[(u >> 16) + local348];
                                     if (local359 != 0) {
                                         local376 = raster[offset];
                                         raster[offset] = ((local359 & 0xFF00FF) * local265 + (local376 & 0xFF00FF) * local273 & 0xFF00FF00) + ((local359 & 0xFF00) * local265 + (local376 & 0xFF00) * local273 & 0xFF0000) >> 8;
@@ -595,10 +595,10 @@ public final class JavaRgbSprite extends JavaSprite {
                         local348 = colour >>> 24;
                         local356 = 256 - local348;
                         for (local359 = -height; local359 < 0; local359++) {
-                            local376 = (v >> 16) * super.anInt9302;
+                            local376 = (v >> 16) * super.width;
                             for (local384 = -width; local384 < 0; local384++) {
                                 if ((float) z < depth[offset]) {
-                                    local392 = this.anIntArray32[(u >> 16) + local376];
+                                    local392 = this.pixels[(u >> 16) + local376];
                                     if (local392 != 0) {
                                         if (local348 == 255) {
                                             local400 = (local392 & 0xFF0000) * local265 & 0xFF000000;
@@ -630,10 +630,10 @@ public final class JavaRgbSprite extends JavaSprite {
                     local265 = colour >>> 24;
                     local273 = 256 - local265;
                     for (local276 = -height; local276 < 0; local276++) {
-                        local348 = (v >> 16) * super.anInt9302;
+                        local348 = (v >> 16) * super.width;
                         for (local356 = -width; local356 < 0; local356++) {
                             if ((float) z < depth[offset]) {
-                                local359 = this.anIntArray32[(u >> 16) + local348];
+                                local359 = this.pixels[(u >> 16) + local348];
                                 local376 = local359 + colour;
                                 local384 = (local359 & 0xFF00FF) + (colour & 0xFF00FF);
                                 local392 = (local384 & 0x1000100) + (local376 - local384 & 0x10000);
@@ -661,10 +661,10 @@ public final class JavaRgbSprite extends JavaSprite {
                     lerpColour = (local273 | local276) >>> 8;
                     local348 = u;
                     for (local356 = -height; local356 < 0; local356++) {
-                        local359 = (v >> 16) * super.anInt9302;
+                        local359 = (v >> 16) * super.width;
                         for (local376 = -width; local376 < 0; local376++) {
                             if ((float) z < depth[offset]) {
-                                local384 = this.anIntArray32[(u >> 16) + local359];
+                                local384 = this.pixels[(u >> 16) + local359];
                                 if (local384 != 0) {
                                     local273 = (local384 & 0xFF00FF) * local262 & 0xFF00FF00;
                                     local276 = (local384 & 0xFF00) * local262 & 0xFF0000;
@@ -687,10 +687,10 @@ public final class JavaRgbSprite extends JavaSprite {
             } else if (op == 1) {
                 local262 = u;
                 for (local265 = -height; local265 < 0; local265++) {
-                    local273 = (v >> 16) * super.anInt9302;
+                    local273 = (v >> 16) * super.width;
                     for (local276 = -width; local276 < 0; local276++) {
                         if ((float) z < depth[offset]) {
-                            local348 = this.anIntArray32[(u >> 16) + local273];
+                            local348 = this.pixels[(u >> 16) + local273];
                             if (local348 != 0) {
                                 local356 = raster[offset];
                                 local359 = local348 + local356;
@@ -713,10 +713,10 @@ public final class JavaRgbSprite extends JavaSprite {
                 local273 = colour >> 8 & 0xFF;
                 local276 = colour & 0xFF;
                 for (local348 = -height; local348 < 0; local348++) {
-                    local356 = (v >> 16) * super.anInt9302;
+                    local356 = (v >> 16) * super.width;
                     for (local359 = -width; local359 < 0; local359++) {
                         if ((float) z < depth[offset]) {
-                            local376 = this.anIntArray32[(u >> 16) + local356];
+                            local376 = this.pixels[(u >> 16) + local356];
                             if (local376 != 0) {
                                 local384 = (local376 & 0xFF0000) * local265 & 0xFF000000;
                                 local392 = (local376 & 0xFF00) * local273 & 0xFF0000;
@@ -740,10 +740,10 @@ public final class JavaRgbSprite extends JavaSprite {
             } else if (op == 3) {
                 local262 = u;
                 for (local265 = -height; local265 < 0; local265++) {
-                    local273 = (v >> 16) * super.anInt9302;
+                    local273 = (v >> 16) * super.width;
                     for (local276 = -width; local276 < 0; local276++) {
                         if ((float) z < depth[offset]) {
-                            local348 = this.anIntArray32[(u >> 16) + local273];
+                            local348 = this.pixels[(u >> 16) + local273];
                             local356 = local348 + colour;
                             local359 = (local348 & 0xFF00FF) + (colour & 0xFF00FF);
                             local376 = (local359 & 0x1000100) + (local356 - local359 & 0x10000);
@@ -770,10 +770,10 @@ public final class JavaRgbSprite extends JavaSprite {
                 lerpColour = (local273 | local276) >>> 8;
                 local348 = u;
                 for (local356 = -height; local356 < 0; local356++) {
-                    local359 = (v >> 16) * super.anInt9302;
+                    local359 = (v >> 16) * super.width;
                     for (local376 = -width; local376 < 0; local376++) {
                         if ((float) z < depth[offset]) {
-                            local384 = this.anIntArray32[(u >> 16) + local359];
+                            local384 = this.pixels[(u >> 16) + local359];
                             if (local384 != 0) {
                                 local273 = (local384 & 0xFF00FF) * local262 & 0xFF00FF00;
                                 local276 = (local384 & 0xFF00) * local262 & 0xFF0000;
@@ -799,10 +799,10 @@ public final class JavaRgbSprite extends JavaSprite {
         } else if (op == 1) {
             local262 = u;
             for (local265 = -height; local265 < 0; local265++) {
-                local273 = (v >> 16) * super.anInt9302;
+                local273 = (v >> 16) * super.width;
                 for (local276 = -width; local276 < 0; local276++) {
                     if ((float) z < depth[offset]) {
-                        raster[offset] = this.anIntArray32[(u >> 16) + local273];
+                        raster[offset] = this.pixels[(u >> 16) + local273];
                         depth[offset] = (float) z;
                     }
                     u += uStep;
@@ -818,10 +818,10 @@ public final class JavaRgbSprite extends JavaSprite {
             local273 = colour & 0xFF;
             local276 = u;
             for (local348 = -height; local348 < 0; local348++) {
-                local356 = (v >> 16) * super.anInt9302;
+                local356 = (v >> 16) * super.width;
                 for (local359 = -width; local359 < 0; local359++) {
                     if ((float) z < depth[offset]) {
-                        local376 = this.anIntArray32[(u >> 16) + local356];
+                        local376 = this.pixels[(u >> 16) + local356];
                         local384 = (local376 & 0xFF0000) * local262 & 0xFF000000;
                         local392 = (local376 & 0xFF00) * local265 & 0xFF0000;
                         local400 = (local376 & 0xFF) * local273 & 0xFF00;
@@ -838,10 +838,10 @@ public final class JavaRgbSprite extends JavaSprite {
         } else if (op == 3) {
             local262 = u;
             for (local265 = -height; local265 < 0; local265++) {
-                local273 = (v >> 16) * super.anInt9302;
+                local273 = (v >> 16) * super.width;
                 for (local276 = -width; local276 < 0; local276++) {
                     if ((float) z < depth[offset]) {
-                        local348 = this.anIntArray32[(u >> 16) + local273];
+                        local348 = this.pixels[(u >> 16) + local273];
                         local356 = local348 + colour;
                         local359 = (local348 & 0xFF00FF) + (colour & 0xFF00FF);
                         local376 = (local359 & 0x1000100) + (local356 - local359 & 0x10000);
@@ -863,10 +863,10 @@ public final class JavaRgbSprite extends JavaSprite {
             lerpColour = (local273 | local276) >>> 8;
             local348 = u;
             for (local356 = -height; local356 < 0; local356++) {
-                local359 = (v >> 16) * super.anInt9302;
+                local359 = (v >> 16) * super.width;
                 for (local376 = -width; local376 < 0; local376++) {
                     if ((float) z < depth[offset]) {
-                        local384 = this.anIntArray32[(u >> 16) + local359];
+                        local384 = this.pixels[(u >> 16) + local359];
                         local273 = (local384 & 0xFF00FF) * local262 & 0xFF00FF00;
                         local276 = (local384 & 0xFF00) * local262 & 0xFF0000;
                         raster[offset] = ((local273 | local276) >>> 8) + lerpColour;
@@ -894,8 +894,8 @@ public final class JavaRgbSprite extends JavaSprite {
         y += super.topMargin;
         @Pc(20) int srcIndex = 0;
         @Pc(24) int dstStride = super.toolkit.surfaceWidth;
-        @Pc(27) int width = super.anInt9302;
-        @Pc(30) int height = super.anInt9306;
+        @Pc(27) int width = super.width;
+        @Pc(30) int height = super.height;
         @Pc(34) int dstStep = dstStride - width;
         @Pc(36) int srcStep = 0;
         @Pc(42) int dstIndex = x + y * dstStride;
@@ -936,7 +936,7 @@ public final class JavaRgbSprite extends JavaSprite {
         if (maskY > y) {
             startY = maskY;
             dstIndex += (maskY - y) * dstStride;
-            srcIndex += (maskY - y) * super.anInt9302;
+            srcIndex += (maskY - y) * super.width;
         }
         @Pc(215) int endY = maskY + lineOffsets.length < y + height ? maskY + lineOffsets.length : y + height;
         for (@Pc(217) int row = startY; row < endY; row++) {
@@ -970,7 +970,7 @@ public final class JavaRgbSprite extends JavaSprite {
                 skip = count - lineWidth;
             }
             for (@Pc(309) int column = -lineWidth; column < 0; column++) {
-                @Pc(316) int src = this.anIntArray32[srcIndex++];
+                @Pc(316) int src = this.pixels[srcIndex++];
                 if (src == 0) {
                     dstIndex++;
                 } else {
@@ -1007,17 +1007,17 @@ public final class JavaRgbSprite extends JavaSprite {
                     u = JavaSpriteBlitState.rowU;
                     v = JavaSpriteBlitState.rowV;
                     column = JavaSpriteBlitState.negativeWidth;
-                    if (u >= 0 && v >= 0 && u - (super.anInt9302 << 12) < 0 && v - (super.anInt9306 << 12) < 0) {
+                    if (u >= 0 && v >= 0 && u - (super.width << 12) < 0 && v - (super.height << 12) < 0) {
                         while (column < 0) {
-                            texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                            texel = (v >> 12) * super.width + (u >> 12);
                             dst = dstIndex++;
                             if (op == 1) {
-                                src = this.anIntArray32[texel];
+                                src = this.pixels[texel];
                                 if (src != 0) {
                                     raster[dst] = src;
                                 }
                             } else if (op == 0) {
-                                src = this.anIntArray32[texel];
+                                src = this.pixels[texel];
                                 if (src != 0) {
                                     if ((JavaSpriteBlitState.colour & 0xFFFFFF) == 16777215) {
                                         local251 = JavaSpriteBlitState.colour >>> 24;
@@ -1039,7 +1039,7 @@ public final class JavaRgbSprite extends JavaSprite {
                                     }
                                 }
                             } else if (op == 3) {
-                                src = this.anIntArray32[texel];
+                                src = this.pixels[texel];
                                 local251 = JavaSpriteBlitState.colour;
                                 local255 = src + local251;
                                 local259 = (src & 0xFF00FF) + (local251 & 0xFF00FF);
@@ -1052,7 +1052,7 @@ public final class JavaRgbSprite extends JavaSprite {
                                 }
                                 raster[dst] = local331;
                             } else if (op == 2) {
-                                src = this.anIntArray32[texel];
+                                src = this.pixels[texel];
                                 if (src != 0) {
                                     local251 = (src & 0xFF00FF) * JavaSpriteBlitState.alpha & 0xFF00FF00;
                                     local255 = (src & 0xFF00) * JavaSpriteBlitState.alpha & 0xFF0000;
@@ -1074,9 +1074,9 @@ public final class JavaRgbSprite extends JavaSprite {
                     u = JavaSpriteBlitState.rowU;
                     v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
                     column = JavaSpriteBlitState.negativeWidth;
-                    if (u >= 0 && u - (super.anInt9302 << 12) < 0) {
+                    if (u >= 0 && u - (super.width << 12) < 0) {
                         @Pc(871) int vOverrun;
-                        if ((vOverrun = v - (super.anInt9306 << 12)) >= 0) {
+                        if ((vOverrun = v - (super.height << 12)) >= 0) {
                             skip = (JavaSpriteBlitState.dvDx - vOverrun) / JavaSpriteBlitState.dvDx;
                             column += skip;
                             v += JavaSpriteBlitState.dvDx * skip;
@@ -1087,15 +1087,15 @@ public final class JavaRgbSprite extends JavaSprite {
                             column = vBound;
                         }
                         while (column < 0) {
-                            texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                            texel = (v >> 12) * super.width + (u >> 12);
                             dst = dstIndex++;
                             if (op == 1) {
-                                src = this.anIntArray32[texel];
+                                src = this.pixels[texel];
                                 if (src != 0) {
                                     raster[dst] = src;
                                 }
                             } else if (op == 0) {
-                                src = this.anIntArray32[texel];
+                                src = this.pixels[texel];
                                 if (src != 0) {
                                     if ((JavaSpriteBlitState.colour & 0xFFFFFF) == 16777215) {
                                         local251 = JavaSpriteBlitState.colour >>> 24;
@@ -1117,7 +1117,7 @@ public final class JavaRgbSprite extends JavaSprite {
                                     }
                                 }
                             } else if (op == 3) {
-                                src = this.anIntArray32[texel];
+                                src = this.pixels[texel];
                                 local251 = JavaSpriteBlitState.colour;
                                 local255 = src + local251;
                                 local259 = (src & 0xFF00FF) + (local251 & 0xFF00FF);
@@ -1130,7 +1130,7 @@ public final class JavaRgbSprite extends JavaSprite {
                                 }
                                 raster[dst] = local331;
                             } else if (op == 2) {
-                                src = this.anIntArray32[texel];
+                                src = this.pixels[texel];
                                 if (src != 0) {
                                     local251 = (src & 0xFF00FF) * JavaSpriteBlitState.alpha & 0xFF00FF00;
                                     local255 = (src & 0xFF00) * JavaSpriteBlitState.alpha & 0xFF0000;
@@ -1154,7 +1154,7 @@ public final class JavaRgbSprite extends JavaSprite {
                     u = JavaSpriteBlitState.rowU;
                     v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
                     column = JavaSpriteBlitState.negativeWidth;
-                    if (u >= 0 && u - (super.anInt9302 << 12) < 0) {
+                    if (u >= 0 && u - (super.width << 12) < 0) {
                         if (v < 0) {
                             skip = (JavaSpriteBlitState.dvDx - v - 1) / JavaSpriteBlitState.dvDx;
                             column += skip;
@@ -1162,19 +1162,19 @@ public final class JavaRgbSprite extends JavaSprite {
                             dstIndex += skip;
                         }
                         @Pc(1767) int vBound;
-                        if ((vBound = (v + 1 - (super.anInt9306 << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
+                        if ((vBound = (v + 1 - (super.height << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
                             column = vBound;
                         }
                         while (column < 0) {
-                            texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                            texel = (v >> 12) * super.width + (u >> 12);
                             dst = dstIndex++;
                             if (op == 1) {
-                                src = this.anIntArray32[texel];
+                                src = this.pixels[texel];
                                 if (src != 0) {
                                     raster[dst] = src;
                                 }
                             } else if (op == 0) {
-                                src = this.anIntArray32[texel];
+                                src = this.pixels[texel];
                                 if (src != 0) {
                                     if ((JavaSpriteBlitState.colour & 0xFFFFFF) == 16777215) {
                                         local251 = JavaSpriteBlitState.colour >>> 24;
@@ -1196,7 +1196,7 @@ public final class JavaRgbSprite extends JavaSprite {
                                     }
                                 }
                             } else if (op == 3) {
-                                src = this.anIntArray32[texel];
+                                src = this.pixels[texel];
                                 local251 = JavaSpriteBlitState.colour;
                                 local255 = src + local251;
                                 local259 = (src & 0xFF00FF) + (local251 & 0xFF00FF);
@@ -1209,7 +1209,7 @@ public final class JavaRgbSprite extends JavaSprite {
                                 }
                                 raster[dst] = local331;
                             } else if (op == 2) {
-                                src = this.anIntArray32[texel];
+                                src = this.pixels[texel];
                                 if (src != 0) {
                                     local251 = (src & 0xFF00FF) * JavaSpriteBlitState.alpha & 0xFF00FF00;
                                     local255 = (src & 0xFF00) * JavaSpriteBlitState.alpha & 0xFF0000;
@@ -1235,9 +1235,9 @@ public final class JavaRgbSprite extends JavaSprite {
                     u = JavaSpriteBlitState.rowU + JavaSpriteBlitState.uBias;
                     v = JavaSpriteBlitState.rowV;
                     column = JavaSpriteBlitState.negativeWidth;
-                    if (v >= 0 && v - (super.anInt9306 << 12) < 0) {
+                    if (v >= 0 && v - (super.height << 12) < 0) {
                         @Pc(2609) int uOverrun;
-                        if ((uOverrun = u - (super.anInt9302 << 12)) >= 0) {
+                        if ((uOverrun = u - (super.width << 12)) >= 0) {
                             skip = (JavaSpriteBlitState.duDx - uOverrun) / JavaSpriteBlitState.duDx;
                             column += skip;
                             u += JavaSpriteBlitState.duDx * skip;
@@ -1248,15 +1248,15 @@ public final class JavaRgbSprite extends JavaSprite {
                             column = uBound;
                         }
                         while (column < 0) {
-                            texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                            texel = (v >> 12) * super.width + (u >> 12);
                             dst = dstIndex++;
                             if (op == 1) {
-                                src = this.anIntArray32[texel];
+                                src = this.pixels[texel];
                                 if (src != 0) {
                                     raster[dst] = src;
                                 }
                             } else if (op == 0) {
-                                src = this.anIntArray32[texel];
+                                src = this.pixels[texel];
                                 if (src != 0) {
                                     if ((JavaSpriteBlitState.colour & 0xFFFFFF) == 16777215) {
                                         local251 = JavaSpriteBlitState.colour >>> 24;
@@ -1278,7 +1278,7 @@ public final class JavaRgbSprite extends JavaSprite {
                                     }
                                 }
                             } else if (op == 3) {
-                                src = this.anIntArray32[texel];
+                                src = this.pixels[texel];
                                 local251 = JavaSpriteBlitState.colour;
                                 local255 = src + local251;
                                 local259 = (src & 0xFF00FF) + (local251 & 0xFF00FF);
@@ -1291,7 +1291,7 @@ public final class JavaRgbSprite extends JavaSprite {
                                 }
                                 raster[dst] = local331;
                             } else if (op == 2) {
-                                src = this.anIntArray32[texel];
+                                src = this.pixels[texel];
                                 if (src != 0) {
                                     local251 = (src & 0xFF00FF) * JavaSpriteBlitState.alpha & 0xFF00FF00;
                                     local255 = (src & 0xFF00) * JavaSpriteBlitState.alpha & 0xFF0000;
@@ -1316,7 +1316,7 @@ public final class JavaRgbSprite extends JavaSprite {
                     v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
                     column = JavaSpriteBlitState.negativeWidth;
                     @Pc(3466) int uOverrun;
-                    if ((uOverrun = u - (super.anInt9302 << 12)) >= 0) {
+                    if ((uOverrun = u - (super.width << 12)) >= 0) {
                         skip = (JavaSpriteBlitState.duDx - uOverrun) / JavaSpriteBlitState.duDx;
                         column += skip;
                         u += JavaSpriteBlitState.duDx * skip;
@@ -1328,7 +1328,7 @@ public final class JavaRgbSprite extends JavaSprite {
                         column = uBound;
                     }
                     @Pc(3512) int vOverrun;
-                    if ((vOverrun = v - (super.anInt9306 << 12)) >= 0) {
+                    if ((vOverrun = v - (super.height << 12)) >= 0) {
                         skip = (JavaSpriteBlitState.dvDx - vOverrun) / JavaSpriteBlitState.dvDx;
                         column += skip;
                         u += JavaSpriteBlitState.duDx * skip;
@@ -1340,15 +1340,15 @@ public final class JavaRgbSprite extends JavaSprite {
                         column = vBound;
                     }
                     while (column < 0) {
-                        texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                        texel = (v >> 12) * super.width + (u >> 12);
                         dst = dstIndex++;
                         if (op == 1) {
-                            src = this.anIntArray32[texel];
+                            src = this.pixels[texel];
                             if (src != 0) {
                                 raster[dst] = src;
                             }
                         } else if (op == 0) {
-                            src = this.anIntArray32[texel];
+                            src = this.pixels[texel];
                             if (src != 0) {
                                 if ((JavaSpriteBlitState.colour & 0xFFFFFF) == 16777215) {
                                     local251 = JavaSpriteBlitState.colour >>> 24;
@@ -1370,7 +1370,7 @@ public final class JavaRgbSprite extends JavaSprite {
                                 }
                             }
                         } else if (op == 3) {
-                            src = this.anIntArray32[texel];
+                            src = this.pixels[texel];
                             local251 = JavaSpriteBlitState.colour;
                             local255 = src + local251;
                             local259 = (src & 0xFF00FF) + (local251 & 0xFF00FF);
@@ -1383,7 +1383,7 @@ public final class JavaRgbSprite extends JavaSprite {
                             }
                             raster[dst] = local331;
                         } else if (op == 2) {
-                            src = this.anIntArray32[texel];
+                            src = this.pixels[texel];
                             if (src != 0) {
                                 local251 = (src & 0xFF00FF) * JavaSpriteBlitState.alpha & 0xFF00FF00;
                                 local255 = (src & 0xFF00) * JavaSpriteBlitState.alpha & 0xFF0000;
@@ -1409,7 +1409,7 @@ public final class JavaRgbSprite extends JavaSprite {
                     v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
                     column = JavaSpriteBlitState.negativeWidth;
                     @Pc(4381) int uOverrun;
-                    if ((uOverrun = u - (super.anInt9302 << 12)) >= 0) {
+                    if ((uOverrun = u - (super.width << 12)) >= 0) {
                         skip = (JavaSpriteBlitState.duDx - uOverrun) / JavaSpriteBlitState.duDx;
                         column += skip;
                         u += JavaSpriteBlitState.duDx * skip;
@@ -1428,19 +1428,19 @@ public final class JavaRgbSprite extends JavaSprite {
                         dstIndex += skip;
                     }
                     @Pc(4463) int vBound;
-                    if ((vBound = (v + 1 - (super.anInt9306 << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
+                    if ((vBound = (v + 1 - (super.height << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
                         column = vBound;
                     }
                     while (column < 0) {
-                        texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                        texel = (v >> 12) * super.width + (u >> 12);
                         dst = dstIndex++;
                         if (op == 1) {
-                            src = this.anIntArray32[texel];
+                            src = this.pixels[texel];
                             if (src != 0) {
                                 raster[dst] = src;
                             }
                         } else if (op == 0) {
-                            src = this.anIntArray32[texel];
+                            src = this.pixels[texel];
                             if (src != 0) {
                                 if ((JavaSpriteBlitState.colour & 0xFFFFFF) == 16777215) {
                                     local251 = JavaSpriteBlitState.colour >>> 24;
@@ -1462,7 +1462,7 @@ public final class JavaRgbSprite extends JavaSprite {
                                 }
                             }
                         } else if (op == 3) {
-                            src = this.anIntArray32[texel];
+                            src = this.pixels[texel];
                             local251 = JavaSpriteBlitState.colour;
                             local255 = src + local251;
                             local259 = (src & 0xFF00FF) + (local251 & 0xFF00FF);
@@ -1475,7 +1475,7 @@ public final class JavaRgbSprite extends JavaSprite {
                             }
                             raster[dst] = local331;
                         } else if (op == 2) {
-                            src = this.anIntArray32[texel];
+                            src = this.pixels[texel];
                             if (src != 0) {
                                 local251 = (src & 0xFF00FF) * JavaSpriteBlitState.alpha & 0xFF00FF00;
                                 local255 = (src & 0xFF00) * JavaSpriteBlitState.alpha & 0xFF0000;
@@ -1501,7 +1501,7 @@ public final class JavaRgbSprite extends JavaSprite {
                 u = JavaSpriteBlitState.rowU + JavaSpriteBlitState.uBias;
                 v = JavaSpriteBlitState.rowV;
                 column = JavaSpriteBlitState.negativeWidth;
-                if (v >= 0 && v - (super.anInt9306 << 12) < 0) {
+                if (v >= 0 && v - (super.height << 12) < 0) {
                     if (u < 0) {
                         skip = (JavaSpriteBlitState.duDx - u - 1) / JavaSpriteBlitState.duDx;
                         column += skip;
@@ -1509,19 +1509,19 @@ public final class JavaRgbSprite extends JavaSprite {
                         dstIndex += skip;
                     }
                     @Pc(5341) int uBound;
-                    if ((uBound = (u + 1 - (super.anInt9302 << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
+                    if ((uBound = (u + 1 - (super.width << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
                         column = uBound;
                     }
                     while (column < 0) {
-                        texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                        texel = (v >> 12) * super.width + (u >> 12);
                         dst = dstIndex++;
                         if (op == 1) {
-                            src = this.anIntArray32[texel];
+                            src = this.pixels[texel];
                             if (src != 0) {
                                 raster[dst] = src;
                             }
                         } else if (op == 0) {
-                            src = this.anIntArray32[texel];
+                            src = this.pixels[texel];
                             if (src != 0) {
                                 if ((JavaSpriteBlitState.colour & 0xFFFFFF) == 16777215) {
                                     local251 = JavaSpriteBlitState.colour >>> 24;
@@ -1543,7 +1543,7 @@ public final class JavaRgbSprite extends JavaSprite {
                                 }
                             }
                         } else if (op == 3) {
-                            src = this.anIntArray32[texel];
+                            src = this.pixels[texel];
                             local251 = JavaSpriteBlitState.colour;
                             local255 = src + local251;
                             local259 = (src & 0xFF00FF) + (local251 & 0xFF00FF);
@@ -1556,7 +1556,7 @@ public final class JavaRgbSprite extends JavaSprite {
                             }
                             raster[dst] = local331;
                         } else if (op == 2) {
-                            src = this.anIntArray32[texel];
+                            src = this.pixels[texel];
                             if (src != 0) {
                                 local251 = (src & 0xFF00FF) * JavaSpriteBlitState.alpha & 0xFF00FF00;
                                 local255 = (src & 0xFF00) * JavaSpriteBlitState.alpha & 0xFF0000;
@@ -1588,11 +1588,11 @@ public final class JavaRgbSprite extends JavaSprite {
                     dstIndex += skip;
                 }
                 @Pc(6210) int uBound;
-                if ((uBound = (u + 1 - (super.anInt9302 << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
+                if ((uBound = (u + 1 - (super.width << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
                     column = uBound;
                 }
                 @Pc(6222) int vOverrun;
-                if ((vOverrun = v - (super.anInt9306 << 12)) >= 0) {
+                if ((vOverrun = v - (super.height << 12)) >= 0) {
                     skip = (JavaSpriteBlitState.dvDx - vOverrun) / JavaSpriteBlitState.dvDx;
                     column += skip;
                     u += JavaSpriteBlitState.duDx * skip;
@@ -1604,15 +1604,15 @@ public final class JavaRgbSprite extends JavaSprite {
                     column = vBound;
                 }
                 while (column < 0) {
-                    texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                    texel = (v >> 12) * super.width + (u >> 12);
                     dst = dstIndex++;
                     if (op == 1) {
-                        src = this.anIntArray32[texel];
+                        src = this.pixels[texel];
                         if (src != 0) {
                             raster[dst] = src;
                         }
                     } else if (op == 0) {
-                        src = this.anIntArray32[texel];
+                        src = this.pixels[texel];
                         if (src != 0) {
                             if ((JavaSpriteBlitState.colour & 0xFFFFFF) == 16777215) {
                                 local251 = JavaSpriteBlitState.colour >>> 24;
@@ -1634,7 +1634,7 @@ public final class JavaRgbSprite extends JavaSprite {
                             }
                         }
                     } else if (op == 3) {
-                        src = this.anIntArray32[texel];
+                        src = this.pixels[texel];
                         local251 = JavaSpriteBlitState.colour;
                         local255 = src + local251;
                         local259 = (src & 0xFF00FF) + (local251 & 0xFF00FF);
@@ -1647,7 +1647,7 @@ public final class JavaRgbSprite extends JavaSprite {
                         }
                         raster[dst] = local331;
                     } else if (op == 2) {
-                        src = this.anIntArray32[texel];
+                        src = this.pixels[texel];
                         if (src != 0) {
                             local251 = (src & 0xFF00FF) * JavaSpriteBlitState.alpha & 0xFF00FF00;
                             local255 = (src & 0xFF00) * JavaSpriteBlitState.alpha & 0xFF0000;
@@ -1678,7 +1678,7 @@ public final class JavaRgbSprite extends JavaSprite {
                     dstIndex += skip;
                 }
                 @Pc(7127) int uBound;
-                if ((uBound = (u + 1 - (super.anInt9302 << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
+                if ((uBound = (u + 1 - (super.width << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
                     column = uBound;
                 }
                 if (v < 0) {
@@ -1689,19 +1689,19 @@ public final class JavaRgbSprite extends JavaSprite {
                     dstIndex += skip;
                 }
                 @Pc(7175) int vBound;
-                if ((vBound = (v + 1 - (super.anInt9306 << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
+                if ((vBound = (v + 1 - (super.height << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
                     column = vBound;
                 }
                 while (column < 0) {
-                    texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                    texel = (v >> 12) * super.width + (u >> 12);
                     dst = dstIndex++;
                     if (op == 1) {
-                        src = this.anIntArray32[texel];
+                        src = this.pixels[texel];
                         if (src != 0) {
                             raster[dst] = src;
                         }
                     } else if (op == 0) {
-                        src = this.anIntArray32[texel];
+                        src = this.pixels[texel];
                         if (src != 0) {
                             if ((JavaSpriteBlitState.colour & 0xFFFFFF) == 16777215) {
                                 local251 = JavaSpriteBlitState.colour >>> 24;
@@ -1723,7 +1723,7 @@ public final class JavaRgbSprite extends JavaSprite {
                             }
                         }
                     } else if (op == 3) {
-                        src = this.anIntArray32[texel];
+                        src = this.pixels[texel];
                         local251 = JavaSpriteBlitState.colour;
                         local255 = src + local251;
                         local259 = (src & 0xFF00FF) + (local251 & 0xFF00FF);
@@ -1736,7 +1736,7 @@ public final class JavaRgbSprite extends JavaSprite {
                         }
                         raster[dst] = local331;
                     } else if (op == 2) {
-                        src = this.anIntArray32[texel];
+                        src = this.pixels[texel];
                         if (src != 0) {
                             local251 = (src & 0xFF00FF) * JavaSpriteBlitState.alpha & 0xFF00FF00;
                             local255 = (src & 0xFF00) * JavaSpriteBlitState.alpha & 0xFF0000;
@@ -1784,7 +1784,7 @@ public final class JavaRgbSprite extends JavaSprite {
                         u = JavaSpriteBlitState.rowU;
                         v = JavaSpriteBlitState.rowV;
                         column = JavaSpriteBlitState.negativeWidth;
-                        if (u >= 0 && v >= 0 && u - (super.anInt9302 << 12) < 0 && v - (super.anInt9306 << 12) < 0) {
+                        if (u >= 0 && v >= 0 && u - (super.width << 12) < 0 && v - (super.height << 12) < 0) {
                             maskStart = lineOffsets[maskIndex] - maskOffsetX;
                             maskCount = -lineWidths[maskIndex];
                             maskSkip = maskStart + JavaSpriteBlitState.rowOffset - dstIndex;
@@ -1800,7 +1800,7 @@ public final class JavaRgbSprite extends JavaSprite {
                                 column = maskCount;
                             }
                             while (column < 0) {
-                                src = this.anIntArray32[(v >> 12) * super.anInt9302 + (u >> 12)];
+                                src = this.pixels[(v >> 12) * super.width + (u >> 12)];
                                 if (src == 0) {
                                     dstIndex++;
                                 } else {
@@ -1825,9 +1825,9 @@ public final class JavaRgbSprite extends JavaSprite {
                         u = JavaSpriteBlitState.rowU;
                         v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
                         column = JavaSpriteBlitState.negativeWidth;
-                        if (u >= 0 && u - (super.anInt9302 << 12) < 0) {
+                        if (u >= 0 && u - (super.width << 12) < 0) {
                             @Pc(194) int vOverrun;
-                            if ((vOverrun = v - (super.anInt9306 << 12)) >= 0) {
+                            if ((vOverrun = v - (super.height << 12)) >= 0) {
                                 skip = (JavaSpriteBlitState.dvDx - vOverrun) / JavaSpriteBlitState.dvDx;
                                 column += skip;
                                 v += JavaSpriteBlitState.dvDx * skip;
@@ -1852,7 +1852,7 @@ public final class JavaRgbSprite extends JavaSprite {
                                 column = maskCount;
                             }
                             while (column < 0) {
-                                src = this.anIntArray32[(v >> 12) * super.anInt9302 + (u >> 12)];
+                                src = this.pixels[(v >> 12) * super.width + (u >> 12)];
                                 if (src == 0) {
                                     dstIndex++;
                                 } else {
@@ -1879,7 +1879,7 @@ public final class JavaRgbSprite extends JavaSprite {
                         u = JavaSpriteBlitState.rowU;
                         v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
                         column = JavaSpriteBlitState.negativeWidth;
-                        if (u >= 0 && u - (super.anInt9302 << 12) < 0) {
+                        if (u >= 0 && u - (super.width << 12) < 0) {
                             if (v < 0) {
                                 skip = (JavaSpriteBlitState.dvDx - v - 1) / JavaSpriteBlitState.dvDx;
                                 column += skip;
@@ -1887,7 +1887,7 @@ public final class JavaRgbSprite extends JavaSprite {
                                 dstIndex += skip;
                             }
                             @Pc(400) int vBound;
-                            if ((vBound = (v + 1 - (super.anInt9306 << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
+                            if ((vBound = (v + 1 - (super.height << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
                                 column = vBound;
                             }
                             maskStart = lineOffsets[maskIndex] - maskOffsetX;
@@ -1905,7 +1905,7 @@ public final class JavaRgbSprite extends JavaSprite {
                                 column = maskCount;
                             }
                             while (column < 0) {
-                                src = this.anIntArray32[(v >> 12) * super.anInt9302 + (u >> 12)];
+                                src = this.pixels[(v >> 12) * super.width + (u >> 12)];
                                 if (src == 0) {
                                     dstIndex++;
                                 } else {
@@ -1934,9 +1934,9 @@ public final class JavaRgbSprite extends JavaSprite {
                         u = JavaSpriteBlitState.rowU + JavaSpriteBlitState.uBias;
                         v = JavaSpriteBlitState.rowV;
                         column = JavaSpriteBlitState.negativeWidth;
-                        if (v >= 0 && v - (super.anInt9306 << 12) < 0) {
+                        if (v >= 0 && v - (super.height << 12) < 0) {
                             @Pc(552) int uOverrun;
-                            if ((uOverrun = u - (super.anInt9302 << 12)) >= 0) {
+                            if ((uOverrun = u - (super.width << 12)) >= 0) {
                                 skip = (JavaSpriteBlitState.duDx - uOverrun) / JavaSpriteBlitState.duDx;
                                 column += skip;
                                 u += JavaSpriteBlitState.duDx * skip;
@@ -1961,7 +1961,7 @@ public final class JavaRgbSprite extends JavaSprite {
                                 column = maskCount;
                             }
                             while (column < 0) {
-                                src = this.anIntArray32[(v >> 12) * super.anInt9302 + (u >> 12)];
+                                src = this.pixels[(v >> 12) * super.width + (u >> 12)];
                                 if (src == 0) {
                                     dstIndex++;
                                 } else {
@@ -1989,7 +1989,7 @@ public final class JavaRgbSprite extends JavaSprite {
                         v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
                         column = JavaSpriteBlitState.negativeWidth;
                         @Pc(719) int uOverrun;
-                        if ((uOverrun = u - (super.anInt9302 << 12)) >= 0) {
+                        if ((uOverrun = u - (super.width << 12)) >= 0) {
                             skip = (JavaSpriteBlitState.duDx - uOverrun) / JavaSpriteBlitState.duDx;
                             column += skip;
                             u += JavaSpriteBlitState.duDx * skip;
@@ -2001,7 +2001,7 @@ public final class JavaRgbSprite extends JavaSprite {
                             column = uBound;
                         }
                         @Pc(765) int vOverrun;
-                        if ((vOverrun = v - (super.anInt9306 << 12)) >= 0) {
+                        if ((vOverrun = v - (super.height << 12)) >= 0) {
                             skip = (JavaSpriteBlitState.dvDx - vOverrun) / JavaSpriteBlitState.dvDx;
                             column += skip;
                             u += JavaSpriteBlitState.duDx * skip;
@@ -2027,7 +2027,7 @@ public final class JavaRgbSprite extends JavaSprite {
                             column = maskCount;
                         }
                         while (column < 0) {
-                            src = this.anIntArray32[(v >> 12) * super.anInt9302 + (u >> 12)];
+                            src = this.pixels[(v >> 12) * super.width + (u >> 12)];
                             if (src == 0) {
                                 dstIndex++;
                             } else {
@@ -2056,7 +2056,7 @@ public final class JavaRgbSprite extends JavaSprite {
                         v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
                         column = JavaSpriteBlitState.negativeWidth;
                         @Pc(944) int uOverrun;
-                        if ((uOverrun = u - (super.anInt9302 << 12)) >= 0) {
+                        if ((uOverrun = u - (super.width << 12)) >= 0) {
                             skip = (JavaSpriteBlitState.duDx - uOverrun) / JavaSpriteBlitState.duDx;
                             column += skip;
                             u += JavaSpriteBlitState.duDx * skip;
@@ -2075,7 +2075,7 @@ public final class JavaRgbSprite extends JavaSprite {
                             dstIndex += skip;
                         }
                         @Pc(1026) int vBound;
-                        if ((vBound = (v + 1 - (super.anInt9306 << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
+                        if ((vBound = (v + 1 - (super.height << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
                             column = vBound;
                         }
                         maskStart = lineOffsets[maskIndex] - maskOffsetX;
@@ -2093,7 +2093,7 @@ public final class JavaRgbSprite extends JavaSprite {
                             column = maskCount;
                         }
                         while (column < 0) {
-                            src = this.anIntArray32[(v >> 12) * super.anInt9302 + (u >> 12)];
+                            src = this.pixels[(v >> 12) * super.width + (u >> 12)];
                             if (src == 0) {
                                 dstIndex++;
                             } else {
@@ -2122,7 +2122,7 @@ public final class JavaRgbSprite extends JavaSprite {
                     u = JavaSpriteBlitState.rowU + JavaSpriteBlitState.uBias;
                     v = JavaSpriteBlitState.rowV;
                     column = JavaSpriteBlitState.negativeWidth;
-                    if (v >= 0 && v - (super.anInt9306 << 12) < 0) {
+                    if (v >= 0 && v - (super.height << 12) < 0) {
                         if (u < 0) {
                             skip = (JavaSpriteBlitState.duDx - u - 1) / JavaSpriteBlitState.duDx;
                             column += skip;
@@ -2130,7 +2130,7 @@ public final class JavaRgbSprite extends JavaSprite {
                             dstIndex += skip;
                         }
                         @Pc(1214) int uBound;
-                        if ((uBound = (u + 1 - (super.anInt9302 << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
+                        if ((uBound = (u + 1 - (super.width << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
                             column = uBound;
                         }
                         maskStart = lineOffsets[maskIndex] - maskOffsetX;
@@ -2148,7 +2148,7 @@ public final class JavaRgbSprite extends JavaSprite {
                             column = maskCount;
                         }
                         while (column < 0) {
-                            src = this.anIntArray32[(v >> 12) * super.anInt9302 + (u >> 12)];
+                            src = this.pixels[(v >> 12) * super.width + (u >> 12)];
                             if (src == 0) {
                                 dstIndex++;
                             } else {
@@ -2184,11 +2184,11 @@ public final class JavaRgbSprite extends JavaSprite {
                         dstIndex += skip;
                     }
                     @Pc(1393) int uBound;
-                    if ((uBound = (u + 1 - (super.anInt9302 << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
+                    if ((uBound = (u + 1 - (super.width << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
                         column = uBound;
                     }
                     @Pc(1405) int vOverrun;
-                    if ((vOverrun = v - (super.anInt9306 << 12)) >= 0) {
+                    if ((vOverrun = v - (super.height << 12)) >= 0) {
                         skip = (JavaSpriteBlitState.dvDx - vOverrun) / JavaSpriteBlitState.dvDx;
                         column += skip;
                         u += JavaSpriteBlitState.duDx * skip;
@@ -2214,7 +2214,7 @@ public final class JavaRgbSprite extends JavaSprite {
                         column = maskCount;
                     }
                     while (column < 0) {
-                        src = this.anIntArray32[(v >> 12) * super.anInt9302 + (u >> 12)];
+                        src = this.pixels[(v >> 12) * super.width + (u >> 12)];
                         if (src == 0) {
                             dstIndex++;
                         } else {
@@ -2250,7 +2250,7 @@ public final class JavaRgbSprite extends JavaSprite {
                         dstIndex += skip;
                     }
                     @Pc(1620) int uBound;
-                    if ((uBound = (u + 1 - (super.anInt9302 << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
+                    if ((uBound = (u + 1 - (super.width << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
                         column = uBound;
                     }
                     if (v < 0) {
@@ -2261,7 +2261,7 @@ public final class JavaRgbSprite extends JavaSprite {
                         dstIndex += skip;
                     }
                     @Pc(1668) int vBound;
-                    if ((vBound = (v + 1 - (super.anInt9306 << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
+                    if ((vBound = (v + 1 - (super.height << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
                         column = vBound;
                     }
                     maskStart = lineOffsets[maskIndex] - maskOffsetX;
@@ -2279,7 +2279,7 @@ public final class JavaRgbSprite extends JavaSprite {
                         column = maskCount;
                     }
                     while (column < 0) {
-                        src = this.anIntArray32[(v >> 12) * super.anInt9302 + (u >> 12)];
+                        src = this.pixels[(v >> 12) * super.width + (u >> 12)];
                         if (src == 0) {
                             dstIndex++;
                         } else {
@@ -2307,8 +2307,8 @@ public final class JavaRgbSprite extends JavaSprite {
             @Pc(18) int u = 0;
             @Pc(20) int v = 0;
             @Pc(24) int dstStride = super.toolkit.surfaceWidth;
-            @Pc(33) int scaleWidth = super.leftMargin + super.anInt9302 + super.rightMargin;
-            @Pc(42) int scaleHeight = super.topMargin + super.anInt9306 + super.bottomMargin;
+            @Pc(33) int scaleWidth = super.leftMargin + super.width + super.rightMargin;
+            @Pc(42) int scaleHeight = super.topMargin + super.height + super.bottomMargin;
             @Pc(48) int uStep = (scaleWidth << 16) / width;
             @Pc(54) int vStep = (scaleHeight << 16) / height;
             @Pc(68) int offset;
@@ -2322,11 +2322,11 @@ public final class JavaRgbSprite extends JavaSprite {
                 y += offset;
                 v = offset * vStep - (super.topMargin << 16);
             }
-            if (super.anInt9302 < scaleWidth) {
-                width = ((super.anInt9302 << 16) + uStep - u - 1) / uStep;
+            if (super.width < scaleWidth) {
+                width = ((super.width << 16) + uStep - u - 1) / uStep;
             }
-            if (super.anInt9306 < scaleHeight) {
-                height = ((super.anInt9306 << 16) + vStep - v - 1) / vStep;
+            if (super.height < scaleHeight) {
+                height = ((super.height << 16) + vStep - v - 1) / vStep;
             }
             offset = x + y * dstStride;
             @Pc(156) int dstStep = dstStride - width;
@@ -2373,9 +2373,9 @@ public final class JavaRgbSprite extends JavaSprite {
                     if (op == 1) {
                         local265 = u;
                         for (local268 = -height; local268 < 0; local268++) {
-                            local276 = (v >> 16) * super.anInt9302;
+                            local276 = (v >> 16) * super.width;
                             for (local279 = -width; local279 < 0; local279++) {
-                                local337 = this.anIntArray32[(u >> 16) + local276];
+                                local337 = this.pixels[(u >> 16) + local276];
                                 if (local337 == 0) {
                                     offset++;
                                 } else {
@@ -2393,9 +2393,9 @@ public final class JavaRgbSprite extends JavaSprite {
                             local268 = colour >>> 24;
                             local276 = 256 - local268;
                             for (local279 = -height; local279 < 0; local279++) {
-                                local337 = (v >> 16) * super.anInt9302;
+                                local337 = (v >> 16) * super.width;
                                 for (local345 = -width; local345 < 0; local345++) {
-                                    local348 = this.anIntArray32[(u >> 16) + local337];
+                                    local348 = this.pixels[(u >> 16) + local337];
                                     if (local348 == 0) {
                                         offset++;
                                     } else {
@@ -2415,9 +2415,9 @@ public final class JavaRgbSprite extends JavaSprite {
                             local337 = colour >>> 24;
                             local345 = 256 - local337;
                             for (local348 = -height; local348 < 0; local348++) {
-                                local358 = (v >> 16) * super.anInt9302;
+                                local358 = (v >> 16) * super.width;
                                 for (local366 = -width; local366 < 0; local366++) {
-                                    local374 = this.anIntArray32[(u >> 16) + local358];
+                                    local374 = this.pixels[(u >> 16) + local358];
                                     if (local374 == 0) {
                                         offset++;
                                     } else if (local337 == 255) {
@@ -2445,9 +2445,9 @@ public final class JavaRgbSprite extends JavaSprite {
                         local268 = colour >>> 24;
                         local276 = 256 - local268;
                         for (local279 = -height; local279 < 0; local279++) {
-                            local337 = (v >> 16) * super.anInt9302;
+                            local337 = (v >> 16) * super.width;
                             for (local345 = -width; local345 < 0; local345++) {
-                                local348 = this.anIntArray32[(u >> 16) + local337];
+                                local348 = this.pixels[(u >> 16) + local337];
                                 local358 = local348 + colour;
                                 local366 = (local348 & 0xFF00FF) + (colour & 0xFF00FF);
                                 local374 = (local366 & 0x1000100) + (local358 - local366 & 0x10000);
@@ -2472,9 +2472,9 @@ public final class JavaRgbSprite extends JavaSprite {
                         lerpColour = (local276 | local279) >>> 8;
                         local337 = u;
                         for (local345 = -height; local345 < 0; local345++) {
-                            local348 = (v >> 16) * super.anInt9302;
+                            local348 = (v >> 16) * super.width;
                             for (local358 = -width; local358 < 0; local358++) {
-                                local366 = this.anIntArray32[(u >> 16) + local348];
+                                local366 = this.pixels[(u >> 16) + local348];
                                 if (local366 == 0) {
                                     offset++;
                                 } else {
@@ -2496,9 +2496,9 @@ public final class JavaRgbSprite extends JavaSprite {
                 } else if (op == 1) {
                     local265 = u;
                     for (local268 = -height; local268 < 0; local268++) {
-                        local276 = (v >> 16) * super.anInt9302;
+                        local276 = (v >> 16) * super.width;
                         for (local279 = -width; local279 < 0; local279++) {
-                            local337 = this.anIntArray32[(u >> 16) + local276];
+                            local337 = this.pixels[(u >> 16) + local276];
                             if (local337 == 0) {
                                 offset++;
                             } else {
@@ -2520,9 +2520,9 @@ public final class JavaRgbSprite extends JavaSprite {
                     local276 = colour >> 8 & 0xFF;
                     local279 = colour & 0xFF;
                     for (local337 = -height; local337 < 0; local337++) {
-                        local345 = (v >> 16) * super.anInt9302;
+                        local345 = (v >> 16) * super.width;
                         for (local348 = -width; local348 < 0; local348++) {
-                            local358 = this.anIntArray32[(u >> 16) + local345];
+                            local358 = this.pixels[(u >> 16) + local345];
                             if (local358 == 0) {
                                 offset++;
                             } else {
@@ -2545,9 +2545,9 @@ public final class JavaRgbSprite extends JavaSprite {
                 } else if (op == 3) {
                     local265 = u;
                     for (local268 = -height; local268 < 0; local268++) {
-                        local276 = (v >> 16) * super.anInt9302;
+                        local276 = (v >> 16) * super.width;
                         for (local279 = -width; local279 < 0; local279++) {
-                            local337 = this.anIntArray32[(u >> 16) + local276];
+                            local337 = this.pixels[(u >> 16) + local276];
                             local345 = local337 + colour;
                             local348 = (local337 & 0xFF00FF) + (colour & 0xFF00FF);
                             local358 = (local348 & 0x1000100) + (local345 - local348 & 0x10000);
@@ -2571,9 +2571,9 @@ public final class JavaRgbSprite extends JavaSprite {
                     lerpColour = (local276 | local279) >>> 8;
                     local337 = u;
                     for (local345 = -height; local345 < 0; local345++) {
-                        local348 = (v >> 16) * super.anInt9302;
+                        local348 = (v >> 16) * super.width;
                         for (local358 = -width; local358 < 0; local358++) {
-                            local366 = this.anIntArray32[(u >> 16) + local348];
+                            local366 = this.pixels[(u >> 16) + local348];
                             if (local366 == 0) {
                                 offset++;
                             } else {
@@ -2598,9 +2598,9 @@ public final class JavaRgbSprite extends JavaSprite {
             } else if (op == 1) {
                 local265 = u;
                 for (local268 = -height; local268 < 0; local268++) {
-                    local276 = (v >> 16) * super.anInt9302;
+                    local276 = (v >> 16) * super.width;
                     for (local279 = -width; local279 < 0; local279++) {
-                        raster[offset++] = this.anIntArray32[(u >> 16) + local276];
+                        raster[offset++] = this.pixels[(u >> 16) + local276];
                         u += uStep;
                     }
                     v += vStep;
@@ -2613,9 +2613,9 @@ public final class JavaRgbSprite extends JavaSprite {
                 local276 = colour & 0xFF;
                 local279 = u;
                 for (local337 = -height; local337 < 0; local337++) {
-                    local345 = (v >> 16) * super.anInt9302;
+                    local345 = (v >> 16) * super.width;
                     for (local348 = -width; local348 < 0; local348++) {
-                        local358 = this.anIntArray32[(u >> 16) + local345];
+                        local358 = this.pixels[(u >> 16) + local345];
                         local366 = (local358 & 0xFF0000) * local265 & 0xFF000000;
                         local374 = (local358 & 0xFF00) * local268 & 0xFF0000;
                         local382 = (local358 & 0xFF) * local276 & 0xFF00;
@@ -2629,9 +2629,9 @@ public final class JavaRgbSprite extends JavaSprite {
             } else if (op == 3) {
                 local265 = u;
                 for (local268 = -height; local268 < 0; local268++) {
-                    local276 = (v >> 16) * super.anInt9302;
+                    local276 = (v >> 16) * super.width;
                     for (local279 = -width; local279 < 0; local279++) {
-                        local337 = this.anIntArray32[(u >> 16) + local276];
+                        local337 = this.pixels[(u >> 16) + local276];
                         local345 = local337 + colour;
                         local348 = (local337 & 0xFF00FF) + (colour & 0xFF00FF);
                         local358 = (local348 & 0x1000100) + (local345 - local348 & 0x10000);
@@ -2650,9 +2650,9 @@ public final class JavaRgbSprite extends JavaSprite {
                 lerpColour = (local276 | local279) >>> 8;
                 local337 = u;
                 for (local345 = -height; local345 < 0; local345++) {
-                    local348 = (v >> 16) * super.anInt9302;
+                    local348 = (v >> 16) * super.width;
                     for (local358 = -width; local358 < 0; local358++) {
-                        local366 = this.anIntArray32[(u >> 16) + local348];
+                        local366 = this.pixels[(u >> 16) + local348];
                         local276 = (local366 & 0xFF00FF) * local265 & 0xFF00FF00;
                         local279 = (local366 & 0xFF00) * local265 & 0xFF0000;
                         raster[offset++] = ((local276 | local279) >>> 8) + lerpColour;
@@ -2679,8 +2679,8 @@ public final class JavaRgbSprite extends JavaSprite {
         y += super.topMargin;
         @Pc(28) int dstIndex = y * dstStride + x;
         @Pc(30) int srcIndex = 0;
-        @Pc(33) int height = super.anInt9306;
-        @Pc(36) int width = super.anInt9302;
+        @Pc(33) int height = super.height;
+        @Pc(36) int width = super.width;
         @Pc(40) int dstStep = dstStride - width;
         @Pc(42) int srcStep = 0;
         @Pc(53) int clip;
@@ -2732,25 +2732,25 @@ public final class JavaRgbSprite extends JavaSprite {
                     for (local174 = -height; local174 < 0; local174++) {
                         local181 = dstIndex + width - 3;
                         while (dstIndex < local181) {
-                            local267 = this.anIntArray32[srcIndex++];
+                            local267 = this.pixels[srcIndex++];
                             if (local267 == 0) {
                                 dstIndex++;
                             } else {
                                 raster[dstIndex++] = local267;
                             }
-                            local267 = this.anIntArray32[srcIndex++];
+                            local267 = this.pixels[srcIndex++];
                             if (local267 == 0) {
                                 dstIndex++;
                             } else {
                                 raster[dstIndex++] = local267;
                             }
-                            local267 = this.anIntArray32[srcIndex++];
+                            local267 = this.pixels[srcIndex++];
                             if (local267 == 0) {
                                 dstIndex++;
                             } else {
                                 raster[dstIndex++] = local267;
                             }
-                            local267 = this.anIntArray32[srcIndex++];
+                            local267 = this.pixels[srcIndex++];
                             if (local267 == 0) {
                                 dstIndex++;
                             } else {
@@ -2759,7 +2759,7 @@ public final class JavaRgbSprite extends JavaSprite {
                         }
                         local181 += 3;
                         while (dstIndex < local181) {
-                            local267 = this.anIntArray32[srcIndex++];
+                            local267 = this.pixels[srcIndex++];
                             if (local267 == 0) {
                                 dstIndex++;
                             } else {
@@ -2775,7 +2775,7 @@ public final class JavaRgbSprite extends JavaSprite {
                         local181 = 256 - local174;
                         for (local267 = -height; local267 < 0; local267++) {
                             for (local270 = -width; local270 < 0; local270++) {
-                                local274 = this.anIntArray32[srcIndex++];
+                                local274 = this.pixels[srcIndex++];
                                 if (local274 == 0) {
                                     dstIndex++;
                                 } else {
@@ -2794,7 +2794,7 @@ public final class JavaRgbSprite extends JavaSprite {
                         local274 = 256 - local270;
                         for (local281 = -height; local281 < 0; local281++) {
                             for (local289 = -width; local289 < 0; local289++) {
-                                local297 = this.anIntArray32[srcIndex++];
+                                local297 = this.pixels[srcIndex++];
                                 if (local297 == 0) {
                                     dstIndex++;
                                 } else if (local270 == 255) {
@@ -2820,7 +2820,7 @@ public final class JavaRgbSprite extends JavaSprite {
                     local181 = 256 - local174;
                     for (local267 = -height; local267 < 0; local267++) {
                         for (local270 = -width; local270 < 0; local270++) {
-                            local274 = this.anIntArray32[srcIndex++];
+                            local274 = this.pixels[srcIndex++];
                             local281 = local274 + color;
                             local289 = (local274 & 0xFF00FF) + (color & 0xFF00FF);
                             local297 = (local289 & 0x1000100) + (local281 - local289 & 0x10000);
@@ -2843,7 +2843,7 @@ public final class JavaRgbSprite extends JavaSprite {
                     lerpColour = (local267 | local270) >>> 8;
                     for (local274 = -height; local274 < 0; local274++) {
                         for (local281 = -width; local281 < 0; local281++) {
-                            local289 = this.anIntArray32[srcIndex++];
+                            local289 = this.pixels[srcIndex++];
                             if (local289 == 0) {
                                 dstIndex++;
                             } else {
@@ -2863,7 +2863,7 @@ public final class JavaRgbSprite extends JavaSprite {
             } else if (op == 1) {
                 for (local174 = -height; local174 < 0; local174++) {
                     for (local181 = -width; local181 < 0; local181++) {
-                        local267 = this.anIntArray32[srcIndex++];
+                        local267 = this.pixels[srcIndex++];
                         if (local267 == 0) {
                             dstIndex++;
                         } else {
@@ -2883,7 +2883,7 @@ public final class JavaRgbSprite extends JavaSprite {
                 local267 = color & 0xFF;
                 for (local270 = -height; local270 < 0; local270++) {
                     for (local274 = -width; local274 < 0; local274++) {
-                        local281 = this.anIntArray32[srcIndex++];
+                        local281 = this.pixels[srcIndex++];
                         if (local281 == 0) {
                             dstIndex++;
                         } else {
@@ -2904,7 +2904,7 @@ public final class JavaRgbSprite extends JavaSprite {
             } else if (op == 3) {
                 for (local174 = -height; local174 < 0; local174++) {
                     for (local181 = -width; local181 < 0; local181++) {
-                        local267 = this.anIntArray32[srcIndex++];
+                        local267 = this.pixels[srcIndex++];
                         local270 = local267 + color;
                         local274 = (local267 & 0xFF00FF) + (color & 0xFF00FF);
                         local281 = (local274 & 0x1000100) + (local270 - local274 & 0x10000);
@@ -2926,7 +2926,7 @@ public final class JavaRgbSprite extends JavaSprite {
                 lerpColour = (local267 | local270) >>> 8;
                 for (local274 = -height; local274 < 0; local274++) {
                     for (local281 = -width; local281 < 0; local281++) {
-                        local289 = this.anIntArray32[srcIndex++];
+                        local289 = this.pixels[srcIndex++];
                         if (local289 == 0) {
                             dstIndex++;
                         } else {
@@ -2950,14 +2950,14 @@ public final class JavaRgbSprite extends JavaSprite {
             for (local174 = -height; local174 < 0; local174++) {
                 local181 = dstIndex + width - 3;
                 while (dstIndex < local181) {
-                    raster[dstIndex++] = this.anIntArray32[srcIndex++];
-                    raster[dstIndex++] = this.anIntArray32[srcIndex++];
-                    raster[dstIndex++] = this.anIntArray32[srcIndex++];
-                    raster[dstIndex++] = this.anIntArray32[srcIndex++];
+                    raster[dstIndex++] = this.pixels[srcIndex++];
+                    raster[dstIndex++] = this.pixels[srcIndex++];
+                    raster[dstIndex++] = this.pixels[srcIndex++];
+                    raster[dstIndex++] = this.pixels[srcIndex++];
                 }
                 local181 += 3;
                 while (dstIndex < local181) {
-                    raster[dstIndex++] = this.anIntArray32[srcIndex++];
+                    raster[dstIndex++] = this.pixels[srcIndex++];
                 }
                 dstIndex += dstStep;
                 srcIndex += srcStep;
@@ -2968,7 +2968,7 @@ public final class JavaRgbSprite extends JavaSprite {
             local267 = color & 0xFF;
             for (local270 = -height; local270 < 0; local270++) {
                 for (local274 = -width; local274 < 0; local274++) {
-                    local281 = this.anIntArray32[srcIndex++];
+                    local281 = this.pixels[srcIndex++];
                     local289 = (local281 & 0xFF0000) * local174 & 0xFF000000;
                     local297 = (local281 & 0xFF00) * local181 & 0xFF0000;
                     local305 = (local281 & 0xFF) * local267 & 0xFF00;
@@ -2980,7 +2980,7 @@ public final class JavaRgbSprite extends JavaSprite {
         } else if (op == 3) {
             for (local174 = -height; local174 < 0; local174++) {
                 for (local181 = -width; local181 < 0; local181++) {
-                    local267 = this.anIntArray32[srcIndex++];
+                    local267 = this.pixels[srcIndex++];
                     local270 = local267 + color;
                     local274 = (local267 & 0xFF00FF) + (color & 0xFF00FF);
                     local281 = (local274 & 0x1000100) + (local270 - local274 & 0x10000);
@@ -2997,7 +2997,7 @@ public final class JavaRgbSprite extends JavaSprite {
             lerpColour = (local267 | local270) >>> 8;
             for (local274 = -height; local274 < 0; local274++) {
                 for (local281 = -width; local281 < 0; local281++) {
-                    local289 = this.anIntArray32[srcIndex++];
+                    local289 = this.pixels[srcIndex++];
                     local267 = (local289 & 0xFF00FF) * local174 & 0xFF00FF00;
                     local270 = (local289 & 0xFF00) * local174 & 0xFF0000;
                     raster[dstIndex++] = ((local267 | local270) >>> 8) + lerpColour;

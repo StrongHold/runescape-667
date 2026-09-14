@@ -20,36 +20,36 @@ public final class Static73 {
             @Pc(45) int local45 = Static246.ground[arg3].getHeight(arg0, arg1) - 1;
             @Pc(51) int local51 = arg2.getMinY(2) + local45;
             if (arg2.aShort58 == 1) {
-                if (!Static172.method2674(local31, local35, local51, local51, local45, local35, Static340.anInt5586 + local35, local31, local31)) {
+                if (!Static172.isTriangleOccluded(local31, local35, local51, local51, local45, local35, Static340.anInt5586 + local35, local31, local31)) {
                     return false;
-                } else if (Static172.method2674(local31, local35, local51, local45, local45, local35 + Static340.anInt5586, local35 + Static340.anInt5586, local31, local31)) {
+                } else if (Static172.isTriangleOccluded(local31, local35, local51, local45, local45, local35 + Static340.anInt5586, local35 + Static340.anInt5586, local31, local31)) {
                     Static679.occludedWallCount++;
                     return true;
                 } else {
                     return false;
                 }
             } else if (arg2.aShort58 == 2) {
-                if (!Static172.method2674(local31 + Static340.anInt5586, local35 - -Static340.anInt5586, local51, local51, local45, local35 + Static340.anInt5586, Static340.anInt5586 + local35, local31, local31)) {
+                if (!Static172.isTriangleOccluded(local31 + Static340.anInt5586, local35 - -Static340.anInt5586, local51, local51, local45, local35 + Static340.anInt5586, Static340.anInt5586 + local35, local31, local31)) {
                     return false;
-                } else if (Static172.method2674(local31 + Static340.anInt5586, local35 - -Static340.anInt5586, local45, local51, local45, Static340.anInt5586 + local35, local35 + Static340.anInt5586, local31, local31 + Static340.anInt5586)) {
+                } else if (Static172.isTriangleOccluded(local31 + Static340.anInt5586, local35 - -Static340.anInt5586, local45, local51, local45, Static340.anInt5586 + local35, local35 + Static340.anInt5586, local31, local31 + Static340.anInt5586)) {
                     Static679.occludedWallCount++;
                     return true;
                 } else {
                     return false;
                 }
             } else if (arg2.aShort58 == 4) {
-                if (!Static172.method2674(Static340.anInt5586 + local31, local35, local51, local51, local45, local35, Static340.anInt5586 + local35, local31 - -Static340.anInt5586, Static340.anInt5586 + local31)) {
+                if (!Static172.isTriangleOccluded(Static340.anInt5586 + local31, local35, local51, local51, local45, local35, Static340.anInt5586 + local35, local31 - -Static340.anInt5586, Static340.anInt5586 + local31)) {
                     return false;
-                } else if (Static172.method2674(local31 + Static340.anInt5586, local35, local51, local45, local45, Static340.anInt5586 + local35, Static340.anInt5586 + local35, local31 + Static340.anInt5586, Static340.anInt5586 + local31)) {
+                } else if (Static172.isTriangleOccluded(local31 + Static340.anInt5586, local35, local51, local45, local45, Static340.anInt5586 + local35, Static340.anInt5586 + local35, local31 + Static340.anInt5586, Static340.anInt5586 + local31)) {
                     Static679.occludedWallCount++;
                     return true;
                 } else {
                     return false;
                 }
             } else if (arg2.aShort58 == 8) {
-                if (!Static172.method2674(Static340.anInt5586 + local31, local35, local51, local51, local45, local35, local35, local31, local31)) {
+                if (!Static172.isTriangleOccluded(Static340.anInt5586 + local31, local35, local51, local51, local45, local35, local35, local31, local31)) {
                     return false;
-                } else if (Static172.method2674(Static340.anInt5586 + local31, local35, local45, local51, local45, local35, local35, local31, local31 + Static340.anInt5586)) {
+                } else if (Static172.isTriangleOccluded(Static340.anInt5586 + local31, local35, local45, local51, local45, local35, local35, local31, local31 + Static340.anInt5586)) {
                     Static679.occludedWallCount++;
                     return true;
                 } else {
@@ -104,7 +104,7 @@ public final class Static73 {
                 @Pc(45) int absZ = (zoneZ * 64) - WorldMap.areaBaseZ;
                 Static557.method7331();
                 region.decodeMapSquare(packet, Client.collisionMaps, absX, absZ, WorldMap.areaBaseX, WorldMap.areaBaseZ);
-                region.method7893(absZ, packet, absX, Toolkit.active);
+                region.decodeStaticEnvironment(absZ, packet, absX, Toolkit.active);
             }
         }
 

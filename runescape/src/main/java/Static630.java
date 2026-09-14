@@ -43,7 +43,7 @@ public final class Static630 {
         if (ClientOptions.instance.animateBackground.getValue() == 0 && Static164.areaLevel != Camera.renderingLevel) {
             Static684.updateMapArea(false, Static62.areaCenterX, MainLogicStep.STEP_GAME_SCREEN_MAP_BUILD, Static525.areaCenterZ);
         } else {
-            Minimap.method2046(Toolkit.active);
+            Minimap.redrawIfLevelChanged(Toolkit.active);
             if (Static514.anInt7680 != Camera.renderingLevel) {
                 Static77.method1561();
             }

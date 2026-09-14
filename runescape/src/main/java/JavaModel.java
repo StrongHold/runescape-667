@@ -1881,7 +1881,7 @@ public final class JavaModel extends Model {
                 return;
             }
         } else if (this.faceBillboard[face] != -1 || (screenXA - screenXB) * (this.screenY[c] - this.screenY[b]) - (this.screenY[a] - this.screenY[b]) * (screenXC - screenXB) > 0) {
-            if (screenXA >= 0 && screenXB >= 0 && screenXC >= 0 && screenXA <= this.threadResource.anInt10607 && screenXB <= this.threadResource.anInt10607 && screenXC <= this.threadResource.anInt10607) {
+            if (screenXA >= 0 && screenXB >= 0 && screenXC >= 0 && screenXA <= this.threadResource.rasterWidth && screenXB <= this.threadResource.rasterWidth && screenXC <= this.threadResource.rasterWidth) {
                 this.rasterizer.clamp = false;
             } else {
                 this.rasterizer.clamp = true;
@@ -3226,16 +3226,16 @@ public final class JavaModel extends Model {
             local110 = this.faceColourA[face] & 0xFFFF;
             if (depthC >= zNear) {
                 local123 = (zNear - depthA) * (65536 / (depthC - depthA));
-                this.clippedX[0] = this.threadResource.anInt10606 + (local98 + ((this.cameraX[c] - local98) * local123 >> 16)) * this.toolkit.projectionScaleX / zNear;
-                this.clippedY[0] = this.threadResource.anInt10608 + (local103 + ((this.cameraY[c] - local103) * local123 >> 16)) * this.toolkit.projectionScaleY / zNear;
+                this.clippedX[0] = this.threadResource.rasterMinX + (local98 + ((this.cameraX[c] - local98) * local123 >> 16)) * this.toolkit.projectionScaleX / zNear;
+                this.clippedY[0] = this.threadResource.rasterMinY + (local103 + ((this.cameraY[c] - local103) * local123 >> 16)) * this.toolkit.projectionScaleY / zNear;
                 this.clippedZ[0] = zNear;
                 count++;
                 this.clippedColour[0] = local110 + (((this.faceColourC[face] & 0xFFFF) - local110) * local123 >> 16);
             }
             if (depthB >= zNear) {
                 local123 = (zNear - depthA) * (65536 / (depthB - depthA));
-                this.clippedX[count] = this.threadResource.anInt10606 + (local98 + ((this.cameraX[b] - local98) * local123 >> 16)) * this.toolkit.projectionScaleX / zNear;
-                this.clippedY[count] = this.threadResource.anInt10608 + (local103 + ((this.cameraY[b] - local103) * local123 >> 16)) * this.toolkit.projectionScaleY / zNear;
+                this.clippedX[count] = this.threadResource.rasterMinX + (local98 + ((this.cameraX[b] - local98) * local123 >> 16)) * this.toolkit.projectionScaleX / zNear;
+                this.clippedY[count] = this.threadResource.rasterMinY + (local103 + ((this.cameraY[b] - local103) * local123 >> 16)) * this.toolkit.projectionScaleY / zNear;
                 this.clippedZ[count] = zNear;
                 this.clippedColour[count++] = local110 + (((this.faceColourB[face] & 0xFFFF) - local110) * local123 >> 16);
             }
@@ -3251,15 +3251,15 @@ public final class JavaModel extends Model {
             local110 = this.faceColourB[face] & 0xFFFF;
             if (depthA >= zNear) {
                 local123 = (zNear - depthB) * (65536 / (depthA - depthB));
-                this.clippedX[count] = this.threadResource.anInt10606 + (local98 + ((this.cameraX[a] - local98) * local123 >> 16)) * this.toolkit.projectionScaleX / zNear;
-                this.clippedY[count] = this.threadResource.anInt10608 + (local103 + ((this.cameraY[a] - local103) * local123 >> 16)) * this.toolkit.projectionScaleY / zNear;
+                this.clippedX[count] = this.threadResource.rasterMinX + (local98 + ((this.cameraX[a] - local98) * local123 >> 16)) * this.toolkit.projectionScaleX / zNear;
+                this.clippedY[count] = this.threadResource.rasterMinY + (local103 + ((this.cameraY[a] - local103) * local123 >> 16)) * this.toolkit.projectionScaleY / zNear;
                 this.clippedZ[count] = zNear;
                 this.clippedColour[count++] = local110 + (((this.faceColourA[face] & 0xFFFF) - local110) * local123 >> 16);
             }
             if (depthC >= zNear) {
                 local123 = (zNear - depthB) * (65536 / (depthC - depthB));
-                this.clippedX[count] = this.threadResource.anInt10606 + (local98 + ((this.cameraX[c] - local98) * local123 >> 16)) * this.toolkit.projectionScaleX / zNear;
-                this.clippedY[count] = this.threadResource.anInt10608 + (local103 + ((this.cameraY[c] - local103) * local123 >> 16)) * this.toolkit.projectionScaleY / zNear;
+                this.clippedX[count] = this.threadResource.rasterMinX + (local98 + ((this.cameraX[c] - local98) * local123 >> 16)) * this.toolkit.projectionScaleX / zNear;
+                this.clippedY[count] = this.threadResource.rasterMinY + (local103 + ((this.cameraY[c] - local103) * local123 >> 16)) * this.toolkit.projectionScaleY / zNear;
                 this.clippedZ[count] = zNear;
                 this.clippedColour[count++] = local110 + (((this.faceColourC[face] & 0xFFFF) - local110) * local123 >> 16);
             }
@@ -3275,15 +3275,15 @@ public final class JavaModel extends Model {
             local110 = this.faceColourC[face] & 0xFFFF;
             if (depthB >= zNear) {
                 local123 = (zNear - depthC) * (65536 / (depthB - depthC));
-                this.clippedX[count] = this.threadResource.anInt10606 + (local98 + ((this.cameraX[b] - local98) * local123 >> 16)) * this.toolkit.projectionScaleX / zNear;
-                this.clippedY[count] = this.threadResource.anInt10608 + (local103 + ((this.cameraY[b] - local103) * local123 >> 16)) * this.toolkit.projectionScaleY / zNear;
+                this.clippedX[count] = this.threadResource.rasterMinX + (local98 + ((this.cameraX[b] - local98) * local123 >> 16)) * this.toolkit.projectionScaleX / zNear;
+                this.clippedY[count] = this.threadResource.rasterMinY + (local103 + ((this.cameraY[b] - local103) * local123 >> 16)) * this.toolkit.projectionScaleY / zNear;
                 this.clippedZ[count] = zNear;
                 this.clippedColour[count++] = local110 + (((this.faceColourB[face] & 0xFFFF) - local110) * local123 >> 16);
             }
             if (depthA >= zNear) {
                 local123 = (zNear - depthC) * (65536 / (depthA - depthC));
-                this.clippedX[count] = this.threadResource.anInt10606 + (local98 + ((this.cameraX[a] - local98) * local123 >> 16)) * this.toolkit.projectionScaleX / zNear;
-                this.clippedY[count] = this.threadResource.anInt10608 + (local103 + ((this.cameraY[a] - local103) * local123 >> 16)) * this.toolkit.projectionScaleY / zNear;
+                this.clippedX[count] = this.threadResource.rasterMinX + (local98 + ((this.cameraX[a] - local98) * local123 >> 16)) * this.toolkit.projectionScaleX / zNear;
+                this.clippedY[count] = this.threadResource.rasterMinY + (local103 + ((this.cameraY[a] - local103) * local123 >> 16)) * this.toolkit.projectionScaleY / zNear;
                 this.clippedZ[count] = zNear;
                 this.clippedColour[count++] = local110 + (((this.faceColourA[face] & 0xFFFF) - local110) * local123 >> 16);
             }
@@ -3301,7 +3301,7 @@ public final class JavaModel extends Model {
         @Pc(938) int local938;
         @Pc(961) int local961;
         if (count == 3) {
-            if (local98 < 0 || local103 < 0 || local110 < 0 || local98 > this.threadResource.anInt10607 || local103 > this.threadResource.anInt10607 || local110 > this.threadResource.anInt10607) {
+            if (local98 < 0 || local103 < 0 || local110 < 0 || local98 > this.threadResource.rasterWidth || local103 > this.threadResource.rasterWidth || local110 > this.threadResource.rasterWidth) {
                 this.rasterizer.clamp = true;
             }
             if (this.faceTextures != null && this.faceTextures[face] != -1) {
@@ -3324,7 +3324,7 @@ public final class JavaModel extends Model {
         if (count != 4) {
             return;
         }
-        if (local98 < 0 || local103 < 0 || local110 < 0 || local98 > this.threadResource.anInt10607 || local103 > this.threadResource.anInt10607 || local110 > this.threadResource.anInt10607 || this.clippedX[3] < 0 || this.clippedX[3] > this.threadResource.anInt10607) {
+        if (local98 < 0 || local103 < 0 || local110 < 0 || local98 > this.threadResource.rasterWidth || local103 > this.threadResource.rasterWidth || local110 > this.threadResource.rasterWidth || this.clippedX[3] < 0 || this.clippedX[3] > this.threadResource.rasterWidth) {
             this.rasterizer.clamp = true;
         }
         if (this.faceTextures == null || this.faceTextures[face] == -1) {
@@ -3361,23 +3361,23 @@ public final class JavaModel extends Model {
             return;
         }
         this.threadResource = resource;
-        this.worldY = this.threadResource.anIntArray845;
-        this.cameraX = this.threadResource.anIntArray854;
-        this.cameraY = this.threadResource.anIntArray849;
-        this.cameraZ = this.threadResource.anIntArray839;
-        this.screenX = this.threadResource.anIntArray851;
-        this.screenY = this.threadResource.anIntArray846;
-        this.screenZ = this.threadResource.anIntArray838;
-        this.boundsCornerX = this.threadResource.anIntArray844;
-        this.boundsCornerY = this.threadResource.anIntArray842;
-        this.boundsCornerZ = this.threadResource.anIntArray837;
-        this.clippedX = this.threadResource.anIntArray847;
-        this.clippedY = this.threadResource.anIntArray850;
-        this.clippedZ = this.threadResource.anIntArray841;
-        this.clippedColour = this.threadResource.anIntArray848;
-        this.mergeStamps = this.threadResource.anIntArray835;
-        this.otherMergeStamps = this.threadResource.anIntArray836;
-        this.faceBillboard = this.threadResource.anIntArray853;
+        this.worldY = this.threadResource.worldY;
+        this.cameraX = this.threadResource.cameraX;
+        this.cameraY = this.threadResource.cameraY;
+        this.cameraZ = this.threadResource.cameraZ;
+        this.screenX = this.threadResource.vertexScreenX;
+        this.screenY = this.threadResource.vertexScreenY;
+        this.screenZ = this.threadResource.vertexScreenZ;
+        this.boundsCornerX = this.threadResource.boundsCornerX;
+        this.boundsCornerY = this.threadResource.boundsCornerY;
+        this.boundsCornerZ = this.threadResource.boundsCornerZ;
+        this.clippedX = this.threadResource.clippedX;
+        this.clippedY = this.threadResource.clippedY;
+        this.clippedZ = this.threadResource.clippedZ;
+        this.clippedColour = this.threadResource.clippedColour;
+        this.mergeStamps = this.threadResource.mergeStamps;
+        this.otherMergeStamps = this.threadResource.otherMergeStamps;
+        this.faceBillboard = this.threadResource.faceBillboard;
     }
 
     @OriginalMember(owner = "client!rs", name = "a", descriptor = "(IIIIIIII)Z")
@@ -3445,16 +3445,16 @@ public final class JavaModel extends Model {
             local110 = this.faceColourA[face] & 0xFFFF;
             if (depthC >= zNear) {
                 local123 = (zNear - depthA) * (65536 / (depthC - depthA));
-                this.clippedX[0] = this.threadResource.anInt10606 + (local98 + ((this.cameraX[c] - local98) * local123 >> 16)) * this.toolkit.projectionScaleX / zNear;
-                this.clippedY[0] = this.threadResource.anInt10608 + (local103 + ((this.cameraY[c] - local103) * local123 >> 16)) * this.toolkit.projectionScaleY / zNear;
+                this.clippedX[0] = this.threadResource.rasterMinX + (local98 + ((this.cameraX[c] - local98) * local123 >> 16)) * this.toolkit.projectionScaleX / zNear;
+                this.clippedY[0] = this.threadResource.rasterMinY + (local103 + ((this.cameraY[c] - local103) * local123 >> 16)) * this.toolkit.projectionScaleY / zNear;
                 this.clippedZ[0] = zNear;
                 count++;
                 this.clippedColour[0] = local110 + (((this.faceColourC[face] & 0xFFFF) - local110) * local123 >> 16);
             }
             if (depthB >= zNear) {
                 local123 = (zNear - depthA) * (65536 / (depthB - depthA));
-                this.clippedX[count] = this.threadResource.anInt10606 + (local98 + ((this.cameraX[b] - local98) * local123 >> 16)) * this.toolkit.projectionScaleX / zNear;
-                this.clippedY[count] = this.threadResource.anInt10608 + (local103 + ((this.cameraY[b] - local103) * local123 >> 16)) * this.toolkit.projectionScaleY / zNear;
+                this.clippedX[count] = this.threadResource.rasterMinX + (local98 + ((this.cameraX[b] - local98) * local123 >> 16)) * this.toolkit.projectionScaleX / zNear;
+                this.clippedY[count] = this.threadResource.rasterMinY + (local103 + ((this.cameraY[b] - local103) * local123 >> 16)) * this.toolkit.projectionScaleY / zNear;
                 this.clippedZ[count] = zNear;
                 this.clippedColour[count++] = local110 + (((this.faceColourB[face] & 0xFFFF) - local110) * local123 >> 16);
             }
@@ -3470,15 +3470,15 @@ public final class JavaModel extends Model {
             local110 = this.faceColourB[face] & 0xFFFF;
             if (depthA >= zNear) {
                 local123 = (zNear - depthB) * (65536 / (depthA - depthB));
-                this.clippedX[count] = this.threadResource.anInt10606 + (local98 + ((this.cameraX[a] - local98) * local123 >> 16)) * this.toolkit.projectionScaleX / zNear;
-                this.clippedY[count] = this.threadResource.anInt10608 + (local103 + ((this.cameraY[a] - local103) * local123 >> 16)) * this.toolkit.projectionScaleY / zNear;
+                this.clippedX[count] = this.threadResource.rasterMinX + (local98 + ((this.cameraX[a] - local98) * local123 >> 16)) * this.toolkit.projectionScaleX / zNear;
+                this.clippedY[count] = this.threadResource.rasterMinY + (local103 + ((this.cameraY[a] - local103) * local123 >> 16)) * this.toolkit.projectionScaleY / zNear;
                 this.clippedZ[count] = zNear;
                 this.clippedColour[count++] = local110 + (((this.faceColourA[face] & 0xFFFF) - local110) * local123 >> 16);
             }
             if (depthC >= zNear) {
                 local123 = (zNear - depthB) * (65536 / (depthC - depthB));
-                this.clippedX[count] = this.threadResource.anInt10606 + (local98 + ((this.cameraX[c] - local98) * local123 >> 16)) * this.toolkit.projectionScaleX / zNear;
-                this.clippedY[count] = this.threadResource.anInt10608 + (local103 + ((this.cameraY[c] - local103) * local123 >> 16)) * this.toolkit.projectionScaleY / zNear;
+                this.clippedX[count] = this.threadResource.rasterMinX + (local98 + ((this.cameraX[c] - local98) * local123 >> 16)) * this.toolkit.projectionScaleX / zNear;
+                this.clippedY[count] = this.threadResource.rasterMinY + (local103 + ((this.cameraY[c] - local103) * local123 >> 16)) * this.toolkit.projectionScaleY / zNear;
                 this.clippedZ[count] = zNear;
                 this.clippedColour[count++] = local110 + (((this.faceColourC[face] & 0xFFFF) - local110) * local123 >> 16);
             }
@@ -3494,15 +3494,15 @@ public final class JavaModel extends Model {
             local110 = this.faceColourC[face] & 0xFFFF;
             if (depthB >= zNear) {
                 local123 = (zNear - depthC) * (65536 / (depthB - depthC));
-                this.clippedX[count] = this.threadResource.anInt10606 + (local98 + ((this.cameraX[b] - local98) * local123 >> 16)) * this.toolkit.projectionScaleX / zNear;
-                this.clippedY[count] = this.threadResource.anInt10608 + (local103 + ((this.cameraY[b] - local103) * local123 >> 16)) * this.toolkit.projectionScaleY / zNear;
+                this.clippedX[count] = this.threadResource.rasterMinX + (local98 + ((this.cameraX[b] - local98) * local123 >> 16)) * this.toolkit.projectionScaleX / zNear;
+                this.clippedY[count] = this.threadResource.rasterMinY + (local103 + ((this.cameraY[b] - local103) * local123 >> 16)) * this.toolkit.projectionScaleY / zNear;
                 this.clippedZ[count] = zNear;
                 this.clippedColour[count++] = local110 + (((this.faceColourB[face] & 0xFFFF) - local110) * local123 >> 16);
             }
             if (depthA >= zNear) {
                 local123 = (zNear - depthC) * (65536 / (depthA - depthC));
-                this.clippedX[count] = this.threadResource.anInt10606 + (local98 + ((this.cameraX[a] - local98) * local123 >> 16)) * this.toolkit.projectionScaleX / zNear;
-                this.clippedY[count] = this.threadResource.anInt10608 + (local103 + ((this.cameraY[a] - local103) * local123 >> 16)) * this.toolkit.projectionScaleY / zNear;
+                this.clippedX[count] = this.threadResource.rasterMinX + (local98 + ((this.cameraX[a] - local98) * local123 >> 16)) * this.toolkit.projectionScaleX / zNear;
+                this.clippedY[count] = this.threadResource.rasterMinY + (local103 + ((this.cameraY[a] - local103) * local123 >> 16)) * this.toolkit.projectionScaleY / zNear;
                 this.clippedZ[count] = zNear;
                 this.clippedColour[count++] = local110 + (((this.faceColourA[face] & 0xFFFF) - local110) * local123 >> 16);
             }
@@ -3520,7 +3520,7 @@ public final class JavaModel extends Model {
         @Pc(938) int local938;
         @Pc(961) int local961;
         if (count == 3) {
-            if (local98 < 0 || local103 < 0 || local110 < 0 || local98 > this.threadResource.anInt10607 || local103 > this.threadResource.anInt10607 || local110 > this.threadResource.anInt10607) {
+            if (local98 < 0 || local103 < 0 || local110 < 0 || local98 > this.threadResource.rasterWidth || local103 > this.threadResource.rasterWidth || local110 > this.threadResource.rasterWidth) {
                 this.rasterizer.clamp = true;
             }
             if (this.faceTextures != null && this.faceTextures[face] != -1) {
@@ -3543,7 +3543,7 @@ public final class JavaModel extends Model {
         if (count != 4) {
             return;
         }
-        if (local98 < 0 || local103 < 0 || local110 < 0 || local98 > this.threadResource.anInt10607 || local103 > this.threadResource.anInt10607 || local110 > this.threadResource.anInt10607 || this.clippedX[3] < 0 || this.clippedX[3] > this.threadResource.anInt10607) {
+        if (local98 < 0 || local103 < 0 || local110 < 0 || local98 > this.threadResource.rasterWidth || local103 > this.threadResource.rasterWidth || local110 > this.threadResource.rasterWidth || this.clippedX[3] < 0 || this.clippedX[3] > this.threadResource.rasterWidth) {
             this.rasterizer.clamp = true;
         }
         if (this.faceTextures == null || this.faceTextures[face] == -1) {
@@ -3608,7 +3608,7 @@ public final class JavaModel extends Model {
                 return;
             }
         } else if (this.faceBillboard[face] != -1 || (screenXA - screenXB) * (this.screenY[c] - this.screenY[b]) - (this.screenY[a] - this.screenY[b]) * (screenXC - screenXB) > 0) {
-            if (screenXA >= 0 && screenXB >= 0 && screenXC >= 0 && screenXA <= this.threadResource.anInt10607 && screenXB <= this.threadResource.anInt10607 && screenXC <= this.threadResource.anInt10607) {
+            if (screenXA >= 0 && screenXB >= 0 && screenXC >= 0 && screenXA <= this.threadResource.rasterWidth && screenXB <= this.threadResource.rasterWidth && screenXC <= this.threadResource.rasterWidth) {
                 this.rasterizer.clamp = false;
             } else {
                 this.rasterizer.clamp = true;
@@ -3911,13 +3911,13 @@ public final class JavaModel extends Model {
             local441 = (local420 + this.radius) * this.toolkit.projectionScaleY;
         }
         if (orthoDepth == -1) {
-            if (local432 / local176 >= this.toolkit.vewY2) {
+            if (local432 / local176 >= this.toolkit.viewY2) {
                 return;
             }
             if (local441 / local176 <= this.toolkit.viewY1) {
                 return;
             }
-        } else if (local432 / orthoDepth >= this.toolkit.vewY2) {
+        } else if (local432 / orthoDepth >= this.toolkit.viewY2) {
             return;
         } else if (local441 / orthoDepth <= this.toolkit.viewY1) {
             return;
@@ -3964,9 +3964,9 @@ public final class JavaModel extends Model {
         @Pc(694) boolean local694 = false;
         @Pc(704) boolean local704 = local171 <= this.toolkit.zNear;
         @Pc(721) boolean local721 = local704 || this.emitters != null || this.effectors != null;
-        this.threadResource.anInt10607 = this.rasterizer.width;
-        this.threadResource.anInt10606 = this.rasterizer.minX;
-        this.threadResource.anInt10608 = this.rasterizer.minY;
+        this.threadResource.rasterWidth = this.rasterizer.width;
+        this.threadResource.rasterMinX = this.rasterizer.minX;
+        this.threadResource.rasterMinY = this.rasterizer.minY;
         @Pc(743) int local743 = this.toolkit.projectionScaleX;
         @Pc(747) int local747 = this.toolkit.projectionScaleY;
         @Pc(751) int local751 = this.toolkit.zNear;
@@ -3993,8 +3993,8 @@ public final class JavaModel extends Model {
                 local823 = local118 + local512 * (float) local762 + local145 * (float) local767 + local521 * (float) local772;
                 this.screenZ[local756] = (int) local823;
                 if (local823 >= (float) local751) {
-                    this.screenX[local756] = this.threadResource.anInt10606 + (int) (local789 * (float) local743 / local823);
-                    this.screenY[local756] = this.threadResource.anInt10608 + (int) (local806 * (float) local747 / local823);
+                    this.screenX[local756] = this.threadResource.rasterMinX + (int) (local789 * (float) local743 / local823);
+                    this.screenY[local756] = this.threadResource.rasterMinY + (int) (local806 * (float) local747 / local823);
                 } else {
                     this.screenX[local756] = -5000;
                     local694 = true;
@@ -4041,8 +4041,8 @@ public final class JavaModel extends Model {
                 local806 = local375 + local509 * (float) local762 + local402 * (float) local767 + local518 * (float) local772;
                 local823 = local118 + local512 * (float) local762 + local145 * (float) local767 + local521 * (float) local772;
                 this.screenZ[local756] = (int) local823;
-                this.screenX[local756] = this.threadResource.anInt10606 + (int) (local789 * (float) local743 / (float) orthoDepth);
-                this.screenY[local756] = this.threadResource.anInt10608 + (int) (local806 * (float) local747 / (float) orthoDepth);
+                this.screenX[local756] = this.threadResource.rasterMinX + (int) (local789 * (float) local743 / (float) orthoDepth);
+                this.screenY[local756] = this.threadResource.rasterMinY + (int) (local806 * (float) local747 / (float) orthoDepth);
                 if (local721) {
                     this.cameraX[local756] = (int) local789;
                     this.cameraY[local756] = (int) local806;

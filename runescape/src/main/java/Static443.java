@@ -29,7 +29,7 @@ public final class Static443 {
 
         InterfaceManager.mainLogic(InterfaceManager.topLevelInterface, parentX, parentY, parentX + mouseX, parentY + GameShell.canvasHei, parentX, parentY, mouseX, mouseY, mouseY + parentY, parentX + GameShell.canvasWid);
         if (WorldMap.component != null) {
-            WorldMap.method6759(mouseX + parentX, mouseY - -parentY);
+            WorldMap.tick(mouseX + parentX, mouseY - -parentY);
         }
     }
 

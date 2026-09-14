@@ -27,22 +27,22 @@ public abstract class JavaSprite extends Sprite {
     protected final JavaToolkit toolkit;
 
     @OriginalMember(owner = "client!qc", name = "z", descriptor = "I")
-    public final int anInt9302;
+    public final int width;
 
     @OriginalMember(owner = "client!qc", name = "u", descriptor = "I")
-    public final int anInt9306;
+    public final int height;
 
     @OriginalMember(owner = "client!qc", name = "<init>", descriptor = "(Lclient!iaa;II)V")
     public JavaSprite(@OriginalArg(0) JavaToolkit toolkit, @OriginalArg(1) int width, @OriginalArg(2) int height) {
         this.toolkit = toolkit;
-        this.anInt9302 = width;
-        this.anInt9306 = height;
+        this.width = width;
+        this.height = height;
     }
 
     @OriginalMember(owner = "client!qc", name = "a", descriptor = "()I")
     @Override
     public final int scaleHeight() {
-        return this.topMargin + this.anInt9306 + this.bottomMargin;
+        return this.topMargin + this.height + this.bottomMargin;
     }
 
     @OriginalMember(owner = "client!qc", name = "a", descriptor = "(IILclient!aa;II)V")
@@ -60,7 +60,7 @@ public abstract class JavaSprite extends Sprite {
     @OriginalMember(owner = "client!qc", name = "d", descriptor = "()I")
     @Override
     public final int getHeight() {
-        return this.anInt9306;
+        return this.height;
     }
 
     @OriginalMember(owner = "client!qc", name = "a", descriptor = "(IIIIIIII)V")
@@ -75,7 +75,7 @@ public abstract class JavaSprite extends Sprite {
     @OriginalMember(owner = "client!qc", name = "c", descriptor = "()I")
     @Override
     public final int getWidth() {
-        return this.anInt9302;
+        return this.width;
     }
 
     @OriginalMember(owner = "client!qc", name = "a", descriptor = "(FFFFFFILclient!aa;II)V")
@@ -126,7 +126,7 @@ public abstract class JavaSprite extends Sprite {
     @OriginalMember(owner = "client!qc", name = "b", descriptor = "()I")
     @Override
     public final int scaleWidth() {
-        return this.leftMargin + this.anInt9302 + this.rightMargin;
+        return this.leftMargin + this.width + this.rightMargin;
     }
 
     @OriginalMember(owner = "client!qc", name = "c", descriptor = "(IIII)V")
@@ -173,8 +173,8 @@ public abstract class JavaSprite extends Sprite {
 
     @OriginalMember(owner = "client!qc", name = "a", descriptor = "(FFFFFF)Z")
     public boolean setupParallelogram(@OriginalArg(0) float centerX, @OriginalArg(1) float centerY, @OriginalArg(2) float x1, @OriginalArg(3) float y1, @OriginalArg(4) float x2, @OriginalArg(5) float y2) {
-        @Pc(8) int scaleWidth = this.leftMargin + this.anInt9302 + this.rightMargin;
-        @Pc(17) int scaleHeight = this.topMargin + this.anInt9306 + this.bottomMargin;
+        @Pc(8) int scaleWidth = this.leftMargin + this.width + this.rightMargin;
+        @Pc(17) int scaleHeight = this.topMargin + this.height + this.bottomMargin;
         @Pc(34) float local34;
         @Pc(41) float local41;
         @Pc(48) float local48;
@@ -183,7 +183,7 @@ public abstract class JavaSprite extends Sprite {
         @Pc(67) float local67;
         @Pc(73) float local73;
         @Pc(79) float local79;
-        if (scaleWidth != this.anInt9302 || scaleHeight != this.anInt9306) {
+        if (scaleWidth != this.width || scaleHeight != this.height) {
             local34 = (x1 - centerX) / (float) scaleWidth;
             local41 = (y1 - centerY) / (float) scaleWidth;
             local48 = (x2 - centerX) / (float) scaleHeight;
@@ -267,14 +267,14 @@ public abstract class JavaSprite extends Sprite {
         JavaSpriteBlitState.rowOffset = (int) ((float) ((int) local61 * JavaSpriteBlitState.dstStride) + local48);
         local73 = (x1 - centerX) * (y2 - centerY) - (y1 - centerY) * (x2 - centerX);
         local79 = (x2 - centerX) * (y1 - centerY) - (y2 - centerY) * (x1 - centerX);
-        JavaSpriteBlitState.duDx = (int) ((y2 - centerY) * 4096.0F * (float) this.anInt9302 / local73);
-        JavaSpriteBlitState.dvDx = (int) ((y1 - centerY) * 4096.0F * (float) this.anInt9306 / local79);
-        JavaSpriteBlitState.duDy = (int) ((x2 - centerX) * 4096.0F * (float) this.anInt9302 / local79);
-        JavaSpriteBlitState.dvDy = (int) ((x1 - centerX) * 4096.0F * (float) this.anInt9306 / local73);
+        JavaSpriteBlitState.duDx = (int) ((y2 - centerY) * 4096.0F * (float) this.width / local73);
+        JavaSpriteBlitState.dvDx = (int) ((y1 - centerY) * 4096.0F * (float) this.height / local79);
+        JavaSpriteBlitState.duDy = (int) ((x2 - centerX) * 4096.0F * (float) this.width / local79);
+        JavaSpriteBlitState.dvDy = (int) ((x1 - centerX) * 4096.0F * (float) this.height / local73);
         JavaSpriteBlitState.xBias = (int) (local48 * 16.0F + 8.0F - (centerX + x1 + x2 + local34) / 4.0F * 16.0F);
         JavaSpriteBlitState.yBias = (int) (local61 * 16.0F + 8.0F - (centerY + y1 + y2 + local41) / 4.0F * 16.0F);
-        JavaSpriteBlitState.rowU = (this.anInt9302 >> 1 << 12) + (JavaSpriteBlitState.yBias * JavaSpriteBlitState.duDy >> 4);
-        JavaSpriteBlitState.rowV = (this.anInt9306 >> 1 << 12) + (JavaSpriteBlitState.yBias * JavaSpriteBlitState.dvDy >> 4);
+        JavaSpriteBlitState.rowU = (this.width >> 1 << 12) + (JavaSpriteBlitState.yBias * JavaSpriteBlitState.duDy >> 4);
+        JavaSpriteBlitState.rowV = (this.height >> 1 << 12) + (JavaSpriteBlitState.yBias * JavaSpriteBlitState.dvDy >> 4);
         JavaSpriteBlitState.uBias = JavaSpriteBlitState.xBias * JavaSpriteBlitState.duDx >> 4;
         JavaSpriteBlitState.vBias = JavaSpriteBlitState.xBias * JavaSpriteBlitState.dvDx >> 4;
         JavaSpriteBlitState.minX = (int) local48;

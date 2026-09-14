@@ -19,7 +19,7 @@ import java.awt.Rectangle;
  * Draws the world through an oversized surface, so that a camera which only pans can reuse the
  * pixels it drew on the previous frame.
  * <p>
- * The field {@code anInt6796} selects how that surface is held: mode 0 keeps a single buffer with a
+ * The field {@link #mode} selects how that surface is held: mode 0 keeps a single buffer with a
  * {@link #borderX} by {@link #borderY} margin around the view, mode 1 keeps a wrapping grid of
  * {@link #tileWidth} by {@link #tileHeight} tiles, and mode 2 draws straight to the display. The
  * retained pixels are scrolled by {@link #scrollX} and {@link #scrollY} and only the strips that
@@ -32,10 +32,10 @@ public final class OrthoMode {
     public static final PickList orthoPickList = new PickList(true);
 
     @OriginalMember(owner = "client!rw", name = "v", descriptor = "I")
-    public static int anInt8534;
+    public static int surfaceWidth;
 
     @OriginalMember(owner = "client!sba", name = "d", descriptor = "I")
-    public static int anInt8585;
+    public static int surfaceHeight;
 
     @OriginalMember(owner = "client!bba", name = "L", descriptor = "I")
     public static int tileSizeX = 100;
@@ -50,7 +50,7 @@ public final class OrthoMode {
     public static boolean toolkitActive = false;
 
     @OriginalMember(owner = "client!oc", name = "j", descriptor = "I")
-    public static int anInt6796;
+    public static int mode;
 
     @OriginalMember(owner = "client!cga", name = "b", descriptor = "Lclient!ha;")
     public static Toolkit toolkit;
@@ -62,7 +62,7 @@ public final class OrthoMode {
     public static Matrix zCameraMatrix;
 
     @OriginalMember(owner = "client!wj", name = "Lc", descriptor = "Lclient!tt;")
-    public static Matrix aMatrix_11;
+    public static Matrix savedCamera;
 
     @OriginalMember(owner = "client!np", name = "v", descriptor = "I")
     public static int tileWidth;
@@ -122,7 +122,7 @@ public final class OrthoMode {
     public static int drawX;
 
     @OriginalMember(owner = "client!jt", name = "f", descriptor = "I")
-    public static int anInt5001;
+    public static int drawY;
 
     @OriginalMember(owner = "client!ld", name = "a", descriptor = "I")
     public static int cameraX;
@@ -164,16 +164,16 @@ public final class OrthoMode {
     public static int screenViewportHeight;
 
     @OriginalMember(owner = "client!km", name = "d", descriptor = "I")
-    public static int anInt5563;
+    public static int savedViewportX;
 
     @OriginalMember(owner = "client!uc", name = "r", descriptor = "I")
-    public static int anInt9536;
+    public static int savedViewportY;
 
     @OriginalMember(owner = "client!ffa", name = "g", descriptor = "I")
-    public static int anInt2888;
+    public static int savedViewportWidth;
 
     @OriginalMember(owner = "client!tv", name = "e", descriptor = "I")
-    public static int anInt9494;
+    public static int savedViewportHeight;
 
     @OriginalMember(owner = "client!rfa", name = "u", descriptor = "I")
     public static int backgroundColour = 0;
@@ -185,7 +185,7 @@ public final class OrthoMode {
     public static int cachedViewportY;
 
     @OriginalMember(owner = "client!nla", name = "Q", descriptor = "I")
-    public static int anInt6565;
+    public static int cachedViewportWidth;
 
     @OriginalMember(owner = "client!uga", name = "c", descriptor = "I")
     public static int cachedViewportHeight;
@@ -201,8 +201,8 @@ public final class OrthoMode {
         @Pc(6) Dimension dimension = canvas.getSize();
         method5454(dimension.height, dimension.width);
 
-        if (anInt6796 == 1) {
-            toolkit.resizeCanvas(canvas, anInt8534, anInt8585);
+        if (mode == 1) {
+            toolkit.resizeCanvas(canvas, surfaceWidth, surfaceHeight);
         } else {
             toolkit.resizeCanvas(canvas, orthoWidth, orthoHeight);
         }
@@ -213,10 +213,10 @@ public final class OrthoMode {
         OrthoMode.toolkit = toolkit;
         cameraMatrix = OrthoMode.toolkit.createMatrix();
         zCameraMatrix = OrthoMode.toolkit.createMatrix();
-        aMatrix_11 = OrthoMode.toolkit.createMatrix();
+        savedCamera = OrthoMode.toolkit.createMatrix();
         OrthoMode.tileWidth = tileWidth;
         extraTilesX = 2;
-        anInt6796 = 1;
+        mode = 1;
         tileOffsetY = 0;
         tileOffsetX = 0;
         extraTilesY = 2;
@@ -230,12 +230,12 @@ public final class OrthoMode {
         OrthoMode.toolkit = toolkit;
         cameraMatrix = toolkit.createMatrix();
         zCameraMatrix = toolkit.createMatrix();
-        aMatrix_11 = toolkit.createMatrix();
+        savedCamera = toolkit.createMatrix();
         tileStamps = null;
         borderX = 100;
         borderY = 100;
         tiles = null;
-        anInt6796 = 0;
+        mode = 0;
         method5454(height, width);
         cameraRotateZ = -1;
         cameraRotateX = -1;
@@ -250,11 +250,11 @@ public final class OrthoMode {
         tileStamps = null;
         cameraMatrix = null;
         cameraRotateY = -1;
-        anInt6796 = -1;
+        mode = -1;
         toolkit = null;
         cameraRotateX = -1;
         tiles = null;
-        aMatrix_11 = null;
+        savedCamera = null;
         orthoPickList.clear();
     }
 
@@ -283,8 +283,8 @@ public final class OrthoMode {
 
     @OriginalMember(owner = "client!nja", name = "d", descriptor = "(B)V")
     public static void flip() throws FlipException {
-        if (anInt6796 == 1) {
-            toolkit.flip(drawX, anInt5001);
+        if (mode == 1) {
+            toolkit.flip(drawX, drawY);
         } else {
             toolkit.flip(0, 0);
         }
@@ -292,7 +292,7 @@ public final class OrthoMode {
 
     @OriginalMember(owner = "client!eb", name = "a", descriptor = "(I)I")
     public static int method2283() {
-        return anInt6796 == 1 ? drawX : 0;
+        return mode == 1 ? drawX : 0;
     }
 
     @OriginalMember(owner = "client!mca", name = "a", descriptor = "(III)V")
@@ -304,10 +304,10 @@ public final class OrthoMode {
         @Pc(9) int oldTilesX = tilesX;
         @Pc(16) int oldTilesY = tilesY;
         updateSurfaceSize(height, width);
-        if (anInt6796 == 0) {
+        if (mode == 0) {
             surface = null;
-            surface = toolkit.createOffscreenSurface(toolkit.method7962(anInt8534, anInt8585), toolkit.method7986(anInt8534, anInt8585));
-        } else if (anInt6796 == 1 && (tiles == null || oldTilesX != tilesX || oldTilesY != tilesY)) {
+            surface = toolkit.createOffscreenSurface(toolkit.method7962(surfaceWidth, surfaceHeight), toolkit.method7986(surfaceWidth, surfaceHeight));
+        } else if (mode == 1 && (tiles == null || oldTilesX != tilesX || oldTilesY != tilesY)) {
             tiles = new OffscreenSurface[tilesX * tilesY];
             for (@Pc(74) int i = 0; i < tiles.length; i++) {
                 tiles[i] = toolkit.createOffscreenSurface(toolkit.method7962(tileWidth, tileHeight), toolkit.method7986(tileWidth, tileHeight));
@@ -320,7 +320,7 @@ public final class OrthoMode {
 
     @OriginalMember(owner = "client!vka", name = "a", descriptor = "(IIIBI)V")
     public static void method8927(@OriginalArg(2) int x1, @OriginalArg(4) int x2, @OriginalArg(0) int y1, @OriginalArg(1) int y2) {
-        if (anInt6796 != 1) {
+        if (mode != 1) {
             return;
         }
         @Pc(14) int tileX1 = x1 / tileWidth;
@@ -367,7 +367,7 @@ public final class OrthoMode {
 
     @OriginalMember(owner = "client!om", name = "a", descriptor = "(BIIII[I[III[IZZI[I[[[B[III)V")
     public static void method6324(@OriginalArg(0) byte roofStamp, @OriginalArg(1) int x, @OriginalArg(2) int z, @OriginalArg(3) int y, @OriginalArg(4) int playerTileZ, @OriginalArg(5) int[] arg5, @OriginalArg(6) int[] arg6, @OriginalArg(7) int clock, @OriginalArg(8) int levels, @OriginalArg(9) int[] arg9, @OriginalArg(10) boolean flickerDisabled, @OriginalArg(12) int orthoZoom, @OriginalArg(13) int[] arg12, @OriginalArg(14) byte[][][] roofStamps, @OriginalArg(15) int[] arg14, @OriginalArg(16) int playerTileX) {
-        if (anInt6796 == -1) {
+        if (mode == -1) {
             return;
         }
         @Pc(13) int[] viewport = toolkit.Y();
@@ -378,13 +378,13 @@ public final class OrthoMode {
 
         @Pc(31) int scaleX = projectionScaleX;
         @Pc(33) int scaleY = projectionScaleY;
-        if (anInt6796 == 1) {
-            scaleY = (int) ((double) orthoHeight * (double) projectionScaleY / (double) anInt8585);
-            scaleX = (int) ((double) orthoHeight * (double) projectionScaleX / (double) anInt8585);
+        if (mode == 1) {
+            scaleY = (int) ((double) orthoHeight * (double) projectionScaleY / (double) surfaceHeight);
+            scaleX = (int) ((double) orthoHeight * (double) projectionScaleX / (double) surfaceHeight);
         }
 
         if (!Static75.hasOpaqueStationaryEntities) {
-            if (anInt6796 == 1) {
+            if (mode == 1) {
                 drawDirtyTiles();
             }
             @Pc(76) int dx = x - cameraX;
@@ -397,13 +397,13 @@ public final class OrthoMode {
             @Pc(159) int newDrawY = screenDy + borderY - scrollY;
             @Pc(163) int rightEdge = newDrawX + orthoWidth;
             @Pc(167) int bottomEdge = orthoHeight + newDrawY;
-            if (newDrawX >= 0 && newDrawY >= 0 && anInt8534 >= rightEdge && bottomEdge <= anInt8585 || anInt6796 == 2) {
-                if (anInt6796 == 2) {
+            if (newDrawX >= 0 && newDrawY >= 0 && surfaceWidth >= rightEdge && bottomEdge <= surfaceHeight || mode == 2) {
+                if (mode == 2) {
                     scrollZ = -depth;
                 }
-                anInt5001 = newDrawY;
+                drawY = newDrawY;
                 drawX = newDrawX;
-            } else if (rightEdge > 0 && bottomEdge > 0 && anInt8534 > newDrawX && anInt8585 > newDrawY) {
+            } else if (rightEdge > 0 && bottomEdge > 0 && surfaceWidth > newDrawX && surfaceHeight > newDrawY) {
                 @Pc(244) int rawShiftX = newDrawX - borderX;
                 @Pc(248) int rawShiftY = newDrawY - borderY;
                 @Pc(250) int shiftX = 0;
@@ -411,11 +411,11 @@ public final class OrthoMode {
                 @Pc(254) int tileShiftX = 0;
                 @Pc(256) int tileShiftY = 0;
                 @Pc(258) double shiftZ = 0.0D;
-                if (anInt6796 == 0) {
+                if (mode == 0) {
                     shiftX = rawShiftX;
                     shiftY = rawShiftY;
                     shiftZ = depth + scrollZ;
-                } else if (anInt6796 == 1) {
+                } else if (mode == 1) {
                     tileShiftY = rawShiftY / tileHeight;
                     tileShiftX = rawShiftX / tileWidth;
                     shiftY = tileShiftY * tileHeight;
@@ -434,20 +434,20 @@ public final class OrthoMode {
                 @Pc(344) int colStripX;
                 @Pc(342) int colStripWidth;
                 if (shiftX >= 0) {
-                    copyWidth = anInt8534 - shiftX;
+                    copyWidth = surfaceWidth - shiftX;
                     copyX = 0;
                     colStripWidth = shiftX;
                     colStripX = copyWidth;
-                    if (anInt6796 == 1) {
+                    if (mode == 1) {
                         newColCount = tileShiftX;
                         newColStart = tilesX - tileShiftX;
                     }
                 } else {
                     copyX = -shiftX;
-                    copyWidth = shiftX + anInt8534;
+                    copyWidth = shiftX + surfaceWidth;
                     colStripX = 0;
                     colStripWidth = copyX;
-                    if (anInt6796 == 1) {
+                    if (mode == 1) {
                         newColStart = 0;
                         newColCount = -tileShiftX;
                     }
@@ -460,19 +460,19 @@ public final class OrthoMode {
                 if (shiftY < 0) {
                     copyY = -shiftY;
                     rowStripY = 0;
-                    copyHeight = anInt8585 + shiftY;
+                    copyHeight = surfaceHeight + shiftY;
                     rowStripHeight = copyY;
                     colStripY = copyY;
-                    if (anInt6796 == 1) {
+                    if (mode == 1) {
                         newRowStart = 0;
                         newRowCount = -tileShiftY;
                         keptRowStart = newRowCount;
                         keptRowCount = tilesY + tileShiftY;
                     }
                 } else {
-                    copyHeight = anInt8585 - shiftY;
+                    copyHeight = surfaceHeight - shiftY;
                     copyY = 0;
-                    if (anInt6796 == 1) {
+                    if (mode == 1) {
                         keptRowStart = 0;
                         newRowCount = tileShiftY;
                         newRowStart = tilesY - tileShiftY;
@@ -504,9 +504,9 @@ public final class OrthoMode {
                         cylinder.anInt4501 = newX2 = x2 - shiftX;
                         if (cull) {
                             @Pc(537) int left = (newX1 >= newX2 ? newX2 : newX1) - radius;
-                            if (anInt8534 >= left) {
+                            if (surfaceWidth >= left) {
                                 @Pc(557) int top = (newY1 < newY2 ? newY1 : newY2) - radius;
-                                if (top <= anInt8585) {
+                                if (top <= surfaceHeight) {
                                     @Pc(573) int right = (newX1 < newX2 ? newX2 : newX1) + radius;
                                     if (right >= 0) {
                                         @Pc(592) int bottom = (newY1 >= newY2 ? newY1 : newY2) + radius;
@@ -523,29 +523,29 @@ public final class OrthoMode {
                         Static281.recycle(entity);
                     }
                 }
-                if (anInt6796 == 0) {
+                if (mode == 0) {
                     toolkit.swapSurface(surface);
                 }
                 toolkit.F(-shiftX, -shiftY);
                 toolkit.b(copyX, copyY, copyWidth, copyHeight, shiftZ);
                 translateCameraZ(scrollZ + shiftZ);
                 cachedCameraZ = shiftZ + scrollZ;
-                if (anInt6796 == 1) {
+                if (mode == 1) {
                     cachedViewportY = projectionCenterY - scrollY - shiftY;
-                    anInt6565 = scaleX;
+                    cachedViewportWidth = scaleX;
                     cachedViewportHeight = scaleY;
                     cachedViewportX = projectionCenterX - shiftX - scrollX;
-                    toolkit.DA(cachedViewportX, cachedViewportY, anInt6565, cachedViewportHeight);
+                    toolkit.DA(cachedViewportX, cachedViewportY, cachedViewportWidth, cachedViewportHeight);
                 } else {
                     cachedViewportHeight = scaleY;
                     cachedViewportY = projectionCenterY + borderY - shiftY - scrollY;
                     cachedViewportX = borderX + projectionCenterX - shiftX - scrollX;
-                    anInt6565 = scaleX;
-                    toolkit.DA(cachedViewportX, cachedViewportY, anInt6565, cachedViewportHeight);
+                    cachedViewportWidth = scaleX;
+                    toolkit.DA(cachedViewportX, cachedViewportY, cachedViewportWidth, cachedViewportHeight);
                 }
                 Static119.setActivePickList(orthoPickList);
                 if (rowStripHeight > 0) {
-                    toolkit.KA(0, rowStripY, anInt8534, rowStripY + rowStripHeight);
+                    toolkit.KA(0, rowStripY, surfaceWidth, rowStripY + rowStripHeight);
                     toolkit.ya();
                     toolkit.GA(backgroundColour);
                     SceneRenderer.renderScene(clock, x, y, z, roofStamps, arg9, arg12, arg5, arg14, arg6, levels, roofStamp, playerTileX, playerTileZ, flickerDisabled, orthoZoom, 1, false);
@@ -558,15 +558,15 @@ public final class OrthoMode {
                 }
                 toolkit.la();
                 Static102.method2021();
-                if (anInt6796 == 0) {
+                if (mode == 0) {
                     toolkit.restoreSurface();
                 }
                 scrollY += shiftY;
                 scrollX += shiftX;
                 scrollZ += shiftZ;
-                anInt5001 = borderY + screenDy - scrollY;
+                drawY = borderY + screenDy - scrollY;
                 drawX = screenDx + borderX - scrollX;
-                if (anInt6796 == 1) {
+                if (mode == 1) {
                     tileOffsetX += tileShiftX;
                     tileOffsetY += tileShiftY;
                     for (@Pc(855) int tileY = 0; tileY < tilesY; tileY++) {
@@ -591,8 +591,8 @@ public final class OrthoMode {
             drawX = borderX;
             cameraY = y;
             scrollY = 0;
-            anInt5001 = borderY;
-            if (anInt6796 == 0) {
+            drawY = borderY;
+            if (mode == 0) {
                 toolkit.swapSurface(surface);
             }
             toolkit.la();
@@ -600,18 +600,18 @@ public final class OrthoMode {
             toolkit.GA(backgroundColour);
             cameraMatrix.createCamera(cameraX, cameraY, cameraZ, cameraRotateX, cameraRotateY, cameraRotateZ);
             toolkit.setCamera(cameraMatrix);
-            if (anInt6796 == 1) {
+            if (mode == 1) {
                 cachedViewportX = projectionCenterX;
                 cachedViewportY = projectionCenterY;
-                anInt6565 = scaleX;
+                cachedViewportWidth = scaleX;
                 cachedViewportHeight = scaleY;
-                toolkit.DA(cachedViewportX, cachedViewportY, anInt6565, cachedViewportHeight);
+                toolkit.DA(cachedViewportX, cachedViewportY, cachedViewportWidth, cachedViewportHeight);
             } else {
                 cachedViewportX = borderX + projectionCenterX;
-                anInt6565 = scaleX;
+                cachedViewportWidth = scaleX;
                 cachedViewportHeight = scaleY;
                 cachedViewportY = projectionCenterY + borderY;
-                toolkit.DA(cachedViewportX, cachedViewportY, anInt6565, cachedViewportHeight);
+                toolkit.DA(cachedViewportX, cachedViewportY, cachedViewportWidth, cachedViewportHeight);
             }
             cachedCameraZ = 0.0D;
             orthoPickList.clear();
@@ -619,46 +619,46 @@ public final class OrthoMode {
             SceneRenderer.renderScene(clock, x, y, z, roofStamps, arg9, arg12, arg5, arg14, arg6, levels, roofStamp, playerTileX, playerTileZ, flickerDisabled, orthoZoom, 1, false);
             Static102.method2021();
             Static75.hasOpaqueStationaryEntities = false;
-            if (anInt6796 == 0) {
+            if (mode == 0) {
                 toolkit.restoreSurface();
             }
-            if (anInt6796 == 1) {
+            if (mode == 1) {
                 drawAllTiles();
             }
         }
-        if (anInt6796 == 0) {
-            surface.method9040(drawX, anInt5001, orthoWidth, orthoHeight, 0, 0);
+        if (mode == 0) {
+            surface.method9040(drawX, drawY, orthoWidth, orthoHeight, 0, 0);
         }
         stamp++;
         translateCameraZ(scrollZ);
         screenCameraZ = scrollZ;
-        if (anInt6796 == 0 || anInt6796 == 2) {
-            if (anInt6796 == 2) {
+        if (mode == 0 || mode == 2) {
+            if (mode == 2) {
                 toolkit.GA(backgroundColour);
                 toolkit.ya();
             }
             screenViewportWidth = scaleX;
-            screenViewportY = projectionCenterY + borderY - anInt5001 - scrollY;
+            screenViewportY = projectionCenterY + borderY - drawY - scrollY;
             screenViewportX = projectionCenterX + borderX - drawX - scrollX;
             screenViewportHeight = scaleY;
             toolkit.DA(screenViewportX, screenViewportY, screenViewportWidth, screenViewportHeight);
-        } else if (anInt6796 == 1) {
+        } else if (mode == 1) {
             screenViewportWidth = scaleX;
             screenViewportX = projectionCenterX - scrollX;
             screenViewportY = projectionCenterY - scrollY;
             screenViewportHeight = scaleY;
             toolkit.DA(screenViewportX, screenViewportY, screenViewportWidth, screenViewportHeight);
-            toolkit.KA(drawX, anInt5001, drawX + orthoWidth, orthoHeight + anInt5001);
+            toolkit.KA(drawX, drawY, drawX + orthoWidth, orthoHeight + drawY);
         }
-        SceneRenderer.renderScene(clock, x, y, z, roofStamps, arg9, arg12, arg5, arg14, arg6, levels, roofStamp, playerTileX, playerTileZ, flickerDisabled, orthoZoom, anInt6796 == 2 ? 0 : 2, anInt6796 == 1);
+        SceneRenderer.renderScene(clock, x, y, z, roofStamps, arg9, arg12, arg5, arg14, arg6, levels, roofStamp, playerTileX, playerTileZ, flickerDisabled, orthoZoom, mode == 2 ? 0 : 2, mode == 1);
         toolkit.la();
         toolkit.DA(projectionCenterX, projectionCenterY, projectionScaleX, projectionScaleY);
     }
 
     @OriginalMember(owner = "client!wca", name = "a", descriptor = "(II[Ljava/awt/Rectangle;)V")
     public static void flipDirtyRect(@OriginalArg(1) int count, @OriginalArg(2) Rectangle[] rectangles) throws FlipException {
-        if (anInt6796 == 1) {
-            toolkit.flipDirtyRect(rectangles, count, drawX, anInt5001);
+        if (mode == 1) {
+            toolkit.flipDirtyRect(rectangles, count, drawX, drawY);
         } else {
             toolkit.flipDirtyRect(rectangles, count, 0, 0);
         }
@@ -682,25 +682,25 @@ public final class OrthoMode {
         orthoHeight = height;
         orthoWidth = width;
 
-        if (anInt6796 == 0) {
-            anInt8534 = orthoWidth + borderX * 2;
-            anInt8585 = orthoHeight + borderY * 2;
-        } else if (anInt6796 == 1) {
+        if (mode == 0) {
+            surfaceWidth = orthoWidth + borderX * 2;
+            surfaceHeight = orthoHeight + borderY * 2;
+        } else if (mode == 1) {
             tilesX = (orthoWidth / tileWidth) + extraTilesX + 2;
             tilesY = (orthoHeight / tileHeight) + extraTilesY + 2;
-            anInt8585 = tilesY * tileHeight;
-            anInt8534 = tilesX * tileWidth;
-            borderX = anInt8534 - orthoWidth >> 1;
-            borderY = anInt8585 - orthoHeight >> 1;
-        } else if (anInt6796 == 2) {
-            anInt8534 = orthoWidth;
-            anInt8585 = orthoHeight;
+            surfaceHeight = tilesY * tileHeight;
+            surfaceWidth = tilesX * tileWidth;
+            borderX = surfaceWidth - orthoWidth >> 1;
+            borderY = surfaceHeight - orthoHeight >> 1;
+        } else if (mode == 2) {
+            surfaceWidth = orthoWidth;
+            surfaceHeight = orthoHeight;
         }
     }
 
     @OriginalMember(owner = "client!hj", name = "a", descriptor = "(IZ)I")
     public static int method3503(@OriginalArg(1) boolean screen) {
-        @Pc(5) int mode = anInt6796;
+        @Pc(5) int mode = OrthoMode.mode;
         if (mode == 0) {
             return screen ? 0 : drawX;
         } else if (mode == 1) {
@@ -721,33 +721,33 @@ public final class OrthoMode {
 
     @OriginalMember(owner = "client!wk", name = "a", descriptor = "(IZ)V")
     public static void method9331(@OriginalArg(1) boolean screen) {
-        aMatrix_11.apply(toolkit.camera());
+        savedCamera.apply(toolkit.camera());
         @Pc(10) int[] viewport = toolkit.Y();
-        anInt5563 = viewport[0];
-        anInt9536 = viewport[1];
-        anInt2888 = viewport[2];
-        anInt9494 = viewport[3];
+        savedViewportX = viewport[0];
+        savedViewportY = viewport[1];
+        savedViewportWidth = viewport[2];
+        savedViewportHeight = viewport[3];
         if (screen) {
             toolkit.DA(screenViewportX, screenViewportY, screenViewportWidth, screenViewportHeight);
             translateCameraZ(screenCameraZ);
         } else {
-            toolkit.DA(cachedViewportX, cachedViewportY, anInt6565, cachedViewportHeight);
+            toolkit.DA(cachedViewportX, cachedViewportY, cachedViewportWidth, cachedViewportHeight);
             translateCameraZ(cachedCameraZ);
         }
     }
 
     @OriginalMember(owner = "client!sm", name = "i", descriptor = "(I)I")
     public static int method7779() {
-        return anInt6796 == 1 ? anInt8534 : orthoWidth;
+        return mode == 1 ? surfaceWidth : orthoWidth;
     }
 
     @OriginalMember(owner = "client!sea", name = "a", descriptor = "(IZ)I")
     public static int method7649(@OriginalArg(1) boolean screen) {
-        @Pc(13) int mode = anInt6796;
+        @Pc(13) int mode = OrthoMode.mode;
         if (mode == 0) {
-            return screen ? 0 : anInt5001;
+            return screen ? 0 : drawY;
         } else if (mode == 1) {
-            return anInt5001;
+            return drawY;
         } else if (mode == 2) {
             return 0;
         } else {
@@ -762,6 +762,6 @@ public final class OrthoMode {
 
     @OriginalMember(owner = "client!bu", name = "d", descriptor = "(B)I")
     public static int method1260() {
-        return anInt6796 == 1 ? anInt8585 : orthoHeight;
+        return mode == 1 ? surfaceHeight : orthoHeight;
     }
 }

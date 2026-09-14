@@ -193,7 +193,7 @@ public final class Texture extends Node2 {
         for (@Pc(11) int i = 0; i < this.ops.length; i++) {
             this.ops[i].initCache(height, width);
         }
-        Static725.method9455(gamma);
+        Static725.setGamma(gamma);
         EnvironmentLight.method2313(height, width);
         @Pc(53) int[] pixels = new int[width * height];
         @Pc(55) int index = 0;
@@ -274,7 +274,7 @@ public final class Texture extends Node2 {
         for (@Pc(11) int i = 0; i < this.ops.length; i++) {
             this.ops[i].initCache(height, width);
         }
-        Static725.method9455(gamma);
+        Static725.setGamma(gamma);
         EnvironmentLight.method2313(height, width);
         @Pc(41) int[] pixels = new int[height * width];
         @Pc(49) int start;

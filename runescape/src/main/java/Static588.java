@@ -34,7 +34,7 @@ public final class Static588 {
             } else {
                 @Pc(64) int local64 = arg2 << EnvironmentLight.anInt1066;
                 @Pc(68) int local68 = arg0 << EnvironmentLight.anInt1066;
-                if (Static172.method2674(local64 + Static340.anInt5586 - 1, local68 + 1, Static246.ground[arg1].getHeight(arg2 + 1, arg0 + 1), Static246.ground[arg1].getHeight(arg2, arg0 + 1), Static246.ground[arg1].getHeight(arg2, arg0), local68 + Static340.anInt5586 - 1, Static340.anInt5586 + local68 + -1, local64 + 1, local64 + 1) && Static172.method2674(Static340.anInt5586 + local64 - 1, local68 + 1, Static246.ground[arg1].getHeight(arg2 + 1, arg0), Static246.ground[arg1].getHeight(arg2 + 1, arg0 + 1), Static246.ground[arg1].getHeight(arg2, arg0), local68 + 1, Static340.anInt5586 + local68 + -1, local64 + 1, Static340.anInt5586 + -1 + local64)) {
+                if (Static172.isTriangleOccluded(local64 + Static340.anInt5586 - 1, local68 + 1, Static246.ground[arg1].getHeight(arg2 + 1, arg0 + 1), Static246.ground[arg1].getHeight(arg2, arg0 + 1), Static246.ground[arg1].getHeight(arg2, arg0), local68 + Static340.anInt5586 - 1, Static340.anInt5586 + local68 + -1, local64 + 1, local64 + 1) && Static172.isTriangleOccluded(Static340.anInt5586 + local64 - 1, local68 + 1, Static246.ground[arg1].getHeight(arg2 + 1, arg0), Static246.ground[arg1].getHeight(arg2 + 1, arg0 + 1), Static246.ground[arg1].getHeight(arg2, arg0), local68 + 1, Static340.anInt5586 + local68 + -1, local64 + 1, Static340.anInt5586 + -1 + local64)) {
                     Static298.occludedGroundCount++;
                     Static446.anIntArrayArrayArray9[arg1][arg2][arg0] = Static675.anInt10155;
                     return true;

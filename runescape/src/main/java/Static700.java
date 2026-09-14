@@ -6,7 +6,7 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static700 {
 
     @OriginalMember(owner = "client!wca", name = "a", descriptor = "(B)V")
-    public static void method9152() {
+    public static void freeScene() {
         Scene.free();
         for (@Pc(16) int level = 0; level < 4; level++) {
             Client.collisionMaps[level].reset();

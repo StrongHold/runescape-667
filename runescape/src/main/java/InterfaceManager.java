@@ -391,7 +391,7 @@ public final class InterfaceManager {
                                 if (aspectRatio) {
                                     OrthoMode.method8927(boundsLeft, boundsRight, boundsBottom, boundsTop);
                                 } else {
-                                    Static595.method7810(boundsBottom, boundsRight, boundsTop, boundsLeft);
+                                    Static595.expandDirtyRect(boundsBottom, boundsRight, boundsTop, boundsLeft);
                                 }
                             }
                         }
@@ -419,7 +419,7 @@ public final class InterfaceManager {
                                 if (aspectRatio) {
                                     OrthoMode.method8927(boundsLeft, boundsRight, boundsBottom, boundsTop);
                                 } else {
-                                    Static595.method7810(boundsBottom, boundsRight, boundsTop, boundsLeft);
+                                    Static595.expandDirtyRect(boundsBottom, boundsRight, boundsTop, boundsLeft);
                                 }
                             }
                         }
@@ -452,7 +452,7 @@ public final class InterfaceManager {
                             if (aspectRatio) {
                                 OrthoMode.method8927(boundsLeft, boundsRight, boundsBottom, boundsTop);
                             } else {
-                                Static595.method7810(boundsBottom, boundsRight, boundsTop, boundsLeft);
+                                Static595.expandDirtyRect(boundsBottom, boundsRight, boundsTop, boundsLeft);
                             }
                         }
 
@@ -601,7 +601,7 @@ public final class InterfaceManager {
                             if (aspectRatio) {
                                 OrthoMode.method8927(boundsLeft, boundsRight, boundsBottom, boundsTop);
                             } else {
-                                Static595.method7810(boundsBottom, boundsRight, boundsTop, boundsLeft);
+                                Static595.expandDirtyRect(boundsBottom, boundsRight, boundsTop, boundsLeft);
                             }
                         }
                     } else if (child.type == Component.TYPE_TEXT) {
@@ -657,14 +657,14 @@ public final class InterfaceManager {
                                         if (aspectRatio) {
                                             OrthoMode.method8927(offsetX, offsetX + textWidth, offsetY, offsetY + textHeight);
                                         } else {
-                                            Static595.method7810(offsetY, offsetX + textWidth, textHeight + offsetY, offsetX);
+                                            Static595.expandDirtyRect(offsetY, offsetX + textWidth, textHeight + offsetY, offsetX);
                                         }
                                     }
                                 } else if (OrthoMode.toolkitActive) {
                                     if (aspectRatio) {
                                         OrthoMode.method8927(boundsLeft, boundsRight, boundsBottom, boundsTop);
                                     } else {
-                                        Static595.method7810(boundsBottom, boundsRight, boundsTop, boundsLeft);
+                                        Static595.expandDirtyRect(boundsBottom, boundsRight, boundsTop, boundsLeft);
                                     }
                                 }
                             }
@@ -743,11 +743,11 @@ public final class InterfaceManager {
                             if (aspectRatio) {
                                 OrthoMode.method8927(boundsLeft, boundsRight, boundsBottom, boundsTop);
                             } else {
-                                Static595.method7810(boundsBottom, boundsRight, boundsTop, boundsLeft);
+                                Static595.expandDirtyRect(boundsBottom, boundsRight, boundsTop, boundsLeft);
                             }
                         }
                     } else if (child.type == Component.TYPE_MODEL) {
-                        Static104.method2033();
+                        Static104.resetLighting();
                         NPCTypeCustomisation customisation = null;
                         @Pc(2313) Model model = null;
                         @Pc(744) int minY = 0;
@@ -880,7 +880,7 @@ public final class InterfaceManager {
                             if (aspectRatio) {
                                 OrthoMode.method8927(boundsLeft, boundsRight, boundsBottom, boundsTop);
                             } else {
-                                Static595.method7810(boundsBottom, boundsRight, boundsTop, boundsLeft);
+                                Static595.expandDirtyRect(boundsBottom, boundsRight, boundsTop, boundsLeft);
                             }
                         }
                     } else if (child.type == Component.TYPE_LINE) {
@@ -908,7 +908,7 @@ public final class InterfaceManager {
                             if (aspectRatio) {
                                 OrthoMode.method8927(boundsLeft, boundsRight, boundsBottom, boundsTop);
                             } else {
-                                Static595.method7810(boundsBottom, boundsRight, boundsTop, boundsLeft);
+                                Static595.expandDirtyRect(boundsBottom, boundsRight, boundsTop, boundsLeft);
                             }
                         }
                     }
@@ -1557,7 +1557,7 @@ public final class InterfaceManager {
                                     }
                                     if (MiniMenu.anInt6964 == 2) {
                                         Static1.aBoolean821 = true;
-                                        WorldMap.method8711(Static661.anInt6055 + (int) ((double) (dragStartX - MouseMonitor.instance.getRecordedX()) * 2.0D / (double) WorldMap.targetZoom));
+                                        WorldMap.setDisplayX(Static661.anInt6055 + (int) ((double) (dragStartX - MouseMonitor.instance.getRecordedX()) * 2.0D / (double) WorldMap.targetZoom));
                                         Static182.method2786(Static417.anInt6399 - (int) ((double) (dragStartY - MouseMonitor.instance.getRecordedY()) * 2.0D / (double) WorldMap.targetZoom));
                                     }
                                     continue;

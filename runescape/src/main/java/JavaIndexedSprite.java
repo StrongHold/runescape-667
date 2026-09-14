@@ -31,8 +31,8 @@ public final class JavaIndexedSprite extends JavaSprite {
         y += super.topMargin;
         @Pc(28) int dstIndex = y * dstStride + x;
         @Pc(30) int srcIndex = 0;
-        @Pc(33) int height = super.anInt9306;
-        @Pc(36) int width = super.anInt9302;
+        @Pc(33) int height = super.height;
+        @Pc(36) int width = super.width;
         @Pc(40) int dstStep = dstStride - width;
         @Pc(42) int srcStep = 0;
         @Pc(53) int clip;
@@ -380,7 +380,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                         u = JavaSpriteBlitState.rowU;
                         v = JavaSpriteBlitState.rowV;
                         column = JavaSpriteBlitState.negativeWidth;
-                        if (u >= 0 && v >= 0 && u - (super.anInt9302 << 12) < 0 && v - (super.anInt9306 << 12) < 0) {
+                        if (u >= 0 && v >= 0 && u - (super.width << 12) < 0 && v - (super.height << 12) < 0) {
                             maskStart = lineOffsets[maskIndex] - maskOffsetX;
                             maskCount = -lineWidths[maskIndex];
                             maskSkip = maskStart + JavaSpriteBlitState.rowOffset - dstIndex;
@@ -396,7 +396,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                                 column = maskCount;
                             }
                             while (column < 0) {
-                                index = this.pixels[(v >> 12) * super.anInt9302 + (u >> 12)];
+                                index = this.pixels[(v >> 12) * super.width + (u >> 12)];
                                 if (index == 0) {
                                     dstIndex++;
                                 } else {
@@ -421,9 +421,9 @@ public final class JavaIndexedSprite extends JavaSprite {
                         u = JavaSpriteBlitState.rowU;
                         v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
                         column = JavaSpriteBlitState.negativeWidth;
-                        if (u >= 0 && u - (super.anInt9302 << 12) < 0) {
+                        if (u >= 0 && u - (super.width << 12) < 0) {
                             @Pc(199) int vOverrun;
-                            if ((vOverrun = v - (super.anInt9306 << 12)) >= 0) {
+                            if ((vOverrun = v - (super.height << 12)) >= 0) {
                                 skip = (JavaSpriteBlitState.dvDx - vOverrun) / JavaSpriteBlitState.dvDx;
                                 column += skip;
                                 v += JavaSpriteBlitState.dvDx * skip;
@@ -448,7 +448,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                                 column = maskCount;
                             }
                             while (column < 0) {
-                                index = this.pixels[(v >> 12) * super.anInt9302 + (u >> 12)];
+                                index = this.pixels[(v >> 12) * super.width + (u >> 12)];
                                 if (index == 0) {
                                     dstIndex++;
                                 } else {
@@ -475,7 +475,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                         u = JavaSpriteBlitState.rowU;
                         v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
                         column = JavaSpriteBlitState.negativeWidth;
-                        if (u >= 0 && u - (super.anInt9302 << 12) < 0) {
+                        if (u >= 0 && u - (super.width << 12) < 0) {
                             if (v < 0) {
                                 skip = (JavaSpriteBlitState.dvDx - v - 1) / JavaSpriteBlitState.dvDx;
                                 column += skip;
@@ -483,7 +483,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                                 dstIndex += skip;
                             }
                             @Pc(410) int vBound;
-                            if ((vBound = (v + 1 - (super.anInt9306 << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
+                            if ((vBound = (v + 1 - (super.height << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
                                 column = vBound;
                             }
                             maskStart = lineOffsets[maskIndex] - maskOffsetX;
@@ -501,7 +501,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                                 column = maskCount;
                             }
                             while (column < 0) {
-                                index = this.pixels[(v >> 12) * super.anInt9302 + (u >> 12)];
+                                index = this.pixels[(v >> 12) * super.width + (u >> 12)];
                                 if (index == 0) {
                                     dstIndex++;
                                 } else {
@@ -530,9 +530,9 @@ public final class JavaIndexedSprite extends JavaSprite {
                         u = JavaSpriteBlitState.rowU + JavaSpriteBlitState.uBias;
                         v = JavaSpriteBlitState.rowV;
                         column = JavaSpriteBlitState.negativeWidth;
-                        if (v >= 0 && v - (super.anInt9306 << 12) < 0) {
+                        if (v >= 0 && v - (super.height << 12) < 0) {
                             @Pc(567) int uOverrun;
-                            if ((uOverrun = u - (super.anInt9302 << 12)) >= 0) {
+                            if ((uOverrun = u - (super.width << 12)) >= 0) {
                                 skip = (JavaSpriteBlitState.duDx - uOverrun) / JavaSpriteBlitState.duDx;
                                 column += skip;
                                 u += JavaSpriteBlitState.duDx * skip;
@@ -557,7 +557,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                                 column = maskCount;
                             }
                             while (column < 0) {
-                                index = this.pixels[(v >> 12) * super.anInt9302 + (u >> 12)];
+                                index = this.pixels[(v >> 12) * super.width + (u >> 12)];
                                 if (index == 0) {
                                     dstIndex++;
                                 } else {
@@ -585,7 +585,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                         v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
                         column = JavaSpriteBlitState.negativeWidth;
                         @Pc(739) int uOverrun;
-                        if ((uOverrun = u - (super.anInt9302 << 12)) >= 0) {
+                        if ((uOverrun = u - (super.width << 12)) >= 0) {
                             skip = (JavaSpriteBlitState.duDx - uOverrun) / JavaSpriteBlitState.duDx;
                             column += skip;
                             u += JavaSpriteBlitState.duDx * skip;
@@ -597,7 +597,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                             column = uBound;
                         }
                         @Pc(785) int vOverrun;
-                        if ((vOverrun = v - (super.anInt9306 << 12)) >= 0) {
+                        if ((vOverrun = v - (super.height << 12)) >= 0) {
                             skip = (JavaSpriteBlitState.dvDx - vOverrun) / JavaSpriteBlitState.dvDx;
                             column += skip;
                             u += JavaSpriteBlitState.duDx * skip;
@@ -623,7 +623,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                             column = maskCount;
                         }
                         while (column < 0) {
-                            index = this.pixels[(v >> 12) * super.anInt9302 + (u >> 12)];
+                            index = this.pixels[(v >> 12) * super.width + (u >> 12)];
                             if (index == 0) {
                                 dstIndex++;
                             } else {
@@ -652,7 +652,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                         v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
                         column = JavaSpriteBlitState.negativeWidth;
                         @Pc(969) int uOverrun;
-                        if ((uOverrun = u - (super.anInt9302 << 12)) >= 0) {
+                        if ((uOverrun = u - (super.width << 12)) >= 0) {
                             skip = (JavaSpriteBlitState.duDx - uOverrun) / JavaSpriteBlitState.duDx;
                             column += skip;
                             u += JavaSpriteBlitState.duDx * skip;
@@ -671,7 +671,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                             dstIndex += skip;
                         }
                         @Pc(1051) int vBound;
-                        if ((vBound = (v + 1 - (super.anInt9306 << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
+                        if ((vBound = (v + 1 - (super.height << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
                             column = vBound;
                         }
                         maskStart = lineOffsets[maskIndex] - maskOffsetX;
@@ -689,7 +689,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                             column = maskCount;
                         }
                         while (column < 0) {
-                            index = this.pixels[(v >> 12) * super.anInt9302 + (u >> 12)];
+                            index = this.pixels[(v >> 12) * super.width + (u >> 12)];
                             if (index == 0) {
                                 dstIndex++;
                             } else {
@@ -718,7 +718,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                     u = JavaSpriteBlitState.rowU + JavaSpriteBlitState.uBias;
                     v = JavaSpriteBlitState.rowV;
                     column = JavaSpriteBlitState.negativeWidth;
-                    if (v >= 0 && v - (super.anInt9306 << 12) < 0) {
+                    if (v >= 0 && v - (super.height << 12) < 0) {
                         if (u < 0) {
                             skip = (JavaSpriteBlitState.duDx - u - 1) / JavaSpriteBlitState.duDx;
                             column += skip;
@@ -726,7 +726,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                             dstIndex += skip;
                         }
                         @Pc(1244) int uBound;
-                        if ((uBound = (u + 1 - (super.anInt9302 << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
+                        if ((uBound = (u + 1 - (super.width << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
                             column = uBound;
                         }
                         maskStart = lineOffsets[maskIndex] - maskOffsetX;
@@ -744,7 +744,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                             column = maskCount;
                         }
                         while (column < 0) {
-                            index = this.pixels[(v >> 12) * super.anInt9302 + (u >> 12)];
+                            index = this.pixels[(v >> 12) * super.width + (u >> 12)];
                             if (index == 0) {
                                 dstIndex++;
                             } else {
@@ -780,11 +780,11 @@ public final class JavaIndexedSprite extends JavaSprite {
                         dstIndex += skip;
                     }
                     @Pc(1428) int uBound;
-                    if ((uBound = (u + 1 - (super.anInt9302 << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
+                    if ((uBound = (u + 1 - (super.width << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
                         column = uBound;
                     }
                     @Pc(1440) int vOverrun;
-                    if ((vOverrun = v - (super.anInt9306 << 12)) >= 0) {
+                    if ((vOverrun = v - (super.height << 12)) >= 0) {
                         skip = (JavaSpriteBlitState.dvDx - vOverrun) / JavaSpriteBlitState.dvDx;
                         column += skip;
                         u += JavaSpriteBlitState.duDx * skip;
@@ -810,7 +810,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                         column = maskCount;
                     }
                     while (column < 0) {
-                        index = this.pixels[(v >> 12) * super.anInt9302 + (u >> 12)];
+                        index = this.pixels[(v >> 12) * super.width + (u >> 12)];
                         if (index == 0) {
                             dstIndex++;
                         } else {
@@ -846,7 +846,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                         dstIndex += skip;
                     }
                     @Pc(1660) int uBound;
-                    if ((uBound = (u + 1 - (super.anInt9302 << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
+                    if ((uBound = (u + 1 - (super.width << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
                         column = uBound;
                     }
                     if (v < 0) {
@@ -857,7 +857,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                         dstIndex += skip;
                     }
                     @Pc(1708) int vBound;
-                    if ((vBound = (v + 1 - (super.anInt9306 << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
+                    if ((vBound = (v + 1 - (super.height << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
                         column = vBound;
                     }
                     maskStart = lineOffsets[maskIndex] - maskOffsetX;
@@ -875,7 +875,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                         column = maskCount;
                     }
                     while (column < 0) {
-                        index = this.pixels[(v >> 12) * super.anInt9302 + (u >> 12)];
+                        index = this.pixels[(v >> 12) * super.width + (u >> 12)];
                         if (index == 0) {
                             dstIndex++;
                         } else {
@@ -920,9 +920,9 @@ public final class JavaIndexedSprite extends JavaSprite {
                     u = JavaSpriteBlitState.rowU;
                     v = JavaSpriteBlitState.rowV;
                     column = JavaSpriteBlitState.negativeWidth;
-                    if (u >= 0 && v >= 0 && u - (super.anInt9302 << 12) < 0 && v - (super.anInt9306 << 12) < 0) {
+                    if (u >= 0 && v >= 0 && u - (super.width << 12) < 0 && v - (super.height << 12) < 0) {
                         while (column < 0) {
-                            texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                            texel = (v >> 12) * super.width + (u >> 12);
                             dst = dstIndex++;
                             if (op == 1) {
                                 index = this.pixels[texel];
@@ -990,9 +990,9 @@ public final class JavaIndexedSprite extends JavaSprite {
                     u = JavaSpriteBlitState.rowU;
                     v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
                     column = JavaSpriteBlitState.negativeWidth;
-                    if (u >= 0 && u - (super.anInt9302 << 12) < 0) {
+                    if (u >= 0 && u - (super.width << 12) < 0) {
                         @Pc(956) int vOverrun;
-                        if ((vOverrun = v - (super.anInt9306 << 12)) >= 0) {
+                        if ((vOverrun = v - (super.height << 12)) >= 0) {
                             skip = (JavaSpriteBlitState.dvDx - vOverrun) / JavaSpriteBlitState.dvDx;
                             column += skip;
                             v += JavaSpriteBlitState.dvDx * skip;
@@ -1003,7 +1003,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                             column = vBound;
                         }
                         while (column < 0) {
-                            texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                            texel = (v >> 12) * super.width + (u >> 12);
                             dst = dstIndex++;
                             if (op == 1) {
                                 index = this.pixels[texel];
@@ -1073,7 +1073,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                     u = JavaSpriteBlitState.rowU;
                     v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
                     column = JavaSpriteBlitState.negativeWidth;
-                    if (u >= 0 && u - (super.anInt9302 << 12) < 0) {
+                    if (u >= 0 && u - (super.width << 12) < 0) {
                         if (v < 0) {
                             skip = (JavaSpriteBlitState.dvDx - v - 1) / JavaSpriteBlitState.dvDx;
                             column += skip;
@@ -1081,11 +1081,11 @@ public final class JavaIndexedSprite extends JavaSprite {
                             dstIndex += skip;
                         }
                         @Pc(1937) int vBound;
-                        if ((vBound = (v + 1 - (super.anInt9306 << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
+                        if ((vBound = (v + 1 - (super.height << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
                             column = vBound;
                         }
                         while (column < 0) {
-                            texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                            texel = (v >> 12) * super.width + (u >> 12);
                             dst = dstIndex++;
                             if (op == 1) {
                                 index = this.pixels[texel];
@@ -1157,9 +1157,9 @@ public final class JavaIndexedSprite extends JavaSprite {
                     u = JavaSpriteBlitState.rowU + JavaSpriteBlitState.uBias;
                     v = JavaSpriteBlitState.rowV;
                     column = JavaSpriteBlitState.negativeWidth;
-                    if (v >= 0 && v - (super.anInt9306 << 12) < 0) {
+                    if (v >= 0 && v - (super.height << 12) < 0) {
                         @Pc(2864) int uOverrun;
-                        if ((uOverrun = u - (super.anInt9302 << 12)) >= 0) {
+                        if ((uOverrun = u - (super.width << 12)) >= 0) {
                             skip = (JavaSpriteBlitState.duDx - uOverrun) / JavaSpriteBlitState.duDx;
                             column += skip;
                             u += JavaSpriteBlitState.duDx * skip;
@@ -1170,7 +1170,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                             column = uBound;
                         }
                         while (column < 0) {
-                            texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                            texel = (v >> 12) * super.width + (u >> 12);
                             dst = dstIndex++;
                             if (op == 1) {
                                 index = this.pixels[texel];
@@ -1241,7 +1241,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                     v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
                     column = JavaSpriteBlitState.negativeWidth;
                     @Pc(3806) int uOverrun;
-                    if ((uOverrun = u - (super.anInt9302 << 12)) >= 0) {
+                    if ((uOverrun = u - (super.width << 12)) >= 0) {
                         skip = (JavaSpriteBlitState.duDx - uOverrun) / JavaSpriteBlitState.duDx;
                         column += skip;
                         u += JavaSpriteBlitState.duDx * skip;
@@ -1253,7 +1253,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                         column = uBound;
                     }
                     @Pc(3852) int vOverrun;
-                    if ((vOverrun = v - (super.anInt9306 << 12)) >= 0) {
+                    if ((vOverrun = v - (super.height << 12)) >= 0) {
                         skip = (JavaSpriteBlitState.dvDx - vOverrun) / JavaSpriteBlitState.dvDx;
                         column += skip;
                         u += JavaSpriteBlitState.duDx * skip;
@@ -1265,7 +1265,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                         column = vBound;
                     }
                     while (column < 0) {
-                        texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                        texel = (v >> 12) * super.width + (u >> 12);
                         dst = dstIndex++;
                         if (op == 1) {
                             index = this.pixels[texel];
@@ -1337,7 +1337,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                     v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
                     column = JavaSpriteBlitState.negativeWidth;
                     @Pc(4806) int uOverrun;
-                    if ((uOverrun = u - (super.anInt9302 << 12)) >= 0) {
+                    if ((uOverrun = u - (super.width << 12)) >= 0) {
                         skip = (JavaSpriteBlitState.duDx - uOverrun) / JavaSpriteBlitState.duDx;
                         column += skip;
                         u += JavaSpriteBlitState.duDx * skip;
@@ -1356,11 +1356,11 @@ public final class JavaIndexedSprite extends JavaSprite {
                         dstIndex += skip;
                     }
                     @Pc(4888) int vBound;
-                    if ((vBound = (v + 1 - (super.anInt9306 << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
+                    if ((vBound = (v + 1 - (super.height << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
                         column = vBound;
                     }
                     while (column < 0) {
-                        texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                        texel = (v >> 12) * super.width + (u >> 12);
                         dst = dstIndex++;
                         if (op == 1) {
                             index = this.pixels[texel];
@@ -1432,7 +1432,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                 u = JavaSpriteBlitState.rowU + JavaSpriteBlitState.uBias;
                 v = JavaSpriteBlitState.rowV;
                 column = JavaSpriteBlitState.negativeWidth;
-                if (v >= 0 && v - (super.anInt9306 << 12) < 0) {
+                if (v >= 0 && v - (super.height << 12) < 0) {
                     if (u < 0) {
                         skip = (JavaSpriteBlitState.duDx - u - 1) / JavaSpriteBlitState.duDx;
                         column += skip;
@@ -1440,11 +1440,11 @@ public final class JavaIndexedSprite extends JavaSprite {
                         dstIndex += skip;
                     }
                     @Pc(5851) int uBound;
-                    if ((uBound = (u + 1 - (super.anInt9302 << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
+                    if ((uBound = (u + 1 - (super.width << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
                         column = uBound;
                     }
                     while (column < 0) {
-                        texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                        texel = (v >> 12) * super.width + (u >> 12);
                         dst = dstIndex++;
                         if (op == 1) {
                             index = this.pixels[texel];
@@ -1522,11 +1522,11 @@ public final class JavaIndexedSprite extends JavaSprite {
                     dstIndex += skip;
                 }
                 @Pc(6805) int uBound;
-                if ((uBound = (u + 1 - (super.anInt9302 << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
+                if ((uBound = (u + 1 - (super.width << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
                     column = uBound;
                 }
                 @Pc(6817) int vOverrun;
-                if ((vOverrun = v - (super.anInt9306 << 12)) >= 0) {
+                if ((vOverrun = v - (super.height << 12)) >= 0) {
                     skip = (JavaSpriteBlitState.dvDx - vOverrun) / JavaSpriteBlitState.dvDx;
                     column += skip;
                     u += JavaSpriteBlitState.duDx * skip;
@@ -1538,7 +1538,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                     column = vBound;
                 }
                 while (column < 0) {
-                    texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                    texel = (v >> 12) * super.width + (u >> 12);
                     dst = dstIndex++;
                     if (op == 1) {
                         index = this.pixels[texel];
@@ -1615,7 +1615,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                     dstIndex += skip;
                 }
                 @Pc(7807) int uBound;
-                if ((uBound = (u + 1 - (super.anInt9302 << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
+                if ((uBound = (u + 1 - (super.width << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
                     column = uBound;
                 }
                 if (v < 0) {
@@ -1626,11 +1626,11 @@ public final class JavaIndexedSprite extends JavaSprite {
                     dstIndex += skip;
                 }
                 @Pc(7855) int vBound;
-                if ((vBound = (v + 1 - (super.anInt9306 << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
+                if ((vBound = (v + 1 - (super.height << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
                     column = vBound;
                 }
                 while (column < 0) {
-                    texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                    texel = (v >> 12) * super.width + (u >> 12);
                     dst = dstIndex++;
                     if (op == 1) {
                         index = this.pixels[texel];
@@ -1716,8 +1716,8 @@ public final class JavaIndexedSprite extends JavaSprite {
         }
         @Pc(9) int u = 0;
         @Pc(11) int v = 0;
-        @Pc(20) int scaleWidth = super.leftMargin + super.anInt9302 + super.rightMargin;
-        @Pc(29) int scaleHeight = super.topMargin + super.anInt9306 + super.bottomMargin;
+        @Pc(20) int scaleWidth = super.leftMargin + super.width + super.rightMargin;
+        @Pc(29) int scaleHeight = super.topMargin + super.height + super.bottomMargin;
         @Pc(35) int uStep = (scaleWidth << 16) / width;
         @Pc(41) int vStep = (scaleHeight << 16) / height;
         @Pc(55) int offset;
@@ -1731,11 +1731,11 @@ public final class JavaIndexedSprite extends JavaSprite {
             y += offset;
             v = offset * vStep - (super.topMargin << 16);
         }
-        if (super.anInt9302 < scaleWidth) {
-            width = ((super.anInt9302 << 16) + uStep - u - 1) / uStep;
+        if (super.width < scaleWidth) {
+            width = ((super.width << 16) + uStep - u - 1) / uStep;
         }
-        if (super.anInt9306 < scaleHeight) {
-            height = ((super.anInt9306 << 16) + vStep - v - 1) / vStep;
+        if (super.height < scaleHeight) {
+            height = ((super.height << 16) + vStep - v - 1) / vStep;
         }
         offset = x + y * super.toolkit.surfaceWidth;
         @Pc(147) int dstStep = super.toolkit.surfaceWidth - width;
@@ -1786,7 +1786,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                 if (op == 1) {
                     local262 = u;
                     for (local265 = -height; local265 < 0; local265++) {
-                        local273 = (v >> 16) * super.anInt9302;
+                        local273 = (v >> 16) * super.width;
                         for (local276 = -width; local276 < 0; local276++) {
                             if ((float) z < depth[offset]) {
                                 local484 = this.pixels[(u >> 16) + local273];
@@ -1810,7 +1810,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                             local265 = colour >>> 24;
                             local273 = 256 - local265;
                             for (local276 = -height; local276 < 0; local276++) {
-                                local353 = (v >> 16) * super.anInt9302;
+                                local353 = (v >> 16) * super.width;
                                 for (local361 = -width; local361 < 0; local361++) {
                                     if ((float) z < depth[offset]) {
                                         local815 = this.pixels[(u >> 16) + local353];
@@ -1835,7 +1835,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                             local353 = colour >>> 24;
                             local361 = 256 - local353;
                             for (local364 = -height; local364 < 0; local364++) {
-                                local386 = (v >> 16) * super.anInt9302;
+                                local386 = (v >> 16) * super.width;
                                 for (local394 = -width; local394 < 0; local394++) {
                                     if ((float) z < depth[offset]) {
                                         @Pc(943) byte local943 = this.pixels[(u >> 16) + local386];
@@ -1871,7 +1871,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                         local265 = colour >>> 24;
                         local273 = 256 - local265;
                         for (local276 = -height; local276 < 0; local276++) {
-                            local353 = (v >> 16) * super.anInt9302;
+                            local353 = (v >> 16) * super.width;
                             for (local361 = -width; local361 < 0; local361++) {
                                 if ((float) z < depth[offset]) {
                                     local815 = this.pixels[(u >> 16) + local353];
@@ -1903,7 +1903,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                         local589 = (local273 | local276) >>> 8;
                         local353 = u;
                         for (local361 = -height; local361 < 0; local361++) {
-                            local364 = (v >> 16) * super.anInt9302;
+                            local364 = (v >> 16) * super.width;
                             for (local386 = -width; local386 < 0; local386++) {
                                 if ((float) z < depth[offset]) {
                                     local1318 = this.pixels[(u >> 16) + local364];
@@ -1931,7 +1931,7 @@ public final class JavaIndexedSprite extends JavaSprite {
             } else if (op == 1) {
                 local262 = u;
                 for (local265 = -height; local265 < 0; local265++) {
-                    local273 = (v >> 16) * super.anInt9302;
+                    local273 = (v >> 16) * super.width;
                     for (local276 = -width; local276 < 0; local276++) {
                         if ((float) z < depth[offset]) {
                             local484 = this.pixels[(u >> 16) + local273];
@@ -1958,7 +1958,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                 local273 = colour >> 8 & 0xFF;
                 local276 = colour & 0xFF;
                 for (local353 = -height; local353 < 0; local353++) {
-                    local361 = (v >> 16) * super.anInt9302;
+                    local361 = (v >> 16) * super.width;
                     for (local364 = -width; local364 < 0; local364++) {
                         if ((float) z < depth[offset]) {
                             @Pc(1552) byte local1552 = this.pixels[(u >> 16) + local361];
@@ -1986,7 +1986,7 @@ public final class JavaIndexedSprite extends JavaSprite {
             } else if (op == 3) {
                 local262 = u;
                 for (local265 = -height; local265 < 0; local265++) {
-                    local273 = (v >> 16) * super.anInt9302;
+                    local273 = (v >> 16) * super.width;
                     for (local276 = -width; local276 < 0; local276++) {
                         if ((float) z < depth[offset]) {
                             local484 = this.pixels[(u >> 16) + local273];
@@ -2017,7 +2017,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                 local589 = (local273 | local276) >>> 8;
                 local353 = u;
                 for (local361 = -height; local361 < 0; local361++) {
-                    local364 = (v >> 16) * super.anInt9302;
+                    local364 = (v >> 16) * super.width;
                     for (local386 = -width; local386 < 0; local386++) {
                         if ((float) z < depth[offset]) {
                             local1318 = this.pixels[(u >> 16) + local364];
@@ -2047,7 +2047,7 @@ public final class JavaIndexedSprite extends JavaSprite {
         } else if (op == 1) {
             local262 = u;
             for (local265 = -height; local265 < 0; local265++) {
-                local273 = (v >> 16) * super.anInt9302;
+                local273 = (v >> 16) * super.width;
                 for (local276 = -width; local276 < 0; local276++) {
                     if ((float) z < depth[offset]) {
                         raster[offset] = this.palette[this.pixels[(u >> 16) + local273] & 0xFF];
@@ -2066,7 +2066,7 @@ public final class JavaIndexedSprite extends JavaSprite {
             local273 = colour & 0xFF;
             local276 = u;
             for (local353 = -height; local353 < 0; local353++) {
-                local361 = (v >> 16) * super.anInt9302;
+                local361 = (v >> 16) * super.width;
                 for (local364 = -width; local364 < 0; local364++) {
                     if ((float) z < depth[offset]) {
                         local386 = this.palette[this.pixels[(u >> 16) + local361] & 0xFF];
@@ -2086,7 +2086,7 @@ public final class JavaIndexedSprite extends JavaSprite {
         } else if (op == 3) {
             local262 = u;
             for (local265 = -height; local265 < 0; local265++) {
-                local273 = (v >> 16) * super.anInt9302;
+                local273 = (v >> 16) * super.width;
                 for (local276 = -width; local276 < 0; local276++) {
                     if ((float) z < depth[offset]) {
                         local484 = this.pixels[(u >> 16) + local273];
@@ -2112,7 +2112,7 @@ public final class JavaIndexedSprite extends JavaSprite {
             local589 = (local273 | local276) >>> 8;
             local353 = u;
             for (local361 = -height; local361 < 0; local361++) {
-                local364 = (v >> 16) * super.anInt9302;
+                local364 = (v >> 16) * super.width;
                 for (local386 = -width; local386 < 0; local386++) {
                     if ((float) z < depth[offset]) {
                         local394 = this.palette[this.pixels[(u >> 16) + local364] & 0xFF];
@@ -2141,8 +2141,8 @@ public final class JavaIndexedSprite extends JavaSprite {
         }
         @Pc(9) int u = 0;
         @Pc(11) int v = 0;
-        @Pc(20) int scaleWidth = super.leftMargin + super.anInt9302 + super.rightMargin;
-        @Pc(29) int scaleHeight = super.topMargin + super.anInt9306 + super.bottomMargin;
+        @Pc(20) int scaleWidth = super.leftMargin + super.width + super.rightMargin;
+        @Pc(29) int scaleHeight = super.topMargin + super.height + super.bottomMargin;
         @Pc(35) int uStep = (scaleWidth << 16) / width;
         @Pc(41) int vStep = (scaleHeight << 16) / height;
         @Pc(55) int offset;
@@ -2156,11 +2156,11 @@ public final class JavaIndexedSprite extends JavaSprite {
             y += offset;
             v = offset * vStep - (super.topMargin << 16);
         }
-        if (super.anInt9302 < scaleWidth) {
-            width = ((super.anInt9302 << 16) + uStep - u - 1) / uStep;
+        if (super.width < scaleWidth) {
+            width = ((super.width << 16) + uStep - u - 1) / uStep;
         }
-        if (super.anInt9306 < scaleHeight) {
-            height = ((super.anInt9306 << 16) + vStep - v - 1) / vStep;
+        if (super.height < scaleHeight) {
+            height = ((super.height << 16) + vStep - v - 1) / vStep;
         }
         offset = x + y * super.toolkit.surfaceWidth;
         @Pc(147) int dstStep = super.toolkit.surfaceWidth - width;
@@ -2211,7 +2211,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                 if (op == 1) {
                     local262 = u;
                     for (local265 = -height; local265 < 0; local265++) {
-                        local273 = (v >> 16) * super.anInt9302;
+                        local273 = (v >> 16) * super.width;
                         for (local276 = -width; local276 < 0; local276++) {
                             if ((float) z < depth[offset]) {
                                 local484 = this.pixels[(u >> 16) + local273];
@@ -2235,7 +2235,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                             local265 = colour >>> 24;
                             local273 = 256 - local265;
                             for (local276 = -height; local276 < 0; local276++) {
-                                local353 = (v >> 16) * super.anInt9302;
+                                local353 = (v >> 16) * super.width;
                                 for (local361 = -width; local361 < 0; local361++) {
                                     if ((float) z < depth[offset]) {
                                         local815 = this.pixels[(u >> 16) + local353];
@@ -2260,7 +2260,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                             local353 = colour >>> 24;
                             local361 = 256 - local353;
                             for (local364 = -height; local364 < 0; local364++) {
-                                local386 = (v >> 16) * super.anInt9302;
+                                local386 = (v >> 16) * super.width;
                                 for (local394 = -width; local394 < 0; local394++) {
                                     if ((float) z < depth[offset]) {
                                         @Pc(943) byte local943 = this.pixels[(u >> 16) + local386];
@@ -2296,7 +2296,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                         local265 = colour >>> 24;
                         local273 = 256 - local265;
                         for (local276 = -height; local276 < 0; local276++) {
-                            local353 = (v >> 16) * super.anInt9302;
+                            local353 = (v >> 16) * super.width;
                             for (local361 = -width; local361 < 0; local361++) {
                                 if ((float) z < depth[offset]) {
                                     local815 = this.pixels[(u >> 16) + local353];
@@ -2328,7 +2328,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                         local589 = (local273 | local276) >>> 8;
                         local353 = u;
                         for (local361 = -height; local361 < 0; local361++) {
-                            local364 = (v >> 16) * super.anInt9302;
+                            local364 = (v >> 16) * super.width;
                             for (local386 = -width; local386 < 0; local386++) {
                                 if ((float) z < depth[offset]) {
                                     local1318 = this.pixels[(u >> 16) + local364];
@@ -2356,7 +2356,7 @@ public final class JavaIndexedSprite extends JavaSprite {
             } else if (op == 1) {
                 local262 = u;
                 for (local265 = -height; local265 < 0; local265++) {
-                    local273 = (v >> 16) * super.anInt9302;
+                    local273 = (v >> 16) * super.width;
                     for (local276 = -width; local276 < 0; local276++) {
                         if ((float) z < depth[offset]) {
                             local484 = this.pixels[(u >> 16) + local273];
@@ -2383,7 +2383,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                 local273 = colour >> 8 & 0xFF;
                 local276 = colour & 0xFF;
                 for (local353 = -height; local353 < 0; local353++) {
-                    local361 = (v >> 16) * super.anInt9302;
+                    local361 = (v >> 16) * super.width;
                     for (local364 = -width; local364 < 0; local364++) {
                         if ((float) z < depth[offset]) {
                             @Pc(1552) byte local1552 = this.pixels[(u >> 16) + local361];
@@ -2411,7 +2411,7 @@ public final class JavaIndexedSprite extends JavaSprite {
             } else if (op == 3) {
                 local262 = u;
                 for (local265 = -height; local265 < 0; local265++) {
-                    local273 = (v >> 16) * super.anInt9302;
+                    local273 = (v >> 16) * super.width;
                     for (local276 = -width; local276 < 0; local276++) {
                         if ((float) z < depth[offset]) {
                             local484 = this.pixels[(u >> 16) + local273];
@@ -2442,7 +2442,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                 local589 = (local273 | local276) >>> 8;
                 local353 = u;
                 for (local361 = -height; local361 < 0; local361++) {
-                    local364 = (v >> 16) * super.anInt9302;
+                    local364 = (v >> 16) * super.width;
                     for (local386 = -width; local386 < 0; local386++) {
                         if ((float) z < depth[offset]) {
                             local1318 = this.pixels[(u >> 16) + local364];
@@ -2472,7 +2472,7 @@ public final class JavaIndexedSprite extends JavaSprite {
         } else if (op == 1) {
             local262 = u;
             for (local265 = -height; local265 < 0; local265++) {
-                local273 = (v >> 16) * super.anInt9302;
+                local273 = (v >> 16) * super.width;
                 for (local276 = -width; local276 < 0; local276++) {
                     if ((float) z < depth[offset]) {
                         raster[offset] = this.palette[this.pixels[(u >> 16) + local273] & 0xFF];
@@ -2491,7 +2491,7 @@ public final class JavaIndexedSprite extends JavaSprite {
             local273 = colour & 0xFF;
             local276 = u;
             for (local353 = -height; local353 < 0; local353++) {
-                local361 = (v >> 16) * super.anInt9302;
+                local361 = (v >> 16) * super.width;
                 for (local364 = -width; local364 < 0; local364++) {
                     if ((float) z < depth[offset]) {
                         local386 = this.palette[this.pixels[(u >> 16) + local361] & 0xFF];
@@ -2511,7 +2511,7 @@ public final class JavaIndexedSprite extends JavaSprite {
         } else if (op == 3) {
             local262 = u;
             for (local265 = -height; local265 < 0; local265++) {
-                local273 = (v >> 16) * super.anInt9302;
+                local273 = (v >> 16) * super.width;
                 for (local276 = -width; local276 < 0; local276++) {
                     if ((float) z < depth[offset]) {
                         local484 = this.pixels[(u >> 16) + local273];
@@ -2537,7 +2537,7 @@ public final class JavaIndexedSprite extends JavaSprite {
             local589 = (local273 | local276) >>> 8;
             local353 = u;
             for (local361 = -height; local361 < 0; local361++) {
-                local364 = (v >> 16) * super.anInt9302;
+                local364 = (v >> 16) * super.width;
                 for (local386 = -width; local386 < 0; local386++) {
                     if ((float) z < depth[offset]) {
                         local394 = this.palette[this.pixels[(u >> 16) + local364] & 0xFF];
@@ -2568,8 +2568,8 @@ public final class JavaIndexedSprite extends JavaSprite {
         y += super.topMargin;
         @Pc(20) int srcIndex = 0;
         @Pc(24) int dstStride = super.toolkit.surfaceWidth;
-        @Pc(27) int width = super.anInt9302;
-        @Pc(30) int height = super.anInt9306;
+        @Pc(27) int width = super.width;
+        @Pc(30) int height = super.height;
         @Pc(34) int dstStep = dstStride - width;
         @Pc(36) int srcStep = 0;
         @Pc(42) int dstIndex = x + y * dstStride;
@@ -2610,7 +2610,7 @@ public final class JavaIndexedSprite extends JavaSprite {
         if (maskY > y) {
             startY = maskY;
             dstIndex += (maskY - y) * dstStride;
-            srcIndex += (maskY - y) * super.anInt9302;
+            srcIndex += (maskY - y) * super.width;
         }
         @Pc(215) int endY = maskY + lineOffsets.length < y + height ? maskY + lineOffsets.length : y + height;
         for (@Pc(217) int row = startY; row < endY; row++) {
@@ -2665,8 +2665,8 @@ public final class JavaIndexedSprite extends JavaSprite {
             @Pc(18) int u = 0;
             @Pc(20) int v = 0;
             @Pc(24) int dstStride = super.toolkit.surfaceWidth;
-            @Pc(33) int scaleWidth = super.leftMargin + super.anInt9302 + super.rightMargin;
-            @Pc(42) int scaleHeight = super.topMargin + super.anInt9306 + super.bottomMargin;
+            @Pc(33) int scaleWidth = super.leftMargin + super.width + super.rightMargin;
+            @Pc(42) int scaleHeight = super.topMargin + super.height + super.bottomMargin;
             @Pc(48) int uStep = (scaleWidth << 16) / width;
             @Pc(54) int vStep = (scaleHeight << 16) / height;
             @Pc(68) int offset;
@@ -2680,11 +2680,11 @@ public final class JavaIndexedSprite extends JavaSprite {
                 y += offset;
                 v = offset * vStep - (super.topMargin << 16);
             }
-            if (super.anInt9302 < scaleWidth) {
-                width = ((super.anInt9302 << 16) + uStep - u - 1) / uStep;
+            if (super.width < scaleWidth) {
+                width = ((super.width << 16) + uStep - u - 1) / uStep;
             }
-            if (super.anInt9306 < scaleHeight) {
-                height = ((super.anInt9306 << 16) + vStep - v - 1) / vStep;
+            if (super.height < scaleHeight) {
+                height = ((super.height << 16) + vStep - v - 1) / vStep;
             }
             offset = x + y * dstStride;
             @Pc(156) int dstStep = dstStride - width;
@@ -2734,7 +2734,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                     if (op == 1) {
                         local265 = u;
                         for (local268 = -height; local268 < 0; local268++) {
-                            local276 = (v >> 16) * super.anInt9302;
+                            local276 = (v >> 16) * super.width;
                             for (local279 = -width; local279 < 0; local279++) {
                                 local454 = this.pixels[(u >> 16) + local276];
                                 if (local454 == 0) {
@@ -2756,7 +2756,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                                 local268 = colour >>> 24;
                                 local276 = 256 - local268;
                                 for (local279 = -height; local279 < 0; local279++) {
-                                    local342 = (v >> 16) * super.anInt9302;
+                                    local342 = (v >> 16) * super.width;
                                     for (local350 = -width; local350 < 0; local350++) {
                                         local750 = this.pixels[(u >> 16) + local342];
                                         if (local750 == 0) {
@@ -2779,7 +2779,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                                 local342 = colour >>> 24;
                                 local350 = 256 - local342;
                                 for (local353 = -height; local353 < 0; local353++) {
-                                    local368 = (v >> 16) * super.anInt9302;
+                                    local368 = (v >> 16) * super.width;
                                     for (local376 = -width; local376 < 0; local376++) {
                                         @Pc(868) byte local868 = this.pixels[(u >> 16) + local368];
                                         if (local868 == 0) {
@@ -2812,7 +2812,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                             local268 = colour >>> 24;
                             local276 = 256 - local268;
                             for (local279 = -height; local279 < 0; local279++) {
-                                local342 = (v >> 16) * super.anInt9302;
+                                local342 = (v >> 16) * super.width;
                                 for (local350 = -width; local350 < 0; local350++) {
                                     local750 = this.pixels[(u >> 16) + local342];
                                     local368 = local750 > 0 ? this.palette[local750] : 0;
@@ -2840,7 +2840,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                             local554 = (local276 | local279) >>> 8;
                             local342 = u;
                             for (local350 = -height; local350 < 0; local350++) {
-                                local353 = (v >> 16) * super.anInt9302;
+                                local353 = (v >> 16) * super.width;
                                 for (local368 = -width; local368 < 0; local368++) {
                                     local1217 = this.pixels[(u >> 16) + local353];
                                     if (local1217 == 0) {
@@ -2866,7 +2866,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                 } else if (op == 1) {
                     local265 = u;
                     for (local268 = -height; local268 < 0; local268++) {
-                        local276 = (v >> 16) * super.anInt9302;
+                        local276 = (v >> 16) * super.width;
                         for (local279 = -width; local279 < 0; local279++) {
                             local454 = this.pixels[(u >> 16) + local276];
                             if (local454 == 0) {
@@ -2891,7 +2891,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                     local276 = colour >> 8 & 0xFF;
                     local279 = colour & 0xFF;
                     for (local342 = -height; local342 < 0; local342++) {
-                        local350 = (v >> 16) * super.anInt9302;
+                        local350 = (v >> 16) * super.width;
                         for (local353 = -width; local353 < 0; local353++) {
                             @Pc(1431) byte local1431 = this.pixels[(u >> 16) + local350];
                             if (local1431 == 0) {
@@ -2917,7 +2917,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                 } else if (op == 3) {
                     local265 = u;
                     for (local268 = -height; local268 < 0; local268++) {
-                        local276 = (v >> 16) * super.anInt9302;
+                        local276 = (v >> 16) * super.width;
                         for (local279 = -width; local279 < 0; local279++) {
                             local454 = this.pixels[(u >> 16) + local276];
                             local350 = local454 > 0 ? this.palette[local454] : 0;
@@ -2944,7 +2944,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                     local554 = (local276 | local279) >>> 8;
                     local342 = u;
                     for (local350 = -height; local350 < 0; local350++) {
-                        local353 = (v >> 16) * super.anInt9302;
+                        local353 = (v >> 16) * super.width;
                         for (local368 = -width; local368 < 0; local368++) {
                             local1217 = this.pixels[(u >> 16) + local353];
                             if (local1217 == 0) {
@@ -2972,7 +2972,7 @@ public final class JavaIndexedSprite extends JavaSprite {
             } else if (op == 1) {
                 local265 = u;
                 for (local268 = -height; local268 < 0; local268++) {
-                    local276 = (v >> 16) * super.anInt9302;
+                    local276 = (v >> 16) * super.width;
                     for (local279 = -width; local279 < 0; local279++) {
                         raster[offset++] = this.palette[this.pixels[(u >> 16) + local276] & 0xFF];
                         u += uStep;
@@ -2987,7 +2987,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                 local276 = colour & 0xFF;
                 local279 = u;
                 for (local342 = -height; local342 < 0; local342++) {
-                    local350 = (v >> 16) * super.anInt9302;
+                    local350 = (v >> 16) * super.width;
                     for (local353 = -width; local353 < 0; local353++) {
                         local368 = this.palette[this.pixels[(u >> 16) + local350] & 0xFF];
                         local376 = (local368 & 0xFF0000) * local265 & 0xFF000000;
@@ -3003,7 +3003,7 @@ public final class JavaIndexedSprite extends JavaSprite {
             } else if (op == 3) {
                 local265 = u;
                 for (local268 = -height; local268 < 0; local268++) {
-                    local276 = (v >> 16) * super.anInt9302;
+                    local276 = (v >> 16) * super.width;
                     for (local279 = -width; local279 < 0; local279++) {
                         local454 = this.pixels[(u >> 16) + local276];
                         local350 = local454 > 0 ? this.palette[local454] : 0;
@@ -3025,7 +3025,7 @@ public final class JavaIndexedSprite extends JavaSprite {
                 local554 = (local276 | local279) >>> 8;
                 local342 = u;
                 for (local350 = -height; local350 < 0; local350++) {
-                    local353 = (v >> 16) * super.anInt9302;
+                    local353 = (v >> 16) * super.width;
                     for (local368 = -width; local368 < 0; local368++) {
                         local376 = this.palette[this.pixels[(u >> 16) + local353] & 0xFF];
                         local276 = (local376 & 0xFF00FF) * local265 & 0xFF00FF00;

@@ -23,7 +23,7 @@ public final class Static498 {
         } else if (local26 > 100) {
             local26 = 100;
         }
-        @Pc(49) int local49 = (Static640.aShort121 - Static640.aShort122) * local26 / 100 + Static640.aShort122;
+        @Pc(49) int local49 = (Static640.wideFov - Static640.fov) * local26 / 100 + Static640.fov;
         if (Static25.aShort1 > local49) {
             local49 = Static25.aShort1;
         } else if (Static598.aShort120 < local49) {

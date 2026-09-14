@@ -609,7 +609,7 @@ public final class Loading {
             MiniMenu.setIcons(Sprites.nameIcons);
         }
 
-        return Static694.method9030();
+        return Static694.advanceLoadState();
     }
 
     @OriginalMember(owner = "client!hc", name = "a", descriptor = "(I)V")

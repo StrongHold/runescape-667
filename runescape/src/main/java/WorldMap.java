@@ -498,7 +498,7 @@ public final class WorldMap {
                 return;
             }
 
-            Static700.method9152();
+            Static700.freeScene();
             loadingPercent = 10;
         }
 
@@ -1157,7 +1157,7 @@ public final class WorldMap {
             points[i * 2] = screenX1 + (screenX2 - screenX1) * (pointX - viewX1) / (viewX2 - viewX1);
             points[i * 2 + 1] = screenY2 - (screenY2 - screenY1) * (pointZ - viewZ1) / (viewZ2 - viewZ1);
         }
-        Minimap.method2371(toolkit, points, type.landmarkBackground);
+        Minimap.fillLandmarkPolygon(toolkit, points, type.landmarkBackground);
         if (type.anInt2603 > 0) {
             @Pc(102) int y1;
             @Pc(110) int x2;
@@ -1600,7 +1600,7 @@ public final class WorldMap {
     }
 
     @OriginalMember(owner = "client!tc", name = "e", descriptor = "(I)V")
-    public static void method7934() {
+    public static void restoreLastArea() {
         if (lastAreaId != -1) {
             setMap(lastAreaId, false, -1, -1);
             lastAreaId = -1;
@@ -1608,7 +1608,7 @@ public final class WorldMap {
     }
 
     @OriginalMember(owner = "client!vd", name = "a", descriptor = "(II)V")
-    public static void method8711(@OriginalArg(0) int x) {
+    public static void setDisplayX(@OriginalArg(0) int x) {
         jumpX = -1;
         jumpZ = -1;
         displayX = x;
@@ -1991,7 +1991,7 @@ public final class WorldMap {
     }
 
     @OriginalMember(owner = "client!qa", name = "a", descriptor = "(BII)V")
-    public static void method6759(@OriginalArg(1) int x, @OriginalArg(2) int y) {
+    public static void tick(@OriginalArg(1) int x, @OriginalArg(2) int y) {
         if (currentZoom < targetZoom) {
             currentZoom = (float) ((double) currentZoom + (double) currentZoom / 30.0D);
             if (currentZoom > targetZoom) {

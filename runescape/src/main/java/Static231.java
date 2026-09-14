@@ -34,7 +34,7 @@ public final class Static231 {
     public static final int anInt3733 = IntMath.countBits(16);
 
     @OriginalMember(owner = "client!hd", name = "b", descriptor = "(I)V")
-    public static void method3375() {
+    public static void freeToolkit() {
         if (Toolkit.active == null) {
             return;
         }

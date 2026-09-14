@@ -40,7 +40,7 @@ public final class Node_Sub1_Sub20 extends TextureOp {
     @Override
     public void method9416(@OriginalArg(0) boolean arg0, @OriginalArg(1) Packet arg1, @OriginalArg(2) int arg2) {
         if (arg0) {
-            OrthoMode.anInt6565 = -73;
+            OrthoMode.cachedViewportWidth = -73;
         }
         if (arg2 == 0) {
             this.anInt6578 = arg1.g2();

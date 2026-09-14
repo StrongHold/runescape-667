@@ -51,7 +51,7 @@ public final class MapRegion extends Terrain {
     public static MapRegion active;
 
     @OriginalMember(owner = "client!taa", name = "K", descriptor = "I")
-    public int maxLevel = 99;
+    public int minLevel = 99;
 
     @OriginalMember(owner = "client!taa", name = "<init>", descriptor = "(IIIZ)V")
     public MapRegion(@OriginalArg(0) int levels, @OriginalArg(1) int mapWidth, @OriginalArg(2) int mapLength, @OriginalArg(3) boolean underwater) {
@@ -160,7 +160,7 @@ public final class MapRegion extends Terrain {
     }
 
     @OriginalMember(owner = "client!qm", name = "a", descriptor = "(IIBI)I")
-    public static int rotateZoneY(@OriginalArg(1) int x, @OriginalArg(0) int z, @OriginalArg(3) int rotation) {
+    public static int rotateZoneZ(@OriginalArg(1) int x, @OriginalArg(0) int z, @OriginalArg(3) int rotation) {
         @Pc(7) int maskedRotation = rotation & 0x3;
         if (maskedRotation == 0) {
             return z;
@@ -258,7 +258,7 @@ public final class MapRegion extends Terrain {
     }
 
     @OriginalMember(owner = "client!taa", name = "a", descriptor = "(ILclient!ge;ILclient!ha;I)V")
-    public void method7893(@OriginalArg(0) int z, @OriginalArg(1) Packet packet, @OriginalArg(2) int x, @OriginalArg(3) Toolkit toolkit) {
+    public void decodeStaticEnvironment(@OriginalArg(0) int z, @OriginalArg(1) Packet packet, @OriginalArg(2) int x, @OriginalArg(3) Toolkit toolkit) {
         if (super.underwater) {
             return;
         }
@@ -296,7 +296,7 @@ public final class MapRegion extends Terrain {
                     if (environment == null) {
                         environment = new Environment();
                     }
-                    environment.method8384(packet);
+                    environment.decodeSkyBox(packet);
                 } else if (code == 129) {
                     if (super.aByteArrayArrayArray12 == null) {
                         super.aByteArrayArrayArray12 = new byte[4][][];
@@ -397,7 +397,7 @@ public final class MapRegion extends Terrain {
             } else if (environment == null) {
                 environment = new Environment(packet);
             } else {
-                environment.method8386(packet);
+                environment.decodeLighting(packet);
             }
         }
         if (environment != null) {
@@ -435,8 +435,8 @@ public final class MapRegion extends Terrain {
             return;
         }
 
-        if (level < this.maxLevel) {
-            this.maxLevel = level;
+        if (level < this.minLevel) {
+            this.minLevel = level;
         }
 
         @Pc(40) LocType locType = LocTypeList.instance.list(id);
@@ -923,7 +923,7 @@ public final class MapRegion extends Terrain {
                 if (environment == null) {
                     environment = new Environment(packet);
                 } else {
-                    environment.method8386(packet);
+                    environment.decodeLighting(packet);
                 }
             } else if (code == 1) {
                 @Pc(63) int count = packet.g1();
@@ -966,7 +966,7 @@ public final class MapRegion extends Terrain {
                 if (environment == null) {
                     environment = new Environment();
                 }
-                environment.method8384(packet);
+                environment.decodeSkyBox(packet);
             } else if (code == 129) {
                 if (super.aByteArrayArrayArray12 == null) {
                     super.aByteArrayArrayArray12 = new byte[4][][];
@@ -1022,7 +1022,7 @@ public final class MapRegion extends Terrain {
                                         for (@Pc(176) int localZ = blockZ; localZ < blockZ + 4; localZ++) {
                                             if (localX >= pointerSquareX && pointerSquareX + 8 > localX && localZ >= pointerSquareZ && pointerSquareZ + 8 > localZ) {
                                                 @Pc(200) int tileX = x + rotateZoneX(localX & 0x7, localZ & 0x7, pointerRotation);
-                                                @Pc(534) int tileZ = z + rotateZoneY(localX & 0x7, localZ & 0x7, pointerRotation);
+                                                @Pc(534) int tileZ = z + rotateZoneZ(localX & 0x7, localZ & 0x7, pointerRotation);
                                                 if (tileX >= 0 && tileX < super.width && tileZ >= 0 && tileZ < super.length) {
                                                     super.aByteArrayArrayArray12[level][tileX][tileZ] = height;
                                                     mapLoaded = true;
@@ -1121,7 +1121,7 @@ public final class MapRegion extends Terrain {
     }
 
     @OriginalMember(owner = "client!taa", name = "a", descriptor = "(ZLclient!ha;B)V")
-    public void method7898(@OriginalArg(0) boolean skipOccluders, @OriginalArg(1) Toolkit toolkit) {
+    public void buildRoofOccluders(@OriginalArg(0) boolean skipOccluders, @OriginalArg(1) Toolkit toolkit) {
         Static323.method4624();
 
         if (!skipOccluders) {

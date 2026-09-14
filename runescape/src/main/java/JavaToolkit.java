@@ -87,7 +87,7 @@ public final class JavaToolkit extends Toolkit {
     public JavaThreadResource[] resources;
 
     @OriginalMember(owner = "client!iaa", name = "ib", descriptor = "I")
-    public int vewY2;
+    public int viewY2;
 
     @OriginalMember(owner = "client!iaa", name = "O", descriptor = "[F")
     public float[] depthBuffer;
@@ -1914,7 +1914,7 @@ public final class JavaToolkit extends Toolkit {
         }
         @Pc(84) int px = (int) ((float) this.projectionScaleX * (this.camera.tx + this.camera.e1_1 * (float) x + this.camera.e1_2 * (float) y + this.camera.e1_3 * (float) z) / depth);
         @Pc(116) int py = (int) ((float) this.projectionScaleY * (this.camera.ty + this.camera.e2_1 * (float) x + this.camera.e2_2 * (float) y + this.camera.e2_3 * (float) z) / depth);
-        if (px >= this.viewX1 && px <= this.viewX2 && py >= this.viewY1 && py <= this.vewY2) {
+        if (px >= this.viewX1 && px <= this.viewX2 && py >= this.viewY1 && py <= this.viewY2) {
             destination[0] = px - this.viewX1;
             destination[1] = py - this.viewY1;
             destination[2] = (int) depth;
@@ -1933,7 +1933,7 @@ public final class JavaToolkit extends Toolkit {
         }
         @Pc(85) int px = (int) ((float) this.projectionScaleX * (this.camera.tx + this.camera.e1_1 * (float) x + this.camera.e1_2 * (float) y + this.camera.e1_3 * (float) z) / (float) zoom);
         @Pc(118) int py = (int) ((float) this.projectionScaleY * (this.camera.ty + this.camera.e2_1 * (float) x + this.camera.e2_2 * (float) y + this.camera.e2_3 * (float) z) / (float) zoom);
-        if (px >= this.viewX1 && px <= this.viewX2 && py >= this.viewY1 && py <= this.vewY2) {
+        if (px >= this.viewX1 && px <= this.viewX2 && py >= this.viewY1 && py <= this.viewY2) {
             destination[0] = px - this.viewX1;
             destination[1] = py - this.viewY1;
             destination[2] = (int) depth;
@@ -2192,7 +2192,7 @@ public final class JavaToolkit extends Toolkit {
         @Pc(257) int py2 = (int) ((float) this.projectionScaleY * (this.camera.e2_1 * (float) x2 + this.camera.e2_2 * (float) y2 + this.camera.e2_3 * (float) z2 + this.camera.ty) / depth2);
         if (py1 < this.viewY1 && py2 < this.viewY1) {
             outcode |= 0x4;
-        } else if (py1 > this.vewY2 && py2 > this.vewY2) {
+        } else if (py1 > this.viewY2 && py2 > this.viewY2) {
             outcode |= 0x8;
         }
         return outcode;
@@ -2388,7 +2388,7 @@ public final class JavaToolkit extends Toolkit {
         @Pc(249) int py2 = (int) ((float) this.projectionScaleY * (this.camera.e2_1 * (float) x2 + this.camera.e2_2 * (float) y2 + this.camera.e2_3 * (float) z2 + this.camera.ty) / (float) zoom);
         if (py1 < this.viewY1 && py2 < this.viewY1) {
             outcode |= 0x4;
-        } else if (py1 > this.vewY2 && py2 > this.vewY2) {
+        } else if (py1 > this.viewY2 && py2 > this.viewY2) {
             outcode |= 0x8;
         }
         return outcode;
@@ -2966,7 +2966,7 @@ public final class JavaToolkit extends Toolkit {
         this.viewX1 = this.clipX1 - this.projectionCenterX;
         this.viewX2 = this.clipX2 - this.projectionCenterX;
         this.viewY1 = this.clipY1 - this.projectionCenterY;
-        this.vewY2 = this.clipY2 - this.projectionCenterY;
+        this.viewY2 = this.clipY2 - this.projectionCenterY;
 
         for (@Pc(29) int i = 0; i < this.threadCount; i++) {
             @Pc(36) Rasterizer rasterizer = this.resources[i].rasterizer;

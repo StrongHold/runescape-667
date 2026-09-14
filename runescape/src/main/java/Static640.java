@@ -5,10 +5,10 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static640 {
 
     @OriginalMember(owner = "client!uda", name = "H", descriptor = "S")
-    public static short aShort121 = 205;
+    public static short wideFov = 205;
 
     @OriginalMember(owner = "client!uda", name = "B", descriptor = "S")
-    public static short aShort122 = 256;
+    public static short fov = 256;
 
     @OriginalMember(owner = "client!uda", name = "a", descriptor = "(II)[[[B")
     public static byte[][][] createTileShapeMasks(@OriginalArg(1) int size) {

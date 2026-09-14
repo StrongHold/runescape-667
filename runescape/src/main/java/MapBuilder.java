@@ -210,7 +210,7 @@ public final class MapBuilder {
         }
         Static314.noTimeout(true);
         MapRegion.active.method7888(Toolkit.active, underwater ? Static693.underwaterGround[0] : null, null);
-        MapRegion.active.method7898(false, Toolkit.active);
+        MapRegion.active.buildRoofOccluders(false, Toolkit.active);
         Static314.noTimeout(true);
         if (underwater) {
             Static379.method5355(true);
@@ -223,12 +223,12 @@ public final class MapBuilder {
             client.cacheReset();
             Static314.noTimeout(true);
             Static134.aMapRegion_3.method7888(Toolkit.active, null, Static706.floor[0]);
-            Static134.aMapRegion_3.method7898(true, Toolkit.active);
+            Static134.aMapRegion_3.buildRoofOccluders(true, Toolkit.active);
             Static314.noTimeout(true);
             Static379.method5355(false);
         }
         Static207.method4432();
-        @Pc(825) int topLevel = MapRegion.active.maxLevel;
+        @Pc(825) int topLevel = MapRegion.active.minLevel;
         if (topLevel > Camera.renderingLevel) {
             topLevel = Camera.renderingLevel;
         }
@@ -291,7 +291,7 @@ public final class MapBuilder {
             }
         }
 
-        WorldMap.method7934();
+        WorldMap.restoreLastArea();
         Static557.method7331();
         Static199.doneslowupdate();
         Static75.hasOpaqueStationaryEntities = true;

@@ -57,7 +57,7 @@ public final class Static294 {
             Minimap.flagY = -1;
             DelayedStateChange.resetMapFlag();
         }
-        Static710.method6711();
+        Static710.buildScene();
         if (!login) {
             Static527.method7083();
         }
@@ -176,7 +176,7 @@ public final class Static294 {
             Static233.method3407(viewportWidth, viewportY, viewportX, viewportHeight);
             Static208.method3105(viewportWidth, viewportX, viewportY, viewportHeight);
         }
-        Static712.method9323();
+        Static712.clearDynamicEntities();
         Camera.z = savedCameraZ;
         Camera.x = local169;
         Camera.pitch = savedCameraPitch;

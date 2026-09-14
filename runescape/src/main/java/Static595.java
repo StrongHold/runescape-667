@@ -132,7 +132,7 @@ public final class Static595 {
     }
 
     @OriginalMember(owner = "client!so", name = "a", descriptor = "(IBIII)V")
-    public static void method7810(@OriginalArg(0) int bottom, @OriginalArg(2) int right, @OriginalArg(3) int top, @OriginalArg(4) int left) {
+    public static void expandDirtyRect(@OriginalArg(0) int bottom, @OriginalArg(2) int right, @OriginalArg(3) int top, @OriginalArg(4) int left) {
         @Pc(5) int mode = Static691.anInt10368;
         if (mode == 0) {
             return;

@@ -21,7 +21,7 @@ public final class Static710 {
     }
 
     @OriginalMember(owner = "client!wha", name = "a", descriptor = "(I)V")
-    public static void method6711() {
+    public static void buildScene() {
         for (@Pc(10) Class8_Sub1 local10 = (Class8_Sub1) Static149.A_ENTITY_LIST___4.removeFirst(); local10 != null; local10 = (Class8_Sub1) Static149.A_ENTITY_LIST___4.removeFirst()) {
             Static703.method9171(local10);
         }

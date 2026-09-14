@@ -83,7 +83,7 @@ public final class SceneRenderer {
                 Static419.anIntArray500 = arg7;
                 Static219.anIntArray288 = arg8;
                 Static665.anIntArray779 = arg9;
-                Static725.method9454(Static665.aToolkit_15, levels);
+                Static725.buildOcclusionBuffer(Static665.aToolkit_15, levels);
             }
         } else {
             if (Static222.aBooleanArrayArray2 == null) {

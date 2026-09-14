@@ -10,7 +10,7 @@ public final class Static613 {
         Static665.aEnvironmentArrayArray1 = new Environment[arg2][arg1];
         Static425.toolkit = arg0;
         if (MapDefaults.skyboxes != null) {
-            Static226.aClass67_9 = Environment.method5301(MapDefaults.skyboxes[4], MapDefaults.skyboxes[1], MapDefaults.skyboxes[2], MapDefaults.skyboxes[3], MapDefaults.skyboxes[5], MapDefaults.skyboxes[0]);
+            Static226.aClass67_9 = Environment.cubeMap(MapDefaults.skyboxes[4], MapDefaults.skyboxes[1], MapDefaults.skyboxes[2], MapDefaults.skyboxes[3], MapDefaults.skyboxes[5], MapDefaults.skyboxes[0]);
         }
         Static495.aSkyBox_4 = null;
         Static556.aEnvironment_2 = new Environment();

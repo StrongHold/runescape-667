@@ -1128,9 +1128,9 @@ public class Terrain {
                             underlayFaces = underlayType == null ? 0 : SPLIT_UNDERLAY_FACE_COUNT[shape];
                             faceC = SPLIT_FACE_C[shape];
                             overlayFaces = overlayType == null ? 0 : SPLIT_OVERLAY_FACE_COUNT[shape];
-                            faceA = Static115.anIntArrayArray56[shape];
+                            faceA = Static115.SPLIT_FACE_A[shape];
                             edgeFaces = Static264.SPLIT_EDGE_FACE[shape];
-                            faceB = Static206.anIntArrayArray84[shape];
+                            faceB = Static206.SPLIT_FACE_B[shape];
                         }
 
                         @Pc(1021) int faceCount = overlayFaces + underlayFaces;
@@ -1518,7 +1518,7 @@ public class Terrain {
             for (@Pc(32) int zoneX = 0; zoneX < 8; zoneX++) {
                 for (@Pc(35) int zoneZ = 0; zoneZ < 8; zoneZ++) {
                     @Pc(49) int tileX = x + MapRegion.rotateZoneX(zoneX & 0x7, zoneZ & 0x7, pointerRotation);
-                    @Pc(61) int tileZ = z + MapRegion.rotateZoneY(zoneX & 0x7, zoneZ & 0x7, pointerRotation);
+                    @Pc(61) int tileZ = z + MapRegion.rotateZoneZ(zoneX & 0x7, zoneZ & 0x7, pointerRotation);
 
                     if (tileX > 0 && this.width - 1 > tileX && tileZ > 0 && tileZ < this.length - 1) {
                         collisionMap.unflagBlocked(tileX, tileZ);
@@ -1565,7 +1565,7 @@ public class Terrain {
                             this.decodeTile(packet, zoneX, zoneZ, squareX + baseX, squareZ + baseZ, 0, 0, level, 0, true);
                         } else {
                             zoneX = x + MapRegion.rotateZoneX(squareX & 0x7, squareZ & 0x7, pointerRotation);
-                            zoneZ = MapRegion.rotateZoneY(squareX & 0x7, squareZ & 0x7, pointerRotation) + z;
+                            zoneZ = MapRegion.rotateZoneZ(squareX & 0x7, squareZ & 0x7, pointerRotation) + z;
                             this.decodeTile(packet, zoneX, zoneZ, squareX + baseX, squareZ + baseZ, offsetX, offsetZ, level, pointerRotation, false);
                         }
 

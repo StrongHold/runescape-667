@@ -19,21 +19,21 @@ public final class Static506 {
             @Pc(40) int local40 = 255 - local35;
             @Pc(45) float local45 = (float) local35 / 255.0F;
             @Pc(50) float local50 = 1.0F - local45;
-            Static448.anInt6801 = (local40 * (Static346.aEnvironment_1.anInt9537 & 0xFF00FF) + (Static386.anInt6062 & 0xFF00FF) * local35 & 0xFF00FF00) + (local35 * (Static386.anInt6062 & 0xFF00) + (local40 * (Static346.aEnvironment_1.anInt9537 & 0xFF00)) & 0xFF0000) >>> 8;
-            Static318.aFloat210 = Static620.aFloat197 + (Static346.aEnvironment_1.aFloat204 - Static620.aFloat197) * local50;
-            Static688.aFloat216 = local50 * (Static346.aEnvironment_1.aFloat205 - Static659.aFloat213) + Static659.aFloat213;
-            Static171.anInt2882 = Static679.anInt10273 * local35 + Static346.aEnvironment_1.anInt9539 * local40 >> 8;
-            Static683.aFloat215 = (Static346.aEnvironment_1.aFloat202 - Static671.aFloat214) * local50 + Static671.aFloat214;
+            Static448.anInt6801 = (local40 * (Static346.aEnvironment_1.sunColour & 0xFF00FF) + (Static386.anInt6062 & 0xFF00FF) * local35 & 0xFF00FF00) + (local35 * (Static386.anInt6062 & 0xFF00) + (local40 * (Static346.aEnvironment_1.sunColour & 0xFF00)) & 0xFF0000) >>> 8;
+            Static318.aFloat210 = Static620.aFloat197 + (Static346.aEnvironment_1.ambient - Static620.aFloat197) * local50;
+            Static688.aFloat216 = local50 * (Static346.aEnvironment_1.sunIntensity - Static659.aFloat213) + Static659.aFloat213;
+            Static171.anInt2882 = Static679.anInt10273 * local35 + Static346.aEnvironment_1.fogRange * local40 >> 8;
+            Static683.aFloat215 = (Static346.aEnvironment_1.reverseSunIntensity - Static671.aFloat214) * local50 + Static671.aFloat214;
             Static151.aFloat218 = Static600.aFloat179 + (Static346.aEnvironment_1.aFloat203 - Static600.aFloat179) * local50;
-            Static251.anInt4037 = (local40 * (Static346.aEnvironment_1.anInt9538 & 0xFF00FF) + (Static360.anInt5820 & 0xFF00FF) * local35 & 0xFF00FF00) + (local35 * (Static360.anInt5820 & 0xFF00) + (Static346.aEnvironment_1.anInt9538 & 0xFF00) * local40 & 0xFF0000) >>> 8;
+            Static251.anInt4037 = (local40 * (Static346.aEnvironment_1.fogColour & 0xFF00FF) + (Static360.anInt5820 & 0xFF00FF) * local35 & 0xFF00FF00) + (local35 * (Static360.anInt5820 & 0xFF00) + (Static346.aEnvironment_1.fogColour & 0xFF00) * local40 & 0xFF0000) >>> 8;
             Static133.aFloat63 = Static538.aFloat174 + (Static346.aEnvironment_1.aFloat201 - Static538.aFloat174) * local50;
             Static57.aFloat29 = local50 * (Static346.aEnvironment_1.aFloat200 - Static203.aFloat69) + Static203.aFloat69;
-            if (Static74.aClass67_3 != Static346.aEnvironment_1.aClass67_10) {
-                Static425.aClass67_6 = Static425.toolkit.method8007(Static74.aClass67_3, Static346.aEnvironment_1.aClass67_10, local50, Static425.aClass67_6);
+            if (Static74.aClass67_3 != Static346.aEnvironment_1.cubeMap) {
+                Static425.aClass67_6 = Static425.toolkit.method8007(Static74.aClass67_3, Static346.aEnvironment_1.cubeMap, local50, Static425.aClass67_6);
             }
-            if (Static346.aEnvironment_1.aSkyBox_5 != Static74.aSkyBox_1) {
+            if (Static346.aEnvironment_1.skyBox != Static74.aSkyBox_1) {
                 if (Static74.aSkyBox_1 == null) {
-                    Static456.aSkyBox_3 = Static346.aEnvironment_1.aSkyBox_5;
+                    Static456.aSkyBox_3 = Static346.aEnvironment_1.skyBox;
                     if (Static456.aSkyBox_3 != null) {
                         Static456.aSkyBox_3.method3160(0, local40);
                     }
@@ -45,21 +45,21 @@ public final class Static506 {
                 }
             }
         } else {
-            Static448.anInt6801 = Static346.aEnvironment_1.anInt9537;
+            Static448.anInt6801 = Static346.aEnvironment_1.sunColour;
             Static151.aFloat218 = Static346.aEnvironment_1.aFloat203;
-            Static318.aFloat210 = Static346.aEnvironment_1.aFloat204;
+            Static318.aFloat210 = Static346.aEnvironment_1.ambient;
             Static133.aFloat63 = Static346.aEnvironment_1.aFloat201;
-            Static683.aFloat215 = Static346.aEnvironment_1.aFloat202;
-            Static425.aClass67_6 = Static346.aEnvironment_1.aClass67_10;
-            Static171.anInt2882 = Static346.aEnvironment_1.anInt9539;
-            Static251.anInt4037 = Static346.aEnvironment_1.anInt9538;
-            Static688.aFloat216 = Static346.aEnvironment_1.aFloat205;
+            Static683.aFloat215 = Static346.aEnvironment_1.reverseSunIntensity;
+            Static425.aClass67_6 = Static346.aEnvironment_1.cubeMap;
+            Static171.anInt2882 = Static346.aEnvironment_1.fogRange;
+            Static251.anInt4037 = Static346.aEnvironment_1.fogColour;
+            Static688.aFloat216 = Static346.aEnvironment_1.sunIntensity;
             Static57.aFloat29 = Static346.aEnvironment_1.aFloat200;
             if (Static456.aSkyBox_3 != null) {
                 Static456.aSkyBox_3.method3169();
             }
             Static173.anInt2913 = -1;
-            Static456.aSkyBox_3 = Static346.aEnvironment_1.aSkyBox_5;
+            Static456.aSkyBox_3 = Static346.aEnvironment_1.skyBox;
         }
         Static344.aLong169 = local18;
     }
