@@ -6,126 +6,140 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static34 {
 
     @OriginalMember(owner = "client!bca", name = "a", descriptor = "(II[BLclient!tca;)Lclient!ns;")
-    public static Class265 method884(@OriginalArg(0) int arg0, @OriginalArg(2) byte[] arg1, @OriginalArg(3) GlxToolkit arg2) {
-        if (arg1 == null || arg1.length == 0) {
+    public static Class265 method884(@OriginalArg(0) int shaderType, @OriginalArg(2) byte[] source, @OriginalArg(3) GlxToolkit toolkit) {
+        if (source == null || source.length == 0) {
             return null;
         }
-        @Pc(22) long local22 = OpenGL.glCreateShaderObjectARB(arg0);
-        OpenGL.glShaderSourceRawARB(local22, arg1);
-        OpenGL.glCompileShaderARB(local22);
-        OpenGL.glGetObjectParameterivARB(local22, OpenGL.GL_COMPILE_STATUS, Static332.anIntArray405, 0);
+        @Pc(22) long shader = OpenGL.glCreateShaderObjectARB(shaderType);
+        OpenGL.glShaderSourceRawARB(shader, source);
+        OpenGL.glCompileShaderARB(shader);
+        OpenGL.glGetObjectParameterivARB(shader, OpenGL.GL_COMPILE_STATUS, Static332.anIntArray405, 0);
         if (Static332.anIntArray405[0] == 0) {
             if (Static332.anIntArray405[0] == 0) {
                 System.out.println("Shader compile failed:");
             }
-            OpenGL.glGetObjectParameterivARB(local22, OpenGL.GL_INFO_LOG_LENGTH, Static332.anIntArray405, 1);
+            OpenGL.glGetObjectParameterivARB(shader, OpenGL.GL_INFO_LOG_LENGTH, Static332.anIntArray405, 1);
             if (Static332.anIntArray405[1] > 1) {
-                @Pc(69) byte[] local69 = new byte[Static332.anIntArray405[1]];
-                OpenGL.glGetInfoLogARB(local22, Static332.anIntArray405[1], Static332.anIntArray405, 0, local69, 0);
-                System.out.println(new String(local69));
+                @Pc(69) byte[] log = new byte[Static332.anIntArray405[1]];
+                OpenGL.glGetInfoLogARB(shader, Static332.anIntArray405[1], Static332.anIntArray405, 0, log, 0);
+                System.out.println(new String(log));
             }
             if (Static332.anIntArray405[0] == 0) {
-                OpenGL.glDeleteObjectARB(local22);
+                OpenGL.glDeleteObjectARB(shader);
                 return null;
             }
         }
-        return new Class265(arg2, local22, arg0);
+        return new Class265(toolkit, shader, shaderType);
     }
 
+    /**
+     * Walks one scanline of a triangle scan converted by {@link Static264#rasteriseTriangle}, from
+     * pixel x0 up to but not including x1, interpolating the depth z by dzdx per pixel. The span is
+     * clipped to the viewport width held in {@link Static228#anInt3709}, and index addresses the
+     * start of the scanline's row in depthBuffer.
+     * <p>
+     * {@link Static254#anInt4115} selects the mode: 1 keeps the nearer of the interpolated depth and
+     * the depth already recorded, and always answers true; 2 leaves the buffer alone and answers
+     * whether every pixel of the span lies behind the recorded depth, so false means part of the span
+     * is visible.
+     * <p>
+     * The body is unrolled four pixels at a time, with the remaining one to three pixels handled by
+     * the trailing loop.
+     */
     @OriginalMember(owner = "client!bca", name = "a", descriptor = "(IIIZ[IIII)Z")
-    public static boolean method885(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(4) int[] arg3, @OriginalArg(5) int arg4, @OriginalArg(7) int arg5) {
-        if (arg0 < 0) {
-            arg0 = 0;
+    public static boolean rasteriseScanline(@OriginalArg(0) int x0, @OriginalArg(1) int x1, @OriginalArg(2) int z, @OriginalArg(4) int[] depthBuffer, @OriginalArg(5) int dzdx, @OriginalArg(7) int index) {
+        if (x0 < 0) {
+            x0 = 0;
         }
-        if (Static228.anInt3709 < arg1) {
-            arg1 = Static228.anInt3709;
+        if (Static228.anInt3709 < x1) {
+            x1 = Static228.anInt3709;
         }
-        if (arg1 <= arg0) {
+        if (x1 <= x0) {
             return true;
         }
-        arg2 += arg0 * arg4;
-        @Pc(41) int local41 = arg1 - arg0 >> 2;
-        arg5 += arg0 - 1;
-        @Pc(74) int local74;
-        @Pc(61) int local61;
+        z += x0 * dzdx;
+        @Pc(41) int count = x1 - x0 >> 2;
+        index += x0 - 1;
+        @Pc(74) int nextZ;
+        @Pc(61) int nextIndex;
         if (Static254.anInt4115 == 1) {
-            Static432.occludedPixelCount += local41;
+            Static432.occludedPixelCount += count;
             while (true) {
-                local41--;
-                if (local41 < 0) {
-                    local41 = arg1 - arg0 & 0x3;
+                count--;
+                if (count < 0) {
+                    count = x1 - x0 & 0x3;
                     while (true) {
-                        local41--;
-                        if (local41 < 0) {
+                        count--;
+                        if (count < 0) {
                             return true;
                         }
-                        arg5++;
-                        if (arg3[arg5] > arg2) {
-                            arg3[arg5] = arg2;
+                        index++;
+                        if (depthBuffer[index] > z) {
+                            depthBuffer[index] = z;
                         }
-                        arg2 += arg4;
+                        z += dzdx;
                     }
                 }
-                local61 = arg5 + 1;
-                if (arg2 < arg3[local61]) {
-                    arg3[local61] = arg2;
+                nextIndex = index + 1;
+                if (z < depthBuffer[nextIndex]) {
+                    depthBuffer[nextIndex] = z;
                 }
-                local74 = arg2 + arg4;
-                local61++;
-                if (local74 < arg3[local61]) {
-                    arg3[local61] = local74;
+                nextZ = z + dzdx;
+                nextIndex++;
+                if (nextZ < depthBuffer[nextIndex]) {
+                    depthBuffer[nextIndex] = nextZ;
                 }
-                local74 += arg4;
-                local61++;
-                if (arg3[local61] > local74) {
-                    arg3[local61] = local74;
+                nextZ += dzdx;
+                nextIndex++;
+                if (depthBuffer[nextIndex] > nextZ) {
+                    depthBuffer[nextIndex] = nextZ;
                 }
-                local74 += arg4;
-                arg5 = local61 + 1;
-                if (local74 < arg3[arg5]) {
-                    arg3[arg5] = local74;
+                nextZ += dzdx;
+                index = nextIndex + 1;
+                if (nextZ < depthBuffer[index]) {
+                    depthBuffer[index] = nextZ;
                 }
-                arg2 = local74 + arg4;
+                z = nextZ + dzdx;
             }
         } else {
-            arg2 -= 38400;
+            z -= 38400;
             while (true) {
-                local41--;
-                if (local41 < 0) {
-                    local41 = arg1 - arg0 & 0x3;
+                count--;
+                if (count < 0) {
+                    count = x1 - x0 & 0x3;
                     while (true) {
-                        local41--;
-                        if (local41 < 0) {
+                        count--;
+                        if (count < 0) {
                             return true;
                         }
-                        @Pc(246) int local246 = ~arg2;
-                        arg5++;
-                        if (local246 > ~arg3[arg5]) {
+                        @Pc(246) int invertedZ = ~z;
+                        index++;
+                        if (invertedZ > ~depthBuffer[index]) {
                             return false;
                         }
-                        arg2 += arg4;
+                        z += dzdx;
                     }
                 }
-                local61 = arg5 + 1;
-                if (arg2 < arg3[local61]) {
+                nextIndex = index + 1;
+                if (z < depthBuffer[nextIndex]) {
                     return false;
                 }
-                local74 = arg2 + arg4;
-                local61++;
-                if (arg3[local61] > local74) {
+                nextZ = z + dzdx;
+                nextIndex++;
+                if (depthBuffer[nextIndex] > nextZ) {
                     return false;
                 }
-                local74 += arg4;
-                local61++;
-                if (arg3[local61] > local74) {
+                nextZ += dzdx;
+                nextIndex++;
+                if (depthBuffer[nextIndex] > nextZ) {
                     return false;
                 }
-                local74 += arg4;
-                arg5 = local61 + 1;
-                if (arg3[arg5] > local74) {
+                nextZ += dzdx;
+                index = nextIndex + 1;
+                if (depthBuffer[index] > nextZ) {
                     return false;
                 }
-                arg2 = local74 + arg4;
+                z = nextZ + dzdx;
             }
         }
     }
