@@ -12,7 +12,7 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static684 {
 
     @OriginalMember(owner = "client!vla", name = "a", descriptor = "[Lclient!qe;")
-    public static Class302[] aClass302Array1;
+    public static RenderQueue[] aClass302Array1;
 
     @OriginalMember(owner = "client!vla", name = "i", descriptor = "I")
     public static int w2debug = 0;

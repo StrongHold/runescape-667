@@ -34,7 +34,7 @@ public final class Static517 {
         if ((arg5 & 0x2) == 0) {
             for (local22 = Static576.opaqueStationaryEntities[local6]; local22 != null; local22 = local22.nextEntity) {
                 if (!Static208.method3107(local22, arg0, arg1, arg2, arg3)) {
-                    method6824(local22);
+                    projectToScreen(local22);
                     if (local22.anInt10697 != -1) {
                         Static48.aEntityArray3[Static546.onscreenOpaqueEntityCount++] = local22;
                     }
@@ -45,7 +45,7 @@ public final class Static517 {
         if ((arg5 & 0x1) == 0) {
             for (local22 = Static398.transparentStationaryEntities[local6]; local22 != null; local22 = local22.nextEntity) {
                 if (!Static208.method3107(local22, arg0, arg1, arg2, arg3)) {
-                    method6824(local22);
+                    projectToScreen(local22);
                     if (local22.anInt10697 != -1) {
                         Static395.aEntityArray11[Static645.onscreenTransparentEntityCount++] = local22;
                     }
@@ -54,12 +54,12 @@ public final class Static517 {
             for (@Pc(98) Entity local98 = Static468.dynamicEntities[local6]; local98 != null; local98 = local98.nextEntity) {
                 if (!Static208.method3107(local98, arg0, arg1, arg2, arg3)) {
                     if (local98.isTransparent(0)) {
-                        method6824(local98);
+                        projectToScreen(local98);
                         if (local98.anInt10697 != -1) {
                             Static395.aEntityArray11[Static645.onscreenTransparentEntityCount++] = local98;
                         }
                     } else {
-                        method6824(local98);
+                        projectToScreen(local98);
                         if (local98.anInt10697 != -1) {
                             Static48.aEntityArray3[Static546.onscreenOpaqueEntityCount++] = local98;
                         }
@@ -69,7 +69,7 @@ public final class Static517 {
             if (!arg0) {
                 for (local157 = 0; local157 < Static125.dynamicEntityCount; local157++) {
                     if (!Static208.method3107(Static679.aPositionEntity[local157], arg0, arg1, arg2, arg3)) {
-                        method6824(Static679.aPositionEntity[local157]);
+                        projectToScreen(Static679.aPositionEntity[local157]);
                         if (Static679.aPositionEntity[local157].anInt10697 != -1) {
                             if (Static679.aPositionEntity[local157].isTransparent(0)) {
                                 Static395.aEntityArray11[Static645.onscreenTransparentEntityCount++] = Static679.aPositionEntity[local157];
@@ -130,7 +130,7 @@ public final class Static517 {
                             Static246.ground[local225].method7870(0, 0, 0, null, false, arg5);
                         }
                         for (local316 = 0; local316 < Static32.anInt772; local316++) {
-                            Static684.aClass302Array1[local316].method6805(new Class8_Sub9(local225 + 1));
+                            Static684.aClass302Array1[local316].addGround(new GroundRenderTask(local225 + 1));
                         }
                     } else if (arg4 >= 0) {
                         Static246.ground[local225].method7877(Static403.anInt6246, Static550.anInt8271, Static35.anInt813, Static142.aBooleanArrayArray1, true, arg4, arg5);
@@ -178,7 +178,7 @@ public final class Static517 {
                             Static246.ground[local225].method7870(0, 0, 0, null, false, arg5);
                         }
                         for (local316 = 0; local316 < Static32.anInt772; local316++) {
-                            Static684.aClass302Array1[local316].method6805(new Class8_Sub9(local225 + 1));
+                            Static684.aClass302Array1[local316].addGround(new GroundRenderTask(local225 + 1));
                         }
                     } else if (arg4 >= 0) {
                         Static246.ground[local225].method7877(Static403.anInt6246, Static550.anInt8271, Static35.anInt813, Static142.aBooleanArrayArray1, false, arg4, arg5);
@@ -197,10 +197,10 @@ public final class Static517 {
     }
 
     @OriginalMember(owner = "client!qea", name = "a", descriptor = "(Lclient!eo;)V")
-    public static void method6824(@OriginalArg(0) Entity arg0) {
-        Static665.aToolkit_15.H(arg0.x, arg0.y + (arg0.getMinY(2) >> 1), arg0.z, Static486.anIntArray591);
-        arg0.anInt10692 = Static486.anIntArray591[0];
-        arg0.anInt10698 = Static486.anIntArray591[1];
-        arg0.anInt10697 = Static486.anIntArray591[2];
+    public static void projectToScreen(@OriginalArg(0) Entity entity) {
+        Static665.aToolkit_15.H(entity.x, entity.y + (entity.getMinY(2) >> 1), entity.z, Static486.anIntArray591);
+        entity.anInt10692 = Static486.anIntArray591[0];
+        entity.anInt10698 = Static486.anIntArray591[1];
+        entity.anInt10697 = Static486.anIntArray591[2];
     }
 }

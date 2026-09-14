@@ -16,26 +16,26 @@ public final class Static21 {
 
     // $FF: synthetic field
     @OriginalMember(owner = "client!am", name = "Xb", descriptor = "Ljava/lang/Class;")
-    public static Class aClass23;
+    public static Class stringClass;
 
     @OriginalMember(owner = "client!am", name = "a", descriptor = "(Lclient!ha;IIIIIIZZ)V")
-    public static void method8043(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) int arg1, @OriginalArg(4) int arg2, @OriginalArg(5) int arg3, @OriginalArg(6) int arg4, @OriginalArg(7) boolean arg5, @OriginalArg(8) boolean arg6) {
+    public static void method8043(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) int threadCount, @OriginalArg(4) int mapWidth, @OriginalArg(5) int mapLength, @OriginalArg(6) int renderDistance, @OriginalArg(7) boolean water, @OriginalArg(8) boolean lighting) {
         Static665.aToolkit_15 = toolkit;
-        Static32.anInt772 = arg1;
+        Static32.anInt772 = threadCount;
         Static661.aBoolean457 = Static32.anInt772 > 1 && Static665.aToolkit_15.method7979();
         EnvironmentLight.anInt1066 = 9;
         Static340.anInt5586 = 0x1 << EnvironmentLight.anInt1066;
         EnvironmentLight.anInt3993 = Static340.anInt5586 >> 1;
         Math.sqrt(EnvironmentLight.anInt3993 * EnvironmentLight.anInt3993 + EnvironmentLight.anInt3993 * EnvironmentLight.anInt3993);
         Static299.tileMaxLevel = 4;
-        Static619.tileMaxX = arg2;
-        Static662.tileMaxZ = arg3;
-        Static35.anInt813 = arg4;
+        Static619.tileMaxX = mapWidth;
+        Static662.tileMaxZ = mapLength;
+        Static35.anInt813 = renderDistance;
         Static272.aClass13_1 = Static167.method2632();
         Static276.method3986();
         Static478.aTileArrayArrayArray3 = new Tile[4][Static619.tileMaxX][Static662.tileMaxZ];
         Static706.floor = new Ground[4];
-        if (arg5) {
+        if (water) {
             Static62.waterColour = new int[Static619.tileMaxX][Static662.tileMaxZ];
             Static421.waterBias = new byte[Static619.tileMaxX][Static662.tileMaxZ];
             Static272.waterDepth = new short[Static619.tileMaxX][Static662.tileMaxZ];
@@ -48,8 +48,8 @@ public final class Static21 {
             Static420.aTileArrayArrayArray2 = null;
             Static693.underwaterGround = null;
         }
-        if (arg6) {
-            Client.tileLightFlags = new long[4][arg2][arg3];
+        if (lighting) {
+            Client.tileLightFlags = new long[4][mapWidth][mapLength];
             EnvironmentLight.aEnvironmentLightArray1 = new EnvironmentLight[65535];
             Static279.aBooleanArray11 = new boolean[65535];
             Static319.anInt5080 = 0;
@@ -79,27 +79,27 @@ public final class Static21 {
             if (Static226.aClass46Array7 != null) {
                 Static227.method3354();
             }
-            Static226.aClass46Array7 = new Class46[Static32.anInt772];
+            Static226.aClass46Array7 = new RenderWorker[Static32.anInt772];
             Static665.aToolkit_15.allocateThreads(Static226.aClass46Array7.length + 1);
             Static665.aToolkit_15.linkThreads(0);
-            for (@Pc(214) int local214 = 0; local214 < Static226.aClass46Array7.length; local214++) {
-                Static226.aClass46Array7[local214] = new Class46(local214 + 1, Static665.aToolkit_15);
-                (new Thread(Static226.aClass46Array7[local214], "wr" + local214)).start();
+            for (@Pc(214) int i = 0; i < Static226.aClass46Array7.length; i++) {
+                Static226.aClass46Array7[i] = new RenderWorker(i + 1, Static665.aToolkit_15);
+                (new Thread(Static226.aClass46Array7[i], "wr" + i)).start();
             }
-            @Pc(253) byte local253;
+            @Pc(253) byte queueCount;
             if (Static32.anInt772 == 2) {
-                local253 = 4;
+                queueCount = 4;
                 Static549.anInt9424 = 2;
             } else if (Static32.anInt772 == 3) {
-                local253 = 6;
+                queueCount = 6;
                 Static549.anInt9424 = 3;
             } else {
-                local253 = 8;
+                queueCount = 8;
                 Static549.anInt9424 = 4;
             }
-            Static684.aClass302Array1 = new Class302[local253];
-            for (@Pc(273) int local273 = 0; local273 < local253; local273++) {
-                Static684.aClass302Array1[local273] = new Class302(Static515.renderingTaskNames[Static32.anInt772 - 2][local273]);
+            Static684.aClass302Array1 = new RenderQueue[queueCount];
+            for (@Pc(273) int i = 0; i < queueCount; i++) {
+                Static684.aClass302Array1[i] = new RenderQueue(Static515.renderingTaskNames[Static32.anInt772 - 2][i]);
             }
         } else {
             Static549.anInt9424 = 1;
@@ -109,17 +109,17 @@ public final class Static21 {
     }
 
     @OriginalMember(owner = "client!am", name = "a", descriptor = "(ILjava/io/File;Z)V")
-    public static void method8048(@OriginalArg(1) File arg0) {
+    public static void method8048(@OriginalArg(1) File file) {
         if (Static210.anObject8 == null) {
             Static716.method9349();
         }
         try {
-            @Pc(28) Class local28 = Class.forName("com.sun.management.HotSpotDiagnosticMXBean");
-            @Pc(54) Method local54 = local28.getDeclaredMethod("dumpHeap", aClass23 == null ? (aClass23 = Class.forName("java.lang.String")) : aClass23, Boolean.TYPE);
-            local54.invoke(Static210.anObject8, arg0.getAbsolutePath(), Boolean.valueOf(false));
-        } catch (@Pc(74) Exception local74) {
+            @Pc(28) Class diagnosticClass = Class.forName("com.sun.management.HotSpotDiagnosticMXBean");
+            @Pc(54) Method dumpHeap = diagnosticClass.getDeclaredMethod("dumpHeap", stringClass == null ? (stringClass = Class.forName("java.lang.String")) : stringClass, Boolean.TYPE);
+            dumpHeap.invoke(Static210.anObject8, file.getAbsolutePath(), Boolean.valueOf(false));
+        } catch (@Pc(74) Exception ex) {
             System.out.println("HeapDump error:");
-            local74.printStackTrace();
+            ex.printStackTrace();
         }
     }
 

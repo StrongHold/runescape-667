@@ -15,7 +15,7 @@ public final class Static226 {
     public static Class67 aClass67_9;
 
     @OriginalMember(owner = "client!ha", name = "t", descriptor = "[Lclient!bl;")
-    public static Class46[] aClass46Array7;
+    public static RenderWorker[] aClass46Array7;
 
     @OriginalMember(owner = "client!ha", name = "q", descriptor = "Lclient!sia;")
     public static final Deque mouseLogs = new Deque();
@@ -38,7 +38,7 @@ public final class Static226 {
     }
 
     @OriginalMember(owner = "client!ha", name = "a", descriptor = "(FIFF)F")
-    public static float method7999(@OriginalArg(0) float arg0, @OriginalArg(2) float arg1, @OriginalArg(3) float arg2) {
-        return arg1 + (arg0 - arg1) * arg2;
+    public static float method7999(@OriginalArg(0) float to, @OriginalArg(2) float from, @OriginalArg(3) float t) {
+        return from + (to - from) * t;
     }
 }
