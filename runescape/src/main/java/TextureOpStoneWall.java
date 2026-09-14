@@ -11,41 +11,45 @@ import org.openrs2.deob.annotation.Pc;
 
 import java.util.Random;
 
+/**
+ * Generates a wall of randomly sized stones, packed in rows that rest on the stones below them,
+ * each with a bevelled edge and its own shade.
+ */
 @OriginalClass("client!dd")
-public final class Node_Sub1_Sub7 extends TextureOp {
+public final class TextureOpStoneWall extends TextureOp {
 
     @OriginalMember(owner = "client!dd", name = "U", descriptor = "I")
-    public int anInt2125;
+    public int bevelSize;
 
     @OriginalMember(owner = "client!dd", name = "Z", descriptor = "I")
-    public int anInt2126 = 2048;
+    public int maxWidth = 2048;
 
     @OriginalMember(owner = "client!dd", name = "N", descriptor = "I")
-    public int anInt2122 = 1024;
+    public int bevel = 1024;
 
     @OriginalMember(owner = "client!dd", name = "T", descriptor = "I")
-    public int anInt2118 = 0;
+    public int bevelShape = 0;
 
     @OriginalMember(owner = "client!dd", name = "L", descriptor = "I")
-    public int anInt2123 = 819;
+    public int maxHeight = 819;
 
     @OriginalMember(owner = "client!dd", name = "J", descriptor = "I")
-    public int anInt2124 = 0;
+    public int seed = 0;
 
     @OriginalMember(owner = "client!dd", name = "I", descriptor = "I")
-    public int anInt2119 = 1024;
+    public int bevelVariance = 1024;
 
     @OriginalMember(owner = "client!dd", name = "Y", descriptor = "I")
-    public int anInt2131 = 1024;
+    public int minWidth = 1024;
 
     @OriginalMember(owner = "client!dd", name = "V", descriptor = "I")
-    public int anInt2132 = 409;
+    public int minHeight = 409;
 
     @OriginalMember(owner = "client!dd", name = "P", descriptor = "I")
-    public int anInt2133 = 1024;
+    public int shadeVariance = 1024;
 
     @OriginalMember(owner = "client!dd", name = "<init>", descriptor = "()V")
-    public Node_Sub1_Sub7() {
+    public TextureOpStoneWall() {
         super(0, true);
     }
 
@@ -69,18 +73,18 @@ public final class Node_Sub1_Sub7 extends TextureOp {
         @Pc(45) boolean local45 = true;
         @Pc(47) int local47 = 0;
         @Pc(49) int local49 = 0;
-        @Pc(56) int local56 = EnvironmentLight.anInt9289 * this.anInt2131 >> 12;
-        @Pc(63) int local63 = this.anInt2126 * EnvironmentLight.anInt9289 >> 12;
-        @Pc(70) int local70 = EnvironmentLight.anInt53 * this.anInt2132 >> 12;
-        @Pc(77) int local77 = this.anInt2123 * EnvironmentLight.anInt53 >> 12;
+        @Pc(56) int local56 = EnvironmentLight.anInt9289 * this.minWidth >> 12;
+        @Pc(63) int local63 = this.maxWidth * EnvironmentLight.anInt9289 >> 12;
+        @Pc(70) int local70 = EnvironmentLight.anInt53 * this.minHeight >> 12;
+        @Pc(77) int local77 = this.maxHeight * EnvironmentLight.anInt53 >> 12;
         if (local77 <= 1) {
             return local31[arg1];
         }
-        this.anInt2125 = EnvironmentLight.anInt9289 / 8 * this.anInt2122 >> 12;
+        this.bevelSize = EnvironmentLight.anInt9289 / 8 * this.bevel >> 12;
         @Pc(101) int local101 = EnvironmentLight.anInt9289 / local56 + 1;
         @Pc(105) int[][] local105 = new int[local101][3];
         @Pc(109) int[][] local109 = new int[local101][3];
-        @Pc(116) Random local116 = new Random(this.anInt2124);
+        @Pc(116) Random local116 = new Random(this.seed);
         while (true) {
             while (true) {
                 @Pc(126) int local126 = local56 + Node_Sub1_Sub27.method8326(-5208, local63 - local56, local116);
@@ -139,7 +143,7 @@ public final class Node_Sub1_Sub7 extends TextureOp {
                                             local311 = Math.max(local234, local300);
                                             local315 = EnvironmentLight.anInt9289;
                                         }
-                                        this.method2023(local31, local157 - local289, local116, local289, local37 + local311, -local311 + local315, (byte) -58);
+                                        this.drawStone(local31, local157 - local289, local116, local289, local37 + local311, -local311 + local315, (byte) -58);
                                     }
                                 }
                             }
@@ -161,7 +165,7 @@ public final class Node_Sub1_Sub7 extends TextureOp {
                 }
                 @Pc(406) int[] local406;
                 if (local141 == EnvironmentLight.anInt9289) {
-                    this.method2023(local31, local136, local116, local157, local35 + local39, local126, (byte) -58);
+                    this.drawStone(local31, local136, local116, local157, local35 + local39, local126, (byte) -58);
                     if (local43) {
                         return local11;
                     }
@@ -203,7 +207,7 @@ public final class Node_Sub1_Sub7 extends TextureOp {
                     local406[2] = local136 + local157;
                     local406[1] = local141;
                     local406[0] = local39;
-                    this.method2023(local31, local136, local116, local157, local39 + local35, local126, (byte) -58);
+                    this.drawStone(local31, local136, local116, local157, local39 + local35, local126, (byte) -58);
                     local39 = local141;
                 }
             }
@@ -213,15 +217,16 @@ public final class Node_Sub1_Sub7 extends TextureOp {
     @OriginalMember(owner = "client!dd", name = "c", descriptor = "(I)V")
     @Override
     public void method9421() {
+        /* empty */
     }
 
     @OriginalMember(owner = "client!dd", name = "a", descriptor = "([[IILjava/util/Random;IIIB)V")
-    public void method2023(@OriginalArg(0) int[][] arg0, @OriginalArg(1) int arg1, @OriginalArg(2) Random arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) byte arg6) {
-        @Pc(22) int local22 = this.anInt2133 <= 0 ? 4096 : 4096 - Node_Sub1_Sub27.method8326(arg6 - 5150, this.anInt2133, arg2);
-        @Pc(30) int local30 = this.anInt2119 * this.anInt2125 >> 12;
-        @Pc(49) int local49 = this.anInt2125 - (local30 <= 0 ? 0 : Node_Sub1_Sub27.method8326(arg6 ^ 0x146E, local30, arg2));
-        if (EnvironmentLight.anInt9289 <= arg4) {
-            arg4 -= EnvironmentLight.anInt9289;
+    public void drawStone(@OriginalArg(0) int[][] dest, @OriginalArg(1) int height, @OriginalArg(2) Random random, @OriginalArg(3) int y, @OriginalArg(4) int x, @OriginalArg(5) int width, @OriginalArg(6) byte arg6) {
+        @Pc(22) int local22 = this.shadeVariance <= 0 ? 4096 : 4096 - Node_Sub1_Sub27.method8326(arg6 - 5150, this.shadeVariance, random);
+        @Pc(30) int local30 = this.bevelVariance * this.bevelSize >> 12;
+        @Pc(49) int local49 = this.bevelSize - (local30 <= 0 ? 0 : Node_Sub1_Sub27.method8326(arg6 ^ 0x146E, local30, random));
+        if (EnvironmentLight.anInt9289 <= x) {
+            x -= EnvironmentLight.anInt9289;
         }
         if (arg6 != -58) {
             return;
@@ -229,41 +234,41 @@ public final class Node_Sub1_Sub7 extends TextureOp {
         @Pc(82) int local82;
         @Pc(84) int local84;
         if (local49 <= 0) {
-            if (EnvironmentLight.anInt9289 < arg5 + arg4) {
-                local82 = EnvironmentLight.anInt9289 - arg4;
-                for (local84 = 0; local84 < arg1; local84++) {
-                    @Pc(92) int[] local92 = arg0[local84 + arg3];
-                    Arrays.set(local92, arg4, local82, local22);
-                    Arrays.set(local92, 0, arg5 - local82, local22);
+            if (EnvironmentLight.anInt9289 < width + x) {
+                local82 = EnvironmentLight.anInt9289 - x;
+                for (local84 = 0; local84 < height; local84++) {
+                    @Pc(92) int[] local92 = dest[local84 + y];
+                    Arrays.set(local92, x, local82, local22);
+                    Arrays.set(local92, 0, width - local82, local22);
                 }
             } else {
-                for (local82 = 0; local82 < arg1; local82++) {
-                    Arrays.set(arg0[local82 + arg3], arg4, arg5, local22);
+                for (local82 = 0; local82 < height; local82++) {
+                    Arrays.set(dest[local82 + y], x, width, local22);
                 }
             }
-        } else if (arg1 > 0 && arg5 > 0) {
-            local82 = arg5 / 2;
-            local84 = arg1 / 2;
+        } else if (height > 0 && width > 0) {
+            local82 = width / 2;
+            local84 = height / 2;
             @Pc(166) int local166 = local49 > local82 ? local82 : local49;
             @Pc(178) int local178 = local84 >= local49 ? local49 : local84;
-            @Pc(182) int local182 = local166 + arg4;
-            @Pc(189) int local189 = arg5 - local166 * 2;
-            for (@Pc(191) int local191 = 0; local191 < arg1; local191++) {
-                @Pc(199) int[] local199 = arg0[arg3 + local191];
+            @Pc(182) int local182 = local166 + x;
+            @Pc(189) int local189 = width - local166 * 2;
+            for (@Pc(191) int local191 = 0; local191 < height; local191++) {
+                @Pc(199) int[] local199 = dest[y + local191];
                 @Pc(212) int local212;
                 @Pc(217) int local217;
                 @Pc(225) int local225;
                 if (local191 < local178) {
                     local212 = local22 * local191 / local178;
-                    if (this.anInt2118 == 0) {
+                    if (this.bevelShape == 0) {
                         for (local217 = 0; local217 < local166; local217++) {
                             local225 = local217 * local22 / local166;
-                            local199[local217 + arg4 & EnvironmentLight.anInt8580] = local199[EnvironmentLight.anInt8580 & arg5 + arg4 - local217 - 1] = local225 * local212 >> 12;
+                            local199[local217 + x & EnvironmentLight.anInt8580] = local199[EnvironmentLight.anInt8580 & width + x - local217 - 1] = local225 * local212 >> 12;
                         }
                     } else {
                         for (local217 = 0; local217 < local166; local217++) {
                             local225 = local217 * local22 / local166;
-                            local199[EnvironmentLight.anInt8580 & local217 + arg4] = local199[EnvironmentLight.anInt8580 & arg4 + arg5 - local217 - 1] = local212 > local225 ? local225 : local212;
+                            local199[EnvironmentLight.anInt8580 & local217 + x] = local199[EnvironmentLight.anInt8580 & x + width - local217 - 1] = local212 > local225 ? local225 : local212;
                         }
                     }
                     if (EnvironmentLight.anInt9289 < local182 + local189) {
@@ -274,19 +279,19 @@ public final class Node_Sub1_Sub7 extends TextureOp {
                         Arrays.set(local199, local182, local189, local212);
                     }
                 } else {
-                    local212 = arg1 - local191 - 1;
+                    local212 = height - local191 - 1;
                     if (local212 < local178) {
                         local217 = local212 * local22 / local178;
                         @Pc(372) int local372;
-                        if (this.anInt2118 == 0) {
+                        if (this.bevelShape == 0) {
                             for (local225 = 0; local225 < local166; local225++) {
                                 local372 = local22 * local225 / local166;
-                                local199[arg4 + local225 & EnvironmentLight.anInt8580] = local199[arg5 + arg4 - local225 - 1 & EnvironmentLight.anInt8580] = local217 * local372 >> 12;
+                                local199[x + local225 & EnvironmentLight.anInt8580] = local199[width + x - local225 - 1 & EnvironmentLight.anInt8580] = local217 * local372 >> 12;
                             }
                         } else {
                             for (local225 = 0; local225 < local166; local225++) {
                                 local372 = local225 * local22 / local166;
-                                local199[EnvironmentLight.anInt8580 & arg4 + local225] = local199[arg4 + arg5 - local225 - 1 & EnvironmentLight.anInt8580] = local217 > local372 ? local372 : local217;
+                                local199[EnvironmentLight.anInt8580 & x + local225] = local199[x + width - local225 - 1 & EnvironmentLight.anInt8580] = local217 > local372 ? local372 : local217;
                             }
                         }
                         if (EnvironmentLight.anInt9289 >= local189 + local182) {
@@ -298,7 +303,7 @@ public final class Node_Sub1_Sub7 extends TextureOp {
                         }
                     } else {
                         for (local217 = 0; local217 < local166; local217++) {
-                            local199[EnvironmentLight.anInt8580 & arg4 + local217] = local199[EnvironmentLight.anInt8580 & arg5 + arg4 - local217 - 1] = local217 * local22 / local166;
+                            local199[EnvironmentLight.anInt8580 & x + local217] = local199[EnvironmentLight.anInt8580 & width + x - local217 - 1] = local217 * local22 / local166;
                         }
                         if (EnvironmentLight.anInt9289 >= local182 + local189) {
                             Arrays.set(local199, local182, local189, local22);
@@ -320,23 +325,23 @@ public final class Node_Sub1_Sub7 extends TextureOp {
             this.monochromeOutput(39, 29);
         }
         if (arg2 == 0) {
-            this.anInt2124 = arg1.g1();
+            this.seed = arg1.g1();
         } else if (arg2 == 1) {
-            this.anInt2131 = arg1.g2();
+            this.minWidth = arg1.g2();
         } else if (arg2 == 2) {
-            this.anInt2126 = arg1.g2();
+            this.maxWidth = arg1.g2();
         } else if (arg2 == 3) {
-            this.anInt2132 = arg1.g2();
+            this.minHeight = arg1.g2();
         } else if (arg2 == 4) {
-            this.anInt2123 = arg1.g2();
+            this.maxHeight = arg1.g2();
         } else if (arg2 == 5) {
-            this.anInt2122 = arg1.g2();
+            this.bevel = arg1.g2();
         } else if (arg2 == 6) {
-            this.anInt2118 = arg1.g1();
+            this.bevelShape = arg1.g1();
         } else if (arg2 == 7) {
-            this.anInt2119 = arg1.g2();
+            this.bevelVariance = arg1.g2();
         } else if (arg2 == 8) {
-            this.anInt2133 = arg1.g2();
+            this.shadeVariance = arg1.g2();
         }
     }
 }

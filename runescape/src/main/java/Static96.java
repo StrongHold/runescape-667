@@ -16,9 +16,9 @@ public final class Static96 {
         } else if (arg0 == 3) {
             return new Node_Sub1_Sub25();
         } else if (arg0 == 4) {
-            return new Node_Sub1_Sub11();
+            return new TextureOpBrick();
         } else if (arg0 == 5) {
-            return new Node_Sub1_Sub12();
+            return new TextureOpBlur();
         } else if (arg0 == 6) {
             return new Node_Sub1_Sub35();
         } else if (arg0 == 7) {
@@ -30,9 +30,9 @@ public final class Static96 {
         } else if (arg0 == 10) {
             return new Node_Sub1_Sub14();
         } else if (arg0 == 11) {
-            return new Node_Sub1_Sub3();
+            return new TextureOpColourise();
         } else if (arg0 == 12) {
-            return new Node_Sub1_Sub4();
+            return new TextureOpWave();
         } else if (arg0 == 13) {
             return new Node_Sub1_Sub34();
         } else if (arg0 == 14) {
@@ -42,15 +42,15 @@ public final class Static96 {
         } else if (arg0 == 16) {
             return new Node_Sub1_Sub39();
         } else if (arg0 == 17) {
-            return new Node_Sub1_Sub9();
+            return new TextureOpHsl();
         } else if (arg0 == 18) {
-            return new TextureOp_Sub1_Sub8_Sub1();
+            return new TextureOpSpriteTiled();
         } else if (arg0 == 19) {
-            return new Node_Sub1_Sub10();
+            return new TextureOpDisplace();
         } else if (arg0 == 20) {
             return new Node_Sub1_Sub30();
         } else if (arg0 == 21) {
-            return new Node_Sub1_Sub2();
+            return new TextureOpBlend();
         } else if (arg0 == 22) {
             return new Node_Sub1_Sub16();
         } else if (arg0 == 23) {
@@ -58,17 +58,17 @@ public final class Static96 {
         } else if (arg0 == 24) {
             return new Node_Sub1_Sub21();
         } else if (arg0 == 25) {
-            return new Node_Sub1_Sub5();
+            return new TextureOpRecolour();
         } else if (arg0 == 26) {
-            return new Node_Sub1_Sub6();
+            return new TextureOpThreshold();
         } else if (arg0 == 27) {
             return new Node_Sub1_Sub28();
         } else if (arg0 == 28) {
-            return new Node_Sub1_Sub7();
+            return new TextureOpStoneWall();
         } else if (arg0 == 29) {
             return new TextureOpShape();
         } else if (arg0 == 30) {
-            return new Node_Sub1_Sub13();
+            return new TextureOpRange();
         } else if (arg0 == 31) {
             return new Node_Sub1_Sub36();
         } else if (arg0 == 32) {
@@ -86,7 +86,7 @@ public final class Static96 {
         } else if (arg0 == 38) {
             return new Node_Sub1_Sub15();
         } else if (arg0 == 39) {
-            return new Node_Sub1_Sub8();
+            return new TextureOpSprite();
         } else {
             return null;
         }
