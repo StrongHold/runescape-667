@@ -8,7 +8,7 @@ public final class Static609 {
     public static final int[] anIntArray716 = new int[256];
 
     @OriginalMember(owner = "client!tea", name = "a", descriptor = "(III)V")
-    public static void method8212(@OriginalArg(0) int level, @OriginalArg(1) int x, @OriginalArg(2) int z) {
+    public static void clearGroundDecor(@OriginalArg(0) int level, @OriginalArg(1) int x, @OriginalArg(2) int z) {
         @Pc(7) Tile tile = Static334.activeTiles[level][x][z];
         if (tile != null) {
             Static109.hide(tile.groundDecor);

@@ -13,7 +13,7 @@ public final class Static408 {
         ServerConnection.active.penultimateProt = null;
         ServerConnection.active.lastProt = null;
         ServerConnection.active.bitPacket.pos = 0;
-        Static102.method2022();
+        Static102.clearChatHistory();
         FriendsList.status = 0;
         FriendChat.name = null;
         FriendsList.count = 0;

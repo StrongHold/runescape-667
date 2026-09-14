@@ -29,7 +29,7 @@ public final class Static619 {
         if (arg0 >= Static724.anInt10930 && Static273.anInt4395 >= arg0) {
             local103 = Static670.method8732(Static180.anInt2995, Static111.anInt2219, arg1 + arg3);
             local112 = Static670.method8732(Static180.anInt2995, Static111.anInt2219, arg3 - arg1);
-            Static696.method9037(local103, arg4, local112, Static723.anIntArrayArray266[arg0]);
+            Static696.fillHorizontalSpan(local103, arg4, local112, Static723.anIntArrayArray266[arg0]);
         }
         while (local9 > 0) {
             if (local42 < 0) {
@@ -59,10 +59,10 @@ public final class Static619 {
                 @Pc(224) int local224 = Static670.method8732(Static180.anInt2995, Static111.anInt2219, arg3 + local7);
                 @Pc(233) int local233 = Static670.method8732(Static180.anInt2995, Static111.anInt2219, arg3 - local7);
                 if (Static724.anInt10930 <= local103) {
-                    Static696.method9037(local224, arg4, local233, Static723.anIntArrayArray266[local103]);
+                    Static696.fillHorizontalSpan(local224, arg4, local233, Static723.anIntArrayArray266[local103]);
                 }
                 if (Static273.anInt4395 >= local112) {
-                    Static696.method9037(local224, arg4, local233, Static723.anIntArrayArray266[local112]);
+                    Static696.fillHorizontalSpan(local224, arg4, local233, Static723.anIntArrayArray266[local112]);
                 }
             }
         }

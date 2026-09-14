@@ -157,7 +157,7 @@ public final class MapBuilder {
         Static305.resetTileFlags();
         SoundManager.removeActiveStreams(false);
         Static508.method6750();
-        Static112.aBoolean197 = false;
+        Static112.locationModelsUploaded = false;
         Static557.updatePcmPlayers();
         System.gc();
         Static314.noTimeout(true);
@@ -206,7 +206,7 @@ public final class MapBuilder {
         }
         client.cacheReset();
         if (GameShell.maxmemory < 96) {
-            Static358.method9191();
+            Static358.uploadSceneLocationModels();
         }
         Static314.noTimeout(true);
         MapRegion.active.load(Toolkit.active, underwater ? Static693.underwaterGround[0] : null, null);

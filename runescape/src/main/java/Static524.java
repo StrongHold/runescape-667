@@ -6,5 +6,5 @@ public final class Static524 {
     public static int entityMoveFlags;
 
     @OriginalMember(owner = "client!qia", name = "m", descriptor = "I")
-    public static int anInt8044;
+    public static int pickCameraRotateX;
 }

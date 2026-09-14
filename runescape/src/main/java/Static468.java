@@ -22,17 +22,17 @@ public final class Static468 {
         @Pc(67) long key = (level << 28) | (absoluteZ << 14) | absoluteX;
         @Pc(73) ObjStack stack = (ObjStack) Static497.objStacks.get(key);
         if (stack == null) {
-            Static638.method8398(level, localX, localZ);
+            Static638.removeObjStack(level, localX, localZ);
             return;
         }
 
         @Pc(88) ObjStackEntry firstEntry = (ObjStackEntry) stack.objs.first();
         if (firstEntry == null) {
-            Static638.method8398(level, localX, localZ);
+            Static638.removeObjStack(level, localX, localZ);
             return;
         }
 
-        @Pc(103) ObjStackEntity entity = (ObjStackEntity) Static638.method8398(level, localX, localZ);
+        @Pc(103) ObjStackEntity entity = (ObjStackEntity) Static638.removeObjStack(level, localX, localZ);
         if (entity == null) {
             entity = new ObjStackEntity(localX << 9, Static246.ground[level].getHeight(localX, localZ), localZ << 9, level, level);
         } else {
@@ -113,7 +113,7 @@ public final class Static468 {
     }
 
     @OriginalMember(owner = "client!op", name = "a", descriptor = "(BLclient!eba;)I")
-    public static int method7644(@OriginalArg(1) Class92 format) {
+    public static int toGlPixelFormat(@OriginalArg(1) Class92 format) {
         if (format == Static685.aClass92_16) {
             return 6407;
         } else if (format == Static172.aClass92_8) {
@@ -132,7 +132,7 @@ public final class Static468 {
     }
 
     @OriginalMember(owner = "client!op", name = "a", descriptor = "(IIB)I")
-    public static int method7648(@OriginalArg(0) int hsl, @OriginalArg(1) int lightness) {
+    public static int shadeHsl(@OriginalArg(0) int hsl, @OriginalArg(1) int lightness) {
         lightness = (hsl & 0x7F) * lightness >> 7;
         if (lightness < 2) {
             lightness = 2;

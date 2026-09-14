@@ -11,7 +11,7 @@ public final class Static442 {
     public static boolean aBoolean500;
 
     @OriginalMember(owner = "client!nv", name = "h", descriptor = "Z")
-    public static boolean aBoolean499 = false;
+    public static boolean occludersDirty = false;
 
     @OriginalMember(owner = "client!nv", name = "a", descriptor = "(Z)V")
     public static void method5969() {

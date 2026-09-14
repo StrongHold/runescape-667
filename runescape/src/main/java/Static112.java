@@ -8,7 +8,7 @@ import rs2.client.loading.screen.op.instance.BackgroundImageInstance;
 public final class Static112 {
 
     @OriginalMember(owner = "client!dj", name = "n", descriptor = "Z")
-    public static boolean aBoolean197 = false;
+    public static boolean locationModelsUploaded = false;
 
     @OriginalMember(owner = "client!dj", name = "a", descriptor = "(ILclient!cg;)I")
     public static int turnTick(@OriginalArg(1) PathingEntity entity) {

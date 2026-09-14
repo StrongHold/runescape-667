@@ -16,7 +16,7 @@ public final class Static358 {
     public static Class positionEntityClass;
 
     @OriginalMember(owner = "client!lf", name = "a", descriptor = "(BI[S)[S")
-    public static short[] method9173(@OriginalArg(1) int length, @OriginalArg(2) short[] src) {
+    public static short[] copyOf(@OriginalArg(1) int length, @OriginalArg(2) short[] src) {
         @Pc(14) short[] copy = new short[length];
         Arrays.copy(src, 0, copy, 0, length);
         return copy;
@@ -144,14 +144,14 @@ public final class Static358 {
     }
 
     @OriginalMember(owner = "client!lf", name = "d", descriptor = "(B)V")
-    public static void method9191() {
-        if (Static112.aBoolean197) {
+    public static void uploadSceneLocationModels() {
+        if (Static112.locationModelsUploaded) {
             return;
         }
         Static458.uploadLocationModels(Static478.aTileArrayArrayArray3);
         if (Static420.aTileArrayArrayArray2 != null) {
             Static458.uploadLocationModels(Static420.aTileArrayArrayArray2);
         }
-        Static112.aBoolean197 = true;
+        Static112.locationModelsUploaded = true;
     }
 }

@@ -16,7 +16,7 @@ public final class Static576 {
     }
 
     @OriginalMember(owner = "client!sba", name = "b", descriptor = "(Z)Z")
-    public static boolean method7611() {
+    public static boolean startPendingSong() {
         try {
             if (SongManager.anInt10171 == 2) {
                 if (Static62.aClass2_Sub8_3 == null) {

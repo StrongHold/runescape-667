@@ -16,7 +16,7 @@ public final class Static712 {
     public static void clearDynamicEntities() {
         for (@Pc(1) int i = 0; i < Static125.dynamicEntityCount; i++) {
             @Pc(6) PositionEntity entity = Static679.aPositionEntity[i];
-            Static549.method8293(entity, true);
+            Static549.removePositionEntity(entity, true);
             Static679.aPositionEntity[i] = null;
         }
         Static125.dynamicEntityCount = 0;

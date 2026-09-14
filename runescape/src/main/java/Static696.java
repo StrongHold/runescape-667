@@ -22,7 +22,7 @@ public final class Static696 {
     }
 
     @OriginalMember(owner = "client!w", name = "a", descriptor = "(III[II)V")
-    public static void method9037(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int[] arg3) {
+    public static void fillHorizontalSpan(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int[] arg3) {
         arg2--;
         @Pc(12) int local12 = arg0 - 1;
         @Pc(15) int local15 = local12 - 7;

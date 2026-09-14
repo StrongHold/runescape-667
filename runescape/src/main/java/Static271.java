@@ -6,7 +6,7 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static271 {
 
     @OriginalMember(owner = "client!ij", name = "n", descriptor = "I")
-    public static int anInt4363;
+    public static int pickCameraRotateY;
 
     @OriginalMember(owner = "client!ij", name = "a", descriptor = "(I)J")
     public static long method3929() {

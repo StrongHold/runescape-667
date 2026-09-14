@@ -13,15 +13,15 @@ public final class Static276 {
     @OriginalMember(owner = "client!ila", name = "a", descriptor = "(I)V")
     public static void resetOccluders() {
         Static317.anInt5046 = 0;
-        Static442.aBoolean499 = false;
+        Static442.occludersDirty = false;
         Static384.aLocOccluderArray2 = new LocOccluder[500];
-        Static150.anInt2634 = 0;
+        Static150.locOccluderCount = 0;
         Static446.tileOcclusionCache = new int[Static299.tileMaxLevel][Static619.tileMaxX + 1][Static662.tileMaxZ + 1];
         Static663.anInt9874 = Static340.anInt5586;
         Static86.anInt1803 = Static340.anInt5586;
         Static444.anInt6751 = 0;
         Static607.aLocOccluderArray4 = new LocOccluder[2000];
-        Static285.aLocOccluderArray1 = new LocOccluder[1000];
+        Static285.locOccluders = new LocOccluder[1000];
         Static469.activeOccluderCount = 0;
         Static560.aLocOccluderArray3 = new LocOccluder[500];
         if (Static665.aToolkit_15 instanceof oa) {

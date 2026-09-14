@@ -11,12 +11,12 @@ import java.awt.Component;
 public final class Static638 {
 
     @OriginalMember(owner = "client!uca", name = "c", descriptor = "(I)V")
-    public static void method8393() {
+    public static void clearPickableEntityPool() {
         @Pc(5) LinkedList[] lock = PickableEntityPool.FREE_LISTS;
         synchronized (PickableEntityPool.FREE_LISTS) {
             for (@Pc(9) int cylinderCount = 0; cylinderCount < PickableEntityPool.FREE_LISTS.length; cylinderCount++) {
                 PickableEntityPool.FREE_LISTS[cylinderCount] = new LinkedList();
-                Static159.anIntArray245[cylinderCount] = 0;
+                Static159.pooledCounts[cylinderCount] = 0;
             }
         }
     }
@@ -78,7 +78,7 @@ public final class Static638 {
     }
 
     @OriginalMember(owner = "client!uca", name = "a", descriptor = "(III)Lclient!nda;")
-    public static Class8_Sub2_Sub5 method8398(@OriginalArg(0) int level, @OriginalArg(1) int x, @OriginalArg(2) int z) {
+    public static Class8_Sub2_Sub5 removeObjStack(@OriginalArg(0) int level, @OriginalArg(1) int x, @OriginalArg(2) int z) {
         @Pc(7) Tile tile = Static334.activeTiles[level][x][z];
 
         if (tile == null) {

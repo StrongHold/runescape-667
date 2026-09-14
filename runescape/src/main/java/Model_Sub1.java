@@ -793,7 +793,7 @@ public final class Model_Sub1 extends Model {
             this.aClass371_1 = new Class371(Static475.method6443(this.anInt2756, this.anInt2765));
         }
         if (arg3 || Static280.method4087(this.anInt2765, this.anInt2756)) {
-            this.aClass371_3 = new Class371(Static519.method6832(-89, this.anInt2756, this.anInt2765));
+            this.aClass371_3 = new Class371(Static519.colourBufferMutable(-89, this.anInt2756, this.anInt2765));
         }
         if (arg3 || Static69.usesNormalBuffer(this.anInt2756, this.anInt2765)) {
             this.aClass371_4 = new Class371(Static576.normalBufferMutable(this.anInt2765, this.anInt2756));
@@ -1150,7 +1150,7 @@ public final class Model_Sub1 extends Model {
             this.aClass371_1.aBoolean735 = Static475.method6443(functionMask, this.anInt2765);
         }
         if (this.aClass371_3 != null) {
-            this.aClass371_3.aBoolean735 = Static519.method6832(-90, functionMask, this.anInt2765);
+            this.aClass371_3.aBoolean735 = Static519.colourBufferMutable(-90, functionMask, this.anInt2765);
         }
         if (this.aClass371_4 != null) {
             this.aClass371_4.aBoolean735 = Static576.normalBufferMutable(this.anInt2765, functionMask);
@@ -2913,7 +2913,7 @@ public final class Model_Sub1 extends Model {
         } else {
             arg4.aByteArray33 = this.aByteArray33;
         }
-        if (Static519.method6832(-61, arg0, this.anInt2765)) {
+        if (Static519.colourBufferMutable(-61, arg0, this.anInt2765)) {
             arg4.aClass371_3 = arg1.aClass371_3;
             arg4.aClass371_3.anInterface16_17 = this.aClass371_3.anInterface16_17;
             arg4.aClass371_3.aBoolean735 = true;

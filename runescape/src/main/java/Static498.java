@@ -10,7 +10,7 @@ public final class Static498 {
     public static final int[] statBaseLevels = new int[25];
 
     @OriginalMember(owner = "client!pm", name = "a", descriptor = "(IZIIBI)V")
-    public static void method6643(@OriginalArg(0) int x, @OriginalArg(1) boolean letterbox, @OriginalArg(2) int y, @OriginalArg(3) int height, @OriginalArg(5) int width) {
+    public static void resizeViewport(@OriginalArg(0) int x, @OriginalArg(1) boolean letterbox, @OriginalArg(2) int y, @OriginalArg(3) int height, @OriginalArg(5) int width) {
         if (width < 1) {
             width = 1;
         }
@@ -33,8 +33,8 @@ public final class Static498 {
         @Pc(115) int fittedSize;
         @Pc(122) int barSize;
         @Pc(86) short clampedHorizontalFov;
-        if (horizontalFov < Static552.aShort123) {
-            clampedHorizontalFov = Static552.aShort123;
+        if (horizontalFov < Static552.minHorizontalFov) {
+            clampedHorizontalFov = Static552.minHorizontalFov;
             fov = clampedHorizontalFov * width * 334 / (height * 512);
             if (Static598.maxFov < fov) {
                 fov = Static598.maxFov;
@@ -48,8 +48,8 @@ public final class Static498 {
                 x += barSize;
                 width -= barSize * 2;
             }
-        } else if (Static306.aShort59 < horizontalFov) {
-            clampedHorizontalFov = Static306.aShort59;
+        } else if (Static306.maxHorizontalFov < horizontalFov) {
+            clampedHorizontalFov = Static306.maxHorizontalFov;
             fov = clampedHorizontalFov * 334 * width / (height * 512);
             if (Static25.minFov > fov) {
                 fov = Static25.minFov;
@@ -72,7 +72,7 @@ public final class Static498 {
     }
 
     @OriginalMember(owner = "client!pm", name = "a", descriptor = "([Lclient!eo;II)V")
-    public static void method6650(@OriginalArg(0) Entity[] entities, @OriginalArg(1) int from, @OriginalArg(2) int to) {
+    public static void sortByDepth(@OriginalArg(0) Entity[] entities, @OriginalArg(1) int from, @OriginalArg(2) int to) {
         if (from >= to) {
             return;
         }
@@ -91,7 +91,7 @@ public final class Static498 {
         }
         entities[to] = entities[boundary];
         entities[boundary] = pivot;
-        method6650(entities, from, boundary - 1);
-        method6650(entities, boundary + 1, to);
+        sortByDepth(entities, from, boundary - 1);
+        sortByDepth(entities, boundary + 1, to);
     }
 }

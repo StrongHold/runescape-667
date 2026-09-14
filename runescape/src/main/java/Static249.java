@@ -17,17 +17,17 @@ public final class Static249 {
         @Pc(38) int local38 = Static670.method8732(Static724.anInt10930, Static273.anInt4395, arg1 + arg0);
         @Pc(47) int local47 = Static670.method8732(Static724.anInt10930, Static273.anInt4395, arg3 - arg0);
         for (@Pc(49) int local49 = local11; local49 < local38; local49++) {
-            Static696.method9037(local29, arg5, local23, Static723.anIntArrayArray266[local49]);
+            Static696.fillHorizontalSpan(local29, arg5, local23, Static723.anIntArrayArray266[local49]);
         }
         for (@Pc(78) int local78 = local17; local78 > local47; local78--) {
-            Static696.method9037(local29, arg5, local23, Static723.anIntArrayArray266[local78]);
+            Static696.fillHorizontalSpan(local29, arg5, local23, Static723.anIntArrayArray266[local78]);
         }
         @Pc(104) int local104 = Static670.method8732(Static180.anInt2995, Static111.anInt2219, arg4 + arg0);
         @Pc(113) int local113 = Static670.method8732(Static180.anInt2995, Static111.anInt2219, arg2 - arg0);
         for (@Pc(115) int local115 = local38; local115 <= local47; local115++) {
             @Pc(123) int[] local123 = Static723.anIntArrayArray266[local115];
-            Static696.method9037(local104, arg5, local23, local123);
-            Static696.method9037(local29, arg5, local113, local123);
+            Static696.fillHorizontalSpan(local104, arg5, local23, local123);
+            Static696.fillHorizontalSpan(local29, arg5, local113, local123);
         }
     }
 

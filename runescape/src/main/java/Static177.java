@@ -31,8 +31,8 @@ public final class Static177 {
                 tile.aShort83 = (short) occlusionHeight;
                 tile.aShort85 = (short) occlusionOffset;
             }
-            if (Static442.aBoolean499) {
-                Static416.method5705();
+            if (Static442.occludersDirty) {
+                Static416.rebuildActiveOccluders();
             }
             return;
         }
@@ -49,7 +49,7 @@ public final class Static177 {
             z2 = z1 + Static340.anInt5586;
             y1 = Static706.floor[level].getHeight(x + 1, z);
             y2 = Static706.floor[level].getHeight(x, z + 1);
-            Static285.aLocOccluderArray1[Static150.anInt2634++] = new LocOccluder(occlusionType, level, x1, x2, x2, x1, y1, y2, y2 - occlusionHeight, y1 - occlusionHeight, z1, z2, z2, z1);
+            Static285.locOccluders[Static150.locOccluderCount++] = new LocOccluder(occlusionType, level, x1, x2, x2, x1, y1, y2, y2 - occlusionHeight, y1 - occlusionHeight, z1, z2, z2, z1);
             return;
         }
         x1 = x << EnvironmentLight.anInt1066;
@@ -58,7 +58,7 @@ public final class Static177 {
         z2 = z1 + Static340.anInt5586;
         y1 = Static706.floor[level].getHeight(x, z);
         y2 = Static706.floor[level].getHeight(x - -1, z + 1);
-        Static285.aLocOccluderArray1[Static150.anInt2634++] = new LocOccluder(occlusionType, level, x1, x2, x2, x1, y1, y2, y2 - occlusionHeight, -occlusionHeight + y1, z1, z2, z2, z1);
+        Static285.locOccluders[Static150.locOccluderCount++] = new LocOccluder(occlusionType, level, x1, x2, x2, x1, y1, y2, y2 - occlusionHeight, -occlusionHeight + y1, z1, z2, z2, z1);
     }
 
     @OriginalMember(owner = "client!fia", name = "a", descriptor = "(IIILclient!tla;Lclient!tla;)V")

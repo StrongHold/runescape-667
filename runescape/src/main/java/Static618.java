@@ -46,7 +46,7 @@ public final class Static618 {
     }
 
     @OriginalMember(owner = "client!tja", name = "a", descriptor = "(Lclient!sb;IZIIIZ)V")
-    public static void method8318(@OriginalArg(0) js5 midiSongs, @OriginalArg(1) int volume, @OriginalArg(4) int id, @OriginalArg(5) int arg3) {
+    public static void playSongWithFade(@OriginalArg(0) js5 midiSongs, @OriginalArg(1) int volume, @OriginalArg(4) int id, @OriginalArg(5) int arg3) {
         if (arg3 <= 0) {
             SongManager.method8229(id, volume, midiSongs);
             return;

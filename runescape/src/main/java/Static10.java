@@ -13,7 +13,7 @@ public final class Static10 {
         for (@Pc(14) PositionEntityNode local14 = local7.head; local14 != null; local14 = local14.node) {
             @Pc(18) PositionEntity local18 = local14.entity;
             if (arg3.isAssignableFrom(local18.getClass()) && local18.x1 == arg1 && local18.z1 == arg2) {
-                Static549.method8293(local18, false);
+                Static549.removePositionEntity(local18, false);
                 return;
             }
         }

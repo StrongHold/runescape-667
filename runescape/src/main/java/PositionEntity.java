@@ -150,7 +150,7 @@ public abstract class PositionEntity extends Entity {
         if (arg0 != 59) {
             this.method9284((byte) -4, null);
         }
-        return Static15.method188(this.z1, this.x2, this.getCylinder(arg1, -115), this.z2, this.x1, super.virtualLevel);
+        return Static15.isTileRangeOccluded(this.z1, this.x2, this.getCylinder(arg1, -115), this.z2, this.x1, super.virtualLevel);
     }
 
     @OriginalMember(owner = "client!qf", name = "g", descriptor = "(I)Z")

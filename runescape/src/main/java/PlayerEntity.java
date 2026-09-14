@@ -501,7 +501,7 @@ public final class PlayerEntity extends PathingEntity {
                 @Pc(186) Animator local186 = super.animator.isAnimating() && (!super.ready || local166 == null) ? super.animator : null;
                 @Pc(212) Model local212 = ShadowList.model(240, super.aModelArray3[0], super.modelRotateZ, 0, super.modelTranslateY, 1, arg0, 160, local186 == null ? local166 : local186, super.modelRotateX, local27, 0);
                 if (local212 != null) {
-                    local114 = Static642.method8441(true, super.aModelArray3.length + 1);
+                    local114 = Static642.allocatePickableEntity(true, super.aModelArray3.length + 1);
                     super.transparent = true;
                     arg0.C(false);
                     if (OrthoMode.enabled) {
@@ -564,7 +564,7 @@ public final class PlayerEntity extends PathingEntity {
         local22.rotate(local27);
         local22.translate(super.x, -super.anInt10732 + super.y - 5, super.z);
         if (local114 == null) {
-            local114 = Static642.method8441(true, super.aModelArray3.length);
+            local114 = Static642.allocatePickableEntity(true, super.aModelArray3.length);
         }
         this.method9319(arg0, false, super.aModelArray3, local22);
         if (OrthoMode.enabled) {
@@ -789,7 +789,7 @@ public final class PlayerEntity extends PathingEntity {
         @Pc(152) Model local152 = super.aModelArray3[0] = this.playerModel.bodyModel(ObjTypeList.instance, actionAnimator, BASTypeList.instance, SeqTypeList.instance, functionMask, super.wornRotation, WearposDefaults.instance, IDKTypeList.instance, toolkit, NPCTypeList.instance, super.wornAnimators, yaw, animator, TimedVarDomain.instance);
         @Pc(155) int local155 = PlayerModel.cacheHardReferenceCount();
         if (GameShell.maxmemory < 96 && local155 > 50) {
-            Static358.method9191();
+            Static358.uploadSceneLocationModels();
         }
         if (ModeWhere.LIVE != Client.modeWhere && local155 < 50) {
             @Pc(181) int local181 = 50 - local155;

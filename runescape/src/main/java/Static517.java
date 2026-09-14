@@ -29,7 +29,7 @@ public final class Static517 {
         @Pc(6) int ground = underwater ? 1 : 0;
         Static546.onscreenOpaqueEntityCount = 0;
         Static645.onscreenTransparentEntityCount = 0;
-        Static675.anInt10155++;
+        Static675.occlusionFrame++;
         @Pc(22) Entity entity;
         if ((entitySkipFlags & 0x2) == 0) {
             for (entity = Static576.opaqueStationaryEntities[ground]; entity != null; entity = entity.nextEntity) {
@@ -115,7 +115,7 @@ public final class Static517 {
                         for (local316 = Static231.anInt3734; local316 < maxOffsetX; local316++) {
                             tileX = local316 + Static441.anInt6691 - Static231.anInt3734;
                             for (offsetZ = Static13.anInt148; offsetZ < local157; offsetZ++) {
-                                if (Static258.aBooleanArrayArray3[local316][offsetZ] && !Static588.method7714(offsetZ + Static220.baseTileZ - Static13.anInt148, local225, tileX)) {
+                                if (Static258.aBooleanArrayArray3[local316][offsetZ] && !Static588.isTileOccluded(offsetZ + Static220.baseTileZ - Static13.anInt148, local225, tileX)) {
                                     visibleTiles[local316][offsetZ] = true;
                                 } else {
                                     visibleTiles[local316][offsetZ] = false;
@@ -159,7 +159,7 @@ public final class Static517 {
                                     @Pc(344) int tileZ = offsetZ + Static220.baseTileZ - Static13.anInt148;
                                     for (@Pc(346) int searchLevel = local225; searchLevel >= 0; searchLevel--) {
                                         if (Static334.activeTiles[searchLevel][tileX][tileZ] != null && Static334.activeTiles[searchLevel][tileX][tileZ].level == local225) {
-                                            if ((searchLevel < levels || roofStamps[searchLevel][tileX][tileZ] != roofStamp) && !Static588.method7714(tileZ, local225, tileX)) {
+                                            if ((searchLevel < levels || roofStamps[searchLevel][tileX][tileZ] != roofStamp) && !Static588.isTileOccluded(tileZ, local225, tileX)) {
                                                 visibleTiles[local316][offsetZ] = true;
                                                 break;
                                             }
@@ -189,7 +189,7 @@ public final class Static517 {
             }
         }
         if (Static645.onscreenTransparentEntityCount > 0) {
-            Static498.method6650(Static395.aEntityArray11, 0, Static645.onscreenTransparentEntityCount - 1);
+            Static498.sortByDepth(Static395.aEntityArray11, 0, Static645.onscreenTransparentEntityCount - 1);
             for (local225 = 0; local225 < Static645.onscreenTransparentEntityCount; local225++) {
                 Static632.drawEntity(Static395.aEntityArray11[local225], trackOrthoTiles);
             }

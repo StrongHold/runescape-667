@@ -26,7 +26,7 @@ public final class GlTexture2D extends GlTexture implements Interface18 {
             this.uploadWithMipmaps(texels, width, height, super.target);
         } else {
             OpenGL.glPixelStorei(OpenGL.GL_UNPACK_ROW_LENGTH, stride);
-            OpenGL.glTexImage2Df(super.target, BASE_LEVEL, this.getInternalFormat(), width, height, NO_BORDER, Static468.method7644(super.format), OpenGL.GL_FLOAT, texels, offset * Float.BYTES);
+            OpenGL.glTexImage2Df(super.target, BASE_LEVEL, this.getInternalFormat(), width, height, NO_BORDER, Static468.toGlPixelFormat(super.format), OpenGL.GL_FLOAT, texels, offset * Float.BYTES);
             OpenGL.glPixelStorei(OpenGL.GL_UNPACK_ROW_LENGTH, PACKED_ROW_LENGTH);
         }
     }
@@ -57,7 +57,7 @@ public final class GlTexture2D extends GlTexture implements Interface18 {
             this.uploadWithMipmaps(height, super.target, texels, width);
         } else {
             OpenGL.glPixelStorei(OpenGL.GL_UNPACK_ROW_LENGTH, stride);
-            OpenGL.glTexImage2Dub(super.target, BASE_LEVEL, this.getInternalFormat(), width, height, NO_BORDER, Static468.method7644(super.format), OpenGL.GL_UNSIGNED_BYTE, texels, offset);
+            OpenGL.glTexImage2Dub(super.target, BASE_LEVEL, this.getInternalFormat(), width, height, NO_BORDER, Static468.toGlPixelFormat(super.format), OpenGL.GL_UNSIGNED_BYTE, texels, offset);
             OpenGL.glPixelStorei(OpenGL.GL_UNPACK_ROW_LENGTH, PACKED_ROW_LENGTH);
         }
         OpenGL.glPixelStorei(OpenGL.GL_UNPACK_ALIGNMENT, DEFAULT_UNPACK_ALIGNMENT);
@@ -69,7 +69,7 @@ public final class GlTexture2D extends GlTexture implements Interface18 {
         this.height = height;
         this.width = width;
         super.toolkit.method8088(this);
-        OpenGL.glTexImage2Dub(super.target, BASE_LEVEL, this.getInternalFormat(), width, height, NO_BORDER, Static468.method7644(super.format), Static248.method3526(super.type), null, 0);
+        OpenGL.glTexImage2Dub(super.target, BASE_LEVEL, this.getInternalFormat(), width, height, NO_BORDER, Static468.toGlPixelFormat(super.format), Static248.method3526(super.type), null, 0);
     }
 
     @OriginalMember(owner = "client!va", name = "a", descriptor = "(FB)F")
@@ -119,7 +119,7 @@ public final class GlTexture2D extends GlTexture implements Interface18 {
         super.toolkit.method8088(this);
         OpenGL.glPixelStorei(OpenGL.GL_UNPACK_ALIGNMENT, BYTE_UNPACK_ALIGNMENT);
         OpenGL.glPixelStorei(OpenGL.GL_UNPACK_ROW_LENGTH, stride);
-        OpenGL.glTexSubImage2Dub(super.target, BASE_LEVEL, NO_OFFSET, NO_OFFSET, width, height, Static468.method7644(format), OpenGL.GL_UNSIGNED_BYTE, texels, 0);
+        OpenGL.glTexSubImage2Dub(super.target, BASE_LEVEL, NO_OFFSET, NO_OFFSET, width, height, Static468.toGlPixelFormat(format), OpenGL.GL_UNSIGNED_BYTE, texels, 0);
         OpenGL.glPixelStorei(OpenGL.GL_UNPACK_ROW_LENGTH, PACKED_ROW_LENGTH);
         OpenGL.glPixelStorei(OpenGL.GL_UNPACK_ALIGNMENT, DEFAULT_UNPACK_ALIGNMENT);
     }
@@ -128,7 +128,7 @@ public final class GlTexture2D extends GlTexture implements Interface18 {
     public void method8651(@OriginalArg(0) Class92 format, @OriginalArg(2) int height, @OriginalArg(4) float[] texels, @OriginalArg(8) int width) {
         super.toolkit.method8088(this);
         OpenGL.glPixelStorei(OpenGL.GL_UNPACK_ROW_LENGTH, PACKED_ROW_LENGTH);
-        OpenGL.glTexSubImage2Df(super.target, BASE_LEVEL, NO_OFFSET, NO_OFFSET, width, height, Static468.method7644(format), OpenGL.GL_UNSIGNED_BYTE, texels, 0);
+        OpenGL.glTexSubImage2Df(super.target, BASE_LEVEL, NO_OFFSET, NO_OFFSET, width, height, Static468.toGlPixelFormat(format), OpenGL.GL_UNSIGNED_BYTE, texels, 0);
         OpenGL.glPixelStorei(OpenGL.GL_UNPACK_ROW_LENGTH, PACKED_ROW_LENGTH);
     }
 

@@ -216,7 +216,7 @@ public final class Static409 {
         @Pc(13) int dx = x1 - x0;
         if (dx == 0) {
             if (dy != 0) {
-                Static87.method1692(y1, y0, rgb, x0);
+                Static87.drawVerticalLineUnclipped(y1, y0, rgb, x0);
             }
         } else if (dy == 0) {
             Static297.drawHorizontalLineUnclipped(y0, x1, rgb, x0);

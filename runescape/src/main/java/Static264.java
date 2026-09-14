@@ -18,7 +18,7 @@ public final class Static264 {
 
     /**
      * Scan converts a screen space triangle against the software occlusion depth buffer held in
-     * {@link Static485#anIntArray886}. {@link Static254#occlusionMode} selects the mode: 1 writes the
+     * {@link Static485#occlusionDepthBuffer}. {@link Static254#occlusionMode} selects the mode: 1 writes the
      * triangle's depth into the buffer and always answers true, 2 leaves the buffer alone and answers
      * whether every pixel of the triangle lies behind the depth already recorded there, so true means
      * the triangle is entirely hidden by the occluders drawn in mode 1.
@@ -30,15 +30,15 @@ public final class Static264 {
         } else if (yA >= -2000 && yB >= -2000 && yC >= -2000 && xA >= -2000 && xB >= -2000 && xC >= -2000) {
             if (Static254.occlusionMode == 2) {
                 int index = Static228.anInt3709 * yA + xA;
-                if (index >= 0 && index < Static485.anIntArray886.length && Static485.anIntArray886[index] > (zA << 8) - 38400) {
+                if (index >= 0 && index < Static485.occlusionDepthBuffer.length && Static485.occlusionDepthBuffer[index] > (zA << 8) - 38400) {
                     return false;
                 }
                 index = Static228.anInt3709 * yB + xB;
-                if (index >= 0 && Static485.anIntArray886.length > index && (zB << 8) - 38400 < Static485.anIntArray886[index]) {
+                if (index >= 0 && Static485.occlusionDepthBuffer.length > index && (zB << 8) - 38400 < Static485.occlusionDepthBuffer[index]) {
                     return false;
                 }
                 index = yC * Static228.anInt3709 + xC;
-                if (index >= 0 && Static485.anIntArray886.length > index && (zC << 8) - 38400 < Static485.anIntArray886[index]) {
+                if (index >= 0 && Static485.occlusionDepthBuffer.length > index && (zC << 8) - 38400 < Static485.occlusionDepthBuffer[index]) {
                     return false;
                 }
             }
@@ -124,7 +124,7 @@ public final class Static264 {
                                     if (yC < 0) {
                                         return true;
                                     }
-                                    if (!Static34.rasteriseScanline((xB >> 12) - 1, (xC >> 12) + 1, zA, Static485.anIntArray886, dzdx, yA)) {
+                                    if (!Static34.rasteriseScanline((xB >> 12) - 1, (xC >> 12) + 1, zA, Static485.occlusionDepthBuffer, dzdx, yA)) {
                                         return false;
                                     }
                                     xC += gradientCA;
@@ -133,7 +133,7 @@ public final class Static264 {
                                     xB += gradientBC;
                                 }
                             }
-                            if (!Static34.rasteriseScanline((xA >> 12) - 1, (xC >> 12) + 1, zA, Static485.anIntArray886, dzdx, yA)) {
+                            if (!Static34.rasteriseScanline((xA >> 12) - 1, (xC >> 12) + 1, zA, Static485.occlusionDepthBuffer, dzdx, yA)) {
                                 return false;
                             }
                             zA += dzdy;
@@ -153,7 +153,7 @@ public final class Static264 {
                                     if (yC < 0) {
                                         return true;
                                     }
-                                    if (!Static34.rasteriseScanline((xC >> 12) - 1, (xB >> 12) + 1, zA, Static485.anIntArray886, dzdx, yA)) {
+                                    if (!Static34.rasteriseScanline((xC >> 12) - 1, (xB >> 12) + 1, zA, Static485.occlusionDepthBuffer, dzdx, yA)) {
                                         return false;
                                     }
                                     xC += gradientCA;
@@ -162,7 +162,7 @@ public final class Static264 {
                                     yA += Static228.anInt3709;
                                 }
                             }
-                            if (!Static34.rasteriseScanline((xC >> 12) - 1, (xA >> 12) + 1, zA, Static485.anIntArray886, dzdx, yA)) {
+                            if (!Static34.rasteriseScanline((xC >> 12) - 1, (xA >> 12) + 1, zA, Static485.occlusionDepthBuffer, dzdx, yA)) {
                                 return false;
                             }
                             xA += gradientAB;
@@ -196,7 +196,7 @@ public final class Static264 {
                                     if (yB < 0) {
                                         return true;
                                     }
-                                    if (!Static34.rasteriseScanline((xC >> 12) - 1, (xA >> 12) + 1, zA, Static485.anIntArray886, dzdx, yA)) {
+                                    if (!Static34.rasteriseScanline((xC >> 12) - 1, (xA >> 12) + 1, zA, Static485.occlusionDepthBuffer, dzdx, yA)) {
                                         return false;
                                     }
                                     xC += gradientBC;
@@ -205,7 +205,7 @@ public final class Static264 {
                                     yA += Static228.anInt3709;
                                 }
                             }
-                            if (!Static34.rasteriseScanline((xB >> 12) - 1, (xA >> 12) + 1, zA, Static485.anIntArray886, dzdx, yA)) {
+                            if (!Static34.rasteriseScanline((xB >> 12) - 1, (xA >> 12) + 1, zA, Static485.occlusionDepthBuffer, dzdx, yA)) {
                                 return false;
                             }
                             xA += gradientAB;
@@ -225,7 +225,7 @@ public final class Static264 {
                                     if (yB < 0) {
                                         return true;
                                     }
-                                    if (!Static34.rasteriseScanline((xA >> 12) - 1, (xC >> 12) + 1, zA, Static485.anIntArray886, dzdx, yA)) {
+                                    if (!Static34.rasteriseScanline((xA >> 12) - 1, (xC >> 12) + 1, zA, Static485.occlusionDepthBuffer, dzdx, yA)) {
                                         return false;
                                     }
                                     zA += dzdy;
@@ -234,7 +234,7 @@ public final class Static264 {
                                     xC += gradientBC;
                                 }
                             }
-                            if (!Static34.rasteriseScanline((xA >> 12) - 1, (xB >> 12) - -1, zA, Static485.anIntArray886, dzdx, yA)) {
+                            if (!Static34.rasteriseScanline((xA >> 12) - 1, (xB >> 12) - -1, zA, Static485.occlusionDepthBuffer, dzdx, yA)) {
                                 return false;
                             }
                             xA += gradientAB;
@@ -280,7 +280,7 @@ public final class Static264 {
                                     if (yB < 0) {
                                         return true;
                                     }
-                                    if (!Static34.rasteriseScanline((xA >> 12) - 1, (xB >> 12) + 1, zC, Static485.anIntArray886, dzdx, yC)) {
+                                    if (!Static34.rasteriseScanline((xA >> 12) - 1, (xB >> 12) + 1, zC, Static485.occlusionDepthBuffer, dzdx, yC)) {
                                         return false;
                                     }
                                     zC += dzdy;
@@ -289,7 +289,7 @@ public final class Static264 {
                                     xA += gradientAB;
                                 }
                             }
-                            if (!Static34.rasteriseScanline((xC >> 12) - 1, (xB >> 12) + 1, zC, Static485.anIntArray886, dzdx, yC)) {
+                            if (!Static34.rasteriseScanline((xC >> 12) - 1, (xB >> 12) + 1, zC, Static485.occlusionDepthBuffer, dzdx, yC)) {
                                 return false;
                             }
                             yC += Static228.anInt3709;
@@ -309,7 +309,7 @@ public final class Static264 {
                                     if (yB < 0) {
                                         return true;
                                     }
-                                    if (!Static34.rasteriseScanline((xB >> 12) - 1, (xA >> 12) + 1, zC, Static485.anIntArray886, dzdx, yC)) {
+                                    if (!Static34.rasteriseScanline((xB >> 12) - 1, (xA >> 12) + 1, zC, Static485.occlusionDepthBuffer, dzdx, yC)) {
                                         return false;
                                     }
                                     zC += dzdy;
@@ -318,7 +318,7 @@ public final class Static264 {
                                     yC += Static228.anInt3709;
                                 }
                             }
-                            if (!Static34.rasteriseScanline((xB >> 12) - 1, (xC >> 12) + 1, zC, Static485.anIntArray886, dzdx, yC)) {
+                            if (!Static34.rasteriseScanline((xB >> 12) - 1, (xC >> 12) + 1, zC, Static485.occlusionDepthBuffer, dzdx, yC)) {
                                 return false;
                             }
                             xC += gradientCA;
@@ -352,7 +352,7 @@ public final class Static264 {
                                     if (yA < 0) {
                                         return true;
                                     }
-                                    if (!Static34.rasteriseScanline((xC >> 12) - 1, (xB >> 12) - -1, zC, Static485.anIntArray886, dzdx, yC)) {
+                                    if (!Static34.rasteriseScanline((xC >> 12) - 1, (xB >> 12) - -1, zC, Static485.occlusionDepthBuffer, dzdx, yC)) {
                                         return false;
                                     }
                                     xB += gradientAB;
@@ -361,7 +361,7 @@ public final class Static264 {
                                     zC += dzdy;
                                 }
                             }
-                            if (!Static34.rasteriseScanline((xC >> 12) - 1, (xA >> 12) + 1, zC, Static485.anIntArray886, dzdx, yC)) {
+                            if (!Static34.rasteriseScanline((xC >> 12) - 1, (xA >> 12) + 1, zC, Static485.occlusionDepthBuffer, dzdx, yC)) {
                                 return false;
                             }
                             xA += gradientBC;
@@ -381,7 +381,7 @@ public final class Static264 {
                                     if (yA < 0) {
                                         return true;
                                     }
-                                    if (!Static34.rasteriseScanline((xB >> 12) - 1, (xC >> 12) + 1, zC, Static485.anIntArray886, dzdx, yC)) {
+                                    if (!Static34.rasteriseScanline((xB >> 12) - 1, (xC >> 12) + 1, zC, Static485.occlusionDepthBuffer, dzdx, yC)) {
                                         return false;
                                     }
                                     zC += dzdy;
@@ -390,7 +390,7 @@ public final class Static264 {
                                     xB += gradientAB;
                                 }
                             }
-                            if (!Static34.rasteriseScanline((xA >> 12) - 1, (xC >> 12) + 1, zC, Static485.anIntArray886, dzdx, yC)) {
+                            if (!Static34.rasteriseScanline((xA >> 12) - 1, (xC >> 12) + 1, zC, Static485.occlusionDepthBuffer, dzdx, yC)) {
                                 return false;
                             }
                             zC += dzdy;
@@ -435,7 +435,7 @@ public final class Static264 {
                                     if (yC < 0) {
                                         return true;
                                     }
-                                    if (!Static34.rasteriseScanline((xA >> 12) - 1, (xB >> 12) + 1, zB, Static485.anIntArray886, dzdx, yB)) {
+                                    if (!Static34.rasteriseScanline((xA >> 12) - 1, (xB >> 12) + 1, zB, Static485.occlusionDepthBuffer, dzdx, yB)) {
                                         return false;
                                     }
                                     xB += gradientBC;
@@ -444,7 +444,7 @@ public final class Static264 {
                                     yB += Static228.anInt3709;
                                 }
                             }
-                            if (!Static34.rasteriseScanline((xC >> 12) - 1, (xB >> 12) + 1, zB, Static485.anIntArray886, dzdx, yB)) {
+                            if (!Static34.rasteriseScanline((xC >> 12) - 1, (xB >> 12) + 1, zB, Static485.occlusionDepthBuffer, dzdx, yB)) {
                                 return false;
                             }
                             xB += gradientBC;
@@ -464,7 +464,7 @@ public final class Static264 {
                                     if (yC < 0) {
                                         return true;
                                     }
-                                    if (!Static34.rasteriseScanline((xB >> 12) - 1, (xA >> 12) + 1, zB, Static485.anIntArray886, dzdx, yB)) {
+                                    if (!Static34.rasteriseScanline((xB >> 12) - 1, (xA >> 12) + 1, zB, Static485.occlusionDepthBuffer, dzdx, yB)) {
                                         return false;
                                     }
                                     xB += gradientBC;
@@ -473,7 +473,7 @@ public final class Static264 {
                                     zB += dzdy;
                                 }
                             }
-                            if (!Static34.rasteriseScanline((xB >> 12) - 1, (xC >> 12) + 1, zB, Static485.anIntArray886, dzdx, yB)) {
+                            if (!Static34.rasteriseScanline((xB >> 12) - 1, (xC >> 12) + 1, zB, Static485.occlusionDepthBuffer, dzdx, yB)) {
                                 return false;
                             }
                             yB += Static228.anInt3709;
@@ -507,7 +507,7 @@ public final class Static264 {
                                     if (yA < 0) {
                                         return true;
                                     }
-                                    if (!Static34.rasteriseScanline((xA >> 12) - 1, (xC >> 12) + 1, zB, Static485.anIntArray886, dzdx, yB)) {
+                                    if (!Static34.rasteriseScanline((xA >> 12) - 1, (xC >> 12) + 1, zB, Static485.occlusionDepthBuffer, dzdx, yB)) {
                                         return false;
                                     }
                                     xA += gradientAB;
@@ -516,7 +516,7 @@ public final class Static264 {
                                     xC += gradientCA;
                                 }
                             }
-                            if (!Static34.rasteriseScanline((xA >> 12) - 1, (xB >> 12) + 1, zB, Static485.anIntArray886, dzdx, yB)) {
+                            if (!Static34.rasteriseScanline((xA >> 12) - 1, (xB >> 12) + 1, zB, Static485.occlusionDepthBuffer, dzdx, yB)) {
                                 return false;
                             }
                             xA += gradientAB;
@@ -536,7 +536,7 @@ public final class Static264 {
                                     if (yA < 0) {
                                         return true;
                                     }
-                                    if (!Static34.rasteriseScanline((xC >> 12) - 1, (xA >> 12) + 1, zB, Static485.anIntArray886, dzdx, yB)) {
+                                    if (!Static34.rasteriseScanline((xC >> 12) - 1, (xA >> 12) + 1, zB, Static485.occlusionDepthBuffer, dzdx, yB)) {
                                         return false;
                                     }
                                     zB += dzdy;
@@ -545,7 +545,7 @@ public final class Static264 {
                                     xC += gradientCA;
                                 }
                             }
-                            if (!Static34.rasteriseScanline((xB >> 12) - 1, (xA >> 12) + 1, zB, Static485.anIntArray886, dzdx, yB)) {
+                            if (!Static34.rasteriseScanline((xB >> 12) - 1, (xA >> 12) + 1, zB, Static485.occlusionDepthBuffer, dzdx, yB)) {
                                 return false;
                             }
                             zB += dzdy;

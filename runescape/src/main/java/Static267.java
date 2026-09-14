@@ -6,5 +6,5 @@ public final class Static267 {
     public static int[] mapGroups;
 
     @OriginalMember(owner = "client!iga", name = "U", descriptor = "S")
-    public static short aShort47;
+    public static short savedMinFov;
 }

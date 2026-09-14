@@ -7,7 +7,7 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static354 {
 
     @OriginalMember(owner = "client!ld", name = "k", descriptor = "Z")
-    public static boolean aBoolean439 = false;
+    public static boolean fovClampsSaved = false;
 
     @OriginalMember(owner = "client!ld", name = "f", descriptor = "Z")
     public static boolean showProfiling = false;

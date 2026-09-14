@@ -25,7 +25,7 @@ public final class GlRectangleTexture extends GlTexture implements Interface18 {
         this.width = width;
         super.toolkit.method8088(this);
         OpenGL.glPixelStorei(OpenGL.GL_UNPACK_ROW_LENGTH, stride);
-        OpenGL.glTexImage2Df(super.target, BASE_LEVEL, this.getInternalFormat(), width, height, NO_BORDER, Static468.method7644(super.format), OpenGL.GL_FLOAT, texels, offset * Float.BYTES);
+        OpenGL.glTexImage2Df(super.target, BASE_LEVEL, this.getInternalFormat(), width, height, NO_BORDER, Static468.toGlPixelFormat(super.format), OpenGL.GL_FLOAT, texels, offset * Float.BYTES);
         OpenGL.glPixelStorei(OpenGL.GL_UNPACK_ROW_LENGTH, PACKED_ROW_LENGTH);
     }
 
@@ -46,7 +46,7 @@ public final class GlRectangleTexture extends GlTexture implements Interface18 {
         this.width = width;
         this.height = height;
         super.toolkit.method8088(this);
-        OpenGL.glTexImage2Dub(super.target, BASE_LEVEL, this.getInternalFormat(), width, height, NO_BORDER, Static468.method7644(super.format), Static248.method3526(super.type), null, 0);
+        OpenGL.glTexImage2Dub(super.target, BASE_LEVEL, this.getInternalFormat(), width, height, NO_BORDER, Static468.toGlPixelFormat(super.format), Static248.method3526(super.type), null, 0);
     }
 
     @OriginalMember(owner = "client!of", name = "<init>", descriptor = "(Lclient!tca;Lclient!eba;II[BII)V")
@@ -57,7 +57,7 @@ public final class GlRectangleTexture extends GlTexture implements Interface18 {
         super.toolkit.method8088(this);
         OpenGL.glPixelStorei(OpenGL.GL_UNPACK_ALIGNMENT, BYTE_UNPACK_ALIGNMENT);
         OpenGL.glPixelStorei(OpenGL.GL_UNPACK_ROW_LENGTH, stride);
-        OpenGL.glTexImage2Dub(super.target, BASE_LEVEL, this.getInternalFormat(), width, height, NO_BORDER, Static468.method7644(super.format), OpenGL.GL_UNSIGNED_BYTE, texels, offset);
+        OpenGL.glTexImage2Dub(super.target, BASE_LEVEL, this.getInternalFormat(), width, height, NO_BORDER, Static468.toGlPixelFormat(super.format), OpenGL.GL_UNSIGNED_BYTE, texels, offset);
         OpenGL.glPixelStorei(OpenGL.GL_UNPACK_ROW_LENGTH, PACKED_ROW_LENGTH);
         OpenGL.glPixelStorei(OpenGL.GL_UNPACK_ALIGNMENT, DEFAULT_UNPACK_ALIGNMENT);
     }
@@ -129,7 +129,7 @@ public final class GlRectangleTexture extends GlTexture implements Interface18 {
         if (width != stride) {
             OpenGL.glPixelStorei(OpenGL.GL_UNPACK_ROW_LENGTH, stride);
         }
-        OpenGL.glTexSubImage2Dub(super.target, BASE_LEVEL, NO_OFFSET, NO_OFFSET, width, height, Static468.method7644(format), OpenGL.GL_UNSIGNED_BYTE, texels, 0);
+        OpenGL.glTexSubImage2Dub(super.target, BASE_LEVEL, NO_OFFSET, NO_OFFSET, width, height, Static468.toGlPixelFormat(format), OpenGL.GL_UNSIGNED_BYTE, texels, 0);
         if (stride != width) {
             OpenGL.glPixelStorei(OpenGL.GL_UNPACK_ROW_LENGTH, PACKED_ROW_LENGTH);
         }

@@ -4,7 +4,7 @@ import org.openrs2.deob.annotation.OriginalMember;
 public final class Static346 {
 
     @OriginalMember(owner = "client!kt", name = "T", descriptor = "Lclient!uc;")
-    public static Environment aEnvironment_1;
+    public static Environment activeEnvironment;
 
     @OriginalMember(owner = "client!kt", name = "V", descriptor = "[F")
     public static final float[] aFloatArray40 = new float[2];

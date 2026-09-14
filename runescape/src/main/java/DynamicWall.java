@@ -100,7 +100,7 @@ public final class DynamicWall extends Wall implements Location {
 
         @Pc(22) Matrix matrix = arg0.scratchMatrix();
         matrix.applyTranslation(super.x, super.y, super.z);
-        @Pc(36) PickableEntity local36 = Static642.method8441(this.interactive, 1);
+        @Pc(36) PickableEntity local36 = Static642.allocatePickableEntity(this.interactive, 1);
 
         @Pc(49) int localX = super.x >> 9;
         @Pc(54) int localZ = super.z >> 9;

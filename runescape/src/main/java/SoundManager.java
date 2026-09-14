@@ -328,7 +328,7 @@ public final class SoundManager {
         if (id == -1 && !Static501.aBoolean575) {
             Static100.method1988();
         } else if (id != -1 && (SongManager.playing != id || !Static52.method1157(-122)) && local12 != 0 && !Static501.aBoolean575) {
-            Static618.method8318(js5.MIDI_SONGS, local12, id, delay);
+            Static618.playSongWithFade(js5.MIDI_SONGS, local12, id, delay);
             AudioRenderer.mixBussReset();
         }
         if (SongManager.playing != id) {

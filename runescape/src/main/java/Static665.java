@@ -4,7 +4,7 @@ import org.openrs2.deob.annotation.OriginalMember;
 public final class Static665 {
 
     @OriginalMember(owner = "client!vb", name = "z", descriptor = "[I")
-    public static int[] anIntArray779;
+    public static int[] roofMinZ;
 
     @OriginalMember(owner = "client!vb", name = "w", descriptor = "Lclient!ha;")
     public static Toolkit aToolkit_15;

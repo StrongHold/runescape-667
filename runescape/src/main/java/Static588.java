@@ -23,16 +23,16 @@ public final class Static588 {
      * as hidden only when both of the triangles its ground quad is split into rasterise as hidden.
      */
     @OriginalMember(owner = "client!sj", name = "a", descriptor = "(ZIII)Z")
-    public static boolean method7714(@OriginalArg(1) int z, @OriginalArg(2) int level, @OriginalArg(3) int x) {
+    public static boolean isTileOccluded(@OriginalArg(1) int z, @OriginalArg(2) int level, @OriginalArg(3) int x) {
         if (!Static18.occlude || !Static29.aBoolean60) {
             return false;
         } else if (Static432.occludedPixelCount < 100) {
             return false;
         } else {
             @Pc(37) int cached = Static446.tileOcclusionCache[level][x][z];
-            if (-Static675.anInt10155 == cached) {
+            if (-Static675.occlusionFrame == cached) {
                 return false;
-            } else if (Static675.anInt10155 == cached) {
+            } else if (Static675.occlusionFrame == cached) {
                 return true;
             } else if (Static693.underwaterGround == Static246.ground) {
                 return false;
@@ -41,10 +41,10 @@ public final class Static588 {
                 @Pc(68) int worldZ = z << EnvironmentLight.anInt1066;
                 if (Static172.isTriangleOccluded(worldX + Static340.anInt5586 - 1, worldZ + 1, Static246.ground[level].getHeight(x + 1, z + 1), Static246.ground[level].getHeight(x, z + 1), Static246.ground[level].getHeight(x, z), worldZ + Static340.anInt5586 - 1, Static340.anInt5586 + worldZ + -1, worldX + 1, worldX + 1) && Static172.isTriangleOccluded(Static340.anInt5586 + worldX - 1, worldZ + 1, Static246.ground[level].getHeight(x + 1, z), Static246.ground[level].getHeight(x + 1, z + 1), Static246.ground[level].getHeight(x, z), worldZ + 1, Static340.anInt5586 + worldZ + -1, worldX + 1, Static340.anInt5586 + -1 + worldX)) {
                     Static298.occludedGroundCount++;
-                    Static446.tileOcclusionCache[level][x][z] = Static675.anInt10155;
+                    Static446.tileOcclusionCache[level][x][z] = Static675.occlusionFrame;
                     return true;
                 } else {
-                    Static446.tileOcclusionCache[level][x][z] = -Static675.anInt10155;
+                    Static446.tileOcclusionCache[level][x][z] = -Static675.occlusionFrame;
                     return false;
                 }
             }

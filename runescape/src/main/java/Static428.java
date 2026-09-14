@@ -4,7 +4,7 @@ import org.openrs2.deob.annotation.OriginalMember;
 public final class Static428 {
 
     @OriginalMember(owner = "client!nia", name = "n", descriptor = "I")
-    public static int anInt6487;
+    public static int pickCameraX;
 
     @OriginalMember(owner = "client!nia", name = "x", descriptor = "I")
     public static int anInt6495 = 0;

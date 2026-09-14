@@ -11,7 +11,7 @@ public final class Static347 {
             if (bridge && level >= Static299.tileMaxLevel - 1) {
                 return null;
             }
-            Static527.method7084(level, x, z);
+            Static527.buildTileColumn(level, x, z);
         }
         return Static334.activeTiles[level][x][z];
     }

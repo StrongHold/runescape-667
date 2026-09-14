@@ -557,7 +557,7 @@ public final class OrthoMode {
                     SceneRenderer.renderScene(clock, x, y, z, roofStamps, arg9, arg12, arg5, arg14, arg6, levels, roofStamp, playerTileX, playerTileZ, flickerDisabled, orthoZoom, 1, false);
                 }
                 toolkit.la();
-                Static102.method2021();
+                Static102.useScenePickList();
                 if (mode == 0) {
                     toolkit.restoreSurface();
                 }
@@ -617,7 +617,7 @@ public final class OrthoMode {
             orthoPickList.clear();
             Static119.setActivePickList(orthoPickList);
             SceneRenderer.renderScene(clock, x, y, z, roofStamps, arg9, arg12, arg5, arg14, arg6, levels, roofStamp, playerTileX, playerTileZ, flickerDisabled, orthoZoom, 1, false);
-            Static102.method2021();
+            Static102.useScenePickList();
             Static75.hasOpaqueStationaryEntities = false;
             if (mode == 0) {
                 toolkit.restoreSurface();

@@ -7076,23 +7076,23 @@ public final class ScriptRunner {
                 } else if (Static598.maxFov < Static25.minFov) {
                     Static598.maxFov = Static25.minFov;
                 }
-                Static552.aShort123 = (short) intStack[intStackPointer + 2];
-                if (Static552.aShort123 <= 0) {
-                    Static552.aShort123 = 1;
+                Static552.minHorizontalFov = (short) intStack[intStackPointer + 2];
+                if (Static552.minHorizontalFov <= 0) {
+                    Static552.minHorizontalFov = 1;
                 }
-                Static306.aShort59 = (short) intStack[intStackPointer + 3];
-                if (Static306.aShort59 <= 0) {
-                    Static306.aShort59 = 32767;
+                Static306.maxHorizontalFov = (short) intStack[intStackPointer + 3];
+                if (Static306.maxHorizontalFov <= 0) {
+                    Static306.maxHorizontalFov = 32767;
                     return;
                 }
-                if (Static306.aShort59 < Static552.aShort123) {
-                    Static306.aShort59 = Static552.aShort123;
+                if (Static306.maxHorizontalFov < Static552.minHorizontalFov) {
+                    Static306.maxHorizontalFov = Static552.minHorizontalFov;
                 }
                 return;
             }
 
             if (opcode == VIEWPORT_GETEFFECTIVESIZE) {
-                Static498.method6643(0, false, 0, InterfaceManager.scene.height, InterfaceManager.scene.width);
+                Static498.resizeViewport(0, false, 0, InterfaceManager.scene.height, InterfaceManager.scene.width);
                 intStack[intStackPointer++] = Static242.anInt3971;
                 intStack[intStackPointer++] = Static200.anInt3305;
                 return;

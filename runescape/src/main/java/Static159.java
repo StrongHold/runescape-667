@@ -6,7 +6,7 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static159 {
 
     @OriginalMember(owner = "client!ew", name = "a", descriptor = "[I")
-    public static final int[] anIntArray245 = new int[5];
+    public static final int[] pooledCounts = new int[5];
 
     @OriginalMember(owner = "client!ew", name = "g", descriptor = "I")
     public static int anInt2788 = 0;
@@ -27,7 +27,7 @@ public final class Static159 {
                 Static127.method2243(0, Static720.mapWidth >> 4, Static501.mapLength >> 4);
             }
         }
-        Static506.method8313();
+        Static506.updateEnvironment();
         Static588.method7713();
         Static683.method8928();
         Static442.method5969();

@@ -11,10 +11,10 @@ public final class Static282 {
             return false;
         } else if (Static432.occludedPixelCount < 100) {
             return false;
-        } else if (Static588.method7714(arg3, arg1, arg2)) {
+        } else if (Static588.isTileOccluded(arg3, arg1, arg2)) {
             @Pc(38) int local38 = arg2 << EnvironmentLight.anInt1066;
             @Pc(42) int local42 = arg3 << EnvironmentLight.anInt1066;
-            if (Static318.method8557(Static340.anInt5586, arg0, local38, local42, Static246.ground[arg1].getHeight(arg2, arg3), Static340.anInt5586)) {
+            if (Static318.isBoxOccluded(Static340.anInt5586, arg0, local38, local42, Static246.ground[arg1].getHeight(arg2, arg3), Static340.anInt5586)) {
                 Static356.anInt5773++;
                 return true;
             } else {

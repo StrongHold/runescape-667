@@ -40,7 +40,7 @@ public final class Static65 {
     }
 
     @OriginalMember(owner = "client!cba", name = "a", descriptor = "(I)V")
-    public static void method1472() {
+    public static void resetEnvironmentCache() {
         Environment.cacheReset();
         Static425.aClass67_6 = null;
         Static74.aSkyBox_1 = null;

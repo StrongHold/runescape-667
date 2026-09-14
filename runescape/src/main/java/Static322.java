@@ -4,7 +4,7 @@ import org.openrs2.deob.annotation.OriginalMember;
 public final class Static322 {
 
     @OriginalMember(owner = "client!kd", name = "m", descriptor = "S")
-    public static short aShort135;
+    public static short savedMaxHorizontalFov;
 
     @OriginalMember(owner = "client!kd", name = "a", descriptor = "(IIC)C")
     public static char stripAccent(@OriginalArg(1) int language, @OriginalArg(2) char c) {

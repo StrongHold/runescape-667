@@ -11,9 +11,9 @@ public final class Static297 {
     @OriginalMember(owner = "client!jha", name = "a", descriptor = "(IIIII)V")
     public static void drawHorizontalLineUnclipped(@OriginalArg(0) int y, @OriginalArg(1) int x1, @OriginalArg(3) int rgb, @OriginalArg(4) int x0) {
         if (x0 <= x1) {
-            Static696.method9037(x1, rgb, x0, Static723.anIntArrayArray266[y]);
+            Static696.fillHorizontalSpan(x1, rgb, x0, Static723.anIntArrayArray266[y]);
         } else {
-            Static696.method9037(x0, rgb, x1, Static723.anIntArrayArray266[y]);
+            Static696.fillHorizontalSpan(x0, rgb, x1, Static723.anIntArrayArray266[y]);
         }
     }
 }

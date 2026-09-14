@@ -14,7 +14,7 @@ public final class Static232 {
     public static int cameraNotifyDelay = 0;
 
     @OriginalMember(owner = "client!hda", name = "c", descriptor = "(I)V")
-    public static void method3392() {
+    public static void updateSongFade() {
         try {
             @Pc(14) int volume;
             if (SongManager.anInt10171 == 1) {

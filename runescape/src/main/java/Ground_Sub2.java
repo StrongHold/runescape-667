@@ -623,7 +623,7 @@ public final class Ground_Sub2 extends Ground {
                 local1702[local1458] = local1713.key;
                 local1713.method5864(this.anInt7498);
             }
-            Static61.method1308(local1702, this.aClass2_Sub39Array1);
+            Static61.sortByKey(local1702, this.aClass2_Sub39Array1);
             if (this.aClass170_1 != null) {
                 this.aClass170_1.method3540();
             }

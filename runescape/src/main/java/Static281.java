@@ -15,9 +15,9 @@ public final class Static281 {
         }
         @Pc(25) LinkedList[] lock = PickableEntityPool.FREE_LISTS;
         synchronized (PickableEntityPool.FREE_LISTS) {
-            if (cylinderCount < PickableEntityPool.FREE_LISTS.length && Static159.anIntArray245[cylinderCount] < 200) {
+            if (cylinderCount < PickableEntityPool.FREE_LISTS.length && Static159.pooledCounts[cylinderCount] < 200) {
                 PickableEntityPool.FREE_LISTS[cylinderCount].add(pickable);
-                @Pc(48) int pooled = Static159.anIntArray245[cylinderCount]++;
+                @Pc(48) int pooled = Static159.pooledCounts[cylinderCount]++;
             }
         }
     }

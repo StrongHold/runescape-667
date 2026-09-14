@@ -517,7 +517,7 @@ public final class MapRegion extends Terrain {
                 decor = new DynamicGroundDecor(toolkit, locType, level, virtualLevel, absX, averageHeight, absZ, super.underwater, rotation, animation);
             }
 
-            Static61.method1299(level, x, z, decor);
+            Static61.setGroundDecor(level, x, z, decor);
 
             if (locType.blockwalk == 1 && collisionMap != null) {
                 collisionMap.flagGroundDecor(x, z);
@@ -537,7 +537,7 @@ public final class MapRegion extends Terrain {
                 loc = new DynamicLocation(toolkit, locType, level, virtualLevel, absX, averageHeight, absZ, super.underwater, x, x + locWidth - 1, z, z + locLength - 1, shape, rotation, animation);
             }
 
-            if (Static102.method2026(loc, false)) {
+            if (Static102.addPositionEntity(loc, false)) {
                 if (staticLoc != null && staticLoc.hardShadow()) {
                     staticLoc.addShadow(toolkit);
                 }
@@ -574,7 +574,7 @@ public final class MapRegion extends Terrain {
                 loc = new DynamicLocation(toolkit, locType, level, virtualLevel, absX, averageHeight, absZ, super.underwater, x, locWidth + x - 1, z, z + locLength - 1, shape, rotation, animation);
             }
 
-            Static102.method2026(loc, false);
+            Static102.addPositionEntity(loc, false);
 
             boolean occludeRoofs = locType.occlude == LocOcclusionMode.ROOFS;
             if (Static404.renderShadows && !super.underwater && shape >= LocShapes.ROOF_STRAIGHT && shape <= LocShapes.ROOF_FLAT && shape != LocShapes.ROOF_DIAGONAL_WITH_ROOFEDGE && level > 0 && !occludeRoofs) {
@@ -603,7 +603,7 @@ public final class MapRegion extends Terrain {
                 wall = new DynamicWall(toolkit, locType, level, virtualLevel, absX, averageHeight, absZ, super.underwater, shape, rotation, animation);
             }
 
-            Static584.method7665(level, x, z, wall, null);
+            Static584.setWall(level, x, z, wall, null);
 
             if (rotation == 0) {
                 if (Static404.renderShadows && locType.shadow) {
@@ -665,7 +665,7 @@ public final class MapRegion extends Terrain {
                 wall = new DynamicWall(toolkit, locType, level, virtualLevel, absX, averageHeight, absZ, super.underwater, shape, rotation, animation);
             }
 
-            Static584.method7665(level, x, z, wall, null);
+            Static584.setWall(level, x, z, wall, null);
 
             if (locType.shadow && Static404.renderShadows) {
                 if (rotation == 0) {
@@ -708,7 +708,7 @@ public final class MapRegion extends Terrain {
                 adjacentWall = new DynamicWall(toolkit, locType, level, virtualLevel, absX, averageHeight, absZ, super.underwater, shape, rotation90, animation);
             }
 
-            Static584.method7665(level, x, z, wall, adjacentWall);
+            Static584.setWall(level, x, z, wall, adjacentWall);
 
             boolean occludesAll = (locType.occlude == LocOcclusionMode.ALL) || (forceOcclusion && locType.occlude == LocOcclusionMode.NONE);
             if (occludesAll && !super.underwater) {
@@ -749,7 +749,7 @@ public final class MapRegion extends Terrain {
                 wall = new DynamicWall(toolkit, locType, level, virtualLevel, absX, averageHeight, absZ, super.underwater, shape, rotation, animation);
             }
 
-            Static584.method7665(level, x, z, wall, null);
+            Static584.setWall(level, x, z, wall, null);
 
             if (locType.shadow && Static404.renderShadows) {
                 if (rotation == 0) {
@@ -781,7 +781,7 @@ public final class MapRegion extends Terrain {
                 loc = new DynamicLocation(toolkit, locType, level, virtualLevel, absX, averageHeight, absZ, super.underwater, x, locWidth + x - 1, z, locLength + z - 1, shape, rotation, animation);
             }
 
-            Static102.method2026(loc, false);
+            Static102.addPositionEntity(loc, false);
 
             if (locType.occlude == LocOcclusionMode.ALL && !super.underwater) {
                 @Pc(1723) byte occlusionType;
@@ -1209,7 +1209,7 @@ public final class MapRegion extends Terrain {
             loc.removeShadow(toolkit);
         }
         if (layer == LocLayer.WALL) {
-            Static26.method717(level, x, z);
+            Static26.clearWalls(level, x, z);
             if (locType.blockwalk != 0) {
                 collisionMap.unflagWall(z, rotation, shape, !locType.breakroutefinding, x, locType.blockrange);
             }
@@ -1225,7 +1225,7 @@ public final class MapRegion extends Terrain {
                 }
             }
         } else if (layer == LocLayer.WALLDECOR) {
-            Static173.method2692(level, x, z);
+            Static173.clearWallDecor(level, x, z);
         } else if (layer == LocLayer.GROUND) {
             Static10.method130(level, x, z, locClass == null ? (locClass = getClass("com.jagex.game.Location")) : locClass);
             if (locType.blockwalk != 0 && super.width > locType.width + x && super.length > locType.width + z && x + locType.length < super.width && locType.length + z < super.length) {
@@ -1239,7 +1239,7 @@ public final class MapRegion extends Terrain {
                 }
             }
         } else if (layer == LocLayer.GROUNDDECOR) {
-            Static609.method8212(level, x, z);
+            Static609.clearGroundDecor(level, x, z);
             if (locType.blockwalk == 1) {
                 collisionMap.unflagGroundDecor(x, z);
             }

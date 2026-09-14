@@ -866,7 +866,7 @@ public final class WorldMap {
                             coloursHigh[index] = 0;
                             coloursLow[index] = 0;
                         } else {
-                            @Pc(261) int hsl = weightSum == 0 ? 0 : Static318.method8555(lightnessSum / count, saturationSum / count, hueSum * 256 / weightSum);
+                            @Pc(261) int hsl = weightSum == 0 ? 0 : Static318.hsl24to16(lightnessSum / count, saturationSum / count, hueSum * 256 / weightSum);
                             @Pc(294) int lightness = (hsl & 0x7F) + lightnessOffset;
                             if (lightness < 0) {
                                 lightness = 0;

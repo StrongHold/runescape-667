@@ -6,7 +6,7 @@ import org.openrs2.deob.annotation.OriginalMember;
 public final class Static150 {
 
     @OriginalMember(owner = "client!en", name = "h", descriptor = "I")
-    public static int anInt2634;
+    public static int locOccluderCount;
 
     @OriginalMember(owner = "client!en", name = "i", descriptor = "I")
     public static int drawOrder = 0;

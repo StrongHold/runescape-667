@@ -5,7 +5,7 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static707 {
 
     @OriginalMember(owner = "client!wg", name = "c", descriptor = "I")
-    public static int anInt10641;
+    public static int pickCameraRotateZ;
 
     @OriginalMember(owner = "client!wg", name = "a", descriptor = "(I[ILclient!qha;[III)Lclient!wl;")
     public static ClippingMask_Sub3 method9228(@OriginalArg(1) int[] arg0, @OriginalArg(2) GlToolkit arg1, @OriginalArg(3) int[] arg2, @OriginalArg(4) int arg3, @OriginalArg(5) int arg4) {
@@ -17,7 +17,7 @@ public final class Static707 {
             }
         }
         if (17787 != 17787) {
-            anInt10641 = 5;
+            pickCameraRotateZ = 5;
         }
         return new ClippingMask_Sub3(arg1, arg4, arg3, local10);
     }

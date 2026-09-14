@@ -11,7 +11,7 @@ public final class Static87 {
     public static int tradeChatFilter = 0;
 
     @OriginalMember(owner = "client!cn", name = "a", descriptor = "(IIIII)V")
-    public static void method1692(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3) {
+    public static void drawVerticalLineUnclipped(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3) {
         @Pc(8) int local8;
         if (arg0 >= arg1) {
             for (local8 = arg1; local8 < arg0; local8++) {

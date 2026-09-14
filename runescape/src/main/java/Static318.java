@@ -8,7 +8,7 @@ public final class Static318 {
     public static float aFloat210;
 
     @OriginalMember(owner = "client!kb", name = "a", descriptor = "(IIZI)I")
-    public static int method8555(@OriginalArg(0) int lightness, @OriginalArg(1) int saturation, @OriginalArg(3) int hue) {
+    public static int hsl24to16(@OriginalArg(0) int lightness, @OriginalArg(1) int saturation, @OriginalArg(3) int hue) {
         if (lightness > 243) {
             saturation >>= 0x4;
         } else if (lightness > 217) {
@@ -22,14 +22,14 @@ public final class Static318 {
     }
 
     @OriginalMember(owner = "client!kb", name = "a", descriptor = "(IIIIIII)Z")
-    public static boolean method8557(@OriginalArg(0) int sizeX, @OriginalArg(1) int sizeY, @OriginalArg(2) int minX, @OriginalArg(4) int minZ, @OriginalArg(5) int minY, @OriginalArg(6) int sizeZ) {
+    public static boolean isBoxOccluded(@OriginalArg(0) int sizeX, @OriginalArg(1) int sizeY, @OriginalArg(2) int minX, @OriginalArg(4) int minZ, @OriginalArg(5) int minY, @OriginalArg(6) int sizeZ) {
         @Pc(8) int maxX = minX + sizeX;
         @Pc(12) int maxY = sizeY + minY;
         @Pc(16) int maxZ = sizeZ + minZ;
         if (!Static172.isTriangleOccluded(maxX, minZ, maxY, maxY, maxY, maxZ, maxZ, minX, minX)) {
             return false;
         } else if (Static172.isTriangleOccluded(maxX, minZ, maxY, maxY, maxY, minZ, maxZ, minX, maxX)) {
-            if (minX >= Static499.anInt7492) {
+            if (minX >= Static499.cameraX) {
                 if (!Static172.isTriangleOccluded(maxX, maxZ, maxY, maxY, minY, minZ, maxZ, maxX, maxX)) {
                     return false;
                 }

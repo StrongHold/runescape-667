@@ -7,7 +7,7 @@ public final class Static601 {
 
     @OriginalMember(owner = "client!sw", name = "b", descriptor = "(I)V")
     public static void method7865() {
-        Static232.method3392();
+        Static232.updateSongFade();
         Static557.updatePcmPlayers();
     }
 }

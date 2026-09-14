@@ -29,7 +29,7 @@ public final class Static725 {
             Static624.anInt9461 = (int) ((float) Static118.anIntArray198[1] / 3.0F);
             Static407.anInt6286 = Static624.anInt9461 >> 1;
             Static460.anInt6970 = Static228.anInt3709 >> 1;
-            Static485.anIntArray886 = new int[Static228.anInt3709 * Static624.anInt9461];
+            Static485.occlusionDepthBuffer = new int[Static228.anInt3709 * Static624.anInt9461];
         }
         Static107.aMatrix_3 = toolkit.camera();
         Static469.activeOccluderCount = 0;
@@ -39,26 +39,26 @@ public final class Static725 {
         for (@Pc(149) int i = 0; i < Static444.anInt6751; i++) {
             Static494.method6601(level, Static607.aLocOccluderArray4[i], toolkit);
         }
-        for (@Pc(170) int i = 0; i < Static150.anInt2634; i++) {
-            Static494.method6601(level, Static285.aLocOccluderArray1[i], toolkit);
+        for (@Pc(170) int i = 0; i < Static150.locOccluderCount; i++) {
+            Static494.method6601(level, Static285.locOccluders[i], toolkit);
         }
         Static432.occludedPixelCount = 0;
         if (Static469.activeOccluderCount > 0) {
-            @Pc(205) int length = Static485.anIntArray886.length;
+            @Pc(205) int length = Static485.occlusionDepthBuffer.length;
             @Pc(212) int unrolledLength = length - length & 0x7;
             @Pc(214) int index = 0;
             while (index < unrolledLength) {
-                Static485.anIntArray886[index++] = Integer.MAX_VALUE;
-                Static485.anIntArray886[index++] = Integer.MAX_VALUE;
-                Static485.anIntArray886[index++] = Integer.MAX_VALUE;
-                Static485.anIntArray886[index++] = Integer.MAX_VALUE;
-                Static485.anIntArray886[index++] = Integer.MAX_VALUE;
-                Static485.anIntArray886[index++] = Integer.MAX_VALUE;
-                Static485.anIntArray886[index++] = Integer.MAX_VALUE;
-                Static485.anIntArray886[index++] = Integer.MAX_VALUE;
+                Static485.occlusionDepthBuffer[index++] = Integer.MAX_VALUE;
+                Static485.occlusionDepthBuffer[index++] = Integer.MAX_VALUE;
+                Static485.occlusionDepthBuffer[index++] = Integer.MAX_VALUE;
+                Static485.occlusionDepthBuffer[index++] = Integer.MAX_VALUE;
+                Static485.occlusionDepthBuffer[index++] = Integer.MAX_VALUE;
+                Static485.occlusionDepthBuffer[index++] = Integer.MAX_VALUE;
+                Static485.occlusionDepthBuffer[index++] = Integer.MAX_VALUE;
+                Static485.occlusionDepthBuffer[index++] = Integer.MAX_VALUE;
             }
             while (index < length) {
-                Static485.anIntArray886[index++] = Integer.MAX_VALUE;
+                Static485.occlusionDepthBuffer[index++] = Integer.MAX_VALUE;
             }
             Static254.occlusionMode = 1;
             for (@Pc(289) int i = 0; i < Static469.activeOccluderCount; i++) {

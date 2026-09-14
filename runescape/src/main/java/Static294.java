@@ -61,7 +61,7 @@ public final class Static294 {
         if (!login) {
             Static527.method7083();
         }
-        Static498.method6643(x, true, y, height, width);
+        Static498.resizeViewport(x, true, y, height, width);
         @Pc(153) int viewportX = Static32.anInt773;
         @Pc(155) int viewportWidth = Static242.anInt3971;
         OrthoMode.renderZoom = OrthoMode.zoom;

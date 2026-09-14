@@ -216,7 +216,7 @@ public final class SpotAnimation extends PositionEntity {
         matrix.applyTranslation(super.x, super.y, super.z);
         this.method6593(matrix, local24, toolkit);
 
-        @Pc(62) PickableEntity local62 = Static642.method8441(false, 1);
+        @Pc(62) PickableEntity local62 = Static642.allocatePickableEntity(false, 1);
         if (OrthoMode.enabled) {
             local24.renderOrtho(matrix, local62.pickingCylinders[0], OrthoMode.renderZoom, 0);
         } else {

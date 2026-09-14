@@ -24,7 +24,7 @@ public abstract class Class8_Sub2_Sub5 extends Entity {
     public final boolean method9284(@OriginalArg(0) byte arg0, @OriginalArg(1) Toolkit arg1) {
         @Pc(15) PositionEntityNode local15 = Static467.getHead(super.level, super.x >> EnvironmentLight.anInt1066, super.z >> EnvironmentLight.anInt1066);
         if (arg0 == 59) {
-            return local15 != null && local15.entity.aBoolean815 ? Static282.method3976(local15.entity.getMinY(2) + this.getMinY(2), super.level, super.x >> EnvironmentLight.anInt1066, super.z >> EnvironmentLight.anInt1066) : Static588.method7714(super.z >> EnvironmentLight.anInt1066, super.level, super.x >> EnvironmentLight.anInt1066);
+            return local15 != null && local15.entity.aBoolean815 ? Static282.method3976(local15.entity.getMinY(2) + this.getMinY(2), super.level, super.x >> EnvironmentLight.anInt1066, super.z >> EnvironmentLight.anInt1066) : Static588.isTileOccluded(super.z >> EnvironmentLight.anInt1066, super.level, super.x >> EnvironmentLight.anInt1066);
         } else {
             return true;
         }

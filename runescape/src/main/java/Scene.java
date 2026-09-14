@@ -45,7 +45,7 @@ public final class Scene {
         Static102.anIntArray184 = null;
         Static433.aBooleanArrayArrayArray5 = null;
         Static275.aBooleanArrayArrayArray4 = null;
-        Static370.method5280();
+        Static370.freeOccluders();
         if (Static679.aPositionEntity != null) {
             for (int i = 0; i < Static125.dynamicEntityCount; i++) {
                 Static679.aPositionEntity[i] = null;
@@ -80,7 +80,7 @@ public final class Scene {
             }
             Static319.anInt5080 = 0;
         }
-        Static638.method8393();
+        Static638.clearPickableEntityPool();
         Static514.activePickList = Static514.scenePickList;
         Static514.activePickList.clear();
         Static421.waterBias = null;

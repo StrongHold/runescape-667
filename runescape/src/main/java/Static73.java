@@ -14,7 +14,7 @@ public final class Static73 {
             return false;
         } else if (Static432.occludedPixelCount < 100) {
             return false;
-        } else if (Static588.method7714(z, level, x)) {
+        } else if (Static588.isTileOccluded(z, level, x)) {
             @Pc(31) int worldX = x << EnvironmentLight.anInt1066;
             @Pc(35) int worldZ = z << EnvironmentLight.anInt1066;
             @Pc(45) int baseY = Static246.ground[level].getHeight(x, z) - 1;
@@ -56,21 +56,21 @@ public final class Static73 {
                     return false;
                 }
             } else if (wall.sideMask == 16) {
-                if (Static318.method8557(EnvironmentLight.anInt3993, topY, worldX, EnvironmentLight.anInt3993 + worldZ, baseY, EnvironmentLight.anInt3993)) {
+                if (Static318.isBoxOccluded(EnvironmentLight.anInt3993, topY, worldX, EnvironmentLight.anInt3993 + worldZ, baseY, EnvironmentLight.anInt3993)) {
                     Static679.occludedWallCount++;
                     return true;
                 } else {
                     return false;
                 }
             } else if (wall.sideMask == 32) {
-                if (Static318.method8557(EnvironmentLight.anInt3993, topY, worldX + EnvironmentLight.anInt3993, EnvironmentLight.anInt3993 + worldZ, baseY, EnvironmentLight.anInt3993)) {
+                if (Static318.isBoxOccluded(EnvironmentLight.anInt3993, topY, worldX + EnvironmentLight.anInt3993, EnvironmentLight.anInt3993 + worldZ, baseY, EnvironmentLight.anInt3993)) {
                     Static679.occludedWallCount++;
                     return true;
                 } else {
                     return false;
                 }
             } else if (wall.sideMask == 64) {
-                if (Static318.method8557(EnvironmentLight.anInt3993, topY, EnvironmentLight.anInt3993 + worldX, worldZ, baseY, EnvironmentLight.anInt3993)) {
+                if (Static318.isBoxOccluded(EnvironmentLight.anInt3993, topY, EnvironmentLight.anInt3993 + worldX, worldZ, baseY, EnvironmentLight.anInt3993)) {
                     Static679.occludedWallCount++;
                     return true;
                 } else {
@@ -78,7 +78,7 @@ public final class Static73 {
                 }
             } else if (wall.sideMask != 128) {
                 return true;
-            } else if (Static318.method8557(EnvironmentLight.anInt3993, topY, worldX, worldZ, baseY, EnvironmentLight.anInt3993)) {
+            } else if (Static318.isBoxOccluded(EnvironmentLight.anInt3993, topY, worldX, worldZ, baseY, EnvironmentLight.anInt3993)) {
                 Static679.occludedWallCount++;
                 return true;
             } else {

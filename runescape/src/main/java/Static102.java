@@ -12,12 +12,12 @@ public final class Static102 {
     public static int lastAreaMode = 0;
 
     @OriginalMember(owner = "client!dd", name = "a", descriptor = "()V")
-    public static void method2021() {
+    public static void useScenePickList() {
         Static514.activePickList = Static514.scenePickList;
     }
 
     @OriginalMember(owner = "client!dd", name = "d", descriptor = "(B)V")
-    public static void method2022() {
+    public static void clearChatHistory() {
         for (@Pc(15) int local15 = 0; local15 < 100; local15++) {
             ChatHistory.lines[local15] = null;
         }
@@ -45,7 +45,7 @@ public final class Static102 {
     }
 
     @OriginalMember(owner = "client!dd", name = "a", descriptor = "(Lclient!qf;Z)Z")
-    public static boolean method2026(@OriginalArg(0) PositionEntity entity, @OriginalArg(1) boolean dynamic) {
+    public static boolean addPositionEntity(@OriginalArg(0) PositionEntity entity, @OriginalArg(1) boolean dynamic) {
         @Pc(7) boolean underwater = Static246.ground == Static693.underwaterGround;
         @Pc(9) int colour = 0;
         @Pc(11) short depth = 0;

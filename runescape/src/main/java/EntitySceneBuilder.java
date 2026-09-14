@@ -44,7 +44,7 @@ public final class EntitySceneBuilder {
                 continue;
             }
             entity.y = Static102.averageHeight(entity.level, entity.x, entity.z);
-            Static102.method2026(entity, true);
+            Static102.addPositionEntity(entity, true);
         }
     }
 
@@ -128,7 +128,7 @@ public final class EntitySceneBuilder {
             }
             entity.visible = false;
             entity.y = Static102.averageHeight(entity.level, entity.x, entity.z);
-            Static102.method2026(entity, true);
+            Static102.addPositionEntity(entity, true);
         }
     }
 

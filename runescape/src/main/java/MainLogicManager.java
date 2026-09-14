@@ -394,7 +394,7 @@ public final class MainLogicManager {
             EntityTick.tickPlayers();
             EntityTick.tickNpcs();
         } else {
-            if (CutsceneManager.state == 1 && Static360.method5230(CutsceneManager.id)) {
+            if (CutsceneManager.state == 1 && Static360.loadCutscene(CutsceneManager.id)) {
                 Static266.method6774();
                 CutsceneManager.state = 2;
             }

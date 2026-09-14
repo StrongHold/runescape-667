@@ -38,12 +38,12 @@ public final class Static385 {
         if (arg4 < Static724.anInt10930) {
             arg4 = Static724.anInt10930;
         } else {
-            Static696.method9037(arg3, arg2, arg1, Static723.anIntArrayArray266[arg4++]);
+            Static696.fillHorizontalSpan(arg3, arg2, arg1, Static723.anIntArrayArray266[arg4++]);
         }
         if (Static273.anInt4395 < arg0) {
             arg0 = Static273.anInt4395;
         } else {
-            Static696.method9037(arg3, arg2, arg1, Static723.anIntArrayArray266[arg0--]);
+            Static696.fillHorizontalSpan(arg3, arg2, arg1, Static723.anIntArrayArray266[arg0--]);
         }
         @Pc(140) int local140;
         if (local31 && local70) {

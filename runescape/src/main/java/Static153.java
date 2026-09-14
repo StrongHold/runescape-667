@@ -8,20 +8,20 @@ public final class Static153 {
     public static int[] anIntArray235 = new int[2];
 
     @OriginalMember(owner = "client!eq", name = "a", descriptor = "(ILclient!uc;I)V")
-    public static void method2461(@OriginalArg(0) int duration, @OriginalArg(1) Environment environment) {
+    public static void setEnvironment(@OriginalArg(0) int duration, @OriginalArg(1) Environment environment) {
         if (InterfaceManager.loginOpened) {
             duration = 0;
             InterfaceManager.loginOpened = false;
         }
-        if (Static346.aEnvironment_1 != null && Static346.aEnvironment_1.equalTo(environment)) {
+        if (Static346.activeEnvironment != null && Static346.activeEnvironment.equalTo(environment)) {
             return;
         }
-        Static346.aEnvironment_1 = environment;
+        Static346.activeEnvironment = environment;
         Static344.aLong169 = SystemTimer.safetime();
         Static173.anInt2913 = duration;
         Static587.anInt8673 = duration;
         if (Static587.anInt8673 == 0) {
-            Static506.method8313();
+            Static506.updateEnvironment();
             return;
         }
         Static74.aSkyBox_1 = Static456.activeSkyBox;
@@ -42,8 +42,8 @@ public final class Static153 {
             Static74.aSkyBox_1 = Static456.activeSkyBox.method3167();
             Static456.activeSkyBox = Static74.aSkyBox_1;
         }
-        if (Static456.activeSkyBox != null && Static346.aEnvironment_1.skyBox != Static456.activeSkyBox) {
-            Static456.activeSkyBox.method3163(Static346.aEnvironment_1.skyBox);
+        if (Static456.activeSkyBox != null && Static346.activeEnvironment.skyBox != Static456.activeSkyBox) {
+            Static456.activeSkyBox.method3163(Static346.activeEnvironment.skyBox);
         }
     }
 }

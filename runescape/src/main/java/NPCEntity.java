@@ -186,7 +186,7 @@ public final class NPCEntity extends PathingEntity {
             @Pc(179) Animator local179 = super.animator.isAnimating() && (!super.ready || local159 == null) ? super.animator : null;
             @Pc(223) Model local223 = ShadowList.model(this.type.shadowInnerAlpha & 0xFF, super.aModelArray3[0], super.modelRotateZ, this.type.shadowInnerColour & 0xFFFF, super.modelTranslateY, this.type.size, arg0, this.type.shadowOuterAlpha & 0xFF, local179 == null ? local159 : local179, super.modelRotateX, local27, this.type.shadowOuterColour & 0xFFFF);
             if (local223 != null) {
-                local123 = Static642.method8441(this.method9330(), super.aModelArray3.length + 1);
+                local123 = Static642.allocatePickableEntity(this.method9330(), super.aModelArray3.length + 1);
                 super.transparent = true;
                 arg0.C(false);
                 if (OrthoMode.enabled) {
@@ -200,7 +200,7 @@ public final class NPCEntity extends PathingEntity {
         local22.rotate(local27);
         local22.translate(super.x, -super.anInt10732 + super.y - 5, super.z);
         if (local123 == null) {
-            local123 = Static642.method8441(this.method9330(), super.aModelArray3.length);
+            local123 = Static642.allocatePickableEntity(this.method9330(), super.aModelArray3.length);
         }
         this.method9319(arg0, false, super.aModelArray3, local22);
         @Pc(314) int local314;

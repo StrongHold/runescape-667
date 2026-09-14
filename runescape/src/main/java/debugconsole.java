@@ -297,7 +297,7 @@ public final class debugconsole {
                     @Pc(511) Runtime local511 = Runtime.getRuntime();
                     @Pc(521) int local521 = (int) ((local511.totalMemory() - local511.freeMemory()) / 1024L);
                     addline("Memory before cleanup=" + local521 + "k");
-                    Static358.method9191();
+                    Static358.uploadSceneLocationModels();
                     Static664.cacheRemoveSoftReferences();
                     for (@Pc(582) int local582 = 0; local582 < 10; local582++) {
                         System.gc();

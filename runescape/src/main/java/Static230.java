@@ -12,7 +12,7 @@ public final class Static230 {
         @Pc(25) int local25 = Static670.method8732(Static180.anInt2995, Static111.anInt2219, arg0);
         @Pc(31) int local31 = Static670.method8732(Static180.anInt2995, Static111.anInt2219, arg1);
         for (@Pc(37) int local37 = local11; local37 <= local19; local37++) {
-            Static696.method9037(local31, arg2, local25, Static723.anIntArrayArray266[local37]);
+            Static696.fillHorizontalSpan(local31, arg2, local25, Static723.anIntArrayArray266[local37]);
         }
     }
 

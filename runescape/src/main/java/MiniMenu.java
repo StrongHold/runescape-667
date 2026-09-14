@@ -282,7 +282,7 @@ public final class MiniMenu {
             local57 = Static168.anInt2842;
             toolkit.KA(InterfaceManager.optionsX, InterfaceManager.optionsY, Static240.anInt3955, Static275.anInt4424);
             local38 = toolkit.createMatrix();
-            local38.createCamera(Static428.anInt6487, Static427.anInt6480, Static523.pickCameraZ, Static524.anInt8044, Static271.anInt4363, Static707.anInt10641);
+            local38.createCamera(Static428.pickCameraX, Static427.pickCameraY, Static523.pickCameraZ, Static524.pickCameraRotateX, Static271.pickCameraRotateY, Static707.pickCameraRotateZ);
             local63 = mouseX;
             toolkit.setCamera(local38);
             local69 = mouseY;

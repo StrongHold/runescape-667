@@ -261,7 +261,7 @@ public final class StaticLocation extends PositionEntity implements Location {
         }
         @Pc(20) Matrix matrix = toolkit.scratchMatrix();
         matrix.applyTranslation(super.x, super.y, super.z);
-        @Pc(34) PickableEntity entity = Static642.method8441(this.interactive, 1);
+        @Pc(34) PickableEntity entity = Static642.allocatePickableEntity(this.interactive, 1);
         if (OrthoMode.enabled) {
             this.model.renderOrtho(matrix, entity.pickingCylinders[0], OrthoMode.renderZoom, 0);
         } else {

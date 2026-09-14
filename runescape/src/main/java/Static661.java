@@ -47,9 +47,9 @@ public final class Static661 {
         @Pc(144) int local144 = local114;
         @Pc(150) int local150 = (local21 - 1) * local110;
         @Pc(154) int[] local154 = Static723.anIntArrayArray266[arg5];
-        Static696.method9037(arg6 - local16, arg2, arg6 - arg1, local154);
-        Static696.method9037(local16 + arg6, arg0, arg6 - local16, local154);
-        Static696.method9037(arg6 + arg1, arg2, local16 + arg6, local154);
+        Static696.fillHorizontalSpan(arg6 - local16, arg2, arg6 - arg1, local154);
+        Static696.fillHorizontalSpan(local16 + arg6, arg0, arg6 - local16, local154);
+        Static696.fillHorizontalSpan(arg6 + arg1, arg2, local16 + arg6, local154);
         while (local9 > 0) {
             @Pc(198) boolean local198 = local9 <= local21;
             if (local198) {
@@ -102,15 +102,15 @@ public final class Static661 {
             if (local198) {
                 @Pc(364) int local364 = local11 + arg6;
                 @Pc(369) int local369 = arg6 - local11;
-                Static696.method9037(local369, arg2, local358, Static723.anIntArrayArray266[local345]);
-                Static696.method9037(local364, arg0, local369, Static723.anIntArrayArray266[local345]);
-                Static696.method9037(local353, arg2, local364, Static723.anIntArrayArray266[local345]);
-                Static696.method9037(local369, arg2, local358, Static723.anIntArrayArray266[local349]);
-                Static696.method9037(local364, arg0, local369, Static723.anIntArrayArray266[local349]);
-                Static696.method9037(local353, arg2, local364, Static723.anIntArrayArray266[local349]);
+                Static696.fillHorizontalSpan(local369, arg2, local358, Static723.anIntArrayArray266[local345]);
+                Static696.fillHorizontalSpan(local364, arg0, local369, Static723.anIntArrayArray266[local345]);
+                Static696.fillHorizontalSpan(local353, arg2, local364, Static723.anIntArrayArray266[local345]);
+                Static696.fillHorizontalSpan(local369, arg2, local358, Static723.anIntArrayArray266[local349]);
+                Static696.fillHorizontalSpan(local364, arg0, local369, Static723.anIntArrayArray266[local349]);
+                Static696.fillHorizontalSpan(local353, arg2, local364, Static723.anIntArrayArray266[local349]);
             } else {
-                Static696.method9037(local353, arg2, local358, Static723.anIntArrayArray266[local345]);
-                Static696.method9037(local353, arg2, local358, Static723.anIntArrayArray266[local349]);
+                Static696.fillHorizontalSpan(local353, arg2, local358, Static723.anIntArrayArray266[local345]);
+                Static696.fillHorizontalSpan(local353, arg2, local358, Static723.anIntArrayArray266[local349]);
             }
         }
     }

@@ -46,10 +46,10 @@ public final class Static418 {
         @Pc(15) int local15 = arg1 - arg4;
         if (local10 == 0) {
             if (local15 != 0) {
-                Static591.method7757(arg2, arg3, arg4, arg1);
+                Static591.drawVerticalLineClipped(arg2, arg3, arg4, arg1);
             }
         } else if (local15 == 0) {
-            Static289.method4184(arg0, arg4, arg3, arg2);
+            Static289.drawHorizontalLineClipped(arg0, arg4, arg3, arg2);
         } else {
             @Pc(53) int local53 = (local15 << 12) / local10;
             @Pc(62) int local62 = arg4 - (arg2 * local53 >> 12);

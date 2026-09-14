@@ -229,7 +229,7 @@ public final class ObjStackEntity extends Class8_Sub2_Sub5 {
         }
 
         matrix.translate(super.x, super.y - 10, super.z);
-        @Pc(345) PickableEntity local345 = Static642.method8441(true, 3);
+        @Pc(345) PickableEntity local345 = Static642.allocatePickableEntity(true, 3);
         this.sphereRadius = 0;
         this.transparent = false;
 

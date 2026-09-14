@@ -33,7 +33,7 @@ public final class CutsceneAction_Sub13 extends CutsceneAction {
         if (this.aClass2_Sub8_4 == null) {
             return false;
         } else {
-            return Static311.method4537(this.aClass2_Sub8_4);
+            return Static311.preloadSong(this.aClass2_Sub8_4);
         }
     }
 

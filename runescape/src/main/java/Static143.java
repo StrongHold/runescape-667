@@ -6,7 +6,7 @@ import rs2.client.loading.screen.LoadingScreen;
 public final class Static143 {
 
     @OriginalMember(owner = "client!eia", name = "I", descriptor = "I")
-    public static int anInt4056;
+    public static int nearestDistance;
 
     @OriginalMember(owner = "client!eia", name = "B", descriptor = "Z")
     public static boolean aBoolean315;

@@ -100,10 +100,10 @@ public final class Node_Sub1_Sub23 extends TextureOp {
             @Pc(38) int row = rowCoord >> 12;
             @Pc(42) int rowEnd = row + 1;
             for (@Pc(44) int x = 0; x < EnvironmentLight.anInt9289; x++) {
-                Static162.anInt2798 = Integer.MAX_VALUE;
+                Static162.fourthNearestDistance = Integer.MAX_VALUE;
                 Static109.thirdNearestDistance = Integer.MAX_VALUE;
-                Static417.anInt6402 = Integer.MAX_VALUE;
-                Static143.anInt4056 = Integer.MAX_VALUE;
+                Static417.secondNearestDistance = Integer.MAX_VALUE;
+                Static143.nearestDistance = Integer.MAX_VALUE;
                 @Pc(63) int columnCoord = this.columns * EnvironmentLight.anIntArray92[x] + 2048;
                 @Pc(67) int column = columnCoord >> 12;
                 @Pc(71) int columnEnd = column + 1;
@@ -138,34 +138,34 @@ public final class Node_Sub1_Sub23 extends TextureOp {
                         } else {
                             distance = (int) (Math.sqrt((float) (dy * dy + dx * dx) / 1.6777216E7F) * 4096.0D);
                         }
-                        if (distance < Static143.anInt4056) {
-                            Static162.anInt2798 = Static109.thirdNearestDistance;
-                            Static109.thirdNearestDistance = Static417.anInt6402;
-                            Static417.anInt6402 = Static143.anInt4056;
-                            Static143.anInt4056 = distance;
-                        } else if (distance < Static417.anInt6402) {
-                            Static162.anInt2798 = Static109.thirdNearestDistance;
-                            Static109.thirdNearestDistance = Static417.anInt6402;
-                            Static417.anInt6402 = distance;
+                        if (distance < Static143.nearestDistance) {
+                            Static162.fourthNearestDistance = Static109.thirdNearestDistance;
+                            Static109.thirdNearestDistance = Static417.secondNearestDistance;
+                            Static417.secondNearestDistance = Static143.nearestDistance;
+                            Static143.nearestDistance = distance;
+                        } else if (distance < Static417.secondNearestDistance) {
+                            Static162.fourthNearestDistance = Static109.thirdNearestDistance;
+                            Static109.thirdNearestDistance = Static417.secondNearestDistance;
+                            Static417.secondNearestDistance = distance;
                         } else if (distance < Static109.thirdNearestDistance) {
-                            Static162.anInt2798 = Static109.thirdNearestDistance;
+                            Static162.fourthNearestDistance = Static109.thirdNearestDistance;
                             Static109.thirdNearestDistance = distance;
-                        } else if (distance < Static162.anInt2798) {
-                            Static162.anInt2798 = distance;
+                        } else if (distance < Static162.fourthNearestDistance) {
+                            Static162.fourthNearestDistance = distance;
                         }
                     }
                 }
                 mode = this.outputMode;
                 if (mode == 0) {
-                    output[x] = Static143.anInt4056;
+                    output[x] = Static143.nearestDistance;
                 } else if (mode == 1) {
-                    output[x] = Static417.anInt6402;
+                    output[x] = Static417.secondNearestDistance;
                 } else if (mode == 3) {
                     output[x] = Static109.thirdNearestDistance;
                 } else if (mode == 4) {
-                    output[x] = Static162.anInt2798;
+                    output[x] = Static162.fourthNearestDistance;
                 } else if (mode == 2) {
-                    output[x] = Static417.anInt6402 - Static143.anInt4056;
+                    output[x] = Static417.secondNearestDistance - Static143.nearestDistance;
                 }
             }
         }

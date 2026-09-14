@@ -48,9 +48,9 @@ public final class Static334 {
         Fonts.debug.render("Occluded: Ground:" + Static298.occludedGroundCount + " Walls: " + Static679.occludedWallCount + " CPs: " + Static356.anInt5773 + " Pixels: " + Static432.occludedPixelCount, 10, 135, 0xFF000000, 0xFFFFFF00);
         Fonts.debug.render("Occlude Calc Took: " + Static666.occludeCalcElapsedMs / 1000L + "us", 10, 150, 0xFF000000, 0xFFFFFF00);
 
-        if (MapArea.w2debug == 2 && Static485.anIntArray886 != null) {
-            for (@Pc(389) int i = 0; i < Static485.anIntArray886.length; i++) {
-                @Pc(395) float intensity = (float) Static485.anIntArray886[i];
+        if (MapArea.w2debug == 2 && Static485.occlusionDepthBuffer != null) {
+            for (@Pc(389) int i = 0; i < Static485.occlusionDepthBuffer.length; i++) {
+                @Pc(395) float intensity = (float) Static485.occlusionDepthBuffer[i];
                 intensity /= 4194304.0F;
                 if (intensity > 1.0F) {
                     intensity = 1.0F;
@@ -58,9 +58,9 @@ public final class Static334 {
                 intensity *= 255.0F;
                 intensity = 255.0F - intensity;
                 @Pc(416) int grey = (int) intensity;
-                Static485.anIntArray886[i] = grey | grey << 8 | grey << 16 | 0xFF000000;
+                Static485.occlusionDepthBuffer[i] = grey | grey << 8 | grey << 16 | 0xFF000000;
             }
-            @Pc(444) Sprite sprite = Static665.aToolkit_15.createSprite(Static228.anInt3709, Static228.anInt3709, Static624.anInt9461, Static485.anIntArray886);
+            @Pc(444) Sprite sprite = Static665.aToolkit_15.createSprite(Static228.anInt3709, Static228.anInt3709, Static624.anInt9461, Static485.occlusionDepthBuffer);
             sprite.render(10, 170, 1, 0, 0);
         }
     }

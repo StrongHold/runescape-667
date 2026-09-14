@@ -391,7 +391,7 @@ public final class client extends GameShell {
             }
             Client.metaFile.close();
             GameShell.uidDat.close();
-            Static314.method4567();
+            Static314.closeDebugConsoleOutput();
         } catch (@Pc(91) Exception local91) {
         }
     }
@@ -712,7 +712,7 @@ public final class client extends GameShell {
         @Pc(20) long local20 = (Static271.method3929() / 1000000L) - Static206.aLong114;
         Static206.aLong114 = Static271.method3929() / 1000000L;
 
-        @Pc(28) boolean local28 = Static576.method7611();
+        @Pc(28) boolean local28 = Static576.startPendingSong();
         if (local28 && Static501.aBoolean575 && Static719.aPcmPlayer_5 != null) {
             Static719.aPcmPlayer_5.method3592();
         }

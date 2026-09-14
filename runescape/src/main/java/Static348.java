@@ -7,7 +7,7 @@ public final class Static348 {
 
     @OriginalMember(owner = "client!kv", name = "c", descriptor = "(I)V")
     public static void method5107() {
-        Static416.method5705();
+        Static416.rebuildActiveOccluders();
     }
 
 }

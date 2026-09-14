@@ -719,9 +719,9 @@ public final class Model_Sub2 extends Model {
         }
         this.anIntArray413[local1216] = this.anInt5506;
         Static350.aLongArray9 = null;
-        this.aShortArray69 = Static358.method9173(this.anInt5538, this.aShortArray69);
-        this.aShortArray73 = Static358.method9173(this.anInt5538, this.aShortArray73);
-        this.aShortArray72 = Static358.method9173(this.anInt5538, this.aShortArray72);
+        this.aShortArray69 = Static358.copyOf(this.anInt5538, this.aShortArray69);
+        this.aShortArray73 = Static358.copyOf(this.anInt5538, this.aShortArray73);
+        this.aShortArray72 = Static358.copyOf(this.anInt5538, this.aShortArray72);
         this.aByteArray53 = Static597.method7823(this.aByteArray53, this.anInt5538);
         this.aFloatArray37 = TextureOp.method9420(false, this.aFloatArray37, this.anInt5538);
         this.aFloatArray39 = TextureOp.method9420(false, this.aFloatArray39, this.anInt5538);
@@ -1271,7 +1271,7 @@ public final class Model_Sub2 extends Model {
 
     @OriginalMember(owner = "client!kla", name = "a", descriptor = "(ZBIIS)I")
     public int method4985(@OriginalArg(1) byte arg0, @OriginalArg(2) int arg1, @OriginalArg(3) int arg2, @OriginalArg(4) short arg3) {
-        @Pc(20) int local20 = ColourUtils.HSL_TO_RGB[Static468.method7648(arg1, arg2)];
+        @Pc(20) int local20 = ColourUtils.HSL_TO_RGB[Static468.shadeHsl(arg1, arg2)];
         if (arg3 != -1) {
             @Pc(33) TextureMetrics local33 = this.aClass19_Sub3_24.textureSource.getMetrics(arg3 & 0xFFFF);
             @Pc(38) int local38 = local33.alpha & 0xFF;

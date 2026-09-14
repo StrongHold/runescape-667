@@ -35,7 +35,7 @@ public final class Static314 {
     }
 
     @OriginalMember(owner = "client!jw", name = "a", descriptor = "(Z)V")
-    public static void method4567() {
+    public static void closeDebugConsoleOutput() {
         if (debugconsole.output != null) {
             try {
                 debugconsole.output.close();

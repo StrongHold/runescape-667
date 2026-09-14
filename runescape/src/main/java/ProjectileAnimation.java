@@ -357,7 +357,7 @@ public final class ProjectileAnimation extends PositionEntity {
 
         this.update(toolkit, matrix, model);
 
-        @Pc(57) PickableEntity local57 = Static642.method8441(false, 1);
+        @Pc(57) PickableEntity local57 = Static642.allocatePickableEntity(false, 1);
         if (OrthoMode.enabled) {
             model.renderOrtho(matrix, local57.pickingCylinders[0], OrthoMode.renderZoom, 0);
         } else {

@@ -56,7 +56,7 @@ public final class DynamicWallDecor extends WallDecor implements Location {
         }
         @Pc(22) Matrix local22 = arg0.scratchMatrix();
         local22.applyTranslation(super.x + super.aShort101, super.y, super.z + super.aShort102);
-        @Pc(42) PickableEntity local42 = Static642.method8441(this.interactive, 1);
+        @Pc(42) PickableEntity local42 = Static642.allocatePickableEntity(this.interactive, 1);
         @Pc(55) int local55 = super.x >> 9;
         @Pc(60) int local60 = super.z >> 9;
         this.entity.method7681(local60, local14, true, -9827, arg0, local55, local55, local60, local22);

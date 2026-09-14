@@ -13,7 +13,7 @@ public final class Static360 {
     public static final Class172 aClass172_3 = new Class172();
 
     @OriginalMember(owner = "client!lg", name = "d", descriptor = "(II)Z")
-    public static boolean method5230(@OriginalArg(0) int cutsceneId) {
+    public static boolean loadCutscene(@OriginalArg(0) int cutsceneId) {
         if (Static5.anInt92 != cutsceneId || Static178.aClass247_1 == null) {
             Static298.method4385();
             Static5.anInt92 = cutsceneId;

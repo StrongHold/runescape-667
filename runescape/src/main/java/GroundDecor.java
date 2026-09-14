@@ -28,7 +28,7 @@ public abstract class GroundDecor extends Entity {
         if (arg0 != 59) {
             this.offsetY = -95;
         }
-        return Static588.method7714(super.z >> EnvironmentLight.anInt1066, super.virtualLevel, super.x >> EnvironmentLight.anInt1066);
+        return Static588.isTileOccluded(super.z >> EnvironmentLight.anInt1066, super.virtualLevel, super.x >> EnvironmentLight.anInt1066);
     }
 
     @OriginalMember(owner = "client!eia", name = "g", descriptor = "(I)Z")

@@ -8,7 +8,7 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static485 {
 
     @OriginalMember(owner = "client!pf", name = "C", descriptor = "[I")
-    public static int[] anIntArray886;
+    public static int[] occlusionDepthBuffer;
 
     @OriginalMember(owner = "client!pf", name = "a", descriptor = "(Lclient!hda;ILclient!ha;)V")
     public static void method9415(@OriginalArg(0) Component component, @OriginalArg(2) Toolkit toolkit) {

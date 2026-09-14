@@ -16,16 +16,16 @@ public final class Static687 {
                     tile.aShort83 = 0;
                 }
             }
-            Static416.method5705();
+            Static416.rebuildActiveOccluders();
             return;
         }
-        for (@Pc(61) int i = 0; i < Static150.anInt2634; i++) {
-            @Pc(67) LocOccluder occluder = Static285.aLocOccluderArray1[i];
+        for (@Pc(61) int i = 0; i < Static150.locOccluderCount; i++) {
+            @Pc(67) LocOccluder occluder = Static285.locOccluders[i];
             if (occluder.aByte43 == type && x == occluder.aShort26 && z == occluder.aShort23 || occluder.aShort24 == x && z == occluder.aShort23) {
-                if (i != Static150.anInt2634) {
-                    Arrays.copy(Static285.aLocOccluderArray1, i + 1, Static285.aLocOccluderArray1, i, Static285.aLocOccluderArray1.length - i - 1);
+                if (i != Static150.locOccluderCount) {
+                    Arrays.copy(Static285.locOccluders, i + 1, Static285.locOccluders, i, Static285.locOccluders.length - i - 1);
                 }
-                Static150.anInt2634--;
+                Static150.locOccluderCount--;
                 return;
             }
         }

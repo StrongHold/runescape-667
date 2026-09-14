@@ -14,7 +14,7 @@ public final class Static416 {
     public static boolean aBoolean472 = false;
 
     @OriginalMember(owner = "client!nca", name = "a", descriptor = "(Z)V")
-    public static void method5705() {
+    public static void rebuildActiveOccluders() {
         for (@Pc(5) int local5 = 0; local5 < Static444.anInt6751; local5++) {
             Static607.aLocOccluderArray4[local5] = null;
         }
@@ -114,7 +114,7 @@ public final class Static416 {
                 }
             }
         }
-        Static442.aBoolean499 = true;
+        Static442.occludersDirty = true;
     }
 
 }

@@ -8,7 +8,7 @@ public final class Static417 {
     public static int anInt6399;
 
     @OriginalMember(owner = "client!nd", name = "B", descriptor = "I")
-    public static int anInt6402;
+    public static int secondNearestDistance;
 
     @OriginalMember(owner = "client!nd", name = "y", descriptor = "I")
     public static int anInt6400 = -60;

@@ -5,7 +5,7 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static219 {
 
     @OriginalMember(owner = "client!gp", name = "h", descriptor = "[I")
-    public static int[] anIntArray288;
+    public static int[] roofMaxZ;
 
     @OriginalMember(owner = "client!gp", name = "a", descriptor = "(IILclient!dda;)Z")
     public static boolean method3190(@OriginalArg(0) int arg0, @OriginalArg(2) LocOccluder arg1) {

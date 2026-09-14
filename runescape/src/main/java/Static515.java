@@ -12,6 +12,6 @@ public final class Static515 {
 
     @OriginalMember(owner = "client!qda", name = "a", descriptor = "(III)Z")
     public static boolean method6804(@OriginalArg(0) int arg0, @OriginalArg(2) int arg1) {
-        return Static77.method1560(arg0, arg1) || Static519.method6832(-97, arg1, arg0);
+        return Static77.method1560(arg0, arg1) || Static519.colourBufferMutable(-97, arg1, arg0);
     }
 }

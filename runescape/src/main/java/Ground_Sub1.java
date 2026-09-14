@@ -641,7 +641,7 @@ public final class Ground_Sub1 extends Ground {
                 this.aClass2_Sub58Array1[local1462] = local1871;
                 local1871.method9403(this.lb);
             }
-            Static61.method1308(local1861, this.aClass2_Sub58Array1);
+            Static61.sortByKey(local1861, this.aClass2_Sub58Array1);
             if (this.aClass293_1 != null) {
                 this.aClass293_1.method6611();
             }

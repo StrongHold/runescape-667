@@ -19,18 +19,18 @@ public final class Static547 {
         @Pc(51) int topEnd = Static670.method8732(Static724.anInt10930, Static273.anInt4395, y0 + lineWidth);
         @Pc(60) int bottomStart = Static670.method8732(Static724.anInt10930, Static273.anInt4395, y1 - lineWidth);
         for (@Pc(62) int y = clippedY0; y < topEnd; y++) {
-            Static696.method9037(clippedX1, lineColour, clippedX0, Static723.anIntArrayArray266[y]);
+            Static696.fillHorizontalSpan(clippedX1, lineColour, clippedX0, Static723.anIntArrayArray266[y]);
         }
         for (@Pc(84) int y = clippedY1; y > bottomStart; y--) {
-            Static696.method9037(clippedX1, lineColour, clippedX0, Static723.anIntArrayArray266[y]);
+            Static696.fillHorizontalSpan(clippedX1, lineColour, clippedX0, Static723.anIntArrayArray266[y]);
         }
         @Pc(114) int leftEnd = Static670.method8732(Static180.anInt2995, Static111.anInt2219, lineWidth + x0);
         @Pc(123) int rightStart = Static670.method8732(Static180.anInt2995, Static111.anInt2219, x1 - lineWidth);
         for (@Pc(125) int y = topEnd; y <= bottomStart; y++) {
             @Pc(133) int[] row = Static723.anIntArrayArray266[y];
-            Static696.method9037(leftEnd, lineColour, clippedX0, row);
-            Static696.method9037(rightStart, fillColour, leftEnd, row);
-            Static696.method9037(clippedX1, lineColour, rightStart, row);
+            Static696.fillHorizontalSpan(leftEnd, lineColour, clippedX0, row);
+            Static696.fillHorizontalSpan(rightStart, fillColour, leftEnd, row);
+            Static696.fillHorizontalSpan(clippedX1, lineColour, rightStart, row);
         }
     }
 }

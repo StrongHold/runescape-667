@@ -66,9 +66,9 @@ public final class Static494 {
     @OriginalMember(owner = "client!pja", name = "a", descriptor = "(ILclient!dda;ILclient!ha;)V")
     public static void method6601(@OriginalArg(0) int level, @OriginalArg(1) LocOccluder occluder, @OriginalArg(3) Toolkit toolkit) {
         @Pc(15) int local15;
-        if (Static617.anIntArray726 != null && level <= occluder.aByte44) {
-            for (local15 = 0; local15 < Static617.anIntArray726.length; local15++) {
-                if (Static617.anIntArray726[local15] != -1000000 && (occluder.anIntArray186[0] <= Static617.anIntArray726[local15] || Static617.anIntArray726[local15] >= occluder.anIntArray186[1] || Static617.anIntArray726[local15] >= occluder.anIntArray186[2] || Static617.anIntArray726[local15] >= occluder.anIntArray186[3]) && (Static419.roofMaxX[local15] >= occluder.anIntArray185[0] || occluder.anIntArray185[1] <= Static419.roofMaxX[local15] || occluder.anIntArray185[2] <= Static419.roofMaxX[local15] || Static419.roofMaxX[local15] >= occluder.anIntArray185[3]) && (occluder.anIntArray185[0] >= Static714.anIntArray880[local15] || Static714.anIntArray880[local15] <= occluder.anIntArray185[1] || occluder.anIntArray185[2] >= Static714.anIntArray880[local15] || Static714.anIntArray880[local15] <= occluder.anIntArray185[3]) && (occluder.anIntArray188[0] <= Static219.anIntArray288[local15] || occluder.anIntArray188[1] <= Static219.anIntArray288[local15] || Static219.anIntArray288[local15] >= occluder.anIntArray188[2] || Static219.anIntArray288[local15] >= occluder.anIntArray188[3]) && (Static665.anIntArray779[local15] <= occluder.anIntArray188[0] || Static665.anIntArray779[local15] <= occluder.anIntArray188[1] || Static665.anIntArray779[local15] <= occluder.anIntArray188[2] || Static665.anIntArray779[local15] <= occluder.anIntArray188[3])) {
+        if (Static617.roofMaxY != null && level <= occluder.aByte44) {
+            for (local15 = 0; local15 < Static617.roofMaxY.length; local15++) {
+                if (Static617.roofMaxY[local15] != -1000000 && (occluder.anIntArray186[0] <= Static617.roofMaxY[local15] || Static617.roofMaxY[local15] >= occluder.anIntArray186[1] || Static617.roofMaxY[local15] >= occluder.anIntArray186[2] || Static617.roofMaxY[local15] >= occluder.anIntArray186[3]) && (Static419.roofMaxX[local15] >= occluder.anIntArray185[0] || occluder.anIntArray185[1] <= Static419.roofMaxX[local15] || occluder.anIntArray185[2] <= Static419.roofMaxX[local15] || Static419.roofMaxX[local15] >= occluder.anIntArray185[3]) && (occluder.anIntArray185[0] >= Static714.roofMinX[local15] || Static714.roofMinX[local15] <= occluder.anIntArray185[1] || occluder.anIntArray185[2] >= Static714.roofMinX[local15] || Static714.roofMinX[local15] <= occluder.anIntArray185[3]) && (occluder.anIntArray188[0] <= Static219.roofMaxZ[local15] || occluder.anIntArray188[1] <= Static219.roofMaxZ[local15] || Static219.roofMaxZ[local15] >= occluder.anIntArray188[2] || Static219.roofMaxZ[local15] >= occluder.anIntArray188[3]) && (Static665.roofMinZ[local15] <= occluder.anIntArray188[0] || Static665.roofMinZ[local15] <= occluder.anIntArray188[1] || Static665.roofMinZ[local15] <= occluder.anIntArray188[2] || Static665.roofMinZ[local15] <= occluder.anIntArray188[3])) {
                     return;
                 }
             }
@@ -100,7 +100,7 @@ public final class Static494 {
                     }
                 }
                 if (spanVisible) {
-                    distance = (float) (Static499.anInt7492 - occluder.anIntArray185[0]);
+                    distance = (float) (Static499.cameraX - occluder.anIntArray185[0]);
                     if (distance < 0.0F) {
                         distance *= -1.0F;
                     }
@@ -146,7 +146,7 @@ public final class Static494 {
             if (local15 >= 0 && Static35.anInt813 + Static35.anInt813 >= local15) {
                 spanFrom = occluder.aShort23 + Static35.anInt813 - Static550.anInt8271;
                 if (spanFrom >= 0 && Static35.anInt813 + Static35.anInt813 >= spanFrom && Static258.aBooleanArrayArray3[local15][spanFrom]) {
-                    @Pc(697) float distanceX = (float) (Static499.anInt7492 - occluder.anIntArray185[0]);
+                    @Pc(697) float distanceX = (float) (Static499.cameraX - occluder.anIntArray185[0]);
                     if (distanceX < 0.0F) {
                         distanceX *= -1.0F;
                     }

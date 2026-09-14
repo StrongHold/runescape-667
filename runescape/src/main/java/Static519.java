@@ -87,7 +87,7 @@ public final class Static519 {
     }
 
     @OriginalMember(owner = "client!qfa", name = "a", descriptor = "(III)Z")
-    public static boolean method6832(@OriginalArg(0) int arg0, @OriginalArg(1) int functionMask, @OriginalArg(2) int flags) {
+    public static boolean colourBufferMutable(@OriginalArg(0) int arg0, @OriginalArg(1) int functionMask, @OriginalArg(2) int flags) {
         if (Static280.method4087(flags, functionMask)) {
             return Static77.method1560(flags, functionMask) | (functionMask & 0x9000) != 0 | Static433.method5601(flags, functionMask) ? true : (flags & 0x37) == 0 & (Static526.normalsMutable(flags, functionMask) | (functionMask & 0x2000) != 0 | Static220.method3197(functionMask, flags));
         } else {

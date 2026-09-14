@@ -14,7 +14,7 @@ public final class SceneRenderer {
         Static581.aBoolean657 = true;
         Static403.anInt6246 = cameraX >> EnvironmentLight.anInt1066;
         Static550.anInt8271 = cameraZ >> EnvironmentLight.anInt1066;
-        Static499.anInt7492 = cameraX;
+        Static499.cameraX = cameraX;
         Static715.cameraZ = cameraZ;
         Static523.cameraY = cameraY;
         Static441.anInt6691 = Static403.anInt6246 - Static35.anInt813;
@@ -78,11 +78,11 @@ public final class SceneRenderer {
             if (orthoZoom >= 0) {
                 Static29.aBoolean60 = false;
             } else {
-                Static617.anIntArray726 = roofMaxY;
-                Static714.anIntArray880 = roofMinX;
+                Static617.roofMaxY = roofMaxY;
+                Static714.roofMinX = roofMinX;
                 Static419.roofMaxX = roofMaxX;
-                Static219.anIntArray288 = roofMaxZ;
-                Static665.anIntArray779 = roofMinZ;
+                Static219.roofMaxZ = roofMaxZ;
+                Static665.roofMinZ = roofMinZ;
                 Static725.buildOcclusionBuffer(Static665.aToolkit_15, levels);
             }
         } else {

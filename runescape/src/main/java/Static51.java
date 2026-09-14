@@ -31,9 +31,9 @@ public final class Static51 {
             local69 = Static670.method8732(Static180.anInt2995, Static111.anInt2219, radius + centreX);
             local78 = Static670.method8732(Static180.anInt2995, Static111.anInt2219, centreX - innerRadius);
             local86 = Static670.method8732(Static180.anInt2995, Static111.anInt2219, centreX + innerRadius);
-            Static696.method9037(local78, lineColour, local59, centreRow);
-            Static696.method9037(local86, fillColour, local78, centreRow);
-            Static696.method9037(local69, lineColour, local86, centreRow);
+            Static696.fillHorizontalSpan(local78, lineColour, local59, centreRow);
+            Static696.fillHorizontalSpan(local86, fillColour, local78, centreRow);
+            Static696.fillHorizontalSpan(local69, lineColour, local86, centreRow);
         }
         @Pc(112) int innerStep = -1;
         while (outerOffset > minorOffset) {
@@ -65,24 +65,24 @@ public final class Static51 {
                         innerLeft = Static670.method8732(Static180.anInt2995, Static111.anInt2219, centreX - local69);
                         if (local59 <= Static273.anInt4395) {
                             row = Static723.anIntArrayArray266[local59];
-                            Static696.method9037(innerLeft, lineColour, local86, row);
-                            Static696.method9037(innerRight, fillColour, innerLeft, row);
-                            Static696.method9037(local78, lineColour, innerRight, row);
+                            Static696.fillHorizontalSpan(innerLeft, lineColour, local86, row);
+                            Static696.fillHorizontalSpan(innerRight, fillColour, innerLeft, row);
+                            Static696.fillHorizontalSpan(local78, lineColour, innerRight, row);
                         }
                         if (topRow >= Static724.anInt10930) {
                             row = Static723.anIntArrayArray266[topRow];
-                            Static696.method9037(innerLeft, lineColour, local86, row);
-                            Static696.method9037(innerRight, fillColour, innerLeft, row);
-                            Static696.method9037(local78, lineColour, innerRight, row);
+                            Static696.fillHorizontalSpan(innerLeft, lineColour, local86, row);
+                            Static696.fillHorizontalSpan(innerRight, fillColour, innerLeft, row);
+                            Static696.fillHorizontalSpan(local78, lineColour, innerRight, row);
                         }
                     } else {
                         local69 = Static670.method8732(Static180.anInt2995, Static111.anInt2219, centreX + minorOffset);
                         local78 = Static670.method8732(Static180.anInt2995, Static111.anInt2219, centreX - minorOffset);
                         if (local59 <= Static273.anInt4395) {
-                            Static696.method9037(local69, lineColour, local78, Static723.anIntArrayArray266[local59]);
+                            Static696.fillHorizontalSpan(local69, lineColour, local78, Static723.anIntArrayArray266[local59]);
                         }
                         if (topRow >= Static724.anInt10930) {
-                            Static696.method9037(local69, lineColour, local78, Static723.anIntArrayArray266[topRow]);
+                            Static696.fillHorizontalSpan(local69, lineColour, local78, Static723.anIntArrayArray266[topRow]);
                         }
                     }
                 }
@@ -97,10 +97,10 @@ public final class Static51 {
                     local78 = Static670.method8732(Static180.anInt2995, Static111.anInt2219, local78);
                     if (innerRadius <= minorOffset) {
                         if (Static273.anInt4395 >= local59) {
-                            Static696.method9037(local69, lineColour, local78, Static723.anIntArrayArray266[local59]);
+                            Static696.fillHorizontalSpan(local69, lineColour, local78, Static723.anIntArrayArray266[local59]);
                         }
                         if (topRow >= Static724.anInt10930) {
-                            Static696.method9037(local69, lineColour, local78, Static723.anIntArrayArray266[topRow]);
+                            Static696.fillHorizontalSpan(local69, lineColour, local78, Static723.anIntArrayArray266[topRow]);
                         }
                     } else {
                         local86 = minorOffset <= innerOffset ? innerOffset : Static430.anIntArray519[minorOffset];
@@ -108,15 +108,15 @@ public final class Static51 {
                         innerLeft = Static670.method8732(Static180.anInt2995, Static111.anInt2219, centreX - local86);
                         if (Static273.anInt4395 >= local59) {
                             row = Static723.anIntArrayArray266[local59];
-                            Static696.method9037(innerLeft, lineColour, local78, row);
-                            Static696.method9037(innerRight, fillColour, innerLeft, row);
-                            Static696.method9037(local69, lineColour, innerRight, row);
+                            Static696.fillHorizontalSpan(innerLeft, lineColour, local78, row);
+                            Static696.fillHorizontalSpan(innerRight, fillColour, innerLeft, row);
+                            Static696.fillHorizontalSpan(local69, lineColour, innerRight, row);
                         }
                         if (topRow >= Static724.anInt10930) {
                             row = Static723.anIntArrayArray266[topRow];
-                            Static696.method9037(innerLeft, lineColour, local78, row);
-                            Static696.method9037(innerRight, fillColour, innerLeft, row);
-                            Static696.method9037(local69, lineColour, innerRight, row);
+                            Static696.fillHorizontalSpan(innerLeft, lineColour, local78, row);
+                            Static696.fillHorizontalSpan(innerRight, fillColour, innerLeft, row);
+                            Static696.fillHorizontalSpan(local69, lineColour, innerRight, row);
                         }
                     }
                 }

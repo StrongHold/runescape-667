@@ -45,8 +45,8 @@ public final class Static231 {
         Scene.free();
         Minimap.reset();
         MiniMenu.resetSprites();
-        Static638.method8393();
-        Static65.method1472();
+        Static638.clearPickableEntityPool();
+        Static65.resetEnvironmentCache();
         Static81.method1589();
         client.cacheReset();
         Static203.resetStaticSprites();

@@ -20,10 +20,10 @@ public final class Static123 {
         @Pc(40) int local40 = -1;
         @Pc(44) int[] local44 = Static723.anIntArrayArray266[arg2];
         @Pc(49) int local49 = arg4 - local15;
-        Static696.method9037(local49, arg0, arg4 - arg3, local44);
+        Static696.fillHorizontalSpan(local49, arg0, arg4 - arg3, local44);
         @Pc(62) int local62 = arg4 + local15;
-        Static696.method9037(local62, arg1, local49, local44);
-        Static696.method9037(arg4 + arg3, arg0, local62, local44);
+        Static696.fillHorizontalSpan(local62, arg1, local49, local44);
+        Static696.fillHorizontalSpan(arg4 + arg3, arg0, local62, local44);
         while (local10 < local21) {
             local38 += 2;
             local40 += 2;
@@ -52,19 +52,19 @@ public final class Static123 {
                     local152 = arg4 - local10;
                     local156 = local143 + arg4;
                     local161 = arg4 - local143;
-                    Static696.method9037(local161, arg0, local152, local132);
-                    Static696.method9037(local156, arg1, local161, local132);
-                    Static696.method9037(local147, arg0, local156, local132);
-                    Static696.method9037(local161, arg0, local152, local139);
-                    Static696.method9037(local156, arg1, local161, local139);
-                    Static696.method9037(local147, arg0, local156, local139);
+                    Static696.fillHorizontalSpan(local161, arg0, local152, local132);
+                    Static696.fillHorizontalSpan(local156, arg1, local161, local132);
+                    Static696.fillHorizontalSpan(local147, arg0, local156, local132);
+                    Static696.fillHorizontalSpan(local161, arg0, local152, local139);
+                    Static696.fillHorizontalSpan(local156, arg1, local161, local139);
+                    Static696.fillHorizontalSpan(local147, arg0, local156, local139);
                 } else {
                     local132 = Static723.anIntArrayArray266[arg2 + local21];
                     local139 = Static723.anIntArrayArray266[arg2 - local21];
                     local143 = arg4 + local10;
                     local147 = arg4 - local10;
-                    Static696.method9037(local143, arg0, local147, local132);
-                    Static696.method9037(local143, arg0, local147, local139);
+                    Static696.fillHorizontalSpan(local143, arg0, local147, local132);
+                    Static696.fillHorizontalSpan(local143, arg0, local147, local139);
                 }
                 local24 -= local21 << 1;
             }
@@ -76,15 +76,15 @@ public final class Static123 {
                 local152 = local26 < local10 ? Static430.anIntArray519[local10] : local26;
                 local156 = arg4 + local152;
                 local161 = arg4 - local152;
-                Static696.method9037(local161, arg0, local147, local132);
-                Static696.method9037(local156, arg1, local161, local132);
-                Static696.method9037(local143, arg0, local156, local132);
-                Static696.method9037(local161, arg0, local147, local139);
-                Static696.method9037(local156, arg1, local161, local139);
-                Static696.method9037(local143, arg0, local156, local139);
+                Static696.fillHorizontalSpan(local161, arg0, local147, local132);
+                Static696.fillHorizontalSpan(local156, arg1, local161, local132);
+                Static696.fillHorizontalSpan(local143, arg0, local156, local132);
+                Static696.fillHorizontalSpan(local161, arg0, local147, local139);
+                Static696.fillHorizontalSpan(local156, arg1, local161, local139);
+                Static696.fillHorizontalSpan(local143, arg0, local156, local139);
             } else {
-                Static696.method9037(local143, arg0, local147, local132);
-                Static696.method9037(local143, arg0, local147, local139);
+                Static696.fillHorizontalSpan(local143, arg0, local147, local132);
+                Static696.fillHorizontalSpan(local143, arg0, local147, local139);
             }
         }
     }

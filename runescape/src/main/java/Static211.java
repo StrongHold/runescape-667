@@ -23,7 +23,7 @@ public final class Static211 {
         @Pc(63) int local63 = local21 * 3;
         @Pc(71) int local71 = local25 * ((arg1 << 1) - 3);
         @Pc(77) int local77 = local55;
-        Static696.method9037(arg2 + arg4, arg3, arg4 - arg2, Static723.anIntArrayArray266[arg0]);
+        Static696.fillHorizontalSpan(arg2 + arg4, arg3, arg4 - arg2, Static723.anIntArrayArray266[arg0]);
         @Pc(96) int local96 = (arg1 - 1) * local51;
         while (local9 > 0) {
             if (local38 < 0) {
@@ -51,8 +51,8 @@ public final class Static211 {
             @Pc(176) int local176 = local9 + arg0;
             @Pc(180) int local180 = local7 + arg4;
             @Pc(185) int local185 = arg4 - local7;
-            Static696.method9037(local180, arg3, local185, Static723.anIntArrayArray266[local172]);
-            Static696.method9037(local180, arg3, local185, Static723.anIntArrayArray266[local176]);
+            Static696.fillHorizontalSpan(local180, arg3, local185, Static723.anIntArrayArray266[local172]);
+            Static696.fillHorizontalSpan(local180, arg3, local185, Static723.anIntArrayArray266[local176]);
         }
     }
 }

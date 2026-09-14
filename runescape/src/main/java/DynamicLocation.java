@@ -76,7 +76,7 @@ public final class DynamicLocation extends PositionEntity implements Location {
         @Pc(30) Matrix matrix = toolkit.scratchMatrix();
         matrix.applyTranslation(super.x, super.y, super.z);
 
-        @Pc(44) PickableEntity local44 = Static642.method8441(this.interactive, 1);
+        @Pc(44) PickableEntity local44 = Static642.allocatePickableEntity(this.interactive, 1);
         this.entity.method7681(super.z2, local14, true, -9827, toolkit, super.x2, super.x1, super.z1, matrix);
 
         if (OrthoMode.enabled) {

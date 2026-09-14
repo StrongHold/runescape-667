@@ -393,7 +393,7 @@ public class Terrain {
                         }
 
                         ground.addTile(x, z, offsetX, offsetLevel, offsetY, depths, faceA, faceB, faceC, colours, blendedColours, textures, sizes, waterColour, waterDepth, waterBias);
-                        Static527.method7084(level, x, z);
+                        Static527.buildTileColumn(level, x, z);
                     }
                 }
             }
@@ -875,7 +875,7 @@ public class Terrain {
                             saturation -= Static467.anIntArray568[removedZ];
                         }
                         if (z >= 0 && hueWeight > 0 && count > 0) {
-                            colour[x][z] = Static318.method8555(lightness / count, saturation / count, hue * 256 / hueWeight);
+                            colour[x][z] = Static318.hsl24to16(lightness / count, saturation / count, hue * 256 / hueWeight);
                         }
                     }
                 }
@@ -1135,7 +1135,7 @@ public class Terrain {
 
                         @Pc(1021) int faceCount = overlayFaces + underlayFaces;
                         if (faceCount <= 0) {
-                            Static527.method7084(level, x, z);
+                            Static527.buildTileColumn(level, x, z);
                         } else {
                             if (edgeSplits[0]) {
                                 faceCount++;
@@ -1500,7 +1500,7 @@ public class Terrain {
                             }
 
                             ground.U(x, z, offsetX, offsetLevel, offsetY, waterDepths, blendedColours, overlayBlendColours, blendedTextures, blendedSizes, waterColour, waterDepth, waterBias, allowShadow);
-                            Static527.method7084(level, x, z);
+                            Static527.buildTileColumn(level, x, z);
                         }
                     }
                 }

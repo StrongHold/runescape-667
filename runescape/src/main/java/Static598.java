@@ -18,7 +18,7 @@ public final class Static598 {
                 node.unlink();
                 spotAnimation.stopParticleSystem();
             } else if (Static334.activeTiles != null && spotAnimation.isAnimating()) {
-                Static102.method2026(spotAnimation, true);
+                Static102.addPositionEntity(spotAnimation, true);
             }
         }
     }

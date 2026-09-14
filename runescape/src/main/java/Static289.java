@@ -16,7 +16,7 @@ public final class Static289 {
      * bounds, and both ends are clamped to the horizontal bounds.
      */
     @OriginalMember(owner = "client!jba", name = "a", descriptor = "(IIIII)V")
-    public static void method4184(@OriginalArg(0) int x1, @OriginalArg(1) int y, @OriginalArg(3) int rgb, @OriginalArg(4) int x0) {
+    public static void drawHorizontalLineClipped(@OriginalArg(0) int x1, @OriginalArg(1) int y, @OriginalArg(3) int rgb, @OriginalArg(4) int x0) {
         if (Static724.anInt10930 <= y && y <= Static273.anInt4395) {
             @Pc(26) int clippedX0 = Static670.method8732(Static180.anInt2995, Static111.anInt2219, x0);
             @Pc(32) int clippedX1 = Static670.method8732(Static180.anInt2995, Static111.anInt2219, x1);

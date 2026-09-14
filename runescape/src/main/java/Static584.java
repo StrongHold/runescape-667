@@ -5,7 +5,7 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static584 {
 
     @OriginalMember(owner = "client!sga", name = "a", descriptor = "(IIILclient!kp;Lclient!kp;)V")
-    public static void method7665(@OriginalArg(0) int level, @OriginalArg(1) int x, @OriginalArg(2) int z, @OriginalArg(3) Wall wall, @OriginalArg(4) Wall adjacentWall) {
+    public static void setWall(@OriginalArg(0) int level, @OriginalArg(1) int x, @OriginalArg(2) int z, @OriginalArg(3) Wall wall, @OriginalArg(4) Wall adjacentWall) {
         @Pc(4) Tile tile = Static347.getTile(level, x, z);
         if (tile == null) {
             return;

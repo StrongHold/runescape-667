@@ -6,7 +6,7 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static617 {
 
     @OriginalMember(owner = "client!tj", name = "B", descriptor = "[I")
-    public static int[] anIntArray726;
+    public static int[] roofMaxY;
 
     @OriginalMember(owner = "client!tj", name = "H", descriptor = "Z")
     public static boolean quickChatWorld = false;

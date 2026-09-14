@@ -25,7 +25,7 @@ public final class GlTexture3D extends GlTexture implements Interface2 {
         this.height = height;
         super.toolkit.method8088(this);
         OpenGL.glPixelStorei(OpenGL.GL_UNPACK_ALIGNMENT, BYTE_UNPACK_ALIGNMENT);
-        OpenGL.glTexImage3Dub(super.target, BASE_LEVEL, this.getInternalFormat(), this.width, this.height, this.depth, NO_BORDER, Static468.method7644(super.format), OpenGL.GL_UNSIGNED_BYTE, voxels, 0);
+        OpenGL.glTexImage3Dub(super.target, BASE_LEVEL, this.getInternalFormat(), this.width, this.height, this.depth, NO_BORDER, Static468.toGlPixelFormat(super.format), OpenGL.GL_UNSIGNED_BYTE, voxels, 0);
         OpenGL.glPixelStorei(OpenGL.GL_UNPACK_ALIGNMENT, DEFAULT_UNPACK_ALIGNMENT);
     }
 }

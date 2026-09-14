@@ -22,7 +22,7 @@ public final class GlCubeMapTexture extends GlTexture implements Interface8 {
             }
         } else {
             for (face = 0; face < FACE_COUNT; face++) {
-                OpenGL.glTexImage2Di(face + OpenGL.GL_TEXTURE_CUBE_MAP_POSITIVE_X, BASE_LEVEL, this.getInternalFormat(), size, size, NO_BORDER, Static468.method7644(super.format), super.toolkit.anInt9277, faces[face], 0);
+                OpenGL.glTexImage2Di(face + OpenGL.GL_TEXTURE_CUBE_MAP_POSITIVE_X, BASE_LEVEL, this.getInternalFormat(), size, size, NO_BORDER, Static468.toGlPixelFormat(super.format), super.toolkit.anInt9277, faces[face], 0);
             }
         }
     }

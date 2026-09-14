@@ -268,7 +268,7 @@ public abstract class GlTexture implements Interface17 {
             @Pc(71) byte[] source = pixels;
             @Pc(78) byte[] scratch = new byte[halfHeight * halfWidth * components];
             while (true) {
-                OpenGL.glTexImage2Dub(target, level, this.getInternalFormat(), width, height, NO_BORDER, Static468.method7644(this.format), OpenGL.GL_UNSIGNED_BYTE, source, 0);
+                OpenGL.glTexImage2Dub(target, level, this.getInternalFormat(), width, height, NO_BORDER, Static468.toGlPixelFormat(this.format), OpenGL.GL_UNSIGNED_BYTE, source, 0);
                 if (smallestSide <= 1) {
                     return;
                 }
@@ -322,7 +322,7 @@ public abstract class GlTexture implements Interface17 {
             @Pc(60) float[] source = pixels;
             @Pc(72) float[] scratch = new float[halfHeight * halfWidth * components];
             while (true) {
-                OpenGL.glTexImage2Df(target, level, this.getInternalFormat(), width, height, NO_BORDER, Static468.method7644(this.format), OpenGL.GL_FLOAT, source, 0);
+                OpenGL.glTexImage2Df(target, level, this.getInternalFormat(), width, height, NO_BORDER, Static468.toGlPixelFormat(this.format), OpenGL.GL_FLOAT, source, 0);
                 if (smallestSide <= 1) {
                     return;
                 }
