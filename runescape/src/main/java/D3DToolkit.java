@@ -104,13 +104,13 @@ public final class D3DToolkit extends NativeToolkit {
     public final GeometryBuffer aGeometryBuffer1;
 
     @OriginalMember(owner = "client!kea", name = "Ng", descriptor = "Z")
-    public final boolean aBoolean412;
+    public final boolean mipmappedCubeMapSupported;
 
     @OriginalMember(owner = "client!kea", name = "Jg", descriptor = "Z")
-    public final boolean aBoolean414;
+    public final boolean mipmapSupported;
 
     @OriginalMember(owner = "client!kea", name = "Lg", descriptor = "Z")
-    public final boolean aBoolean413;
+    public final boolean nonPowerOfTwoSupported;
 
     @OriginalMember(owner = "client!kea", name = "Tg", descriptor = "[I")
     public final int[] anIntArray391;
@@ -213,12 +213,12 @@ public final class D3DToolkit extends NativeToolkit {
             this.aGeometryBuffer1 = new GeometryBuffer(this.aTi1);
             new GeometryBuffer(this.aTi1);
             this.anInt9184 = this.aD3DCAPS1.MaxSimultaneousTextures;
-            this.aBoolean412 = (this.aD3DCAPS1.TextureCaps & 0x10000) != 0;
-            this.aBoolean414 = (this.aD3DCAPS1.TextureCaps & 0x4000) != 0;
+            this.mipmappedCubeMapSupported = (this.aD3DCAPS1.TextureCaps & 0x10000) != 0;
+            this.mipmapSupported = (this.aD3DCAPS1.TextureCaps & 0x4000) != 0;
             this.anInt9182 = this.aD3DCAPS1.MaxActiveLights > 0 ? this.aD3DCAPS1.MaxActiveLights : 8;
             this.aBoolean685 = (this.aD3DCAPS1.TextureCaps & 0x800) != 0;
             this.aBoolean696 = (this.aD3DCAPS1.TextureCaps & 0x2000) != 0;
-            this.aBoolean413 = (this.aD3DCAPS1.TextureCaps & 0x2) == 0;
+            this.nonPowerOfTwoSupported = (this.aD3DCAPS1.TextureCaps & 0x2) == 0;
             this.aBoolean692 = this.anInt9158 > 0 || this.anIDirect3D1.CheckDeviceMultiSampleType(this.anInt5369, this.anInt5368, this.aD3DPRESENT_PARAMETERS1.BackBufferFormat, true, 2) == 0;
             this.anIntArray391 = new int[this.anInt9184];
             this.aBooleanArray13 = new boolean[this.anInt9184];
@@ -237,13 +237,13 @@ public final class D3DToolkit extends NativeToolkit {
     @OriginalMember(owner = "client!kea", name = "a", descriptor = "(Lclient!eba;Lclient!wda;III)Lclient!og;")
     @Override
     public Interface18 method8067(@OriginalArg(0) Class92 arg0, @OriginalArg(1) Class397 arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3) {
-        return new Class61_Sub3(this, arg0, arg1, arg3, arg2);
+        return new D3DTexture2D(this, arg0, arg1, arg3, arg2);
     }
 
     @OriginalMember(owner = "client!kea", name = "a", descriptor = "(Lclient!eba;[BBIII)Lclient!bga;")
     @Override
     public Interface2 method8038(@OriginalArg(0) Class92 arg0, @OriginalArg(1) byte[] arg1) {
-        return new Class61_Sub1(this, arg0, 128, 128, 16, arg1);
+        return new D3DTexture3D(this, arg0, 128, 128, 16, arg1);
     }
 
     @OriginalMember(owner = "client!kea", name = "Y", descriptor = "(I)V")
@@ -304,7 +304,7 @@ public final class D3DToolkit extends NativeToolkit {
     @OriginalMember(owner = "client!kea", name = "a", descriptor = "(I[[IZI)Lclient!fv;")
     @Override
     public Interface8 method8063(@OriginalArg(0) int arg0, @OriginalArg(1) int[][] arg1, @OriginalArg(2) boolean arg2) {
-        return new Class61_Sub2(this, arg0, arg2, arg1);
+        return new D3DCubeMapTexture(this, arg0, arg2, arg1);
     }
 
     @OriginalMember(owner = "client!kea", name = "a", descriptor = "(Lclient!wda;Lclient!eba;B)Z")
@@ -566,7 +566,7 @@ public final class D3DToolkit extends NativeToolkit {
     @OriginalMember(owner = "client!kea", name = "a", descriptor = "(II[IIIZI)Lclient!og;")
     @Override
     public Interface18 method8143(@OriginalArg(1) int arg0, @OriginalArg(2) int[] arg1, @OriginalArg(3) int arg2, @OriginalArg(4) int arg3, @OriginalArg(5) boolean arg4, @OriginalArg(6) int arg5) {
-        return new Class61_Sub3(this, arg0, arg5, arg4, arg1, 0, arg3);
+        return new D3DTexture2D(this, arg0, arg5, arg4, arg1, 0, arg3);
     }
 
     @OriginalMember(owner = "client!kea", name = "l", descriptor = "(Z)V")
@@ -682,7 +682,7 @@ public final class D3DToolkit extends NativeToolkit {
     @OriginalMember(owner = "client!kea", name = "a", descriptor = "(Lclient!eba;IZIIIZ[B)Lclient!og;")
     @Override
     protected Interface18 method8103(@OriginalArg(0) Class92 arg0, @OriginalArg(1) int arg1, @OriginalArg(2) boolean arg2, @OriginalArg(5) int arg3, @OriginalArg(7) byte[] arg4) {
-        return new Class61_Sub3(this, arg0, arg1, arg3, arg2, arg4, 0, 0);
+        return new D3DTexture2D(this, arg0, arg1, arg3, arg2, arg4, 0, 0);
     }
 
     @OriginalMember(owner = "client!kea", name = "a", descriptor = "(Lclient!eca;Lclient!wja;)Lclient!gaa;")
@@ -720,15 +720,15 @@ public final class D3DToolkit extends NativeToolkit {
     }
 
     @OriginalMember(owner = "client!kea", name = "a", descriptor = "(ILclient!waa;)V")
-    public void method4864(@OriginalArg(1) Class61_Sub3 arg0) {
-        this.method4867(arg0);
-        if (arg0.aBoolean787 != this.aBooleanArray15[this.anInt9148]) {
-            this.anIDirect3DDevice1.SetSamplerState(this.anInt9148, 1, arg0.aBoolean787 ? 1 : 3);
-            this.aBooleanArray15[this.anInt9148] = arg0.aBoolean787;
+    public void bindTexture2D(@OriginalArg(1) D3DTexture2D texture) {
+        this.bindTexture(texture);
+        if (texture.repeatU != this.aBooleanArray15[this.anInt9148]) {
+            this.anIDirect3DDevice1.SetSamplerState(this.anInt9148, 1, texture.repeatU ? 1 : 3);
+            this.aBooleanArray15[this.anInt9148] = texture.repeatU;
         }
-        if (arg0.aBoolean786 != this.aBooleanArray14[this.anInt9148]) {
-            this.anIDirect3DDevice1.SetSamplerState(this.anInt9148, 2, arg0.aBoolean786 ? 1 : 3);
-            this.aBooleanArray14[this.anInt9148] = arg0.aBoolean786;
+        if (texture.repeatV != this.aBooleanArray14[this.anInt9148]) {
+            this.anIDirect3DDevice1.SetSamplerState(this.anInt9148, 2, texture.repeatV ? 1 : 3);
+            this.aBooleanArray14[this.anInt9148] = texture.repeatV;
         }
     }
 
@@ -896,8 +896,8 @@ public final class D3DToolkit extends NativeToolkit {
     }
 
     @OriginalMember(owner = "client!kea", name = "a", descriptor = "(Lclient!cfa;I)V")
-    public void method4866(@OriginalArg(0) Class61_Sub1 arg0) {
-        this.method4867(arg0);
+    public void bindTexture3D(@OriginalArg(0) D3DTexture3D texture) {
+        this.bindTexture(texture);
         if (!this.aBooleanArray15[this.anInt9148]) {
             this.anIDirect3DDevice1.SetSamplerState(this.anInt9148, 1, 1);
             this.aBooleanArray15[this.anInt9148] = true;
@@ -941,20 +941,20 @@ public final class D3DToolkit extends NativeToolkit {
     }
 
     @OriginalMember(owner = "client!kea", name = "a", descriptor = "(Lclient!pl;I)V")
-    public void method4867(@OriginalArg(0) Class61 arg0) {
-        this.anIDirect3DDevice1.SetTexture(this.anInt9148, arg0.method9042());
-        if (arg0.aClass259_16 != this.aClass259Array1[this.anInt9148]) {
-            @Pc(63) int local63 = Static325.method4860(arg0.aClass259_16);
+    public void bindTexture(@OriginalArg(0) D3DTexture texture) {
+        this.anIDirect3DDevice1.SetTexture(this.anInt9148, texture.getTexture());
+        if (texture.filter != this.aClass259Array1[this.anInt9148]) {
+            @Pc(63) int local63 = Static325.method4860(texture.filter);
             this.anIDirect3DDevice1.SetSamplerState(this.anInt9148, 6, local63);
             this.anIDirect3DDevice1.SetSamplerState(this.anInt9148, 5, local63);
-            this.aClass259Array1[this.anInt9148] = arg0.aClass259_16;
-            if (arg0.aBoolean785 != this.aBooleanArray13[this.anInt9148]) {
-                this.anIDirect3DDevice1.SetSamplerState(this.anInt9148, 7, arg0.aBoolean785 ? Static325.method4860(arg0.aClass259_16) : 0);
-                this.aBooleanArray13[this.anInt9148] = arg0.aBoolean785;
+            this.aClass259Array1[this.anInt9148] = texture.filter;
+            if (texture.mipmapped != this.aBooleanArray13[this.anInt9148]) {
+                this.anIDirect3DDevice1.SetSamplerState(this.anInt9148, 7, texture.mipmapped ? Static325.method4860(texture.filter) : 0);
+                this.aBooleanArray13[this.anInt9148] = texture.mipmapped;
             }
-        } else if (arg0.aBoolean785 != this.aBooleanArray13[this.anInt9148]) {
-            this.anIDirect3DDevice1.SetSamplerState(this.anInt9148, 7, arg0.aBoolean785 ? Static325.method4860(arg0.aClass259_16) : 0);
-            this.aBooleanArray13[this.anInt9148] = arg0.aBoolean785;
+        } else if (texture.mipmapped != this.aBooleanArray13[this.anInt9148]) {
+            this.anIDirect3DDevice1.SetSamplerState(this.anInt9148, 7, texture.mipmapped ? Static325.method4860(texture.filter) : 0);
+            this.aBooleanArray13[this.anInt9148] = texture.mipmapped;
         }
         if (!this.aBooleanArray16[this.anInt9148]) {
             this.aBooleanArray16[this.anInt9148] = true;
