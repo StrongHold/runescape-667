@@ -4,21 +4,21 @@ import org.openrs2.deob.annotation.OriginalClass;
 import org.openrs2.deob.annotation.OriginalMember;
 
 @OriginalClass("client!hia")
-public final class Class165 implements DepthBuffer {
+public final class JavaDepthBuffer implements DepthBuffer {
 
     @OriginalMember(owner = "client!hia", name = "e", descriptor = "I")
-    public final int anInt3961;
+    public final int width;
 
     @OriginalMember(owner = "client!hia", name = "b", descriptor = "[F")
-    public final float[] aFloatArray21;
+    public final float[] depths;
 
     @OriginalMember(owner = "client!hia", name = "c", descriptor = "I")
-    public final int anInt3960;
+    public final int height;
 
     @OriginalMember(owner = "client!hia", name = "<init>", descriptor = "(II)V")
-    public Class165(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) {
-        this.anInt3961 = arg0;
-        this.aFloatArray21 = new float[arg0 * arg1];
-        this.anInt3960 = arg1;
+    public JavaDepthBuffer(@OriginalArg(0) int width, @OriginalArg(1) int height) {
+        this.width = width;
+        this.depths = new float[width * height];
+        this.height = height;
     }
 }

@@ -527,40 +527,40 @@ public final class JavaToolkit extends Toolkit {
     }
 
     @OriginalMember(owner = "client!iaa", name = "a", descriptor = "(IIIIIIII)V")
-    public void method3783(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(5) int arg4, @OriginalArg(6) int arg5, @OriginalArg(7) int arg6) {
-        if (arg0 < this.clipX1 || arg0 >= this.clipX2) {
+    public void verticalDashedLine(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int length, @OriginalArg(3) int colour, @OriginalArg(5) int dashLength, @OriginalArg(6) int gapLength, @OriginalArg(7) int phase) {
+        if (x < this.clipX1 || x >= this.clipX2) {
             return;
         }
-        @Pc(18) int local18 = arg0 + arg1 * this.surfaceWidth;
-        @Pc(22) int local22 = arg3 >>> 24;
-        @Pc(26) int local26 = arg4 + arg5;
-        @Pc(30) int local30 = arg6 % local26;
+        @Pc(18) int pixel = x + y * this.surfaceWidth;
+        @Pc(22) int alpha = colour >>> 24;
+        @Pc(26) int period = dashLength + gapLength;
+        @Pc(30) int offset = phase % period;
         @Pc(44) int local44;
-        if (local22 == 255 && true) {
+        if (alpha == 255 && true) {
             local44 = 0;
-            while (local44 < arg2) {
-                if (arg1 + local44 >= this.clipY1 && arg1 + local44 < this.clipY2 && local30 < arg4) {
-                    this.surfaceRaster[local18 + local44 * this.surfaceWidth] = arg3;
+            while (local44 < length) {
+                if (y + local44 >= this.clipY1 && y + local44 < this.clipY2 && offset < dashLength) {
+                    this.surfaceRaster[pixel + local44 * this.surfaceWidth] = colour;
                 }
                 local44++;
-                local30++;
-                local30 %= local26;
+                offset++;
+                offset %= period;
             }
             return;
         }
-        @Pc(114) int local114 = ((arg3 & 0xFF00FF) * local22 >> 8 & 0xFF00FF) + ((arg3 & 0xFF00) * local22 >> 8 & 0xFF00) + (local22 << 24);
-        local44 = 256 - local22;
-        @Pc(120) int local120 = 0;
-        while (local120 < arg2) {
-            if (arg1 + local120 >= this.clipY1 && arg1 + local120 < this.clipY2 && local30 < arg4) {
-                @Pc(147) int local147 = local18 + local120 * this.surfaceWidth;
-                @Pc(152) int local152 = this.surfaceRaster[local147];
-                @Pc(172) int local172 = ((local152 & 0xFF00FF) * local44 >> 8 & 0xFF00FF) + ((local152 & 0xFF00) * local44 >> 8 & 0xFF00);
-                this.surfaceRaster[local147] = local114 + local172;
+        @Pc(114) int blended = ((colour & 0xFF00FF) * alpha >> 8 & 0xFF00FF) + ((colour & 0xFF00) * alpha >> 8 & 0xFF00) + (alpha << 24);
+        local44 = 256 - alpha;
+        @Pc(120) int i = 0;
+        while (i < length) {
+            if (y + i >= this.clipY1 && y + i < this.clipY2 && offset < dashLength) {
+                @Pc(147) int index = pixel + i * this.surfaceWidth;
+                @Pc(152) int dest = this.surfaceRaster[index];
+                @Pc(172) int faded = ((dest & 0xFF00FF) * local44 >> 8 & 0xFF00FF) + ((dest & 0xFF00) * local44 >> 8 & 0xFF00);
+                this.surfaceRaster[index] = blended + faded;
             }
-            local120++;
-            local30++;
-            local30 %= local26;
+            i++;
+            offset++;
+            offset %= period;
         }
     }
 
@@ -688,7 +688,7 @@ public final class JavaToolkit extends Toolkit {
         @Pc(2) int texture = particle.texture;
         @Pc(8) int doubleSize = size << 1;
         if (texture == -1) {
-            this.method3790(x, y, z, size, particle.colour, 1);
+            this.fillDepthTestedCircle(x, y, z, size, particle.colour, 1);
             return;
         }
 
@@ -1059,8 +1059,8 @@ public final class JavaToolkit extends Toolkit {
 
     @OriginalMember(owner = "client!iaa", name = "d", descriptor = "(II)Lclient!wja;")
     @Override
-    public DepthBuffer method7986(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) {
-        return new Class165(arg0, arg1);
+    public DepthBuffer method7986(@OriginalArg(0) int width, @OriginalArg(1) int height) {
+        return new JavaDepthBuffer(width, height);
     }
 
     @OriginalMember(owner = "client!iaa", name = "n", descriptor = "()Lclient!tt;")
@@ -1147,14 +1147,14 @@ public final class JavaToolkit extends Toolkit {
     }
 
     @OriginalMember(owner = "client!iaa", name = "n", descriptor = "(I)Z")
-    public boolean textureAvailable(@OriginalArg(0) int arg0) {
-        return super.textureSource.textureAvailable(arg0);
+    public boolean textureAvailable(@OriginalArg(0) int id) {
+        return super.textureSource.textureAvailable(id);
     }
 
     @OriginalMember(owner = "client!iaa", name = "a", descriptor = "(Ljava/lang/Runnable;)Lclient!wf;")
-    public JavaThreadResource threadResource(@OriginalArg(0) Runnable arg0) {
+    public JavaThreadResource threadResource(@OriginalArg(0) Runnable thread) {
         for (@Pc(1) int i = 0; i < this.threadCount; i++) {
-            if (this.resources[i].thread == arg0) {
+            if (this.resources[i].thread == thread) {
                 return this.resources[i];
             }
         }
@@ -1311,7 +1311,7 @@ public final class JavaToolkit extends Toolkit {
 
     @OriginalMember(owner = "client!iaa", name = "o", descriptor = "(I)[I")
     public int[] getArgbTexture(@OriginalArg(0) int id) {
-        @Pc(2) ReferenceCache local2 = this.textureCache;
+        @Pc(2) ReferenceCache cache = this.textureCache;
         @Pc(14) JavaAnimatedTexture texture;
         synchronized (this.textureCache) {
             texture = (JavaAnimatedTexture) this.textureCache.get((long) id | Long.MIN_VALUE);
@@ -1387,46 +1387,46 @@ public final class JavaToolkit extends Toolkit {
 
     @OriginalMember(owner = "client!iaa", name = "a", descriptor = "(IIIIIIIII)V")
     @Override
-    public void method7995(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(6) int arg5, @OriginalArg(7) int arg6, @OriginalArg(8) int arg7) {
-        arg2 -= arg0;
-        arg3 -= arg1;
-        @Pc(31) int local31;
+    public void method7995(@OriginalArg(0) int x1, @OriginalArg(1) int y1, @OriginalArg(2) int x2, @OriginalArg(3) int y2, @OriginalArg(4) int colour, @OriginalArg(6) int dashLength, @OriginalArg(7) int gapLength, @OriginalArg(8) int phase) {
+        x2 -= x1;
+        y2 -= y1;
+        @Pc(31) int period;
         @Pc(35) int local35;
-        if (arg3 == 0) {
-            if (arg2 >= 0) {
-                this.method3794(arg0, arg1, arg2 + 1, arg4, arg5, arg6, arg7);
+        if (y2 == 0) {
+            if (x2 >= 0) {
+                this.horizontalDashedLine(x1, y1, x2 + 1, colour, dashLength, gapLength, phase);
             } else {
-                local31 = arg5 + arg6;
-                local35 = arg7 % local31;
-                local35 = local31 + arg5 - local35 - (-arg2 + 1) % local31;
-                arg7 = local35 % local31;
-                if (arg7 < 0) {
-                    arg7 += local31;
+                period = dashLength + gapLength;
+                local35 = phase % period;
+                local35 = period + dashLength - local35 - (-x2 + 1) % period;
+                phase = local35 % period;
+                if (phase < 0) {
+                    phase += period;
                 }
-                this.method3794(arg0 + arg2, arg1, 1 - arg2, arg4, arg5, arg6, arg7);
+                this.horizontalDashedLine(x1 + x2, y1, 1 - x2, colour, dashLength, gapLength, phase);
             }
-        } else if (arg2 != 0) {
-            local35 = arg7 << 8;
-            @Pc(149) int local149 = arg5 << 8;
-            @Pc(153) int local153 = arg6 << 8;
-            local31 = local149 + local153;
-            arg7 = local35 % local31;
+        } else if (x2 != 0) {
+            local35 = phase << 8;
+            @Pc(149) int scaledDash = dashLength << 8;
+            @Pc(153) int scaledGap = gapLength << 8;
+            period = scaledDash + scaledGap;
+            phase = local35 % period;
             @Pc(178) int local178;
             @Pc(182) int local182;
-            if (arg2 + arg3 < 0) {
-                local178 = (int) (Math.sqrt(arg2 * arg2 + arg3 * arg3) * 256.0D);
-                local182 = local178 % local31;
-                local35 = local31 + local149 - arg7 - local182;
-                arg7 = local35 % local31;
-                if (arg7 < 0) {
-                    arg7 += local31;
+            if (x2 + y2 < 0) {
+                local178 = (int) (Math.sqrt(x2 * x2 + y2 * y2) * 256.0D);
+                local182 = local178 % period;
+                local35 = period + scaledDash - phase - local182;
+                phase = local35 % period;
+                if (phase < 0) {
+                    phase += period;
                 }
-                arg0 += arg2;
-                arg2 = -arg2;
-                arg1 += arg3;
-                arg3 = -arg3;
+                x1 += x2;
+                x2 = -x2;
+                y1 += y2;
+                y2 = -y2;
             }
-            @Pc(260) int local260;
+            @Pc(260) int step;
             @Pc(278) int local278;
             @Pc(371) int local371;
             @Pc(405) int local405;
@@ -1434,90 +1434,90 @@ public final class JavaToolkit extends Toolkit {
             @Pc(243) int local243;
             @Pc(229) int local229;
             @Pc(362) int local362;
-            if (arg2 > arg3) {
-                arg1 <<= 0x10;
-                arg1 += 32768;
-                local229 = arg3 << 16;
-                local178 = (int) Math.floor((double) local229 / (double) arg2 + 0.5D);
-                local243 = arg2 + arg0;
-                local182 = arg4 >>> 24;
-                local260 = (int) Math.sqrt((local178 >> 8) * (local178 >> 8) + 65536);
+            if (x2 > y2) {
+                y1 <<= 0x10;
+                y1 += 32768;
+                local229 = y2 << 16;
+                local178 = (int) Math.floor((double) local229 / (double) x2 + 0.5D);
+                local243 = x2 + x1;
+                local182 = colour >>> 24;
+                step = (int) Math.sqrt((local178 >> 8) * (local178 >> 8) + 65536);
                 if (local182 == 255 && true) {
-                    while (arg0 <= local243) {
-                        local278 = arg1 >> 16;
-                        if (arg0 >= this.clipX1 && arg0 < this.clipX2 && local278 >= this.clipY1 && local278 < this.clipY2 && arg7 < local149) {
-                            this.surfaceRaster[arg0 + local278 * this.surfaceWidth] = arg4;
+                    while (x1 <= local243) {
+                        local278 = y1 >> 16;
+                        if (x1 >= this.clipX1 && x1 < this.clipX2 && local278 >= this.clipY1 && local278 < this.clipY2 && phase < scaledDash) {
+                            this.surfaceRaster[x1 + local278 * this.surfaceWidth] = colour;
                         }
-                        arg1 += local178;
-                        arg0++;
-                        local35 = arg7 + local260;
-                        arg7 = local35 % local31;
+                        y1 += local178;
+                        x1++;
+                        local35 = phase + step;
+                        phase = local35 % period;
                     }
                 } else {
-                    local362 = ((arg4 & 0xFF00FF) * local182 >> 8 & 0xFF00FF) + ((arg4 & 0xFF00) * local182 >> 8 & 0xFF00) + (local182 << 24);
+                    local362 = ((colour & 0xFF00FF) * local182 >> 8 & 0xFF00FF) + ((colour & 0xFF00) * local182 >> 8 & 0xFF00) + (local182 << 24);
                     local278 = 256 - local182;
-                    while (arg0 <= local243) {
-                        local371 = arg1 >> 16;
-                        if (arg0 >= this.clipX1 && arg0 < this.clipX2 && local371 >= this.clipY1 && local371 < this.clipY2 && arg7 < local149) {
-                            local405 = arg0 + local371 * this.surfaceWidth;
+                    while (x1 <= local243) {
+                        local371 = y1 >> 16;
+                        if (x1 >= this.clipX1 && x1 < this.clipX2 && local371 >= this.clipY1 && local371 < this.clipY2 && phase < scaledDash) {
+                            local405 = x1 + local371 * this.surfaceWidth;
                             local410 = this.surfaceRaster[local405];
                             local410 = ((local410 & 0xFF00FF) * local278 >> 8 & 0xFF00FF) + ((local410 & 0xFF00) * local278 >> 8 & 0xFF00);
                             this.surfaceRaster[local405] = local362 + local410;
                         }
-                        arg1 += local178;
-                        arg0++;
-                        local35 = arg7 + local260;
-                        arg7 = local35 % local31;
+                        y1 += local178;
+                        x1++;
+                        local35 = phase + step;
+                        phase = local35 % period;
                     }
                 }
             } else {
-                arg0 <<= 0x10;
-                arg0 += 32768;
-                local243 = arg2 << 16;
-                local178 = (int) Math.floor((double) local243 / (double) arg3 + 0.5D);
-                local229 = arg3 + arg1;
-                local182 = arg4 >>> 24;
-                local260 = (int) Math.sqrt((local178 >> 8) * (local178 >> 8) + 65536);
+                x1 <<= 0x10;
+                x1 += 32768;
+                local243 = x2 << 16;
+                local178 = (int) Math.floor((double) local243 / (double) y2 + 0.5D);
+                local229 = y2 + y1;
+                local182 = colour >>> 24;
+                step = (int) Math.sqrt((local178 >> 8) * (local178 >> 8) + 65536);
                 if (local182 == 255 && true) {
-                    while (arg1 <= local229) {
-                        local278 = arg0 >> 16;
-                        if (arg1 >= this.clipY1 && arg1 < this.clipY2 && local278 >= this.clipX1 && local278 < this.clipX2 && arg7 < local149) {
-                            this.surfaceRaster[local278 + arg1 * this.surfaceWidth] = arg4;
+                    while (y1 <= local229) {
+                        local278 = x1 >> 16;
+                        if (y1 >= this.clipY1 && y1 < this.clipY2 && local278 >= this.clipX1 && local278 < this.clipX2 && phase < scaledDash) {
+                            this.surfaceRaster[local278 + y1 * this.surfaceWidth] = colour;
                         }
-                        arg0 += local178;
-                        arg1++;
-                        local35 = arg7 + local260;
-                        arg7 = local35 % local31;
+                        x1 += local178;
+                        y1++;
+                        local35 = phase + step;
+                        phase = local35 % period;
                     }
                 } else {
-                    local362 = ((arg4 & 0xFF00FF) * local182 >> 8 & 0xFF00FF) + ((arg4 & 0xFF00) * local182 >> 8 & 0xFF00) + (local182 << 24);
+                    local362 = ((colour & 0xFF00FF) * local182 >> 8 & 0xFF00FF) + ((colour & 0xFF00) * local182 >> 8 & 0xFF00) + (local182 << 24);
                     local278 = 256 - local182;
-                    while (arg1 <= local229) {
-                        local371 = arg0 >> 16;
-                        if (arg1 >= this.clipY1 && arg1 < this.clipY2 && local371 >= this.clipX1 && local371 < this.clipX2 && arg7 < local149) {
-                            local405 = local371 + arg1 * this.surfaceWidth;
+                    while (y1 <= local229) {
+                        local371 = x1 >> 16;
+                        if (y1 >= this.clipY1 && y1 < this.clipY2 && local371 >= this.clipX1 && local371 < this.clipX2 && phase < scaledDash) {
+                            local405 = local371 + y1 * this.surfaceWidth;
                             local410 = this.surfaceRaster[local405];
                             @Pc(773) int local773 = ((local410 & 0xFF00FF) * local278 >> 8 & 0xFF00FF) + ((local410 & 0xFF00) * local278 >> 8 & 0xFF00);
-                            this.surfaceRaster[local371 + arg1 * this.surfaceWidth] = local362 + local773;
+                            this.surfaceRaster[local371 + y1 * this.surfaceWidth] = local362 + local773;
                         }
-                        arg0 += local178;
-                        arg1++;
-                        local35 = arg7 + local260;
-                        arg7 = local35 % local31;
+                        x1 += local178;
+                        y1++;
+                        local35 = phase + step;
+                        phase = local35 % period;
                     }
                 }
             }
-        } else if (arg3 >= 0) {
-            this.method3783(arg0, arg1, arg3 + 1, arg4, arg5, arg6, arg7);
+        } else if (y2 >= 0) {
+            this.verticalDashedLine(x1, y1, y2 + 1, colour, dashLength, gapLength, phase);
         } else {
-            local31 = arg5 + arg6;
-            local35 = arg7 % local31;
-            local35 = local31 + arg5 - local35 - (-arg3 + 1) % local31;
-            arg7 = local35 % local31;
-            if (arg7 < 0) {
-                arg7 += local31;
+            period = dashLength + gapLength;
+            local35 = phase % period;
+            local35 = period + dashLength - local35 - (-y2 + 1) % period;
+            phase = local35 % period;
+            if (phase < 0) {
+                phase += period;
             }
-            this.method3783(arg0, arg1 + arg3, -arg3 + 1, arg4, arg5, arg6, arg7);
+            this.verticalDashedLine(x1, y1 + y2, -y2 + 1, colour, dashLength, gapLength, phase);
         }
     }
 
@@ -1557,22 +1557,22 @@ public final class JavaToolkit extends Toolkit {
         }
 
         try {
-            @Pc(19) Graphics local19 = this.canvas.getGraphics();
-            for (@Pc(21) int local21 = 0; local21 < count; local21++) {
-                @Pc(26) Rectangle local26 = rectangles[local21];
-                if (local26.x + x <= this.surfaceWidth && local26.y + y <= this.surfaceHeight && local26.x + x + local26.width > 0 && local26.y + y + local26.height > 0) {
-                    this.surface.clip(local26.x, local26.y, local26.x + x, local26.y + y, local26.width, local26.height, local19);
+            @Pc(19) Graphics graphics = this.canvas.getGraphics();
+            for (@Pc(21) int i = 0; i < count; i++) {
+                @Pc(26) Rectangle rect = rectangles[i];
+                if (rect.x + x <= this.surfaceWidth && rect.y + y <= this.surfaceHeight && rect.x + x + rect.width > 0 && rect.y + y + rect.height > 0) {
+                    this.surface.clip(rect.x, rect.y, rect.x + x, rect.y + y, rect.width, rect.height, graphics);
                 }
             }
-        } catch (@Pc(91) Exception local91) {
+        } catch (@Pc(91) Exception exception) {
             this.canvas.repaint();
         }
     }
 
     @OriginalMember(owner = "client!iaa", name = "D", descriptor = "()V")
     public void reset() {
-        for (@Pc(1) int local1 = 0; local1 < this.threadCount; local1++) {
-            this.resources[local1].method9194();
+        for (@Pc(1) int i = 0; i < this.threadCount; i++) {
+            this.resources[i].method9194();
         }
         this.la();
     }
@@ -1584,8 +1584,8 @@ public final class JavaToolkit extends Toolkit {
 
     @OriginalMember(owner = "client!iaa", name = "k", descriptor = "(I)V")
     @Override
-    public void linkThreads(@OriginalArg(0) int arg0) {
-        this.resources[arg0].method9196(Thread.currentThread());
+    public void linkThreads(@OriginalArg(0) int index) {
+        this.resources[index].method9196(Thread.currentThread());
     }
 
     @OriginalMember(owner = "client!iaa", name = "p", descriptor = "()Z")
@@ -1596,9 +1596,9 @@ public final class JavaToolkit extends Toolkit {
 
     @OriginalMember(owner = "client!iaa", name = "a", descriptor = "([I)V")
     @Override
-    public void method7944(@OriginalArg(0) int[] arg0) {
-        arg0[0] = this.surfaceWidth;
-        arg0[1] = this.surfaceHeight;
+    public void method7944(@OriginalArg(0) int[] destination) {
+        destination[0] = this.surfaceWidth;
+        destination[1] = this.surfaceHeight;
     }
 
     @OriginalMember(owner = "client!iaa", name = "a", descriptor = "(IIII)V")
@@ -1614,23 +1614,23 @@ public final class JavaToolkit extends Toolkit {
 
     @OriginalMember(owner = "client!iaa", name = "a", descriptor = "(II)Lclient!eca;")
     @Override
-    public Surface method7962(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) {
-        return this.createSprite(arg0, arg1, false);
+    public Surface method7962(@OriginalArg(0) int width, @OriginalArg(1) int height) {
+        return this.createSprite(width, height, false);
     }
 
     @OriginalMember(owner = "client!iaa", name = "H", descriptor = "(III[I)V")
     @Override
-    public void H(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int[] arg3) {
-        @Pc(24) float local24 = this.camera.tz + this.camera.e3_1 * (float) arg0 + this.camera.e3_2 * (float) arg1 + this.camera.e3_3 * (float) arg2;
-        if (local24 == 0.0F) {
-            arg3[0] = arg3[1] = arg3[2] = -1;
+    public void H(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int[] destination) {
+        @Pc(24) float depth = this.camera.tz + this.camera.e3_1 * (float) x + this.camera.e3_2 * (float) y + this.camera.e3_3 * (float) z;
+        if (depth == 0.0F) {
+            destination[0] = destination[1] = destination[2] = -1;
             return;
         }
-        @Pc(74) int local74 = (int) ((float) this.projectionScaleX * (this.camera.tx + this.camera.e1_1 * (float) arg0 + this.camera.e1_2 * (float) arg1 + this.camera.e1_3 * (float) arg2) / local24);
-        @Pc(106) int local106 = (int) ((float) this.projectionScaleY * (this.camera.ty + this.camera.e2_1 * (float) arg0 + this.camera.e2_2 * (float) arg1 + this.camera.e2_3 * (float) arg2) / local24);
-        arg3[0] = local74 - this.viewX1;
-        arg3[1] = local106 - this.viewY1;
-        arg3[2] = (int) local24;
+        @Pc(74) int px = (int) ((float) this.projectionScaleX * (this.camera.tx + this.camera.e1_1 * (float) x + this.camera.e1_2 * (float) y + this.camera.e1_3 * (float) z) / depth);
+        @Pc(106) int py = (int) ((float) this.projectionScaleY * (this.camera.ty + this.camera.e2_1 * (float) x + this.camera.e2_2 * (float) y + this.camera.e2_3 * (float) z) / depth);
+        destination[0] = px - this.viewX1;
+        destination[1] = py - this.viewY1;
+        destination[2] = (int) depth;
     }
 
     @OriginalMember(owner = "client!iaa", name = "x", descriptor = "()Z")
@@ -1641,94 +1641,94 @@ public final class JavaToolkit extends Toolkit {
 
     @OriginalMember(owner = "client!iaa", name = "ra", descriptor = "(IIII)V")
     @Override
-    public void ra(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3) {
-        for (@Pc(1) int local1 = 0; local1 < this.resources.length; local1++) {
-            this.resources[local1].anInt10600 = this.resources[local1].fogColour;
-            this.resources[local1].waterHeight = arg0;
-            this.resources[local1].fogColour = arg1;
-            this.resources[local1].waterDepth = arg2;
-            this.resources[local1].water = true;
+    public void ra(@OriginalArg(0) int waterHeight, @OriginalArg(1) int fogColour, @OriginalArg(2) int waterDepth, @OriginalArg(3) int bias) {
+        for (@Pc(1) int i = 0; i < this.resources.length; i++) {
+            this.resources[i].anInt10600 = this.resources[i].fogColour;
+            this.resources[i].waterHeight = waterHeight;
+            this.resources[i].fogColour = fogColour;
+            this.resources[i].waterDepth = waterDepth;
+            this.resources[i].water = true;
         }
     }
 
     @OriginalMember(owner = "client!iaa", name = "e", descriptor = "(IIIIII)V")
-    public void method3790(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int size, @OriginalArg(4) int colour, @OriginalArg(5) int mode) {
+    public void fillDepthTestedCircle(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int size, @OriginalArg(4) int colour, @OriginalArg(5) int mode) {
         if (size < 0) {
             size = -size;
         }
-        @Pc(8) int local8 = y - size;
-        if (local8 < this.clipY1) {
-            local8 = this.clipY1;
+        @Pc(8) int y1 = y - size;
+        if (y1 < this.clipY1) {
+            y1 = this.clipY1;
         }
-        @Pc(21) int local21 = y + size + 1;
-        if (local21 > this.clipY2) {
-            local21 = this.clipY2;
+        @Pc(21) int y2 = y + size + 1;
+        if (y2 > this.clipY2) {
+            y2 = this.clipY2;
         }
-        @Pc(30) int local30 = local8;
-        @Pc(34) int local34 = size * size;
-        @Pc(36) int local36 = 0;
-        @Pc(40) int local40 = y - local8;
+        @Pc(30) int currY = y1;
+        @Pc(34) int squareRadius = size * size;
+        @Pc(36) int width = 0;
+        @Pc(40) int local40 = y - y1;
         @Pc(44) int local44 = local40 * local40;
         @Pc(48) int local48 = local44 - local40;
-        if (y > local21) {
-            y = local21;
+        if (y > y2) {
+            y = y2;
         }
-        @Pc(57) int local57 = colour >>> 24;
+        @Pc(57) int alpha = colour >>> 24;
         @Pc(98) int local98;
         @Pc(109) int local109;
         @Pc(123) int local123;
         @Pc(125) int local125;
-        if (mode == 0 || mode == 1 && local57 == 255) {
-            while (local30 < y) {
-                while (local48 <= local34 || local44 <= local34) {
-                    local44 += local36 + local36;
-                    local48 += local36++ + local36;
+        if (mode == 0 || mode == 1 && alpha == 255) {
+            while (currY < y) {
+                while (local48 <= squareRadius || local44 <= squareRadius) {
+                    local44 += width + width;
+                    local48 += width++ + width;
                 }
-                local98 = x + 1 - local36;
+                local98 = x + 1 - width;
                 if (local98 < this.clipX1) {
                     local98 = this.clipX1;
                 }
-                local109 = x + local36;
+                local109 = x + width;
                 if (local109 > this.clipX2) {
                     local109 = this.clipX2;
                 }
-                local123 = local98 + local30 * this.surfaceWidth;
+                local123 = local98 + currY * this.surfaceWidth;
                 for (local125 = local98; local125 < local109; local125++) {
                     if ((float) z < this.depthBuffer[local123]) {
                         this.surfaceRaster[local123] = colour;
                     }
                     local123++;
                 }
-                local30++;
+                currY++;
                 local44 -= local40-- + local40;
                 local48 -= local40 + local40;
             }
-            local36 = size;
-            local40 = local30 - y;
-            local48 = local40 * local40 + local34;
+            width = size;
+            local40 = currY - y;
+            local48 = local40 * local40 + squareRadius;
             local44 = local48 - size;
             local48 -= local40;
-            while (local30 < local21) {
-                while (local48 > local34 && local44 > local34) {
-                    local48 -= local36-- + local36;
-                    local44 -= local36 + local36;
+            while (currY < y2) {
+                while (local48 > squareRadius && local44 > squareRadius) {
+                    local48 -= width-- + width;
+                    local44 -= width + width;
                 }
-                local98 = x - local36;
+                local98 = x - width;
                 if (local98 < this.clipX1) {
                     local98 = this.clipX1;
                 }
-                local109 = x + local36;
+                local109 = x + width;
                 if (local109 > this.clipX2 - 1) {
                     local109 = this.clipX2 - 1;
                 }
-                local123 = local98 + local30 * this.surfaceWidth;
+                local123 = local98 + currY * this.surfaceWidth;
                 for (local125 = local98; local125 <= local109; local125++) {
                     if ((float) z < this.depthBuffer[local123]) {
                         this.surfaceRaster[local123] = colour;
                     }
                     local123++;
                 }
-                local30++;
+                currY++;
                 local48 += local40 + local40;
                 local44 += local40++ + local40;
             }
@@ -1737,81 +1737,81 @@ public final class JavaToolkit extends Toolkit {
         @Pc(366) int local366;
         @Pc(380) int local380;
         if (mode == 1) {
-            @Pc(307) int local307 = ((colour & 0xFF00FF) * local57 >> 8 & 0xFF00FF) + ((colour & 0xFF00) * local57 >> 8 & 0xFF00) + (local57 << 24);
-            local98 = 256 - local57;
-            while (local30 < y) {
-                while (local48 <= local34 || local44 <= local34) {
-                    local44 += local36 + local36;
-                    local48 += local36++ + local36;
+            @Pc(307) int blended = ((colour & 0xFF00FF) * alpha >> 8 & 0xFF00FF) + ((colour & 0xFF00) * alpha >> 8 & 0xFF00) + (alpha << 24);
+            local98 = 256 - alpha;
+            while (currY < y) {
+                while (local48 <= squareRadius || local44 <= squareRadius) {
+                    local44 += width + width;
+                    local48 += width++ + width;
                 }
-                local109 = x + 1 - local36;
+                local109 = x + 1 - width;
                 if (local109 < this.clipX1) {
                     local109 = this.clipX1;
                 }
-                local123 = x + local36;
+                local123 = x + width;
                 if (local123 > this.clipX2) {
                     local123 = this.clipX2;
                 }
-                local125 = local109 + local30 * this.surfaceWidth;
+                local125 = local109 + currY * this.surfaceWidth;
                 for (local366 = local109; local366 < local123; local366++) {
                     if ((float) z < this.depthBuffer[local125]) {
                         local380 = this.surfaceRaster[local125];
                         local380 = ((local380 & 0xFF00FF) * local98 >> 8 & 0xFF00FF) + ((local380 & 0xFF00) * local98 >> 8 & 0xFF00);
-                        this.surfaceRaster[local125] = local307 + local380;
+                        this.surfaceRaster[local125] = blended + local380;
                     }
                     local125++;
                 }
-                local30++;
+                currY++;
                 local44 -= local40-- + local40;
                 local48 -= local40 + local40;
             }
-            local36 = size;
+            width = size;
             local40 = -local40;
-            local48 = local40 * local40 + local34;
+            local48 = local40 * local40 + squareRadius;
             local44 = local48 - size;
             local48 -= local40;
-            while (local30 < local21) {
-                while (local48 > local34 && local44 > local34) {
-                    local48 -= local36-- + local36;
-                    local44 -= local36 + local36;
+            while (currY < y2) {
+                while (local48 > squareRadius && local44 > squareRadius) {
+                    local48 -= width-- + width;
+                    local44 -= width + width;
                 }
-                local109 = x - local36;
+                local109 = x - width;
                 if (local109 < this.clipX1) {
                     local109 = this.clipX1;
                 }
-                local123 = x + local36;
+                local123 = x + width;
                 if (local123 > this.clipX2 - 1) {
                     local123 = this.clipX2 - 1;
                 }
-                local125 = local109 + local30 * this.surfaceWidth;
+                local125 = local109 + currY * this.surfaceWidth;
                 for (local366 = local109; local366 <= local123; local366++) {
                     if ((float) z < this.depthBuffer[local125]) {
                         local380 = this.surfaceRaster[local125];
                         local380 = ((local380 & 0xFF00FF) * local98 >> 8 & 0xFF00FF) + ((local380 & 0xFF00) * local98 >> 8 & 0xFF00);
-                        this.surfaceRaster[local125] = local307 + local380;
+                        this.surfaceRaster[local125] = blended + local380;
                     }
                     local125++;
                 }
-                local30++;
+                currY++;
                 local48 += local40 + local40;
                 local44 += local40++ + local40;
             }
         } else if (mode == 2) {
             @Pc(655) int local655;
-            while (local30 < y) {
-                while (local48 <= local34 || local44 <= local34) {
-                    local44 += local36 + local36;
-                    local48 += local36++ + local36;
+            while (currY < y) {
+                while (local48 <= squareRadius || local44 <= squareRadius) {
+                    local44 += width + width;
+                    local48 += width++ + width;
                 }
-                local98 = x + 1 - local36;
+                local98 = x + 1 - width;
                 if (local98 < this.clipX1) {
                     local98 = this.clipX1;
                 }
-                local109 = x + local36;
+                local109 = x + width;
                 if (local109 > this.clipX2) {
                     local109 = this.clipX2;
                 }
-                local123 = local98 + local30 * this.surfaceWidth;
+                local123 = local98 + currY * this.surfaceWidth;
                 for (local125 = local98; local125 < local109; local125++) {
                     if ((float) z < this.depthBuffer[local123]) {
                         local366 = this.surfaceRaster[local123];
@@ -1822,29 +1822,29 @@ public final class JavaToolkit extends Toolkit {
                     }
                     local123++;
                 }
-                local30++;
+                currY++;
                 local44 -= local40-- + local40;
                 local48 -= local40 + local40;
             }
-            local36 = size;
+            width = size;
             local40 = -local40;
-            local48 = local40 * local40 + local34;
+            local48 = local40 * local40 + squareRadius;
             local44 = local48 - size;
             local48 -= local40;
-            while (local30 < local21) {
-                while (local48 > local34 && local44 > local34) {
-                    local48 -= local36-- + local36;
-                    local44 -= local36 + local36;
+            while (currY < y2) {
+                while (local48 > squareRadius && local44 > squareRadius) {
+                    local48 -= width-- + width;
+                    local44 -= width + width;
                 }
-                local98 = x - local36;
+                local98 = x - width;
                 if (local98 < this.clipX1) {
                     local98 = this.clipX1;
                 }
-                local109 = x + local36;
+                local109 = x + width;
                 if (local109 > this.clipX2 - 1) {
                     local109 = this.clipX2 - 1;
                 }
-                local123 = local98 + local30 * this.surfaceWidth;
+                local123 = local98 + currY * this.surfaceWidth;
                 for (local125 = local98; local125 <= local109; local125++) {
                     if ((float) z < this.depthBuffer[local123]) {
                         local366 = this.surfaceRaster[local123];
@@ -1855,7 +1855,7 @@ public final class JavaToolkit extends Toolkit {
                     }
                     local123++;
                 }
-                local30++;
+                currY++;
                 local48 += local40 + local40;
                 local44 += local40++ + local40;
             }
@@ -1906,39 +1906,39 @@ public final class JavaToolkit extends Toolkit {
 
     @OriginalMember(owner = "client!iaa", name = "da", descriptor = "(III[I)V")
     @Override
-    public void da(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int[] arg3) {
-        @Pc(24) float local24 = this.camera.tz + this.camera.e3_1 * (float) arg0 + this.camera.e3_2 * (float) arg1 + this.camera.e3_3 * (float) arg2;
-        if (local24 < (float) this.zNear || local24 > (float) this.zFar) {
-            arg3[0] = arg3[1] = arg3[2] = -1;
+    public void da(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int[] destination) {
+        @Pc(24) float depth = this.camera.tz + this.camera.e3_1 * (float) x + this.camera.e3_2 * (float) y + this.camera.e3_3 * (float) z;
+        if (depth < (float) this.zNear || depth > (float) this.zFar) {
+            destination[0] = destination[1] = destination[2] = -1;
             return;
         }
-        @Pc(84) int local84 = (int) ((float) this.projectionScaleX * (this.camera.tx + this.camera.e1_1 * (float) arg0 + this.camera.e1_2 * (float) arg1 + this.camera.e1_3 * (float) arg2) / local24);
-        @Pc(116) int local116 = (int) ((float) this.projectionScaleY * (this.camera.ty + this.camera.e2_1 * (float) arg0 + this.camera.e2_2 * (float) arg1 + this.camera.e2_3 * (float) arg2) / local24);
-        if (local84 >= this.viewX1 && local84 <= this.viewX2 && local116 >= this.viewY1 && local116 <= this.vewY2) {
-            arg3[0] = local84 - this.viewX1;
-            arg3[1] = local116 - this.viewY1;
-            arg3[2] = (int) local24;
+        @Pc(84) int px = (int) ((float) this.projectionScaleX * (this.camera.tx + this.camera.e1_1 * (float) x + this.camera.e1_2 * (float) y + this.camera.e1_3 * (float) z) / depth);
+        @Pc(116) int py = (int) ((float) this.projectionScaleY * (this.camera.ty + this.camera.e2_1 * (float) x + this.camera.e2_2 * (float) y + this.camera.e2_3 * (float) z) / depth);
+        if (px >= this.viewX1 && px <= this.viewX2 && py >= this.viewY1 && py <= this.vewY2) {
+            destination[0] = px - this.viewX1;
+            destination[1] = py - this.viewY1;
+            destination[2] = (int) depth;
         } else {
-            arg3[0] = arg3[1] = arg3[2] = -1;
+            destination[0] = destination[1] = destination[2] = -1;
         }
     }
 
     @OriginalMember(owner = "client!iaa", name = "HA", descriptor = "(IIII[I)V")
     @Override
-    public void HA(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int[] arg4) {
-        @Pc(24) float local24 = this.camera.tz + this.camera.e3_1 * (float) arg0 + this.camera.e3_2 * (float) arg1 + this.camera.e3_3 * (float) arg2;
-        if (local24 < (float) this.zNear || local24 > (float) this.zFar) {
-            arg4[0] = arg4[1] = arg4[2] = -1;
+    public void HA(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int zoom, @OriginalArg(4) int[] destination) {
+        @Pc(24) float depth = this.camera.tz + this.camera.e3_1 * (float) x + this.camera.e3_2 * (float) y + this.camera.e3_3 * (float) z;
+        if (depth < (float) this.zNear || depth > (float) this.zFar) {
+            destination[0] = destination[1] = destination[2] = -1;
             return;
         }
-        @Pc(85) int local85 = (int) ((float) this.projectionScaleX * (this.camera.tx + this.camera.e1_1 * (float) arg0 + this.camera.e1_2 * (float) arg1 + this.camera.e1_3 * (float) arg2) / (float) arg3);
-        @Pc(118) int local118 = (int) ((float) this.projectionScaleY * (this.camera.ty + this.camera.e2_1 * (float) arg0 + this.camera.e2_2 * (float) arg1 + this.camera.e2_3 * (float) arg2) / (float) arg3);
-        if (local85 >= this.viewX1 && local85 <= this.viewX2 && local118 >= this.viewY1 && local118 <= this.vewY2) {
-            arg4[0] = local85 - this.viewX1;
-            arg4[1] = local118 - this.viewY1;
-            arg4[2] = (int) local24;
+        @Pc(85) int px = (int) ((float) this.projectionScaleX * (this.camera.tx + this.camera.e1_1 * (float) x + this.camera.e1_2 * (float) y + this.camera.e1_3 * (float) z) / (float) zoom);
+        @Pc(118) int py = (int) ((float) this.projectionScaleY * (this.camera.ty + this.camera.e2_1 * (float) x + this.camera.e2_2 * (float) y + this.camera.e2_3 * (float) z) / (float) zoom);
+        if (px >= this.viewX1 && px <= this.viewX2 && py >= this.viewY1 && py <= this.vewY2) {
+            destination[0] = px - this.viewX1;
+            destination[1] = py - this.viewY1;
+            destination[2] = (int) depth;
         } else {
-            arg4[0] = arg4[1] = arg4[2] = -1;
+            destination[0] = destination[1] = destination[2] = -1;
         }
     }
 
@@ -1950,17 +1950,17 @@ public final class JavaToolkit extends Toolkit {
 
     @OriginalMember(owner = "client!iaa", name = "c", descriptor = "(I)V")
     @Override
-    public void method8016(@OriginalArg(0) int arg0) {
-        this.resources[arg0].method9196(null);
+    public void method8016(@OriginalArg(0) int index) {
+        this.resources[index].method9196(null);
     }
 
     @OriginalMember(owner = "client!iaa", name = "j", descriptor = "(I)V")
     @Override
-    public void allocateThreads(@OriginalArg(0) int arg0) {
-        this.threadCount = arg0;
+    public void allocateThreads(@OriginalArg(0) int count) {
+        this.threadCount = count;
         this.resources = new JavaThreadResource[this.threadCount];
-        for (@Pc(9) int local9 = 0; local9 < this.threadCount; local9++) {
-            this.resources[local9] = new JavaThreadResource(this);
+        for (@Pc(9) int i = 0; i < this.threadCount; i++) {
+            this.resources[i] = new JavaThreadResource(this);
         }
     }
 
@@ -1978,19 +1978,19 @@ public final class JavaToolkit extends Toolkit {
 
     @OriginalMember(owner = "client!iaa", name = "a", descriptor = "([IIIIIZ)Lclient!st;")
     @Override
-    public Sprite method7958(@OriginalArg(0) int[] arg0, @OriginalArg(2) int arg1, @OriginalArg(3) int arg2, @OriginalArg(4) int arg3, @OriginalArg(5) boolean arg4) {
-        @Pc(1) boolean local1 = false;
-        @Pc(3) int local3 = 0;
-        for (@Pc(5) int local5 = 0; local5 < arg3; local5++) {
-            for (@Pc(8) int local8 = 0; local8 < arg2; local8++) {
-                @Pc(16) int local16 = arg0[local3++] >>> 24;
-                if (local16 != 0 && local16 != 255) {
-                    local1 = true;
-                    return local1 ? new JavaArgbSprite(this, arg0, 0, arg1, arg2, arg3, arg4) : new JavaRgbSprite(this, arg0, 0, arg1, arg2, arg3, arg4);
+    public Sprite method7958(@OriginalArg(0) int[] raster, @OriginalArg(2) int stride, @OriginalArg(3) int width, @OriginalArg(4) int height, @OriginalArg(5) boolean copy) {
+        @Pc(1) boolean hasAlpha = false;
+        @Pc(3) int pointer = 0;
+        for (@Pc(5) int currY = 0; currY < height; currY++) {
+            for (@Pc(8) int currX = 0; currX < width; currX++) {
+                @Pc(16) int alpha = raster[pointer++] >>> 24;
+                if (alpha != 0 && alpha != 255) {
+                    hasAlpha = true;
+                    return hasAlpha ? new JavaArgbSprite(this, raster, 0, stride, width, height, copy) : new JavaRgbSprite(this, raster, 0, stride, width, height, copy);
                 }
             }
         }
-        return local1 ? new JavaArgbSprite(this, arg0, 0, arg1, arg2, arg3, arg4) : new JavaRgbSprite(this, arg0, 0, arg1, arg2, arg3, arg4);
+        return hasAlpha ? new JavaArgbSprite(this, raster, 0, stride, width, height, copy) : new JavaRgbSprite(this, raster, 0, stride, width, height, copy);
     }
 
     @OriginalMember(owner = "client!iaa", name = "E", descriptor = "()I")
@@ -2043,159 +2043,159 @@ public final class JavaToolkit extends Toolkit {
     }
 
     @OriginalMember(owner = "client!iaa", name = "b", descriptor = "(IIIIIIIIII)V")
-    public void method3791(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) int arg6, @OriginalArg(7) int arg7, @OriginalArg(8) int arg8, @OriginalArg(9) int arg9) {
-        if (arg3 == 0 || arg4 == 0) {
+    public void method3791(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int halfWidth, @OriginalArg(4) int halfHeight, @OriginalArg(5) int arg5, @OriginalArg(6) int id, @OriginalArg(7) int colour, @OriginalArg(8) int arg8, @OriginalArg(9) int mode) {
+        if (halfWidth == 0 || halfHeight == 0) {
             return;
         }
-        if (arg6 == 65535 || super.textureSource.getMetrics(arg6).disableable) {
-            this.method3790(arg0, arg1, arg2, arg3, arg7, arg9);
+        if (id == 65535 || super.textureSource.getMetrics(id).disableable) {
+            this.fillDepthTestedCircle(x, y, z, halfWidth, colour, mode);
             return;
         }
-        if (this.textureId != arg6) {
-            @Pc(33) Sprite local33 = (Sprite) this.spriteCache.get(arg6);
-            if (local33 == null) {
-                @Pc(39) int[] local39 = this.getArgbTexture(arg6);
-                if (local39 == null) {
+        if (this.textureId != id) {
+            @Pc(33) Sprite sprite = (Sprite) this.spriteCache.get(id);
+            if (sprite == null) {
+                @Pc(39) int[] data = this.getArgbTexture(id);
+                if (data == null) {
                     return;
                 }
-                @Pc(53) int local53 = this.smallTexture(arg6) ? 64 : this.textureSize;
-                local33 = this.createSprite(local53, local53, local53, local39);
-                this.spriteCache.put(local33, arg6);
+                @Pc(53) int size = this.smallTexture(id) ? 64 : this.textureSize;
+                sprite = this.createSprite(size, size, size, data);
+                this.spriteCache.put(sprite, id);
             }
-            this.textureId = arg6;
-            this.sprite = local33;
+            this.textureId = id;
+            this.sprite = sprite;
         }
-        ((JavaSprite) this.sprite).method8208(arg0 - arg3, arg1 - arg4, arg2, arg3 << 1, arg4 << 1, arg8, arg7, arg9);
+        ((JavaSprite) this.sprite).method8208(x - halfWidth, y - halfHeight, z, halfWidth << 1, halfHeight << 1, arg8, colour, mode);
     }
 
     @OriginalMember(owner = "client!iaa", name = "a", descriptor = "(IIIIZ)Lclient!st;")
     @Override
-    public Sprite createSprite(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) boolean arg4) {
-        @Pc(4) int[] local4 = new int[arg2 * arg3];
-        @Pc(11) int local11 = arg1 * this.surfaceWidth + arg0;
-        @Pc(16) int local16 = this.surfaceWidth - arg2;
-        for (@Pc(18) int local18 = 0; local18 < arg3; local18++) {
-            @Pc(23) int local23 = local18 * arg2;
-            for (@Pc(25) int local25 = 0; local25 < arg2; local25++) {
-                local4[local23 + local25] = this.surfaceRaster[local11++];
+    public Sprite createSprite(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int width, @OriginalArg(3) int height, @OriginalArg(4) boolean transparent) {
+        @Pc(4) int[] raster = new int[width * height];
+        @Pc(11) int sourcePixel = y * this.surfaceWidth + x;
+        @Pc(16) int step = this.surfaceWidth - width;
+        for (@Pc(18) int currY = 0; currY < height; currY++) {
+            @Pc(23) int rowOffset = currY * width;
+            for (@Pc(25) int currX = 0; currX < width; currX++) {
+                raster[rowOffset + currX] = this.surfaceRaster[sourcePixel++];
             }
-            local11 += local16;
+            sourcePixel += step;
         }
-        if (arg4) {
-            return new JavaArgbSprite(this, local4, arg2, arg3);
+        if (transparent) {
+            return new JavaArgbSprite(this, raster, width, height);
         } else {
-            return new JavaRgbSprite(this, local4, arg2, arg3);
+            return new JavaRgbSprite(this, raster, width, height);
         }
     }
 
     @OriginalMember(owner = "client!iaa", name = "T", descriptor = "(IIII)V")
     @Override
-    public void T(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3) {
-        if (this.clipX1 < arg0) {
-            this.clipX1 = arg0;
+    public void T(@OriginalArg(0) int x1, @OriginalArg(1) int y1, @OriginalArg(2) int x2, @OriginalArg(3) int y2) {
+        if (this.clipX1 < x1) {
+            this.clipX1 = x1;
         }
-        if (this.clipY1 < arg1) {
-            this.clipY1 = arg1;
+        if (this.clipY1 < y1) {
+            this.clipY1 = y1;
         }
-        if (this.clipX2 > arg2) {
-            this.clipX2 = arg2;
+        if (this.clipX2 > x2) {
+            this.clipX2 = x2;
         }
-        if (this.clipY2 > arg3) {
-            this.clipY2 = arg3;
+        if (this.clipY2 > y2) {
+            this.clipY2 = y2;
         }
         this.updateViewport();
     }
 
     @OriginalMember(owner = "client!iaa", name = "a", descriptor = "(Lclient!wp;Z)Lclient!st;")
     @Override
-    public Sprite createSprite(@OriginalArg(0) IndexedImage arg0, @OriginalArg(1) boolean arg1) {
-        @Pc(2) int[] local2 = arg0.palette;
-        @Pc(5) byte[] local5 = arg0.raster;
-        @Pc(8) int local8 = arg0.width;
-        @Pc(11) int local11 = arg0.height;
-        @Pc(80) JavaSprite local80;
+    public Sprite createSprite(@OriginalArg(0) IndexedImage image, @OriginalArg(1) boolean transparent) {
+        @Pc(2) int[] palette = image.palette;
+        @Pc(5) byte[] indexes = image.raster;
+        @Pc(8) int width = image.width;
+        @Pc(11) int height = image.height;
+        @Pc(80) JavaSprite sprite;
         @Pc(22) int[] local22;
         @Pc(27) byte[] local27;
         @Pc(29) int local29;
         @Pc(34) int local34;
         @Pc(36) int local36;
-        if (arg1 && arg0.alpha == null) {
-            local22 = new int[local2.length];
-            local27 = new byte[local8 * local11];
-            for (local29 = 0; local29 < local11; local29++) {
-                local34 = local29 * local8;
-                for (local36 = 0; local36 < local8; local36++) {
-                    local27[local34 + local36] = local5[local34 + local36];
+        if (transparent && image.alpha == null) {
+            local22 = new int[palette.length];
+            local27 = new byte[width * height];
+            for (local29 = 0; local29 < height; local29++) {
+                local34 = local29 * width;
+                for (local36 = 0; local36 < width; local36++) {
+                    local27[local34 + local36] = indexes[local34 + local36];
                 }
             }
-            for (local34 = 0; local34 < local2.length; local34++) {
-                local22[local34] = local2[local34];
+            for (local34 = 0; local34 < palette.length; local34++) {
+                local22[local34] = palette[local34];
             }
-            local80 = new JavaIndexedSprite(this, local27, local22, local8, local11);
+            sprite = new JavaIndexedSprite(this, local27, local22, width, height);
         } else {
-            local22 = new int[local8 * local11];
-            local27 = arg0.alpha;
+            local22 = new int[width * height];
+            local27 = image.alpha;
             if (local27 == null) {
-                for (local29 = 0; local29 < local11; local29++) {
-                    local34 = local29 * local8;
-                    for (local36 = 0; local36 < local8; local36++) {
-                        @Pc(162) int local162 = local2[local5[local34 + local36] & 0xFF];
-                        local22[local34 + local36] = local162 == 0 ? 0 : local162 | 0xFF000000;
+                for (local29 = 0; local29 < height; local29++) {
+                    local34 = local29 * width;
+                    for (local36 = 0; local36 < width; local36++) {
+                        @Pc(162) int colour = palette[indexes[local34 + local36] & 0xFF];
+                        local22[local34 + local36] = colour == 0 ? 0 : colour | 0xFF000000;
                     }
                 }
-                local80 = new JavaRgbSprite(this, local22, local8, local11);
+                sprite = new JavaRgbSprite(this, local22, width, height);
             } else {
-                for (local29 = 0; local29 < local11; local29++) {
-                    local34 = local29 * local8;
-                    for (local36 = 0; local36 < local8; local36++) {
-                        local22[local34 + local36] = local2[local5[local34 + local36] & 0xFF] | local27[local34 + local36] << 24;
+                for (local29 = 0; local29 < height; local29++) {
+                    local34 = local29 * width;
+                    for (local36 = 0; local36 < width; local36++) {
+                        local22[local34 + local36] = palette[indexes[local34 + local36] & 0xFF] | local27[local34 + local36] << 24;
                     }
                 }
-                local80 = new JavaArgbSprite(this, local22, local8, local11);
+                sprite = new JavaArgbSprite(this, local22, width, height);
             }
         }
-        local80.setOffsets(arg0.offX1, arg0.offY1, arg0.offX2, arg0.offY2);
-        return local80;
+        sprite.setOffsets(image.offX1, image.offY1, image.offX2, image.offY2);
+        return sprite;
     }
 
     @OriginalMember(owner = "client!iaa", name = "a", descriptor = "(II[[I[[IIII)Lclient!s;")
     @Override
-    public Ground createGround(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int[][] arg2, @OriginalArg(3) int[][] arg3, @OriginalArg(5) int arg4, @OriginalArg(6) int arg5) {
-        return new JavaGround(this, arg4, arg5, arg0, arg1, arg2, arg3, 512);
+    public Ground createGround(@OriginalArg(0) int width, @OriginalArg(1) int length, @OriginalArg(2) int[][] tileHeights, @OriginalArg(3) int[][] heights, @OriginalArg(5) int groundFlags, @OriginalArg(6) int featureFlags) {
+        return new JavaGround(this, groundFlags, featureFlags, width, length, tileHeights, heights, 512);
     }
 
     @OriginalMember(owner = "client!iaa", name = "JA", descriptor = "(IIIIII)I")
     @Override
-    public int JA(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5) {
-        @Pc(1) int local1 = 0;
-        @Pc(26) float local26 = this.camera.e3_1 * (float) arg0 + this.camera.e3_2 * (float) arg1 + this.camera.e3_3 * (float) arg2 + this.camera.tz;
-        if (local26 < 1.0F) {
-            local26 = 1.0F;
+    public int JA(@OriginalArg(0) int x1, @OriginalArg(1) int y1, @OriginalArg(2) int z1, @OriginalArg(3) int x2, @OriginalArg(4) int y2, @OriginalArg(5) int z2) {
+        @Pc(1) int outcode = 0;
+        @Pc(26) float depth1 = this.camera.e3_1 * (float) x1 + this.camera.e3_2 * (float) y1 + this.camera.e3_3 * (float) z1 + this.camera.tz;
+        if (depth1 < 1.0F) {
+            depth1 = 1.0F;
         }
-        @Pc(57) float local57 = this.camera.e3_1 * (float) arg3 + this.camera.e3_2 * (float) arg4 + this.camera.e3_3 * (float) arg5 + this.camera.tz;
-        if (local57 < 1.0F) {
-            local57 = 1.0F;
+        @Pc(57) float depth2 = this.camera.e3_1 * (float) x2 + this.camera.e3_2 * (float) y2 + this.camera.e3_3 * (float) z2 + this.camera.tz;
+        if (depth2 < 1.0F) {
+            depth2 = 1.0F;
         }
-        if (local26 < (float) this.zNear && local57 < (float) this.zNear) {
-            local1 |= 0x10;
-        } else if (local26 > (float) this.zFar && local57 > (float) this.zFar) {
-            local1 |= 0x20;
+        if (depth1 < (float) this.zNear && depth2 < (float) this.zNear) {
+            outcode |= 0x10;
+        } else if (depth1 > (float) this.zFar && depth2 > (float) this.zFar) {
+            outcode |= 0x20;
         }
-        @Pc(132) int local132 = (int) ((float) this.projectionScaleX * (this.camera.e1_1 * (float) arg0 + this.camera.e1_2 * (float) arg1 + this.camera.e1_3 * (float) arg2 + this.camera.tx) / local26);
-        @Pc(164) int local164 = (int) ((float) this.projectionScaleX * (this.camera.e1_1 * (float) arg3 + this.camera.e1_2 * (float) arg4 + this.camera.e1_3 * (float) arg5 + this.camera.tx) / local57);
-        if (local132 < this.viewX1 && local164 < this.viewX1) {
-            local1 |= 0x1;
-        } else if (local132 > this.viewX2 && local164 > this.viewX2) {
-            local1 |= 0x2;
+        @Pc(132) int px1 = (int) ((float) this.projectionScaleX * (this.camera.e1_1 * (float) x1 + this.camera.e1_2 * (float) y1 + this.camera.e1_3 * (float) z1 + this.camera.tx) / depth1);
+        @Pc(164) int px2 = (int) ((float) this.projectionScaleX * (this.camera.e1_1 * (float) x2 + this.camera.e1_2 * (float) y2 + this.camera.e1_3 * (float) z2 + this.camera.tx) / depth2);
+        if (px1 < this.viewX1 && px2 < this.viewX1) {
+            outcode |= 0x1;
+        } else if (px1 > this.viewX2 && px2 > this.viewX2) {
+            outcode |= 0x2;
         }
-        @Pc(225) int local225 = (int) ((float) this.projectionScaleY * (this.camera.e2_1 * (float) arg0 + this.camera.e2_2 * (float) arg1 + this.camera.e2_3 * (float) arg2 + this.camera.ty) / local26);
-        @Pc(257) int local257 = (int) ((float) this.projectionScaleY * (this.camera.e2_1 * (float) arg3 + this.camera.e2_2 * (float) arg4 + this.camera.e2_3 * (float) arg5 + this.camera.ty) / local57);
-        if (local225 < this.viewY1 && local257 < this.viewY1) {
-            local1 |= 0x4;
-        } else if (local225 > this.vewY2 && local257 > this.vewY2) {
-            local1 |= 0x8;
+        @Pc(225) int py1 = (int) ((float) this.projectionScaleY * (this.camera.e2_1 * (float) x1 + this.camera.e2_2 * (float) y1 + this.camera.e2_3 * (float) z1 + this.camera.ty) / depth1);
+        @Pc(257) int py2 = (int) ((float) this.projectionScaleY * (this.camera.e2_1 * (float) x2 + this.camera.e2_2 * (float) y2 + this.camera.e2_3 * (float) z2 + this.camera.ty) / depth2);
+        if (py1 < this.viewY1 && py2 < this.viewY1) {
+            outcode |= 0x4;
+        } else if (py1 > this.vewY2 && py2 > this.vewY2) {
+            outcode |= 0x8;
         }
-        return local1;
+        return outcode;
     }
 
     @OriginalMember(owner = "client!iaa", name = "a", descriptor = "(IIIIII)V")
@@ -2341,23 +2341,23 @@ public final class JavaToolkit extends Toolkit {
     }
 
     @OriginalMember(owner = "client!iaa", name = "l", descriptor = "(I)[I")
-    public int[] method3792(@OriginalArg(0) int arg0) {
-        @Pc(2) ReferenceCache local2 = this.textureCache;
-        @Pc(12) JavaAnimatedTexture local12;
+    public int[] method3792(@OriginalArg(0) int id) {
+        @Pc(2) ReferenceCache cache = this.textureCache;
+        @Pc(12) JavaAnimatedTexture texture;
         synchronized (this.textureCache) {
-            local12 = (JavaAnimatedTexture) this.textureCache.get(arg0);
-            if (local12 == null) {
-                if (!super.textureSource.textureAvailable(arg0)) {
+            texture = (JavaAnimatedTexture) this.textureCache.get(id);
+            if (texture == null) {
+                if (!super.textureSource.textureAvailable(id)) {
                     return null;
                 }
-                @Pc(34) TextureMetrics local34 = super.textureSource.getMetrics(arg0);
-                @Pc(48) int local48 = local34.small || this.shrinkTextures ? 64 : this.textureSize;
-                local12 = new JavaAnimatedTexture(arg0, local48, super.textureSource.rgbOutput(local48, true, local48, arg0, 0.7F), local34.alphaBlendMode != 1);
-                this.textureCache.put(local12, arg0);
+                @Pc(34) TextureMetrics metrics = super.textureSource.getMetrics(id);
+                @Pc(48) int size = metrics.small || this.shrinkTextures ? 64 : this.textureSize;
+                texture = new JavaAnimatedTexture(id, size, super.textureSource.rgbOutput(size, true, size, id, 0.7F), metrics.alphaBlendMode != 1);
+                this.textureCache.put(texture, id);
             }
         }
-        local12.awaitingTick = true;
-        return local12.method3972();
+        texture.awaitingTick = true;
+        return texture.method3972();
     }
 
     @OriginalMember(owner = "client!iaa", name = "r", descriptor = "()Z")
@@ -2368,44 +2368,44 @@ public final class JavaToolkit extends Toolkit {
 
     @OriginalMember(owner = "client!iaa", name = "r", descriptor = "(IIIIIII)I")
     @Override
-    public int r(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) int arg6) {
-        @Pc(24) float local24 = this.camera.e3_1 * (float) arg0 + this.camera.e3_2 * (float) arg1 + this.camera.e3_3 * (float) arg2 + this.camera.tz;
-        @Pc(49) float local49 = this.camera.e3_1 * (float) arg3 + this.camera.e3_2 * (float) arg4 + this.camera.e3_3 * (float) arg5 + this.camera.tz;
-        @Pc(51) int local51 = 0;
-        if (local24 < (float) this.zNear && local49 < (float) this.zNear) {
-            local51 |= 0x10;
-        } else if (local24 > (float) this.zFar && local49 > (float) this.zFar) {
-            local51 |= 0x20;
+    public int r(@OriginalArg(0) int x1, @OriginalArg(1) int y1, @OriginalArg(2) int z1, @OriginalArg(3) int x2, @OriginalArg(4) int y2, @OriginalArg(5) int z2, @OriginalArg(6) int zoom) {
+        @Pc(24) float depth1 = this.camera.e3_1 * (float) x1 + this.camera.e3_2 * (float) y1 + this.camera.e3_3 * (float) z1 + this.camera.tz;
+        @Pc(49) float depth2 = this.camera.e3_1 * (float) x2 + this.camera.e3_2 * (float) y2 + this.camera.e3_3 * (float) z2 + this.camera.tz;
+        @Pc(51) int outcode = 0;
+        if (depth1 < (float) this.zNear && depth2 < (float) this.zNear) {
+            outcode |= 0x10;
+        } else if (depth1 > (float) this.zFar && depth2 > (float) this.zFar) {
+            outcode |= 0x20;
         }
-        @Pc(121) int local121 = (int) ((float) this.projectionScaleX * (this.camera.e1_1 * (float) arg0 + this.camera.e1_2 * (float) arg1 + this.camera.e1_3 * (float) arg2 + this.camera.tx) / (float) arg6);
-        @Pc(154) int local154 = (int) ((float) this.projectionScaleX * (this.camera.e1_1 * (float) arg3 + this.camera.e1_2 * (float) arg4 + this.camera.e1_3 * (float) arg5 + this.camera.tx) / (float) arg6);
-        if (local121 < this.viewX1 && local154 < this.viewX1) {
-            local51 |= 0x1;
-        } else if (local121 > this.viewX2 && local154 > this.viewX2) {
-            local51 |= 0x2;
+        @Pc(121) int px1 = (int) ((float) this.projectionScaleX * (this.camera.e1_1 * (float) x1 + this.camera.e1_2 * (float) y1 + this.camera.e1_3 * (float) z1 + this.camera.tx) / (float) zoom);
+        @Pc(154) int px2 = (int) ((float) this.projectionScaleX * (this.camera.e1_1 * (float) x2 + this.camera.e1_2 * (float) y2 + this.camera.e1_3 * (float) z2 + this.camera.tx) / (float) zoom);
+        if (px1 < this.viewX1 && px2 < this.viewX1) {
+            outcode |= 0x1;
+        } else if (px1 > this.viewX2 && px2 > this.viewX2) {
+            outcode |= 0x2;
         }
-        @Pc(216) int local216 = (int) ((float) this.projectionScaleY * (this.camera.e2_1 * (float) arg0 + this.camera.e2_2 * (float) arg1 + this.camera.e2_3 * (float) arg2 + this.camera.ty) / (float) arg6);
-        @Pc(249) int local249 = (int) ((float) this.projectionScaleY * (this.camera.e2_1 * (float) arg3 + this.camera.e2_2 * (float) arg4 + this.camera.e2_3 * (float) arg5 + this.camera.ty) / (float) arg6);
-        if (local216 < this.viewY1 && local249 < this.viewY1) {
-            local51 |= 0x4;
-        } else if (local216 > this.vewY2 && local249 > this.vewY2) {
-            local51 |= 0x8;
+        @Pc(216) int py1 = (int) ((float) this.projectionScaleY * (this.camera.e2_1 * (float) x1 + this.camera.e2_2 * (float) y1 + this.camera.e2_3 * (float) z1 + this.camera.ty) / (float) zoom);
+        @Pc(249) int py2 = (int) ((float) this.projectionScaleY * (this.camera.e2_1 * (float) x2 + this.camera.e2_2 * (float) y2 + this.camera.e2_3 * (float) z2 + this.camera.ty) / (float) zoom);
+        if (py1 < this.viewY1 && py2 < this.viewY1) {
+            outcode |= 0x4;
+        } else if (py1 > this.vewY2 && py2 > this.vewY2) {
+            outcode |= 0x8;
         }
-        return local51;
+        return outcode;
     }
 
     @OriginalMember(owner = "client!iaa", name = "pa", descriptor = "()V")
     @Override
     public void pa() {
-        for (@Pc(1) int local1 = 0; local1 < this.resources.length; local1++) {
-            this.resources[local1].fogColour = this.resources[local1].anInt10600;
-            this.resources[local1].water = false;
+        for (@Pc(1) int i = 0; i < this.resources.length; i++) {
+            this.resources[i].fogColour = this.resources[i].anInt10600;
+            this.resources[i].water = false;
         }
     }
 
     @OriginalMember(owner = "client!iaa", name = "m", descriptor = "(I)I")
-    public int textureHsl(@OriginalArg(0) int arg0) {
-        return super.textureSource.getMetrics(arg0).aShort37 & 0xFFFF;
+    public int textureHsl(@OriginalArg(0) int id) {
+        return super.textureSource.getMetrics(id).aShort37 & 0xFFFF;
     }
 
     @OriginalMember(owner = "client!iaa", name = "X", descriptor = "(I)V")
@@ -2414,39 +2414,39 @@ public final class JavaToolkit extends Toolkit {
     }
 
     @OriginalMember(owner = "client!iaa", name = "b", descriptor = "(IIIIIIII)V")
-    public void method3794(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(5) int arg4, @OriginalArg(6) int arg5, @OriginalArg(7) int arg6) {
-        if (arg1 < this.clipY1 || arg1 >= this.clipY2) {
+    public void horizontalDashedLine(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int length, @OriginalArg(3) int colour, @OriginalArg(5) int dashLength, @OriginalArg(6) int gapLength, @OriginalArg(7) int phase) {
+        if (y < this.clipY1 || y >= this.clipY2) {
             return;
         }
-        @Pc(18) int local18 = arg0 + arg1 * this.surfaceWidth;
-        @Pc(22) int local22 = arg3 >>> 24;
-        @Pc(26) int local26 = arg4 + arg5;
-        @Pc(30) int local30 = arg6 % local26;
+        @Pc(18) int pixel = x + y * this.surfaceWidth;
+        @Pc(22) int alpha = colour >>> 24;
+        @Pc(26) int period = dashLength + gapLength;
+        @Pc(30) int offset = phase % period;
         @Pc(44) int local44;
-        if (local22 == 255 && true) {
+        if (alpha == 255 && true) {
             local44 = 0;
-            while (local44 < arg2) {
-                if (arg0 + local44 >= this.clipX1 && arg0 + local44 < this.clipX2 && local30 < arg4) {
-                    this.surfaceRaster[local18 + local44] = arg3;
+            while (local44 < length) {
+                if (x + local44 >= this.clipX1 && x + local44 < this.clipX2 && offset < dashLength) {
+                    this.surfaceRaster[pixel + local44] = colour;
                 }
                 local44++;
-                local30++;
-                local30 %= local26;
+                offset++;
+                offset %= period;
             }
             return;
         }
-        @Pc(111) int local111 = ((arg3 & 0xFF00FF) * local22 >> 8 & 0xFF00FF) + ((arg3 & 0xFF00) * local22 >> 8 & 0xFF00) + (local22 << 24);
-        local44 = 256 - local22;
-        @Pc(117) int local117 = 0;
-        while (local117 < arg2) {
-            if (arg0 + local117 >= this.clipX1 && arg0 + local117 < this.clipX2 && local30 < arg4) {
-                @Pc(144) int local144 = this.surfaceRaster[local18 + local117];
-                @Pc(164) int local164 = ((local144 & 0xFF00FF) * local44 >> 8 & 0xFF00FF) + ((local144 & 0xFF00) * local44 >> 8 & 0xFF00);
-                this.surfaceRaster[local18 + local117] = local111 + local164;
+        @Pc(111) int blended = ((colour & 0xFF00FF) * alpha >> 8 & 0xFF00FF) + ((colour & 0xFF00) * alpha >> 8 & 0xFF00) + (alpha << 24);
+        local44 = 256 - alpha;
+        @Pc(117) int i = 0;
+        while (i < length) {
+            if (x + i >= this.clipX1 && x + i < this.clipX2 && offset < dashLength) {
+                @Pc(144) int dest = this.surfaceRaster[pixel + i];
+                @Pc(164) int faded = ((dest & 0xFF00FF) * local44 >> 8 & 0xFF00FF) + ((dest & 0xFF00) * local44 >> 8 & 0xFF00);
+                this.surfaceRaster[pixel + i] = blended + faded;
             }
-            local117++;
-            local30++;
-            local30 %= local26;
+            i++;
+            offset++;
+            offset %= period;
         }
     }
 
@@ -2650,27 +2650,27 @@ public final class JavaToolkit extends Toolkit {
 
     @OriginalMember(owner = "client!iaa", name = "a", descriptor = "(IIIIIILclient!aa;IIIII)V")
     @Override
-    public void method7942(@OriginalArg(0) int x1, @OriginalArg(1) int y1, @OriginalArg(2) int x2, @OriginalArg(3) int y2, @OriginalArg(4) int colour, @OriginalArg(5) int mode, @OriginalArg(6) ClippingMask mask, @OriginalArg(7) int maskX, @OriginalArg(8) int maskY, @OriginalArg(9) int arg8, @OriginalArg(10) int arg9, @OriginalArg(11) int arg10) {
-        @Pc(2) JavaClippingMask local2 = (JavaClippingMask) mask;
-        @Pc(5) int[] local5 = local2.lineOffsets;
-        @Pc(8) int[] local8 = local2.lineWidths;
+    public void method7942(@OriginalArg(0) int x1, @OriginalArg(1) int y1, @OriginalArg(2) int x2, @OriginalArg(3) int y2, @OriginalArg(4) int colour, @OriginalArg(5) int mode, @OriginalArg(6) ClippingMask mask, @OriginalArg(7) int maskX, @OriginalArg(8) int maskY, @OriginalArg(9) int dashLength, @OriginalArg(10) int gapLength, @OriginalArg(11) int phase) {
+        @Pc(2) JavaClippingMask javaMask = (JavaClippingMask) mask;
+        @Pc(5) int[] lineOffsets = javaMask.lineOffsets;
+        @Pc(8) int[] lineWidths = javaMask.lineWidths;
         @Pc(18) int local18 = this.clipY1 > maskY ? this.clipY1 : maskY;
-        @Pc(34) int local34 = this.clipY2 < maskY + local5.length ? this.clipY2 : maskY + local5.length;
-        @Pc(38) int local38 = arg10 << 8;
-        @Pc(42) int local42 = arg8 << 8;
-        @Pc(46) int local46 = arg9 << 8;
-        @Pc(50) int local50 = local42 + local46;
-        arg10 = local38 % local50;
+        @Pc(34) int local34 = this.clipY2 < maskY + lineOffsets.length ? this.clipY2 : maskY + lineOffsets.length;
+        @Pc(38) int local38 = phase << 8;
+        @Pc(42) int scaledDash = dashLength << 8;
+        @Pc(46) int scaledGap = gapLength << 8;
+        @Pc(50) int period = scaledDash + scaledGap;
+        phase = local38 % period;
         x2 -= x1;
         y2 -= y1;
 
         if (x2 + y2 < 0) {
             @Pc(79) int local79 = (int) (Math.sqrt(x2 * x2 + y2 * y2) * 256.0D);
-            @Pc(83) int local83 = local79 % local50;
-            local38 = local50 + local42 - arg10 - local83;
-            arg10 = local38 % local50;
-            if (arg10 < 0) {
-                arg10 += local50;
+            @Pc(83) int local83 = local79 % period;
+            local38 = period + scaledDash - phase - local83;
+            phase = local38 % period;
+            if (phase < 0) {
+                phase += period;
             }
             x1 += x2;
             x2 = -x2;
@@ -2690,16 +2690,16 @@ public final class JavaToolkit extends Toolkit {
                 while (x1 <= local144) {
                     @Pc(179) int local179 = y1 >> 16;
                     @Pc(183) int local183 = local179 - maskY;
-                    if (x1 >= this.clipX1 && x1 < this.clipX2 && local179 >= local18 && local179 < local34 && arg10 < local42) {
-                        @Pc(214) int local214 = maskX + local5[local183];
-                        if (x1 >= local214 && x1 < local214 + local8[local183]) {
+                    if (x1 >= this.clipX1 && x1 < this.clipX2 && local179 >= local18 && local179 < local34 && phase < scaledDash) {
+                        @Pc(214) int local214 = maskX + lineOffsets[local183];
+                        if (x1 >= local214 && x1 < local214 + lineWidths[local183]) {
                             this.surfaceRaster[x1 + local179 * this.surfaceWidth] = colour;
                         }
                     }
                     y1 += local79;
                     x1++;
-                    local38 = arg10 + local161;
-                    arg10 = local38 % local50;
+                    local38 = phase + local161;
+                    phase = local38 % period;
                 }
             } else if (mode == 1) {
                 @Pc(283) int local283 = ((colour & 0xFF00FF) * alpha >> 8 & 0xFF00FF) + ((colour & 0xFF00) * alpha >> 8 & 0xFF00) + (alpha << 24);
@@ -2707,9 +2707,9 @@ public final class JavaToolkit extends Toolkit {
                 while (x1 <= local144) {
                     @Pc(183) int local183 = y1 >> 16;
                     @Pc(214) int local214 = local183 - maskY;
-                    if (x1 >= this.clipX1 && x1 < this.clipX2 && local183 >= local18 && local183 < local34 && arg10 < local42) {
-                        @Pc(327) int local327 = maskX + local5[local214];
-                        if (x1 >= local327 && x1 < local327 + local8[local214]) {
+                    if (x1 >= this.clipX1 && x1 < this.clipX2 && local183 >= local18 && local183 < local34 && phase < scaledDash) {
+                        @Pc(327) int local327 = maskX + lineOffsets[local214];
+                        if (x1 >= local327 && x1 < local327 + lineWidths[local214]) {
                             @Pc(346) int local346 = x1 + local183 * this.surfaceWidth;
                             @Pc(351) int local351 = this.surfaceRaster[local346];
                             @Pc(371) int local371 = ((local351 & 0xFF00FF) * local179 >> 8 & 0xFF00FF) + ((local351 & 0xFF00) * local179 >> 8 & 0xFF00);
@@ -2718,16 +2718,16 @@ public final class JavaToolkit extends Toolkit {
                     }
                     y1 += local79;
                     x1++;
-                    local38 = arg10 + local161;
-                    arg10 = local38 % local50;
+                    local38 = phase + local161;
+                    phase = local38 % period;
                 }
             } else if (mode == 2) {
                 while (x1 <= local144) {
                     @Pc(183) int local183 = y1 >> 16;
                     @Pc(214) int local214 = local183 - maskY;
-                    if (x1 >= this.clipX1 && x1 < this.clipX2 && local183 >= local18 && local183 < local34 && arg10 < local42) {
-                        @Pc(327) int local327 = maskX + local5[local214];
-                        if (x1 >= local327 && x1 < local327 + local8[local214]) {
+                    if (x1 >= this.clipX1 && x1 < this.clipX2 && local183 >= local18 && local183 < local34 && phase < scaledDash) {
+                        @Pc(327) int local327 = maskX + lineOffsets[local214];
+                        if (x1 >= local327 && x1 < local327 + lineWidths[local214]) {
                             @Pc(346) int local346 = x1 + local183 * this.surfaceWidth;
                             @Pc(351) int local351 = this.surfaceRaster[local346];
                             @Pc(371) int local371 = colour + local351;
@@ -2738,8 +2738,8 @@ public final class JavaToolkit extends Toolkit {
                     }
                     y1 += local79;
                     x1++;
-                    local38 = arg10 + local161;
-                    arg10 = local38 % local50;
+                    local38 = phase + local161;
+                    phase = local38 % period;
                 }
             } else {
                 throw new IllegalArgumentException();
@@ -2756,13 +2756,13 @@ public final class JavaToolkit extends Toolkit {
                 while (y1 <= local130) {
                     @Pc(179) int local179 = x1 >> 16;
                     @Pc(183) int local183 = y1 - maskY;
-                    if (y1 >= local18 && y1 < local34 && local179 >= this.clipX1 && local179 < this.clipX2 && arg10 < local42 && local179 >= maskX + local5[local183] && local179 < maskX + local5[local183] + local8[local183]) {
+                    if (y1 >= local18 && y1 < local34 && local179 >= this.clipX1 && local179 < this.clipX2 && phase < scaledDash && local179 >= maskX + lineOffsets[local183] && local179 < maskX + lineOffsets[local183] + lineWidths[local183]) {
                         this.surfaceRaster[local179 + y1 * this.surfaceWidth] = colour;
                     }
                     x1 += local79;
                     y1++;
-                    local38 = arg10 + local83;
-                    arg10 = local38 % local50;
+                    local38 = phase + local83;
+                    phase = local38 % period;
                 }
             } else if (mode == 1) {
                 @Pc(283) int local283 = ((colour & 0xFF00FF) * alpha >> 8 & 0xFF00FF) + ((colour & 0xFF00) * alpha >> 8 & 0xFF00) + (alpha << 24);
@@ -2770,7 +2770,7 @@ public final class JavaToolkit extends Toolkit {
                 while (y1 <= local130) {
                     @Pc(183) int local183 = x1 >> 16;
                     @Pc(214) int local214 = y1 - maskY;
-                    if (y1 >= local18 && y1 < local34 && local183 >= this.clipX1 && local183 < this.clipX2 && arg10 < local42 && local183 >= maskX + local5[local214] && local183 < maskX + local5[local214] + local8[local214]) {
+                    if (y1 >= local18 && y1 < local34 && local183 >= this.clipX1 && local183 < this.clipX2 && phase < scaledDash && local183 >= maskX + lineOffsets[local214] && local183 < maskX + lineOffsets[local214] + lineWidths[local214]) {
                         @Pc(327) int local327 = local183 + y1 * this.surfaceWidth;
                         @Pc(346) int local346 = this.surfaceRaster[local327];
                         @Pc(782) int local782 = ((local346 & 0xFF00FF) * local179 >> 8 & 0xFF00FF) + ((local346 & 0xFF00) * local179 >> 8 & 0xFF00);
@@ -2778,14 +2778,14 @@ public final class JavaToolkit extends Toolkit {
                     }
                     x1 += local79;
                     y1++;
-                    local38 = arg10 + local83;
-                    arg10 = local38 % local50;
+                    local38 = phase + local83;
+                    phase = local38 % period;
                 }
             } else if (mode == 2) {
                 while (y1 <= local130) {
                     @Pc(183) int local183 = x1 >> 16;
                     @Pc(214) int local214 = y1 - maskY;
-                    if (y1 >= local18 && y1 < local34 && local183 >= this.clipX1 && local183 < this.clipX2 && arg10 < local42 && local183 >= maskX + local5[local214] && local183 < maskX + local5[local214] + local8[local214]) {
+                    if (y1 >= local18 && y1 < local34 && local183 >= this.clipX1 && local183 < this.clipX2 && phase < scaledDash && local183 >= maskX + lineOffsets[local214] && local183 < maskX + lineOffsets[local214] + lineWidths[local214]) {
                         @Pc(327) int local327 = local183 + y1 * this.surfaceWidth;
                         @Pc(346) int local346 = this.surfaceRaster[local327];
                         @Pc(782) int local782 =colour + local346;
@@ -2795,8 +2795,8 @@ public final class JavaToolkit extends Toolkit {
                     }
                     x1 += local79;
                     y1++;
-                    local38 = arg10 + local83;
-                    arg10 = local38 % local50;
+                    local38 = phase + local83;
+                    phase = local38 % period;
                 }
             } else {
                 throw new IllegalArgumentException();
@@ -2805,8 +2805,8 @@ public final class JavaToolkit extends Toolkit {
     }
 
     @OriginalMember(owner = "client!iaa", name = "p", descriptor = "(I)I")
-    public int textureAlphaBlendMode(@OriginalArg(0) int arg0) {
-        return super.textureSource.getMetrics(arg0).alphaBlendMode;
+    public int textureAlphaBlendMode(@OriginalArg(0) int id) {
+        return super.textureSource.getMetrics(id).alphaBlendMode;
     }
 
     @OriginalMember(owner = "client!iaa", name = "z", descriptor = "()Z")
@@ -2818,7 +2818,7 @@ public final class JavaToolkit extends Toolkit {
     @OriginalMember(owner = "client!iaa", name = "a", descriptor = "(Lclient!eca;Lclient!wja;)Lclient!gaa;")
     @Override
     public OffscreenSurface createOffscreenSurface(@OriginalArg(0) Surface surface, @OriginalArg(1) DepthBuffer buffer) {
-        return new JavaOffscreenSurface(this, (Sprite) surface, (Class165) buffer);
+        return new JavaOffscreenSurface(this, (Sprite) surface, (JavaDepthBuffer) buffer);
     }
 
     @OriginalMember(owner = "client!iaa", name = "e", descriptor = "()I")
@@ -2870,8 +2870,8 @@ public final class JavaToolkit extends Toolkit {
     @OriginalMember(owner = "client!iaa", name = "L", descriptor = "(III)V")
     @Override
     public void L(@OriginalArg(0) int colour, @OriginalArg(1) int range, @OriginalArg(2) int offset) {
-        for (@Pc(1) int local1 = 0; local1 < this.resources.length; local1++) {
-            @Pc(7) JavaThreadResource resource = this.resources[local1];
+        for (@Pc(1) int i = 0; i < this.resources.length; i++) {
+            @Pc(7) JavaThreadResource resource = this.resources[i];
             resource.fogColour = colour & 0xFFFFFF;
             @Pc(19) int red = resource.fogColour >>> 16 & 0xFF;
             if (red < 2) {
@@ -2909,35 +2909,35 @@ public final class JavaToolkit extends Toolkit {
     @OriginalMember(owner = "client!iaa", name = "I", descriptor = "()I")
     @Override
     public int I() {
-        @Pc(2) int local2 = this.count;
+        @Pc(2) int count = this.count;
         this.count = 0;
-        return local2;
+        return count;
     }
 
     @OriginalMember(owner = "client!iaa", name = "a", descriptor = "(IIIIIIIIII)V")
-    public void method3797(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) int id, @OriginalArg(7) int arg7, @OriginalArg(8) int arg8, @OriginalArg(9) int arg9) {
-        if (arg3 == 0 || arg4 == 0) {
+    public void method3797(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int halfWidth, @OriginalArg(4) int halfHeight, @OriginalArg(5) int arg5, @OriginalArg(6) int id, @OriginalArg(7) int colour, @OriginalArg(8) int arg8, @OriginalArg(9) int mode) {
+        if (halfWidth == 0 || halfHeight == 0) {
             return;
         }
         if (id == 65535 || super.textureSource.getMetrics(id).disableable) {
-            this.method3790(arg0, arg1, arg2, arg3, arg7, arg9);
+            this.fillDepthTestedCircle(x, y, z, halfWidth, colour, mode);
             return;
         }
         if (this.textureId != id) {
             @Pc(33) Sprite sprite = (Sprite) this.spriteCache.get(id);
             if (sprite == null) {
-                @Pc(39) int[] local39 = this.getArgbTexture(id);
-                if (local39 == null) {
+                @Pc(39) int[] data = this.getArgbTexture(id);
+                if (data == null) {
                     return;
                 }
                 @Pc(53) int size = this.smallTexture(id) ? 64 : this.textureSize;
-                sprite = this.createSprite(size, size, size, local39);
+                sprite = this.createSprite(size, size, size, data);
                 this.spriteCache.put(sprite, id);
             }
             this.textureId = id;
             this.sprite = sprite;
         }
-        ((JavaSprite) this.sprite).method8207(arg0 - arg3, arg1 - arg4, arg2, arg3 << 1, arg4 << 1, arg8, arg7, arg9);
+        ((JavaSprite) this.sprite).method8207(x - halfWidth, y - halfHeight, z, halfWidth << 1, halfHeight << 1, arg8, colour, mode);
     }
 
     @OriginalMember(owner = "client!iaa", name = "la", descriptor = "()V")
@@ -2951,8 +2951,8 @@ public final class JavaToolkit extends Toolkit {
     }
 
     @OriginalMember(owner = "client!iaa", name = "q", descriptor = "(I)Z")
-    public boolean smallTexture(@OriginalArg(0) int arg0) {
-        return this.shrinkTextures || super.textureSource.getMetrics(arg0).small;
+    public boolean smallTexture(@OriginalArg(0) int id) {
+        return this.shrinkTextures || super.textureSource.getMetrics(id).small;
     }
 
     @OriginalMember(owner = "client!iaa", name = "w", descriptor = "()Z")
@@ -2969,11 +2969,11 @@ public final class JavaToolkit extends Toolkit {
         this.vewY2 = this.clipY2 - this.projectionCenterY;
 
         for (@Pc(29) int i = 0; i < this.threadCount; i++) {
-            @Pc(36) Rasterizer local36 = this.resources[i].rasterizer;
-            local36.minX = this.projectionCenterX - this.clipX1;
-            local36.minY = this.projectionCenterY - this.clipY1;
-            local36.width = this.clipX2 - this.clipX1;
-            local36.height = this.clipY2 - this.clipY1;
+            @Pc(36) Rasterizer rasterizer = this.resources[i].rasterizer;
+            rasterizer.minX = this.projectionCenterX - this.clipX1;
+            rasterizer.minY = this.projectionCenterY - this.clipY1;
+            rasterizer.width = this.clipX2 - this.clipX1;
+            rasterizer.height = this.clipY2 - this.clipY1;
         }
 
         @Pc(78) int pixel = (this.clipY1 * this.surfaceWidth) + this.clipX1;
