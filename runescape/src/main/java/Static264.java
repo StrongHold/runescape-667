@@ -22,6 +22,12 @@ public final class Static264 {
      * triangle's depth into the buffer and always answers true, 2 leaves the buffer alone and answers
      * whether every pixel of the triangle lies behind the depth already recorded there, so true means
      * the triangle is entirely hidden by the occluders drawn in mode 1.
+     *
+     * <p>The three branches that follow the edge deltas expand the triangle by one scanline, and each
+     * one handles a different vertex being the topmost. The first tests {@code yB > yA && yC > yC}.
+     * Its second term can never hold, so that branch is dead and a triangle with {@code yA} topmost
+     * takes one of the other two. The intended test was most likely {@code yC > yA}. This is a defect
+     * of the client itself and it is kept on purpose, so do not correct it.
      */
     @OriginalMember(owner = "client!ie", name = "a", descriptor = "(IIIBIIIIII)Z")
     public static boolean rasteriseTriangle(@OriginalArg(0) int xA, @OriginalArg(1) int yA, @OriginalArg(2) int zC, @OriginalArg(4) int zB, @OriginalArg(5) int yC, @OriginalArg(6) int xC, @OriginalArg(7) int yB, @OriginalArg(8) int zA, @OriginalArg(9) int xB) {
