@@ -431,8 +431,7 @@ public final class MapRegion extends Terrain {
     @OriginalMember(owner = "client!taa", name = "a", descriptor = "(IILclient!eq;ILclient!ha;IIIIII)V")
     public void loadLocation(@OriginalArg(5) int x, @OriginalArg(3) int z, @OriginalArg(9) int level, @OriginalArg(8) int virtualLevel, @OriginalArg(1) int id, @OriginalArg(0) int shape, @OriginalArg(6) int rotation, @OriginalArg(10) int animation, @OriginalArg(2) CollisionMap collisionMap, @OriginalArg(4) Toolkit toolkit) {
         boolean animatingBackground = ClientOptions.instance.animateBackground.getValue() != 0;
-        boolean tileVisible = Static696.isTileVisibleFrom(z, Static164.areaLevel, x, virtualLevel);
-        if (!animatingBackground && !tileVisible) {
+        if (!animatingBackground && !Static696.isTileVisibleFrom(z, Static164.areaLevel, x, virtualLevel)) {
             return;
         }
 
@@ -441,8 +440,8 @@ public final class MapRegion extends Terrain {
         }
 
         @Pc(40) LocType locType = LocTypeList.instance.list(id);
-        boolean texturesEnabled = ClientOptions.instance.textures.getValue() == 0;
-        if (texturesEnabled && locType.istexture) {
+        boolean texturesDisabled = ClientOptions.instance.textures.getValue() == 0;
+        if (texturesDisabled && locType.istexture) {
             return;
         }
 
@@ -494,9 +493,9 @@ public final class MapRegion extends Terrain {
 
         @Pc(248) boolean isStatic = animation == -1 && !locType.hasAnimations() && locType.multiloc == null && !locType.animated && !locType.aBoolean91;
 
-        boolean occludeWall = LocShapes.isWall(shape) && locType.occlude != LocOcclusionMode.ALL;
-        boolean occludeRoof = LocShapes.isRoof(shape) && locType.occlude == LocOcclusionMode.ROOFS;
-        if (occlude && (occludeWall || occludeRoof)) {
+        boolean skipWall = LocShapes.isWall(shape) && locType.occlude != LocOcclusionMode.ALL;
+        boolean skipRoof = LocShapes.isRoof(shape) && locType.occlude == LocOcclusionMode.ROOFS;
+        if (occlude && (skipWall || skipRoof)) {
             return;
         }
 
@@ -550,7 +549,7 @@ public final class MapRegion extends Terrain {
 
                     for (@Pc(492) int locX = 0; locX <= locWidth; locX++) {
                         for (@Pc(495) int locZ = 0; locZ <= locLength; locZ++) {
-                            ground.ka(locX + locX, locZ + locZ, shadowValue);
+                            ground.ka(x + locX, z + locZ, shadowValue);
                         }
                     }
                 }
@@ -711,8 +710,8 @@ public final class MapRegion extends Terrain {
 
             Static584.method7665(level, x, z, wall, adjacentWall);
 
-            boolean occlude = (locType.occlude == LocOcclusionMode.ALL) || (forceOcclusion && locType.occlude == -1);
-            if (occlude && !super.underwater) {
+            boolean occludesAll = (locType.occlude == LocOcclusionMode.ALL) || (forceOcclusion && locType.occlude == LocOcclusionMode.NONE);
+            if (occludesAll && !super.underwater) {
                 if (rotation == 0) {
                     Static177.addLocationOccluder(1, locType.occlusionOffset, z, x, level, locType.occlusionHeight);
                     Static177.addLocationOccluder(2, locType.occlusionOffset, z + 1, x, level, locType.occlusionHeight);
@@ -784,7 +783,7 @@ public final class MapRegion extends Terrain {
 
             Static102.method2026(loc, false);
 
-            if (locType.occlude == 1 && !super.underwater) {
+            if (locType.occlude == LocOcclusionMode.ALL && !super.underwater) {
                 @Pc(1723) byte occlusionType;
                 if ((rotation & 0x1) == 0) {
                     occlusionType = 8;
@@ -915,8 +914,8 @@ public final class MapRegion extends Terrain {
         }
         @Pc(10) boolean mapLoaded = false;
         @Pc(12) Environment environment = null;
-        @Pc(18) int absX = (pointerX & 0x7) * 8;
-        @Pc(24) int absZ = (pointerZ & 0x7) * 8;
+        @Pc(18) int pointerSquareX = (pointerX & 0x7) * 8;
+        @Pc(24) int pointerSquareZ = (pointerZ & 0x7) * 8;
         while (packet.pos < packet.data.length) {
             @Pc(35) int code = packet.g1();
 
@@ -944,15 +943,15 @@ public final class MapRegion extends Terrain {
                         @Pc(116) int lightX = light.getX() >> 9;
                         @Pc(122) int lightZ = light.getZ() >> 9;
 
-                        if ((pointerLevel == envLight.level) && (lightX >= absX) && (lightX < (absX + 8)) && (lightZ >= absZ) && (lightZ < (absZ + 8))) {
-                            @Pc(176) int rx = (x << 9) + rotateLightX(light.getX() & 0xFFF, light.getZ() & 0xFFF, pointerRotation);
-                            lightX = rx >> 9;
+                        if ((pointerLevel == envLight.level) && (lightX >= pointerSquareX) && (lightX < (pointerSquareX + 8)) && (lightZ >= pointerSquareZ) && (lightZ < (pointerSquareZ + 8))) {
+                            @Pc(176) int worldX = (x << 9) + rotateLightX(light.getX() & 0xFFF, light.getZ() & 0xFFF, pointerRotation);
+                            lightX = worldX >> 9;
 
-                            @Pc(200) int rz = (z << 9) + rotateLightZ(light.getX() & 0xFFF, light.getZ() & 0xFFF, pointerRotation);
-                            lightZ = rz >> 9;
+                            @Pc(200) int worldZ = (z << 9) + rotateLightZ(light.getX() & 0xFFF, light.getZ() & 0xFFF, pointerRotation);
+                            lightZ = worldZ >> 9;
 
                             if (lightX >= 0 && lightZ >= 0 && lightX < super.width && lightZ < super.length) {
-                                light.setPosition(rx, rz, super.tileHeights[pointerLevel][lightX][lightZ] - light.getY());
+                                light.setPosition(worldX, worldZ, super.tileHeights[pointerLevel][lightX][lightZ] - light.getY());
                                 registerLight(envLight);
                             }
                         }
@@ -1021,11 +1020,11 @@ public final class MapRegion extends Terrain {
                                 if (mapLevel <= pointerLevel) {
                                     for (@Pc(122) int localX = blockX; localX < blockX + 4; localX++) {
                                         for (@Pc(176) int localZ = blockZ; localZ < blockZ + 4; localZ++) {
-                                            if (localX >= absX && absX + 8 > localX && localZ >= absZ && absZ + 8 > localZ) {
-                                                @Pc(200) int rx = x + rotateZoneX(localX & 0x7, localZ & 0x7, pointerRotation);
-                                                @Pc(534) int ry = z + rotateZoneY(localX & 0x7, localZ & 0x7, pointerRotation);
-                                                if (rx >= 0 && rx < super.width && ry >= 0 && ry < super.length) {
-                                                    super.aByteArrayArrayArray12[level][rx][ry] = height;
+                                            if (localX >= pointerSquareX && pointerSquareX + 8 > localX && localZ >= pointerSquareZ && pointerSquareZ + 8 > localZ) {
+                                                @Pc(200) int tileX = x + rotateZoneX(localX & 0x7, localZ & 0x7, pointerRotation);
+                                                @Pc(534) int tileZ = z + rotateZoneY(localX & 0x7, localZ & 0x7, pointerRotation);
+                                                if (tileX >= 0 && tileX < super.width && tileZ >= 0 && tileZ < super.length) {
+                                                    super.aByteArrayArrayArray12[level][tileX][tileZ] = height;
                                                     mapLoaded = true;
                                                 }
                                             }
@@ -1075,7 +1074,7 @@ public final class MapRegion extends Terrain {
     }
 
     @OriginalMember(owner = "client!taa", name = "a", descriptor = "(I[Lclient!eq;ILclient!ha;BII[BIII)V")
-    public void loadChunkLocations(@OriginalArg(0) int regionX, @OriginalArg(1) CollisionMap[] collisionMaps, @OriginalArg(2) int level, @OriginalArg(3) Toolkit toolkit, @OriginalArg(5) int x, @OriginalArg(6) int z, @OriginalArg(7) byte[] data, @OriginalArg(8) int regionRotation, @OriginalArg(9) int regionLevel, @OriginalArg(10) int regionZ) {
+    public void loadChunkLocations(@OriginalArg(0) int pointerSquareX, @OriginalArg(1) CollisionMap[] collisionMaps, @OriginalArg(2) int level, @OriginalArg(3) Toolkit toolkit, @OriginalArg(5) int x, @OriginalArg(6) int z, @OriginalArg(7) byte[] data, @OriginalArg(8) int pointerRotation, @OriginalArg(9) int pointerLevel, @OriginalArg(10) int pointerSquareZ) {
         @Pc(26) Packet packet = new Packet(data);
         @Pc(28) int id = -1;
         while (true) {
@@ -1099,22 +1098,22 @@ public final class MapRegion extends Terrain {
                 @Pc(73) int shapeAndRotation = packet.g1();
                 @Pc(77) int locShape = shapeAndRotation >> 2;
                 @Pc(81) int locRotation = shapeAndRotation & 0x3;
-                if ((locLevel == regionLevel) && (locX >= regionX) && (locX < (regionX + 8)) && (locZ >= regionZ) && (locZ < (regionZ + 8))) {
+                if ((locLevel == pointerLevel) && (locX >= pointerSquareX) && (locX < (pointerSquareX + 8)) && (locZ >= pointerSquareZ) && (locZ < (pointerSquareZ + 8))) {
                     @Pc(113) LocType locType = LocTypeList.instance.list(id);
-                    @Pc(130) int rx = rotateLocX(locX & 0x7, locZ & 0x7, locType.width, locType.length, regionRotation, locRotation) + x;
-                    @Pc(147) int rz = rotateLocZ(locX & 0x7, locZ & 0x7, locType.width, locType.length, regionRotation, locRotation) + z;
-                    if (rx > 0 && rz > 0 && rx < super.width - 1 && rz < super.length - 1) {
+                    @Pc(130) int tileX = rotateLocX(locX & 0x7, locZ & 0x7, locType.width, locType.length, pointerRotation, locRotation) + x;
+                    @Pc(147) int tileZ = rotateLocZ(locX & 0x7, locZ & 0x7, locType.width, locType.length, pointerRotation, locRotation) + z;
+                    if (tileX > 0 && tileZ > 0 && tileX < super.width - 1 && tileZ < super.length - 1) {
                         @Pc(173) CollisionMap collisionMap = null;
                         if (!super.underwater) {
                             @Pc(178) int actualLevel = level;
-                            if ((Static280.tileFlags[1][rx][rz] & TileFlag.BRIDGE) != 0) {
+                            if ((Static280.tileFlags[1][tileX][tileZ] & TileFlag.BRIDGE) != 0) {
                                 actualLevel = level - 1;
                             }
                             if (actualLevel >= 0) {
                                 collisionMap = collisionMaps[actualLevel];
                             }
                         }
-                        this.loadLocation(rx, rz, level, level, id, locShape, (regionRotation + locRotation) & 0x3, -1, collisionMap, toolkit);
+                        this.loadLocation(tileX, tileZ, level, level, id, locShape, (pointerRotation + locRotation) & 0x3, -1, collisionMap, toolkit);
                     }
                 }
             }
@@ -1209,12 +1208,12 @@ public final class MapRegion extends Terrain {
         if (loc.hardShadow()) {
             loc.removeShadow(toolkit);
         }
-        if (layer == 0) {
+        if (layer == LocLayer.WALL) {
             Static26.method717(level, x, z);
             if (locType.blockwalk != 0) {
                 collisionMap.unflagWall(z, rotation, shape, !locType.breakroutefinding, x, locType.blockrange);
             }
-            if (locType.occlude == 1) {
+            if (locType.occlude == LocOcclusionMode.ALL) {
                 if (rotation == 0) {
                     Static687.method8958(x, level, 1, z);
                 } else if (rotation == 1) {
@@ -1225,21 +1224,21 @@ public final class MapRegion extends Terrain {
                     Static687.method8958(x, level, 2, z);
                 }
             }
-        } else if (layer == 1) {
+        } else if (layer == LocLayer.WALLDECOR) {
             Static173.method2692(level, x, z);
-        } else if (layer == 2) {
+        } else if (layer == LocLayer.GROUND) {
             Static10.method130(level, x, z, locClass == null ? (locClass = getClass("com.jagex.game.Location")) : locClass);
             if (locType.blockwalk != 0 && super.width > locType.width + x && super.length > locType.width + z && x + locType.length < super.width && locType.length + z < super.length) {
                 collisionMap.unflagLoc(x, z, locType.width, locType.length, rotation, locType.blockrange, !locType.breakroutefinding);
             }
-            if (shape == 9) {
+            if (shape == LocShapes.WALL_DIAGONAL) {
                 if ((rotation & 0x1) == 0) {
                     Static687.method8958(x, level, 8, z);
                 } else {
                     Static687.method8958(x, level, 16, z);
                 }
             }
-        } else if (layer == 3) {
+        } else if (layer == LocLayer.GROUNDDECOR) {
             Static609.method8212(level, x, z);
             if (locType.blockwalk == 1) {
                 collisionMap.unflagGroundDecor(x, z);

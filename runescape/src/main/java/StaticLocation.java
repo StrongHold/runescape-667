@@ -166,7 +166,7 @@ public final class StaticLocation extends PositionEntity implements Location {
     public boolean picked(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) boolean arg2, @OriginalArg(3) Toolkit toolkit) {
         @Pc(9) Model model = this.getModel(toolkit, 131072);
         if (model == null) {
-            return arg2 ? false : false;
+            return false;
         } else {
             @Pc(14) Matrix matrix = toolkit.scratchMatrix();
             matrix.applyTranslation(super.x, super.y, super.z);

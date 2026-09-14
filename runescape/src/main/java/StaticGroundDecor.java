@@ -129,7 +129,7 @@ public final class StaticGroundDecor extends GroundDecor implements Location {
 
     @OriginalMember(owner = "client!cu", name = "a", descriptor = "(IIZLclient!ha;)Z")
     @Override
-    public boolean picked(@OriginalArg(0) int y, @OriginalArg(1) int x, @OriginalArg(2) boolean arg2, @OriginalArg(3) Toolkit toolkit) {
+    public boolean picked(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) boolean arg2, @OriginalArg(3) Toolkit toolkit) {
         if (arg2) {
             LibraryManager.signLink = null;
         }
@@ -140,7 +140,7 @@ public final class StaticGroundDecor extends GroundDecor implements Location {
         } else {
             @Pc(21) Matrix matrix = toolkit.scratchMatrix();
             matrix.applyTranslation(super.x, super.y, super.z);
-            return OrthoMode.enabled ? model.pickedOrtho(x, y, matrix, false, 0, OrthoMode.renderZoom) : model.picked(x, y, matrix, false, 0);
+            return OrthoMode.enabled ? model.pickedOrtho(y, x, matrix, false, 0, OrthoMode.renderZoom) : model.picked(y, x, matrix, false, 0);
         }
     }
 
