@@ -105,10 +105,10 @@ public final class RenderWorker implements Runnable {
                                 if (Static433.aBooleanArrayArrayArray5[level - 1][offsetX][offsetZ]) {
                                     @Pc(98) int x = Static403.anInt6246 + offsetX - Static35.anInt813;
                                     @Pc(104) int z = Static550.anInt8271 + offsetZ - Static35.anInt813;
-                                    if (x >= 0 && x < ground.anInt8894 && z >= 0 && z < ground.anInt8892) {
+                                    if (x >= 0 && x < ground.sizeX && z >= 0 && z < ground.sizeZ) {
                                         Static665.aToolkit_15.H(x << EnvironmentLight.anInt1066, ground.getHeight(x, z), z << EnvironmentLight.anInt1066, this.screenCoords);
                                         if (Static356.method5199(this.screenCoords[0]) == this.threadId - 1) {
-                                            ground.method7875(x, z);
+                                            ground.renderTile(x, z);
                                         }
                                     }
                                 }

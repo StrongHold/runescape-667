@@ -73,11 +73,11 @@ public final class Node_Sub33 extends Node {
         this.aClass178_Sub2_2 = arg1;
         this.aClass2_Sub7_2 = arg2;
         this.aClass19_Sub3_23 = arg0;
-        @Pc(23) int local23 = this.aClass2_Sub7_2.getRange() - (arg1.anInt8888 >> 1);
-        this.anInt5451 = this.aClass2_Sub7_2.getX() - local23 >> arg1.anInt8895;
-        this.anInt5446 = local23 + this.aClass2_Sub7_2.getX() >> arg1.anInt8895;
-        this.anInt5449 = this.aClass2_Sub7_2.getZ() - local23 >> arg1.anInt8895;
-        this.anInt5454 = this.aClass2_Sub7_2.getZ() + local23 >> arg1.anInt8895;
+        @Pc(23) int local23 = this.aClass2_Sub7_2.getRange() - (arg1.tileSize >> 1);
+        this.anInt5451 = this.aClass2_Sub7_2.getX() - local23 >> arg1.tileSizeShift;
+        this.anInt5446 = local23 + this.aClass2_Sub7_2.getX() >> arg1.tileSizeShift;
+        this.anInt5449 = this.aClass2_Sub7_2.getZ() - local23 >> arg1.tileSizeShift;
+        this.anInt5454 = this.aClass2_Sub7_2.getZ() + local23 >> arg1.tileSizeShift;
         @Pc(76) int local76 = this.anInt5446 + 1 - this.anInt5451;
         @Pc(84) int local84 = this.anInt5454 + 1 - this.anInt5449;
         this.aFloatArrayArray10 = new float[local76 + 1][local84 + 1];
@@ -90,10 +90,10 @@ public final class Node_Sub33 extends Node {
         @Pc(195) int local195;
         for (@Pc(113) int local113 = 0; local113 <= local84; local113++) {
             local121 = local113 + this.anInt5449;
-            if (local121 > 0 && local121 < this.aClass178_Sub2_2.anInt8892 - 1) {
+            if (local121 > 0 && local121 < this.aClass178_Sub2_2.sizeZ - 1) {
                 for (local141 = 0; local141 <= local76; local141++) {
                     local148 = this.anInt5451 + local141;
-                    if (local148 > 0 && this.aClass178_Sub2_2.anInt8894 - 1 > local148) {
+                    if (local148 > 0 && this.aClass178_Sub2_2.sizeX - 1 > local148) {
                         local178 = arg1.getHeight(local148 + 1, local121) - arg1.getHeight(local148 - 1, local121);
                         local195 = arg1.getHeight(local148, local121 + 1) - arg1.getHeight(local148, local121 - 1);
                         @Pc(211) float local211 = (float) (1.0D / Math.sqrt(local178 * local178 + local195 * local195 + 65536));
@@ -107,9 +107,9 @@ public final class Node_Sub33 extends Node {
         local121 = 0;
         @Pc(345) int local345;
         for (local141 = this.anInt5449; local141 <= this.anInt5454; local141++) {
-            if (local141 >= 0 && local141 < arg1.anInt8892) {
+            if (local141 >= 0 && local141 < arg1.sizeZ) {
                 for (local148 = this.anInt5451; local148 <= this.anInt5446; local148++) {
-                    if (local148 >= 0 && local148 < arg1.anInt8894) {
+                    if (local148 >= 0 && local148 < arg1.sizeX) {
                         local178 = arg3[local121];
                         @Pc(320) int[] local320 = arg1.anIntArrayArrayArray15[local148][local141];
                         if (local320 != null && local178 != 0) {
@@ -143,10 +143,10 @@ public final class Node_Sub33 extends Node {
             local148 = 0;
             local121 = 0;
             for (local178 = this.anInt5449; local178 <= this.anInt5454; local178++) {
-                if (local178 >= 0 && local178 < arg1.anInt8892) {
+                if (local178 >= 0 && local178 < arg1.sizeZ) {
                     local195 = 0;
                     for (local345 = this.anInt5451; local345 <= this.anInt5446; local345++) {
-                        if (local345 >= 0 && arg1.anInt8894 > local345) {
+                        if (local345 >= 0 && arg1.sizeX > local345) {
                             @Pc(515) int local515 = arg3[local121];
                             @Pc(522) int[] local522 = arg1.anIntArrayArrayArray15[local345][local178];
                             if (local522 != null && local515 != 0) {
@@ -174,20 +174,20 @@ public final class Node_Sub33 extends Node {
                                     }
                                 } else if (local515 == 3) {
                                     this.method4932(0, 0, local178, local148, local345, local195);
-                                    this.method4932(0, arg1.anInt8888, local178, local148, local345, local195);
-                                    this.method4932(arg1.anInt8888, 0, local178, local148, local345, local195);
+                                    this.method4932(0, arg1.tileSize, local178, local148, local345, local195);
+                                    this.method4932(arg1.tileSize, 0, local178, local148, local345, local195);
                                 } else if (local515 == 2) {
-                                    this.method4932(0, arg1.anInt8888, local178, local148, local345, local195);
-                                    this.method4932(arg1.anInt8888, arg1.anInt8888, local178, local148, local345, local195);
+                                    this.method4932(0, arg1.tileSize, local178, local148, local345, local195);
+                                    this.method4932(arg1.tileSize, arg1.tileSize, local178, local148, local345, local195);
                                     this.method4932(0, 0, local178, local148, local345, local195);
                                 } else if (local515 == 5) {
-                                    this.method4932(arg1.anInt8888, arg1.anInt8888, local178, local148, local345, local195);
-                                    this.method4932(arg1.anInt8888, 0, local178, local148, local345, local195);
-                                    this.method4932(0, arg1.anInt8888, local178, local148, local345, local195);
+                                    this.method4932(arg1.tileSize, arg1.tileSize, local178, local148, local345, local195);
+                                    this.method4932(arg1.tileSize, 0, local178, local148, local345, local195);
+                                    this.method4932(0, arg1.tileSize, local178, local148, local345, local195);
                                 } else if (local515 == 4) {
-                                    this.method4932(arg1.anInt8888, 0, local178, local148, local345, local195);
+                                    this.method4932(arg1.tileSize, 0, local178, local148, local345, local195);
                                     this.method4932(0, 0, local178, local148, local345, local195);
-                                    this.method4932(arg1.anInt8888, arg1.anInt8888, local178, local148, local345, local195);
+                                    this.method4932(arg1.tileSize, arg1.tileSize, local178, local148, local345, local195);
                                 }
                             }
                         }
@@ -213,8 +213,8 @@ public final class Node_Sub33 extends Node {
     @OriginalMember(owner = "client!kia", name = "a", descriptor = "(IIIIIII)V")
     public void method4932(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(4) int arg3, @OriginalArg(5) int arg4, @OriginalArg(6) int arg5) {
         @Pc(7) long local7 = -1L;
-        @Pc(15) int local15 = (arg4 << this.aClass178_Sub2_2.anInt8895) + arg1;
-        @Pc(23) int local23 = arg0 + (arg2 << this.aClass178_Sub2_2.anInt8895);
+        @Pc(15) int local15 = (arg4 << this.aClass178_Sub2_2.tileSizeShift) + arg1;
+        @Pc(23) int local23 = arg0 + (arg2 << this.aClass178_Sub2_2.tileSizeShift);
         @Pc(30) int local30 = this.aClass178_Sub2_2.averageHeight(local15, local23);
         if ((arg1 & 0x7F) == 0 || (arg0 & 0x7F) == 0) {
             local7 = ((long) local23 & 0xFFFFL) << 16 | (long) local15 & 0xFFFFL;
@@ -243,21 +243,21 @@ public final class Node_Sub33 extends Node {
             local114 = this.aFloatArrayArray11[arg5][arg3];
             local121 = this.aFloatArrayArray9[arg5][arg3];
             local128 = this.aFloatArrayArray10[arg5][arg3];
-        } else if (this.aClass178_Sub2_2.anInt8888 == arg1 && arg0 == 0) {
+        } else if (this.aClass178_Sub2_2.tileSize == arg1 && arg0 == 0) {
             local128 = this.aFloatArrayArray10[arg5 + 1][arg3];
             local121 = this.aFloatArrayArray9[arg5 + 1][arg3];
             local114 = this.aFloatArrayArray11[arg5 + 1][arg3];
-        } else if (this.aClass178_Sub2_2.anInt8888 == arg1 && arg0 == this.aClass178_Sub2_2.anInt8888) {
+        } else if (this.aClass178_Sub2_2.tileSize == arg1 && arg0 == this.aClass178_Sub2_2.tileSize) {
             local128 = this.aFloatArrayArray10[arg5 + 1][arg3 + 1];
             local114 = this.aFloatArrayArray11[arg5 + 1][arg3 + 1];
             local121 = this.aFloatArrayArray9[arg5 + 1][arg3 + 1];
-        } else if (arg1 == 0 && arg0 == this.aClass178_Sub2_2.anInt8888) {
+        } else if (arg1 == 0 && arg0 == this.aClass178_Sub2_2.tileSize) {
             local114 = this.aFloatArrayArray11[arg5][arg3 + 1];
             local121 = this.aFloatArrayArray9[arg5][arg3 + 1];
             local128 = this.aFloatArrayArray10[arg5][arg3 + 1];
         } else {
-            local275 = (float) arg1 / (float) this.aClass178_Sub2_2.anInt8888;
-            local283 = (float) arg0 / (float) this.aClass178_Sub2_2.anInt8888;
+            local275 = (float) arg1 / (float) this.aClass178_Sub2_2.tileSize;
+            local283 = (float) arg0 / (float) this.aClass178_Sub2_2.tileSize;
             local290 = this.aFloatArrayArray11[arg5][arg3];
             local297 = this.aFloatArrayArray9[arg5][arg3];
             local304 = this.aFloatArrayArray10[arg5][arg3];

@@ -40,12 +40,12 @@ public final class Class293 {
     public Class293(@OriginalArg(0) NativeToolkit arg0, @OriginalArg(1) Ground_Sub1 arg1) {
         this.aClass178_Sub1_2 = arg1;
         this.aClass19_Sub1_17 = arg0;
-        this.anInt7428 = (this.aClass178_Sub1_2.anInt8894 * this.aClass178_Sub1_2.anInt8888 >> this.aClass19_Sub1_17.anInt9173) + 2;
-        this.anInt7425 = (this.aClass178_Sub1_2.anInt8888 * this.aClass178_Sub1_2.anInt8892 >> this.aClass19_Sub1_17.anInt9173) + 2;
+        this.anInt7428 = (this.aClass178_Sub1_2.sizeX * this.aClass178_Sub1_2.tileSize >> this.aClass19_Sub1_17.anInt9173) + 2;
+        this.anInt7425 = (this.aClass178_Sub1_2.tileSize * this.aClass178_Sub1_2.sizeZ >> this.aClass19_Sub1_17.anInt9173) + 2;
         this.aByteArray87 = new byte[this.anInt7428 * this.anInt7425];
-        this.anInt7417 = this.aClass19_Sub1_17.anInt9173 + 7 - this.aClass178_Sub1_2.anInt8895;
-        this.anInt7420 = this.aClass178_Sub1_2.anInt8894 >> this.anInt7417;
-        this.anInt7426 = this.aClass178_Sub1_2.anInt8892 >> this.anInt7417;
+        this.anInt7417 = this.aClass19_Sub1_17.anInt9173 + 7 - this.aClass178_Sub1_2.tileSizeShift;
+        this.anInt7420 = this.aClass178_Sub1_2.sizeX >> this.anInt7417;
+        this.anInt7426 = this.aClass178_Sub1_2.sizeZ >> this.anInt7417;
     }
 
     @OriginalMember(owner = "client!pk", name = "a", descriptor = "(IIIII)V")
@@ -121,7 +121,7 @@ public final class Class293 {
                             @Pc(306) int local306 = local74 + 1 << this.anInt7417;
                             for (@Pc(308) int local308 = local65; local308 < local72; local308++) {
                                 if (local308 - arg2 >= -arg1 && arg1 >= local308 - arg2) {
-                                    @Pc(342) int local342 = local299 + this.aClass178_Sub1_2.anInt8894 * local308;
+                                    @Pc(342) int local342 = local299 + this.aClass178_Sub1_2.sizeX * local308;
                                     for (@Pc(344) int local344 = local299; local344 < local306; local344++) {
                                         if (-arg1 <= local344 - arg3 && local344 - arg3 <= arg1 && arg0[arg1 + local344 - arg3][local308 + arg1 - arg2]) {
                                             @Pc(393) short[] local393 = this.aClass178_Sub1_2.aShortArrayArray4[local342];

@@ -49,7 +49,7 @@ public final class Class373 {
         @Pc(35) int local35 = arg4 << arg5;
         @Pc(53) int local53;
         for (@Pc(37) int local37 = 0; local37 < local25; local37++) {
-            @Pc(51) int local51 = local31 + arg2.anInt8894 * (local35 + local37);
+            @Pc(51) int local51 = local31 + arg2.sizeX * (local35 + local37);
             for (local53 = 0; local53 < local25; local53++) {
                 @Pc(61) short[] local61 = arg2.aShortArrayArray6[local51++];
                 if (local61 != null) {
@@ -68,7 +68,7 @@ public final class Class373 {
             @Pc(121) int local121;
             if (this.aClass19_Sub3_36.aBoolean618) {
                 for (local53 = 0; local53 < local25; local53++) {
-                    local121 = local31 + arg2.anInt8894 * (local53 + local35);
+                    local121 = local31 + arg2.sizeX * (local53 + local35);
                     for (local123 = 0; local123 < local25; local123++) {
                         local131 = arg2.aShortArrayArray6[local121++];
                         if (local131 != null) {
@@ -80,7 +80,7 @@ public final class Class373 {
                 }
             } else {
                 for (local53 = 0; local53 < local25; local53++) {
-                    local121 = (local35 + local53) * arg2.anInt8894 + local31;
+                    local121 = (local35 + local53) * arg2.sizeX + local31;
                     for (local123 = 0; local123 < local25; local123++) {
                         local131 = arg2.aShortArrayArray6[local121++];
                         if (local131 != null) {

@@ -44,7 +44,7 @@ public final class t extends Ground implements SoftwareObject {
 
     @OriginalMember(owner = "client!t", name = "a", descriptor = "(III[[ZZI)V")
     @Override
-    public void method7870(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) boolean[][] arg3, @OriginalArg(4) boolean arg4, @OriginalArg(5) int arg5) {
+    public void renderTiles(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) boolean[][] arg3, @OriginalArg(4) boolean arg4, @OriginalArg(5) int arg5) {
         this.anInt8897 = -1;
         @Pc(4) int local4 = 0;
         @Pc(10) float[] local10 = new float[this.aDeque_57.size()];
@@ -57,8 +57,8 @@ public final class t extends Ground implements SoftwareObject {
                 if (arg3[local37][local40]) {
                     @Pc(53) int local53 = arg0 + local37 - arg2;
                     @Pc(59) int local59 = arg1 + local40 - arg2;
-                    if (local53 >= 0 && local53 < super.anInt8894 && local59 >= 0 && local59 < super.anInt8892) {
-                        this.method7875(local53, local59);
+                    if (local53 >= 0 && local53 < super.sizeX && local59 >= 0 && local59 < super.sizeZ) {
+                        this.renderTile(local53, local59);
                     }
                 }
             }
@@ -77,7 +77,7 @@ public final class t extends Ground implements SoftwareObject {
 
     @OriginalMember(owner = "client!t", name = "a", descriptor = "(II)V")
     @Override
-    public void method7875(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) {
+    public void renderTile(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) {
         if (this.anInt8897 < 0) {
             this.anOa3.method6087().method2(this, arg0, arg1);
         } else {
@@ -87,7 +87,7 @@ public final class t extends Ground implements SoftwareObject {
 
     @OriginalMember(owner = "client!t", name = "a", descriptor = "(III[[ZZII)V")
     @Override
-    public void method7877(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) boolean[][] arg3, @OriginalArg(4) boolean arg4, @OriginalArg(5) int arg5, @OriginalArg(6) int arg6) {
+    public void renderTilesAtDepth(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) boolean[][] arg3, @OriginalArg(4) boolean arg4, @OriginalArg(5) int arg5, @OriginalArg(6) int arg6) {
         this.anInt8897 = arg5;
         @Pc(4) int local4 = 0;
         @Pc(10) float[] local10 = new float[this.aDeque_57.size()];
@@ -100,8 +100,8 @@ public final class t extends Ground implements SoftwareObject {
                 if (arg3[local37][local40]) {
                     @Pc(53) int local53 = arg0 + local37 - arg2;
                     @Pc(59) int local59 = arg1 + local40 - arg2;
-                    if (local53 >= 0 && local53 < super.anInt8894 && local59 >= 0 && local59 < super.anInt8892) {
-                        this.method7875(local53, local59);
+                    if (local53 >= 0 && local53 < super.sizeX && local59 >= 0 && local59 < super.sizeZ) {
+                        this.renderTile(local53, local59);
                     }
                 }
             }
@@ -215,7 +215,7 @@ public final class t extends Ground implements SoftwareObject {
 
     @OriginalMember(owner = "client!t", name = "a", descriptor = "(IIIIIII[[Z)V")
     @Override
-    public void method7873(@OriginalArg(3) int x1, @OriginalArg(4) int y1, @OriginalArg(5) int x2, @OriginalArg(6) int y2, @OriginalArg(7) boolean[][] visibility) {
+    public void drawMinimap(@OriginalArg(3) int x1, @OriginalArg(4) int y1, @OriginalArg(5) int x2, @OriginalArg(6) int y2, @OriginalArg(7) boolean[][] visibility) {
         this.anOa3.method6087().method13(this, x1, y1, x2, y2, visibility);
     }
 

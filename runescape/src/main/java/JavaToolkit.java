@@ -1647,7 +1647,7 @@ public final class JavaToolkit extends Toolkit {
             this.resources[local1].waterHeight = arg0;
             this.resources[local1].fogColour = arg1;
             this.resources[local1].waterDepth = arg2;
-            this.resources[local1].aBoolean805 = true;
+            this.resources[local1].water = true;
         }
     }
 
@@ -2161,7 +2161,7 @@ public final class JavaToolkit extends Toolkit {
     @OriginalMember(owner = "client!iaa", name = "a", descriptor = "(II[[I[[IIII)Lclient!s;")
     @Override
     public Ground createGround(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int[][] arg2, @OriginalArg(3) int[][] arg3, @OriginalArg(5) int arg4, @OriginalArg(6) int arg5) {
-        return new Ground_Sub3(this, arg4, arg5, arg0, arg1, arg2, arg3, 512);
+        return new JavaGround(this, arg4, arg5, arg0, arg1, arg2, arg3, 512);
     }
 
     @OriginalMember(owner = "client!iaa", name = "JA", descriptor = "(IIIIII)I")
@@ -2399,12 +2399,12 @@ public final class JavaToolkit extends Toolkit {
     public void pa() {
         for (@Pc(1) int local1 = 0; local1 < this.resources.length; local1++) {
             this.resources[local1].fogColour = this.resources[local1].anInt10600;
-            this.resources[local1].aBoolean805 = false;
+            this.resources[local1].water = false;
         }
     }
 
     @OriginalMember(owner = "client!iaa", name = "m", descriptor = "(I)I")
-    public int method3793(@OriginalArg(0) int arg0) {
+    public int textureHsl(@OriginalArg(0) int arg0) {
         return super.textureSource.getMetrics(arg0).aShort37 & 0xFFFF;
     }
 

@@ -55,7 +55,7 @@ public final class Ground_Sub2 extends Ground {
     public final Deque aDeque_43 = new Deque();
 
     @OriginalMember(owner = "client!pn", name = "J", descriptor = "I")
-    public final int anInt7488 = this.anInt8895 - 2;
+    public final int anInt7488 = this.tileSizeShift - 2;
 
     @OriginalMember(owner = "client!pn", name = "O", descriptor = "Lclient!qha;")
     public final GlToolkit aClass19_Sub3_33;
@@ -117,17 +117,17 @@ public final class Ground_Sub2 extends Ground {
         this.anIntArrayArrayArray12 = new int[arg3][arg4][];
         this.anInt7486 = arg2;
         this.aShortArrayArray6 = new short[arg3 * arg4][];
-        this.aFloatArrayArray14 = new float[super.anInt8894 + 1][super.anInt8892 + 1];
+        this.aFloatArrayArray14 = new float[super.sizeX + 1][super.sizeZ + 1];
         this.anIntArrayArrayArray11 = new int[arg3][arg4][];
         this.anIntArrayArrayArray14 = new int[arg3][arg4][];
-        this.aFloatArrayArray15 = new float[super.anInt8894 + 1][super.anInt8892 + 1];
+        this.aFloatArrayArray15 = new float[super.sizeX + 1][super.sizeZ + 1];
         this.anIntArrayArrayArray15 = new int[arg3][arg4][];
         this.aByteArrayArray25 = new byte[arg3][arg4];
         this.anIntArrayArrayArray13 = new int[arg3][arg4][];
-        this.aFloatArrayArray16 = new float[super.anInt8894 + 1][super.anInt8892 + 1];
+        this.aFloatArrayArray16 = new float[super.sizeX + 1][super.sizeZ + 1];
         this.anInt7499 = 0x1 << this.anInt7488;
-        for (@Pc(115) int local115 = 1; super.anInt8892 > local115; local115++) {
-            for (@Pc(121) int local121 = 1; local121 < super.anInt8894; local121++) {
+        for (@Pc(115) int local115 = 1; super.sizeZ > local115; local115++) {
+            for (@Pc(121) int local121 = 1; local121 < super.sizeX; local121++) {
                 @Pc(140) int local140 = arg6[local121 + 1][local115] - arg6[local121 - 1][local115];
                 @Pc(157) int local157 = arg6[local121][local115 + 1] - arg6[local121][local115 - 1];
                 @Pc(176) float local176 = (float) (1.0D / Math.sqrt(local157 * local157 + arg7 * 4 * arg7 + local140 * local140));
@@ -144,7 +144,7 @@ public final class Ground_Sub2 extends Ground {
 
     @OriginalMember(owner = "client!pn", name = "a", descriptor = "(III[[ZZI)V")
     @Override
-    public void method7870(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) boolean[][] arg3, @OriginalArg(4) boolean arg4, @OriginalArg(5) int arg5) {
+    public void renderTiles(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) boolean[][] arg3, @OriginalArg(4) boolean arg4, @OriginalArg(5) int arg5) {
         this.method6668(arg4, arg3, arg0, -1, arg2, arg1, arg5);
     }
 
@@ -185,7 +185,7 @@ public final class Ground_Sub2 extends Ground {
 
     @OriginalMember(owner = "client!pn", name = "a", descriptor = "(IIIIIII[[Z)V")
     @Override
-    public void method7873(@OriginalArg(3) int x1, @OriginalArg(4) int y1, @OriginalArg(5) int x2, @OriginalArg(6) int y2, @OriginalArg(7) boolean[][] visibility) {
+    public void drawMinimap(@OriginalArg(3) int x1, @OriginalArg(4) int y1, @OriginalArg(5) int x2, @OriginalArg(6) int y2, @OriginalArg(7) boolean[][] visibility) {
         if (this.anInt7508 <= 0) {
             return;
         }
@@ -197,8 +197,8 @@ public final class Ground_Sub2 extends Ground {
         this.aClass19_Sub3_33.setBlendMode(0);
         this.aClass19_Sub3_33.method7046(-2);
         this.aClass19_Sub3_33.method7001(null);
-        Static699.aFloatArray81[5] = (float) 1024 / ((float) super.anInt8888 * 128.0F * (float) this.aClass19_Sub3_33.anInt7956);
-        Static699.aFloatArray81[0] = (float) 1024 / ((float) this.aClass19_Sub3_33.anInt7869 * 128.0F * (float) super.anInt8888);
+        Static699.aFloatArray81[5] = (float) 1024 / ((float) super.tileSize * 128.0F * (float) this.aClass19_Sub3_33.anInt7956);
+        Static699.aFloatArray81[0] = (float) 1024 / ((float) this.aClass19_Sub3_33.anInt7869 * 128.0F * (float) super.tileSize);
         Static699.aFloatArray81[2] = 0.0F;
         Static699.aFloatArray81[15] = 1.0F;
         Static699.aFloatArray81[8] = 0.0F;
@@ -254,7 +254,7 @@ public final class Ground_Sub2 extends Ground {
         @Pc(364) int local364;
         if (this.aClass19_Sub3_33.aBoolean618) {
             for (local327 = y1; local327 < y2; local327++) {
-                local337 = local327 * super.anInt8894 + x1;
+                local337 = local327 * super.sizeX + x1;
                 for (local339 = x1; local339 < x2; local339++) {
                     if (visibility[local339 - x1][local327 - y1]) {
                         local360 = this.aShortArrayArray6[local337];
@@ -270,7 +270,7 @@ public final class Ground_Sub2 extends Ground {
             }
         } else {
             for (local327 = y1; local327 < y2; local327++) {
-                local337 = local327 * super.anInt8894 + x1;
+                local337 = local327 * super.sizeX + x1;
                 for (local339 = x1; local339 < x2; local339++) {
                     if (visibility[local339 - x1][local327 - y1]) {
                         local360 = this.aShortArrayArray6[local337];
@@ -307,10 +307,10 @@ public final class Ground_Sub2 extends Ground {
         if (this.anInt7508 <= 0) {
             this.aClass170_1 = null;
         } else {
-            @Pc(25) byte[][] local25 = new byte[super.anInt8894 + 1][super.anInt8892 + 1];
+            @Pc(25) byte[][] local25 = new byte[super.sizeX + 1][super.sizeZ + 1];
             @Pc(31) int local31;
-            for (@Pc(27) int local27 = 1; local27 < super.anInt8894; local27++) {
-                for (local31 = 1; local31 < super.anInt8892; local31++) {
+            for (@Pc(27) int local27 = 1; local27 < super.sizeX; local27++) {
+                for (local31 = 1; local31 < super.sizeZ; local31++) {
                     local25[local27][local31] = (byte) ((this.aByteArrayArray26[local27][local31] >> 1) + (this.aByteArrayArray26[local27 + 1][local31] >> 3) + (this.aByteArrayArray26[local27 - 1][local31] >> 2) + (this.aByteArrayArray26[local27][local31 + -1] >> 2) + (this.aByteArrayArray26[local27][local31 + 1] >> 3));
                 }
             }
@@ -336,8 +336,8 @@ public final class Ground_Sub2 extends Ground {
             @Pc(206) IterableHashTable local206 = new IterableHashTable(local194);
             @Pc(210) Node_Sub39[] local210 = new Node_Sub39[this.anInt7507];
             @Pc(216) int local216;
-            for (@Pc(212) int local212 = 0; super.anInt8894 > local212; local212++) {
-                for (local216 = 0; super.anInt8892 > local216; local216++) {
+            for (@Pc(212) int local212 = 0; super.sizeX > local212; local212++) {
+                for (local216 = 0; super.sizeZ > local216; local216++) {
                     if (this.anIntArrayArrayArray15[local212][local216] != null) {
                         @Pc(234) Node_Sub39[] local234 = this.aClass2_Sub39ArrayArrayArray1[local212][local216];
                         @Pc(241) int[] local241 = this.anIntArrayArrayArray14[local212][local216];
@@ -377,10 +377,10 @@ public final class Ground_Sub2 extends Ground {
                             }
                             local210[local442++] = local452;
                         }
-                        @Pc(499) short[] local499 = this.aShortArrayArray6[local212 + super.anInt8894 * local216] = new short[local262.length];
+                        @Pc(499) short[] local499 = this.aShortArrayArray6[local212 + super.sizeX * local216] = new short[local262.length];
                         for (local454 = 0; local454 < local262.length; local454++) {
-                            @Pc(512) int local512 = (local212 << super.anInt8895) + local241[local454];
-                            @Pc(522) int local522 = (local216 << super.anInt8895) + local248[local454];
+                            @Pc(512) int local512 = (local212 << super.tileSizeShift) + local241[local454];
+                            @Pc(522) int local522 = (local216 << super.tileSizeShift) + local248[local454];
                             @Pc(527) int local527 = local512 >> this.anInt7488;
                             @Pc(532) int local532 = local522 >> this.anInt7488;
                             @Pc(536) int local536 = local262[local454];
@@ -402,24 +402,24 @@ public final class Ground_Sub2 extends Ground {
                                 local606 = local577 - local408;
                                 local602 = local313;
                                 local610 = local299;
-                            } else if (local571 == 0 && local575 == super.anInt8888) {
+                            } else if (local571 == 0 && local575 == super.tileSize) {
                                 local602 = local340;
                                 local606 = local577 - local418;
                                 local608 = local331;
                                 local610 = local322;
-                            } else if (super.anInt8888 == local571 && super.anInt8888 == local575) {
+                            } else if (super.tileSize == local571 && super.tileSize == local575) {
                                 local606 = local577 - local430;
                                 local602 = local373;
                                 local608 = local362;
                                 local610 = local351;
-                            } else if (super.anInt8888 == local571 && local575 == 0) {
+                            } else if (super.tileSize == local571 && local575 == 0) {
                                 local606 = local577 - local440;
                                 local608 = local391;
                                 local610 = local382;
                                 local602 = local400;
                             } else {
-                                @Pc(677) float local677 = (float) local571 / (float) super.anInt8888;
-                                @Pc(684) float local684 = (float) local575 / (float) super.anInt8888;
+                                @Pc(677) float local677 = (float) local571 / (float) super.tileSize;
+                                @Pc(684) float local684 = (float) local575 / (float) super.tileSize;
                                 @Pc(693) float local693 = local299 + local677 * (local382 - local299);
                                 local702 = local677 * (local391 - local306) + local306;
                                 @Pc(711) float local711 = local313 + (local400 - local313) * local677;
@@ -429,9 +429,9 @@ public final class Ground_Sub2 extends Ground {
                                 @Pc(746) float local746 = (local373 - local340) * local677 + local340;
                                 local608 = (local728 - local702) * local684 + local702;
                                 local602 = (local746 - local711) * local684 + local711;
-                                @Pc(776) int local776 = ((local440 - local408) * local571 >> super.anInt8895) + local408;
-                                @Pc(788) int local788 = local418 + (local571 * (local430 - local418) >> super.anInt8895);
-                                local606 = local577 - (local575 * (local788 - local776) >> super.anInt8895) - local776;
+                                @Pc(776) int local776 = ((local440 - local408) * local571 >> super.tileSizeShift) + local408;
+                                @Pc(788) int local788 = local418 + (local571 * (local430 - local418) >> super.tileSizeShift);
+                                local606 = local577 - (local575 * (local788 - local776) >> super.tileSizeShift) - local776;
                             }
                             if (local536 != -1) {
                                 @Pc(826) int local826 = local606 * (local536 & 0x7F) >> 7;
@@ -555,9 +555,9 @@ public final class Ground_Sub2 extends Ground {
                 }
             }
             @Pc(1458) int local1458;
-            for (@Pc(1438) int local1438 = 0; local1438 < super.anInt8894; local1438++) {
-                for (@Pc(1442) int local1442 = 0; local1442 < super.anInt8892; local1442++) {
-                    @Pc(1454) short[] local1454 = this.aShortArrayArray6[local1438 + local1442 * super.anInt8894];
+            for (@Pc(1438) int local1438 = 0; local1438 < super.sizeX; local1438++) {
+                for (@Pc(1442) int local1442 = 0; local1442 < super.sizeZ; local1442++) {
+                    @Pc(1454) short[] local1454 = this.aShortArrayArray6[local1438 + local1442 * super.sizeX];
                     if (local1454 != null) {
                         local1458 = 0;
                         @Pc(1460) int local1460 = 0;
@@ -641,7 +641,7 @@ public final class Ground_Sub2 extends Ground {
 
     @OriginalMember(owner = "client!pn", name = "a", descriptor = "(II)V")
     @Override
-    public void method7875(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) {
+    public void renderTile(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) {
     }
 
     @OriginalMember(owner = "client!pn", name = "ka", descriptor = "(III)V")
@@ -678,10 +678,10 @@ public final class Ground_Sub2 extends Ground {
     @Override
     public void U(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int[] arg2, @OriginalArg(3) int[] arg3, @OriginalArg(4) int[] arg4, @OriginalArg(5) int[] arg5, @OriginalArg(6) int[] arg6, @OriginalArg(7) int[] arg7, @OriginalArg(8) int[] arg8, @OriginalArg(9) int[] arg9, @OriginalArg(10) int arg10, @OriginalArg(11) int arg11, @OriginalArg(12) int arg12, @OriginalArg(13) boolean arg13) {
         if (arg3 != null && this.anIntArrayArrayArray13 == null) {
-            this.anIntArrayArrayArray13 = new int[super.anInt8894][super.anInt8892][];
+            this.anIntArrayArrayArray13 = new int[super.sizeX][super.sizeZ][];
         }
         if (arg5 != null && this.anIntArrayArrayArray10 == null) {
-            this.anIntArrayArrayArray10 = new int[super.anInt8894][super.anInt8892][];
+            this.anIntArrayArrayArray10 = new int[super.sizeX][super.sizeZ][];
         }
         @Pc(41) TextureSource local41 = this.aClass19_Sub3_33.textureSource;
         this.anIntArrayArrayArray14[arg0][arg1] = arg2;
@@ -728,7 +728,7 @@ public final class Ground_Sub2 extends Ground {
 
     @OriginalMember(owner = "client!pn", name = "a", descriptor = "(III[[ZZII)V")
     @Override
-    public void method7877(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) boolean[][] arg3, @OriginalArg(4) boolean arg4, @OriginalArg(5) int arg5, @OriginalArg(6) int arg6) {
+    public void renderTilesAtDepth(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) boolean[][] arg3, @OriginalArg(4) boolean arg4, @OriginalArg(5) int arg5, @OriginalArg(6) int arg6) {
         this.method6668(arg4, arg3, arg0, arg5, arg2, arg1, arg6);
     }
 
@@ -756,12 +756,12 @@ public final class Ground_Sub2 extends Ground {
             local75 = 0;
         }
         @Pc(86) int local86 = arg2 + arg4;
-        if (super.anInt8894 - 1 < local86) {
-            local86 = super.anInt8894 - 1;
+        if (super.sizeX - 1 < local86) {
+            local86 = super.sizeX - 1;
         }
         @Pc(105) int local105 = arg4 + arg5;
-        if (local105 > super.anInt8892 - 1) {
-            local105 = super.anInt8892 - 1;
+        if (local105 > super.sizeZ - 1) {
+            local105 = super.sizeZ - 1;
         }
         @Pc(122) int local122 = 0;
         @Pc(126) int[] local126 = this.aClass19_Sub3_33.anIntArray624;
@@ -770,7 +770,7 @@ public final class Ground_Sub2 extends Ground {
             @Pc(136) boolean[] local136 = arg1[local128 - local63];
             for (local138 = local75; local138 <= local105; local138++) {
                 if (local136[local138 - local77]) {
-                    local126[local122++] = local128 + local138 * super.anInt8894;
+                    local126[local122++] = local128 + local138 * super.sizeX;
                 }
             }
         }
@@ -821,7 +821,7 @@ public final class Ground_Sub2 extends Ground {
         if ((this.aByteArrayArray25[arg0][arg1] & 0x1) == 0) {
             return null;
         }
-        @Pc(22) int local22 = super.anInt8888 >> this.aClass19_Sub3_33.anInt7989;
+        @Pc(22) int local22 = super.tileSize >> this.aClass19_Sub3_33.anInt7989;
         @Pc(25) DoublyLinkedNode_Sub2_Sub9_ local25 = (DoublyLinkedNode_Sub2_Sub9_) arg2;
         @Pc(43) DoublyLinkedNode_Sub2_Sub9_ local43;
         if (local25 != null && local25.method6545(local22, local22)) {

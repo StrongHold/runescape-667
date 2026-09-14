@@ -53,7 +53,7 @@ public final class Class274 {
         @Pc(35) int local35 = arg4 << arg5;
         @Pc(50) int local50;
         for (@Pc(37) int local37 = 0; local37 < local25; local37++) {
-            local50 = local31 + (local37 + local35) * arg2.anInt8894;
+            local50 = local31 + (local37 + local35) * arg2.sizeX;
             for (@Pc(52) int local52 = 0; local52 < local25; local52++) {
                 @Pc(60) short[] local60 = arg2.aShortArrayArray4[local50++];
                 if (local60 != null) {
@@ -81,7 +81,7 @@ public final class Class274 {
                     @Pc(166) int local166;
                     if (Stream.b()) {
                         for (local132 = 0; local132 < local25; local132++) {
-                            local144 = arg2.anInt8894 * (local132 + local35) + local31;
+                            local144 = arg2.sizeX * (local132 + local35) + local31;
                             for (local146 = 0; local146 < local25; local146++) {
                                 local154 = arg2.aShortArrayArray4[local144++];
                                 if (local154 != null) {
@@ -100,7 +100,7 @@ public final class Class274 {
                         }
                     } else {
                         for (local132 = 0; local132 < local25; local132++) {
-                            local144 = (local132 + local35) * arg2.anInt8894 + local31;
+                            local144 = (local132 + local35) * arg2.sizeX + local31;
                             for (local146 = 0; local146 < local25; local146++) {
                                 local154 = arg2.aShortArrayArray4[local144++];
                                 if (local154 != null) {

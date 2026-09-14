@@ -39,12 +39,12 @@ public final class Class170 {
     public Class170(@OriginalArg(0) GlToolkit arg0, @OriginalArg(1) Ground_Sub2 arg1) {
         this.aClass19_Sub3_18 = arg0;
         this.aClass178_Sub2_1 = arg1;
-        this.anInt4022 = (this.aClass178_Sub2_1.anInt8894 * this.aClass178_Sub2_1.anInt8888 >> this.aClass19_Sub3_18.anInt7989) + 2;
-        this.anInt4026 = (this.aClass178_Sub2_1.anInt8892 * this.aClass178_Sub2_1.anInt8888 >> this.aClass19_Sub3_18.anInt7989) + 2;
-        this.anInt4025 = this.aClass19_Sub3_18.anInt7989 + 7 - this.aClass178_Sub2_1.anInt8895;
+        this.anInt4022 = (this.aClass178_Sub2_1.sizeX * this.aClass178_Sub2_1.tileSize >> this.aClass19_Sub3_18.anInt7989) + 2;
+        this.anInt4026 = (this.aClass178_Sub2_1.sizeZ * this.aClass178_Sub2_1.tileSize >> this.aClass19_Sub3_18.anInt7989) + 2;
+        this.anInt4025 = this.aClass19_Sub3_18.anInt7989 + 7 - this.aClass178_Sub2_1.tileSizeShift;
         this.aByteArray41 = new byte[this.anInt4026 * this.anInt4022];
-        this.anInt4020 = this.aClass178_Sub2_1.anInt8894 >> this.anInt4025;
-        this.anInt4023 = this.aClass178_Sub2_1.anInt8892 >> this.anInt4025;
+        this.anInt4020 = this.aClass178_Sub2_1.sizeX >> this.anInt4025;
+        this.anInt4023 = this.aClass178_Sub2_1.sizeZ >> this.anInt4025;
     }
 
     @OriginalMember(owner = "client!hn", name = "a", descriptor = "(B)V")
@@ -153,7 +153,7 @@ public final class Class170 {
                     local262.pos = 0;
                     for (@Pc(267) int local267 = local61; local267 < local68; local267++) {
                         if (-arg4 <= local267 - arg2 && local267 - arg2 <= arg4) {
-                            @Pc(298) int local298 = local84 + local267 * this.aClass178_Sub2_1.anInt8894;
+                            @Pc(298) int local298 = local84 + local267 * this.aClass178_Sub2_1.sizeX;
                             for (@Pc(300) int local300 = local84; local300 < local86; local300++) {
                                 if (local300 - arg0 >= -arg4 && local300 - arg0 <= arg4 && arg3[arg4 + local300 - arg0][local267 + arg4 - arg2]) {
                                     @Pc(350) short[] local350 = this.aClass178_Sub2_1.aShortArrayArray6[local298];

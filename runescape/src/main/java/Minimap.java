@@ -630,7 +630,7 @@ public final class Minimap {
                         }
                     }
 
-                    Static706.floor[level].method7873(x1, z1, x2, z2, visibility);
+                    Static706.floor[level].drawMinimap(x1, z1, x2, z2, visibility);
 
                     if (!drawCollisionMap) {
                         for (@Pc(284) int offsetX = -4; offsetX < BLOCK_SIZE; offsetX++) {

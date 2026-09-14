@@ -3758,21 +3758,21 @@ public final class Model_Sub2 extends Model {
         @Pc(24) int local24 = x + this.aShort62;
         @Pc(29) int local29 = this.aShort61 + z;
         @Pc(34) int local34 = this.aShort69 + z;
-        if ((hillType == 1 || hillType == 2 || hillType == 3 || hillType == 5) && (local18 < 0 || floor.anInt8894 <= floor.anInt8888 + local24 >> floor.anInt8895 || local29 < 0 || local34 + floor.anInt8888 >> floor.anInt8895 >= floor.anInt8892)) {
+        if ((hillType == 1 || hillType == 2 || hillType == 3 || hillType == 5) && (local18 < 0 || floor.sizeX <= floor.tileSize + local24 >> floor.tileSizeShift || local29 < 0 || local34 + floor.tileSize >> floor.tileSizeShift >= floor.sizeZ)) {
             return;
         }
         if (hillType == 4 || hillType == 5) {
             if (ceiling == null) {
                 return;
             }
-            if (local18 < 0 || ceiling.anInt8894 <= local24 + ceiling.anInt8888 >> ceiling.anInt8895 || local29 < 0 || ceiling.anInt8892 <= ceiling.anInt8888 + local34 >> ceiling.anInt8895) {
+            if (local18 < 0 || ceiling.sizeX <= local24 + ceiling.tileSize >> ceiling.tileSizeShift || local29 < 0 || ceiling.sizeZ <= ceiling.tileSize + local34 >> ceiling.tileSizeShift) {
                 return;
             }
         } else {
-            local18 >>= floor.anInt8895;
-            local24 = local24 + floor.anInt8888 - 1 >> floor.anInt8895;
-            local29 >>= floor.anInt8895;
-            local34 = floor.anInt8888 + local34 - 1 >> floor.anInt8895;
+            local18 >>= floor.tileSizeShift;
+            local24 = local24 + floor.tileSize - 1 >> floor.tileSizeShift;
+            local29 >>= floor.tileSizeShift;
+            local34 = floor.tileSize + local34 - 1 >> floor.tileSizeShift;
             if (floor.getHeight(local18, local29) == y && y == floor.getHeight(local24, local29) && floor.getHeight(local18, local34) == y && y == floor.getHeight(local24, local34)) {
                 return;
             }
@@ -3803,7 +3803,7 @@ public final class Model_Sub2 extends Model {
                     local240 = (hillValue >> 8 & 0xFF) * 4;
                     local251 = (hillValue >> 16 & 0xFF) << 6;
                     local338 = (hillValue >> 24 & 0xFF) << 6;
-                    if (x - (local314 >> 1) < 0 || floor.anInt8894 << floor.anInt8895 <= (local314 >> 1) + x + floor.anInt8888 || z - (local240 >> 1) < 0 || z + (local240 >> 1) + floor.anInt8888 >= floor.anInt8892 << floor.anInt8895) {
+                    if (x - (local314 >> 1) < 0 || floor.sizeX << floor.tileSizeShift <= (local314 >> 1) + x + floor.tileSize || z - (local240 >> 1) < 0 || z + (local240 >> 1) + floor.tileSize >= floor.sizeZ << floor.tileSizeShift) {
                         return;
                     }
                     this.method7490(y, local251, x, local314, z, local240, floor, local338);

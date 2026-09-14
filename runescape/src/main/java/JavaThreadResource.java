@@ -34,7 +34,7 @@ public final class JavaThreadResource {
     public int waterHeight = 0;
 
     @OriginalMember(owner = "client!wf", name = "x", descriptor = "Z")
-    public boolean aBoolean805 = false;
+    public boolean water = false;
 
     @OriginalMember(owner = "client!wf", name = "j", descriptor = "I")
     public int anInt10600 = 0;
@@ -49,7 +49,7 @@ public final class JavaThreadResource {
     public final int[] anIntArray838 = new int[Static567.anInt8484];
 
     @OriginalMember(owner = "client!wf", name = "O", descriptor = "[I")
-    public final int[] anIntArray840 = new int[64];
+    public final int[] screenX = new int[64];
 
     @OriginalMember(owner = "client!wf", name = "o", descriptor = "[I")
     public final int[] anIntArray837 = new int[8];
@@ -73,7 +73,7 @@ public final class JavaThreadResource {
     public final int[] anIntArray836 = new int[10000];
 
     @OriginalMember(owner = "client!wf", name = "F", descriptor = "[I")
-    public final int[] anIntArray843 = new int[64];
+    public final int[] screenY = new int[64];
 
     @OriginalMember(owner = "client!wf", name = "D", descriptor = "[I")
     public final int[] anIntArray848 = new int[10];
@@ -97,10 +97,10 @@ public final class JavaThreadResource {
     public final int[] anIntArray839 = new int[Static567.anInt8484];
 
     @OriginalMember(owner = "client!wf", name = "r", descriptor = "[I")
-    public final int[] anIntArray855 = new int[64];
+    public final int[] fogLevels = new int[64];
 
     @OriginalMember(owner = "client!wf", name = "b", descriptor = "[I")
-    public final int[] anIntArray852 = new int[64];
+    public final int[] depths = new int[64];
 
     @OriginalMember(owner = "client!wf", name = "u", descriptor = "[I")
     public final int[] anIntArray841 = new int[10];

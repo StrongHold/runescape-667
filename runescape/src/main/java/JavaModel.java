@@ -819,7 +819,7 @@ public final class JavaModel extends Model {
         @Pc(65) int local65;
         @Pc(81) int local81;
         @Pc(333) int local333;
-        if (this.aJavaThreadResource_3.aBoolean805) {
+        if (this.aJavaThreadResource_3.water) {
             local8 = this.faceA[arg0];
             local13 = this.faceB[arg0];
             local18 = this.faceC[arg0];
@@ -1504,7 +1504,7 @@ public final class JavaModel extends Model {
         @Pc(65) int local65;
         @Pc(81) int local81;
         @Pc(333) int local333;
-        if (this.aJavaThreadResource_3.aBoolean805) {
+        if (this.aJavaThreadResource_3.water) {
             local8 = this.faceA[arg0];
             local13 = this.faceB[arg0];
             local18 = this.faceC[arg0];
@@ -4001,7 +4001,7 @@ public final class JavaModel extends Model {
                     this.anIntArray660[local756] = (int) local806;
                     this.anIntArray659[local756] = (int) local823;
                 }
-                if (this.aJavaThreadResource_3.aBoolean805) {
+                if (this.aJavaThreadResource_3.water) {
                     this.anIntArray673[local756] = (int) (this.aClass73_Sub2_2.ty + this.aClass73_Sub2_2.e2_1 * (float) local762 + this.aClass73_Sub2_2.e2_2 * (float) local767 + this.aClass73_Sub2_2.e2_3 * (float) local772);
                 }
             }
@@ -4045,7 +4045,7 @@ public final class JavaModel extends Model {
                     this.anIntArray660[local756] = (int) local806;
                     this.anIntArray659[local756] = arg2;
                 }
-                if (this.aJavaThreadResource_3.aBoolean805) {
+                if (this.aJavaThreadResource_3.water) {
                     this.anIntArray673[local756] = (int) (this.aClass73_Sub2_2.ty + this.aClass73_Sub2_2.e2_1 * (float) local762 + this.aClass73_Sub2_2.e2_2 * (float) local767 + this.aClass73_Sub2_2.e2_3 * (float) local772);
                 }
             }
@@ -4158,9 +4158,9 @@ public final class JavaModel extends Model {
         try {
             local1543 = (arg3 & 0x4) != 0;
             if (local1543) {
-                this.method7516(local694, this.aJavaThreadResource_3.fogActive && local176 > this.aJavaThreadResource_3.fogPlane || this.aJavaThreadResource_3.aBoolean805, local171, local176 - local171);
+                this.method7516(local694, this.aJavaThreadResource_3.fogActive && local176 > this.aJavaThreadResource_3.fogPlane || this.aJavaThreadResource_3.water, local171, local176 - local171);
             } else {
-                this.method7529(local694, this.aJavaThreadResource_3.fogActive && local176 > this.aJavaThreadResource_3.fogPlane || this.aJavaThreadResource_3.aBoolean805, local171, local176 - local171);
+                this.method7529(local694, this.aJavaThreadResource_3.fogActive && local176 > this.aJavaThreadResource_3.fogPlane || this.aJavaThreadResource_3.water, local171, local176 - local171);
             }
         } catch (@Pc(2068) Exception local2068) {
         }
@@ -4460,7 +4460,7 @@ public final class JavaModel extends Model {
         @Pc(43) int local43 = x + this.aShort117;
         @Pc(48) int local48 = z + this.aShort112;
         @Pc(53) int local53 = z + this.aShort111;
-        if (hillType != 4 && (local38 < 0 || local43 + floor.anInt8888 >> floor.anInt8895 >= floor.anInt8894 || local48 < 0 || local53 + floor.anInt8888 >> floor.anInt8895 >= floor.anInt8892)) {
+        if (hillType != 4 && (local38 < 0 || local43 + floor.tileSize >> floor.tileSizeShift >= floor.sizeX || local48 < 0 || local53 + floor.tileSize >> floor.tileSizeShift >= floor.sizeZ)) {
             return;
         }
         @Pc(94) int[][] local94 = floor.tileHeights;
@@ -4472,14 +4472,14 @@ public final class JavaModel extends Model {
             if (ceiling == null) {
                 return;
             }
-            if (local38 < 0 || local43 + ceiling.anInt8888 >> ceiling.anInt8895 >= ceiling.anInt8894 || local48 < 0 || local53 + ceiling.anInt8888 >> ceiling.anInt8895 >= ceiling.anInt8892) {
+            if (local38 < 0 || local43 + ceiling.tileSize >> ceiling.tileSizeShift >= ceiling.sizeX || local48 < 0 || local53 + ceiling.tileSize >> ceiling.tileSizeShift >= ceiling.sizeZ) {
                 return;
             }
         } else {
-            local38 >>= floor.anInt8895;
-            local43 = local43 + floor.anInt8888 - 1 >> floor.anInt8895;
-            local48 >>= floor.anInt8895;
-            local53 = local53 + floor.anInt8888 - 1 >> floor.anInt8895;
+            local38 >>= floor.tileSizeShift;
+            local43 = local43 + floor.tileSize - 1 >> floor.tileSizeShift;
+            local48 >>= floor.tileSizeShift;
+            local53 = local53 + floor.tileSize - 1 >> floor.tileSizeShift;
             if (local94[local38][local48] == y && local94[local43][local48] == y && local94[local38][local53] == y && local94[local43][local53] == y) {
                 return;
             }
@@ -4498,17 +4498,17 @@ public final class JavaModel extends Model {
             @Pc(327) int local327;
             @Pc(472) int local472;
             if (hillType == 1) {
-                local226 = floor.anInt8888 - 1;
+                local226 = floor.tileSize - 1;
                 for (local228 = 0; local228 < this.maxVertex; local228++) {
                     local236 = this.vertexX[local228] + x;
                     local243 = this.vertexZ[local228] + z;
                     local247 = local236 & local226;
                     local251 = local243 & local226;
-                    local256 = local236 >> floor.anInt8895;
-                    local261 = local243 >> floor.anInt8895;
-                    local285 = local94[local256][local261] * (floor.anInt8888 - local247) + local94[local256 + 1][local261] * local247 >> floor.anInt8895;
-                    local313 = local94[local256][local261 + 1] * (floor.anInt8888 - local247) + local94[local256 + 1][local261 + 1] * local247 >> floor.anInt8895;
-                    local327 = local285 * (floor.anInt8888 - local251) + local313 * local251 >> floor.anInt8895;
+                    local256 = local236 >> floor.tileSizeShift;
+                    local261 = local243 >> floor.tileSizeShift;
+                    local285 = local94[local256][local261] * (floor.tileSize - local247) + local94[local256 + 1][local261] * local247 >> floor.tileSizeShift;
+                    local313 = local94[local256][local261 + 1] * (floor.tileSize - local247) + local94[local256 + 1][local261 + 1] * local247 >> floor.tileSizeShift;
+                    local327 = local285 * (floor.tileSize - local251) + local313 * local251 >> floor.tileSizeShift;
                     this.vertexY[local228] = this.vertexY[local228] + local327 - y;
                 }
                 for (local236 = this.maxVertex; local236 < this.vertexCount; local236++) {
@@ -4516,19 +4516,19 @@ public final class JavaModel extends Model {
                     local247 = this.vertexZ[local236] + z;
                     local251 = local243 & local226;
                     local256 = local247 & local226;
-                    local261 = local243 >> floor.anInt8895;
-                    local285 = local247 >> floor.anInt8895;
+                    local261 = local243 >> floor.tileSizeShift;
+                    local285 = local247 >> floor.tileSizeShift;
                     if (local261 >= 0 && local261 < local94.length - 1 && local285 >= 0 && local285 < local94[0].length - 1) {
-                        local313 = local94[local261][local285] * (floor.anInt8888 - local251) + local94[local261 + 1][local285] * local251 >> floor.anInt8895;
-                        local327 = local94[local261][local285 + 1] * (floor.anInt8888 - local251) + local94[local261 + 1][local285 + 1] * local251 >> floor.anInt8895;
-                        local472 = local313 * (floor.anInt8888 - local256) + local327 * local256 >> floor.anInt8895;
+                        local313 = local94[local261][local285] * (floor.tileSize - local251) + local94[local261 + 1][local285] * local251 >> floor.tileSizeShift;
+                        local327 = local94[local261][local285 + 1] * (floor.tileSize - local251) + local94[local261 + 1][local285 + 1] * local251 >> floor.tileSizeShift;
+                        local472 = local313 * (floor.tileSize - local256) + local327 * local256 >> floor.tileSizeShift;
                         this.vertexY[local236] = this.vertexY[local236] + local472 - y;
                     }
                 }
             } else {
                 @Pc(784) int local784;
                 if (hillType == 2) {
-                    local226 = floor.anInt8888 - 1;
+                    local226 = floor.tileSize - 1;
                     for (local228 = 0; local228 < this.maxVertex; local228++) {
                         local236 = (this.vertexY[local228] << 16) / this.aShort116;
                         if (local236 < hillValue) {
@@ -4536,11 +4536,11 @@ public final class JavaModel extends Model {
                             local247 = this.vertexZ[local228] + z;
                             local251 = local243 & local226;
                             local256 = local247 & local226;
-                            local261 = local243 >> floor.anInt8895;
-                            local285 = local247 >> floor.anInt8895;
-                            local313 = local94[local261][local285] * (floor.anInt8888 - local251) + local94[local261 + 1][local285] * local251 >> floor.anInt8895;
-                            local327 = local94[local261][local285 + 1] * (floor.anInt8888 - local251) + local94[local261 + 1][local285 + 1] * local251 >> floor.anInt8895;
-                            local472 = local313 * (floor.anInt8888 - local256) + local327 * local256 >> floor.anInt8895;
+                            local261 = local243 >> floor.tileSizeShift;
+                            local285 = local247 >> floor.tileSizeShift;
+                            local313 = local94[local261][local285] * (floor.tileSize - local251) + local94[local261 + 1][local285] * local251 >> floor.tileSizeShift;
+                            local327 = local94[local261][local285 + 1] * (floor.tileSize - local251) + local94[local261 + 1][local285 + 1] * local251 >> floor.tileSizeShift;
+                            local472 = local313 * (floor.tileSize - local256) + local327 * local256 >> floor.tileSizeShift;
                             this.vertexY[local228] += (local472 - y) * (hillValue - local236) / hillValue;
                         } else {
                             this.vertexY[local228] = this.vertexY[local228];
@@ -4553,12 +4553,12 @@ public final class JavaModel extends Model {
                             local251 = this.vertexZ[local236] + z;
                             local256 = local247 & local226;
                             local261 = local251 & local226;
-                            local285 = local247 >> floor.anInt8895;
-                            local313 = local251 >> floor.anInt8895;
-                            if (local285 >= 0 && local285 < floor.anInt8894 - 1 && local313 >= 0 && local313 < floor.anInt8892 - 1) {
-                                local327 = local94[local285][local313] * (floor.anInt8888 - local256) + local94[local285 + 1][local313] * local256 >> floor.anInt8895;
-                                local472 = local94[local285][local313 + 1] * (floor.anInt8888 - local256) + local94[local285 + 1][local313 + 1] * local256 >> floor.anInt8895;
-                                local784 = local327 * (floor.anInt8888 - local261) + local472 * local261 >> floor.anInt8895;
+                            local285 = local247 >> floor.tileSizeShift;
+                            local313 = local251 >> floor.tileSizeShift;
+                            if (local285 >= 0 && local285 < floor.sizeX - 1 && local313 >= 0 && local313 < floor.sizeZ - 1) {
+                                local327 = local94[local285][local313] * (floor.tileSize - local256) + local94[local285 + 1][local313] * local256 >> floor.tileSizeShift;
+                                local472 = local94[local285][local313 + 1] * (floor.tileSize - local256) + local94[local285 + 1][local313 + 1] * local256 >> floor.tileSizeShift;
+                                local784 = local327 * (floor.tileSize - local261) + local472 * local261 >> floor.tileSizeShift;
                                 this.vertexY[local236] += (local784 - y) * (hillValue - local243) / hillValue;
                             }
                         } else {
@@ -4570,23 +4570,23 @@ public final class JavaModel extends Model {
                     local228 = (hillValue >> 8 & 0xFF) * 4;
                     local236 = (hillValue >> 16 & 0xFF) << 6;
                     local243 = (hillValue >> 24 & 0xFF) << 6;
-                    if (x - (local226 >> 1) < 0 || x + (local226 >> 1) + floor.anInt8888 >= floor.anInt8894 << floor.anInt8895 || z - (local228 >> 1) < 0 || z + (local228 >> 1) + floor.anInt8888 >= floor.anInt8892 << floor.anInt8895) {
+                    if (x - (local226 >> 1) < 0 || x + (local226 >> 1) + floor.tileSize >= floor.sizeX << floor.tileSizeShift || z - (local228 >> 1) < 0 || z + (local228 >> 1) + floor.tileSize >= floor.sizeZ << floor.tileSizeShift) {
                         return;
                     }
                     this.method7490(y, local236, x, local226, z, local228, floor, local243);
                 } else if (hillType == 4) {
-                    local226 = ceiling.anInt8888 - 1;
+                    local226 = ceiling.tileSize - 1;
                     local228 = this.aShort113 - this.aShort116;
                     for (local236 = 0; local236 < this.maxVertex; local236++) {
                         local243 = this.vertexX[local236] + x;
                         local247 = this.vertexZ[local236] + z;
                         local251 = local243 & local226;
                         local256 = local247 & local226;
-                        local261 = local243 >> ceiling.anInt8895;
-                        local285 = local247 >> ceiling.anInt8895;
-                        local313 = local96[local261][local285] * (ceiling.anInt8888 - local251) + local96[local261 + 1][local285] * local251 >> ceiling.anInt8895;
-                        local327 = local96[local261][local285 + 1] * (ceiling.anInt8888 - local251) + local96[local261 + 1][local285 + 1] * local251 >> ceiling.anInt8895;
-                        local472 = local313 * (ceiling.anInt8888 - local256) + local327 * local256 >> ceiling.anInt8895;
+                        local261 = local243 >> ceiling.tileSizeShift;
+                        local285 = local247 >> ceiling.tileSizeShift;
+                        local313 = local96[local261][local285] * (ceiling.tileSize - local251) + local96[local261 + 1][local285] * local251 >> ceiling.tileSizeShift;
+                        local327 = local96[local261][local285 + 1] * (ceiling.tileSize - local251) + local96[local261 + 1][local285 + 1] * local251 >> ceiling.tileSizeShift;
+                        local472 = local313 * (ceiling.tileSize - local256) + local327 * local256 >> ceiling.tileSizeShift;
                         this.vertexY[local236] = this.vertexY[local236] + local472 + local228 - y;
                     }
                     for (local243 = this.maxVertex; local243 < this.vertexCount; local243++) {
@@ -4594,17 +4594,17 @@ public final class JavaModel extends Model {
                         local251 = this.vertexZ[local243] + z;
                         local256 = local247 & local226;
                         local261 = local251 & local226;
-                        local285 = local247 >> ceiling.anInt8895;
-                        local313 = local251 >> ceiling.anInt8895;
-                        if (local285 >= 0 && local285 < ceiling.anInt8894 - 1 && local313 >= 0 && local313 < ceiling.anInt8892 - 1) {
-                            local327 = local96[local285][local313] * (ceiling.anInt8888 - local256) + local96[local285 + 1][local313] * local256 >> ceiling.anInt8895;
-                            local472 = local96[local285][local313 + 1] * (ceiling.anInt8888 - local256) + local96[local285 + 1][local313 + 1] * local256 >> ceiling.anInt8895;
-                            local784 = local327 * (ceiling.anInt8888 - local261) + local472 * local261 >> ceiling.anInt8895;
+                        local285 = local247 >> ceiling.tileSizeShift;
+                        local313 = local251 >> ceiling.tileSizeShift;
+                        if (local285 >= 0 && local285 < ceiling.sizeX - 1 && local313 >= 0 && local313 < ceiling.sizeZ - 1) {
+                            local327 = local96[local285][local313] * (ceiling.tileSize - local256) + local96[local285 + 1][local313] * local256 >> ceiling.tileSizeShift;
+                            local472 = local96[local285][local313 + 1] * (ceiling.tileSize - local256) + local96[local285 + 1][local313 + 1] * local256 >> ceiling.tileSizeShift;
+                            local784 = local327 * (ceiling.tileSize - local261) + local472 * local261 >> ceiling.tileSizeShift;
                             this.vertexY[local243] = this.vertexY[local243] + local784 + local228 - y;
                         }
                     }
                 } else if (hillType == 5) {
-                    local226 = ceiling.anInt8888 - 1;
+                    local226 = ceiling.tileSize - 1;
                     local228 = this.aShort113 - this.aShort116;
                     @Pc(1380) int local1380;
                     for (local236 = 0; local236 < this.maxVertex; local236++) {
@@ -4612,14 +4612,14 @@ public final class JavaModel extends Model {
                         local247 = this.vertexZ[local236] + z;
                         local251 = local243 & local226;
                         local256 = local247 & local226;
-                        local261 = local243 >> floor.anInt8895;
-                        local285 = local247 >> floor.anInt8895;
-                        local313 = local94[local261][local285] * (floor.anInt8888 - local251) + local94[local261 + 1][local285] * local251 >> floor.anInt8895;
-                        local327 = local94[local261][local285 + 1] * (floor.anInt8888 - local251) + local94[local261 + 1][local285 + 1] * local251 >> floor.anInt8895;
-                        local472 = local313 * (floor.anInt8888 - local256) + local327 * local256 >> floor.anInt8895;
-                        local313 = local96[local261][local285] * (ceiling.anInt8888 - local251) + local96[local261 + 1][local285] * local251 >> ceiling.anInt8895;
-                        local327 = local96[local261][local285 + 1] * (ceiling.anInt8888 - local251) + local96[local261 + 1][local285 + 1] * local251 >> ceiling.anInt8895;
-                        local784 = local313 * (ceiling.anInt8888 - local256) + local327 * local256 >> ceiling.anInt8895;
+                        local261 = local243 >> floor.tileSizeShift;
+                        local285 = local247 >> floor.tileSizeShift;
+                        local313 = local94[local261][local285] * (floor.tileSize - local251) + local94[local261 + 1][local285] * local251 >> floor.tileSizeShift;
+                        local327 = local94[local261][local285 + 1] * (floor.tileSize - local251) + local94[local261 + 1][local285 + 1] * local251 >> floor.tileSizeShift;
+                        local472 = local313 * (floor.tileSize - local256) + local327 * local256 >> floor.tileSizeShift;
+                        local313 = local96[local261][local285] * (ceiling.tileSize - local251) + local96[local261 + 1][local285] * local251 >> ceiling.tileSizeShift;
+                        local327 = local96[local261][local285 + 1] * (ceiling.tileSize - local251) + local96[local261 + 1][local285 + 1] * local251 >> ceiling.tileSizeShift;
+                        local784 = local313 * (ceiling.tileSize - local256) + local327 * local256 >> ceiling.tileSizeShift;
                         local1380 = local472 - local784 - hillValue;
                         this.vertexY[local236] = ((this.vertexY[local236] << 8) / local228 * local1380 >> 8) - (y - local472);
                     }
@@ -4628,15 +4628,15 @@ public final class JavaModel extends Model {
                         local251 = this.vertexZ[local243] + z;
                         local256 = local247 & local226;
                         local261 = local251 & local226;
-                        local285 = local247 >> floor.anInt8895;
-                        local313 = local251 >> floor.anInt8895;
-                        if (local285 >= 0 && local285 < floor.anInt8894 - 1 && local285 < ceiling.anInt8894 - 1 && local313 >= 0 && local313 < floor.anInt8892 - 1 && local313 < ceiling.anInt8892 - 1) {
-                            local327 = local94[local285][local313] * (floor.anInt8888 - local256) + local94[local285 + 1][local313] * local256 >> floor.anInt8895;
-                            local472 = local94[local285][local313 + 1] * (floor.anInt8888 - local256) + local94[local285 + 1][local313 + 1] * local256 >> floor.anInt8895;
-                            local784 = local327 * (floor.anInt8888 - local261) + local472 * local261 >> floor.anInt8895;
-                            local327 = local96[local285][local313] * (ceiling.anInt8888 - local256) + local96[local285 + 1][local313] * local256 >> ceiling.anInt8895;
-                            local472 = local96[local285][local313 + 1] * (ceiling.anInt8888 - local256) + local96[local285 + 1][local313 + 1] * local256 >> ceiling.anInt8895;
-                            local1380 = local327 * (ceiling.anInt8888 - local261) + local472 * local261 >> ceiling.anInt8895;
+                        local285 = local247 >> floor.tileSizeShift;
+                        local313 = local251 >> floor.tileSizeShift;
+                        if (local285 >= 0 && local285 < floor.sizeX - 1 && local285 < ceiling.sizeX - 1 && local313 >= 0 && local313 < floor.sizeZ - 1 && local313 < ceiling.sizeZ - 1) {
+                            local327 = local94[local285][local313] * (floor.tileSize - local256) + local94[local285 + 1][local313] * local256 >> floor.tileSizeShift;
+                            local472 = local94[local285][local313 + 1] * (floor.tileSize - local256) + local94[local285 + 1][local313 + 1] * local256 >> floor.tileSizeShift;
+                            local784 = local327 * (floor.tileSize - local261) + local472 * local261 >> floor.tileSizeShift;
+                            local327 = local96[local285][local313] * (ceiling.tileSize - local256) + local96[local285 + 1][local313] * local256 >> ceiling.tileSizeShift;
+                            local472 = local96[local285][local313 + 1] * (ceiling.tileSize - local256) + local96[local285 + 1][local313 + 1] * local256 >> ceiling.tileSizeShift;
+                            local1380 = local327 * (ceiling.tileSize - local261) + local472 * local261 >> ceiling.tileSizeShift;
                             @Pc(1619) int local1619 = local784 - local1380 - hillValue;
                             this.vertexY[local243] = ((this.vertexY[local243] << 8) / local228 * local1619 >> 8) - (y - local784);
                         }

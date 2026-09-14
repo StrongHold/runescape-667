@@ -52,7 +52,7 @@ public final class Node_Sub39 extends Node {
         this.aClass178_Sub2_3 = arg0;
         this.aClass19_Sub3_31 = this.aClass178_Sub2_3.aClass19_Sub3_33;
         this.anInt6595 = arg4;
-        this.anIntArray525 = new int[this.aClass178_Sub2_3.anInt8894 * this.aClass178_Sub2_3.anInt8892];
+        this.anIntArray525 = new int[this.aClass178_Sub2_3.sizeX * this.aClass178_Sub2_3.sizeZ];
         this.anInt6593 = arg3;
         this.anInt6585 = arg5;
         this.anInt6592 = arg1;
@@ -224,7 +224,7 @@ public final class Node_Sub39 extends Node {
 
     @OriginalMember(owner = "client!nm", name = "a", descriptor = "(IIZI)V")
     public void method5867(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(3) int arg2) {
-        this.anIntArray525[this.aClass178_Sub2_3.anInt8894 * arg2 + arg0] |= 0x1 << arg1;
+        this.anIntArray525[this.aClass178_Sub2_3.sizeX * arg2 + arg0] |= 0x1 << arg1;
     }
 
     @OriginalMember(owner = "client!nm", name = "a", descriptor = "(II)V")

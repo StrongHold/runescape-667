@@ -56,7 +56,7 @@ public final class Node_Sub58 extends Node {
         this.anInt10860 = arg4;
         this.anInt10868 = arg5;
         this.anInt10870 = arg1;
-        this.anIntArray884 = new int[this.aClass178_Sub1_3.anInt8892 * this.aClass178_Sub1_3.anInt8894];
+        this.anIntArray884 = new int[this.aClass178_Sub1_3.sizeZ * this.aClass178_Sub1_3.sizeX];
     }
 
     @OriginalMember(owner = "client!wr", name = "a", descriptor = "(II)V")
@@ -176,7 +176,7 @@ public final class Node_Sub58 extends Node {
 
     @OriginalMember(owner = "client!wr", name = "a", descriptor = "(IIII)V")
     public void method9401(@OriginalArg(0) int arg0, @OriginalArg(2) int arg1, @OriginalArg(3) int arg2) {
-        this.anIntArray884[this.aClass178_Sub1_3.anInt8894 * arg2 + arg0] |= 0x1 << arg1;
+        this.anIntArray884[this.aClass178_Sub1_3.sizeX * arg2 + arg0] |= 0x1 << arg1;
         this.anInt10871++;
     }
 

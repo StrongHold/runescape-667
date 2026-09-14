@@ -5,35 +5,35 @@ import org.openrs2.deob.annotation.OriginalMember;
 public final class JavaSimpleBlendedTile {
 
     @OriginalMember(owner = "client!qh", name = "k", descriptor = "S")
-    public short aShort103;
+    public short waterDepthSe;
 
     @OriginalMember(owner = "client!qh", name = "e", descriptor = "S")
-    public short aShort104;
+    public short waterDepthNw;
 
     @OriginalMember(owner = "client!qh", name = "b", descriptor = "S")
-    public short aShort105;
+    public short texture;
 
     @OriginalMember(owner = "client!qh", name = "f", descriptor = "I")
-    public int anInt7767;
+    public int colourNe;
 
     @OriginalMember(owner = "client!qh", name = "c", descriptor = "I")
-    public int anInt7768;
+    public int colourSw;
 
     @OriginalMember(owner = "client!qh", name = "d", descriptor = "B")
-    public byte aByte126;
+    public byte flags;
 
     @OriginalMember(owner = "client!qh", name = "j", descriptor = "I")
-    public int anInt7769;
+    public int colourNw;
 
     @OriginalMember(owner = "client!qh", name = "a", descriptor = "S")
-    public short aShort106;
+    public short waterDepthNe;
 
     @OriginalMember(owner = "client!qh", name = "h", descriptor = "I")
-    public int anInt7771;
+    public int colourSe;
 
     @OriginalMember(owner = "client!qh", name = "i", descriptor = "S")
-    public short aShort107;
+    public short waterDepthSw;
 
     @OriginalMember(owner = "client!qh", name = "g", descriptor = "I")
-    public int anInt7770 = 0;
+    public int blendedColour = 0;
 }
