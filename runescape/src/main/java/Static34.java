@@ -13,18 +13,18 @@ public final class Static34 {
         @Pc(22) long shader = OpenGL.glCreateShaderObjectARB(shaderType);
         OpenGL.glShaderSourceRawARB(shader, source);
         OpenGL.glCompileShaderARB(shader);
-        OpenGL.glGetObjectParameterivARB(shader, OpenGL.GL_COMPILE_STATUS, Static332.shaderStatus, 0);
-        if (Static332.shaderStatus[0] == 0) {
-            if (Static332.shaderStatus[0] == 0) {
+        OpenGL.glGetObjectParameterivARB(shader, OpenGL.GL_COMPILE_STATUS, ShaderQuery.results, 0);
+        if (ShaderQuery.results[0] == 0) {
+            if (ShaderQuery.results[0] == 0) {
                 System.out.println("Shader compile failed:");
             }
-            OpenGL.glGetObjectParameterivARB(shader, OpenGL.GL_INFO_LOG_LENGTH, Static332.shaderStatus, 1);
-            if (Static332.shaderStatus[1] > 1) {
-                @Pc(69) byte[] log = new byte[Static332.shaderStatus[1]];
-                OpenGL.glGetInfoLogARB(shader, Static332.shaderStatus[1], Static332.shaderStatus, 0, log, 0);
+            OpenGL.glGetObjectParameterivARB(shader, OpenGL.GL_INFO_LOG_LENGTH, ShaderQuery.results, 1);
+            if (ShaderQuery.results[1] > 1) {
+                @Pc(69) byte[] log = new byte[ShaderQuery.results[1]];
+                OpenGL.glGetInfoLogARB(shader, ShaderQuery.results[1], ShaderQuery.results, 0, log, 0);
                 System.out.println(new String(log));
             }
-            if (Static332.shaderStatus[0] == 0) {
+            if (ShaderQuery.results[0] == 0) {
                 OpenGL.glDeleteObjectARB(shader);
                 return null;
             }
