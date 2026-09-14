@@ -6,6 +6,6 @@ public final class Static151 {
     public static float aFloat218;
 
     @OriginalMember(owner = "client!eo", name = "h", descriptor = "Lclient!lha;")
-    public static Class226 aClass226_20 = new Class226();
+    public static PingWorker aClass226_20 = new PingWorker();
 
 }

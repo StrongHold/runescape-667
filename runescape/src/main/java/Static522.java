@@ -5,7 +5,7 @@ import org.openrs2.deob.annotation.OriginalMember;
 public final class Static522 {
 
     @OriginalMember(owner = "client!qha", name = "Xd", descriptor = "Lclient!cja;")
-    public static Node_Sub12 aClass2_Sub12_4 = null;
+    public static PingRequest pingRequest = null;
 
     @OriginalMember(owner = "client!qha", name = "a", descriptor = "(ILclient!bn;)V")
     public static void method7041(@OriginalArg(1) MidiSong arg0) {

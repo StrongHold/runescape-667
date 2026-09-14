@@ -182,7 +182,7 @@ public final class WorldList {
     public static void quicksortWorldList(@OriginalArg(3) int primaryComparison, @OriginalArg(1) boolean primaryDescending, @OriginalArg(2) int secondaryComparison, @OriginalArg(4) boolean secondaryDescending) {
         quicksort(activeWorlds.length - 1, 0, primaryDescending, primaryComparison, secondaryDescending, secondaryComparison);
         Static419.anInt6434 = 0;
-        Static522.aClass2_Sub12_4 = null;
+        Static522.pingRequest = null;
     }
 
     @OriginalMember(owner = "client!ep", name = "f", descriptor = "(I)V")

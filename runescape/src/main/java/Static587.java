@@ -22,15 +22,15 @@ public final class Static587 {
             while (WorldList.activeWorlds.length > Static419.anInt6434) {
                 @Pc(26) GameWorld local26 = WorldList.activeWorlds[Static419.anInt6434];
                 if (local26 != null && local26.ping == -1) {
-                    if (Static522.aClass2_Sub12_4 == null) {
-                        Static522.aClass2_Sub12_4 = Static151.aClass226_20.method5245(local26.address);
+                    if (Static522.pingRequest == null) {
+                        Static522.pingRequest = Static151.aClass226_20.method5245(local26.address);
                     }
-                    @Pc(54) int local54 = Static522.aClass2_Sub12_4.anInt1631;
+                    @Pc(54) int local54 = Static522.pingRequest.anInt1631;
                     if (local54 == -1) {
                         return;
                     }
                     Static419.anInt6434++;
-                    Static522.aClass2_Sub12_4 = null;
+                    Static522.pingRequest = null;
                     local26.ping = local54;
                 } else {
                     Static419.anInt6434++;
