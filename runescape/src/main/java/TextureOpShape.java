@@ -22,11 +22,11 @@ public final class TextureOpShape extends TextureOp {
 
     @OriginalMember(owner = "client!ot", name = "a", descriptor = "(II)[I")
     @Override
-    public int[] monochromeOutput(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) {
+    public int[] monochromeOutput(@OriginalArg(0) int arg0, @OriginalArg(1) int row) {
         if (arg0 < 107) {
             Sprites.mapdots = null;
         }
-        @Pc(16) int[] output = super.monochromeCache.get(arg1);
+        @Pc(16) int[] output = super.monochromeCache.get(row);
         if (super.monochromeCache.dirty) {
             this.render(super.monochromeCache.get());
         }
@@ -60,8 +60,8 @@ public final class TextureOpShape extends TextureOp {
 
     @OriginalMember(owner = "client!ot", name = "a", descriptor = "(IZ)[[I")
     @Override
-    public int[][] method9414(@OriginalArg(0) int arg0) {
-        @Pc(17) int[][] output = super.colourCache.get(arg0);
+    public int[][] method9414(@OriginalArg(0) int row) {
+        @Pc(17) int[][] output = super.colourCache.get(row);
         if (super.colourCache.dirty) {
             @Pc(23) int width = EnvironmentLight.anInt9289;
             @Pc(25) int height = EnvironmentLight.anInt53;
@@ -70,10 +70,10 @@ public final class TextureOpShape extends TextureOp {
             this.render(raster);
             for (@Pc(40) int y = 0; y < EnvironmentLight.anInt53; y++) {
                 @Pc(46) int[] rasterRow = raster[y];
-                @Pc(50) int[][] row = rows[y];
-                @Pc(54) int[] red = row[0];
-                @Pc(58) int[] green = row[1];
-                @Pc(62) int[] blue = row[2];
+                @Pc(50) int[][] channels = rows[y];
+                @Pc(54) int[] red = channels[0];
+                @Pc(58) int[] green = channels[1];
+                @Pc(62) int[] blue = channels[2];
                 for (@Pc(64) int x = 0; x < EnvironmentLight.anInt9289; x++) {
                     @Pc(70) int rgb = rasterRow[x];
                     blue[x] = (rgb & 0xFF) << 4;

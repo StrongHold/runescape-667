@@ -16,17 +16,17 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static294 {
 
     @OriginalMember(owner = "client!jg", name = "a", descriptor = "(Lclient!tca;II[B)Lclient!fr;")
-    public static Class135 method4338(@OriginalArg(0) GlxToolkit arg0, @OriginalArg(3) byte[] arg1) {
-        if (arg1 == null) {
+    public static Class135 method4338(@OriginalArg(0) GlxToolkit toolkit, @OriginalArg(3) byte[] program) {
+        if (program == null) {
             return null;
         }
-        @Pc(16) int local16 = OpenGL.glGenProgramARB();
-        OpenGL.glBindProgramARB(OpenGL.GL_VERTEX_PROGRAM_ARB, local16);
-        OpenGL.glProgramRawARB(34336, 34933, arg1);
+        @Pc(16) int programId = OpenGL.glGenProgramARB();
+        OpenGL.glBindProgramARB(OpenGL.GL_VERTEX_PROGRAM_ARB, programId);
+        OpenGL.glProgramRawARB(34336, 34933, program);
         OpenGL.glGetIntegerv(OpenGL.GL_PROGRAM_ERROR_POSITION_ARB, Static564.anIntArray653, 0);
         if (Static564.anIntArray653[0] == -1) {
             OpenGL.glBindProgramARB(OpenGL.GL_VERTEX_PROGRAM_ARB, 0);
-            return new Class135(arg0, 34336, local16);
+            return new Class135(toolkit, 34336, programId);
         } else {
             OpenGL.glBindProgramARB(OpenGL.GL_VERTEX_PROGRAM_ARB, 0);
             return null;
@@ -34,21 +34,21 @@ public final class Static294 {
     }
 
     @OriginalMember(owner = "client!jg", name = "a", descriptor = "(IIZIII)V")
-    public static void method4339(@OriginalArg(1) int arg0, @OriginalArg(2) boolean login, @OriginalArg(3) int arg2, @OriginalArg(4) int arg3, @OriginalArg(5) int arg4) {
+    public static void method4339(@OriginalArg(1) int y, @OriginalArg(2) boolean login, @OriginalArg(3) int width, @OriginalArg(4) int height, @OriginalArg(5) int x) {
         if (Static334.activeTiles == null) {
-            Toolkit.active.fillRect(arg4, arg0, arg2, arg3, -16777216);
+            Toolkit.active.fillRect(x, y, width, height, -16777216);
             return;
         }
-        @Pc(19) boolean local19 = false;
+        @Pc(19) boolean blank = false;
         if (CutsceneManager.state == 0) {
             if (PlayerEntity.self.x < 0 || PlayerEntity.self.x >= Static720.mapWidth * 512 || PlayerEntity.self.z < 0 || PlayerEntity.self.z >= Static501.mapLength * 512) {
-                local19 = true;
+                blank = true;
             }
         } else if (!CutsceneManager.aBoolean480) {
-            local19 = true;
+            blank = true;
         }
-        if (local19) {
-            Toolkit.active.fillRect(arg4, arg0, arg2, arg3, -16777216);
+        if (blank) {
+            Toolkit.active.fillRect(x, y, width, height, -16777216);
             return;
         }
         Static198.anInt3276++;
@@ -61,12 +61,12 @@ public final class Static294 {
         if (!login) {
             Static527.method7083();
         }
-        Static498.method6643(arg4, true, arg0, arg3, arg2);
-        @Pc(153) int local153 = Static32.anInt773;
-        @Pc(155) int local155 = Static242.anInt3971;
+        Static498.method6643(x, true, y, height, width);
+        @Pc(153) int viewportX = Static32.anInt773;
+        @Pc(155) int viewportWidth = Static242.anInt3971;
         OrthoMode.renderZoom = OrthoMode.zoom;
-        @Pc(159) int local159 = Static290.anInt4657;
-        @Pc(161) int local161 = Static200.anInt3305;
+        @Pc(159) int viewportY = Static290.anInt4657;
+        @Pc(161) int viewportHeight = Static200.anInt3305;
         @Pc(169) int local169;
         @Pc(204) int local204;
         if (Camera.mode == CameraMode.MODE_DEFAULT) {
@@ -78,7 +78,7 @@ public final class Static294 {
                 local169 = Shake.amplitude[4] + 128;
             }
             local204 = Static288.anInt4621 + (int) Camera.playerCameraYaw & 0x3FFF;
-            Camera.method4606(local169, (local169 >> 3) * 3 + 600 << 2, local161, Static494.anInt7409, local204, Static38.anInt920, Static102.averageHeight(Camera.renderingLevel, PlayerEntity.self.x, PlayerEntity.self.z) - 200);
+            Camera.method4606(local169, (local169 >> 3) * 3 + 600 << 2, viewportHeight, Static494.anInt7409, local204, Static38.anInt920, Static102.averageHeight(Camera.renderingLevel, PlayerEntity.self.x, PlayerEntity.self.z) - 200);
         } else if (Camera.mode == CameraMode.MODE_FOLLOWCOORD) {
             local169 = (int) Camera.playerCameraPitch;
             if (Static188.anInt3103 >> 8 > local169) {
@@ -88,32 +88,32 @@ public final class Static294 {
                 local169 = Shake.amplitude[4] + 128;
             }
             local204 = (int) Camera.playerCameraYaw & 0x3FFF;
-            Camera.method4606(local169, (local169 >> 3) * 3 + 600 << 2, local161, Static494.anInt7409, local204, Static38.anInt920, Static102.averageHeight(Camera.renderingLevel, Camera.anInt6262, Camera.anInt4018) - 200);
+            Camera.method4606(local169, (local169 >> 3) * 3 + 600 << 2, viewportHeight, Static494.anInt7409, local204, Static38.anInt920, Static102.averageHeight(Camera.renderingLevel, Camera.anInt6262, Camera.anInt4018) - 200);
         } else if (Camera.mode == CameraMode.MODE_SMOOTH_RESET) {
-            Camera.update(local161);
+            Camera.update(viewportHeight);
         }
         local169 = Camera.x;
         local204 = Camera.y;
-        @Pc(325) int local325 = Camera.z;
-        @Pc(327) int local327 = Camera.pitch;
-        @Pc(329) int local329 = Camera.yaw;
+        @Pc(325) int savedCameraZ = Camera.z;
+        @Pc(327) int savedCameraPitch = Camera.pitch;
+        @Pc(329) int savedCameraYaw = Camera.yaw;
         @Pc(375) int local375;
-        for (@Pc(331) int local331 = 0; local331 < Shake.DIRECTIONS; local331++) {
-            if (Shake.enabled[local331]) {
-                local375 = (int) ((double) -Shake.center[local331] + (double) (Shake.center[local331] * 2 + 1) * Math.random() + Math.sin((double) Shake.frequency[local331] / 100.0D * (double) Shake.time[local331]) * (double) Shake.amplitude[local331]);
-                if (local331 == 3) {
+        for (@Pc(331) int direction = 0; direction < Shake.DIRECTIONS; direction++) {
+            if (Shake.enabled[direction]) {
+                local375 = (int) ((double) -Shake.center[direction] + (double) (Shake.center[direction] * 2 + 1) * Math.random() + Math.sin((double) Shake.frequency[direction] / 100.0D * (double) Shake.time[direction]) * (double) Shake.amplitude[direction]);
+                if (direction == 3) {
                     Camera.yaw = local375 + Camera.yaw & 0x3FFF;
                 }
-                if (local331 == 0) {
+                if (direction == 0) {
                     Camera.x += local375 << 2;
                 }
-                if (local331 == 1) {
+                if (direction == 1) {
                     Camera.y += local375 << 2;
                 }
-                if (local331 == 2) {
+                if (direction == 2) {
                     Camera.z += local375 << 2;
                 }
-                if (local331 == 4) {
+                if (direction == 4) {
                     Camera.pitch += local375;
                     if (Camera.pitch < 1024) {
                         Camera.pitch = 1024;
@@ -136,12 +136,12 @@ public final class Static294 {
             Camera.z = (Static662.tileMaxZ << 9) - 1;
         }
         Static276.method3988();
-        Toolkit.active.KA(local153, local159, local155 + local153, local159 + local161);
+        Toolkit.active.KA(viewportX, viewportY, viewportWidth + viewportX, viewportY + viewportHeight);
         Static501.method6716(true);
         local375 = Static251.anInt4037;
         Static460.aMatrix_10.createCamera(Camera.x, Camera.y, Camera.z, -Camera.pitch & 0x3FFF, -Camera.yaw & 0x3FFF, -Camera.roll & 0x3FFF);
         Toolkit.active.setCamera(Static460.aMatrix_10);
-        Toolkit.active.DA(local155 / 2 + local153, local161 / 2 + local159, Static428.anInt6495 << 1, Static428.anInt6495 << 1);
+        Toolkit.active.DA(viewportWidth / 2 + viewportX, viewportHeight / 2 + viewportY, Static428.anInt6495 << 1, Static428.anInt6495 << 1);
         if (OrthoMode.toolkitActive) {
             OrthoMode.method6448(Static251.anInt4037);
             if (Static162.anInt2800 != OrthoMode.renderZoom) {
@@ -156,55 +156,55 @@ public final class Static294 {
         } else {
             Toolkit.active.xa(1.0F);
             Toolkit.active.ZA(0xFFFFFF, 0.0F, 0.0F, 1.0F, 0.0F, 0.0F);
-            Static456.aSkyBox_3.method3159(local159, Toolkit.active, Camera.yaw, local155, local375, Camera.roll, local161, local153, Static436.anInt3852 << 3, Camera.pitch);
+            Static456.aSkyBox_3.method3159(viewportY, Toolkit.active, Camera.yaw, viewportWidth, local375, Camera.roll, viewportHeight, viewportX, Static436.anInt3852 << 3, Camera.pitch);
         }
         Static557.method7331();
-        Static527.method7081(Static428.anInt6495 << 1, local161 / 2 + local159, Static428.anInt6495 << 1, local153 + local155 / 2);
+        Static527.method7081(Static428.anInt6495 << 1, viewportHeight / 2 + viewportY, Static428.anInt6495 << 1, viewportX + viewportWidth / 2);
         Static620.method8324(-Camera.yaw & 0x3FFF, Camera.z, -Camera.roll & 0x3FFF, Camera.y, -Camera.pitch & 0x3FFF, Camera.x);
         Static159.method2575();
-        @Pc(688) byte local688 = ClientOptions.instance.removeRoofsOverride.getValue() == 2 ? (byte) Static198.anInt3276 : 1;
+        @Pc(688) byte roofStamp = ClientOptions.instance.removeRoofsOverride.getValue() == 2 ? (byte) Static198.anInt3276 : 1;
         if (OrthoMode.toolkitActive) {
             Static648.method8483(-Camera.yaw & 0x3FFF, -Camera.roll & 0x3FFF, -Camera.pitch & 0x3FFF);
-            OrthoMode.method6324(local688, Camera.x, Camera.z, Camera.y, PlayerEntity.self.z >> 9, Static457.anIntArray552, Static682.anIntArray817, TimeUtils.clock, PlayerEntity.self.level + 1, Static482.anIntArray588, ClientOptions.instance.flickeringEffects.getValue() == 0, OrthoMode.renderZoom, Static9.anIntArray18, Static328.aByteArrayArrayArray4, Static153.anIntArray235, PlayerEntity.self.x >> 9);
+            OrthoMode.method6324(roofStamp, Camera.x, Camera.z, Camera.y, PlayerEntity.self.z >> 9, Static457.anIntArray552, Static682.anIntArray817, TimeUtils.clock, PlayerEntity.self.level + 1, Static482.anIntArray588, ClientOptions.instance.flickeringEffects.getValue() == 0, OrthoMode.renderZoom, Static9.anIntArray18, Static328.aByteArrayArrayArray4, Static153.anIntArray235, PlayerEntity.self.x >> 9);
         } else {
-            Static283.renderScene(TimeUtils.clock, Camera.x, Camera.y, Camera.z, Static328.aByteArrayArrayArray4, Static482.anIntArray588, Static9.anIntArray18, Static457.anIntArray552, Static153.anIntArray235, Static682.anIntArray817, PlayerEntity.self.level + 1, local688, PlayerEntity.self.x >> 9, PlayerEntity.self.z >> 9, ClientOptions.instance.flickeringEffects.getValue() == 0, OrthoMode.enabled ? OrthoMode.renderZoom : -1, 0, false);
+            SceneRenderer.renderScene(TimeUtils.clock, Camera.x, Camera.y, Camera.z, Static328.aByteArrayArrayArray4, Static482.anIntArray588, Static9.anIntArray18, Static457.anIntArray552, Static153.anIntArray235, Static682.anIntArray817, PlayerEntity.self.level + 1, roofStamp, PlayerEntity.self.x >> 9, PlayerEntity.self.z >> 9, ClientOptions.instance.flickeringEffects.getValue() == 0, OrthoMode.enabled ? OrthoMode.renderZoom : -1, 0, false);
         }
         Static557.method7331();
         if (MainLogicManager.step == 11) {
-            Static205.method3091(local155, local161, local159, local153);
-            OverlayManager.render(local159, local155, local153, local161);
-            Static233.method3407(local155, local159, local153, local161);
-            Static208.method3105(local155, local153, local159, local161);
+            Static205.method3091(viewportWidth, viewportHeight, viewportY, viewportX);
+            OverlayManager.render(viewportY, viewportWidth, viewportX, viewportHeight);
+            Static233.method3407(viewportWidth, viewportY, viewportX, viewportHeight);
+            Static208.method3105(viewportWidth, viewportX, viewportY, viewportHeight);
         }
         Static712.method9323();
-        Camera.z = local325;
+        Camera.z = savedCameraZ;
         Camera.x = local169;
-        Camera.pitch = local327;
+        Camera.pitch = savedCameraPitch;
         Camera.y = local204;
-        Camera.yaw = local329;
+        Camera.yaw = savedCameraYaw;
         Static288.aBoolean356 = false;
         if (Static426.aBoolean72 && Client.js5WorkerThread.urgentCount() == 0) {
             Static426.aBoolean72 = false;
         }
         if (Static426.aBoolean72) {
-            Toolkit.active.fillRect(local153, local159, local155, local161, -16777216);
+            Toolkit.active.fillRect(viewportX, viewportY, viewportWidth, viewportHeight, -16777216);
             MessageBox.draw(Toolkit.active, LocalisedText.LOADING.localise(Client.language), false, Fonts.p12Metrics, Fonts.p12);
         }
         Static501.method6716(false);
     }
 
     @OriginalMember(owner = "client!jg", name = "a", descriptor = "(ILclient!ge;)Lclient!pf;")
-    public static TextureOp method4341(@OriginalArg(1) Packet arg0) {
-        arg0.g1();
-        @Pc(13) int local13 = arg0.g1();
-        @Pc(17) TextureOp local17 = Static96.method8821(local13);
-        local17.cacheSize = arg0.g1();
-        @Pc(32) int local32 = arg0.g1();
-        for (@Pc(34) int local34 = 0; local34 < local32; local34++) {
-            @Pc(40) int local40 = arg0.g1();
-            local17.method9416(false, arg0, local40);
+    public static TextureOp readTextureOp(@OriginalArg(1) Packet packet) {
+        packet.g1();
+        @Pc(13) int type = packet.g1();
+        @Pc(17) TextureOp op = Static96.newTextureOp(type);
+        op.cacheSize = packet.g1();
+        @Pc(32) int count = packet.g1();
+        for (@Pc(34) int i = 0; i < count; i++) {
+            @Pc(40) int opcode = packet.g1();
+            op.method9416(false, packet, opcode);
         }
-        local17.postDecode();
-        return local17;
+        op.postDecode();
+        return op;
     }
 }

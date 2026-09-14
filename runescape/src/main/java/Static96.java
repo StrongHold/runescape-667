@@ -6,86 +6,86 @@ import org.openrs2.deob.annotation.OriginalMember;
 public final class Static96 {
 
     @OriginalMember(owner = "client!da", name = "a", descriptor = "(II)Lclient!pf;")
-    public static TextureOp method8821(@OriginalArg(0) int arg0) {
-        if (arg0 == 0) {
+    public static TextureOp newTextureOp(@OriginalArg(0) int type) {
+        if (type == 0) {
             return new Node_Sub1_Sub17();
-        } else if (arg0 == 1) {
+        } else if (type == 1) {
             return new Node_Sub1_Sub26();
-        } else if (arg0 == 2) {
+        } else if (type == 2) {
             return new Node_Sub1_Sub33();
-        } else if (arg0 == 3) {
+        } else if (type == 3) {
             return new Node_Sub1_Sub25();
-        } else if (arg0 == 4) {
+        } else if (type == 4) {
             return new TextureOpBrick();
-        } else if (arg0 == 5) {
+        } else if (type == 5) {
             return new TextureOpBlur();
-        } else if (arg0 == 6) {
+        } else if (type == 6) {
             return new Node_Sub1_Sub35();
-        } else if (arg0 == 7) {
+        } else if (type == 7) {
             return new Node_Sub1_Sub18();
-        } else if (arg0 == 8) {
+        } else if (type == 8) {
             return new Node_Sub1_Sub37();
-        } else if (arg0 == 9) {
+        } else if (type == 9) {
             return new Node_Sub1_Sub38();
-        } else if (arg0 == 10) {
+        } else if (type == 10) {
             return new Node_Sub1_Sub14();
-        } else if (arg0 == 11) {
+        } else if (type == 11) {
             return new TextureOpColourise();
-        } else if (arg0 == 12) {
+        } else if (type == 12) {
             return new TextureOpWave();
-        } else if (arg0 == 13) {
+        } else if (type == 13) {
             return new Node_Sub1_Sub34();
-        } else if (arg0 == 14) {
+        } else if (type == 14) {
             return new Node_Sub1_Sub29();
-        } else if (arg0 == 15) {
+        } else if (type == 15) {
             return new Node_Sub1_Sub23();
-        } else if (arg0 == 16) {
+        } else if (type == 16) {
             return new Node_Sub1_Sub39();
-        } else if (arg0 == 17) {
+        } else if (type == 17) {
             return new TextureOpHsl();
-        } else if (arg0 == 18) {
+        } else if (type == 18) {
             return new TextureOpSpriteTiled();
-        } else if (arg0 == 19) {
+        } else if (type == 19) {
             return new TextureOpDisplace();
-        } else if (arg0 == 20) {
+        } else if (type == 20) {
             return new Node_Sub1_Sub30();
-        } else if (arg0 == 21) {
+        } else if (type == 21) {
             return new TextureOpBlend();
-        } else if (arg0 == 22) {
+        } else if (type == 22) {
             return new Node_Sub1_Sub16();
-        } else if (arg0 == 23) {
+        } else if (type == 23) {
             return new Node_Sub1_Sub31();
-        } else if (arg0 == 24) {
+        } else if (type == 24) {
             return new Node_Sub1_Sub21();
-        } else if (arg0 == 25) {
+        } else if (type == 25) {
             return new TextureOpRecolour();
-        } else if (arg0 == 26) {
+        } else if (type == 26) {
             return new TextureOpThreshold();
-        } else if (arg0 == 27) {
+        } else if (type == 27) {
             return new Node_Sub1_Sub28();
-        } else if (arg0 == 28) {
+        } else if (type == 28) {
             return new TextureOpStoneWall();
-        } else if (arg0 == 29) {
+        } else if (type == 29) {
             return new TextureOpShape();
-        } else if (arg0 == 30) {
+        } else if (type == 30) {
             return new TextureOpRange();
-        } else if (arg0 == 31) {
+        } else if (type == 31) {
             return new Node_Sub1_Sub36();
-        } else if (arg0 == 32) {
+        } else if (type == 32) {
             return new Node_Sub1_Sub32();
-        } else if (arg0 == 33) {
+        } else if (type == 33) {
             return new Node_Sub1_Sub19();
-        } else if (arg0 == 34) {
+        } else if (type == 34) {
             return new Node_Sub1_Sub27();
-        } else if (arg0 == 35) {
+        } else if (type == 35) {
             return new Node_Sub1_Sub22();
-        } else if (arg0 == 36) {
+        } else if (type == 36) {
             return new TextureOpTexture();
-        } else if (arg0 == 37) {
+        } else if (type == 37) {
             return new Node_Sub1_Sub20();
-        } else if (arg0 == 38) {
+        } else if (type == 38) {
             return new Node_Sub1_Sub15();
-        } else if (arg0 == 39) {
+        } else if (type == 39) {
             return new TextureOpSprite();
         } else {
             return null;

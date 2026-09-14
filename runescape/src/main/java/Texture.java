@@ -9,163 +9,168 @@ import org.openrs2.deob.annotation.OriginalClass;
 import org.openrs2.deob.annotation.OriginalMember;
 import org.openrs2.deob.annotation.Pc;
 
+/**
+ * A procedural texture, held as a graph of {@link TextureOp} nodes with one root per channel.
+ * <p>
+ * {@link #colourOp} produces the red, green and blue rows, {@link #alphaOp} the opacity, and
+ * {@link #hdrOp} a per pixel multiplier between 1 and 32 that only the floating point output
+ * applies.
+ */
 @OriginalClass("client!vm")
 public final class Texture extends Node2 {
 
     @OriginalMember(owner = "client!vm", name = "E", descriptor = "[I")
-    public final int[] anIntArray824;
+    public final int[] spriteIds;
 
     @OriginalMember(owner = "client!vm", name = "A", descriptor = "[I")
-    public final int[] anIntArray823;
+    public final int[] textureIds;
 
     @OriginalMember(owner = "client!vm", name = "t", descriptor = "Lclient!pf;")
-    public final TextureOp aClass2_Sub1_2;
+    public final TextureOp hdrOp;
 
     @OriginalMember(owner = "client!vm", name = "D", descriptor = "Lclient!pf;")
-    public final TextureOp aClass2_Sub1_3;
+    public final TextureOp colourOp;
 
     @OriginalMember(owner = "client!vm", name = "v", descriptor = "Lclient!pf;")
-    public final TextureOp aClass2_Sub1_1;
+    public final TextureOp alphaOp;
 
     @OriginalMember(owner = "client!vm", name = "F", descriptor = "[Lclient!pf;")
-    public final TextureOp[] aClass2_Sub1Array39;
+    public final TextureOp[] ops;
 
     @OriginalMember(owner = "client!vm", name = "<init>", descriptor = "()V")
     public Texture() {
-        this.anIntArray824 = new int[0];
-        this.anIntArray823 = new int[0];
-        this.aClass2_Sub1_2 = new Node_Sub1_Sub17(0);
-        this.aClass2_Sub1_2.cacheSize = 1;
-        this.aClass2_Sub1_3 = new Node_Sub1_Sub17();
-        this.aClass2_Sub1_3.cacheSize = 1;
-        this.aClass2_Sub1_1 = new Node_Sub1_Sub17();
-        this.aClass2_Sub1_1.cacheSize = 1;
-        this.aClass2_Sub1Array39 = new TextureOp[]{this.aClass2_Sub1_3, this.aClass2_Sub1_1, this.aClass2_Sub1_2};
+        this.spriteIds = new int[0];
+        this.textureIds = new int[0];
+        this.hdrOp = new Node_Sub1_Sub17(0);
+        this.hdrOp.cacheSize = 1;
+        this.colourOp = new Node_Sub1_Sub17();
+        this.colourOp.cacheSize = 1;
+        this.alphaOp = new Node_Sub1_Sub17();
+        this.alphaOp.cacheSize = 1;
+        this.ops = new TextureOp[]{this.colourOp, this.alphaOp, this.hdrOp};
     }
 
     @OriginalMember(owner = "client!vm", name = "<init>", descriptor = "(Lclient!ge;)V")
-    public Texture(@OriginalArg(0) Packet arg0) {
-        @Pc(7) int local7 = arg0.g1();
-        @Pc(9) int local9 = 0;
-        @Pc(11) int local11 = 0;
-        @Pc(14) int[][] local14 = new int[local7][];
-        this.aClass2_Sub1Array39 = new TextureOp[local7];
-        @Pc(56) int local56;
-        for (@Pc(20) int local20 = 0; local20 < local7; local20++) {
-            @Pc(28) TextureOp local28 = Static294.method4341(arg0);
-            if (local28.getSpriteId() >= 0) {
-                local9++;
+    public Texture(@OriginalArg(0) Packet packet) {
+        @Pc(7) int count = packet.g1();
+        @Pc(9) int spriteCount = 0;
+        @Pc(11) int textureCount = 0;
+        @Pc(14) int[][] childIndices = new int[count][];
+        this.ops = new TextureOp[count];
+        for (@Pc(20) int i = 0; i < count; i++) {
+            @Pc(28) TextureOp op = Static294.readTextureOp(packet);
+            if (op.getSpriteId() >= 0) {
+                spriteCount++;
             }
-            if (local28.getTextureId() >= 0) {
-                local11++;
+            if (op.getTextureId() >= 0) {
+                textureCount++;
             }
-            @Pc(49) int local49 = local28.ops.length;
-            local14[local20] = new int[local49];
-            for (local56 = 0; local56 < local49; local56++) {
-                local14[local20][local56] = arg0.g1();
+            @Pc(49) int childCount = op.ops.length;
+            childIndices[i] = new int[childCount];
+            for (@Pc(56) int child = 0; child < childCount; child++) {
+                childIndices[i][child] = packet.g1();
             }
-            this.aClass2_Sub1Array39[local20] = local28;
+            this.ops[i] = op;
         }
-        this.anIntArray824 = new int[local9];
-        this.anIntArray823 = new int[local11];
-        local9 = 0;
-        local11 = 0;
-        for (@Pc(105) int local105 = 0; local105 < local7; local105++) {
-            @Pc(114) TextureOp local114 = this.aClass2_Sub1Array39[local105];
-            local56 = local114.ops.length;
-            for (@Pc(120) int local120 = 0; local120 < local56; local120++) {
-                local114.ops[local120] = this.aClass2_Sub1Array39[local14[local105][local120]];
+        this.spriteIds = new int[spriteCount];
+        this.textureIds = new int[textureCount];
+        spriteCount = 0;
+        textureCount = 0;
+        for (@Pc(105) int i = 0; i < count; i++) {
+            @Pc(114) TextureOp op = this.ops[i];
+            for (@Pc(120) int child = 0; child < op.ops.length; child++) {
+                op.ops[child] = this.ops[childIndices[i][child]];
             }
-            @Pc(148) int local148 = local114.getSpriteId();
-            @Pc(152) int local152 = local114.getTextureId();
-            if (local148 > 0) {
-                this.anIntArray824[local9++] = local148;
+            @Pc(148) int spriteId = op.getSpriteId();
+            @Pc(152) int textureId = op.getTextureId();
+            if (spriteId > 0) {
+                this.spriteIds[spriteCount++] = spriteId;
             }
-            if (local152 > 0) {
-                this.anIntArray823[local11++] = local152;
+            if (textureId > 0) {
+                this.textureIds[textureCount++] = textureId;
             }
-            local14[local105] = null;
+            childIndices[i] = null;
         }
-        this.aClass2_Sub1_3 = this.aClass2_Sub1Array39[arg0.g1()];
-        this.aClass2_Sub1_1 = this.aClass2_Sub1Array39[arg0.g1()];
-        this.aClass2_Sub1_2 = this.aClass2_Sub1Array39[arg0.g1()];
+        this.colourOp = this.ops[packet.g1()];
+        this.alphaOp = this.ops[packet.g1()];
+        this.hdrOp = this.ops[packet.g1()];
     }
 
     @OriginalMember(owner = "client!vm", name = "a", descriptor = "(BILclient!d;Lclient!sb;ZI)[F")
-    public float[] method8946(@OriginalArg(1) int arg0, @OriginalArg(2) TextureSource arg1, @OriginalArg(3) js5 arg2, @OriginalArg(4) boolean arg3, @OriginalArg(5) int arg4) {
-        Static582.aJs5_108 = arg2;
-        Static677.anTextureSource_11 = arg1;
-        for (@Pc(25) int local25 = 0; local25 < this.aClass2_Sub1Array39.length; local25++) {
-            this.aClass2_Sub1Array39[local25].initCache(arg0, arg4);
+    public float[] method8946(@OriginalArg(1) int height, @OriginalArg(2) TextureSource source, @OriginalArg(3) js5 sprites, @OriginalArg(4) boolean transpose, @OriginalArg(5) int width) {
+        Static582.aJs5_108 = sprites;
+        Static677.anTextureSource_11 = source;
+        for (@Pc(25) int i = 0; i < this.ops.length; i++) {
+            this.ops[i].initCache(height, width);
         }
-        EnvironmentLight.method2313(arg0, arg4);
-        @Pc(54) float[] local54 = new float[arg4 * 4 * arg0];
-        @Pc(56) int local56 = 0;
-        for (@Pc(58) int local58 = 0; local58 < arg0; local58++) {
-            @Pc(78) int[] local78;
-            @Pc(80) int[] local80;
-            @Pc(76) int[] local76;
-            if (this.aClass2_Sub1_3.monochrome) {
-                @Pc(74) int[] local74 = this.aClass2_Sub1_3.monochromeOutput(117, local58);
-                local76 = local74;
-                local78 = local74;
-                local80 = local74;
+        EnvironmentLight.method2313(height, width);
+        @Pc(54) float[] pixels = new float[width * 4 * height];
+        @Pc(56) int index = 0;
+        for (@Pc(58) int y = 0; y < height; y++) {
+            @Pc(78) int[] redRow;
+            @Pc(80) int[] greenRow;
+            @Pc(76) int[] blueRow;
+            if (this.colourOp.monochrome) {
+                @Pc(74) int[] greyRow = this.colourOp.monochromeOutput(117, y);
+                blueRow = greyRow;
+                redRow = greyRow;
+                greenRow = greyRow;
             } else {
-                @Pc(88) int[][] local88 = this.aClass2_Sub1_3.method9414(local58);
-                local78 = local88[0];
-                local76 = local88[2];
-                local80 = local88[1];
+                @Pc(88) int[][] rows = this.colourOp.method9414(y);
+                redRow = rows[0];
+                blueRow = rows[2];
+                greenRow = rows[1];
             }
-            @Pc(110) int[] local110;
-            if (this.aClass2_Sub1_1.monochrome) {
-                local110 = this.aClass2_Sub1_1.monochromeOutput(114, local58);
+            @Pc(110) int[] alphaRow;
+            if (this.alphaOp.monochrome) {
+                alphaRow = this.alphaOp.monochromeOutput(114, y);
             } else {
-                local110 = this.aClass2_Sub1_1.method9414(local58)[0];
+                alphaRow = this.alphaOp.method9414(y)[0];
             }
-            if (arg3) {
-                local56 = local58 << 2;
+            if (transpose) {
+                index = y << 2;
             }
-            @Pc(136) int[] local136;
-            if (this.aClass2_Sub1_2.monochrome) {
-                local136 = this.aClass2_Sub1_2.monochromeOutput(115, local58);
+            @Pc(136) int[] hdrRow;
+            if (this.hdrOp.monochrome) {
+                hdrRow = this.hdrOp.monochromeOutput(115, y);
             } else {
-                local136 = this.aClass2_Sub1_2.method9414(local58)[0];
+                hdrRow = this.hdrOp.method9414(y)[0];
             }
-            for (@Pc(150) int local150 = arg4 - 1; local150 >= 0; local150--) {
-                @Pc(159) float local159 = (float) local110[local150] / 4096.0F;
-                if (local159 < 0.0F) {
-                    local159 = 0.0F;
-                } else if (local159 > 1.0F) {
-                    local159 = 1.0F;
+            for (@Pc(150) int x = width - 1; x >= 0; x--) {
+                @Pc(159) float alpha = (float) alphaRow[x] / 4096.0F;
+                if (alpha < 0.0F) {
+                    alpha = 0.0F;
+                } else if (alpha > 1.0F) {
+                    alpha = 1.0F;
                 }
-                @Pc(188) float local188 = ((float) local136[local150] * 31.0F / 4096.0F + 1.0F) / 4096.0F;
-                local54[local56++] = local188 * (float) local78[local150];
-                local54[local56++] = local188 * (float) local80[local150];
-                local54[local56++] = local188 * (float) local76[local150];
-                local54[local56++] = local159;
-                if (arg3) {
-                    local56 += (arg4 << 2) - 4;
+                @Pc(188) float scale = ((float) hdrRow[x] * 31.0F / 4096.0F + 1.0F) / 4096.0F;
+                pixels[index++] = scale * (float) redRow[x];
+                pixels[index++] = scale * (float) greenRow[x];
+                pixels[index++] = scale * (float) blueRow[x];
+                pixels[index++] = alpha;
+                if (transpose) {
+                    index += (width << 2) - 4;
                 }
             }
         }
-        for (@Pc(244) int local244 = 0; local244 < this.aClass2_Sub1Array39.length; local244++) {
-            this.aClass2_Sub1Array39[local244].cacheReset();
+        for (@Pc(244) int i = 0; i < this.ops.length; i++) {
+            this.ops[i].cacheReset();
         }
-        return local54;
+        return pixels;
     }
 
     @OriginalMember(owner = "client!vm", name = "a", descriptor = "(Lclient!sb;Lclient!d;B)Z")
-    public boolean available(@OriginalArg(0) js5 arg0, @OriginalArg(1) TextureSource arg1) {
-        @Pc(12) int local12;
+    public boolean available(@OriginalArg(0) js5 sprites, @OriginalArg(1) TextureSource source) {
+        @Pc(12) int i;
         if (Static426.anInt940 < 0) {
-            for (local12 = 0; local12 < this.anIntArray824.length; local12++) {
-                if (!arg0.fileready(this.anIntArray824[local12])) {
+            for (i = 0; i < this.spriteIds.length; i++) {
+                if (!sprites.fileready(this.spriteIds[i])) {
                     return false;
                 }
             }
         } else {
-            for (local12 = 0; local12 < this.anIntArray824.length; local12++) {
-                if (!arg0.requestdownload(this.anIntArray824[local12], Static426.anInt940)) {
+            for (i = 0; i < this.spriteIds.length; i++) {
+                if (!sprites.requestdownload(this.spriteIds[i], Static426.anInt940)) {
                     return false;
                 }
             }
@@ -173,8 +178,8 @@ public final class Texture extends Node2 {
         if (4 != 4) {
             return true;
         }
-        for (local12 = 0; local12 < this.anIntArray823.length; local12++) {
-            if (!arg1.textureAvailable(this.anIntArray823[local12])) {
+        for (i = 0; i < this.textureIds.length; i++) {
+            if (!source.textureAvailable(this.textureIds[i])) {
                 return false;
             }
         }
@@ -182,168 +187,165 @@ public final class Texture extends Node2 {
     }
 
     @OriginalMember(owner = "client!vm", name = "a", descriptor = "(IDZIBLclient!d;Lclient!sb;)[I")
-    public int[] method8948(@OriginalArg(0) int arg0, @OriginalArg(1) double arg1, @OriginalArg(2) boolean arg2, @OriginalArg(3) int arg3, @OriginalArg(5) TextureSource arg4, @OriginalArg(6) js5 arg5) {
-        Static582.aJs5_108 = arg5;
-        Static677.anTextureSource_11 = arg4;
-        for (@Pc(11) int local11 = 0; local11 < this.aClass2_Sub1Array39.length; local11++) {
-            this.aClass2_Sub1Array39[local11].initCache(arg3, arg0);
+    public int[] method8948(@OriginalArg(0) int width, @OriginalArg(1) double gamma, @OriginalArg(2) boolean transpose, @OriginalArg(3) int height, @OriginalArg(5) TextureSource source, @OriginalArg(6) js5 sprites) {
+        Static582.aJs5_108 = sprites;
+        Static677.anTextureSource_11 = source;
+        for (@Pc(11) int i = 0; i < this.ops.length; i++) {
+            this.ops[i].initCache(height, width);
         }
-        Static725.method9455(arg1);
-        EnvironmentLight.method2313(arg3, arg0);
-        @Pc(53) int[] local53 = new int[arg0 * arg3];
-        @Pc(55) int local55 = 0;
-        for (@Pc(57) int local57 = 0; local57 < arg3; local57++) {
-            @Pc(77) int[] local77;
-            @Pc(85) int[] local85;
-            @Pc(81) int[] local81;
-            @Pc(93) int[] local93;
-            if (this.aClass2_Sub1_3.monochrome) {
-                local93 = this.aClass2_Sub1_3.monochromeOutput(117, local57);
-                local81 = local93;
-                local85 = local93;
-                local77 = local93;
+        Static725.method9455(gamma);
+        EnvironmentLight.method2313(height, width);
+        @Pc(53) int[] pixels = new int[width * height];
+        @Pc(55) int index = 0;
+        for (@Pc(57) int y = 0; y < height; y++) {
+            @Pc(77) int[] redRow;
+            @Pc(85) int[] greenRow;
+            @Pc(81) int[] blueRow;
+            @Pc(93) int[] alphaRow;
+            if (this.colourOp.monochrome) {
+                redRow = greenRow = blueRow = this.colourOp.monochromeOutput(117, y);
             } else {
-                @Pc(73) int[][] local73 = this.aClass2_Sub1_3.method9414(local57);
-                local77 = local73[0];
-                local81 = local73[2];
-                local85 = local73[1];
+                @Pc(73) int[][] rows = this.colourOp.method9414(y);
+                redRow = rows[0];
+                blueRow = rows[2];
+                greenRow = rows[1];
             }
-            if (this.aClass2_Sub1_1.monochrome) {
-                local93 = this.aClass2_Sub1_1.monochromeOutput(111, local57);
+            if (this.alphaOp.monochrome) {
+                alphaRow = this.alphaOp.monochromeOutput(111, y);
             } else {
-                local93 = this.aClass2_Sub1_1.method9414(local57)[0];
+                alphaRow = this.alphaOp.method9414(y)[0];
             }
-            if (arg2) {
-                local55 = local57;
+            if (transpose) {
+                index = y;
             }
-            for (@Pc(127) int local127 = arg0 - 1; local127 >= 0; local127--) {
-                @Pc(135) int local135 = local77[local127] >> 4;
-                if (local135 > 255) {
-                    local135 = 255;
+            for (@Pc(127) int x = width - 1; x >= 0; x--) {
+                @Pc(135) int red = redRow[x] >> 4;
+                if (red > 255) {
+                    red = 255;
                 }
-                if (local135 < 0) {
-                    local135 = 0;
+                if (red < 0) {
+                    red = 0;
                 }
-                @Pc(150) int local150 = local85[local127] >> 4;
-                if (local150 > 255) {
-                    local150 = 255;
+                @Pc(150) int green = greenRow[x] >> 4;
+                if (green > 255) {
+                    green = 255;
                 }
-                if (local150 < 0) {
-                    local150 = 0;
+                if (green < 0) {
+                    green = 0;
                 }
-                @Pc(165) int local165 = local81[local127] >> 4;
-                if (local165 > 255) {
-                    local165 = 255;
+                @Pc(165) int blue = blueRow[x] >> 4;
+                if (blue > 255) {
+                    blue = 255;
                 }
-                local150 = Static609.anIntArray716[local150];
-                if (local165 < 0) {
-                    local165 = 0;
+                green = Static609.anIntArray716[green];
+                if (blue < 0) {
+                    blue = 0;
                 }
-                local135 = Static609.anIntArray716[local135];
-                local165 = Static609.anIntArray716[local165];
-                @Pc(209) int local209;
-                if (local135 == 0 && local150 == 0 && local165 == 0) {
-                    local209 = 0;
+                red = Static609.anIntArray716[red];
+                blue = Static609.anIntArray716[blue];
+                @Pc(209) int alpha;
+                if (red == 0 && green == 0 && blue == 0) {
+                    alpha = 0;
                 } else {
-                    local209 = local93[local127] >> 4;
-                    if (local209 > 255) {
-                        local209 = 255;
+                    alpha = alphaRow[x] >> 4;
+                    if (alpha > 255) {
+                        alpha = 255;
                     }
-                    if (local209 < 0) {
-                        local209 = 0;
+                    if (alpha < 0) {
+                        alpha = 0;
                     }
                 }
-                local53[local55++] = (local150 << 8) + (local209 << 24) + (local135 << 16) + local165;
-                if (arg2) {
-                    local55 += arg0 - 1;
+                pixels[index++] = (green << 8) + (alpha << 24) + (red << 16) + blue;
+                if (transpose) {
+                    index += width - 1;
                 }
             }
         }
-        for (@Pc(268) int local268 = 0; local268 < this.aClass2_Sub1Array39.length; local268++) {
-            this.aClass2_Sub1Array39[local268].cacheReset();
+        for (@Pc(268) int i = 0; i < this.ops.length; i++) {
+            this.ops[i].cacheReset();
         }
-        return local53;
+        return pixels;
     }
 
     @OriginalMember(owner = "client!vm", name = "a", descriptor = "(Lclient!sb;DZLclient!d;ZIII)[I")
-    public int[] method8951(@OriginalArg(0) js5 arg0, @OriginalArg(1) double arg1, @OriginalArg(2) boolean arg2, @OriginalArg(3) TextureSource arg3, @OriginalArg(4) boolean arg4, @OriginalArg(5) int arg5, @OriginalArg(6) int arg6) {
-        Static677.anTextureSource_11 = arg3;
-        Static582.aJs5_108 = arg0;
-        for (@Pc(11) int local11 = 0; local11 < this.aClass2_Sub1Array39.length; local11++) {
-            this.aClass2_Sub1Array39[local11].initCache(arg5, arg6);
+    public int[] method8951(@OriginalArg(0) js5 sprites, @OriginalArg(1) double gamma, @OriginalArg(2) boolean transpose, @OriginalArg(3) TextureSource source, @OriginalArg(4) boolean reverse, @OriginalArg(5) int height, @OriginalArg(6) int width) {
+        Static677.anTextureSource_11 = source;
+        Static582.aJs5_108 = sprites;
+        for (@Pc(11) int i = 0; i < this.ops.length; i++) {
+            this.ops[i].initCache(height, width);
         }
-        Static725.method9455(arg1);
-        EnvironmentLight.method2313(arg5, arg6);
-        @Pc(41) int[] local41 = new int[arg5 * arg6];
-        @Pc(49) int local49;
-        @Pc(47) int local47;
-        @Pc(51) byte local51;
-        if (arg4) {
-            local47 = -1;
-            local49 = arg6 - 1;
-            local51 = -1;
+        Static725.method9455(gamma);
+        EnvironmentLight.method2313(height, width);
+        @Pc(41) int[] pixels = new int[height * width];
+        @Pc(49) int start;
+        @Pc(47) int end;
+        @Pc(51) byte step;
+        if (reverse) {
+            end = -1;
+            start = width - 1;
+            step = -1;
         } else {
-            local47 = arg6;
-            local49 = 0;
-            local51 = 1;
+            end = width;
+            start = 0;
+            step = 1;
         }
-        @Pc(63) int local63 = 0;
-        for (@Pc(65) int local65 = 0; local65 < arg5; local65++) {
-            @Pc(85) int[] local85;
-            @Pc(81) int[] local81;
-            @Pc(83) int[] local83;
-            if (this.aClass2_Sub1_3.monochrome) {
-                @Pc(79) int[] local79 = this.aClass2_Sub1_3.monochromeOutput(127, local65);
-                local81 = local79;
-                local83 = local79;
-                local85 = local79;
+        @Pc(63) int index = 0;
+        for (@Pc(65) int y = 0; y < height; y++) {
+            @Pc(85) int[] redRow;
+            @Pc(81) int[] greenRow;
+            @Pc(83) int[] blueRow;
+            if (this.colourOp.monochrome) {
+                @Pc(79) int[] greyRow = this.colourOp.monochromeOutput(127, y);
+                greenRow = greyRow;
+                blueRow = greyRow;
+                redRow = greyRow;
             } else {
-                @Pc(93) int[][] local93 = this.aClass2_Sub1_3.method9414(local65);
-                local83 = local93[2];
-                local81 = local93[1];
-                local85 = local93[0];
+                @Pc(93) int[][] rows = this.colourOp.method9414(y);
+                blueRow = rows[2];
+                greenRow = rows[1];
+                redRow = rows[0];
             }
-            if (arg2) {
-                local63 = local65;
+            if (transpose) {
+                index = y;
             }
-            for (@Pc(111) int local111 = local49; local111 != local47; local111 += local51) {
-                @Pc(119) int local119 = local85[local111] >> 4;
-                if (local119 > 255) {
-                    local119 = 255;
+            for (@Pc(111) int x = start; x != end; x += step) {
+                @Pc(119) int red = redRow[x] >> 4;
+                if (red > 255) {
+                    red = 255;
                 }
-                if (local119 < 0) {
-                    local119 = 0;
+                if (red < 0) {
+                    red = 0;
                 }
-                @Pc(137) int local137 = local81[local111] >> 4;
-                if (local137 > 255) {
-                    local137 = 255;
+                @Pc(137) int green = greenRow[x] >> 4;
+                if (green > 255) {
+                    green = 255;
                 }
-                if (local137 < 0) {
-                    local137 = 0;
+                if (green < 0) {
+                    green = 0;
                 }
-                @Pc(154) int local154 = local83[local111] >> 4;
-                if (local154 > 255) {
-                    local154 = 255;
+                @Pc(154) int blue = blueRow[x] >> 4;
+                if (blue > 255) {
+                    blue = 255;
                 }
-                local137 = Static609.anIntArray716[local137];
-                local119 = Static609.anIntArray716[local119];
-                if (local154 < 0) {
-                    local154 = 0;
+                green = Static609.anIntArray716[green];
+                red = Static609.anIntArray716[red];
+                if (blue < 0) {
+                    blue = 0;
                 }
-                local154 = Static609.anIntArray716[local154];
-                @Pc(189) int local189 = (local119 << 16) + (local137 << 8) + local154;
-                if (local189 != 0) {
-                    local189 |= 0xFF000000;
+                blue = Static609.anIntArray716[blue];
+                @Pc(189) int rgb = (red << 16) + (green << 8) + blue;
+                if (rgb != 0) {
+                    rgb |= 0xFF000000;
                 }
-                local41[local63++] = local189;
-                if (arg2) {
-                    local63 += arg6 - 1;
+                pixels[index++] = rgb;
+                if (transpose) {
+                    index += width - 1;
                 }
             }
         }
-        for (@Pc(230) int local230 = 0; local230 < this.aClass2_Sub1Array39.length; local230++) {
-            this.aClass2_Sub1Array39[local230].cacheReset();
+        for (@Pc(230) int i = 0; i < this.ops.length; i++) {
+            this.ops[i].cacheReset();
         }
-        return local41;
+        return pixels;
     }
 }
