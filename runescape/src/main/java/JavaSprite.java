@@ -9,19 +9,19 @@ import org.openrs2.deob.annotation.Pc;
 public abstract class JavaSprite extends Sprite {
 
     @OriginalMember(owner = "client!qc", name = "j", descriptor = "I")
-    protected int anInt9294;
+    protected int bottomMargin;
 
     @OriginalMember(owner = "client!qc", name = "n", descriptor = "I")
-    protected int anInt9295;
+    protected int rightMargin;
 
     @OriginalMember(owner = "client!qc", name = "v", descriptor = "I")
-    protected int anInt9298;
+    protected int leftMargin;
 
     @OriginalMember(owner = "client!qc", name = "h", descriptor = "I")
-    protected int anInt9308;
+    protected int topMargin;
 
     @OriginalMember(owner = "client!qc", name = "w", descriptor = "[I")
-    public int[] anIntArray713;
+    public int[] savedClip;
 
     @OriginalMember(owner = "client!qc", name = "o", descriptor = "Lclient!iaa;")
     protected final JavaToolkit toolkit;
@@ -33,16 +33,16 @@ public abstract class JavaSprite extends Sprite {
     public final int anInt9306;
 
     @OriginalMember(owner = "client!qc", name = "<init>", descriptor = "(Lclient!iaa;II)V")
-    public JavaSprite(@OriginalArg(0) JavaToolkit arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
-        this.toolkit = arg0;
-        this.anInt9302 = arg1;
-        this.anInt9306 = arg2;
+    public JavaSprite(@OriginalArg(0) JavaToolkit toolkit, @OriginalArg(1) int width, @OriginalArg(2) int height) {
+        this.toolkit = toolkit;
+        this.anInt9302 = width;
+        this.anInt9306 = height;
     }
 
     @OriginalMember(owner = "client!qc", name = "a", descriptor = "()I")
     @Override
     public final int scaleHeight() {
-        return this.anInt9308 + this.anInt9306 + this.anInt9294;
+        return this.topMargin + this.anInt9306 + this.bottomMargin;
     }
 
     @OriginalMember(owner = "client!qc", name = "a", descriptor = "(IILclient!aa;II)V")
@@ -51,10 +51,10 @@ public abstract class JavaSprite extends Sprite {
     @OriginalMember(owner = "client!qc", name = "a", descriptor = "([I)V")
     @Override
     public final void projectOffsets(@OriginalArg(0) int[] destination) {
-        destination[0] = this.anInt9298;
-        destination[1] = this.anInt9308;
-        destination[2] = this.anInt9295;
-        destination[3] = this.anInt9294;
+        destination[0] = this.leftMargin;
+        destination[1] = this.topMargin;
+        destination[2] = this.rightMargin;
+        destination[3] = this.bottomMargin;
     }
 
     @OriginalMember(owner = "client!qc", name = "d", descriptor = "()I")
@@ -83,42 +83,42 @@ public abstract class JavaSprite extends Sprite {
     protected final void renderParallelogramImpl(@OriginalArg(0) float centerX, @OriginalArg(1) float centerY, @OriginalArg(2) float x1, @OriginalArg(3) float y1, @OriginalArg(4) float x2, @OriginalArg(5) float y2, @OriginalArg(7) ClippingMask mask, @OriginalArg(8) int maskX, @OriginalArg(9) int maskY) {
         if (this.toolkit.stopped()) {
             throw new IllegalStateException();
-        } else if (this.method8211(centerX, centerY, x1, y1, x2, y2)) {
-            @Pc(22) JavaClippingMask local22 = (JavaClippingMask) mask;
-            this.method8210(local22.lineOffsets, local22.lineWidths, Static513.anInt9301 - maskX, -maskY - (Static513.anInt9297 - Static513.anInt9314));
+        } else if (this.setupParallelogram(centerX, centerY, x1, y1, x2, y2)) {
+            @Pc(22) JavaClippingMask clippingMask = (JavaClippingMask) mask;
+            this.blitParallelogramMasked(clippingMask.lineOffsets, clippingMask.lineWidths, JavaSpriteBlitState.minX - maskX, -maskY - (JavaSpriteBlitState.negativeHeight - JavaSpriteBlitState.minY));
         }
     }
 
     @OriginalMember(owner = "client!qc", name = "a", descriptor = "(FFFFFFIIII)V")
     @Override
-    protected final void renderImpl(@OriginalArg(0) float x, @OriginalArg(1) float y, @OriginalArg(2) float width, @OriginalArg(3) float height, @OriginalArg(4) float op, @OriginalArg(5) float colour, @OriginalArg(6) int mode, @OriginalArg(7) int filter) {
+    protected final void renderImpl(@OriginalArg(0) float centerX, @OriginalArg(1) float centerY, @OriginalArg(2) float x1, @OriginalArg(3) float y1, @OriginalArg(4) float x2, @OriginalArg(5) float y2, @OriginalArg(6) int op, @OriginalArg(7) int colour) {
         if (this.toolkit.stopped()) {
             throw new IllegalStateException();
-        } else if (this.method8211(x, y, width, height, op, colour)) {
-            Static513.anInt9313 = filter;
-            if (mode != 1) {
-                Static513.anInt9304 = filter >>> 24;
-                Static513.anInt9312 = 256 - Static513.anInt9304;
-                if (mode == 0) {
-                    Static513.anInt9319 = filter >> 16 & 0xFF;
-                    Static513.anInt9299 = filter >> 8 & 0xFF;
-                    Static513.anInt9315 = filter & 0xFF;
-                } else if (mode == 2) {
-                    Static513.anInt9296 = filter >>> 24;
-                    Static513.anInt9300 = 256 - Static513.anInt9296;
-                    @Pc(73) int local73 = (filter & 0xFF00FF) * Static513.anInt9300 & 0xFF00FF00;
-                    @Pc(81) int local81 = (filter & 0xFF00) * Static513.anInt9300 & 0xFF0000;
-                    Static513.anInt9305 = (local73 | local81) >>> 8;
+        } else if (this.setupParallelogram(centerX, centerY, x1, y1, x2, y2)) {
+            JavaSpriteBlitState.colour = colour;
+            if (op != 1) {
+                JavaSpriteBlitState.alpha = colour >>> 24;
+                JavaSpriteBlitState.invAlpha = 256 - JavaSpriteBlitState.alpha;
+                if (op == 0) {
+                    JavaSpriteBlitState.red = colour >> 16 & 0xFF;
+                    JavaSpriteBlitState.green = colour >> 8 & 0xFF;
+                    JavaSpriteBlitState.blue = colour & 0xFF;
+                } else if (op == 2) {
+                    JavaSpriteBlitState.lerpAlpha = colour >>> 24;
+                    JavaSpriteBlitState.lerpInvAlpha = 256 - JavaSpriteBlitState.lerpAlpha;
+                    @Pc(73) int lerpRedBlue = (colour & 0xFF00FF) * JavaSpriteBlitState.lerpInvAlpha & 0xFF00FF00;
+                    @Pc(81) int lerpGreen = (colour & 0xFF00) * JavaSpriteBlitState.lerpInvAlpha & 0xFF0000;
+                    JavaSpriteBlitState.lerpColour = (lerpRedBlue | lerpGreen) >>> 8;
                 }
             }
-            if (mode == 1) {
-                this.method8209(1);
-            } else if (mode == 0) {
-                this.method8209(0);
-            } else if (mode == 3) {
-                this.method8209(3);
-            } else if (mode == 2) {
-                this.method8209(2);
+            if (op == 1) {
+                this.blitParallelogram(1);
+            } else if (op == 0) {
+                this.blitParallelogram(0);
+            } else if (op == 3) {
+                this.blitParallelogram(3);
+            } else if (op == 2) {
+                this.blitParallelogram(2);
             }
         }
     }
@@ -126,16 +126,16 @@ public abstract class JavaSprite extends Sprite {
     @OriginalMember(owner = "client!qc", name = "b", descriptor = "()I")
     @Override
     public final int scaleWidth() {
-        return this.anInt9298 + this.anInt9302 + this.anInt9295;
+        return this.leftMargin + this.anInt9302 + this.rightMargin;
     }
 
     @OriginalMember(owner = "client!qc", name = "c", descriptor = "(IIII)V")
     @Override
     public final void setOffsets(@OriginalArg(0) int x1, @OriginalArg(1) int y1, @OriginalArg(2) int x2, @OriginalArg(3) int y2) {
-        this.anInt9298 = x1;
-        this.anInt9308 = y1;
-        this.anInt9295 = x2;
-        this.anInt9294 = y2;
+        this.leftMargin = x1;
+        this.topMargin = y1;
+        this.rightMargin = x2;
+        this.bottomMargin = y2;
     }
 
     @OriginalMember(owner = "client!qc", name = "a", descriptor = "(IIIII)V")
@@ -147,34 +147,34 @@ public abstract class JavaSprite extends Sprite {
         if (this.toolkit.stopped()) {
             throw new IllegalStateException();
         }
-        if (this.anIntArray713 == null) {
-            this.anIntArray713 = new int[4];
+        if (this.savedClip == null) {
+            this.savedClip = new int[4];
         }
-        this.toolkit.K(this.anIntArray713);
+        this.toolkit.K(this.savedClip);
         this.toolkit.T(this.toolkit.clipX1, this.toolkit.clipY1, x + width, y + height);
-        @Pc(40) int local40 = this.scaleWidth();
-        @Pc(43) int local43 = this.scaleHeight();
-        @Pc(51) int local51 = (width + local40 - 1) / local40;
-        @Pc(59) int local59 = (height + local43 - 1) / local43;
-        for (@Pc(61) int local61 = 0; local61 < local59; local61++) {
-            @Pc(66) int local66 = local61 * local43;
-            for (@Pc(68) int local68 = 0; local68 < local51; local68++) {
-                this.render(x + local68 * local40, y + local66, op, colour, mode);
+        @Pc(40) int tileWidth = this.scaleWidth();
+        @Pc(43) int tileHeight = this.scaleHeight();
+        @Pc(51) int columns = (width + tileWidth - 1) / tileWidth;
+        @Pc(59) int rows = (height + tileHeight - 1) / tileHeight;
+        for (@Pc(61) int row = 0; row < rows; row++) {
+            @Pc(66) int offsetY = row * tileHeight;
+            for (@Pc(68) int column = 0; column < columns; column++) {
+                this.render(x + column * tileWidth, y + offsetY, op, colour, mode);
             }
         }
-        this.toolkit.KA(this.anIntArray713[0], this.anIntArray713[1], this.anIntArray713[2], this.anIntArray713[3]);
+        this.toolkit.KA(this.savedClip[0], this.savedClip[1], this.savedClip[2], this.savedClip[3]);
     }
 
     @OriginalMember(owner = "client!qc", name = "b", descriptor = "(II)V")
-    protected abstract void method8209(@OriginalArg(0) int arg0);
+    protected abstract void blitParallelogram(@OriginalArg(0) int op);
 
     @OriginalMember(owner = "client!qc", name = "a", descriptor = "([I[III)V")
-    protected abstract void method8210(@OriginalArg(0) int[] arg0, @OriginalArg(1) int[] arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3);
+    protected abstract void blitParallelogramMasked(@OriginalArg(0) int[] lineOffsets, @OriginalArg(1) int[] lineWidths, @OriginalArg(2) int maskOffsetX, @OriginalArg(3) int maskOffsetY);
 
     @OriginalMember(owner = "client!qc", name = "a", descriptor = "(FFFFFF)Z")
-    public boolean method8211(@OriginalArg(0) float arg0, @OriginalArg(1) float arg1, @OriginalArg(2) float arg2, @OriginalArg(3) float arg3, @OriginalArg(4) float arg4, @OriginalArg(5) float arg5) {
-        @Pc(8) int local8 = this.anInt9298 + this.anInt9302 + this.anInt9295;
-        @Pc(17) int local17 = this.anInt9308 + this.anInt9306 + this.anInt9294;
+    public boolean setupParallelogram(@OriginalArg(0) float centerX, @OriginalArg(1) float centerY, @OriginalArg(2) float x1, @OriginalArg(3) float y1, @OriginalArg(4) float x2, @OriginalArg(5) float y2) {
+        @Pc(8) int scaleWidth = this.leftMargin + this.anInt9302 + this.rightMargin;
+        @Pc(17) int scaleHeight = this.topMargin + this.anInt9306 + this.bottomMargin;
         @Pc(34) float local34;
         @Pc(41) float local41;
         @Pc(48) float local48;
@@ -183,62 +183,62 @@ public abstract class JavaSprite extends Sprite {
         @Pc(67) float local67;
         @Pc(73) float local73;
         @Pc(79) float local79;
-        if (local8 != this.anInt9302 || local17 != this.anInt9306) {
-            local34 = (arg2 - arg0) / (float) local8;
-            local41 = (arg3 - arg1) / (float) local8;
-            local48 = (arg4 - arg0) / (float) local17;
-            local55 = (arg5 - arg1) / (float) local17;
-            local61 = local48 * (float) this.anInt9308;
-            local67 = local55 * (float) this.anInt9308;
-            local73 = local34 * (float) this.anInt9298;
-            local79 = local41 * (float) this.anInt9298;
-            @Pc(86) float local86 = -local34 * (float) this.anInt9295;
-            @Pc(93) float local93 = -local41 * (float) this.anInt9295;
-            @Pc(100) float local100 = -local48 * (float) this.anInt9294;
-            @Pc(107) float local107 = -local55 * (float) this.anInt9294;
-            arg0 += local73 + local61;
-            arg1 += local79 + local67;
-            arg2 += local86 + local61;
-            arg3 += local93 + local67;
-            arg4 += local73 + local100;
-            arg5 += local79 + local107;
+        if (scaleWidth != this.anInt9302 || scaleHeight != this.anInt9306) {
+            local34 = (x1 - centerX) / (float) scaleWidth;
+            local41 = (y1 - centerY) / (float) scaleWidth;
+            local48 = (x2 - centerX) / (float) scaleHeight;
+            local55 = (y2 - centerY) / (float) scaleHeight;
+            local61 = local48 * (float) this.topMargin;
+            local67 = local55 * (float) this.topMargin;
+            local73 = local34 * (float) this.leftMargin;
+            local79 = local41 * (float) this.leftMargin;
+            @Pc(86) float rightX = -local34 * (float) this.rightMargin;
+            @Pc(93) float rightY = -local41 * (float) this.rightMargin;
+            @Pc(100) float bottomX = -local48 * (float) this.bottomMargin;
+            @Pc(107) float bottomY = -local55 * (float) this.bottomMargin;
+            centerX += local73 + local61;
+            centerY += local79 + local67;
+            x1 += rightX + local61;
+            y1 += rightY + local67;
+            x2 += local73 + bottomX;
+            y2 += local79 + bottomY;
         }
-        local34 = arg4 + arg2 - arg0;
-        local41 = arg3 + arg5 - arg1;
-        if (arg0 < arg2) {
-            local48 = arg0;
-            local55 = arg2;
+        local34 = x2 + x1 - centerX;
+        local41 = y1 + y2 - centerY;
+        if (centerX < x1) {
+            local48 = centerX;
+            local55 = x1;
         } else {
-            local48 = arg2;
-            local55 = arg0;
+            local48 = x1;
+            local55 = centerX;
         }
-        if (arg4 < local48) {
-            local48 = arg4;
+        if (x2 < local48) {
+            local48 = x2;
         }
         if (local34 < local48) {
             local48 = local34;
         }
-        if (arg4 > local55) {
-            local55 = arg4;
+        if (x2 > local55) {
+            local55 = x2;
         }
         if (local34 > local55) {
             local55 = local34;
         }
-        if (arg1 < arg3) {
-            local61 = arg1;
-            local67 = arg3;
+        if (centerY < y1) {
+            local61 = centerY;
+            local67 = y1;
         } else {
-            local61 = arg3;
-            local67 = arg1;
+            local61 = y1;
+            local67 = centerY;
         }
-        if (arg5 < local61) {
-            local61 = arg5;
+        if (y2 < local61) {
+            local61 = y2;
         }
         if (local41 < local61) {
             local61 = local41;
         }
-        if (arg5 > local67) {
-            local67 = arg5;
+        if (y2 > local67) {
+            local67 = y2;
         }
         if (local41 > local67) {
             local67 = local41;
@@ -263,24 +263,24 @@ public abstract class JavaSprite extends Sprite {
         if (local67 >= 0.0F) {
             return false;
         }
-        Static513.anInt9291 = this.toolkit.surfaceWidth;
-        Static513.anInt9292 = (int) ((float) ((int) local61 * Static513.anInt9291) + local48);
-        local73 = (arg2 - arg0) * (arg5 - arg1) - (arg3 - arg1) * (arg4 - arg0);
-        local79 = (arg4 - arg0) * (arg3 - arg1) - (arg5 - arg1) * (arg2 - arg0);
-        Static513.anInt9321 = (int) ((arg5 - arg1) * 4096.0F * (float) this.anInt9302 / local73);
-        Static513.anInt9309 = (int) ((arg3 - arg1) * 4096.0F * (float) this.anInt9306 / local79);
-        Static513.anInt9311 = (int) ((arg4 - arg0) * 4096.0F * (float) this.anInt9302 / local79);
-        Static513.anInt9293 = (int) ((arg2 - arg0) * 4096.0F * (float) this.anInt9306 / local73);
-        Static513.anInt9320 = (int) (local48 * 16.0F + 8.0F - (arg0 + arg2 + arg4 + local34) / 4.0F * 16.0F);
-        Static513.anInt9307 = (int) (local61 * 16.0F + 8.0F - (arg1 + arg3 + arg5 + local41) / 4.0F * 16.0F);
-        Static513.anInt9310 = (this.anInt9302 >> 1 << 12) + (Static513.anInt9307 * Static513.anInt9311 >> 4);
-        Static513.anInt9317 = (this.anInt9306 >> 1 << 12) + (Static513.anInt9307 * Static513.anInt9293 >> 4);
-        Static513.anInt9318 = Static513.anInt9320 * Static513.anInt9321 >> 4;
-        Static513.anInt9316 = Static513.anInt9320 * Static513.anInt9309 >> 4;
-        Static513.anInt9301 = (int) local48;
-        Static513.anInt9303 = (int) local55;
-        Static513.anInt9314 = (int) local61;
-        Static513.anInt9297 = (int) local67;
+        JavaSpriteBlitState.dstStride = this.toolkit.surfaceWidth;
+        JavaSpriteBlitState.rowOffset = (int) ((float) ((int) local61 * JavaSpriteBlitState.dstStride) + local48);
+        local73 = (x1 - centerX) * (y2 - centerY) - (y1 - centerY) * (x2 - centerX);
+        local79 = (x2 - centerX) * (y1 - centerY) - (y2 - centerY) * (x1 - centerX);
+        JavaSpriteBlitState.duDx = (int) ((y2 - centerY) * 4096.0F * (float) this.anInt9302 / local73);
+        JavaSpriteBlitState.dvDx = (int) ((y1 - centerY) * 4096.0F * (float) this.anInt9306 / local79);
+        JavaSpriteBlitState.duDy = (int) ((x2 - centerX) * 4096.0F * (float) this.anInt9302 / local79);
+        JavaSpriteBlitState.dvDy = (int) ((x1 - centerX) * 4096.0F * (float) this.anInt9306 / local73);
+        JavaSpriteBlitState.xBias = (int) (local48 * 16.0F + 8.0F - (centerX + x1 + x2 + local34) / 4.0F * 16.0F);
+        JavaSpriteBlitState.yBias = (int) (local61 * 16.0F + 8.0F - (centerY + y1 + y2 + local41) / 4.0F * 16.0F);
+        JavaSpriteBlitState.rowU = (this.anInt9302 >> 1 << 12) + (JavaSpriteBlitState.yBias * JavaSpriteBlitState.duDy >> 4);
+        JavaSpriteBlitState.rowV = (this.anInt9306 >> 1 << 12) + (JavaSpriteBlitState.yBias * JavaSpriteBlitState.dvDy >> 4);
+        JavaSpriteBlitState.uBias = JavaSpriteBlitState.xBias * JavaSpriteBlitState.duDx >> 4;
+        JavaSpriteBlitState.vBias = JavaSpriteBlitState.xBias * JavaSpriteBlitState.dvDx >> 4;
+        JavaSpriteBlitState.minX = (int) local48;
+        JavaSpriteBlitState.negativeWidth = (int) local55;
+        JavaSpriteBlitState.minY = (int) local61;
+        JavaSpriteBlitState.negativeHeight = (int) local67;
         return true;
     }
 }

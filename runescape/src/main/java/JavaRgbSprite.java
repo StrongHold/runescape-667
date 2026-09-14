@@ -11,108 +11,108 @@ public final class JavaRgbSprite extends JavaSprite {
     public final int[] anIntArray32;
 
     @OriginalMember(owner = "client!ap", name = "<init>", descriptor = "(Lclient!iaa;[III)V")
-    public JavaRgbSprite(@OriginalArg(0) JavaToolkit arg0, @OriginalArg(1) int[] arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3) {
-        super(arg0, arg2, arg3);
-        this.anIntArray32 = arg1;
+    public JavaRgbSprite(@OriginalArg(0) JavaToolkit toolkit, @OriginalArg(1) int[] pixels, @OriginalArg(2) int width, @OriginalArg(3) int height) {
+        super(toolkit, width, height);
+        this.anIntArray32 = pixels;
     }
 
     @OriginalMember(owner = "client!ap", name = "<init>", descriptor = "(Lclient!iaa;II)V")
-    public JavaRgbSprite(@OriginalArg(0) JavaToolkit arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
-        super(arg0, arg1, arg2);
-        this.anIntArray32 = new int[arg1 * arg2];
+    public JavaRgbSprite(@OriginalArg(0) JavaToolkit toolkit, @OriginalArg(1) int width, @OriginalArg(2) int height) {
+        super(toolkit, width, height);
+        this.anIntArray32 = new int[width * height];
     }
 
     @OriginalMember(owner = "client!ap", name = "<init>", descriptor = "(Lclient!iaa;[IIIIIZ)V")
-    public JavaRgbSprite(@OriginalArg(0) JavaToolkit arg0, @OriginalArg(1) int[] arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) boolean arg6) {
-        super(arg0, arg4, arg5);
-        if (arg6) {
-            this.anIntArray32 = new int[arg4 * arg5];
+    public JavaRgbSprite(@OriginalArg(0) JavaToolkit toolkit, @OriginalArg(1) int[] pixels, @OriginalArg(2) int offset, @OriginalArg(3) int stride, @OriginalArg(4) int width, @OriginalArg(5) int height, @OriginalArg(6) boolean copy) {
+        super(toolkit, width, height);
+        if (copy) {
+            this.anIntArray32 = new int[width * height];
         } else {
-            this.anIntArray32 = arg1;
+            this.anIntArray32 = pixels;
         }
-        @Pc(21) int local21 = arg3 - super.anInt9302;
-        @Pc(23) int local23 = 0;
-        for (@Pc(25) int local25 = 0; local25 < arg5; local25++) {
-            for (@Pc(28) int local28 = 0; local28 < arg4; local28++) {
-                @Pc(34) int local34 = arg1[arg2++];
-                if (local34 >>> 24 == 255) {
-                    this.anIntArray32[local23++] = (local34 & 0xFFFFFF) == 0 ? -16777215 : local34;
+        @Pc(21) int step = stride - super.anInt9302;
+        @Pc(23) int index = 0;
+        for (@Pc(25) int row = 0; row < height; row++) {
+            for (@Pc(28) int column = 0; column < width; column++) {
+                @Pc(34) int argb = pixels[offset++];
+                if (argb >>> 24 == 255) {
+                    this.anIntArray32[index++] = (argb & 0xFFFFFF) == 0 ? -16777215 : argb;
                 } else {
-                    this.anIntArray32[local23++] = 0;
+                    this.anIntArray32[index++] = 0;
                 }
             }
-            arg2 += local21;
+            offset += step;
         }
     }
 
     @OriginalMember(owner = "client!ap", name = "a", descriptor = "(IIIIII)V")
     @Override
-    public void copyRect(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int width, @OriginalArg(3) int height, @OriginalArg(4) int op, @OriginalArg(5) int colour) {
-        @Pc(3) int[] local3 = super.toolkit.surfaceRaster;
-        for (@Pc(5) int local5 = 0; local5 < height; local5++) {
-            @Pc(15) int local15 = (y + local5) * super.anInt9302 + x;
-            @Pc(25) int local25 = (colour + local5) * super.toolkit.surfaceWidth + op;
-            for (@Pc(27) int local27 = 0; local27 < width; local27++) {
-                this.anIntArray32[local15 + local27] = local3[local25 + local27];
+    public void copyRect(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int width, @OriginalArg(3) int height, @OriginalArg(4) int srcX, @OriginalArg(5) int srcY) {
+        @Pc(3) int[] raster = super.toolkit.surfaceRaster;
+        for (@Pc(5) int row = 0; row < height; row++) {
+            @Pc(15) int dstIndex = (y + row) * super.anInt9302 + x;
+            @Pc(25) int srcIndex = (srcY + row) * super.toolkit.surfaceWidth + srcX;
+            for (@Pc(27) int column = 0; column < width; column++) {
+                this.anIntArray32[dstIndex + column] = raster[srcIndex + column];
             }
         }
     }
 
     @OriginalMember(owner = "client!ap", name = "b", descriptor = "(IIIIIIIII)V")
     @Override
-    public void method8207(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) int arg6, @OriginalArg(7) int arg7) {
-        if (arg3 <= 0 || arg4 <= 0) {
+    public void method8207(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int width, @OriginalArg(4) int height, @OriginalArg(5) int op, @OriginalArg(6) int colour, @OriginalArg(7) int mode) {
+        if (width <= 0 || height <= 0) {
             return;
         }
-        @Pc(9) int local9 = 0;
-        @Pc(11) int local11 = 0;
-        @Pc(20) int local20 = super.anInt9298 + super.anInt9302 + super.anInt9295;
-        @Pc(29) int local29 = super.anInt9308 + super.anInt9306 + super.anInt9294;
-        @Pc(35) int local35 = (local20 << 16) / arg3;
-        @Pc(41) int local41 = (local29 << 16) / arg4;
-        @Pc(55) int local55;
-        if (super.anInt9298 > 0) {
-            local55 = ((super.anInt9298 << 16) + local35 - 1) / local35;
-            arg0 += local55;
-            local9 = local55 * local35 - (super.anInt9298 << 16);
+        @Pc(9) int u = 0;
+        @Pc(11) int v = 0;
+        @Pc(20) int scaleWidth = super.leftMargin + super.anInt9302 + super.rightMargin;
+        @Pc(29) int scaleHeight = super.topMargin + super.anInt9306 + super.bottomMargin;
+        @Pc(35) int uStep = (scaleWidth << 16) / width;
+        @Pc(41) int vStep = (scaleHeight << 16) / height;
+        @Pc(55) int offset;
+        if (super.leftMargin > 0) {
+            offset = ((super.leftMargin << 16) + uStep - 1) / uStep;
+            x += offset;
+            u = offset * uStep - (super.leftMargin << 16);
         }
-        if (super.anInt9308 > 0) {
-            local55 = ((super.anInt9308 << 16) + local41 - 1) / local41;
-            arg1 += local55;
-            local11 = local55 * local41 - (super.anInt9308 << 16);
+        if (super.topMargin > 0) {
+            offset = ((super.topMargin << 16) + vStep - 1) / vStep;
+            y += offset;
+            v = offset * vStep - (super.topMargin << 16);
         }
-        if (super.anInt9302 < local20) {
-            arg3 = ((super.anInt9302 << 16) + local35 - local9 - 1) / local35;
+        if (super.anInt9302 < scaleWidth) {
+            width = ((super.anInt9302 << 16) + uStep - u - 1) / uStep;
         }
-        if (super.anInt9306 < local29) {
-            arg4 = ((super.anInt9306 << 16) + local41 - local11 - 1) / local41;
+        if (super.anInt9306 < scaleHeight) {
+            height = ((super.anInt9306 << 16) + vStep - v - 1) / vStep;
         }
-        local55 = arg0 + arg1 * super.toolkit.surfaceWidth;
-        @Pc(147) int local147 = super.toolkit.surfaceWidth - arg3;
-        if (arg1 + arg4 > super.toolkit.clipY2) {
-            arg4 -= arg1 + arg4 - super.toolkit.clipY2;
+        offset = x + y * super.toolkit.surfaceWidth;
+        @Pc(147) int dstStep = super.toolkit.surfaceWidth - width;
+        if (y + height > super.toolkit.clipY2) {
+            height -= y + height - super.toolkit.clipY2;
         }
-        @Pc(175) int local175;
-        if (arg1 < super.toolkit.clipY1) {
-            local175 = super.toolkit.clipY1 - arg1;
-            arg4 -= local175;
-            local55 += local175 * super.toolkit.surfaceWidth;
-            local11 += local41 * local175;
+        @Pc(175) int clip;
+        if (y < super.toolkit.clipY1) {
+            clip = super.toolkit.clipY1 - y;
+            height -= clip;
+            offset += clip * super.toolkit.surfaceWidth;
+            v += vStep * clip;
         }
-        if (arg0 + arg3 > super.toolkit.clipX2) {
-            local175 = arg0 + arg3 - super.toolkit.clipX2;
-            arg3 -= local175;
-            local147 += local175;
+        if (x + width > super.toolkit.clipX2) {
+            clip = x + width - super.toolkit.clipX2;
+            width -= clip;
+            dstStep += clip;
         }
-        if (arg0 < super.toolkit.clipX1) {
-            local175 = super.toolkit.clipX1 - arg0;
-            arg3 -= local175;
-            local55 += local175;
-            local9 += local35 * local175;
-            local147 += local175;
+        if (x < super.toolkit.clipX1) {
+            clip = super.toolkit.clipX1 - x;
+            width -= clip;
+            offset += clip;
+            u += uStep * clip;
+            dstStep += clip;
         }
-        @Pc(249) float[] local249 = super.toolkit.depthBuffer;
-        @Pc(253) int[] local253 = super.toolkit.surfaceRaster;
+        @Pc(249) float[] depth = super.toolkit.depthBuffer;
+        @Pc(253) int[] raster = super.toolkit.surfaceRaster;
         @Pc(262) int local262;
         @Pc(265) int local265;
         @Pc(273) int local273;
@@ -124,344 +124,344 @@ public final class JavaRgbSprite extends JavaSprite {
         @Pc(384) int local384;
         @Pc(392) int local392;
         @Pc(400) int local400;
-        @Pc(569) int local569;
-        if (arg7 != 0) {
+        @Pc(569) int lerpColour;
+        if (mode != 0) {
             @Pc(929) int local929;
             @Pc(937) int local937;
             @Pc(949) int local949;
-            if (arg7 == 1) {
-                if (arg5 == 1) {
-                    local262 = local9;
-                    for (local265 = -arg4; local265 < 0; local265++) {
-                        local273 = (local11 >> 16) * super.anInt9302;
-                        for (local276 = -arg3; local276 < 0; local276++) {
-                            if ((float) arg2 < local249[local55]) {
-                                local348 = this.anIntArray32[(local9 >> 16) + local273];
+            if (mode == 1) {
+                if (op == 1) {
+                    local262 = u;
+                    for (local265 = -height; local265 < 0; local265++) {
+                        local273 = (v >> 16) * super.anInt9302;
+                        for (local276 = -width; local276 < 0; local276++) {
+                            if ((float) z < depth[offset]) {
+                                local348 = this.anIntArray32[(u >> 16) + local273];
                                 if (local348 != 0) {
-                                    local253[local55] = local348;
-                                    local249[local55] = (float) arg2;
+                                    raster[offset] = local348;
+                                    depth[offset] = (float) z;
                                 }
                             }
-                            local9 += local35;
-                            local55++;
+                            u += uStep;
+                            offset++;
                         }
-                        local11 += local41;
-                        local9 = local262;
-                        local55 += local147;
+                        v += vStep;
+                        u = local262;
+                        offset += dstStep;
                     }
-                } else if (arg5 == 0) {
-                    local262 = local9;
-                    if ((arg6 & 0xFFFFFF) == 16777215) {
-                        local265 = arg6 >>> 24;
+                } else if (op == 0) {
+                    local262 = u;
+                    if ((colour & 0xFFFFFF) == 16777215) {
+                        local265 = colour >>> 24;
                         local273 = 256 - local265;
-                        for (local276 = -arg4; local276 < 0; local276++) {
-                            local348 = (local11 >> 16) * super.anInt9302;
-                            for (local356 = -arg3; local356 < 0; local356++) {
-                                if ((float) arg2 < local249[local55]) {
-                                    local359 = this.anIntArray32[(local9 >> 16) + local348];
+                        for (local276 = -height; local276 < 0; local276++) {
+                            local348 = (v >> 16) * super.anInt9302;
+                            for (local356 = -width; local356 < 0; local356++) {
+                                if ((float) z < depth[offset]) {
+                                    local359 = this.anIntArray32[(u >> 16) + local348];
                                     if (local359 != 0) {
-                                        local376 = local253[local55];
-                                        local253[local55] = ((local359 & 0xFF00FF) * local265 + (local376 & 0xFF00FF) * local273 & 0xFF00FF00) + ((local359 & 0xFF00) * local265 + (local376 & 0xFF00) * local273 & 0xFF0000) >> 8;
-                                        local249[local55] = (float) arg2;
+                                        local376 = raster[offset];
+                                        raster[offset] = ((local359 & 0xFF00FF) * local265 + (local376 & 0xFF00FF) * local273 & 0xFF00FF00) + ((local359 & 0xFF00) * local265 + (local376 & 0xFF00) * local273 & 0xFF0000) >> 8;
+                                        depth[offset] = (float) z;
                                     }
                                 }
-                                local9 += local35;
-                                local55++;
+                                u += uStep;
+                                offset++;
                             }
-                            local11 += local41;
-                            local9 = local262;
-                            local55 += local147;
+                            v += vStep;
+                            u = local262;
+                            offset += dstStep;
                         }
                     } else {
-                        local265 = arg6 >> 16 & 0xFF;
-                        local273 = arg6 >> 8 & 0xFF;
-                        local276 = arg6 & 0xFF;
-                        local348 = arg6 >>> 24;
+                        local265 = colour >> 16 & 0xFF;
+                        local273 = colour >> 8 & 0xFF;
+                        local276 = colour & 0xFF;
+                        local348 = colour >>> 24;
                         local356 = 256 - local348;
-                        for (local359 = -arg4; local359 < 0; local359++) {
-                            local376 = (local11 >> 16) * super.anInt9302;
-                            for (local384 = -arg3; local384 < 0; local384++) {
-                                if ((float) arg2 < local249[local55]) {
-                                    local392 = this.anIntArray32[(local9 >> 16) + local376];
+                        for (local359 = -height; local359 < 0; local359++) {
+                            local376 = (v >> 16) * super.anInt9302;
+                            for (local384 = -width; local384 < 0; local384++) {
+                                if ((float) z < depth[offset]) {
+                                    local392 = this.anIntArray32[(u >> 16) + local376];
                                     if (local392 != 0) {
                                         if (local348 == 255) {
                                             local400 = (local392 & 0xFF0000) * local265 & 0xFF000000;
                                             local929 = (local392 & 0xFF00) * local273 & 0xFF0000;
                                             local937 = (local392 & 0xFF) * local276 & 0xFF00;
-                                            local253[local55] = (local400 | local929 | local937) >>> 8;
-                                            local249[local55] = (float) arg2;
+                                            raster[offset] = (local400 | local929 | local937) >>> 8;
+                                            depth[offset] = (float) z;
                                         } else {
                                             local400 = (local392 & 0xFF0000) * local265 & 0xFF000000;
                                             local929 = (local392 & 0xFF00) * local273 & 0xFF0000;
                                             local937 = (local392 & 0xFF) * local276 & 0xFF00;
                                             local392 = (local400 | local929 | local937) >>> 8;
-                                            local949 = local253[local55];
-                                            local253[local55] = ((local392 & 0xFF00FF) * local348 + (local949 & 0xFF00FF) * local356 & 0xFF00FF00) + ((local392 & 0xFF00) * local348 + (local949 & 0xFF00) * local356 & 0xFF0000) >> 8;
-                                            local249[local55] = (float) arg2;
+                                            local949 = raster[offset];
+                                            raster[offset] = ((local392 & 0xFF00FF) * local348 + (local949 & 0xFF00FF) * local356 & 0xFF00FF00) + ((local392 & 0xFF00) * local348 + (local949 & 0xFF00) * local356 & 0xFF0000) >> 8;
+                                            depth[offset] = (float) z;
                                         }
                                     }
                                 }
-                                local9 += local35;
-                                local55++;
+                                u += uStep;
+                                offset++;
                             }
-                            local11 += local41;
-                            local9 = local262;
-                            local55 += local147;
+                            v += vStep;
+                            u = local262;
+                            offset += dstStep;
                         }
                     }
-                } else if (arg5 == 3) {
-                    local262 = local9;
-                    local265 = arg6 >>> 24;
+                } else if (op == 3) {
+                    local262 = u;
+                    local265 = colour >>> 24;
                     local273 = 256 - local265;
-                    for (local276 = -arg4; local276 < 0; local276++) {
-                        local348 = (local11 >> 16) * super.anInt9302;
-                        for (local356 = -arg3; local356 < 0; local356++) {
-                            if ((float) arg2 < local249[local55]) {
-                                local359 = this.anIntArray32[(local9 >> 16) + local348];
-                                local376 = local359 + arg6;
-                                local384 = (local359 & 0xFF00FF) + (arg6 & 0xFF00FF);
+                    for (local276 = -height; local276 < 0; local276++) {
+                        local348 = (v >> 16) * super.anInt9302;
+                        for (local356 = -width; local356 < 0; local356++) {
+                            if ((float) z < depth[offset]) {
+                                local359 = this.anIntArray32[(u >> 16) + local348];
+                                local376 = local359 + colour;
+                                local384 = (local359 & 0xFF00FF) + (colour & 0xFF00FF);
                                 local392 = (local384 & 0x1000100) + (local376 - local384 & 0x10000);
                                 local392 = local376 - local392 | local392 - (local392 >>> 8);
                                 if (local359 == 0 && local265 != 255) {
                                     local359 = local392;
-                                    local392 = local253[local55];
+                                    local392 = raster[offset];
                                     local392 = ((local359 & 0xFF00FF) * local265 + (local392 & 0xFF00FF) * local273 & 0xFF00FF00) + ((local359 & 0xFF00) * local265 + (local392 & 0xFF00) * local273 & 0xFF0000) >> 8;
                                 }
-                                local253[local55] = local392;
-                                local249[local55] = (float) arg2;
+                                raster[offset] = local392;
+                                depth[offset] = (float) z;
                             }
-                            local9 += local35;
-                            local55++;
+                            u += uStep;
+                            offset++;
                         }
-                        local11 += local41;
-                        local9 = local262;
-                        local55 += local147;
+                        v += vStep;
+                        u = local262;
+                        offset += dstStep;
                     }
-                } else if (arg5 == 2) {
-                    local262 = arg6 >>> 24;
+                } else if (op == 2) {
+                    local262 = colour >>> 24;
                     local265 = 256 - local262;
-                    local273 = (arg6 & 0xFF00FF) * local265 & 0xFF00FF00;
-                    local276 = (arg6 & 0xFF00) * local265 & 0xFF0000;
-                    local569 = (local273 | local276) >>> 8;
-                    local348 = local9;
-                    for (local356 = -arg4; local356 < 0; local356++) {
-                        local359 = (local11 >> 16) * super.anInt9302;
-                        for (local376 = -arg3; local376 < 0; local376++) {
-                            if ((float) arg2 < local249[local55]) {
-                                local384 = this.anIntArray32[(local9 >> 16) + local359];
+                    local273 = (colour & 0xFF00FF) * local265 & 0xFF00FF00;
+                    local276 = (colour & 0xFF00) * local265 & 0xFF0000;
+                    lerpColour = (local273 | local276) >>> 8;
+                    local348 = u;
+                    for (local356 = -height; local356 < 0; local356++) {
+                        local359 = (v >> 16) * super.anInt9302;
+                        for (local376 = -width; local376 < 0; local376++) {
+                            if ((float) z < depth[offset]) {
+                                local384 = this.anIntArray32[(u >> 16) + local359];
                                 if (local384 != 0) {
                                     local273 = (local384 & 0xFF00FF) * local262 & 0xFF00FF00;
                                     local276 = (local384 & 0xFF00) * local262 & 0xFF0000;
-                                    local253[local55] = ((local273 | local276) >>> 8) + local569;
-                                    local249[local55] = (float) arg2;
+                                    raster[offset] = ((local273 | local276) >>> 8) + lerpColour;
+                                    depth[offset] = (float) z;
                                 }
                             }
-                            local9 += local35;
-                            local55++;
+                            u += uStep;
+                            offset++;
                         }
-                        local11 += local41;
-                        local9 = local348;
-                        local55 += local147;
+                        v += vStep;
+                        u = local348;
+                        offset += dstStep;
                     }
                 } else {
                     throw new IllegalArgumentException();
                 }
-            } else if (arg7 != 2) {
+            } else if (mode != 2) {
                 throw new IllegalArgumentException();
-            } else if (arg5 == 1) {
-                local262 = local9;
-                for (local265 = -arg4; local265 < 0; local265++) {
-                    local273 = (local11 >> 16) * super.anInt9302;
-                    for (local276 = -arg3; local276 < 0; local276++) {
-                        if ((float) arg2 < local249[local55]) {
-                            local348 = this.anIntArray32[(local9 >> 16) + local273];
+            } else if (op == 1) {
+                local262 = u;
+                for (local265 = -height; local265 < 0; local265++) {
+                    local273 = (v >> 16) * super.anInt9302;
+                    for (local276 = -width; local276 < 0; local276++) {
+                        if ((float) z < depth[offset]) {
+                            local348 = this.anIntArray32[(u >> 16) + local273];
                             if (local348 != 0) {
-                                local356 = local253[local55];
+                                local356 = raster[offset];
                                 local359 = local348 + local356;
                                 local376 = (local348 & 0xFF00FF) + (local356 & 0xFF00FF);
                                 local356 = (local376 & 0x1000100) + (local359 - local376 & 0x10000);
-                                local253[local55] = local359 - local356 | local356 - (local356 >>> 8);
-                                local249[local55] = (float) arg2;
+                                raster[offset] = local359 - local356 | local356 - (local356 >>> 8);
+                                depth[offset] = (float) z;
                             }
                         }
-                        local9 += local35;
-                        local55++;
+                        u += uStep;
+                        offset++;
                     }
-                    local11 += local41;
-                    local9 = local262;
-                    local55 += local147;
+                    v += vStep;
+                    u = local262;
+                    offset += dstStep;
                 }
-            } else if (arg5 == 0) {
-                local262 = local9;
-                local265 = arg6 >> 16 & 0xFF;
-                local273 = arg6 >> 8 & 0xFF;
-                local276 = arg6 & 0xFF;
-                for (local348 = -arg4; local348 < 0; local348++) {
-                    local356 = (local11 >> 16) * super.anInt9302;
-                    for (local359 = -arg3; local359 < 0; local359++) {
-                        if ((float) arg2 < local249[local55]) {
-                            local376 = this.anIntArray32[(local9 >> 16) + local356];
+            } else if (op == 0) {
+                local262 = u;
+                local265 = colour >> 16 & 0xFF;
+                local273 = colour >> 8 & 0xFF;
+                local276 = colour & 0xFF;
+                for (local348 = -height; local348 < 0; local348++) {
+                    local356 = (v >> 16) * super.anInt9302;
+                    for (local359 = -width; local359 < 0; local359++) {
+                        if ((float) z < depth[offset]) {
+                            local376 = this.anIntArray32[(u >> 16) + local356];
                             if (local376 != 0) {
                                 local384 = (local376 & 0xFF0000) * local265 & 0xFF000000;
                                 local392 = (local376 & 0xFF00) * local273 & 0xFF0000;
                                 local400 = (local376 & 0xFF) * local276 & 0xFF00;
                                 local376 = (local384 | local392 | local400) >>> 8;
-                                local929 = local253[local55];
+                                local929 = raster[offset];
                                 local937 = local376 + local929;
                                 local949 = (local376 & 0xFF00FF) + (local929 & 0xFF00FF);
                                 local929 = (local949 & 0x1000100) + (local937 - local949 & 0x10000);
-                                local253[local55] = local937 - local929 | local929 - (local929 >>> 8);
-                                local249[local55] = (float) arg2;
+                                raster[offset] = local937 - local929 | local929 - (local929 >>> 8);
+                                depth[offset] = (float) z;
                             }
                         }
-                        local9 += local35;
-                        local55++;
+                        u += uStep;
+                        offset++;
                     }
-                    local11 += local41;
-                    local9 = local262;
-                    local55 += local147;
+                    v += vStep;
+                    u = local262;
+                    offset += dstStep;
                 }
-            } else if (arg5 == 3) {
-                local262 = local9;
-                for (local265 = -arg4; local265 < 0; local265++) {
-                    local273 = (local11 >> 16) * super.anInt9302;
-                    for (local276 = -arg3; local276 < 0; local276++) {
-                        if ((float) arg2 < local249[local55]) {
-                            local348 = this.anIntArray32[(local9 >> 16) + local273];
-                            local356 = local348 + arg6;
-                            local359 = (local348 & 0xFF00FF) + (arg6 & 0xFF00FF);
+            } else if (op == 3) {
+                local262 = u;
+                for (local265 = -height; local265 < 0; local265++) {
+                    local273 = (v >> 16) * super.anInt9302;
+                    for (local276 = -width; local276 < 0; local276++) {
+                        if ((float) z < depth[offset]) {
+                            local348 = this.anIntArray32[(u >> 16) + local273];
+                            local356 = local348 + colour;
+                            local359 = (local348 & 0xFF00FF) + (colour & 0xFF00FF);
                             local376 = (local359 & 0x1000100) + (local356 - local359 & 0x10000);
                             local348 = local356 - local376 | local376 - (local376 >>> 8);
-                            local376 = local253[local55];
+                            local376 = raster[offset];
                             local356 = local348 + local376;
                             local359 = (local348 & 0xFF00FF) + (local376 & 0xFF00FF);
                             local376 = (local359 & 0x1000100) + (local356 - local359 & 0x10000);
-                            local253[local55] = local356 - local376 | local376 - (local376 >>> 8);
-                            local249[local55] = (float) arg2;
+                            raster[offset] = local356 - local376 | local376 - (local376 >>> 8);
+                            depth[offset] = (float) z;
                         }
-                        local9 += local35;
-                        local55++;
+                        u += uStep;
+                        offset++;
                     }
-                    local11 += local41;
-                    local9 = local262;
-                    local55 += local147;
+                    v += vStep;
+                    u = local262;
+                    offset += dstStep;
                 }
-            } else if (arg5 == 2) {
-                local262 = arg6 >>> 24;
+            } else if (op == 2) {
+                local262 = colour >>> 24;
                 local265 = 256 - local262;
-                local273 = (arg6 & 0xFF00FF) * local265 & 0xFF00FF00;
-                local276 = (arg6 & 0xFF00) * local265 & 0xFF0000;
-                local569 = (local273 | local276) >>> 8;
-                local348 = local9;
-                for (local356 = -arg4; local356 < 0; local356++) {
-                    local359 = (local11 >> 16) * super.anInt9302;
-                    for (local376 = -arg3; local376 < 0; local376++) {
-                        if ((float) arg2 < local249[local55]) {
-                            local384 = this.anIntArray32[(local9 >> 16) + local359];
+                local273 = (colour & 0xFF00FF) * local265 & 0xFF00FF00;
+                local276 = (colour & 0xFF00) * local265 & 0xFF0000;
+                lerpColour = (local273 | local276) >>> 8;
+                local348 = u;
+                for (local356 = -height; local356 < 0; local356++) {
+                    local359 = (v >> 16) * super.anInt9302;
+                    for (local376 = -width; local376 < 0; local376++) {
+                        if ((float) z < depth[offset]) {
+                            local384 = this.anIntArray32[(u >> 16) + local359];
                             if (local384 != 0) {
                                 local273 = (local384 & 0xFF00FF) * local262 & 0xFF00FF00;
                                 local276 = (local384 & 0xFF00) * local262 & 0xFF0000;
-                                local384 = ((local273 | local276) >>> 8) + local569;
-                                local392 = local253[local55];
+                                local384 = ((local273 | local276) >>> 8) + lerpColour;
+                                local392 = raster[offset];
                                 local400 = local384 + local392;
                                 local929 = (local384 & 0xFF00FF) + (local392 & 0xFF00FF);
                                 @Pc(1838) int local1838 = (local929 & 0x1000100) + (local400 - local929 & 0x10000);
-                                local253[local55] = local400 - local1838 | local1838 - (local1838 >>> 8);
-                                local249[local55] = (float) arg2;
+                                raster[offset] = local400 - local1838 | local1838 - (local1838 >>> 8);
+                                depth[offset] = (float) z;
                             }
                         }
-                        local9 += local35;
-                        local55++;
+                        u += uStep;
+                        offset++;
                     }
-                    local11 += local41;
-                    local9 = local348;
-                    local55 += local147;
+                    v += vStep;
+                    u = local348;
+                    offset += dstStep;
                 }
             } else {
                 throw new IllegalArgumentException();
             }
-        } else if (arg5 == 1) {
-            local262 = local9;
-            for (local265 = -arg4; local265 < 0; local265++) {
-                local273 = (local11 >> 16) * super.anInt9302;
-                for (local276 = -arg3; local276 < 0; local276++) {
-                    if ((float) arg2 < local249[local55]) {
-                        local253[local55] = this.anIntArray32[(local9 >> 16) + local273];
-                        local249[local55] = (float) arg2;
+        } else if (op == 1) {
+            local262 = u;
+            for (local265 = -height; local265 < 0; local265++) {
+                local273 = (v >> 16) * super.anInt9302;
+                for (local276 = -width; local276 < 0; local276++) {
+                    if ((float) z < depth[offset]) {
+                        raster[offset] = this.anIntArray32[(u >> 16) + local273];
+                        depth[offset] = (float) z;
                     }
-                    local9 += local35;
-                    local55++;
+                    u += uStep;
+                    offset++;
                 }
-                local11 += local41;
-                local9 = local262;
-                local55 += local147;
+                v += vStep;
+                u = local262;
+                offset += dstStep;
             }
-        } else if (arg5 == 0) {
-            local262 = arg6 >> 16 & 0xFF;
-            local265 = arg6 >> 8 & 0xFF;
-            local273 = arg6 & 0xFF;
-            local276 = local9;
-            for (local348 = -arg4; local348 < 0; local348++) {
-                local356 = (local11 >> 16) * super.anInt9302;
-                for (local359 = -arg3; local359 < 0; local359++) {
-                    if ((float) arg2 < local249[local55]) {
-                        local376 = this.anIntArray32[(local9 >> 16) + local356];
+        } else if (op == 0) {
+            local262 = colour >> 16 & 0xFF;
+            local265 = colour >> 8 & 0xFF;
+            local273 = colour & 0xFF;
+            local276 = u;
+            for (local348 = -height; local348 < 0; local348++) {
+                local356 = (v >> 16) * super.anInt9302;
+                for (local359 = -width; local359 < 0; local359++) {
+                    if ((float) z < depth[offset]) {
+                        local376 = this.anIntArray32[(u >> 16) + local356];
                         local384 = (local376 & 0xFF0000) * local262 & 0xFF000000;
                         local392 = (local376 & 0xFF00) * local265 & 0xFF0000;
                         local400 = (local376 & 0xFF) * local273 & 0xFF00;
-                        local253[local55] = (local384 | local392 | local400) >>> 8;
-                        local249[local55] = (float) arg2;
+                        raster[offset] = (local384 | local392 | local400) >>> 8;
+                        depth[offset] = (float) z;
                     }
-                    local9 += local35;
-                    local55++;
+                    u += uStep;
+                    offset++;
                 }
-                local11 += local41;
-                local9 = local276;
-                local55 += local147;
+                v += vStep;
+                u = local276;
+                offset += dstStep;
             }
-        } else if (arg5 == 3) {
-            local262 = local9;
-            for (local265 = -arg4; local265 < 0; local265++) {
-                local273 = (local11 >> 16) * super.anInt9302;
-                for (local276 = -arg3; local276 < 0; local276++) {
-                    if ((float) arg2 < local249[local55]) {
-                        local348 = this.anIntArray32[(local9 >> 16) + local273];
-                        local356 = local348 + arg6;
-                        local359 = (local348 & 0xFF00FF) + (arg6 & 0xFF00FF);
+        } else if (op == 3) {
+            local262 = u;
+            for (local265 = -height; local265 < 0; local265++) {
+                local273 = (v >> 16) * super.anInt9302;
+                for (local276 = -width; local276 < 0; local276++) {
+                    if ((float) z < depth[offset]) {
+                        local348 = this.anIntArray32[(u >> 16) + local273];
+                        local356 = local348 + colour;
+                        local359 = (local348 & 0xFF00FF) + (colour & 0xFF00FF);
                         local376 = (local359 & 0x1000100) + (local356 - local359 & 0x10000);
-                        local253[local55] = local356 - local376 | local376 - (local376 >>> 8);
-                        local249[local55] = (float) arg2;
+                        raster[offset] = local356 - local376 | local376 - (local376 >>> 8);
+                        depth[offset] = (float) z;
                     }
-                    local9 += local35;
-                    local55++;
+                    u += uStep;
+                    offset++;
                 }
-                local11 += local41;
-                local9 = local262;
-                local55 += local147;
+                v += vStep;
+                u = local262;
+                offset += dstStep;
             }
-        } else if (arg5 == 2) {
-            local262 = arg6 >>> 24;
+        } else if (op == 2) {
+            local262 = colour >>> 24;
             local265 = 256 - local262;
-            local273 = (arg6 & 0xFF00FF) * local265 & 0xFF00FF00;
-            local276 = (arg6 & 0xFF00) * local265 & 0xFF0000;
-            local569 = (local273 | local276) >>> 8;
-            local348 = local9;
-            for (local356 = -arg4; local356 < 0; local356++) {
-                local359 = (local11 >> 16) * super.anInt9302;
-                for (local376 = -arg3; local376 < 0; local376++) {
-                    if ((float) arg2 < local249[local55]) {
-                        local384 = this.anIntArray32[(local9 >> 16) + local359];
+            local273 = (colour & 0xFF00FF) * local265 & 0xFF00FF00;
+            local276 = (colour & 0xFF00) * local265 & 0xFF0000;
+            lerpColour = (local273 | local276) >>> 8;
+            local348 = u;
+            for (local356 = -height; local356 < 0; local356++) {
+                local359 = (v >> 16) * super.anInt9302;
+                for (local376 = -width; local376 < 0; local376++) {
+                    if ((float) z < depth[offset]) {
+                        local384 = this.anIntArray32[(u >> 16) + local359];
                         local273 = (local384 & 0xFF00FF) * local262 & 0xFF00FF00;
                         local276 = (local384 & 0xFF00) * local262 & 0xFF0000;
-                        local253[local55] = ((local273 | local276) >>> 8) + local569;
-                        local249[local55] = (float) arg2;
+                        raster[offset] = ((local273 | local276) >>> 8) + lerpColour;
+                        depth[offset] = (float) z;
                     }
-                    local9 += local35;
-                    local55++;
+                    u += uStep;
+                    offset++;
                 }
-                local11 += local41;
-                local9 = local348;
-                local55 += local147;
+                v += vStep;
+                u = local348;
+                offset += dstStep;
             }
         } else {
             throw new IllegalArgumentException();
@@ -476,59 +476,59 @@ public final class JavaRgbSprite extends JavaSprite {
 
     @OriginalMember(owner = "client!ap", name = "a", descriptor = "(IIIIIIIII)V")
     @Override
-    public void method8208(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) int arg6, @OriginalArg(7) int arg7) {
-        if (arg3 <= 0 || arg4 <= 0) {
+    public void method8208(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int width, @OriginalArg(4) int height, @OriginalArg(5) int op, @OriginalArg(6) int colour, @OriginalArg(7) int mode) {
+        if (width <= 0 || height <= 0) {
             return;
         }
-        @Pc(9) int local9 = 0;
-        @Pc(11) int local11 = 0;
-        @Pc(20) int local20 = super.anInt9298 + super.anInt9302 + super.anInt9295;
-        @Pc(29) int local29 = super.anInt9308 + super.anInt9306 + super.anInt9294;
-        @Pc(35) int local35 = (local20 << 16) / arg3;
-        @Pc(41) int local41 = (local29 << 16) / arg4;
-        @Pc(55) int local55;
-        if (super.anInt9298 > 0) {
-            local55 = ((super.anInt9298 << 16) + local35 - 1) / local35;
-            arg0 += local55;
-            local9 = local55 * local35 - (super.anInt9298 << 16);
+        @Pc(9) int u = 0;
+        @Pc(11) int v = 0;
+        @Pc(20) int scaleWidth = super.leftMargin + super.anInt9302 + super.rightMargin;
+        @Pc(29) int scaleHeight = super.topMargin + super.anInt9306 + super.bottomMargin;
+        @Pc(35) int uStep = (scaleWidth << 16) / width;
+        @Pc(41) int vStep = (scaleHeight << 16) / height;
+        @Pc(55) int offset;
+        if (super.leftMargin > 0) {
+            offset = ((super.leftMargin << 16) + uStep - 1) / uStep;
+            x += offset;
+            u = offset * uStep - (super.leftMargin << 16);
         }
-        if (super.anInt9308 > 0) {
-            local55 = ((super.anInt9308 << 16) + local41 - 1) / local41;
-            arg1 += local55;
-            local11 = local55 * local41 - (super.anInt9308 << 16);
+        if (super.topMargin > 0) {
+            offset = ((super.topMargin << 16) + vStep - 1) / vStep;
+            y += offset;
+            v = offset * vStep - (super.topMargin << 16);
         }
-        if (super.anInt9302 < local20) {
-            arg3 = ((super.anInt9302 << 16) + local35 - local9 - 1) / local35;
+        if (super.anInt9302 < scaleWidth) {
+            width = ((super.anInt9302 << 16) + uStep - u - 1) / uStep;
         }
-        if (super.anInt9306 < local29) {
-            arg4 = ((super.anInt9306 << 16) + local41 - local11 - 1) / local41;
+        if (super.anInt9306 < scaleHeight) {
+            height = ((super.anInt9306 << 16) + vStep - v - 1) / vStep;
         }
-        local55 = arg0 + arg1 * super.toolkit.surfaceWidth;
-        @Pc(147) int local147 = super.toolkit.surfaceWidth - arg3;
-        if (arg1 + arg4 > super.toolkit.clipY2) {
-            arg4 -= arg1 + arg4 - super.toolkit.clipY2;
+        offset = x + y * super.toolkit.surfaceWidth;
+        @Pc(147) int dstStep = super.toolkit.surfaceWidth - width;
+        if (y + height > super.toolkit.clipY2) {
+            height -= y + height - super.toolkit.clipY2;
         }
-        @Pc(175) int local175;
-        if (arg1 < super.toolkit.clipY1) {
-            local175 = super.toolkit.clipY1 - arg1;
-            arg4 -= local175;
-            local55 += local175 * super.toolkit.surfaceWidth;
-            local11 += local41 * local175;
+        @Pc(175) int clip;
+        if (y < super.toolkit.clipY1) {
+            clip = super.toolkit.clipY1 - y;
+            height -= clip;
+            offset += clip * super.toolkit.surfaceWidth;
+            v += vStep * clip;
         }
-        if (arg0 + arg3 > super.toolkit.clipX2) {
-            local175 = arg0 + arg3 - super.toolkit.clipX2;
-            arg3 -= local175;
-            local147 += local175;
+        if (x + width > super.toolkit.clipX2) {
+            clip = x + width - super.toolkit.clipX2;
+            width -= clip;
+            dstStep += clip;
         }
-        if (arg0 < super.toolkit.clipX1) {
-            local175 = super.toolkit.clipX1 - arg0;
-            arg3 -= local175;
-            local55 += local175;
-            local9 += local35 * local175;
-            local147 += local175;
+        if (x < super.toolkit.clipX1) {
+            clip = super.toolkit.clipX1 - x;
+            width -= clip;
+            offset += clip;
+            u += uStep * clip;
+            dstStep += clip;
         }
-        @Pc(249) float[] local249 = super.toolkit.depthBuffer;
-        @Pc(253) int[] local253 = super.toolkit.surfaceRaster;
+        @Pc(249) float[] depth = super.toolkit.depthBuffer;
+        @Pc(253) int[] raster = super.toolkit.surfaceRaster;
         @Pc(262) int local262;
         @Pc(265) int local265;
         @Pc(273) int local273;
@@ -540,344 +540,344 @@ public final class JavaRgbSprite extends JavaSprite {
         @Pc(384) int local384;
         @Pc(392) int local392;
         @Pc(400) int local400;
-        @Pc(569) int local569;
-        if (arg7 != 0) {
+        @Pc(569) int lerpColour;
+        if (mode != 0) {
             @Pc(929) int local929;
             @Pc(937) int local937;
             @Pc(949) int local949;
-            if (arg7 == 1) {
-                if (arg5 == 1) {
-                    local262 = local9;
-                    for (local265 = -arg4; local265 < 0; local265++) {
-                        local273 = (local11 >> 16) * super.anInt9302;
-                        for (local276 = -arg3; local276 < 0; local276++) {
-                            if ((float) arg2 < local249[local55]) {
-                                local348 = this.anIntArray32[(local9 >> 16) + local273];
+            if (mode == 1) {
+                if (op == 1) {
+                    local262 = u;
+                    for (local265 = -height; local265 < 0; local265++) {
+                        local273 = (v >> 16) * super.anInt9302;
+                        for (local276 = -width; local276 < 0; local276++) {
+                            if ((float) z < depth[offset]) {
+                                local348 = this.anIntArray32[(u >> 16) + local273];
                                 if (local348 != 0) {
-                                    local253[local55] = local348;
-                                    local249[local55] = (float) arg2;
+                                    raster[offset] = local348;
+                                    depth[offset] = (float) z;
                                 }
                             }
-                            local9 += local35;
-                            local55++;
+                            u += uStep;
+                            offset++;
                         }
-                        local11 += local41;
-                        local9 = local262;
-                        local55 += local147;
+                        v += vStep;
+                        u = local262;
+                        offset += dstStep;
                     }
-                } else if (arg5 == 0) {
-                    local262 = local9;
-                    if ((arg6 & 0xFFFFFF) == 16777215) {
-                        local265 = arg6 >>> 24;
+                } else if (op == 0) {
+                    local262 = u;
+                    if ((colour & 0xFFFFFF) == 16777215) {
+                        local265 = colour >>> 24;
                         local273 = 256 - local265;
-                        for (local276 = -arg4; local276 < 0; local276++) {
-                            local348 = (local11 >> 16) * super.anInt9302;
-                            for (local356 = -arg3; local356 < 0; local356++) {
-                                if ((float) arg2 < local249[local55]) {
-                                    local359 = this.anIntArray32[(local9 >> 16) + local348];
+                        for (local276 = -height; local276 < 0; local276++) {
+                            local348 = (v >> 16) * super.anInt9302;
+                            for (local356 = -width; local356 < 0; local356++) {
+                                if ((float) z < depth[offset]) {
+                                    local359 = this.anIntArray32[(u >> 16) + local348];
                                     if (local359 != 0) {
-                                        local376 = local253[local55];
-                                        local253[local55] = ((local359 & 0xFF00FF) * local265 + (local376 & 0xFF00FF) * local273 & 0xFF00FF00) + ((local359 & 0xFF00) * local265 + (local376 & 0xFF00) * local273 & 0xFF0000) >> 8;
-                                        local249[local55] = (float) arg2;
+                                        local376 = raster[offset];
+                                        raster[offset] = ((local359 & 0xFF00FF) * local265 + (local376 & 0xFF00FF) * local273 & 0xFF00FF00) + ((local359 & 0xFF00) * local265 + (local376 & 0xFF00) * local273 & 0xFF0000) >> 8;
+                                        depth[offset] = (float) z;
                                     }
                                 }
-                                local9 += local35;
-                                local55++;
+                                u += uStep;
+                                offset++;
                             }
-                            local11 += local41;
-                            local9 = local262;
-                            local55 += local147;
+                            v += vStep;
+                            u = local262;
+                            offset += dstStep;
                         }
                     } else {
-                        local265 = arg6 >> 16 & 0xFF;
-                        local273 = arg6 >> 8 & 0xFF;
-                        local276 = arg6 & 0xFF;
-                        local348 = arg6 >>> 24;
+                        local265 = colour >> 16 & 0xFF;
+                        local273 = colour >> 8 & 0xFF;
+                        local276 = colour & 0xFF;
+                        local348 = colour >>> 24;
                         local356 = 256 - local348;
-                        for (local359 = -arg4; local359 < 0; local359++) {
-                            local376 = (local11 >> 16) * super.anInt9302;
-                            for (local384 = -arg3; local384 < 0; local384++) {
-                                if ((float) arg2 < local249[local55]) {
-                                    local392 = this.anIntArray32[(local9 >> 16) + local376];
+                        for (local359 = -height; local359 < 0; local359++) {
+                            local376 = (v >> 16) * super.anInt9302;
+                            for (local384 = -width; local384 < 0; local384++) {
+                                if ((float) z < depth[offset]) {
+                                    local392 = this.anIntArray32[(u >> 16) + local376];
                                     if (local392 != 0) {
                                         if (local348 == 255) {
                                             local400 = (local392 & 0xFF0000) * local265 & 0xFF000000;
                                             local929 = (local392 & 0xFF00) * local273 & 0xFF0000;
                                             local937 = (local392 & 0xFF) * local276 & 0xFF00;
-                                            local253[local55] = (local400 | local929 | local937) >>> 8;
-                                            local249[local55] = (float) arg2;
+                                            raster[offset] = (local400 | local929 | local937) >>> 8;
+                                            depth[offset] = (float) z;
                                         } else {
                                             local400 = (local392 & 0xFF0000) * local265 & 0xFF000000;
                                             local929 = (local392 & 0xFF00) * local273 & 0xFF0000;
                                             local937 = (local392 & 0xFF) * local276 & 0xFF00;
                                             local392 = (local400 | local929 | local937) >>> 8;
-                                            local949 = local253[local55];
-                                            local253[local55] = ((local392 & 0xFF00FF) * local348 + (local949 & 0xFF00FF) * local356 & 0xFF00FF00) + ((local392 & 0xFF00) * local348 + (local949 & 0xFF00) * local356 & 0xFF0000) >> 8;
-                                            local249[local55] = (float) arg2;
+                                            local949 = raster[offset];
+                                            raster[offset] = ((local392 & 0xFF00FF) * local348 + (local949 & 0xFF00FF) * local356 & 0xFF00FF00) + ((local392 & 0xFF00) * local348 + (local949 & 0xFF00) * local356 & 0xFF0000) >> 8;
+                                            depth[offset] = (float) z;
                                         }
                                     }
                                 }
-                                local9 += local35;
-                                local55++;
+                                u += uStep;
+                                offset++;
                             }
-                            local11 += local41;
-                            local9 = local262;
-                            local55 += local147;
+                            v += vStep;
+                            u = local262;
+                            offset += dstStep;
                         }
                     }
-                } else if (arg5 == 3) {
-                    local262 = local9;
-                    local265 = arg6 >>> 24;
+                } else if (op == 3) {
+                    local262 = u;
+                    local265 = colour >>> 24;
                     local273 = 256 - local265;
-                    for (local276 = -arg4; local276 < 0; local276++) {
-                        local348 = (local11 >> 16) * super.anInt9302;
-                        for (local356 = -arg3; local356 < 0; local356++) {
-                            if ((float) arg2 < local249[local55]) {
-                                local359 = this.anIntArray32[(local9 >> 16) + local348];
-                                local376 = local359 + arg6;
-                                local384 = (local359 & 0xFF00FF) + (arg6 & 0xFF00FF);
+                    for (local276 = -height; local276 < 0; local276++) {
+                        local348 = (v >> 16) * super.anInt9302;
+                        for (local356 = -width; local356 < 0; local356++) {
+                            if ((float) z < depth[offset]) {
+                                local359 = this.anIntArray32[(u >> 16) + local348];
+                                local376 = local359 + colour;
+                                local384 = (local359 & 0xFF00FF) + (colour & 0xFF00FF);
                                 local392 = (local384 & 0x1000100) + (local376 - local384 & 0x10000);
                                 local392 = local376 - local392 | local392 - (local392 >>> 8);
                                 if (local359 == 0 && local265 != 255) {
                                     local359 = local392;
-                                    local392 = local253[local55];
+                                    local392 = raster[offset];
                                     local392 = ((local359 & 0xFF00FF) * local265 + (local392 & 0xFF00FF) * local273 & 0xFF00FF00) + ((local359 & 0xFF00) * local265 + (local392 & 0xFF00) * local273 & 0xFF0000) >> 8;
                                 }
-                                local253[local55] = local392;
-                                local249[local55] = (float) arg2;
+                                raster[offset] = local392;
+                                depth[offset] = (float) z;
                             }
-                            local9 += local35;
-                            local55++;
+                            u += uStep;
+                            offset++;
                         }
-                        local11 += local41;
-                        local9 = local262;
-                        local55 += local147;
+                        v += vStep;
+                        u = local262;
+                        offset += dstStep;
                     }
-                } else if (arg5 == 2) {
-                    local262 = arg6 >>> 24;
+                } else if (op == 2) {
+                    local262 = colour >>> 24;
                     local265 = 256 - local262;
-                    local273 = (arg6 & 0xFF00FF) * local265 & 0xFF00FF00;
-                    local276 = (arg6 & 0xFF00) * local265 & 0xFF0000;
-                    local569 = (local273 | local276) >>> 8;
-                    local348 = local9;
-                    for (local356 = -arg4; local356 < 0; local356++) {
-                        local359 = (local11 >> 16) * super.anInt9302;
-                        for (local376 = -arg3; local376 < 0; local376++) {
-                            if ((float) arg2 < local249[local55]) {
-                                local384 = this.anIntArray32[(local9 >> 16) + local359];
+                    local273 = (colour & 0xFF00FF) * local265 & 0xFF00FF00;
+                    local276 = (colour & 0xFF00) * local265 & 0xFF0000;
+                    lerpColour = (local273 | local276) >>> 8;
+                    local348 = u;
+                    for (local356 = -height; local356 < 0; local356++) {
+                        local359 = (v >> 16) * super.anInt9302;
+                        for (local376 = -width; local376 < 0; local376++) {
+                            if ((float) z < depth[offset]) {
+                                local384 = this.anIntArray32[(u >> 16) + local359];
                                 if (local384 != 0) {
                                     local273 = (local384 & 0xFF00FF) * local262 & 0xFF00FF00;
                                     local276 = (local384 & 0xFF00) * local262 & 0xFF0000;
-                                    local253[local55] = ((local273 | local276) >>> 8) + local569;
-                                    local249[local55] = (float) arg2;
+                                    raster[offset] = ((local273 | local276) >>> 8) + lerpColour;
+                                    depth[offset] = (float) z;
                                 }
                             }
-                            local9 += local35;
-                            local55++;
+                            u += uStep;
+                            offset++;
                         }
-                        local11 += local41;
-                        local9 = local348;
-                        local55 += local147;
+                        v += vStep;
+                        u = local348;
+                        offset += dstStep;
                     }
                 } else {
                     throw new IllegalArgumentException();
                 }
-            } else if (arg7 != 2) {
+            } else if (mode != 2) {
                 throw new IllegalArgumentException();
-            } else if (arg5 == 1) {
-                local262 = local9;
-                for (local265 = -arg4; local265 < 0; local265++) {
-                    local273 = (local11 >> 16) * super.anInt9302;
-                    for (local276 = -arg3; local276 < 0; local276++) {
-                        if ((float) arg2 < local249[local55]) {
-                            local348 = this.anIntArray32[(local9 >> 16) + local273];
+            } else if (op == 1) {
+                local262 = u;
+                for (local265 = -height; local265 < 0; local265++) {
+                    local273 = (v >> 16) * super.anInt9302;
+                    for (local276 = -width; local276 < 0; local276++) {
+                        if ((float) z < depth[offset]) {
+                            local348 = this.anIntArray32[(u >> 16) + local273];
                             if (local348 != 0) {
-                                local356 = local253[local55];
+                                local356 = raster[offset];
                                 local359 = local348 + local356;
                                 local376 = (local348 & 0xFF00FF) + (local356 & 0xFF00FF);
                                 local356 = (local376 & 0x1000100) + (local359 - local376 & 0x10000);
-                                local253[local55] = local359 - local356 | local356 - (local356 >>> 8);
-                                local249[local55] = (float) arg2;
+                                raster[offset] = local359 - local356 | local356 - (local356 >>> 8);
+                                depth[offset] = (float) z;
                             }
                         }
-                        local9 += local35;
-                        local55++;
+                        u += uStep;
+                        offset++;
                     }
-                    local11 += local41;
-                    local9 = local262;
-                    local55 += local147;
+                    v += vStep;
+                    u = local262;
+                    offset += dstStep;
                 }
-            } else if (arg5 == 0) {
-                local262 = local9;
-                local265 = arg6 >> 16 & 0xFF;
-                local273 = arg6 >> 8 & 0xFF;
-                local276 = arg6 & 0xFF;
-                for (local348 = -arg4; local348 < 0; local348++) {
-                    local356 = (local11 >> 16) * super.anInt9302;
-                    for (local359 = -arg3; local359 < 0; local359++) {
-                        if ((float) arg2 < local249[local55]) {
-                            local376 = this.anIntArray32[(local9 >> 16) + local356];
+            } else if (op == 0) {
+                local262 = u;
+                local265 = colour >> 16 & 0xFF;
+                local273 = colour >> 8 & 0xFF;
+                local276 = colour & 0xFF;
+                for (local348 = -height; local348 < 0; local348++) {
+                    local356 = (v >> 16) * super.anInt9302;
+                    for (local359 = -width; local359 < 0; local359++) {
+                        if ((float) z < depth[offset]) {
+                            local376 = this.anIntArray32[(u >> 16) + local356];
                             if (local376 != 0) {
                                 local384 = (local376 & 0xFF0000) * local265 & 0xFF000000;
                                 local392 = (local376 & 0xFF00) * local273 & 0xFF0000;
                                 local400 = (local376 & 0xFF) * local276 & 0xFF00;
                                 local376 = (local384 | local392 | local400) >>> 8;
-                                local929 = local253[local55];
+                                local929 = raster[offset];
                                 local937 = local376 + local929;
                                 local949 = (local376 & 0xFF00FF) + (local929 & 0xFF00FF);
                                 local929 = (local949 & 0x1000100) + (local937 - local949 & 0x10000);
-                                local253[local55] = local937 - local929 | local929 - (local929 >>> 8);
-                                local249[local55] = (float) arg2;
+                                raster[offset] = local937 - local929 | local929 - (local929 >>> 8);
+                                depth[offset] = (float) z;
                             }
                         }
-                        local9 += local35;
-                        local55++;
+                        u += uStep;
+                        offset++;
                     }
-                    local11 += local41;
-                    local9 = local262;
-                    local55 += local147;
+                    v += vStep;
+                    u = local262;
+                    offset += dstStep;
                 }
-            } else if (arg5 == 3) {
-                local262 = local9;
-                for (local265 = -arg4; local265 < 0; local265++) {
-                    local273 = (local11 >> 16) * super.anInt9302;
-                    for (local276 = -arg3; local276 < 0; local276++) {
-                        if ((float) arg2 < local249[local55]) {
-                            local348 = this.anIntArray32[(local9 >> 16) + local273];
-                            local356 = local348 + arg6;
-                            local359 = (local348 & 0xFF00FF) + (arg6 & 0xFF00FF);
+            } else if (op == 3) {
+                local262 = u;
+                for (local265 = -height; local265 < 0; local265++) {
+                    local273 = (v >> 16) * super.anInt9302;
+                    for (local276 = -width; local276 < 0; local276++) {
+                        if ((float) z < depth[offset]) {
+                            local348 = this.anIntArray32[(u >> 16) + local273];
+                            local356 = local348 + colour;
+                            local359 = (local348 & 0xFF00FF) + (colour & 0xFF00FF);
                             local376 = (local359 & 0x1000100) + (local356 - local359 & 0x10000);
                             local348 = local356 - local376 | local376 - (local376 >>> 8);
-                            local376 = local253[local55];
+                            local376 = raster[offset];
                             local356 = local348 + local376;
                             local359 = (local348 & 0xFF00FF) + (local376 & 0xFF00FF);
                             local376 = (local359 & 0x1000100) + (local356 - local359 & 0x10000);
-                            local253[local55] = local356 - local376 | local376 - (local376 >>> 8);
-                            local249[local55] = (float) arg2;
+                            raster[offset] = local356 - local376 | local376 - (local376 >>> 8);
+                            depth[offset] = (float) z;
                         }
-                        local9 += local35;
-                        local55++;
+                        u += uStep;
+                        offset++;
                     }
-                    local11 += local41;
-                    local9 = local262;
-                    local55 += local147;
+                    v += vStep;
+                    u = local262;
+                    offset += dstStep;
                 }
-            } else if (arg5 == 2) {
-                local262 = arg6 >>> 24;
+            } else if (op == 2) {
+                local262 = colour >>> 24;
                 local265 = 256 - local262;
-                local273 = (arg6 & 0xFF00FF) * local265 & 0xFF00FF00;
-                local276 = (arg6 & 0xFF00) * local265 & 0xFF0000;
-                local569 = (local273 | local276) >>> 8;
-                local348 = local9;
-                for (local356 = -arg4; local356 < 0; local356++) {
-                    local359 = (local11 >> 16) * super.anInt9302;
-                    for (local376 = -arg3; local376 < 0; local376++) {
-                        if ((float) arg2 < local249[local55]) {
-                            local384 = this.anIntArray32[(local9 >> 16) + local359];
+                local273 = (colour & 0xFF00FF) * local265 & 0xFF00FF00;
+                local276 = (colour & 0xFF00) * local265 & 0xFF0000;
+                lerpColour = (local273 | local276) >>> 8;
+                local348 = u;
+                for (local356 = -height; local356 < 0; local356++) {
+                    local359 = (v >> 16) * super.anInt9302;
+                    for (local376 = -width; local376 < 0; local376++) {
+                        if ((float) z < depth[offset]) {
+                            local384 = this.anIntArray32[(u >> 16) + local359];
                             if (local384 != 0) {
                                 local273 = (local384 & 0xFF00FF) * local262 & 0xFF00FF00;
                                 local276 = (local384 & 0xFF00) * local262 & 0xFF0000;
-                                local384 = ((local273 | local276) >>> 8) + local569;
-                                local392 = local253[local55];
+                                local384 = ((local273 | local276) >>> 8) + lerpColour;
+                                local392 = raster[offset];
                                 local400 = local384 + local392;
                                 local929 = (local384 & 0xFF00FF) + (local392 & 0xFF00FF);
                                 @Pc(1838) int local1838 = (local929 & 0x1000100) + (local400 - local929 & 0x10000);
-                                local253[local55] = local400 - local1838 | local1838 - (local1838 >>> 8);
-                                local249[local55] = (float) arg2;
+                                raster[offset] = local400 - local1838 | local1838 - (local1838 >>> 8);
+                                depth[offset] = (float) z;
                             }
                         }
-                        local9 += local35;
-                        local55++;
+                        u += uStep;
+                        offset++;
                     }
-                    local11 += local41;
-                    local9 = local348;
-                    local55 += local147;
+                    v += vStep;
+                    u = local348;
+                    offset += dstStep;
                 }
             } else {
                 throw new IllegalArgumentException();
             }
-        } else if (arg5 == 1) {
-            local262 = local9;
-            for (local265 = -arg4; local265 < 0; local265++) {
-                local273 = (local11 >> 16) * super.anInt9302;
-                for (local276 = -arg3; local276 < 0; local276++) {
-                    if ((float) arg2 < local249[local55]) {
-                        local253[local55] = this.anIntArray32[(local9 >> 16) + local273];
-                        local249[local55] = (float) arg2;
+        } else if (op == 1) {
+            local262 = u;
+            for (local265 = -height; local265 < 0; local265++) {
+                local273 = (v >> 16) * super.anInt9302;
+                for (local276 = -width; local276 < 0; local276++) {
+                    if ((float) z < depth[offset]) {
+                        raster[offset] = this.anIntArray32[(u >> 16) + local273];
+                        depth[offset] = (float) z;
                     }
-                    local9 += local35;
-                    local55++;
+                    u += uStep;
+                    offset++;
                 }
-                local11 += local41;
-                local9 = local262;
-                local55 += local147;
+                v += vStep;
+                u = local262;
+                offset += dstStep;
             }
-        } else if (arg5 == 0) {
-            local262 = arg6 >> 16 & 0xFF;
-            local265 = arg6 >> 8 & 0xFF;
-            local273 = arg6 & 0xFF;
-            local276 = local9;
-            for (local348 = -arg4; local348 < 0; local348++) {
-                local356 = (local11 >> 16) * super.anInt9302;
-                for (local359 = -arg3; local359 < 0; local359++) {
-                    if ((float) arg2 < local249[local55]) {
-                        local376 = this.anIntArray32[(local9 >> 16) + local356];
+        } else if (op == 0) {
+            local262 = colour >> 16 & 0xFF;
+            local265 = colour >> 8 & 0xFF;
+            local273 = colour & 0xFF;
+            local276 = u;
+            for (local348 = -height; local348 < 0; local348++) {
+                local356 = (v >> 16) * super.anInt9302;
+                for (local359 = -width; local359 < 0; local359++) {
+                    if ((float) z < depth[offset]) {
+                        local376 = this.anIntArray32[(u >> 16) + local356];
                         local384 = (local376 & 0xFF0000) * local262 & 0xFF000000;
                         local392 = (local376 & 0xFF00) * local265 & 0xFF0000;
                         local400 = (local376 & 0xFF) * local273 & 0xFF00;
-                        local253[local55] = (local384 | local392 | local400) >>> 8;
-                        local249[local55] = (float) arg2;
+                        raster[offset] = (local384 | local392 | local400) >>> 8;
+                        depth[offset] = (float) z;
                     }
-                    local9 += local35;
-                    local55++;
+                    u += uStep;
+                    offset++;
                 }
-                local11 += local41;
-                local9 = local276;
-                local55 += local147;
+                v += vStep;
+                u = local276;
+                offset += dstStep;
             }
-        } else if (arg5 == 3) {
-            local262 = local9;
-            for (local265 = -arg4; local265 < 0; local265++) {
-                local273 = (local11 >> 16) * super.anInt9302;
-                for (local276 = -arg3; local276 < 0; local276++) {
-                    if ((float) arg2 < local249[local55]) {
-                        local348 = this.anIntArray32[(local9 >> 16) + local273];
-                        local356 = local348 + arg6;
-                        local359 = (local348 & 0xFF00FF) + (arg6 & 0xFF00FF);
+        } else if (op == 3) {
+            local262 = u;
+            for (local265 = -height; local265 < 0; local265++) {
+                local273 = (v >> 16) * super.anInt9302;
+                for (local276 = -width; local276 < 0; local276++) {
+                    if ((float) z < depth[offset]) {
+                        local348 = this.anIntArray32[(u >> 16) + local273];
+                        local356 = local348 + colour;
+                        local359 = (local348 & 0xFF00FF) + (colour & 0xFF00FF);
                         local376 = (local359 & 0x1000100) + (local356 - local359 & 0x10000);
-                        local253[local55] = local356 - local376 | local376 - (local376 >>> 8);
-                        local249[local55] = (float) arg2;
+                        raster[offset] = local356 - local376 | local376 - (local376 >>> 8);
+                        depth[offset] = (float) z;
                     }
-                    local9 += local35;
-                    local55++;
+                    u += uStep;
+                    offset++;
                 }
-                local11 += local41;
-                local9 = local262;
-                local55 += local147;
+                v += vStep;
+                u = local262;
+                offset += dstStep;
             }
-        } else if (arg5 == 2) {
-            local262 = arg6 >>> 24;
+        } else if (op == 2) {
+            local262 = colour >>> 24;
             local265 = 256 - local262;
-            local273 = (arg6 & 0xFF00FF) * local265 & 0xFF00FF00;
-            local276 = (arg6 & 0xFF00) * local265 & 0xFF0000;
-            local569 = (local273 | local276) >>> 8;
-            local348 = local9;
-            for (local356 = -arg4; local356 < 0; local356++) {
-                local359 = (local11 >> 16) * super.anInt9302;
-                for (local376 = -arg3; local376 < 0; local376++) {
-                    if ((float) arg2 < local249[local55]) {
-                        local384 = this.anIntArray32[(local9 >> 16) + local359];
+            local273 = (colour & 0xFF00FF) * local265 & 0xFF00FF00;
+            local276 = (colour & 0xFF00) * local265 & 0xFF0000;
+            lerpColour = (local273 | local276) >>> 8;
+            local348 = u;
+            for (local356 = -height; local356 < 0; local356++) {
+                local359 = (v >> 16) * super.anInt9302;
+                for (local376 = -width; local376 < 0; local376++) {
+                    if ((float) z < depth[offset]) {
+                        local384 = this.anIntArray32[(u >> 16) + local359];
                         local273 = (local384 & 0xFF00FF) * local262 & 0xFF00FF00;
                         local276 = (local384 & 0xFF00) * local262 & 0xFF0000;
-                        local253[local55] = ((local273 | local276) >>> 8) + local569;
-                        local249[local55] = (float) arg2;
+                        raster[offset] = ((local273 | local276) >>> 8) + lerpColour;
+                        depth[offset] = (float) z;
                     }
-                    local9 += local35;
-                    local55++;
+                    u += uStep;
+                    offset++;
                 }
-                local11 += local41;
-                local9 = local348;
-                local55 += local147;
+                v += vStep;
+                u = local348;
+                offset += dstStep;
             }
         } else {
             throw new IllegalArgumentException();
@@ -890,1410 +890,1410 @@ public final class JavaRgbSprite extends JavaSprite {
         if (super.toolkit.stopped()) {
             throw new IllegalStateException();
         }
-        x += super.anInt9298;
-        y += super.anInt9308;
-        @Pc(20) int local20 = 0;
-        @Pc(24) int local24 = super.toolkit.surfaceWidth;
-        @Pc(27) int local27 = super.anInt9302;
-        @Pc(30) int local30 = super.anInt9306;
-        @Pc(34) int local34 = local24 - local27;
-        @Pc(36) int local36 = 0;
-        @Pc(42) int local42 = x + y * local24;
-        @Pc(53) int local53;
+        x += super.leftMargin;
+        y += super.topMargin;
+        @Pc(20) int srcIndex = 0;
+        @Pc(24) int dstStride = super.toolkit.surfaceWidth;
+        @Pc(27) int width = super.anInt9302;
+        @Pc(30) int height = super.anInt9306;
+        @Pc(34) int dstStep = dstStride - width;
+        @Pc(36) int srcStep = 0;
+        @Pc(42) int dstIndex = x + y * dstStride;
+        @Pc(53) int clip;
         if (y < super.toolkit.clipY1) {
-            local53 = super.toolkit.clipY1 - y;
-            local30 -= local53;
+            clip = super.toolkit.clipY1 - y;
+            height -= clip;
             y = super.toolkit.clipY1;
-            local20 = local53 * local27;
-            local42 += local53 * local24;
+            srcIndex = clip * width;
+            dstIndex += clip * dstStride;
         }
-        if (y + local30 > super.toolkit.clipY2) {
-            local30 -= y + local30 - super.toolkit.clipY2;
+        if (y + height > super.toolkit.clipY2) {
+            height -= y + height - super.toolkit.clipY2;
         }
         if (x < super.toolkit.clipX1) {
-            local53 = super.toolkit.clipX1 - x;
-            local27 -= local53;
+            clip = super.toolkit.clipX1 - x;
+            width -= clip;
             x = super.toolkit.clipX1;
-            local20 += local53;
-            local42 += local53;
-            local36 = local53;
-            local34 += local53;
+            srcIndex += clip;
+            dstIndex += clip;
+            srcStep = clip;
+            dstStep += clip;
         }
-        if (x + local27 > super.toolkit.clipX2) {
-            local53 = x + local27 - super.toolkit.clipX2;
-            local27 -= local53;
-            local36 += local53;
-            local34 += local53;
+        if (x + width > super.toolkit.clipX2) {
+            clip = x + width - super.toolkit.clipX2;
+            width -= clip;
+            srcStep += clip;
+            dstStep += clip;
         }
-        if (local27 <= 0 || local30 <= 0) {
+        if (width <= 0 || height <= 0) {
             return;
         }
-        @Pc(163) JavaClippingMask local163 = (JavaClippingMask) mask;
-        @Pc(166) int[] local166 = local163.lineOffsets;
-        @Pc(169) int[] local169 = local163.lineWidths;
-        @Pc(173) int[] local173 = super.toolkit.surfaceRaster;
-        @Pc(175) int local175 = y;
+        @Pc(163) JavaClippingMask clippingMask = (JavaClippingMask) mask;
+        @Pc(166) int[] lineOffsets = clippingMask.lineOffsets;
+        @Pc(169) int[] lineWidths = clippingMask.lineWidths;
+        @Pc(173) int[] raster = super.toolkit.surfaceRaster;
+        @Pc(175) int startY = y;
         if (maskY > y) {
-            local175 = maskY;
-            local42 += (maskY - y) * local24;
-            local20 += (maskY - y) * super.anInt9302;
+            startY = maskY;
+            dstIndex += (maskY - y) * dstStride;
+            srcIndex += (maskY - y) * super.anInt9302;
         }
-        @Pc(215) int local215 = maskY + local166.length < y + local30 ? maskY + local166.length : y + local30;
-        for (@Pc(217) int local217 = local175; local217 < local215; local217++) {
-            @Pc(226) int local226 = local166[local217 - maskY] + maskX;
-            @Pc(232) int local232 = local169[local217 - maskY];
-            @Pc(234) int local234 = local27;
-            @Pc(241) int local241;
-            if (x > local226) {
-                local241 = x - local226;
-                if (local241 >= local232) {
-                    local20 += local27 + local36;
-                    local42 += local27 + local34;
+        @Pc(215) int endY = maskY + lineOffsets.length < y + height ? maskY + lineOffsets.length : y + height;
+        for (@Pc(217) int row = startY; row < endY; row++) {
+            @Pc(226) int lineStart = lineOffsets[row - maskY] + maskX;
+            @Pc(232) int lineWidth = lineWidths[row - maskY];
+            @Pc(234) int count = width;
+            @Pc(241) int skip;
+            if (x > lineStart) {
+                skip = x - lineStart;
+                if (skip >= lineWidth) {
+                    srcIndex += width + srcStep;
+                    dstIndex += width + dstStep;
                     continue;
                 }
-                local232 -= local241;
+                lineWidth -= skip;
             } else {
-                local241 = local226 - x;
-                if (local241 >= local27) {
-                    local20 += local27 + local36;
-                    local42 += local27 + local34;
+                skip = lineStart - x;
+                if (skip >= width) {
+                    srcIndex += width + srcStep;
+                    dstIndex += width + dstStep;
                     continue;
                 }
-                local20 += local241;
-                local234 = local27 - local241;
-                local42 += local241;
+                srcIndex += skip;
+                count = width - skip;
+                dstIndex += skip;
             }
-            local241 = 0;
-            if (local234 < local232) {
-                local232 = local234;
+            skip = 0;
+            if (count < lineWidth) {
+                lineWidth = count;
             } else {
-                local241 = local234 - local232;
+                skip = count - lineWidth;
             }
-            for (@Pc(309) int local309 = -local232; local309 < 0; local309++) {
-                @Pc(316) int local316 = this.anIntArray32[local20++];
-                if (local316 == 0) {
-                    local42++;
+            for (@Pc(309) int column = -lineWidth; column < 0; column++) {
+                @Pc(316) int src = this.anIntArray32[srcIndex++];
+                if (src == 0) {
+                    dstIndex++;
                 } else {
-                    local173[local42++] = local316;
+                    raster[dstIndex++] = src;
                 }
             }
-            local20 += local241 + local36;
-            local42 += local241 + local34;
+            srcIndex += skip + srcStep;
+            dstIndex += skip + dstStep;
         }
     }
 
     @OriginalMember(owner = "client!ap", name = "b", descriptor = "(II)V")
     @Override
-    protected void method8209(@OriginalArg(0) int arg0) {
-        @Pc(3) int[] local3 = super.toolkit.surfaceRaster;
-        @Pc(878) int local878;
-        @Pc(11) int local11;
-        @Pc(14) int local14;
-        @Pc(16) int local16;
-        @Pc(18) int local18;
-        @Pc(20) int local20;
-        @Pc(57) int local57;
-        @Pc(60) int local60;
-        @Pc(223) int local223;
+    protected void blitParallelogram(@OriginalArg(0) int op) {
+        @Pc(3) int[] raster = super.toolkit.surfaceRaster;
+        @Pc(878) int skip;
+        @Pc(11) int row;
+        @Pc(14) int dstIndex;
+        @Pc(16) int u;
+        @Pc(18) int v;
+        @Pc(20) int column;
+        @Pc(57) int texel;
+        @Pc(60) int dst;
+        @Pc(223) int src;
         @Pc(251) int local251;
         @Pc(255) int local255;
         @Pc(259) int local259;
         @Pc(331) int local331;
-        if (Static513.anInt9321 == 0) {
-            if (Static513.anInt9309 == 0) {
-                local11 = Static513.anInt9297;
-                while (local11 < 0) {
-                    local14 = Static513.anInt9292;
-                    local16 = Static513.anInt9310;
-                    local18 = Static513.anInt9317;
-                    local20 = Static513.anInt9303;
-                    if (local16 >= 0 && local18 >= 0 && local16 - (super.anInt9302 << 12) < 0 && local18 - (super.anInt9306 << 12) < 0) {
-                        while (local20 < 0) {
-                            local57 = (local18 >> 12) * super.anInt9302 + (local16 >> 12);
-                            local60 = local14++;
-                            if (arg0 == 1) {
-                                local223 = this.anIntArray32[local57];
-                                if (local223 != 0) {
-                                    local3[local60] = local223;
+        if (JavaSpriteBlitState.duDx == 0) {
+            if (JavaSpriteBlitState.dvDx == 0) {
+                row = JavaSpriteBlitState.negativeHeight;
+                while (row < 0) {
+                    dstIndex = JavaSpriteBlitState.rowOffset;
+                    u = JavaSpriteBlitState.rowU;
+                    v = JavaSpriteBlitState.rowV;
+                    column = JavaSpriteBlitState.negativeWidth;
+                    if (u >= 0 && v >= 0 && u - (super.anInt9302 << 12) < 0 && v - (super.anInt9306 << 12) < 0) {
+                        while (column < 0) {
+                            texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                            dst = dstIndex++;
+                            if (op == 1) {
+                                src = this.anIntArray32[texel];
+                                if (src != 0) {
+                                    raster[dst] = src;
                                 }
-                            } else if (arg0 == 0) {
-                                local223 = this.anIntArray32[local57];
-                                if (local223 != 0) {
-                                    if ((Static513.anInt9313 & 0xFFFFFF) == 16777215) {
-                                        local251 = Static513.anInt9313 >>> 24;
+                            } else if (op == 0) {
+                                src = this.anIntArray32[texel];
+                                if (src != 0) {
+                                    if ((JavaSpriteBlitState.colour & 0xFFFFFF) == 16777215) {
+                                        local251 = JavaSpriteBlitState.colour >>> 24;
                                         local255 = 256 - local251;
-                                        local259 = local3[local60];
-                                        local3[local60] = ((local223 & 0xFF00FF) * local251 + (local259 & 0xFF00FF) * local255 & 0xFF00FF00) + ((local223 & 0xFF00) * local251 + (local259 & 0xFF00) * local255 & 0xFF0000) >> 8;
-                                    } else if (Static513.anInt9304 == 255) {
-                                        local251 = (local223 & 0xFF0000) * Static513.anInt9319 & 0xFF000000;
-                                        local255 = (local223 & 0xFF00) * Static513.anInt9299 & 0xFF0000;
-                                        local259 = (local223 & 0xFF) * Static513.anInt9315 & 0xFF00;
-                                        local3[local60] = (local251 | local255 | local259) >>> 8;
+                                        local259 = raster[dst];
+                                        raster[dst] = ((src & 0xFF00FF) * local251 + (local259 & 0xFF00FF) * local255 & 0xFF00FF00) + ((src & 0xFF00) * local251 + (local259 & 0xFF00) * local255 & 0xFF0000) >> 8;
+                                    } else if (JavaSpriteBlitState.alpha == 255) {
+                                        local251 = (src & 0xFF0000) * JavaSpriteBlitState.red & 0xFF000000;
+                                        local255 = (src & 0xFF00) * JavaSpriteBlitState.green & 0xFF0000;
+                                        local259 = (src & 0xFF) * JavaSpriteBlitState.blue & 0xFF00;
+                                        raster[dst] = (local251 | local255 | local259) >>> 8;
                                     } else {
-                                        local251 = (local223 & 0xFF0000) * Static513.anInt9319 & 0xFF000000;
-                                        local255 = (local223 & 0xFF00) * Static513.anInt9299 & 0xFF0000;
-                                        local259 = (local223 & 0xFF) * Static513.anInt9315 & 0xFF00;
-                                        local223 = (local251 | local255 | local259) >>> 8;
-                                        local331 = local3[local60];
-                                        local3[local60] = ((local223 & 0xFF00FF) * Static513.anInt9304 + (local331 & 0xFF00FF) * Static513.anInt9312 & 0xFF00FF00) + ((local223 & 0xFF00) * Static513.anInt9304 + (local331 & 0xFF00) * Static513.anInt9312 & 0xFF0000) >> 8;
+                                        local251 = (src & 0xFF0000) * JavaSpriteBlitState.red & 0xFF000000;
+                                        local255 = (src & 0xFF00) * JavaSpriteBlitState.green & 0xFF0000;
+                                        local259 = (src & 0xFF) * JavaSpriteBlitState.blue & 0xFF00;
+                                        src = (local251 | local255 | local259) >>> 8;
+                                        local331 = raster[dst];
+                                        raster[dst] = ((src & 0xFF00FF) * JavaSpriteBlitState.alpha + (local331 & 0xFF00FF) * JavaSpriteBlitState.invAlpha & 0xFF00FF00) + ((src & 0xFF00) * JavaSpriteBlitState.alpha + (local331 & 0xFF00) * JavaSpriteBlitState.invAlpha & 0xFF0000) >> 8;
                                     }
                                 }
-                            } else if (arg0 == 3) {
-                                local223 = this.anIntArray32[local57];
-                                local251 = Static513.anInt9313;
-                                local255 = local223 + local251;
-                                local259 = (local223 & 0xFF00FF) + (local251 & 0xFF00FF);
+                            } else if (op == 3) {
+                                src = this.anIntArray32[texel];
+                                local251 = JavaSpriteBlitState.colour;
+                                local255 = src + local251;
+                                local259 = (src & 0xFF00FF) + (local251 & 0xFF00FF);
                                 local331 = (local259 & 0x1000100) + (local255 - local259 & 0x10000);
                                 local331 = local255 - local331 | local331 - (local331 >>> 8);
-                                if (local223 == 0 && Static513.anInt9304 != 255) {
-                                    local223 = local331;
-                                    local331 = local3[local60];
-                                    local331 = ((local223 & 0xFF00FF) * Static513.anInt9304 + (local331 & 0xFF00FF) * Static513.anInt9312 & 0xFF00FF00) + ((local223 & 0xFF00) * Static513.anInt9304 + (local331 & 0xFF00) * Static513.anInt9312 & 0xFF0000) >> 8;
+                                if (src == 0 && JavaSpriteBlitState.alpha != 255) {
+                                    src = local331;
+                                    local331 = raster[dst];
+                                    local331 = ((src & 0xFF00FF) * JavaSpriteBlitState.alpha + (local331 & 0xFF00FF) * JavaSpriteBlitState.invAlpha & 0xFF00FF00) + ((src & 0xFF00) * JavaSpriteBlitState.alpha + (local331 & 0xFF00) * JavaSpriteBlitState.invAlpha & 0xFF0000) >> 8;
                                 }
-                                local3[local60] = local331;
-                            } else if (arg0 == 2) {
-                                local223 = this.anIntArray32[local57];
-                                if (local223 != 0) {
-                                    local251 = (local223 & 0xFF00FF) * Static513.anInt9304 & 0xFF00FF00;
-                                    local255 = (local223 & 0xFF00) * Static513.anInt9304 & 0xFF0000;
-                                    local3[local60++] = ((local251 | local255) >>> 8) + Static513.anInt9305;
+                                raster[dst] = local331;
+                            } else if (op == 2) {
+                                src = this.anIntArray32[texel];
+                                if (src != 0) {
+                                    local251 = (src & 0xFF00FF) * JavaSpriteBlitState.alpha & 0xFF00FF00;
+                                    local255 = (src & 0xFF00) * JavaSpriteBlitState.alpha & 0xFF0000;
+                                    raster[dst++] = ((local251 | local255) >>> 8) + JavaSpriteBlitState.lerpColour;
                                 }
                             } else {
                                 throw new IllegalArgumentException();
                             }
-                            local20++;
+                            column++;
                         }
                     }
-                    local11++;
-                    Static513.anInt9292 += Static513.anInt9291;
+                    row++;
+                    JavaSpriteBlitState.rowOffset += JavaSpriteBlitState.dstStride;
                 }
-            } else if (Static513.anInt9309 < 0) {
-                local11 = Static513.anInt9297;
-                while (local11 < 0) {
-                    local14 = Static513.anInt9292;
-                    local16 = Static513.anInt9310;
-                    local18 = Static513.anInt9317 + Static513.anInt9316;
-                    local20 = Static513.anInt9303;
-                    if (local16 >= 0 && local16 - (super.anInt9302 << 12) < 0) {
-                        @Pc(871) int local871;
-                        if ((local871 = local18 - (super.anInt9306 << 12)) >= 0) {
-                            local878 = (Static513.anInt9309 - local871) / Static513.anInt9309;
-                            local20 += local878;
-                            local18 += Static513.anInt9309 * local878;
-                            local14 += local878;
+            } else if (JavaSpriteBlitState.dvDx < 0) {
+                row = JavaSpriteBlitState.negativeHeight;
+                while (row < 0) {
+                    dstIndex = JavaSpriteBlitState.rowOffset;
+                    u = JavaSpriteBlitState.rowU;
+                    v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
+                    column = JavaSpriteBlitState.negativeWidth;
+                    if (u >= 0 && u - (super.anInt9302 << 12) < 0) {
+                        @Pc(871) int vOverrun;
+                        if ((vOverrun = v - (super.anInt9306 << 12)) >= 0) {
+                            skip = (JavaSpriteBlitState.dvDx - vOverrun) / JavaSpriteBlitState.dvDx;
+                            column += skip;
+                            v += JavaSpriteBlitState.dvDx * skip;
+                            dstIndex += skip;
                         }
-                        @Pc(899) int local899;
-                        if ((local899 = (local18 - Static513.anInt9309) / Static513.anInt9309) > local20) {
-                            local20 = local899;
+                        @Pc(899) int vBound;
+                        if ((vBound = (v - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
+                            column = vBound;
                         }
-                        while (local20 < 0) {
-                            local57 = (local18 >> 12) * super.anInt9302 + (local16 >> 12);
-                            local60 = local14++;
-                            if (arg0 == 1) {
-                                local223 = this.anIntArray32[local57];
-                                if (local223 != 0) {
-                                    local3[local60] = local223;
+                        while (column < 0) {
+                            texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                            dst = dstIndex++;
+                            if (op == 1) {
+                                src = this.anIntArray32[texel];
+                                if (src != 0) {
+                                    raster[dst] = src;
                                 }
-                            } else if (arg0 == 0) {
-                                local223 = this.anIntArray32[local57];
-                                if (local223 != 0) {
-                                    if ((Static513.anInt9313 & 0xFFFFFF) == 16777215) {
-                                        local251 = Static513.anInt9313 >>> 24;
+                            } else if (op == 0) {
+                                src = this.anIntArray32[texel];
+                                if (src != 0) {
+                                    if ((JavaSpriteBlitState.colour & 0xFFFFFF) == 16777215) {
+                                        local251 = JavaSpriteBlitState.colour >>> 24;
                                         local255 = 256 - local251;
-                                        local259 = local3[local60];
-                                        local3[local60] = ((local223 & 0xFF00FF) * local251 + (local259 & 0xFF00FF) * local255 & 0xFF00FF00) + ((local223 & 0xFF00) * local251 + (local259 & 0xFF00) * local255 & 0xFF0000) >> 8;
-                                    } else if (Static513.anInt9304 == 255) {
-                                        local251 = (local223 & 0xFF0000) * Static513.anInt9319 & 0xFF000000;
-                                        local255 = (local223 & 0xFF00) * Static513.anInt9299 & 0xFF0000;
-                                        local259 = (local223 & 0xFF) * Static513.anInt9315 & 0xFF00;
-                                        local3[local60] = (local251 | local255 | local259) >>> 8;
+                                        local259 = raster[dst];
+                                        raster[dst] = ((src & 0xFF00FF) * local251 + (local259 & 0xFF00FF) * local255 & 0xFF00FF00) + ((src & 0xFF00) * local251 + (local259 & 0xFF00) * local255 & 0xFF0000) >> 8;
+                                    } else if (JavaSpriteBlitState.alpha == 255) {
+                                        local251 = (src & 0xFF0000) * JavaSpriteBlitState.red & 0xFF000000;
+                                        local255 = (src & 0xFF00) * JavaSpriteBlitState.green & 0xFF0000;
+                                        local259 = (src & 0xFF) * JavaSpriteBlitState.blue & 0xFF00;
+                                        raster[dst] = (local251 | local255 | local259) >>> 8;
                                     } else {
-                                        local251 = (local223 & 0xFF0000) * Static513.anInt9319 & 0xFF000000;
-                                        local255 = (local223 & 0xFF00) * Static513.anInt9299 & 0xFF0000;
-                                        local259 = (local223 & 0xFF) * Static513.anInt9315 & 0xFF00;
-                                        local223 = (local251 | local255 | local259) >>> 8;
-                                        local331 = local3[local60];
-                                        local3[local60] = ((local223 & 0xFF00FF) * Static513.anInt9304 + (local331 & 0xFF00FF) * Static513.anInt9312 & 0xFF00FF00) + ((local223 & 0xFF00) * Static513.anInt9304 + (local331 & 0xFF00) * Static513.anInt9312 & 0xFF0000) >> 8;
+                                        local251 = (src & 0xFF0000) * JavaSpriteBlitState.red & 0xFF000000;
+                                        local255 = (src & 0xFF00) * JavaSpriteBlitState.green & 0xFF0000;
+                                        local259 = (src & 0xFF) * JavaSpriteBlitState.blue & 0xFF00;
+                                        src = (local251 | local255 | local259) >>> 8;
+                                        local331 = raster[dst];
+                                        raster[dst] = ((src & 0xFF00FF) * JavaSpriteBlitState.alpha + (local331 & 0xFF00FF) * JavaSpriteBlitState.invAlpha & 0xFF00FF00) + ((src & 0xFF00) * JavaSpriteBlitState.alpha + (local331 & 0xFF00) * JavaSpriteBlitState.invAlpha & 0xFF0000) >> 8;
                                     }
                                 }
-                            } else if (arg0 == 3) {
-                                local223 = this.anIntArray32[local57];
-                                local251 = Static513.anInt9313;
-                                local255 = local223 + local251;
-                                local259 = (local223 & 0xFF00FF) + (local251 & 0xFF00FF);
+                            } else if (op == 3) {
+                                src = this.anIntArray32[texel];
+                                local251 = JavaSpriteBlitState.colour;
+                                local255 = src + local251;
+                                local259 = (src & 0xFF00FF) + (local251 & 0xFF00FF);
                                 local331 = (local259 & 0x1000100) + (local255 - local259 & 0x10000);
                                 local331 = local255 - local331 | local331 - (local331 >>> 8);
-                                if (local223 == 0 && Static513.anInt9304 != 255) {
-                                    local223 = local331;
-                                    local331 = local3[local60];
-                                    local331 = ((local223 & 0xFF00FF) * Static513.anInt9304 + (local331 & 0xFF00FF) * Static513.anInt9312 & 0xFF00FF00) + ((local223 & 0xFF00) * Static513.anInt9304 + (local331 & 0xFF00) * Static513.anInt9312 & 0xFF0000) >> 8;
+                                if (src == 0 && JavaSpriteBlitState.alpha != 255) {
+                                    src = local331;
+                                    local331 = raster[dst];
+                                    local331 = ((src & 0xFF00FF) * JavaSpriteBlitState.alpha + (local331 & 0xFF00FF) * JavaSpriteBlitState.invAlpha & 0xFF00FF00) + ((src & 0xFF00) * JavaSpriteBlitState.alpha + (local331 & 0xFF00) * JavaSpriteBlitState.invAlpha & 0xFF0000) >> 8;
                                 }
-                                local3[local60] = local331;
-                            } else if (arg0 == 2) {
-                                local223 = this.anIntArray32[local57];
-                                if (local223 != 0) {
-                                    local251 = (local223 & 0xFF00FF) * Static513.anInt9304 & 0xFF00FF00;
-                                    local255 = (local223 & 0xFF00) * Static513.anInt9304 & 0xFF0000;
-                                    local3[local60++] = ((local251 | local255) >>> 8) + Static513.anInt9305;
+                                raster[dst] = local331;
+                            } else if (op == 2) {
+                                src = this.anIntArray32[texel];
+                                if (src != 0) {
+                                    local251 = (src & 0xFF00FF) * JavaSpriteBlitState.alpha & 0xFF00FF00;
+                                    local255 = (src & 0xFF00) * JavaSpriteBlitState.alpha & 0xFF0000;
+                                    raster[dst++] = ((local251 | local255) >>> 8) + JavaSpriteBlitState.lerpColour;
                                 }
                             } else {
                                 throw new IllegalArgumentException();
                             }
-                            local18 += Static513.anInt9309;
-                            local20++;
+                            v += JavaSpriteBlitState.dvDx;
+                            column++;
                         }
                     }
-                    local11++;
-                    Static513.anInt9310 += Static513.anInt9311;
-                    Static513.anInt9292 += Static513.anInt9291;
+                    row++;
+                    JavaSpriteBlitState.rowU += JavaSpriteBlitState.duDy;
+                    JavaSpriteBlitState.rowOffset += JavaSpriteBlitState.dstStride;
                 }
             } else {
-                local11 = Static513.anInt9297;
-                while (local11 < 0) {
-                    local14 = Static513.anInt9292;
-                    local16 = Static513.anInt9310;
-                    local18 = Static513.anInt9317 + Static513.anInt9316;
-                    local20 = Static513.anInt9303;
-                    if (local16 >= 0 && local16 - (super.anInt9302 << 12) < 0) {
-                        if (local18 < 0) {
-                            local878 = (Static513.anInt9309 - local18 - 1) / Static513.anInt9309;
-                            local20 += local878;
-                            local18 += Static513.anInt9309 * local878;
-                            local14 += local878;
+                row = JavaSpriteBlitState.negativeHeight;
+                while (row < 0) {
+                    dstIndex = JavaSpriteBlitState.rowOffset;
+                    u = JavaSpriteBlitState.rowU;
+                    v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
+                    column = JavaSpriteBlitState.negativeWidth;
+                    if (u >= 0 && u - (super.anInt9302 << 12) < 0) {
+                        if (v < 0) {
+                            skip = (JavaSpriteBlitState.dvDx - v - 1) / JavaSpriteBlitState.dvDx;
+                            column += skip;
+                            v += JavaSpriteBlitState.dvDx * skip;
+                            dstIndex += skip;
                         }
-                        @Pc(1767) int local1767;
-                        if ((local1767 = (local18 + 1 - (super.anInt9306 << 12) - Static513.anInt9309) / Static513.anInt9309) > local20) {
-                            local20 = local1767;
+                        @Pc(1767) int vBound;
+                        if ((vBound = (v + 1 - (super.anInt9306 << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
+                            column = vBound;
                         }
-                        while (local20 < 0) {
-                            local57 = (local18 >> 12) * super.anInt9302 + (local16 >> 12);
-                            local60 = local14++;
-                            if (arg0 == 1) {
-                                local223 = this.anIntArray32[local57];
-                                if (local223 != 0) {
-                                    local3[local60] = local223;
+                        while (column < 0) {
+                            texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                            dst = dstIndex++;
+                            if (op == 1) {
+                                src = this.anIntArray32[texel];
+                                if (src != 0) {
+                                    raster[dst] = src;
                                 }
-                            } else if (arg0 == 0) {
-                                local223 = this.anIntArray32[local57];
-                                if (local223 != 0) {
-                                    if ((Static513.anInt9313 & 0xFFFFFF) == 16777215) {
-                                        local251 = Static513.anInt9313 >>> 24;
+                            } else if (op == 0) {
+                                src = this.anIntArray32[texel];
+                                if (src != 0) {
+                                    if ((JavaSpriteBlitState.colour & 0xFFFFFF) == 16777215) {
+                                        local251 = JavaSpriteBlitState.colour >>> 24;
                                         local255 = 256 - local251;
-                                        local259 = local3[local60];
-                                        local3[local60] = ((local223 & 0xFF00FF) * local251 + (local259 & 0xFF00FF) * local255 & 0xFF00FF00) + ((local223 & 0xFF00) * local251 + (local259 & 0xFF00) * local255 & 0xFF0000) >> 8;
-                                    } else if (Static513.anInt9304 == 255) {
-                                        local251 = (local223 & 0xFF0000) * Static513.anInt9319 & 0xFF000000;
-                                        local255 = (local223 & 0xFF00) * Static513.anInt9299 & 0xFF0000;
-                                        local259 = (local223 & 0xFF) * Static513.anInt9315 & 0xFF00;
-                                        local3[local60] = (local251 | local255 | local259) >>> 8;
+                                        local259 = raster[dst];
+                                        raster[dst] = ((src & 0xFF00FF) * local251 + (local259 & 0xFF00FF) * local255 & 0xFF00FF00) + ((src & 0xFF00) * local251 + (local259 & 0xFF00) * local255 & 0xFF0000) >> 8;
+                                    } else if (JavaSpriteBlitState.alpha == 255) {
+                                        local251 = (src & 0xFF0000) * JavaSpriteBlitState.red & 0xFF000000;
+                                        local255 = (src & 0xFF00) * JavaSpriteBlitState.green & 0xFF0000;
+                                        local259 = (src & 0xFF) * JavaSpriteBlitState.blue & 0xFF00;
+                                        raster[dst] = (local251 | local255 | local259) >>> 8;
                                     } else {
-                                        local251 = (local223 & 0xFF0000) * Static513.anInt9319 & 0xFF000000;
-                                        local255 = (local223 & 0xFF00) * Static513.anInt9299 & 0xFF0000;
-                                        local259 = (local223 & 0xFF) * Static513.anInt9315 & 0xFF00;
-                                        local223 = (local251 | local255 | local259) >>> 8;
-                                        local331 = local3[local60];
-                                        local3[local60] = ((local223 & 0xFF00FF) * Static513.anInt9304 + (local331 & 0xFF00FF) * Static513.anInt9312 & 0xFF00FF00) + ((local223 & 0xFF00) * Static513.anInt9304 + (local331 & 0xFF00) * Static513.anInt9312 & 0xFF0000) >> 8;
+                                        local251 = (src & 0xFF0000) * JavaSpriteBlitState.red & 0xFF000000;
+                                        local255 = (src & 0xFF00) * JavaSpriteBlitState.green & 0xFF0000;
+                                        local259 = (src & 0xFF) * JavaSpriteBlitState.blue & 0xFF00;
+                                        src = (local251 | local255 | local259) >>> 8;
+                                        local331 = raster[dst];
+                                        raster[dst] = ((src & 0xFF00FF) * JavaSpriteBlitState.alpha + (local331 & 0xFF00FF) * JavaSpriteBlitState.invAlpha & 0xFF00FF00) + ((src & 0xFF00) * JavaSpriteBlitState.alpha + (local331 & 0xFF00) * JavaSpriteBlitState.invAlpha & 0xFF0000) >> 8;
                                     }
                                 }
-                            } else if (arg0 == 3) {
-                                local223 = this.anIntArray32[local57];
-                                local251 = Static513.anInt9313;
-                                local255 = local223 + local251;
-                                local259 = (local223 & 0xFF00FF) + (local251 & 0xFF00FF);
+                            } else if (op == 3) {
+                                src = this.anIntArray32[texel];
+                                local251 = JavaSpriteBlitState.colour;
+                                local255 = src + local251;
+                                local259 = (src & 0xFF00FF) + (local251 & 0xFF00FF);
                                 local331 = (local259 & 0x1000100) + (local255 - local259 & 0x10000);
                                 local331 = local255 - local331 | local331 - (local331 >>> 8);
-                                if (local223 == 0 && Static513.anInt9304 != 255) {
-                                    local223 = local331;
-                                    local331 = local3[local60];
-                                    local331 = ((local223 & 0xFF00FF) * Static513.anInt9304 + (local331 & 0xFF00FF) * Static513.anInt9312 & 0xFF00FF00) + ((local223 & 0xFF00) * Static513.anInt9304 + (local331 & 0xFF00) * Static513.anInt9312 & 0xFF0000) >> 8;
+                                if (src == 0 && JavaSpriteBlitState.alpha != 255) {
+                                    src = local331;
+                                    local331 = raster[dst];
+                                    local331 = ((src & 0xFF00FF) * JavaSpriteBlitState.alpha + (local331 & 0xFF00FF) * JavaSpriteBlitState.invAlpha & 0xFF00FF00) + ((src & 0xFF00) * JavaSpriteBlitState.alpha + (local331 & 0xFF00) * JavaSpriteBlitState.invAlpha & 0xFF0000) >> 8;
                                 }
-                                local3[local60] = local331;
-                            } else if (arg0 == 2) {
-                                local223 = this.anIntArray32[local57];
-                                if (local223 != 0) {
-                                    local251 = (local223 & 0xFF00FF) * Static513.anInt9304 & 0xFF00FF00;
-                                    local255 = (local223 & 0xFF00) * Static513.anInt9304 & 0xFF0000;
-                                    local3[local60++] = ((local251 | local255) >>> 8) + Static513.anInt9305;
+                                raster[dst] = local331;
+                            } else if (op == 2) {
+                                src = this.anIntArray32[texel];
+                                if (src != 0) {
+                                    local251 = (src & 0xFF00FF) * JavaSpriteBlitState.alpha & 0xFF00FF00;
+                                    local255 = (src & 0xFF00) * JavaSpriteBlitState.alpha & 0xFF0000;
+                                    raster[dst++] = ((local251 | local255) >>> 8) + JavaSpriteBlitState.lerpColour;
                                 }
                             } else {
                                 throw new IllegalArgumentException();
                             }
-                            local18 += Static513.anInt9309;
-                            local20++;
+                            v += JavaSpriteBlitState.dvDx;
+                            column++;
                         }
                     }
-                    local11++;
-                    Static513.anInt9310 += Static513.anInt9311;
-                    Static513.anInt9292 += Static513.anInt9291;
+                    row++;
+                    JavaSpriteBlitState.rowU += JavaSpriteBlitState.duDy;
+                    JavaSpriteBlitState.rowOffset += JavaSpriteBlitState.dstStride;
                 }
             }
-        } else if (Static513.anInt9321 < 0) {
-            if (Static513.anInt9309 == 0) {
-                local11 = Static513.anInt9297;
-                while (local11 < 0) {
-                    local14 = Static513.anInt9292;
-                    local16 = Static513.anInt9310 + Static513.anInt9318;
-                    local18 = Static513.anInt9317;
-                    local20 = Static513.anInt9303;
-                    if (local18 >= 0 && local18 - (super.anInt9306 << 12) < 0) {
-                        @Pc(2609) int local2609;
-                        if ((local2609 = local16 - (super.anInt9302 << 12)) >= 0) {
-                            local878 = (Static513.anInt9321 - local2609) / Static513.anInt9321;
-                            local20 += local878;
-                            local16 += Static513.anInt9321 * local878;
-                            local14 += local878;
+        } else if (JavaSpriteBlitState.duDx < 0) {
+            if (JavaSpriteBlitState.dvDx == 0) {
+                row = JavaSpriteBlitState.negativeHeight;
+                while (row < 0) {
+                    dstIndex = JavaSpriteBlitState.rowOffset;
+                    u = JavaSpriteBlitState.rowU + JavaSpriteBlitState.uBias;
+                    v = JavaSpriteBlitState.rowV;
+                    column = JavaSpriteBlitState.negativeWidth;
+                    if (v >= 0 && v - (super.anInt9306 << 12) < 0) {
+                        @Pc(2609) int uOverrun;
+                        if ((uOverrun = u - (super.anInt9302 << 12)) >= 0) {
+                            skip = (JavaSpriteBlitState.duDx - uOverrun) / JavaSpriteBlitState.duDx;
+                            column += skip;
+                            u += JavaSpriteBlitState.duDx * skip;
+                            dstIndex += skip;
                         }
-                        @Pc(2637) int local2637;
-                        if ((local2637 = (local16 - Static513.anInt9321) / Static513.anInt9321) > local20) {
-                            local20 = local2637;
+                        @Pc(2637) int uBound;
+                        if ((uBound = (u - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
+                            column = uBound;
                         }
-                        while (local20 < 0) {
-                            local57 = (local18 >> 12) * super.anInt9302 + (local16 >> 12);
-                            local60 = local14++;
-                            if (arg0 == 1) {
-                                local223 = this.anIntArray32[local57];
-                                if (local223 != 0) {
-                                    local3[local60] = local223;
+                        while (column < 0) {
+                            texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                            dst = dstIndex++;
+                            if (op == 1) {
+                                src = this.anIntArray32[texel];
+                                if (src != 0) {
+                                    raster[dst] = src;
                                 }
-                            } else if (arg0 == 0) {
-                                local223 = this.anIntArray32[local57];
-                                if (local223 != 0) {
-                                    if ((Static513.anInt9313 & 0xFFFFFF) == 16777215) {
-                                        local251 = Static513.anInt9313 >>> 24;
+                            } else if (op == 0) {
+                                src = this.anIntArray32[texel];
+                                if (src != 0) {
+                                    if ((JavaSpriteBlitState.colour & 0xFFFFFF) == 16777215) {
+                                        local251 = JavaSpriteBlitState.colour >>> 24;
                                         local255 = 256 - local251;
-                                        local259 = local3[local60];
-                                        local3[local60] = ((local223 & 0xFF00FF) * local251 + (local259 & 0xFF00FF) * local255 & 0xFF00FF00) + ((local223 & 0xFF00) * local251 + (local259 & 0xFF00) * local255 & 0xFF0000) >> 8;
-                                    } else if (Static513.anInt9304 == 255) {
-                                        local251 = (local223 & 0xFF0000) * Static513.anInt9319 & 0xFF000000;
-                                        local255 = (local223 & 0xFF00) * Static513.anInt9299 & 0xFF0000;
-                                        local259 = (local223 & 0xFF) * Static513.anInt9315 & 0xFF00;
-                                        local3[local60] = (local251 | local255 | local259) >>> 8;
+                                        local259 = raster[dst];
+                                        raster[dst] = ((src & 0xFF00FF) * local251 + (local259 & 0xFF00FF) * local255 & 0xFF00FF00) + ((src & 0xFF00) * local251 + (local259 & 0xFF00) * local255 & 0xFF0000) >> 8;
+                                    } else if (JavaSpriteBlitState.alpha == 255) {
+                                        local251 = (src & 0xFF0000) * JavaSpriteBlitState.red & 0xFF000000;
+                                        local255 = (src & 0xFF00) * JavaSpriteBlitState.green & 0xFF0000;
+                                        local259 = (src & 0xFF) * JavaSpriteBlitState.blue & 0xFF00;
+                                        raster[dst] = (local251 | local255 | local259) >>> 8;
                                     } else {
-                                        local251 = (local223 & 0xFF0000) * Static513.anInt9319 & 0xFF000000;
-                                        local255 = (local223 & 0xFF00) * Static513.anInt9299 & 0xFF0000;
-                                        local259 = (local223 & 0xFF) * Static513.anInt9315 & 0xFF00;
-                                        local223 = (local251 | local255 | local259) >>> 8;
-                                        local331 = local3[local60];
-                                        local3[local60] = ((local223 & 0xFF00FF) * Static513.anInt9304 + (local331 & 0xFF00FF) * Static513.anInt9312 & 0xFF00FF00) + ((local223 & 0xFF00) * Static513.anInt9304 + (local331 & 0xFF00) * Static513.anInt9312 & 0xFF0000) >> 8;
+                                        local251 = (src & 0xFF0000) * JavaSpriteBlitState.red & 0xFF000000;
+                                        local255 = (src & 0xFF00) * JavaSpriteBlitState.green & 0xFF0000;
+                                        local259 = (src & 0xFF) * JavaSpriteBlitState.blue & 0xFF00;
+                                        src = (local251 | local255 | local259) >>> 8;
+                                        local331 = raster[dst];
+                                        raster[dst] = ((src & 0xFF00FF) * JavaSpriteBlitState.alpha + (local331 & 0xFF00FF) * JavaSpriteBlitState.invAlpha & 0xFF00FF00) + ((src & 0xFF00) * JavaSpriteBlitState.alpha + (local331 & 0xFF00) * JavaSpriteBlitState.invAlpha & 0xFF0000) >> 8;
                                     }
                                 }
-                            } else if (arg0 == 3) {
-                                local223 = this.anIntArray32[local57];
-                                local251 = Static513.anInt9313;
-                                local255 = local223 + local251;
-                                local259 = (local223 & 0xFF00FF) + (local251 & 0xFF00FF);
+                            } else if (op == 3) {
+                                src = this.anIntArray32[texel];
+                                local251 = JavaSpriteBlitState.colour;
+                                local255 = src + local251;
+                                local259 = (src & 0xFF00FF) + (local251 & 0xFF00FF);
                                 local331 = (local259 & 0x1000100) + (local255 - local259 & 0x10000);
                                 local331 = local255 - local331 | local331 - (local331 >>> 8);
-                                if (local223 == 0 && Static513.anInt9304 != 255) {
-                                    local223 = local331;
-                                    local331 = local3[local60];
-                                    local331 = ((local223 & 0xFF00FF) * Static513.anInt9304 + (local331 & 0xFF00FF) * Static513.anInt9312 & 0xFF00FF00) + ((local223 & 0xFF00) * Static513.anInt9304 + (local331 & 0xFF00) * Static513.anInt9312 & 0xFF0000) >> 8;
+                                if (src == 0 && JavaSpriteBlitState.alpha != 255) {
+                                    src = local331;
+                                    local331 = raster[dst];
+                                    local331 = ((src & 0xFF00FF) * JavaSpriteBlitState.alpha + (local331 & 0xFF00FF) * JavaSpriteBlitState.invAlpha & 0xFF00FF00) + ((src & 0xFF00) * JavaSpriteBlitState.alpha + (local331 & 0xFF00) * JavaSpriteBlitState.invAlpha & 0xFF0000) >> 8;
                                 }
-                                local3[local60] = local331;
-                            } else if (arg0 == 2) {
-                                local223 = this.anIntArray32[local57];
-                                if (local223 != 0) {
-                                    local251 = (local223 & 0xFF00FF) * Static513.anInt9304 & 0xFF00FF00;
-                                    local255 = (local223 & 0xFF00) * Static513.anInt9304 & 0xFF0000;
-                                    local3[local60++] = ((local251 | local255) >>> 8) + Static513.anInt9305;
+                                raster[dst] = local331;
+                            } else if (op == 2) {
+                                src = this.anIntArray32[texel];
+                                if (src != 0) {
+                                    local251 = (src & 0xFF00FF) * JavaSpriteBlitState.alpha & 0xFF00FF00;
+                                    local255 = (src & 0xFF00) * JavaSpriteBlitState.alpha & 0xFF0000;
+                                    raster[dst++] = ((local251 | local255) >>> 8) + JavaSpriteBlitState.lerpColour;
                                 }
                             } else {
                                 throw new IllegalArgumentException();
                             }
-                            local16 += Static513.anInt9321;
-                            local20++;
+                            u += JavaSpriteBlitState.duDx;
+                            column++;
                         }
                     }
-                    local11++;
-                    Static513.anInt9317 += Static513.anInt9293;
-                    Static513.anInt9292 += Static513.anInt9291;
+                    row++;
+                    JavaSpriteBlitState.rowV += JavaSpriteBlitState.dvDy;
+                    JavaSpriteBlitState.rowOffset += JavaSpriteBlitState.dstStride;
                 }
-            } else if (Static513.anInt9309 < 0) {
-                local11 = Static513.anInt9297;
-                while (local11 < 0) {
-                    local14 = Static513.anInt9292;
-                    local16 = Static513.anInt9310 + Static513.anInt9318;
-                    local18 = Static513.anInt9317 + Static513.anInt9316;
-                    local20 = Static513.anInt9303;
-                    @Pc(3466) int local3466;
-                    if ((local3466 = local16 - (super.anInt9302 << 12)) >= 0) {
-                        local878 = (Static513.anInt9321 - local3466) / Static513.anInt9321;
-                        local20 += local878;
-                        local16 += Static513.anInt9321 * local878;
-                        local18 += Static513.anInt9309 * local878;
-                        local14 += local878;
+            } else if (JavaSpriteBlitState.dvDx < 0) {
+                row = JavaSpriteBlitState.negativeHeight;
+                while (row < 0) {
+                    dstIndex = JavaSpriteBlitState.rowOffset;
+                    u = JavaSpriteBlitState.rowU + JavaSpriteBlitState.uBias;
+                    v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
+                    column = JavaSpriteBlitState.negativeWidth;
+                    @Pc(3466) int uOverrun;
+                    if ((uOverrun = u - (super.anInt9302 << 12)) >= 0) {
+                        skip = (JavaSpriteBlitState.duDx - uOverrun) / JavaSpriteBlitState.duDx;
+                        column += skip;
+                        u += JavaSpriteBlitState.duDx * skip;
+                        v += JavaSpriteBlitState.dvDx * skip;
+                        dstIndex += skip;
                     }
-                    @Pc(3500) int local3500;
-                    if ((local3500 = (local16 - Static513.anInt9321) / Static513.anInt9321) > local20) {
-                        local20 = local3500;
+                    @Pc(3500) int uBound;
+                    if ((uBound = (u - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
+                        column = uBound;
                     }
-                    @Pc(3512) int local3512;
-                    if ((local3512 = local18 - (super.anInt9306 << 12)) >= 0) {
-                        local878 = (Static513.anInt9309 - local3512) / Static513.anInt9309;
-                        local20 += local878;
-                        local16 += Static513.anInt9321 * local878;
-                        local18 += Static513.anInt9309 * local878;
-                        local14 += local878;
+                    @Pc(3512) int vOverrun;
+                    if ((vOverrun = v - (super.anInt9306 << 12)) >= 0) {
+                        skip = (JavaSpriteBlitState.dvDx - vOverrun) / JavaSpriteBlitState.dvDx;
+                        column += skip;
+                        u += JavaSpriteBlitState.duDx * skip;
+                        v += JavaSpriteBlitState.dvDx * skip;
+                        dstIndex += skip;
                     }
-                    @Pc(3546) int local3546;
-                    if ((local3546 = (local18 - Static513.anInt9309) / Static513.anInt9309) > local20) {
-                        local20 = local3546;
+                    @Pc(3546) int vBound;
+                    if ((vBound = (v - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
+                        column = vBound;
                     }
-                    while (local20 < 0) {
-                        local57 = (local18 >> 12) * super.anInt9302 + (local16 >> 12);
-                        local60 = local14++;
-                        if (arg0 == 1) {
-                            local223 = this.anIntArray32[local57];
-                            if (local223 != 0) {
-                                local3[local60] = local223;
+                    while (column < 0) {
+                        texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                        dst = dstIndex++;
+                        if (op == 1) {
+                            src = this.anIntArray32[texel];
+                            if (src != 0) {
+                                raster[dst] = src;
                             }
-                        } else if (arg0 == 0) {
-                            local223 = this.anIntArray32[local57];
-                            if (local223 != 0) {
-                                if ((Static513.anInt9313 & 0xFFFFFF) == 16777215) {
-                                    local251 = Static513.anInt9313 >>> 24;
+                        } else if (op == 0) {
+                            src = this.anIntArray32[texel];
+                            if (src != 0) {
+                                if ((JavaSpriteBlitState.colour & 0xFFFFFF) == 16777215) {
+                                    local251 = JavaSpriteBlitState.colour >>> 24;
                                     local255 = 256 - local251;
-                                    local259 = local3[local60];
-                                    local3[local60] = ((local223 & 0xFF00FF) * local251 + (local259 & 0xFF00FF) * local255 & 0xFF00FF00) + ((local223 & 0xFF00) * local251 + (local259 & 0xFF00) * local255 & 0xFF0000) >> 8;
-                                } else if (Static513.anInt9304 == 255) {
-                                    local251 = (local223 & 0xFF0000) * Static513.anInt9319 & 0xFF000000;
-                                    local255 = (local223 & 0xFF00) * Static513.anInt9299 & 0xFF0000;
-                                    local259 = (local223 & 0xFF) * Static513.anInt9315 & 0xFF00;
-                                    local3[local60] = (local251 | local255 | local259) >>> 8;
+                                    local259 = raster[dst];
+                                    raster[dst] = ((src & 0xFF00FF) * local251 + (local259 & 0xFF00FF) * local255 & 0xFF00FF00) + ((src & 0xFF00) * local251 + (local259 & 0xFF00) * local255 & 0xFF0000) >> 8;
+                                } else if (JavaSpriteBlitState.alpha == 255) {
+                                    local251 = (src & 0xFF0000) * JavaSpriteBlitState.red & 0xFF000000;
+                                    local255 = (src & 0xFF00) * JavaSpriteBlitState.green & 0xFF0000;
+                                    local259 = (src & 0xFF) * JavaSpriteBlitState.blue & 0xFF00;
+                                    raster[dst] = (local251 | local255 | local259) >>> 8;
                                 } else {
-                                    local251 = (local223 & 0xFF0000) * Static513.anInt9319 & 0xFF000000;
-                                    local255 = (local223 & 0xFF00) * Static513.anInt9299 & 0xFF0000;
-                                    local259 = (local223 & 0xFF) * Static513.anInt9315 & 0xFF00;
-                                    local223 = (local251 | local255 | local259) >>> 8;
-                                    local331 = local3[local60];
-                                    local3[local60] = ((local223 & 0xFF00FF) * Static513.anInt9304 + (local331 & 0xFF00FF) * Static513.anInt9312 & 0xFF00FF00) + ((local223 & 0xFF00) * Static513.anInt9304 + (local331 & 0xFF00) * Static513.anInt9312 & 0xFF0000) >> 8;
+                                    local251 = (src & 0xFF0000) * JavaSpriteBlitState.red & 0xFF000000;
+                                    local255 = (src & 0xFF00) * JavaSpriteBlitState.green & 0xFF0000;
+                                    local259 = (src & 0xFF) * JavaSpriteBlitState.blue & 0xFF00;
+                                    src = (local251 | local255 | local259) >>> 8;
+                                    local331 = raster[dst];
+                                    raster[dst] = ((src & 0xFF00FF) * JavaSpriteBlitState.alpha + (local331 & 0xFF00FF) * JavaSpriteBlitState.invAlpha & 0xFF00FF00) + ((src & 0xFF00) * JavaSpriteBlitState.alpha + (local331 & 0xFF00) * JavaSpriteBlitState.invAlpha & 0xFF0000) >> 8;
                                 }
                             }
-                        } else if (arg0 == 3) {
-                            local223 = this.anIntArray32[local57];
-                            local251 = Static513.anInt9313;
-                            local255 = local223 + local251;
-                            local259 = (local223 & 0xFF00FF) + (local251 & 0xFF00FF);
+                        } else if (op == 3) {
+                            src = this.anIntArray32[texel];
+                            local251 = JavaSpriteBlitState.colour;
+                            local255 = src + local251;
+                            local259 = (src & 0xFF00FF) + (local251 & 0xFF00FF);
                             local331 = (local259 & 0x1000100) + (local255 - local259 & 0x10000);
                             local331 = local255 - local331 | local331 - (local331 >>> 8);
-                            if (local223 == 0 && Static513.anInt9304 != 255) {
-                                local223 = local331;
-                                local331 = local3[local60];
-                                local331 = ((local223 & 0xFF00FF) * Static513.anInt9304 + (local331 & 0xFF00FF) * Static513.anInt9312 & 0xFF00FF00) + ((local223 & 0xFF00) * Static513.anInt9304 + (local331 & 0xFF00) * Static513.anInt9312 & 0xFF0000) >> 8;
+                            if (src == 0 && JavaSpriteBlitState.alpha != 255) {
+                                src = local331;
+                                local331 = raster[dst];
+                                local331 = ((src & 0xFF00FF) * JavaSpriteBlitState.alpha + (local331 & 0xFF00FF) * JavaSpriteBlitState.invAlpha & 0xFF00FF00) + ((src & 0xFF00) * JavaSpriteBlitState.alpha + (local331 & 0xFF00) * JavaSpriteBlitState.invAlpha & 0xFF0000) >> 8;
                             }
-                            local3[local60] = local331;
-                        } else if (arg0 == 2) {
-                            local223 = this.anIntArray32[local57];
-                            if (local223 != 0) {
-                                local251 = (local223 & 0xFF00FF) * Static513.anInt9304 & 0xFF00FF00;
-                                local255 = (local223 & 0xFF00) * Static513.anInt9304 & 0xFF0000;
-                                local3[local60++] = ((local251 | local255) >>> 8) + Static513.anInt9305;
+                            raster[dst] = local331;
+                        } else if (op == 2) {
+                            src = this.anIntArray32[texel];
+                            if (src != 0) {
+                                local251 = (src & 0xFF00FF) * JavaSpriteBlitState.alpha & 0xFF00FF00;
+                                local255 = (src & 0xFF00) * JavaSpriteBlitState.alpha & 0xFF0000;
+                                raster[dst++] = ((local251 | local255) >>> 8) + JavaSpriteBlitState.lerpColour;
                             }
                         } else {
                             throw new IllegalArgumentException();
                         }
-                        local16 += Static513.anInt9321;
-                        local18 += Static513.anInt9309;
-                        local20++;
+                        u += JavaSpriteBlitState.duDx;
+                        v += JavaSpriteBlitState.dvDx;
+                        column++;
                     }
-                    local11++;
-                    Static513.anInt9310 += Static513.anInt9311;
-                    Static513.anInt9317 += Static513.anInt9293;
-                    Static513.anInt9292 += Static513.anInt9291;
+                    row++;
+                    JavaSpriteBlitState.rowU += JavaSpriteBlitState.duDy;
+                    JavaSpriteBlitState.rowV += JavaSpriteBlitState.dvDy;
+                    JavaSpriteBlitState.rowOffset += JavaSpriteBlitState.dstStride;
                 }
             } else {
-                local11 = Static513.anInt9297;
-                while (local11 < 0) {
-                    local14 = Static513.anInt9292;
-                    local16 = Static513.anInt9310 + Static513.anInt9318;
-                    local18 = Static513.anInt9317 + Static513.anInt9316;
-                    local20 = Static513.anInt9303;
-                    @Pc(4381) int local4381;
-                    if ((local4381 = local16 - (super.anInt9302 << 12)) >= 0) {
-                        local878 = (Static513.anInt9321 - local4381) / Static513.anInt9321;
-                        local20 += local878;
-                        local16 += Static513.anInt9321 * local878;
-                        local18 += Static513.anInt9309 * local878;
-                        local14 += local878;
+                row = JavaSpriteBlitState.negativeHeight;
+                while (row < 0) {
+                    dstIndex = JavaSpriteBlitState.rowOffset;
+                    u = JavaSpriteBlitState.rowU + JavaSpriteBlitState.uBias;
+                    v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
+                    column = JavaSpriteBlitState.negativeWidth;
+                    @Pc(4381) int uOverrun;
+                    if ((uOverrun = u - (super.anInt9302 << 12)) >= 0) {
+                        skip = (JavaSpriteBlitState.duDx - uOverrun) / JavaSpriteBlitState.duDx;
+                        column += skip;
+                        u += JavaSpriteBlitState.duDx * skip;
+                        v += JavaSpriteBlitState.dvDx * skip;
+                        dstIndex += skip;
                     }
-                    @Pc(4415) int local4415;
-                    if ((local4415 = (local16 - Static513.anInt9321) / Static513.anInt9321) > local20) {
-                        local20 = local4415;
+                    @Pc(4415) int uBound;
+                    if ((uBound = (u - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
+                        column = uBound;
                     }
-                    if (local18 < 0) {
-                        local878 = (Static513.anInt9309 - local18 - 1) / Static513.anInt9309;
-                        local20 += local878;
-                        local16 += Static513.anInt9321 * local878;
-                        local18 += Static513.anInt9309 * local878;
-                        local14 += local878;
+                    if (v < 0) {
+                        skip = (JavaSpriteBlitState.dvDx - v - 1) / JavaSpriteBlitState.dvDx;
+                        column += skip;
+                        u += JavaSpriteBlitState.duDx * skip;
+                        v += JavaSpriteBlitState.dvDx * skip;
+                        dstIndex += skip;
                     }
-                    @Pc(4463) int local4463;
-                    if ((local4463 = (local18 + 1 - (super.anInt9306 << 12) - Static513.anInt9309) / Static513.anInt9309) > local20) {
-                        local20 = local4463;
+                    @Pc(4463) int vBound;
+                    if ((vBound = (v + 1 - (super.anInt9306 << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
+                        column = vBound;
                     }
-                    while (local20 < 0) {
-                        local57 = (local18 >> 12) * super.anInt9302 + (local16 >> 12);
-                        local60 = local14++;
-                        if (arg0 == 1) {
-                            local223 = this.anIntArray32[local57];
-                            if (local223 != 0) {
-                                local3[local60] = local223;
+                    while (column < 0) {
+                        texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                        dst = dstIndex++;
+                        if (op == 1) {
+                            src = this.anIntArray32[texel];
+                            if (src != 0) {
+                                raster[dst] = src;
                             }
-                        } else if (arg0 == 0) {
-                            local223 = this.anIntArray32[local57];
-                            if (local223 != 0) {
-                                if ((Static513.anInt9313 & 0xFFFFFF) == 16777215) {
-                                    local251 = Static513.anInt9313 >>> 24;
+                        } else if (op == 0) {
+                            src = this.anIntArray32[texel];
+                            if (src != 0) {
+                                if ((JavaSpriteBlitState.colour & 0xFFFFFF) == 16777215) {
+                                    local251 = JavaSpriteBlitState.colour >>> 24;
                                     local255 = 256 - local251;
-                                    local259 = local3[local60];
-                                    local3[local60] = ((local223 & 0xFF00FF) * local251 + (local259 & 0xFF00FF) * local255 & 0xFF00FF00) + ((local223 & 0xFF00) * local251 + (local259 & 0xFF00) * local255 & 0xFF0000) >> 8;
-                                } else if (Static513.anInt9304 == 255) {
-                                    local251 = (local223 & 0xFF0000) * Static513.anInt9319 & 0xFF000000;
-                                    local255 = (local223 & 0xFF00) * Static513.anInt9299 & 0xFF0000;
-                                    local259 = (local223 & 0xFF) * Static513.anInt9315 & 0xFF00;
-                                    local3[local60] = (local251 | local255 | local259) >>> 8;
+                                    local259 = raster[dst];
+                                    raster[dst] = ((src & 0xFF00FF) * local251 + (local259 & 0xFF00FF) * local255 & 0xFF00FF00) + ((src & 0xFF00) * local251 + (local259 & 0xFF00) * local255 & 0xFF0000) >> 8;
+                                } else if (JavaSpriteBlitState.alpha == 255) {
+                                    local251 = (src & 0xFF0000) * JavaSpriteBlitState.red & 0xFF000000;
+                                    local255 = (src & 0xFF00) * JavaSpriteBlitState.green & 0xFF0000;
+                                    local259 = (src & 0xFF) * JavaSpriteBlitState.blue & 0xFF00;
+                                    raster[dst] = (local251 | local255 | local259) >>> 8;
                                 } else {
-                                    local251 = (local223 & 0xFF0000) * Static513.anInt9319 & 0xFF000000;
-                                    local255 = (local223 & 0xFF00) * Static513.anInt9299 & 0xFF0000;
-                                    local259 = (local223 & 0xFF) * Static513.anInt9315 & 0xFF00;
-                                    local223 = (local251 | local255 | local259) >>> 8;
-                                    local331 = local3[local60];
-                                    local3[local60] = ((local223 & 0xFF00FF) * Static513.anInt9304 + (local331 & 0xFF00FF) * Static513.anInt9312 & 0xFF00FF00) + ((local223 & 0xFF00) * Static513.anInt9304 + (local331 & 0xFF00) * Static513.anInt9312 & 0xFF0000) >> 8;
+                                    local251 = (src & 0xFF0000) * JavaSpriteBlitState.red & 0xFF000000;
+                                    local255 = (src & 0xFF00) * JavaSpriteBlitState.green & 0xFF0000;
+                                    local259 = (src & 0xFF) * JavaSpriteBlitState.blue & 0xFF00;
+                                    src = (local251 | local255 | local259) >>> 8;
+                                    local331 = raster[dst];
+                                    raster[dst] = ((src & 0xFF00FF) * JavaSpriteBlitState.alpha + (local331 & 0xFF00FF) * JavaSpriteBlitState.invAlpha & 0xFF00FF00) + ((src & 0xFF00) * JavaSpriteBlitState.alpha + (local331 & 0xFF00) * JavaSpriteBlitState.invAlpha & 0xFF0000) >> 8;
                                 }
                             }
-                        } else if (arg0 == 3) {
-                            local223 = this.anIntArray32[local57];
-                            local251 = Static513.anInt9313;
-                            local255 = local223 + local251;
-                            local259 = (local223 & 0xFF00FF) + (local251 & 0xFF00FF);
+                        } else if (op == 3) {
+                            src = this.anIntArray32[texel];
+                            local251 = JavaSpriteBlitState.colour;
+                            local255 = src + local251;
+                            local259 = (src & 0xFF00FF) + (local251 & 0xFF00FF);
                             local331 = (local259 & 0x1000100) + (local255 - local259 & 0x10000);
                             local331 = local255 - local331 | local331 - (local331 >>> 8);
-                            if (local223 == 0 && Static513.anInt9304 != 255) {
-                                local223 = local331;
-                                local331 = local3[local60];
-                                local331 = ((local223 & 0xFF00FF) * Static513.anInt9304 + (local331 & 0xFF00FF) * Static513.anInt9312 & 0xFF00FF00) + ((local223 & 0xFF00) * Static513.anInt9304 + (local331 & 0xFF00) * Static513.anInt9312 & 0xFF0000) >> 8;
+                            if (src == 0 && JavaSpriteBlitState.alpha != 255) {
+                                src = local331;
+                                local331 = raster[dst];
+                                local331 = ((src & 0xFF00FF) * JavaSpriteBlitState.alpha + (local331 & 0xFF00FF) * JavaSpriteBlitState.invAlpha & 0xFF00FF00) + ((src & 0xFF00) * JavaSpriteBlitState.alpha + (local331 & 0xFF00) * JavaSpriteBlitState.invAlpha & 0xFF0000) >> 8;
                             }
-                            local3[local60] = local331;
-                        } else if (arg0 == 2) {
-                            local223 = this.anIntArray32[local57];
-                            if (local223 != 0) {
-                                local251 = (local223 & 0xFF00FF) * Static513.anInt9304 & 0xFF00FF00;
-                                local255 = (local223 & 0xFF00) * Static513.anInt9304 & 0xFF0000;
-                                local3[local60++] = ((local251 | local255) >>> 8) + Static513.anInt9305;
+                            raster[dst] = local331;
+                        } else if (op == 2) {
+                            src = this.anIntArray32[texel];
+                            if (src != 0) {
+                                local251 = (src & 0xFF00FF) * JavaSpriteBlitState.alpha & 0xFF00FF00;
+                                local255 = (src & 0xFF00) * JavaSpriteBlitState.alpha & 0xFF0000;
+                                raster[dst++] = ((local251 | local255) >>> 8) + JavaSpriteBlitState.lerpColour;
                             }
                         } else {
                             throw new IllegalArgumentException();
                         }
-                        local16 += Static513.anInt9321;
-                        local18 += Static513.anInt9309;
-                        local20++;
+                        u += JavaSpriteBlitState.duDx;
+                        v += JavaSpriteBlitState.dvDx;
+                        column++;
                     }
-                    local11++;
-                    Static513.anInt9310 += Static513.anInt9311;
-                    Static513.anInt9317 += Static513.anInt9293;
-                    Static513.anInt9292 += Static513.anInt9291;
+                    row++;
+                    JavaSpriteBlitState.rowU += JavaSpriteBlitState.duDy;
+                    JavaSpriteBlitState.rowV += JavaSpriteBlitState.dvDy;
+                    JavaSpriteBlitState.rowOffset += JavaSpriteBlitState.dstStride;
                 }
             }
-        } else if (Static513.anInt9309 == 0) {
-            local11 = Static513.anInt9297;
-            while (local11 < 0) {
-                local14 = Static513.anInt9292;
-                local16 = Static513.anInt9310 + Static513.anInt9318;
-                local18 = Static513.anInt9317;
-                local20 = Static513.anInt9303;
-                if (local18 >= 0 && local18 - (super.anInt9306 << 12) < 0) {
-                    if (local16 < 0) {
-                        local878 = (Static513.anInt9321 - local16 - 1) / Static513.anInt9321;
-                        local20 += local878;
-                        local16 += Static513.anInt9321 * local878;
-                        local14 += local878;
+        } else if (JavaSpriteBlitState.dvDx == 0) {
+            row = JavaSpriteBlitState.negativeHeight;
+            while (row < 0) {
+                dstIndex = JavaSpriteBlitState.rowOffset;
+                u = JavaSpriteBlitState.rowU + JavaSpriteBlitState.uBias;
+                v = JavaSpriteBlitState.rowV;
+                column = JavaSpriteBlitState.negativeWidth;
+                if (v >= 0 && v - (super.anInt9306 << 12) < 0) {
+                    if (u < 0) {
+                        skip = (JavaSpriteBlitState.duDx - u - 1) / JavaSpriteBlitState.duDx;
+                        column += skip;
+                        u += JavaSpriteBlitState.duDx * skip;
+                        dstIndex += skip;
                     }
-                    @Pc(5341) int local5341;
-                    if ((local5341 = (local16 + 1 - (super.anInt9302 << 12) - Static513.anInt9321) / Static513.anInt9321) > local20) {
-                        local20 = local5341;
+                    @Pc(5341) int uBound;
+                    if ((uBound = (u + 1 - (super.anInt9302 << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
+                        column = uBound;
                     }
-                    while (local20 < 0) {
-                        local57 = (local18 >> 12) * super.anInt9302 + (local16 >> 12);
-                        local60 = local14++;
-                        if (arg0 == 1) {
-                            local223 = this.anIntArray32[local57];
-                            if (local223 != 0) {
-                                local3[local60] = local223;
+                    while (column < 0) {
+                        texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                        dst = dstIndex++;
+                        if (op == 1) {
+                            src = this.anIntArray32[texel];
+                            if (src != 0) {
+                                raster[dst] = src;
                             }
-                        } else if (arg0 == 0) {
-                            local223 = this.anIntArray32[local57];
-                            if (local223 != 0) {
-                                if ((Static513.anInt9313 & 0xFFFFFF) == 16777215) {
-                                    local251 = Static513.anInt9313 >>> 24;
+                        } else if (op == 0) {
+                            src = this.anIntArray32[texel];
+                            if (src != 0) {
+                                if ((JavaSpriteBlitState.colour & 0xFFFFFF) == 16777215) {
+                                    local251 = JavaSpriteBlitState.colour >>> 24;
                                     local255 = 256 - local251;
-                                    local259 = local3[local60];
-                                    local3[local60] = ((local223 & 0xFF00FF) * local251 + (local259 & 0xFF00FF) * local255 & 0xFF00FF00) + ((local223 & 0xFF00) * local251 + (local259 & 0xFF00) * local255 & 0xFF0000) >> 8;
-                                } else if (Static513.anInt9304 == 255) {
-                                    local251 = (local223 & 0xFF0000) * Static513.anInt9319 & 0xFF000000;
-                                    local255 = (local223 & 0xFF00) * Static513.anInt9299 & 0xFF0000;
-                                    local259 = (local223 & 0xFF) * Static513.anInt9315 & 0xFF00;
-                                    local3[local60] = (local251 | local255 | local259) >>> 8;
+                                    local259 = raster[dst];
+                                    raster[dst] = ((src & 0xFF00FF) * local251 + (local259 & 0xFF00FF) * local255 & 0xFF00FF00) + ((src & 0xFF00) * local251 + (local259 & 0xFF00) * local255 & 0xFF0000) >> 8;
+                                } else if (JavaSpriteBlitState.alpha == 255) {
+                                    local251 = (src & 0xFF0000) * JavaSpriteBlitState.red & 0xFF000000;
+                                    local255 = (src & 0xFF00) * JavaSpriteBlitState.green & 0xFF0000;
+                                    local259 = (src & 0xFF) * JavaSpriteBlitState.blue & 0xFF00;
+                                    raster[dst] = (local251 | local255 | local259) >>> 8;
                                 } else {
-                                    local251 = (local223 & 0xFF0000) * Static513.anInt9319 & 0xFF000000;
-                                    local255 = (local223 & 0xFF00) * Static513.anInt9299 & 0xFF0000;
-                                    local259 = (local223 & 0xFF) * Static513.anInt9315 & 0xFF00;
-                                    local223 = (local251 | local255 | local259) >>> 8;
-                                    local331 = local3[local60];
-                                    local3[local60] = ((local223 & 0xFF00FF) * Static513.anInt9304 + (local331 & 0xFF00FF) * Static513.anInt9312 & 0xFF00FF00) + ((local223 & 0xFF00) * Static513.anInt9304 + (local331 & 0xFF00) * Static513.anInt9312 & 0xFF0000) >> 8;
+                                    local251 = (src & 0xFF0000) * JavaSpriteBlitState.red & 0xFF000000;
+                                    local255 = (src & 0xFF00) * JavaSpriteBlitState.green & 0xFF0000;
+                                    local259 = (src & 0xFF) * JavaSpriteBlitState.blue & 0xFF00;
+                                    src = (local251 | local255 | local259) >>> 8;
+                                    local331 = raster[dst];
+                                    raster[dst] = ((src & 0xFF00FF) * JavaSpriteBlitState.alpha + (local331 & 0xFF00FF) * JavaSpriteBlitState.invAlpha & 0xFF00FF00) + ((src & 0xFF00) * JavaSpriteBlitState.alpha + (local331 & 0xFF00) * JavaSpriteBlitState.invAlpha & 0xFF0000) >> 8;
                                 }
                             }
-                        } else if (arg0 == 3) {
-                            local223 = this.anIntArray32[local57];
-                            local251 = Static513.anInt9313;
-                            local255 = local223 + local251;
-                            local259 = (local223 & 0xFF00FF) + (local251 & 0xFF00FF);
+                        } else if (op == 3) {
+                            src = this.anIntArray32[texel];
+                            local251 = JavaSpriteBlitState.colour;
+                            local255 = src + local251;
+                            local259 = (src & 0xFF00FF) + (local251 & 0xFF00FF);
                             local331 = (local259 & 0x1000100) + (local255 - local259 & 0x10000);
                             local331 = local255 - local331 | local331 - (local331 >>> 8);
-                            if (local223 == 0 && Static513.anInt9304 != 255) {
-                                local223 = local331;
-                                local331 = local3[local60];
-                                local331 = ((local223 & 0xFF00FF) * Static513.anInt9304 + (local331 & 0xFF00FF) * Static513.anInt9312 & 0xFF00FF00) + ((local223 & 0xFF00) * Static513.anInt9304 + (local331 & 0xFF00) * Static513.anInt9312 & 0xFF0000) >> 8;
+                            if (src == 0 && JavaSpriteBlitState.alpha != 255) {
+                                src = local331;
+                                local331 = raster[dst];
+                                local331 = ((src & 0xFF00FF) * JavaSpriteBlitState.alpha + (local331 & 0xFF00FF) * JavaSpriteBlitState.invAlpha & 0xFF00FF00) + ((src & 0xFF00) * JavaSpriteBlitState.alpha + (local331 & 0xFF00) * JavaSpriteBlitState.invAlpha & 0xFF0000) >> 8;
                             }
-                            local3[local60] = local331;
-                        } else if (arg0 == 2) {
-                            local223 = this.anIntArray32[local57];
-                            if (local223 != 0) {
-                                local251 = (local223 & 0xFF00FF) * Static513.anInt9304 & 0xFF00FF00;
-                                local255 = (local223 & 0xFF00) * Static513.anInt9304 & 0xFF0000;
-                                local3[local60++] = ((local251 | local255) >>> 8) + Static513.anInt9305;
+                            raster[dst] = local331;
+                        } else if (op == 2) {
+                            src = this.anIntArray32[texel];
+                            if (src != 0) {
+                                local251 = (src & 0xFF00FF) * JavaSpriteBlitState.alpha & 0xFF00FF00;
+                                local255 = (src & 0xFF00) * JavaSpriteBlitState.alpha & 0xFF0000;
+                                raster[dst++] = ((local251 | local255) >>> 8) + JavaSpriteBlitState.lerpColour;
                             }
                         } else {
                             throw new IllegalArgumentException();
                         }
-                        local16 += Static513.anInt9321;
-                        local20++;
+                        u += JavaSpriteBlitState.duDx;
+                        column++;
                     }
                 }
-                local11++;
-                Static513.anInt9310 += Static513.anInt9311;
-                Static513.anInt9317 += Static513.anInt9293;
-                Static513.anInt9292 += Static513.anInt9291;
+                row++;
+                JavaSpriteBlitState.rowU += JavaSpriteBlitState.duDy;
+                JavaSpriteBlitState.rowV += JavaSpriteBlitState.dvDy;
+                JavaSpriteBlitState.rowOffset += JavaSpriteBlitState.dstStride;
             }
-        } else if (Static513.anInt9309 < 0) {
-            for (local11 = Static513.anInt9297; local11 < 0; local11++) {
-                local14 = Static513.anInt9292;
-                local16 = Static513.anInt9310 + Static513.anInt9318;
-                local18 = Static513.anInt9317 + Static513.anInt9316;
-                local20 = Static513.anInt9303;
-                if (local16 < 0) {
-                    local878 = (Static513.anInt9321 - local16 - 1) / Static513.anInt9321;
-                    local20 += local878;
-                    local16 += Static513.anInt9321 * local878;
-                    local18 += Static513.anInt9309 * local878;
-                    local14 += local878;
+        } else if (JavaSpriteBlitState.dvDx < 0) {
+            for (row = JavaSpriteBlitState.negativeHeight; row < 0; row++) {
+                dstIndex = JavaSpriteBlitState.rowOffset;
+                u = JavaSpriteBlitState.rowU + JavaSpriteBlitState.uBias;
+                v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
+                column = JavaSpriteBlitState.negativeWidth;
+                if (u < 0) {
+                    skip = (JavaSpriteBlitState.duDx - u - 1) / JavaSpriteBlitState.duDx;
+                    column += skip;
+                    u += JavaSpriteBlitState.duDx * skip;
+                    v += JavaSpriteBlitState.dvDx * skip;
+                    dstIndex += skip;
                 }
-                @Pc(6210) int local6210;
-                if ((local6210 = (local16 + 1 - (super.anInt9302 << 12) - Static513.anInt9321) / Static513.anInt9321) > local20) {
-                    local20 = local6210;
+                @Pc(6210) int uBound;
+                if ((uBound = (u + 1 - (super.anInt9302 << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
+                    column = uBound;
                 }
-                @Pc(6222) int local6222;
-                if ((local6222 = local18 - (super.anInt9306 << 12)) >= 0) {
-                    local878 = (Static513.anInt9309 - local6222) / Static513.anInt9309;
-                    local20 += local878;
-                    local16 += Static513.anInt9321 * local878;
-                    local18 += Static513.anInt9309 * local878;
-                    local14 += local878;
+                @Pc(6222) int vOverrun;
+                if ((vOverrun = v - (super.anInt9306 << 12)) >= 0) {
+                    skip = (JavaSpriteBlitState.dvDx - vOverrun) / JavaSpriteBlitState.dvDx;
+                    column += skip;
+                    u += JavaSpriteBlitState.duDx * skip;
+                    v += JavaSpriteBlitState.dvDx * skip;
+                    dstIndex += skip;
                 }
-                @Pc(6256) int local6256;
-                if ((local6256 = (local18 - Static513.anInt9309) / Static513.anInt9309) > local20) {
-                    local20 = local6256;
+                @Pc(6256) int vBound;
+                if ((vBound = (v - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
+                    column = vBound;
                 }
-                while (local20 < 0) {
-                    local57 = (local18 >> 12) * super.anInt9302 + (local16 >> 12);
-                    local60 = local14++;
-                    if (arg0 == 1) {
-                        local223 = this.anIntArray32[local57];
-                        if (local223 != 0) {
-                            local3[local60] = local223;
+                while (column < 0) {
+                    texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                    dst = dstIndex++;
+                    if (op == 1) {
+                        src = this.anIntArray32[texel];
+                        if (src != 0) {
+                            raster[dst] = src;
                         }
-                    } else if (arg0 == 0) {
-                        local223 = this.anIntArray32[local57];
-                        if (local223 != 0) {
-                            if ((Static513.anInt9313 & 0xFFFFFF) == 16777215) {
-                                local251 = Static513.anInt9313 >>> 24;
+                    } else if (op == 0) {
+                        src = this.anIntArray32[texel];
+                        if (src != 0) {
+                            if ((JavaSpriteBlitState.colour & 0xFFFFFF) == 16777215) {
+                                local251 = JavaSpriteBlitState.colour >>> 24;
                                 local255 = 256 - local251;
-                                local259 = local3[local60];
-                                local3[local60] = ((local223 & 0xFF00FF) * local251 + (local259 & 0xFF00FF) * local255 & 0xFF00FF00) + ((local223 & 0xFF00) * local251 + (local259 & 0xFF00) * local255 & 0xFF0000) >> 8;
-                            } else if (Static513.anInt9304 == 255) {
-                                local251 = (local223 & 0xFF0000) * Static513.anInt9319 & 0xFF000000;
-                                local255 = (local223 & 0xFF00) * Static513.anInt9299 & 0xFF0000;
-                                local259 = (local223 & 0xFF) * Static513.anInt9315 & 0xFF00;
-                                local3[local60] = (local251 | local255 | local259) >>> 8;
+                                local259 = raster[dst];
+                                raster[dst] = ((src & 0xFF00FF) * local251 + (local259 & 0xFF00FF) * local255 & 0xFF00FF00) + ((src & 0xFF00) * local251 + (local259 & 0xFF00) * local255 & 0xFF0000) >> 8;
+                            } else if (JavaSpriteBlitState.alpha == 255) {
+                                local251 = (src & 0xFF0000) * JavaSpriteBlitState.red & 0xFF000000;
+                                local255 = (src & 0xFF00) * JavaSpriteBlitState.green & 0xFF0000;
+                                local259 = (src & 0xFF) * JavaSpriteBlitState.blue & 0xFF00;
+                                raster[dst] = (local251 | local255 | local259) >>> 8;
                             } else {
-                                local251 = (local223 & 0xFF0000) * Static513.anInt9319 & 0xFF000000;
-                                local255 = (local223 & 0xFF00) * Static513.anInt9299 & 0xFF0000;
-                                local259 = (local223 & 0xFF) * Static513.anInt9315 & 0xFF00;
-                                local223 = (local251 | local255 | local259) >>> 8;
-                                local331 = local3[local60];
-                                local3[local60] = ((local223 & 0xFF00FF) * Static513.anInt9304 + (local331 & 0xFF00FF) * Static513.anInt9312 & 0xFF00FF00) + ((local223 & 0xFF00) * Static513.anInt9304 + (local331 & 0xFF00) * Static513.anInt9312 & 0xFF0000) >> 8;
+                                local251 = (src & 0xFF0000) * JavaSpriteBlitState.red & 0xFF000000;
+                                local255 = (src & 0xFF00) * JavaSpriteBlitState.green & 0xFF0000;
+                                local259 = (src & 0xFF) * JavaSpriteBlitState.blue & 0xFF00;
+                                src = (local251 | local255 | local259) >>> 8;
+                                local331 = raster[dst];
+                                raster[dst] = ((src & 0xFF00FF) * JavaSpriteBlitState.alpha + (local331 & 0xFF00FF) * JavaSpriteBlitState.invAlpha & 0xFF00FF00) + ((src & 0xFF00) * JavaSpriteBlitState.alpha + (local331 & 0xFF00) * JavaSpriteBlitState.invAlpha & 0xFF0000) >> 8;
                             }
                         }
-                    } else if (arg0 == 3) {
-                        local223 = this.anIntArray32[local57];
-                        local251 = Static513.anInt9313;
-                        local255 = local223 + local251;
-                        local259 = (local223 & 0xFF00FF) + (local251 & 0xFF00FF);
+                    } else if (op == 3) {
+                        src = this.anIntArray32[texel];
+                        local251 = JavaSpriteBlitState.colour;
+                        local255 = src + local251;
+                        local259 = (src & 0xFF00FF) + (local251 & 0xFF00FF);
                         local331 = (local259 & 0x1000100) + (local255 - local259 & 0x10000);
                         local331 = local255 - local331 | local331 - (local331 >>> 8);
-                        if (local223 == 0 && Static513.anInt9304 != 255) {
-                            local223 = local331;
-                            local331 = local3[local60];
-                            local331 = ((local223 & 0xFF00FF) * Static513.anInt9304 + (local331 & 0xFF00FF) * Static513.anInt9312 & 0xFF00FF00) + ((local223 & 0xFF00) * Static513.anInt9304 + (local331 & 0xFF00) * Static513.anInt9312 & 0xFF0000) >> 8;
+                        if (src == 0 && JavaSpriteBlitState.alpha != 255) {
+                            src = local331;
+                            local331 = raster[dst];
+                            local331 = ((src & 0xFF00FF) * JavaSpriteBlitState.alpha + (local331 & 0xFF00FF) * JavaSpriteBlitState.invAlpha & 0xFF00FF00) + ((src & 0xFF00) * JavaSpriteBlitState.alpha + (local331 & 0xFF00) * JavaSpriteBlitState.invAlpha & 0xFF0000) >> 8;
                         }
-                        local3[local60] = local331;
-                    } else if (arg0 == 2) {
-                        local223 = this.anIntArray32[local57];
-                        if (local223 != 0) {
-                            local251 = (local223 & 0xFF00FF) * Static513.anInt9304 & 0xFF00FF00;
-                            local255 = (local223 & 0xFF00) * Static513.anInt9304 & 0xFF0000;
-                            local3[local60++] = ((local251 | local255) >>> 8) + Static513.anInt9305;
+                        raster[dst] = local331;
+                    } else if (op == 2) {
+                        src = this.anIntArray32[texel];
+                        if (src != 0) {
+                            local251 = (src & 0xFF00FF) * JavaSpriteBlitState.alpha & 0xFF00FF00;
+                            local255 = (src & 0xFF00) * JavaSpriteBlitState.alpha & 0xFF0000;
+                            raster[dst++] = ((local251 | local255) >>> 8) + JavaSpriteBlitState.lerpColour;
                         }
                     } else {
                         throw new IllegalArgumentException();
                     }
-                    local16 += Static513.anInt9321;
-                    local18 += Static513.anInt9309;
-                    local20++;
+                    u += JavaSpriteBlitState.duDx;
+                    v += JavaSpriteBlitState.dvDx;
+                    column++;
                 }
-                Static513.anInt9310 += Static513.anInt9311;
-                Static513.anInt9317 += Static513.anInt9293;
-                Static513.anInt9292 += Static513.anInt9291;
+                JavaSpriteBlitState.rowU += JavaSpriteBlitState.duDy;
+                JavaSpriteBlitState.rowV += JavaSpriteBlitState.dvDy;
+                JavaSpriteBlitState.rowOffset += JavaSpriteBlitState.dstStride;
             }
         } else {
-            for (local11 = Static513.anInt9297; local11 < 0; local11++) {
-                local14 = Static513.anInt9292;
-                local16 = Static513.anInt9310 + Static513.anInt9318;
-                local18 = Static513.anInt9317 + Static513.anInt9316;
-                local20 = Static513.anInt9303;
-                if (local16 < 0) {
-                    local878 = (Static513.anInt9321 - local16 - 1) / Static513.anInt9321;
-                    local20 += local878;
-                    local16 += Static513.anInt9321 * local878;
-                    local18 += Static513.anInt9309 * local878;
-                    local14 += local878;
+            for (row = JavaSpriteBlitState.negativeHeight; row < 0; row++) {
+                dstIndex = JavaSpriteBlitState.rowOffset;
+                u = JavaSpriteBlitState.rowU + JavaSpriteBlitState.uBias;
+                v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
+                column = JavaSpriteBlitState.negativeWidth;
+                if (u < 0) {
+                    skip = (JavaSpriteBlitState.duDx - u - 1) / JavaSpriteBlitState.duDx;
+                    column += skip;
+                    u += JavaSpriteBlitState.duDx * skip;
+                    v += JavaSpriteBlitState.dvDx * skip;
+                    dstIndex += skip;
                 }
-                @Pc(7127) int local7127;
-                if ((local7127 = (local16 + 1 - (super.anInt9302 << 12) - Static513.anInt9321) / Static513.anInt9321) > local20) {
-                    local20 = local7127;
+                @Pc(7127) int uBound;
+                if ((uBound = (u + 1 - (super.anInt9302 << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
+                    column = uBound;
                 }
-                if (local18 < 0) {
-                    local878 = (Static513.anInt9309 - local18 - 1) / Static513.anInt9309;
-                    local20 += local878;
-                    local16 += Static513.anInt9321 * local878;
-                    local18 += Static513.anInt9309 * local878;
-                    local14 += local878;
+                if (v < 0) {
+                    skip = (JavaSpriteBlitState.dvDx - v - 1) / JavaSpriteBlitState.dvDx;
+                    column += skip;
+                    u += JavaSpriteBlitState.duDx * skip;
+                    v += JavaSpriteBlitState.dvDx * skip;
+                    dstIndex += skip;
                 }
-                @Pc(7175) int local7175;
-                if ((local7175 = (local18 + 1 - (super.anInt9306 << 12) - Static513.anInt9309) / Static513.anInt9309) > local20) {
-                    local20 = local7175;
+                @Pc(7175) int vBound;
+                if ((vBound = (v + 1 - (super.anInt9306 << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
+                    column = vBound;
                 }
-                while (local20 < 0) {
-                    local57 = (local18 >> 12) * super.anInt9302 + (local16 >> 12);
-                    local60 = local14++;
-                    if (arg0 == 1) {
-                        local223 = this.anIntArray32[local57];
-                        if (local223 != 0) {
-                            local3[local60] = local223;
+                while (column < 0) {
+                    texel = (v >> 12) * super.anInt9302 + (u >> 12);
+                    dst = dstIndex++;
+                    if (op == 1) {
+                        src = this.anIntArray32[texel];
+                        if (src != 0) {
+                            raster[dst] = src;
                         }
-                    } else if (arg0 == 0) {
-                        local223 = this.anIntArray32[local57];
-                        if (local223 != 0) {
-                            if ((Static513.anInt9313 & 0xFFFFFF) == 16777215) {
-                                local251 = Static513.anInt9313 >>> 24;
+                    } else if (op == 0) {
+                        src = this.anIntArray32[texel];
+                        if (src != 0) {
+                            if ((JavaSpriteBlitState.colour & 0xFFFFFF) == 16777215) {
+                                local251 = JavaSpriteBlitState.colour >>> 24;
                                 local255 = 256 - local251;
-                                local259 = local3[local60];
-                                local3[local60] = ((local223 & 0xFF00FF) * local251 + (local259 & 0xFF00FF) * local255 & 0xFF00FF00) + ((local223 & 0xFF00) * local251 + (local259 & 0xFF00) * local255 & 0xFF0000) >> 8;
-                            } else if (Static513.anInt9304 == 255) {
-                                local251 = (local223 & 0xFF0000) * Static513.anInt9319 & 0xFF000000;
-                                local255 = (local223 & 0xFF00) * Static513.anInt9299 & 0xFF0000;
-                                local259 = (local223 & 0xFF) * Static513.anInt9315 & 0xFF00;
-                                local3[local60] = (local251 | local255 | local259) >>> 8;
+                                local259 = raster[dst];
+                                raster[dst] = ((src & 0xFF00FF) * local251 + (local259 & 0xFF00FF) * local255 & 0xFF00FF00) + ((src & 0xFF00) * local251 + (local259 & 0xFF00) * local255 & 0xFF0000) >> 8;
+                            } else if (JavaSpriteBlitState.alpha == 255) {
+                                local251 = (src & 0xFF0000) * JavaSpriteBlitState.red & 0xFF000000;
+                                local255 = (src & 0xFF00) * JavaSpriteBlitState.green & 0xFF0000;
+                                local259 = (src & 0xFF) * JavaSpriteBlitState.blue & 0xFF00;
+                                raster[dst] = (local251 | local255 | local259) >>> 8;
                             } else {
-                                local251 = (local223 & 0xFF0000) * Static513.anInt9319 & 0xFF000000;
-                                local255 = (local223 & 0xFF00) * Static513.anInt9299 & 0xFF0000;
-                                local259 = (local223 & 0xFF) * Static513.anInt9315 & 0xFF00;
-                                local223 = (local251 | local255 | local259) >>> 8;
-                                local331 = local3[local60];
-                                local3[local60] = ((local223 & 0xFF00FF) * Static513.anInt9304 + (local331 & 0xFF00FF) * Static513.anInt9312 & 0xFF00FF00) + ((local223 & 0xFF00) * Static513.anInt9304 + (local331 & 0xFF00) * Static513.anInt9312 & 0xFF0000) >> 8;
+                                local251 = (src & 0xFF0000) * JavaSpriteBlitState.red & 0xFF000000;
+                                local255 = (src & 0xFF00) * JavaSpriteBlitState.green & 0xFF0000;
+                                local259 = (src & 0xFF) * JavaSpriteBlitState.blue & 0xFF00;
+                                src = (local251 | local255 | local259) >>> 8;
+                                local331 = raster[dst];
+                                raster[dst] = ((src & 0xFF00FF) * JavaSpriteBlitState.alpha + (local331 & 0xFF00FF) * JavaSpriteBlitState.invAlpha & 0xFF00FF00) + ((src & 0xFF00) * JavaSpriteBlitState.alpha + (local331 & 0xFF00) * JavaSpriteBlitState.invAlpha & 0xFF0000) >> 8;
                             }
                         }
-                    } else if (arg0 == 3) {
-                        local223 = this.anIntArray32[local57];
-                        local251 = Static513.anInt9313;
-                        local255 = local223 + local251;
-                        local259 = (local223 & 0xFF00FF) + (local251 & 0xFF00FF);
+                    } else if (op == 3) {
+                        src = this.anIntArray32[texel];
+                        local251 = JavaSpriteBlitState.colour;
+                        local255 = src + local251;
+                        local259 = (src & 0xFF00FF) + (local251 & 0xFF00FF);
                         local331 = (local259 & 0x1000100) + (local255 - local259 & 0x10000);
                         local331 = local255 - local331 | local331 - (local331 >>> 8);
-                        if (local223 == 0 && Static513.anInt9304 != 255) {
-                            local223 = local331;
-                            local331 = local3[local60];
-                            local331 = ((local223 & 0xFF00FF) * Static513.anInt9304 + (local331 & 0xFF00FF) * Static513.anInt9312 & 0xFF00FF00) + ((local223 & 0xFF00) * Static513.anInt9304 + (local331 & 0xFF00) * Static513.anInt9312 & 0xFF0000) >> 8;
+                        if (src == 0 && JavaSpriteBlitState.alpha != 255) {
+                            src = local331;
+                            local331 = raster[dst];
+                            local331 = ((src & 0xFF00FF) * JavaSpriteBlitState.alpha + (local331 & 0xFF00FF) * JavaSpriteBlitState.invAlpha & 0xFF00FF00) + ((src & 0xFF00) * JavaSpriteBlitState.alpha + (local331 & 0xFF00) * JavaSpriteBlitState.invAlpha & 0xFF0000) >> 8;
                         }
-                        local3[local60] = local331;
-                    } else if (arg0 == 2) {
-                        local223 = this.anIntArray32[local57];
-                        if (local223 != 0) {
-                            local251 = (local223 & 0xFF00FF) * Static513.anInt9304 & 0xFF00FF00;
-                            local255 = (local223 & 0xFF00) * Static513.anInt9304 & 0xFF0000;
-                            local3[local60++] = ((local251 | local255) >>> 8) + Static513.anInt9305;
+                        raster[dst] = local331;
+                    } else if (op == 2) {
+                        src = this.anIntArray32[texel];
+                        if (src != 0) {
+                            local251 = (src & 0xFF00FF) * JavaSpriteBlitState.alpha & 0xFF00FF00;
+                            local255 = (src & 0xFF00) * JavaSpriteBlitState.alpha & 0xFF0000;
+                            raster[dst++] = ((local251 | local255) >>> 8) + JavaSpriteBlitState.lerpColour;
                         }
                     } else {
                         throw new IllegalArgumentException();
                     }
-                    local16 += Static513.anInt9321;
-                    local18 += Static513.anInt9309;
-                    local20++;
+                    u += JavaSpriteBlitState.duDx;
+                    v += JavaSpriteBlitState.dvDx;
+                    column++;
                 }
-                Static513.anInt9310 += Static513.anInt9311;
-                Static513.anInt9317 += Static513.anInt9293;
-                Static513.anInt9292 += Static513.anInt9291;
+                JavaSpriteBlitState.rowU += JavaSpriteBlitState.duDy;
+                JavaSpriteBlitState.rowV += JavaSpriteBlitState.dvDy;
+                JavaSpriteBlitState.rowOffset += JavaSpriteBlitState.dstStride;
             }
         }
     }
 
     @OriginalMember(owner = "client!ap", name = "a", descriptor = "([I[III)V")
     @Override
-    protected void method8210(@OriginalArg(0) int[] arg0, @OriginalArg(1) int[] arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3) {
-        @Pc(3) int[] local3 = super.toolkit.surfaceRaster;
-        @Pc(201) int local201;
-        @Pc(11) int local11;
-        @Pc(16) int local16;
-        @Pc(28) int local28;
-        @Pc(30) int local30;
-        @Pc(32) int local32;
-        @Pc(34) int local34;
-        @Pc(64) int local64;
-        @Pc(69) int local69;
-        @Pc(75) int local75;
-        @Pc(122) int local122;
-        if (Static513.anInt9321 == 0) {
-            if (Static513.anInt9309 == 0) {
-                local11 = Static513.anInt9297;
-                while (local11 < 0) {
-                    local16 = local11 + arg3;
-                    if (local16 >= 0) {
-                        if (local16 >= arg0.length) {
+    protected void blitParallelogramMasked(@OriginalArg(0) int[] lineOffsets, @OriginalArg(1) int[] lineWidths, @OriginalArg(2) int maskOffsetX, @OriginalArg(3) int maskOffsetY) {
+        @Pc(3) int[] raster = super.toolkit.surfaceRaster;
+        @Pc(201) int skip;
+        @Pc(11) int row;
+        @Pc(16) int maskIndex;
+        @Pc(28) int dstIndex;
+        @Pc(30) int u;
+        @Pc(32) int v;
+        @Pc(34) int column;
+        @Pc(64) int maskStart;
+        @Pc(69) int maskCount;
+        @Pc(75) int maskSkip;
+        @Pc(122) int src;
+        if (JavaSpriteBlitState.duDx == 0) {
+            if (JavaSpriteBlitState.dvDx == 0) {
+                row = JavaSpriteBlitState.negativeHeight;
+                while (row < 0) {
+                    maskIndex = row + maskOffsetY;
+                    if (maskIndex >= 0) {
+                        if (maskIndex >= lineOffsets.length) {
                             return;
                         }
-                        local28 = Static513.anInt9292;
-                        local30 = Static513.anInt9310;
-                        local32 = Static513.anInt9317;
-                        local34 = Static513.anInt9303;
-                        if (local30 >= 0 && local32 >= 0 && local30 - (super.anInt9302 << 12) < 0 && local32 - (super.anInt9306 << 12) < 0) {
-                            local64 = arg0[local16] - arg2;
-                            local69 = -arg1[local16];
-                            local75 = local64 + Static513.anInt9292 - local28;
-                            if (local75 > 0) {
-                                local28 += local75;
-                                local34 += local75;
-                                local30 += Static513.anInt9321 * local75;
-                                local32 += Static513.anInt9309 * local75;
+                        dstIndex = JavaSpriteBlitState.rowOffset;
+                        u = JavaSpriteBlitState.rowU;
+                        v = JavaSpriteBlitState.rowV;
+                        column = JavaSpriteBlitState.negativeWidth;
+                        if (u >= 0 && v >= 0 && u - (super.anInt9302 << 12) < 0 && v - (super.anInt9306 << 12) < 0) {
+                            maskStart = lineOffsets[maskIndex] - maskOffsetX;
+                            maskCount = -lineWidths[maskIndex];
+                            maskSkip = maskStart + JavaSpriteBlitState.rowOffset - dstIndex;
+                            if (maskSkip > 0) {
+                                dstIndex += maskSkip;
+                                column += maskSkip;
+                                u += JavaSpriteBlitState.duDx * maskSkip;
+                                v += JavaSpriteBlitState.dvDx * maskSkip;
                             } else {
-                                local69 -= local75;
+                                maskCount -= maskSkip;
                             }
-                            if (local34 < local69) {
-                                local34 = local69;
+                            if (column < maskCount) {
+                                column = maskCount;
                             }
-                            while (local34 < 0) {
-                                local122 = this.anIntArray32[(local32 >> 12) * super.anInt9302 + (local30 >> 12)];
-                                if (local122 == 0) {
-                                    local28++;
+                            while (column < 0) {
+                                src = this.anIntArray32[(v >> 12) * super.anInt9302 + (u >> 12)];
+                                if (src == 0) {
+                                    dstIndex++;
                                 } else {
-                                    local3[local28++] = local122;
+                                    raster[dstIndex++] = src;
                                 }
-                                local34++;
+                                column++;
                             }
                         }
                     }
-                    local11++;
-                    Static513.anInt9292 += Static513.anInt9291;
+                    row++;
+                    JavaSpriteBlitState.rowOffset += JavaSpriteBlitState.dstStride;
                 }
-            } else if (Static513.anInt9309 < 0) {
-                local11 = Static513.anInt9297;
-                while (local11 < 0) {
-                    local16 = local11 + arg3;
-                    if (local16 >= 0) {
-                        if (local16 >= arg0.length) {
+            } else if (JavaSpriteBlitState.dvDx < 0) {
+                row = JavaSpriteBlitState.negativeHeight;
+                while (row < 0) {
+                    maskIndex = row + maskOffsetY;
+                    if (maskIndex >= 0) {
+                        if (maskIndex >= lineOffsets.length) {
                             return;
                         }
-                        local28 = Static513.anInt9292;
-                        local30 = Static513.anInt9310;
-                        local32 = Static513.anInt9317 + Static513.anInt9316;
-                        local34 = Static513.anInt9303;
-                        if (local30 >= 0 && local30 - (super.anInt9302 << 12) < 0) {
-                            @Pc(194) int local194;
-                            if ((local194 = local32 - (super.anInt9306 << 12)) >= 0) {
-                                local201 = (Static513.anInt9309 - local194) / Static513.anInt9309;
-                                local34 += local201;
-                                local32 += Static513.anInt9309 * local201;
-                                local28 += local201;
+                        dstIndex = JavaSpriteBlitState.rowOffset;
+                        u = JavaSpriteBlitState.rowU;
+                        v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
+                        column = JavaSpriteBlitState.negativeWidth;
+                        if (u >= 0 && u - (super.anInt9302 << 12) < 0) {
+                            @Pc(194) int vOverrun;
+                            if ((vOverrun = v - (super.anInt9306 << 12)) >= 0) {
+                                skip = (JavaSpriteBlitState.dvDx - vOverrun) / JavaSpriteBlitState.dvDx;
+                                column += skip;
+                                v += JavaSpriteBlitState.dvDx * skip;
+                                dstIndex += skip;
                             }
-                            @Pc(222) int local222;
-                            if ((local222 = (local32 - Static513.anInt9309) / Static513.anInt9309) > local34) {
-                                local34 = local222;
+                            @Pc(222) int vBound;
+                            if ((vBound = (v - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
+                                column = vBound;
                             }
-                            local64 = arg0[local16] - arg2;
-                            local69 = -arg1[local16];
-                            local75 = local64 + Static513.anInt9292 - local28;
-                            if (local75 > 0) {
-                                local28 += local75;
-                                local34 += local75;
-                                local30 += Static513.anInt9321 * local75;
-                                local32 += Static513.anInt9309 * local75;
+                            maskStart = lineOffsets[maskIndex] - maskOffsetX;
+                            maskCount = -lineWidths[maskIndex];
+                            maskSkip = maskStart + JavaSpriteBlitState.rowOffset - dstIndex;
+                            if (maskSkip > 0) {
+                                dstIndex += maskSkip;
+                                column += maskSkip;
+                                u += JavaSpriteBlitState.duDx * maskSkip;
+                                v += JavaSpriteBlitState.dvDx * maskSkip;
                             } else {
-                                local69 -= local75;
+                                maskCount -= maskSkip;
                             }
-                            if (local34 < local69) {
-                                local34 = local69;
+                            if (column < maskCount) {
+                                column = maskCount;
                             }
-                            while (local34 < 0) {
-                                local122 = this.anIntArray32[(local32 >> 12) * super.anInt9302 + (local30 >> 12)];
-                                if (local122 == 0) {
-                                    local28++;
+                            while (column < 0) {
+                                src = this.anIntArray32[(v >> 12) * super.anInt9302 + (u >> 12)];
+                                if (src == 0) {
+                                    dstIndex++;
                                 } else {
-                                    local3[local28++] = local122;
+                                    raster[dstIndex++] = src;
                                 }
-                                local32 += Static513.anInt9309;
-                                local34++;
+                                v += JavaSpriteBlitState.dvDx;
+                                column++;
                             }
                         }
                     }
-                    local11++;
-                    Static513.anInt9310 += Static513.anInt9311;
-                    Static513.anInt9292 += Static513.anInt9291;
+                    row++;
+                    JavaSpriteBlitState.rowU += JavaSpriteBlitState.duDy;
+                    JavaSpriteBlitState.rowOffset += JavaSpriteBlitState.dstStride;
                 }
             } else {
-                local11 = Static513.anInt9297;
-                while (local11 < 0) {
-                    local16 = local11 + arg3;
-                    if (local16 >= 0) {
-                        if (local16 >= arg0.length) {
+                row = JavaSpriteBlitState.negativeHeight;
+                while (row < 0) {
+                    maskIndex = row + maskOffsetY;
+                    if (maskIndex >= 0) {
+                        if (maskIndex >= lineOffsets.length) {
                             return;
                         }
-                        local28 = Static513.anInt9292;
-                        local30 = Static513.anInt9310;
-                        local32 = Static513.anInt9317 + Static513.anInt9316;
-                        local34 = Static513.anInt9303;
-                        if (local30 >= 0 && local30 - (super.anInt9302 << 12) < 0) {
-                            if (local32 < 0) {
-                                local201 = (Static513.anInt9309 - local32 - 1) / Static513.anInt9309;
-                                local34 += local201;
-                                local32 += Static513.anInt9309 * local201;
-                                local28 += local201;
+                        dstIndex = JavaSpriteBlitState.rowOffset;
+                        u = JavaSpriteBlitState.rowU;
+                        v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
+                        column = JavaSpriteBlitState.negativeWidth;
+                        if (u >= 0 && u - (super.anInt9302 << 12) < 0) {
+                            if (v < 0) {
+                                skip = (JavaSpriteBlitState.dvDx - v - 1) / JavaSpriteBlitState.dvDx;
+                                column += skip;
+                                v += JavaSpriteBlitState.dvDx * skip;
+                                dstIndex += skip;
                             }
-                            @Pc(400) int local400;
-                            if ((local400 = (local32 + 1 - (super.anInt9306 << 12) - Static513.anInt9309) / Static513.anInt9309) > local34) {
-                                local34 = local400;
+                            @Pc(400) int vBound;
+                            if ((vBound = (v + 1 - (super.anInt9306 << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
+                                column = vBound;
                             }
-                            local64 = arg0[local16] - arg2;
-                            local69 = -arg1[local16];
-                            local75 = local64 + Static513.anInt9292 - local28;
-                            if (local75 > 0) {
-                                local28 += local75;
-                                local34 += local75;
-                                local30 += Static513.anInt9321 * local75;
-                                local32 += Static513.anInt9309 * local75;
+                            maskStart = lineOffsets[maskIndex] - maskOffsetX;
+                            maskCount = -lineWidths[maskIndex];
+                            maskSkip = maskStart + JavaSpriteBlitState.rowOffset - dstIndex;
+                            if (maskSkip > 0) {
+                                dstIndex += maskSkip;
+                                column += maskSkip;
+                                u += JavaSpriteBlitState.duDx * maskSkip;
+                                v += JavaSpriteBlitState.dvDx * maskSkip;
                             } else {
-                                local69 -= local75;
+                                maskCount -= maskSkip;
                             }
-                            if (local34 < local69) {
-                                local34 = local69;
+                            if (column < maskCount) {
+                                column = maskCount;
                             }
-                            while (local34 < 0) {
-                                local122 = this.anIntArray32[(local32 >> 12) * super.anInt9302 + (local30 >> 12)];
-                                if (local122 == 0) {
-                                    local28++;
+                            while (column < 0) {
+                                src = this.anIntArray32[(v >> 12) * super.anInt9302 + (u >> 12)];
+                                if (src == 0) {
+                                    dstIndex++;
                                 } else {
-                                    local3[local28++] = local122;
+                                    raster[dstIndex++] = src;
                                 }
-                                local32 += Static513.anInt9309;
-                                local34++;
+                                v += JavaSpriteBlitState.dvDx;
+                                column++;
                             }
                         }
                     }
-                    local11++;
-                    Static513.anInt9310 += Static513.anInt9311;
-                    Static513.anInt9292 += Static513.anInt9291;
+                    row++;
+                    JavaSpriteBlitState.rowU += JavaSpriteBlitState.duDy;
+                    JavaSpriteBlitState.rowOffset += JavaSpriteBlitState.dstStride;
                 }
             }
-        } else if (Static513.anInt9321 < 0) {
-            if (Static513.anInt9309 == 0) {
-                local11 = Static513.anInt9297;
-                while (local11 < 0) {
-                    local16 = local11 + arg3;
-                    if (local16 >= 0) {
-                        if (local16 >= arg0.length) {
+        } else if (JavaSpriteBlitState.duDx < 0) {
+            if (JavaSpriteBlitState.dvDx == 0) {
+                row = JavaSpriteBlitState.negativeHeight;
+                while (row < 0) {
+                    maskIndex = row + maskOffsetY;
+                    if (maskIndex >= 0) {
+                        if (maskIndex >= lineOffsets.length) {
                             return;
                         }
-                        local28 = Static513.anInt9292;
-                        local30 = Static513.anInt9310 + Static513.anInt9318;
-                        local32 = Static513.anInt9317;
-                        local34 = Static513.anInt9303;
-                        if (local32 >= 0 && local32 - (super.anInt9306 << 12) < 0) {
-                            @Pc(552) int local552;
-                            if ((local552 = local30 - (super.anInt9302 << 12)) >= 0) {
-                                local201 = (Static513.anInt9321 - local552) / Static513.anInt9321;
-                                local34 += local201;
-                                local30 += Static513.anInt9321 * local201;
-                                local28 += local201;
+                        dstIndex = JavaSpriteBlitState.rowOffset;
+                        u = JavaSpriteBlitState.rowU + JavaSpriteBlitState.uBias;
+                        v = JavaSpriteBlitState.rowV;
+                        column = JavaSpriteBlitState.negativeWidth;
+                        if (v >= 0 && v - (super.anInt9306 << 12) < 0) {
+                            @Pc(552) int uOverrun;
+                            if ((uOverrun = u - (super.anInt9302 << 12)) >= 0) {
+                                skip = (JavaSpriteBlitState.duDx - uOverrun) / JavaSpriteBlitState.duDx;
+                                column += skip;
+                                u += JavaSpriteBlitState.duDx * skip;
+                                dstIndex += skip;
                             }
-                            @Pc(580) int local580;
-                            if ((local580 = (local30 - Static513.anInt9321) / Static513.anInt9321) > local34) {
-                                local34 = local580;
+                            @Pc(580) int uBound;
+                            if ((uBound = (u - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
+                                column = uBound;
                             }
-                            local64 = arg0[local16] - arg2;
-                            local69 = -arg1[local16];
-                            local75 = local64 + Static513.anInt9292 - local28;
-                            if (local75 > 0) {
-                                local28 += local75;
-                                local34 += local75;
-                                local30 += Static513.anInt9321 * local75;
-                                local32 += Static513.anInt9309 * local75;
+                            maskStart = lineOffsets[maskIndex] - maskOffsetX;
+                            maskCount = -lineWidths[maskIndex];
+                            maskSkip = maskStart + JavaSpriteBlitState.rowOffset - dstIndex;
+                            if (maskSkip > 0) {
+                                dstIndex += maskSkip;
+                                column += maskSkip;
+                                u += JavaSpriteBlitState.duDx * maskSkip;
+                                v += JavaSpriteBlitState.dvDx * maskSkip;
                             } else {
-                                local69 -= local75;
+                                maskCount -= maskSkip;
                             }
-                            if (local34 < local69) {
-                                local34 = local69;
+                            if (column < maskCount) {
+                                column = maskCount;
                             }
-                            while (local34 < 0) {
-                                local122 = this.anIntArray32[(local32 >> 12) * super.anInt9302 + (local30 >> 12)];
-                                if (local122 == 0) {
-                                    local28++;
+                            while (column < 0) {
+                                src = this.anIntArray32[(v >> 12) * super.anInt9302 + (u >> 12)];
+                                if (src == 0) {
+                                    dstIndex++;
                                 } else {
-                                    local3[local28++] = local122;
+                                    raster[dstIndex++] = src;
                                 }
-                                local30 += Static513.anInt9321;
-                                local34++;
+                                u += JavaSpriteBlitState.duDx;
+                                column++;
                             }
                         }
                     }
-                    local11++;
-                    Static513.anInt9317 += Static513.anInt9293;
-                    Static513.anInt9292 += Static513.anInt9291;
+                    row++;
+                    JavaSpriteBlitState.rowV += JavaSpriteBlitState.dvDy;
+                    JavaSpriteBlitState.rowOffset += JavaSpriteBlitState.dstStride;
                 }
-            } else if (Static513.anInt9309 < 0) {
-                local11 = Static513.anInt9297;
-                while (local11 < 0) {
-                    local16 = local11 + arg3;
-                    if (local16 >= 0) {
-                        if (local16 >= arg0.length) {
+            } else if (JavaSpriteBlitState.dvDx < 0) {
+                row = JavaSpriteBlitState.negativeHeight;
+                while (row < 0) {
+                    maskIndex = row + maskOffsetY;
+                    if (maskIndex >= 0) {
+                        if (maskIndex >= lineOffsets.length) {
                             return;
                         }
-                        local28 = Static513.anInt9292;
-                        local30 = Static513.anInt9310 + Static513.anInt9318;
-                        local32 = Static513.anInt9317 + Static513.anInt9316;
-                        local34 = Static513.anInt9303;
-                        @Pc(719) int local719;
-                        if ((local719 = local30 - (super.anInt9302 << 12)) >= 0) {
-                            local201 = (Static513.anInt9321 - local719) / Static513.anInt9321;
-                            local34 += local201;
-                            local30 += Static513.anInt9321 * local201;
-                            local32 += Static513.anInt9309 * local201;
-                            local28 += local201;
+                        dstIndex = JavaSpriteBlitState.rowOffset;
+                        u = JavaSpriteBlitState.rowU + JavaSpriteBlitState.uBias;
+                        v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
+                        column = JavaSpriteBlitState.negativeWidth;
+                        @Pc(719) int uOverrun;
+                        if ((uOverrun = u - (super.anInt9302 << 12)) >= 0) {
+                            skip = (JavaSpriteBlitState.duDx - uOverrun) / JavaSpriteBlitState.duDx;
+                            column += skip;
+                            u += JavaSpriteBlitState.duDx * skip;
+                            v += JavaSpriteBlitState.dvDx * skip;
+                            dstIndex += skip;
                         }
-                        @Pc(753) int local753;
-                        if ((local753 = (local30 - Static513.anInt9321) / Static513.anInt9321) > local34) {
-                            local34 = local753;
+                        @Pc(753) int uBound;
+                        if ((uBound = (u - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
+                            column = uBound;
                         }
-                        @Pc(765) int local765;
-                        if ((local765 = local32 - (super.anInt9306 << 12)) >= 0) {
-                            local201 = (Static513.anInt9309 - local765) / Static513.anInt9309;
-                            local34 += local201;
-                            local30 += Static513.anInt9321 * local201;
-                            local32 += Static513.anInt9309 * local201;
-                            local28 += local201;
+                        @Pc(765) int vOverrun;
+                        if ((vOverrun = v - (super.anInt9306 << 12)) >= 0) {
+                            skip = (JavaSpriteBlitState.dvDx - vOverrun) / JavaSpriteBlitState.dvDx;
+                            column += skip;
+                            u += JavaSpriteBlitState.duDx * skip;
+                            v += JavaSpriteBlitState.dvDx * skip;
+                            dstIndex += skip;
                         }
-                        @Pc(799) int local799;
-                        if ((local799 = (local32 - Static513.anInt9309) / Static513.anInt9309) > local34) {
-                            local34 = local799;
+                        @Pc(799) int vBound;
+                        if ((vBound = (v - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
+                            column = vBound;
                         }
-                        local64 = arg0[local16] - arg2;
-                        local69 = -arg1[local16];
-                        local75 = local64 + Static513.anInt9292 - local28;
-                        if (local75 > 0) {
-                            local28 += local75;
-                            local34 += local75;
-                            local30 += Static513.anInt9321 * local75;
-                            local32 += Static513.anInt9309 * local75;
+                        maskStart = lineOffsets[maskIndex] - maskOffsetX;
+                        maskCount = -lineWidths[maskIndex];
+                        maskSkip = maskStart + JavaSpriteBlitState.rowOffset - dstIndex;
+                        if (maskSkip > 0) {
+                            dstIndex += maskSkip;
+                            column += maskSkip;
+                            u += JavaSpriteBlitState.duDx * maskSkip;
+                            v += JavaSpriteBlitState.dvDx * maskSkip;
                         } else {
-                            local69 -= local75;
+                            maskCount -= maskSkip;
                         }
-                        if (local34 < local69) {
-                            local34 = local69;
+                        if (column < maskCount) {
+                            column = maskCount;
                         }
-                        while (local34 < 0) {
-                            local122 = this.anIntArray32[(local32 >> 12) * super.anInt9302 + (local30 >> 12)];
-                            if (local122 == 0) {
-                                local28++;
+                        while (column < 0) {
+                            src = this.anIntArray32[(v >> 12) * super.anInt9302 + (u >> 12)];
+                            if (src == 0) {
+                                dstIndex++;
                             } else {
-                                local3[local28++] = local122;
+                                raster[dstIndex++] = src;
                             }
-                            local30 += Static513.anInt9321;
-                            local32 += Static513.anInt9309;
-                            local34++;
+                            u += JavaSpriteBlitState.duDx;
+                            v += JavaSpriteBlitState.dvDx;
+                            column++;
                         }
                     }
-                    local11++;
-                    Static513.anInt9310 += Static513.anInt9311;
-                    Static513.anInt9317 += Static513.anInt9293;
-                    Static513.anInt9292 += Static513.anInt9291;
+                    row++;
+                    JavaSpriteBlitState.rowU += JavaSpriteBlitState.duDy;
+                    JavaSpriteBlitState.rowV += JavaSpriteBlitState.dvDy;
+                    JavaSpriteBlitState.rowOffset += JavaSpriteBlitState.dstStride;
                 }
             } else {
-                local11 = Static513.anInt9297;
-                while (local11 < 0) {
-                    local16 = local11 + arg3;
-                    if (local16 >= 0) {
-                        if (local16 >= arg0.length) {
+                row = JavaSpriteBlitState.negativeHeight;
+                while (row < 0) {
+                    maskIndex = row + maskOffsetY;
+                    if (maskIndex >= 0) {
+                        if (maskIndex >= lineOffsets.length) {
                             return;
                         }
-                        local28 = Static513.anInt9292;
-                        local30 = Static513.anInt9310 + Static513.anInt9318;
-                        local32 = Static513.anInt9317 + Static513.anInt9316;
-                        local34 = Static513.anInt9303;
-                        @Pc(944) int local944;
-                        if ((local944 = local30 - (super.anInt9302 << 12)) >= 0) {
-                            local201 = (Static513.anInt9321 - local944) / Static513.anInt9321;
-                            local34 += local201;
-                            local30 += Static513.anInt9321 * local201;
-                            local32 += Static513.anInt9309 * local201;
-                            local28 += local201;
+                        dstIndex = JavaSpriteBlitState.rowOffset;
+                        u = JavaSpriteBlitState.rowU + JavaSpriteBlitState.uBias;
+                        v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
+                        column = JavaSpriteBlitState.negativeWidth;
+                        @Pc(944) int uOverrun;
+                        if ((uOverrun = u - (super.anInt9302 << 12)) >= 0) {
+                            skip = (JavaSpriteBlitState.duDx - uOverrun) / JavaSpriteBlitState.duDx;
+                            column += skip;
+                            u += JavaSpriteBlitState.duDx * skip;
+                            v += JavaSpriteBlitState.dvDx * skip;
+                            dstIndex += skip;
                         }
-                        @Pc(978) int local978;
-                        if ((local978 = (local30 - Static513.anInt9321) / Static513.anInt9321) > local34) {
-                            local34 = local978;
+                        @Pc(978) int uBound;
+                        if ((uBound = (u - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
+                            column = uBound;
                         }
-                        if (local32 < 0) {
-                            local201 = (Static513.anInt9309 - local32 - 1) / Static513.anInt9309;
-                            local34 += local201;
-                            local30 += Static513.anInt9321 * local201;
-                            local32 += Static513.anInt9309 * local201;
-                            local28 += local201;
+                        if (v < 0) {
+                            skip = (JavaSpriteBlitState.dvDx - v - 1) / JavaSpriteBlitState.dvDx;
+                            column += skip;
+                            u += JavaSpriteBlitState.duDx * skip;
+                            v += JavaSpriteBlitState.dvDx * skip;
+                            dstIndex += skip;
                         }
-                        @Pc(1026) int local1026;
-                        if ((local1026 = (local32 + 1 - (super.anInt9306 << 12) - Static513.anInt9309) / Static513.anInt9309) > local34) {
-                            local34 = local1026;
+                        @Pc(1026) int vBound;
+                        if ((vBound = (v + 1 - (super.anInt9306 << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
+                            column = vBound;
                         }
-                        local64 = arg0[local16] - arg2;
-                        local69 = -arg1[local16];
-                        local75 = local64 + Static513.anInt9292 - local28;
-                        if (local75 > 0) {
-                            local28 += local75;
-                            local34 += local75;
-                            local30 += Static513.anInt9321 * local75;
-                            local32 += Static513.anInt9309 * local75;
+                        maskStart = lineOffsets[maskIndex] - maskOffsetX;
+                        maskCount = -lineWidths[maskIndex];
+                        maskSkip = maskStart + JavaSpriteBlitState.rowOffset - dstIndex;
+                        if (maskSkip > 0) {
+                            dstIndex += maskSkip;
+                            column += maskSkip;
+                            u += JavaSpriteBlitState.duDx * maskSkip;
+                            v += JavaSpriteBlitState.dvDx * maskSkip;
                         } else {
-                            local69 -= local75;
+                            maskCount -= maskSkip;
                         }
-                        if (local34 < local69) {
-                            local34 = local69;
+                        if (column < maskCount) {
+                            column = maskCount;
                         }
-                        while (local34 < 0) {
-                            local122 = this.anIntArray32[(local32 >> 12) * super.anInt9302 + (local30 >> 12)];
-                            if (local122 == 0) {
-                                local28++;
+                        while (column < 0) {
+                            src = this.anIntArray32[(v >> 12) * super.anInt9302 + (u >> 12)];
+                            if (src == 0) {
+                                dstIndex++;
                             } else {
-                                local3[local28++] = local122;
+                                raster[dstIndex++] = src;
                             }
-                            local30 += Static513.anInt9321;
-                            local32 += Static513.anInt9309;
-                            local34++;
+                            u += JavaSpriteBlitState.duDx;
+                            v += JavaSpriteBlitState.dvDx;
+                            column++;
                         }
                     }
-                    local11++;
-                    Static513.anInt9310 += Static513.anInt9311;
-                    Static513.anInt9317 += Static513.anInt9293;
-                    Static513.anInt9292 += Static513.anInt9291;
+                    row++;
+                    JavaSpriteBlitState.rowU += JavaSpriteBlitState.duDy;
+                    JavaSpriteBlitState.rowV += JavaSpriteBlitState.dvDy;
+                    JavaSpriteBlitState.rowOffset += JavaSpriteBlitState.dstStride;
                 }
             }
-        } else if (Static513.anInt9309 == 0) {
-            local11 = Static513.anInt9297;
-            while (local11 < 0) {
-                local16 = local11 + arg3;
-                if (local16 >= 0) {
-                    if (local16 >= arg0.length) {
+        } else if (JavaSpriteBlitState.dvDx == 0) {
+            row = JavaSpriteBlitState.negativeHeight;
+            while (row < 0) {
+                maskIndex = row + maskOffsetY;
+                if (maskIndex >= 0) {
+                    if (maskIndex >= lineOffsets.length) {
                         return;
                     }
-                    local28 = Static513.anInt9292;
-                    local30 = Static513.anInt9310 + Static513.anInt9318;
-                    local32 = Static513.anInt9317;
-                    local34 = Static513.anInt9303;
-                    if (local32 >= 0 && local32 - (super.anInt9306 << 12) < 0) {
-                        if (local30 < 0) {
-                            local201 = (Static513.anInt9321 - local30 - 1) / Static513.anInt9321;
-                            local34 += local201;
-                            local30 += Static513.anInt9321 * local201;
-                            local28 += local201;
+                    dstIndex = JavaSpriteBlitState.rowOffset;
+                    u = JavaSpriteBlitState.rowU + JavaSpriteBlitState.uBias;
+                    v = JavaSpriteBlitState.rowV;
+                    column = JavaSpriteBlitState.negativeWidth;
+                    if (v >= 0 && v - (super.anInt9306 << 12) < 0) {
+                        if (u < 0) {
+                            skip = (JavaSpriteBlitState.duDx - u - 1) / JavaSpriteBlitState.duDx;
+                            column += skip;
+                            u += JavaSpriteBlitState.duDx * skip;
+                            dstIndex += skip;
                         }
-                        @Pc(1214) int local1214;
-                        if ((local1214 = (local30 + 1 - (super.anInt9302 << 12) - Static513.anInt9321) / Static513.anInt9321) > local34) {
-                            local34 = local1214;
+                        @Pc(1214) int uBound;
+                        if ((uBound = (u + 1 - (super.anInt9302 << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
+                            column = uBound;
                         }
-                        local64 = arg0[local16] - arg2;
-                        local69 = -arg1[local16];
-                        local75 = local64 + Static513.anInt9292 - local28;
-                        if (local75 > 0) {
-                            local28 += local75;
-                            local34 += local75;
-                            local30 += Static513.anInt9321 * local75;
-                            local32 += Static513.anInt9309 * local75;
+                        maskStart = lineOffsets[maskIndex] - maskOffsetX;
+                        maskCount = -lineWidths[maskIndex];
+                        maskSkip = maskStart + JavaSpriteBlitState.rowOffset - dstIndex;
+                        if (maskSkip > 0) {
+                            dstIndex += maskSkip;
+                            column += maskSkip;
+                            u += JavaSpriteBlitState.duDx * maskSkip;
+                            v += JavaSpriteBlitState.dvDx * maskSkip;
                         } else {
-                            local69 -= local75;
+                            maskCount -= maskSkip;
                         }
-                        if (local34 < local69) {
-                            local34 = local69;
+                        if (column < maskCount) {
+                            column = maskCount;
                         }
-                        while (local34 < 0) {
-                            local122 = this.anIntArray32[(local32 >> 12) * super.anInt9302 + (local30 >> 12)];
-                            if (local122 == 0) {
-                                local28++;
+                        while (column < 0) {
+                            src = this.anIntArray32[(v >> 12) * super.anInt9302 + (u >> 12)];
+                            if (src == 0) {
+                                dstIndex++;
                             } else {
-                                local3[local28++] = local122;
+                                raster[dstIndex++] = src;
                             }
-                            local30 += Static513.anInt9321;
-                            local34++;
+                            u += JavaSpriteBlitState.duDx;
+                            column++;
                         }
                     }
                 }
-                local11++;
-                Static513.anInt9310 += Static513.anInt9311;
-                Static513.anInt9317 += Static513.anInt9293;
-                Static513.anInt9292 += Static513.anInt9291;
+                row++;
+                JavaSpriteBlitState.rowU += JavaSpriteBlitState.duDy;
+                JavaSpriteBlitState.rowV += JavaSpriteBlitState.dvDy;
+                JavaSpriteBlitState.rowOffset += JavaSpriteBlitState.dstStride;
             }
-        } else if (Static513.anInt9309 < 0) {
-            local11 = Static513.anInt9297;
-            while (local11 < 0) {
-                local16 = local11 + arg3;
-                if (local16 >= 0) {
-                    if (local16 >= arg0.length) {
+        } else if (JavaSpriteBlitState.dvDx < 0) {
+            row = JavaSpriteBlitState.negativeHeight;
+            while (row < 0) {
+                maskIndex = row + maskOffsetY;
+                if (maskIndex >= 0) {
+                    if (maskIndex >= lineOffsets.length) {
                         return;
                     }
-                    local28 = Static513.anInt9292;
-                    local30 = Static513.anInt9310 + Static513.anInt9318;
-                    local32 = Static513.anInt9317 + Static513.anInt9316;
-                    local34 = Static513.anInt9303;
-                    if (local30 < 0) {
-                        local201 = (Static513.anInt9321 - local30 - 1) / Static513.anInt9321;
-                        local34 += local201;
-                        local30 += Static513.anInt9321 * local201;
-                        local32 += Static513.anInt9309 * local201;
-                        local28 += local201;
+                    dstIndex = JavaSpriteBlitState.rowOffset;
+                    u = JavaSpriteBlitState.rowU + JavaSpriteBlitState.uBias;
+                    v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
+                    column = JavaSpriteBlitState.negativeWidth;
+                    if (u < 0) {
+                        skip = (JavaSpriteBlitState.duDx - u - 1) / JavaSpriteBlitState.duDx;
+                        column += skip;
+                        u += JavaSpriteBlitState.duDx * skip;
+                        v += JavaSpriteBlitState.dvDx * skip;
+                        dstIndex += skip;
                     }
-                    @Pc(1393) int local1393;
-                    if ((local1393 = (local30 + 1 - (super.anInt9302 << 12) - Static513.anInt9321) / Static513.anInt9321) > local34) {
-                        local34 = local1393;
+                    @Pc(1393) int uBound;
+                    if ((uBound = (u + 1 - (super.anInt9302 << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
+                        column = uBound;
                     }
-                    @Pc(1405) int local1405;
-                    if ((local1405 = local32 - (super.anInt9306 << 12)) >= 0) {
-                        local201 = (Static513.anInt9309 - local1405) / Static513.anInt9309;
-                        local34 += local201;
-                        local30 += Static513.anInt9321 * local201;
-                        local32 += Static513.anInt9309 * local201;
-                        local28 += local201;
+                    @Pc(1405) int vOverrun;
+                    if ((vOverrun = v - (super.anInt9306 << 12)) >= 0) {
+                        skip = (JavaSpriteBlitState.dvDx - vOverrun) / JavaSpriteBlitState.dvDx;
+                        column += skip;
+                        u += JavaSpriteBlitState.duDx * skip;
+                        v += JavaSpriteBlitState.dvDx * skip;
+                        dstIndex += skip;
                     }
-                    @Pc(1439) int local1439;
-                    if ((local1439 = (local32 - Static513.anInt9309) / Static513.anInt9309) > local34) {
-                        local34 = local1439;
+                    @Pc(1439) int vBound;
+                    if ((vBound = (v - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
+                        column = vBound;
                     }
-                    local64 = arg0[local16] - arg2;
-                    local69 = -arg1[local16];
-                    local75 = local64 + Static513.anInt9292 - local28;
-                    if (local75 > 0) {
-                        local28 += local75;
-                        local34 += local75;
-                        local30 += Static513.anInt9321 * local75;
-                        local32 += Static513.anInt9309 * local75;
+                    maskStart = lineOffsets[maskIndex] - maskOffsetX;
+                    maskCount = -lineWidths[maskIndex];
+                    maskSkip = maskStart + JavaSpriteBlitState.rowOffset - dstIndex;
+                    if (maskSkip > 0) {
+                        dstIndex += maskSkip;
+                        column += maskSkip;
+                        u += JavaSpriteBlitState.duDx * maskSkip;
+                        v += JavaSpriteBlitState.dvDx * maskSkip;
                     } else {
-                        local69 -= local75;
+                        maskCount -= maskSkip;
                     }
-                    if (local34 < local69) {
-                        local34 = local69;
+                    if (column < maskCount) {
+                        column = maskCount;
                     }
-                    while (local34 < 0) {
-                        local122 = this.anIntArray32[(local32 >> 12) * super.anInt9302 + (local30 >> 12)];
-                        if (local122 == 0) {
-                            local28++;
+                    while (column < 0) {
+                        src = this.anIntArray32[(v >> 12) * super.anInt9302 + (u >> 12)];
+                        if (src == 0) {
+                            dstIndex++;
                         } else {
-                            local3[local28++] = local122;
+                            raster[dstIndex++] = src;
                         }
-                        local30 += Static513.anInt9321;
-                        local32 += Static513.anInt9309;
-                        local34++;
+                        u += JavaSpriteBlitState.duDx;
+                        v += JavaSpriteBlitState.dvDx;
+                        column++;
                     }
                 }
-                local11++;
-                Static513.anInt9310 += Static513.anInt9311;
-                Static513.anInt9317 += Static513.anInt9293;
-                Static513.anInt9292 += Static513.anInt9291;
+                row++;
+                JavaSpriteBlitState.rowU += JavaSpriteBlitState.duDy;
+                JavaSpriteBlitState.rowV += JavaSpriteBlitState.dvDy;
+                JavaSpriteBlitState.rowOffset += JavaSpriteBlitState.dstStride;
             }
         } else {
-            local11 = Static513.anInt9297;
-            while (local11 < 0) {
-                local16 = local11 + arg3;
-                if (local16 >= 0) {
-                    if (local16 >= arg0.length) {
+            row = JavaSpriteBlitState.negativeHeight;
+            while (row < 0) {
+                maskIndex = row + maskOffsetY;
+                if (maskIndex >= 0) {
+                    if (maskIndex >= lineOffsets.length) {
                         return;
                     }
-                    local28 = Static513.anInt9292;
-                    local30 = Static513.anInt9310 + Static513.anInt9318;
-                    local32 = Static513.anInt9317 + Static513.anInt9316;
-                    local34 = Static513.anInt9303;
-                    if (local30 < 0) {
-                        local201 = (Static513.anInt9321 - local30 - 1) / Static513.anInt9321;
-                        local34 += local201;
-                        local30 += Static513.anInt9321 * local201;
-                        local32 += Static513.anInt9309 * local201;
-                        local28 += local201;
+                    dstIndex = JavaSpriteBlitState.rowOffset;
+                    u = JavaSpriteBlitState.rowU + JavaSpriteBlitState.uBias;
+                    v = JavaSpriteBlitState.rowV + JavaSpriteBlitState.vBias;
+                    column = JavaSpriteBlitState.negativeWidth;
+                    if (u < 0) {
+                        skip = (JavaSpriteBlitState.duDx - u - 1) / JavaSpriteBlitState.duDx;
+                        column += skip;
+                        u += JavaSpriteBlitState.duDx * skip;
+                        v += JavaSpriteBlitState.dvDx * skip;
+                        dstIndex += skip;
                     }
-                    @Pc(1620) int local1620;
-                    if ((local1620 = (local30 + 1 - (super.anInt9302 << 12) - Static513.anInt9321) / Static513.anInt9321) > local34) {
-                        local34 = local1620;
+                    @Pc(1620) int uBound;
+                    if ((uBound = (u + 1 - (super.anInt9302 << 12) - JavaSpriteBlitState.duDx) / JavaSpriteBlitState.duDx) > column) {
+                        column = uBound;
                     }
-                    if (local32 < 0) {
-                        local201 = (Static513.anInt9309 - local32 - 1) / Static513.anInt9309;
-                        local34 += local201;
-                        local30 += Static513.anInt9321 * local201;
-                        local32 += Static513.anInt9309 * local201;
-                        local28 += local201;
+                    if (v < 0) {
+                        skip = (JavaSpriteBlitState.dvDx - v - 1) / JavaSpriteBlitState.dvDx;
+                        column += skip;
+                        u += JavaSpriteBlitState.duDx * skip;
+                        v += JavaSpriteBlitState.dvDx * skip;
+                        dstIndex += skip;
                     }
-                    @Pc(1668) int local1668;
-                    if ((local1668 = (local32 + 1 - (super.anInt9306 << 12) - Static513.anInt9309) / Static513.anInt9309) > local34) {
-                        local34 = local1668;
+                    @Pc(1668) int vBound;
+                    if ((vBound = (v + 1 - (super.anInt9306 << 12) - JavaSpriteBlitState.dvDx) / JavaSpriteBlitState.dvDx) > column) {
+                        column = vBound;
                     }
-                    local64 = arg0[local16] - arg2;
-                    local69 = -arg1[local16];
-                    local75 = local64 + Static513.anInt9292 - local28;
-                    if (local75 > 0) {
-                        local28 += local75;
-                        local34 += local75;
-                        local30 += Static513.anInt9321 * local75;
-                        local32 += Static513.anInt9309 * local75;
+                    maskStart = lineOffsets[maskIndex] - maskOffsetX;
+                    maskCount = -lineWidths[maskIndex];
+                    maskSkip = maskStart + JavaSpriteBlitState.rowOffset - dstIndex;
+                    if (maskSkip > 0) {
+                        dstIndex += maskSkip;
+                        column += maskSkip;
+                        u += JavaSpriteBlitState.duDx * maskSkip;
+                        v += JavaSpriteBlitState.dvDx * maskSkip;
                     } else {
-                        local69 -= local75;
+                        maskCount -= maskSkip;
                     }
-                    if (local34 < local69) {
-                        local34 = local69;
+                    if (column < maskCount) {
+                        column = maskCount;
                     }
-                    while (local34 < 0) {
-                        local122 = this.anIntArray32[(local32 >> 12) * super.anInt9302 + (local30 >> 12)];
-                        if (local122 == 0) {
-                            local28++;
+                    while (column < 0) {
+                        src = this.anIntArray32[(v >> 12) * super.anInt9302 + (u >> 12)];
+                        if (src == 0) {
+                            dstIndex++;
                         } else {
-                            local3[local28++] = local122;
+                            raster[dstIndex++] = src;
                         }
-                        local30 += Static513.anInt9321;
-                        local32 += Static513.anInt9309;
-                        local34++;
+                        u += JavaSpriteBlitState.duDx;
+                        v += JavaSpriteBlitState.dvDx;
+                        column++;
                     }
                 }
-                local11++;
-                Static513.anInt9310 += Static513.anInt9311;
-                Static513.anInt9317 += Static513.anInt9293;
-                Static513.anInt9292 += Static513.anInt9291;
+                row++;
+                JavaSpriteBlitState.rowU += JavaSpriteBlitState.duDy;
+                JavaSpriteBlitState.rowV += JavaSpriteBlitState.dvDy;
+                JavaSpriteBlitState.rowOffset += JavaSpriteBlitState.dstStride;
             }
         }
     }
@@ -2304,55 +2304,55 @@ public final class JavaRgbSprite extends JavaSprite {
         if (super.toolkit.stopped()) {
             throw new IllegalStateException();
         } else if (width > 0 && height > 0) {
-            @Pc(18) int local18 = 0;
-            @Pc(20) int local20 = 0;
-            @Pc(24) int local24 = super.toolkit.surfaceWidth;
-            @Pc(33) int local33 = super.anInt9298 + super.anInt9302 + super.anInt9295;
-            @Pc(42) int local42 = super.anInt9308 + super.anInt9306 + super.anInt9294;
-            @Pc(48) int local48 = (local33 << 16) / width;
-            @Pc(54) int local54 = (local42 << 16) / height;
-            @Pc(68) int local68;
-            if (super.anInt9298 > 0) {
-                local68 = ((super.anInt9298 << 16) + local48 - 1) / local48;
-                x += local68;
-                local18 = local68 * local48 - (super.anInt9298 << 16);
+            @Pc(18) int u = 0;
+            @Pc(20) int v = 0;
+            @Pc(24) int dstStride = super.toolkit.surfaceWidth;
+            @Pc(33) int scaleWidth = super.leftMargin + super.anInt9302 + super.rightMargin;
+            @Pc(42) int scaleHeight = super.topMargin + super.anInt9306 + super.bottomMargin;
+            @Pc(48) int uStep = (scaleWidth << 16) / width;
+            @Pc(54) int vStep = (scaleHeight << 16) / height;
+            @Pc(68) int offset;
+            if (super.leftMargin > 0) {
+                offset = ((super.leftMargin << 16) + uStep - 1) / uStep;
+                x += offset;
+                u = offset * uStep - (super.leftMargin << 16);
             }
-            if (super.anInt9308 > 0) {
-                local68 = ((super.anInt9308 << 16) + local54 - 1) / local54;
-                y += local68;
-                local20 = local68 * local54 - (super.anInt9308 << 16);
+            if (super.topMargin > 0) {
+                offset = ((super.topMargin << 16) + vStep - 1) / vStep;
+                y += offset;
+                v = offset * vStep - (super.topMargin << 16);
             }
-            if (super.anInt9302 < local33) {
-                width = ((super.anInt9302 << 16) + local48 - local18 - 1) / local48;
+            if (super.anInt9302 < scaleWidth) {
+                width = ((super.anInt9302 << 16) + uStep - u - 1) / uStep;
             }
-            if (super.anInt9306 < local42) {
-                height = ((super.anInt9306 << 16) + local54 - local20 - 1) / local54;
+            if (super.anInt9306 < scaleHeight) {
+                height = ((super.anInt9306 << 16) + vStep - v - 1) / vStep;
             }
-            local68 = x + y * local24;
-            @Pc(156) int local156 = local24 - width;
+            offset = x + y * dstStride;
+            @Pc(156) int dstStep = dstStride - width;
             if (y + height > super.toolkit.clipY2) {
                 height -= y + height - super.toolkit.clipY2;
             }
-            @Pc(184) int local184;
+            @Pc(184) int clip;
             if (y < super.toolkit.clipY1) {
-                local184 = super.toolkit.clipY1 - y;
-                height -= local184;
-                local68 += local184 * local24;
-                local20 += local54 * local184;
+                clip = super.toolkit.clipY1 - y;
+                height -= clip;
+                offset += clip * dstStride;
+                v += vStep * clip;
             }
             if (x + width > super.toolkit.clipX2) {
-                local184 = x + width - super.toolkit.clipX2;
-                width -= local184;
-                local156 += local184;
+                clip = x + width - super.toolkit.clipX2;
+                width -= clip;
+                dstStep += clip;
             }
             if (x < super.toolkit.clipX1) {
-                local184 = super.toolkit.clipX1 - x;
-                width -= local184;
-                local68 += local184;
-                local18 += local48 * local184;
-                local156 += local184;
+                clip = super.toolkit.clipX1 - x;
+                width -= clip;
+                offset += clip;
+                u += uStep * clip;
+                dstStep += clip;
             }
-            @Pc(256) int[] local256 = super.toolkit.surfaceRaster;
+            @Pc(256) int[] raster = super.toolkit.surfaceRaster;
             @Pc(265) int local265;
             @Pc(268) int local268;
             @Pc(276) int local276;
@@ -2364,49 +2364,49 @@ public final class JavaRgbSprite extends JavaSprite {
             @Pc(366) int local366;
             @Pc(374) int local374;
             @Pc(382) int local382;
-            @Pc(534) int local534;
+            @Pc(534) int lerpColour;
             if (mode != 0) {
                 @Pc(854) int local854;
                 @Pc(862) int local862;
                 @Pc(874) int local874;
                 if (mode == 1) {
                     if (op == 1) {
-                        local265 = local18;
+                        local265 = u;
                         for (local268 = -height; local268 < 0; local268++) {
-                            local276 = (local20 >> 16) * super.anInt9302;
+                            local276 = (v >> 16) * super.anInt9302;
                             for (local279 = -width; local279 < 0; local279++) {
-                                local337 = this.anIntArray32[(local18 >> 16) + local276];
+                                local337 = this.anIntArray32[(u >> 16) + local276];
                                 if (local337 == 0) {
-                                    local68++;
+                                    offset++;
                                 } else {
-                                    local256[local68++] = local337;
+                                    raster[offset++] = local337;
                                 }
-                                local18 += local48;
+                                u += uStep;
                             }
-                            local20 += local54;
-                            local18 = local265;
-                            local68 += local156;
+                            v += vStep;
+                            u = local265;
+                            offset += dstStep;
                         }
                     } else if (op == 0) {
-                        local265 = local18;
+                        local265 = u;
                         if ((colour & 0xFFFFFF) == 16777215) {
                             local268 = colour >>> 24;
                             local276 = 256 - local268;
                             for (local279 = -height; local279 < 0; local279++) {
-                                local337 = (local20 >> 16) * super.anInt9302;
+                                local337 = (v >> 16) * super.anInt9302;
                                 for (local345 = -width; local345 < 0; local345++) {
-                                    local348 = this.anIntArray32[(local18 >> 16) + local337];
+                                    local348 = this.anIntArray32[(u >> 16) + local337];
                                     if (local348 == 0) {
-                                        local68++;
+                                        offset++;
                                     } else {
-                                        local358 = local256[local68];
-                                        local256[local68++] = ((local348 & 0xFF00FF) * local268 + (local358 & 0xFF00FF) * local276 & 0xFF00FF00) + ((local348 & 0xFF00) * local268 + (local358 & 0xFF00) * local276 & 0xFF0000) >> 8;
+                                        local358 = raster[offset];
+                                        raster[offset++] = ((local348 & 0xFF00FF) * local268 + (local358 & 0xFF00FF) * local276 & 0xFF00FF00) + ((local348 & 0xFF00) * local268 + (local358 & 0xFF00) * local276 & 0xFF0000) >> 8;
                                     }
-                                    local18 += local48;
+                                    u += uStep;
                                 }
-                                local20 += local54;
-                                local18 = local265;
-                                local68 += local156;
+                                v += vStep;
+                                u = local265;
+                                offset += dstStep;
                             }
                         } else {
                             local268 = colour >> 16 & 0xFF;
@@ -2415,78 +2415,78 @@ public final class JavaRgbSprite extends JavaSprite {
                             local337 = colour >>> 24;
                             local345 = 256 - local337;
                             for (local348 = -height; local348 < 0; local348++) {
-                                local358 = (local20 >> 16) * super.anInt9302;
+                                local358 = (v >> 16) * super.anInt9302;
                                 for (local366 = -width; local366 < 0; local366++) {
-                                    local374 = this.anIntArray32[(local18 >> 16) + local358];
+                                    local374 = this.anIntArray32[(u >> 16) + local358];
                                     if (local374 == 0) {
-                                        local68++;
+                                        offset++;
                                     } else if (local337 == 255) {
                                         local382 = (local374 & 0xFF0000) * local268 & 0xFF000000;
                                         local854 = (local374 & 0xFF00) * local276 & 0xFF0000;
                                         local862 = (local374 & 0xFF) * local279 & 0xFF00;
-                                        local256[local68++] = (local382 | local854 | local862) >>> 8;
+                                        raster[offset++] = (local382 | local854 | local862) >>> 8;
                                     } else {
                                         local382 = (local374 & 0xFF0000) * local268 & 0xFF000000;
                                         local854 = (local374 & 0xFF00) * local276 & 0xFF0000;
                                         local862 = (local374 & 0xFF) * local279 & 0xFF00;
                                         local374 = (local382 | local854 | local862) >>> 8;
-                                        local874 = local256[local68];
-                                        local256[local68++] = ((local374 & 0xFF00FF) * local337 + (local874 & 0xFF00FF) * local345 & 0xFF00FF00) + ((local374 & 0xFF00) * local337 + (local874 & 0xFF00) * local345 & 0xFF0000) >> 8;
+                                        local874 = raster[offset];
+                                        raster[offset++] = ((local374 & 0xFF00FF) * local337 + (local874 & 0xFF00FF) * local345 & 0xFF00FF00) + ((local374 & 0xFF00) * local337 + (local874 & 0xFF00) * local345 & 0xFF0000) >> 8;
                                     }
-                                    local18 += local48;
+                                    u += uStep;
                                 }
-                                local20 += local54;
-                                local18 = local265;
-                                local68 += local156;
+                                v += vStep;
+                                u = local265;
+                                offset += dstStep;
                             }
                         }
                     } else if (op == 3) {
-                        local265 = local18;
+                        local265 = u;
                         local268 = colour >>> 24;
                         local276 = 256 - local268;
                         for (local279 = -height; local279 < 0; local279++) {
-                            local337 = (local20 >> 16) * super.anInt9302;
+                            local337 = (v >> 16) * super.anInt9302;
                             for (local345 = -width; local345 < 0; local345++) {
-                                local348 = this.anIntArray32[(local18 >> 16) + local337];
+                                local348 = this.anIntArray32[(u >> 16) + local337];
                                 local358 = local348 + colour;
                                 local366 = (local348 & 0xFF00FF) + (colour & 0xFF00FF);
                                 local374 = (local366 & 0x1000100) + (local358 - local366 & 0x10000);
                                 local374 = local358 - local374 | local374 - (local374 >>> 8);
                                 if (local348 == 0 && local268 != 255) {
                                     local348 = local374;
-                                    local374 = local256[local68];
+                                    local374 = raster[offset];
                                     local374 = ((local348 & 0xFF00FF) * local268 + (local374 & 0xFF00FF) * local276 & 0xFF00FF00) + ((local348 & 0xFF00) * local268 + (local374 & 0xFF00) * local276 & 0xFF0000) >> 8;
                                 }
-                                local256[local68++] = local374;
-                                local18 += local48;
+                                raster[offset++] = local374;
+                                u += uStep;
                             }
-                            local20 += local54;
-                            local18 = local265;
-                            local68 += local156;
+                            v += vStep;
+                            u = local265;
+                            offset += dstStep;
                         }
                     } else if (op == 2) {
                         local265 = colour >>> 24;
                         local268 = 256 - local265;
                         local276 = (colour & 0xFF00FF) * local268 & 0xFF00FF00;
                         local279 = (colour & 0xFF00) * local268 & 0xFF0000;
-                        local534 = (local276 | local279) >>> 8;
-                        local337 = local18;
+                        lerpColour = (local276 | local279) >>> 8;
+                        local337 = u;
                         for (local345 = -height; local345 < 0; local345++) {
-                            local348 = (local20 >> 16) * super.anInt9302;
+                            local348 = (v >> 16) * super.anInt9302;
                             for (local358 = -width; local358 < 0; local358++) {
-                                local366 = this.anIntArray32[(local18 >> 16) + local348];
+                                local366 = this.anIntArray32[(u >> 16) + local348];
                                 if (local366 == 0) {
-                                    local68++;
+                                    offset++;
                                 } else {
                                     local276 = (local366 & 0xFF00FF) * local265 & 0xFF00FF00;
                                     local279 = (local366 & 0xFF00) * local265 & 0xFF0000;
-                                    local256[local68++] = ((local276 | local279) >>> 8) + local534;
+                                    raster[offset++] = ((local276 | local279) >>> 8) + lerpColour;
                                 }
-                                local18 += local48;
+                                u += uStep;
                             }
-                            local20 += local54;
-                            local18 = local337;
-                            local68 += local156;
+                            v += vStep;
+                            u = local337;
+                            offset += dstStep;
                         }
                     } else {
                         throw new IllegalArgumentException();
@@ -2494,173 +2494,173 @@ public final class JavaRgbSprite extends JavaSprite {
                 } else if (mode != 2) {
                     throw new IllegalArgumentException();
                 } else if (op == 1) {
-                    local265 = local18;
+                    local265 = u;
                     for (local268 = -height; local268 < 0; local268++) {
-                        local276 = (local20 >> 16) * super.anInt9302;
+                        local276 = (v >> 16) * super.anInt9302;
                         for (local279 = -width; local279 < 0; local279++) {
-                            local337 = this.anIntArray32[(local18 >> 16) + local276];
+                            local337 = this.anIntArray32[(u >> 16) + local276];
                             if (local337 == 0) {
-                                local68++;
+                                offset++;
                             } else {
-                                local345 = local256[local68];
+                                local345 = raster[offset];
                                 local348 = local337 + local345;
                                 local358 = (local337 & 0xFF00FF) + (local345 & 0xFF00FF);
                                 local345 = (local358 & 0x1000100) + (local348 - local358 & 0x10000);
-                                local256[local68++] = local348 - local345 | local345 - (local345 >>> 8);
+                                raster[offset++] = local348 - local345 | local345 - (local345 >>> 8);
                             }
-                            local18 += local48;
+                            u += uStep;
                         }
-                        local20 += local54;
-                        local18 = local265;
-                        local68 += local156;
+                        v += vStep;
+                        u = local265;
+                        offset += dstStep;
                     }
                 } else if (op == 0) {
-                    local265 = local18;
+                    local265 = u;
                     local268 = colour >> 16 & 0xFF;
                     local276 = colour >> 8 & 0xFF;
                     local279 = colour & 0xFF;
                     for (local337 = -height; local337 < 0; local337++) {
-                        local345 = (local20 >> 16) * super.anInt9302;
+                        local345 = (v >> 16) * super.anInt9302;
                         for (local348 = -width; local348 < 0; local348++) {
-                            local358 = this.anIntArray32[(local18 >> 16) + local345];
+                            local358 = this.anIntArray32[(u >> 16) + local345];
                             if (local358 == 0) {
-                                local68++;
+                                offset++;
                             } else {
                                 local366 = (local358 & 0xFF0000) * local268 & 0xFF000000;
                                 local374 = (local358 & 0xFF00) * local276 & 0xFF0000;
                                 local382 = (local358 & 0xFF) * local279 & 0xFF00;
                                 local358 = (local366 | local374 | local382) >>> 8;
-                                local854 = local256[local68];
+                                local854 = raster[offset];
                                 local862 = local358 + local854;
                                 local874 = (local358 & 0xFF00FF) + (local854 & 0xFF00FF);
                                 local854 = (local874 & 0x1000100) + (local862 - local874 & 0x10000);
-                                local256[local68++] = local862 - local854 | local854 - (local854 >>> 8);
+                                raster[offset++] = local862 - local854 | local854 - (local854 >>> 8);
                             }
-                            local18 += local48;
+                            u += uStep;
                         }
-                        local20 += local54;
-                        local18 = local265;
-                        local68 += local156;
+                        v += vStep;
+                        u = local265;
+                        offset += dstStep;
                     }
                 } else if (op == 3) {
-                    local265 = local18;
+                    local265 = u;
                     for (local268 = -height; local268 < 0; local268++) {
-                        local276 = (local20 >> 16) * super.anInt9302;
+                        local276 = (v >> 16) * super.anInt9302;
                         for (local279 = -width; local279 < 0; local279++) {
-                            local337 = this.anIntArray32[(local18 >> 16) + local276];
+                            local337 = this.anIntArray32[(u >> 16) + local276];
                             local345 = local337 + colour;
                             local348 = (local337 & 0xFF00FF) + (colour & 0xFF00FF);
                             local358 = (local348 & 0x1000100) + (local345 - local348 & 0x10000);
                             local337 = local345 - local358 | local358 - (local358 >>> 8);
-                            local358 = local256[local68];
+                            local358 = raster[offset];
                             local345 = local337 + local358;
                             local348 = (local337 & 0xFF00FF) + (local358 & 0xFF00FF);
                             local358 = (local348 & 0x1000100) + (local345 - local348 & 0x10000);
-                            local256[local68++] = local345 - local358 | local358 - (local358 >>> 8);
-                            local18 += local48;
+                            raster[offset++] = local345 - local358 | local358 - (local358 >>> 8);
+                            u += uStep;
                         }
-                        local20 += local54;
-                        local18 = local265;
-                        local68 += local156;
+                        v += vStep;
+                        u = local265;
+                        offset += dstStep;
                     }
                 } else if (op == 2) {
                     local265 = colour >>> 24;
                     local268 = 256 - local265;
                     local276 = (colour & 0xFF00FF) * local268 & 0xFF00FF00;
                     local279 = (colour & 0xFF00) * local268 & 0xFF0000;
-                    local534 = (local276 | local279) >>> 8;
-                    local337 = local18;
+                    lerpColour = (local276 | local279) >>> 8;
+                    local337 = u;
                     for (local345 = -height; local345 < 0; local345++) {
-                        local348 = (local20 >> 16) * super.anInt9302;
+                        local348 = (v >> 16) * super.anInt9302;
                         for (local358 = -width; local358 < 0; local358++) {
-                            local366 = this.anIntArray32[(local18 >> 16) + local348];
+                            local366 = this.anIntArray32[(u >> 16) + local348];
                             if (local366 == 0) {
-                                local68++;
+                                offset++;
                             } else {
                                 local276 = (local366 & 0xFF00FF) * local265 & 0xFF00FF00;
                                 local279 = (local366 & 0xFF00) * local265 & 0xFF0000;
-                                local366 = ((local276 | local279) >>> 8) + local534;
-                                local374 = local256[local68];
+                                local366 = ((local276 | local279) >>> 8) + lerpColour;
+                                local374 = raster[offset];
                                 local382 = local366 + local374;
                                 local854 = (local366 & 0xFF00FF) + (local374 & 0xFF00FF);
                                 @Pc(1695) int local1695 = (local854 & 0x1000100) + (local382 - local854 & 0x10000);
-                                local256[local68++] = local382 - local1695 | local1695 - (local1695 >>> 8);
+                                raster[offset++] = local382 - local1695 | local1695 - (local1695 >>> 8);
                             }
-                            local18 += local48;
+                            u += uStep;
                         }
-                        local20 += local54;
-                        local18 = local337;
-                        local68 += local156;
+                        v += vStep;
+                        u = local337;
+                        offset += dstStep;
                     }
                 } else {
                     throw new IllegalArgumentException();
                 }
             } else if (op == 1) {
-                local265 = local18;
+                local265 = u;
                 for (local268 = -height; local268 < 0; local268++) {
-                    local276 = (local20 >> 16) * super.anInt9302;
+                    local276 = (v >> 16) * super.anInt9302;
                     for (local279 = -width; local279 < 0; local279++) {
-                        local256[local68++] = this.anIntArray32[(local18 >> 16) + local276];
-                        local18 += local48;
+                        raster[offset++] = this.anIntArray32[(u >> 16) + local276];
+                        u += uStep;
                     }
-                    local20 += local54;
-                    local18 = local265;
-                    local68 += local156;
+                    v += vStep;
+                    u = local265;
+                    offset += dstStep;
                 }
             } else if (op == 0) {
                 local265 = colour >> 16 & 0xFF;
                 local268 = colour >> 8 & 0xFF;
                 local276 = colour & 0xFF;
-                local279 = local18;
+                local279 = u;
                 for (local337 = -height; local337 < 0; local337++) {
-                    local345 = (local20 >> 16) * super.anInt9302;
+                    local345 = (v >> 16) * super.anInt9302;
                     for (local348 = -width; local348 < 0; local348++) {
-                        local358 = this.anIntArray32[(local18 >> 16) + local345];
+                        local358 = this.anIntArray32[(u >> 16) + local345];
                         local366 = (local358 & 0xFF0000) * local265 & 0xFF000000;
                         local374 = (local358 & 0xFF00) * local268 & 0xFF0000;
                         local382 = (local358 & 0xFF) * local276 & 0xFF00;
-                        local256[local68++] = (local366 | local374 | local382) >>> 8;
-                        local18 += local48;
+                        raster[offset++] = (local366 | local374 | local382) >>> 8;
+                        u += uStep;
                     }
-                    local20 += local54;
-                    local18 = local279;
-                    local68 += local156;
+                    v += vStep;
+                    u = local279;
+                    offset += dstStep;
                 }
             } else if (op == 3) {
-                local265 = local18;
+                local265 = u;
                 for (local268 = -height; local268 < 0; local268++) {
-                    local276 = (local20 >> 16) * super.anInt9302;
+                    local276 = (v >> 16) * super.anInt9302;
                     for (local279 = -width; local279 < 0; local279++) {
-                        local337 = this.anIntArray32[(local18 >> 16) + local276];
+                        local337 = this.anIntArray32[(u >> 16) + local276];
                         local345 = local337 + colour;
                         local348 = (local337 & 0xFF00FF) + (colour & 0xFF00FF);
                         local358 = (local348 & 0x1000100) + (local345 - local348 & 0x10000);
-                        local256[local68++] = local345 - local358 | local358 - (local358 >>> 8);
-                        local18 += local48;
+                        raster[offset++] = local345 - local358 | local358 - (local358 >>> 8);
+                        u += uStep;
                     }
-                    local20 += local54;
-                    local18 = local265;
-                    local68 += local156;
+                    v += vStep;
+                    u = local265;
+                    offset += dstStep;
                 }
             } else if (op == 2) {
                 local265 = colour >>> 24;
                 local268 = 256 - local265;
                 local276 = (colour & 0xFF00FF) * local268 & 0xFF00FF00;
                 local279 = (colour & 0xFF00) * local268 & 0xFF0000;
-                local534 = (local276 | local279) >>> 8;
-                local337 = local18;
+                lerpColour = (local276 | local279) >>> 8;
+                local337 = u;
                 for (local345 = -height; local345 < 0; local345++) {
-                    local348 = (local20 >> 16) * super.anInt9302;
+                    local348 = (v >> 16) * super.anInt9302;
                     for (local358 = -width; local358 < 0; local358++) {
-                        local366 = this.anIntArray32[(local18 >> 16) + local348];
+                        local366 = this.anIntArray32[(u >> 16) + local348];
                         local276 = (local366 & 0xFF00FF) * local265 & 0xFF00FF00;
                         local279 = (local366 & 0xFF00) * local265 & 0xFF0000;
-                        local256[local68++] = ((local276 | local279) >>> 8) + local534;
-                        local18 += local48;
+                        raster[offset++] = ((local276 | local279) >>> 8) + lerpColour;
+                        u += uStep;
                     }
-                    local20 += local54;
-                    local18 = local337;
-                    local68 += local156;
+                    v += vStep;
+                    u = local337;
+                    offset += dstStep;
                 }
             } else {
                 throw new IllegalArgumentException();
@@ -2674,45 +2674,45 @@ public final class JavaRgbSprite extends JavaSprite {
         if (super.toolkit.stopped()) {
             throw new IllegalStateException();
         }
-        @Pc(12) int local12 = super.toolkit.surfaceWidth;
-        x += super.anInt9298;
-        y += super.anInt9308;
-        @Pc(28) int local28 = y * local12 + x;
-        @Pc(30) int local30 = 0;
-        @Pc(33) int local33 = super.anInt9306;
-        @Pc(36) int local36 = super.anInt9302;
-        @Pc(40) int local40 = local12 - local36;
-        @Pc(42) int local42 = 0;
-        @Pc(53) int local53;
+        @Pc(12) int dstStride = super.toolkit.surfaceWidth;
+        x += super.leftMargin;
+        y += super.topMargin;
+        @Pc(28) int dstIndex = y * dstStride + x;
+        @Pc(30) int srcIndex = 0;
+        @Pc(33) int height = super.anInt9306;
+        @Pc(36) int width = super.anInt9302;
+        @Pc(40) int dstStep = dstStride - width;
+        @Pc(42) int srcStep = 0;
+        @Pc(53) int clip;
         if (y < super.toolkit.clipY1) {
-            local53 = super.toolkit.clipY1 - y;
-            local33 -= local53;
+            clip = super.toolkit.clipY1 - y;
+            height -= clip;
             y = super.toolkit.clipY1;
-            local30 = local53 * local36;
-            local28 += local53 * local12;
+            srcIndex = clip * width;
+            dstIndex += clip * dstStride;
         }
-        if (y + local33 > super.toolkit.clipY2) {
-            local33 -= y + local33 - super.toolkit.clipY2;
+        if (y + height > super.toolkit.clipY2) {
+            height -= y + height - super.toolkit.clipY2;
         }
         if (x < super.toolkit.clipX1) {
-            local53 = super.toolkit.clipX1 - x;
-            local36 -= local53;
+            clip = super.toolkit.clipX1 - x;
+            width -= clip;
             x = super.toolkit.clipX1;
-            local30 += local53;
-            local28 += local53;
-            local42 = local53;
-            local40 += local53;
+            srcIndex += clip;
+            dstIndex += clip;
+            srcStep = clip;
+            dstStep += clip;
         }
-        if (x + local36 > super.toolkit.clipX2) {
-            local53 = x + local36 - super.toolkit.clipX2;
-            local36 -= local53;
-            local42 += local53;
-            local40 += local53;
+        if (x + width > super.toolkit.clipX2) {
+            clip = x + width - super.toolkit.clipX2;
+            width -= clip;
+            srcStep += clip;
+            dstStep += clip;
         }
-        if (local36 <= 0 || local33 <= 0) {
+        if (width <= 0 || height <= 0) {
             return;
         }
-        @Pc(164) int[] local164 = super.toolkit.surfaceRaster;
+        @Pc(164) int[] raster = super.toolkit.surfaceRaster;
         @Pc(174) int local174;
         @Pc(181) int local181;
         @Pc(267) int local267;
@@ -2722,69 +2722,69 @@ public final class JavaRgbSprite extends JavaSprite {
         @Pc(289) int local289;
         @Pc(297) int local297;
         @Pc(305) int local305;
-        @Pc(433) int local433;
+        @Pc(433) int lerpColour;
         if (mode != 0) {
             @Pc(764) int local764;
             @Pc(772) int local772;
             @Pc(784) int local784;
             if (mode == 1) {
                 if (op == 1) {
-                    for (local174 = -local33; local174 < 0; local174++) {
-                        local181 = local28 + local36 - 3;
-                        while (local28 < local181) {
-                            local267 = this.anIntArray32[local30++];
+                    for (local174 = -height; local174 < 0; local174++) {
+                        local181 = dstIndex + width - 3;
+                        while (dstIndex < local181) {
+                            local267 = this.anIntArray32[srcIndex++];
                             if (local267 == 0) {
-                                local28++;
+                                dstIndex++;
                             } else {
-                                local164[local28++] = local267;
+                                raster[dstIndex++] = local267;
                             }
-                            local267 = this.anIntArray32[local30++];
+                            local267 = this.anIntArray32[srcIndex++];
                             if (local267 == 0) {
-                                local28++;
+                                dstIndex++;
                             } else {
-                                local164[local28++] = local267;
+                                raster[dstIndex++] = local267;
                             }
-                            local267 = this.anIntArray32[local30++];
+                            local267 = this.anIntArray32[srcIndex++];
                             if (local267 == 0) {
-                                local28++;
+                                dstIndex++;
                             } else {
-                                local164[local28++] = local267;
+                                raster[dstIndex++] = local267;
                             }
-                            local267 = this.anIntArray32[local30++];
+                            local267 = this.anIntArray32[srcIndex++];
                             if (local267 == 0) {
-                                local28++;
+                                dstIndex++;
                             } else {
-                                local164[local28++] = local267;
+                                raster[dstIndex++] = local267;
                             }
                         }
                         local181 += 3;
-                        while (local28 < local181) {
-                            local267 = this.anIntArray32[local30++];
+                        while (dstIndex < local181) {
+                            local267 = this.anIntArray32[srcIndex++];
                             if (local267 == 0) {
-                                local28++;
+                                dstIndex++;
                             } else {
-                                local164[local28++] = local267;
+                                raster[dstIndex++] = local267;
                             }
                         }
-                        local28 += local40;
-                        local30 += local42;
+                        dstIndex += dstStep;
+                        srcIndex += srcStep;
                     }
                 } else if (op == 0) {
                     if ((color & 0xFFFFFF) == 16777215) {
                         local174 = color >>> 24;
                         local181 = 256 - local174;
-                        for (local267 = -local33; local267 < 0; local267++) {
-                            for (local270 = -local36; local270 < 0; local270++) {
-                                local274 = this.anIntArray32[local30++];
+                        for (local267 = -height; local267 < 0; local267++) {
+                            for (local270 = -width; local270 < 0; local270++) {
+                                local274 = this.anIntArray32[srcIndex++];
                                 if (local274 == 0) {
-                                    local28++;
+                                    dstIndex++;
                                 } else {
-                                    local281 = local164[local28];
-                                    local164[local28++] = ((local274 & 0xFF00FF) * local174 + (local281 & 0xFF00FF) * local181 & 0xFF00FF00) + ((local274 & 0xFF00) * local174 + (local281 & 0xFF00) * local181 & 0xFF0000) >> 8;
+                                    local281 = raster[dstIndex];
+                                    raster[dstIndex++] = ((local274 & 0xFF00FF) * local174 + (local281 & 0xFF00FF) * local181 & 0xFF00FF00) + ((local274 & 0xFF00) * local174 + (local281 & 0xFF00) * local181 & 0xFF0000) >> 8;
                                 }
                             }
-                            local28 += local40;
-                            local30 += local42;
+                            dstIndex += dstStep;
+                            srcIndex += srcStep;
                         }
                     } else {
                         local174 = color >> 16 & 0xFF;
@@ -2792,68 +2792,68 @@ public final class JavaRgbSprite extends JavaSprite {
                         local267 = color & 0xFF;
                         local270 = color >>> 24;
                         local274 = 256 - local270;
-                        for (local281 = -local33; local281 < 0; local281++) {
-                            for (local289 = -local36; local289 < 0; local289++) {
-                                local297 = this.anIntArray32[local30++];
+                        for (local281 = -height; local281 < 0; local281++) {
+                            for (local289 = -width; local289 < 0; local289++) {
+                                local297 = this.anIntArray32[srcIndex++];
                                 if (local297 == 0) {
-                                    local28++;
+                                    dstIndex++;
                                 } else if (local270 == 255) {
                                     local305 = (local297 & 0xFF0000) * local174 & 0xFF000000;
                                     local764 = (local297 & 0xFF00) * local181 & 0xFF0000;
                                     local772 = (local297 & 0xFF) * local267 & 0xFF00;
-                                    local164[local28++] = (local305 | local764 | local772) >>> 8;
+                                    raster[dstIndex++] = (local305 | local764 | local772) >>> 8;
                                 } else {
                                     local305 = (local297 & 0xFF0000) * local174 & 0xFF000000;
                                     local764 = (local297 & 0xFF00) * local181 & 0xFF0000;
                                     local772 = (local297 & 0xFF) * local267 & 0xFF00;
                                     local297 = (local305 | local764 | local772) >>> 8;
-                                    local784 = local164[local28];
-                                    local164[local28++] = ((local297 & 0xFF00FF) * local270 + (local784 & 0xFF00FF) * local274 & 0xFF00FF00) + ((local297 & 0xFF00) * local270 + (local784 & 0xFF00) * local274 & 0xFF0000) >> 8;
+                                    local784 = raster[dstIndex];
+                                    raster[dstIndex++] = ((local297 & 0xFF00FF) * local270 + (local784 & 0xFF00FF) * local274 & 0xFF00FF00) + ((local297 & 0xFF00) * local270 + (local784 & 0xFF00) * local274 & 0xFF0000) >> 8;
                                 }
                             }
-                            local28 += local40;
-                            local30 += local42;
+                            dstIndex += dstStep;
+                            srcIndex += srcStep;
                         }
                     }
                 } else if (op == 3) {
                     local174 = color >>> 24;
                     local181 = 256 - local174;
-                    for (local267 = -local33; local267 < 0; local267++) {
-                        for (local270 = -local36; local270 < 0; local270++) {
-                            local274 = this.anIntArray32[local30++];
+                    for (local267 = -height; local267 < 0; local267++) {
+                        for (local270 = -width; local270 < 0; local270++) {
+                            local274 = this.anIntArray32[srcIndex++];
                             local281 = local274 + color;
                             local289 = (local274 & 0xFF00FF) + (color & 0xFF00FF);
                             local297 = (local289 & 0x1000100) + (local281 - local289 & 0x10000);
                             local297 = local281 - local297 | local297 - (local297 >>> 8);
                             if (local274 == 0 && local174 != 255) {
                                 local274 = local297;
-                                local297 = local164[local28];
+                                local297 = raster[dstIndex];
                                 local297 = ((local274 & 0xFF00FF) * local174 + (local297 & 0xFF00FF) * local181 & 0xFF00FF00) + ((local274 & 0xFF00) * local174 + (local297 & 0xFF00) * local181 & 0xFF0000) >> 8;
                             }
-                            local164[local28++] = local297;
+                            raster[dstIndex++] = local297;
                         }
-                        local28 += local40;
-                        local30 += local42;
+                        dstIndex += dstStep;
+                        srcIndex += srcStep;
                     }
                 } else if (op == 2) {
                     local174 = color >>> 24;
                     local181 = 256 - local174;
                     local267 = (color & 0xFF00FF) * local181 & 0xFF00FF00;
                     local270 = (color & 0xFF00) * local181 & 0xFF0000;
-                    local433 = (local267 | local270) >>> 8;
-                    for (local274 = -local33; local274 < 0; local274++) {
-                        for (local281 = -local36; local281 < 0; local281++) {
-                            local289 = this.anIntArray32[local30++];
+                    lerpColour = (local267 | local270) >>> 8;
+                    for (local274 = -height; local274 < 0; local274++) {
+                        for (local281 = -width; local281 < 0; local281++) {
+                            local289 = this.anIntArray32[srcIndex++];
                             if (local289 == 0) {
-                                local28++;
+                                dstIndex++;
                             } else {
                                 local267 = (local289 & 0xFF00FF) * local174 & 0xFF00FF00;
                                 local270 = (local289 & 0xFF00) * local174 & 0xFF0000;
-                                local164[local28++] = ((local267 | local270) >>> 8) + local433;
+                                raster[dstIndex++] = ((local267 | local270) >>> 8) + lerpColour;
                             }
                         }
-                        local28 += local40;
-                        local30 += local42;
+                        dstIndex += dstStep;
+                        srcIndex += srcStep;
                     }
                 } else {
                     throw new IllegalArgumentException();
@@ -2861,149 +2861,149 @@ public final class JavaRgbSprite extends JavaSprite {
             } else if (mode != 2) {
                 throw new IllegalArgumentException();
             } else if (op == 1) {
-                for (local174 = -local33; local174 < 0; local174++) {
-                    for (local181 = -local36; local181 < 0; local181++) {
-                        local267 = this.anIntArray32[local30++];
+                for (local174 = -height; local174 < 0; local174++) {
+                    for (local181 = -width; local181 < 0; local181++) {
+                        local267 = this.anIntArray32[srcIndex++];
                         if (local267 == 0) {
-                            local28++;
+                            dstIndex++;
                         } else {
-                            local270 = local164[local28];
+                            local270 = raster[dstIndex];
                             local274 = local267 + local270;
                             local281 = (local267 & 0xFF00FF) + (local270 & 0xFF00FF);
                             local270 = (local281 & 0x1000100) + (local274 - local281 & 0x10000);
-                            local164[local28++] = local274 - local270 | local270 - (local270 >>> 8);
+                            raster[dstIndex++] = local274 - local270 | local270 - (local270 >>> 8);
                         }
                     }
-                    local28 += local40;
-                    local30 += local42;
+                    dstIndex += dstStep;
+                    srcIndex += srcStep;
                 }
             } else if (op == 0) {
                 local174 = color >> 16 & 0xFF;
                 local181 = color >> 8 & 0xFF;
                 local267 = color & 0xFF;
-                for (local270 = -local33; local270 < 0; local270++) {
-                    for (local274 = -local36; local274 < 0; local274++) {
-                        local281 = this.anIntArray32[local30++];
+                for (local270 = -height; local270 < 0; local270++) {
+                    for (local274 = -width; local274 < 0; local274++) {
+                        local281 = this.anIntArray32[srcIndex++];
                         if (local281 == 0) {
-                            local28++;
+                            dstIndex++;
                         } else {
                             local289 = (local281 & 0xFF0000) * local174 & 0xFF000000;
                             local297 = (local281 & 0xFF00) * local181 & 0xFF0000;
                             local305 = (local281 & 0xFF) * local267 & 0xFF00;
                             local281 = (local289 | local297 | local305) >>> 8;
-                            local764 = local164[local28];
+                            local764 = raster[dstIndex];
                             local772 = local281 + local764;
                             local784 = (local281 & 0xFF00FF) + (local764 & 0xFF00FF);
                             local764 = (local784 & 0x1000100) + (local772 - local784 & 0x10000);
-                            local164[local28++] = local772 - local764 | local764 - (local764 >>> 8);
+                            raster[dstIndex++] = local772 - local764 | local764 - (local764 >>> 8);
                         }
                     }
-                    local28 += local40;
-                    local30 += local42;
+                    dstIndex += dstStep;
+                    srcIndex += srcStep;
                 }
             } else if (op == 3) {
-                for (local174 = -local33; local174 < 0; local174++) {
-                    for (local181 = -local36; local181 < 0; local181++) {
-                        local267 = this.anIntArray32[local30++];
+                for (local174 = -height; local174 < 0; local174++) {
+                    for (local181 = -width; local181 < 0; local181++) {
+                        local267 = this.anIntArray32[srcIndex++];
                         local270 = local267 + color;
                         local274 = (local267 & 0xFF00FF) + (color & 0xFF00FF);
                         local281 = (local274 & 0x1000100) + (local270 - local274 & 0x10000);
                         local267 = local270 - local281 | local281 - (local281 >>> 8);
-                        local281 = local164[local28];
+                        local281 = raster[dstIndex];
                         local270 = local267 + local281;
                         local274 = (local267 & 0xFF00FF) + (local281 & 0xFF00FF);
                         local281 = (local274 & 0x1000100) + (local270 - local274 & 0x10000);
-                        local164[local28++] = local270 - local281 | local281 - (local281 >>> 8);
+                        raster[dstIndex++] = local270 - local281 | local281 - (local281 >>> 8);
                     }
-                    local28 += local40;
-                    local30 += local42;
+                    dstIndex += dstStep;
+                    srcIndex += srcStep;
                 }
             } else if (op == 2) {
                 local174 = color >>> 24;
                 local181 = 256 - local174;
                 local267 = (color & 0xFF00FF) * local181 & 0xFF00FF00;
                 local270 = (color & 0xFF00) * local181 & 0xFF0000;
-                local433 = (local267 | local270) >>> 8;
-                for (local274 = -local33; local274 < 0; local274++) {
-                    for (local281 = -local36; local281 < 0; local281++) {
-                        local289 = this.anIntArray32[local30++];
+                lerpColour = (local267 | local270) >>> 8;
+                for (local274 = -height; local274 < 0; local274++) {
+                    for (local281 = -width; local281 < 0; local281++) {
+                        local289 = this.anIntArray32[srcIndex++];
                         if (local289 == 0) {
-                            local28++;
+                            dstIndex++;
                         } else {
                             local267 = (local289 & 0xFF00FF) * local174 & 0xFF00FF00;
                             local270 = (local289 & 0xFF00) * local174 & 0xFF0000;
-                            local289 = ((local267 | local270) >>> 8) + local433;
-                            local297 = local164[local28];
+                            local289 = ((local267 | local270) >>> 8) + lerpColour;
+                            local297 = raster[dstIndex];
                             local305 = local289 + local297;
                             local764 = (local289 & 0xFF00FF) + (local297 & 0xFF00FF);
                             @Pc(1497) int local1497 = (local764 & 0x1000100) + (local305 - local764 & 0x10000);
-                            local164[local28++] = local305 - local1497 | local1497 - (local1497 >>> 8);
+                            raster[dstIndex++] = local305 - local1497 | local1497 - (local1497 >>> 8);
                         }
                     }
-                    local28 += local40;
-                    local30 += local42;
+                    dstIndex += dstStep;
+                    srcIndex += srcStep;
                 }
             } else {
                 throw new IllegalArgumentException();
             }
         } else if (op == 1) {
-            for (local174 = -local33; local174 < 0; local174++) {
-                local181 = local28 + local36 - 3;
-                while (local28 < local181) {
-                    local164[local28++] = this.anIntArray32[local30++];
-                    local164[local28++] = this.anIntArray32[local30++];
-                    local164[local28++] = this.anIntArray32[local30++];
-                    local164[local28++] = this.anIntArray32[local30++];
+            for (local174 = -height; local174 < 0; local174++) {
+                local181 = dstIndex + width - 3;
+                while (dstIndex < local181) {
+                    raster[dstIndex++] = this.anIntArray32[srcIndex++];
+                    raster[dstIndex++] = this.anIntArray32[srcIndex++];
+                    raster[dstIndex++] = this.anIntArray32[srcIndex++];
+                    raster[dstIndex++] = this.anIntArray32[srcIndex++];
                 }
                 local181 += 3;
-                while (local28 < local181) {
-                    local164[local28++] = this.anIntArray32[local30++];
+                while (dstIndex < local181) {
+                    raster[dstIndex++] = this.anIntArray32[srcIndex++];
                 }
-                local28 += local40;
-                local30 += local42;
+                dstIndex += dstStep;
+                srcIndex += srcStep;
             }
         } else if (op == 0) {
             local174 = color >> 16 & 0xFF;
             local181 = color >> 8 & 0xFF;
             local267 = color & 0xFF;
-            for (local270 = -local33; local270 < 0; local270++) {
-                for (local274 = -local36; local274 < 0; local274++) {
-                    local281 = this.anIntArray32[local30++];
+            for (local270 = -height; local270 < 0; local270++) {
+                for (local274 = -width; local274 < 0; local274++) {
+                    local281 = this.anIntArray32[srcIndex++];
                     local289 = (local281 & 0xFF0000) * local174 & 0xFF000000;
                     local297 = (local281 & 0xFF00) * local181 & 0xFF0000;
                     local305 = (local281 & 0xFF) * local267 & 0xFF00;
-                    local164[local28++] = (local289 | local297 | local305) >>> 8;
+                    raster[dstIndex++] = (local289 | local297 | local305) >>> 8;
                 }
-                local28 += local40;
-                local30 += local42;
+                dstIndex += dstStep;
+                srcIndex += srcStep;
             }
         } else if (op == 3) {
-            for (local174 = -local33; local174 < 0; local174++) {
-                for (local181 = -local36; local181 < 0; local181++) {
-                    local267 = this.anIntArray32[local30++];
+            for (local174 = -height; local174 < 0; local174++) {
+                for (local181 = -width; local181 < 0; local181++) {
+                    local267 = this.anIntArray32[srcIndex++];
                     local270 = local267 + color;
                     local274 = (local267 & 0xFF00FF) + (color & 0xFF00FF);
                     local281 = (local274 & 0x1000100) + (local270 - local274 & 0x10000);
-                    local164[local28++] = local270 - local281 | local281 - (local281 >>> 8);
+                    raster[dstIndex++] = local270 - local281 | local281 - (local281 >>> 8);
                 }
-                local28 += local40;
-                local30 += local42;
+                dstIndex += dstStep;
+                srcIndex += srcStep;
             }
         } else if (op == 2) {
             local174 = color >>> 24;
             local181 = 256 - local174;
             local267 = (color & 0xFF00FF) * local181 & 0xFF00FF00;
             local270 = (color & 0xFF00) * local181 & 0xFF0000;
-            local433 = (local267 | local270) >>> 8;
-            for (local274 = -local33; local274 < 0; local274++) {
-                for (local281 = -local36; local281 < 0; local281++) {
-                    local289 = this.anIntArray32[local30++];
+            lerpColour = (local267 | local270) >>> 8;
+            for (local274 = -height; local274 < 0; local274++) {
+                for (local281 = -width; local281 < 0; local281++) {
+                    local289 = this.anIntArray32[srcIndex++];
                     local267 = (local289 & 0xFF00FF) * local174 & 0xFF00FF00;
                     local270 = (local289 & 0xFF00) * local174 & 0xFF0000;
-                    local164[local28++] = ((local267 | local270) >>> 8) + local433;
+                    raster[dstIndex++] = ((local267 | local270) >>> 8) + lerpColour;
                 }
-                local28 += local40;
-                local30 += local42;
+                dstIndex += dstStep;
+                srcIndex += srcStep;
             }
         } else {
             throw new IllegalArgumentException();
