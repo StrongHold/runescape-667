@@ -12,7 +12,7 @@ import org.openrs2.deob.annotation.OriginalMember;
 import org.openrs2.deob.annotation.Pc;
 
 @OriginalClass("client!qja")
-public class Class306 {
+public class Terrain {
 
     @OriginalMember(owner = "client!ji", name = "I", descriptor = "[I")
     public static final int[] OVERLAY_FACE_COUNT = {2, 1, 1, 1, 2, 2, 2, 1, 3, 3, 3, 2, 0, 4, 0};
@@ -24,28 +24,28 @@ public class Class306 {
     public static final int[][] TILE_FACE_C = {{6, 6}, {6, 6}, {6, 5, 5}, {5, 6, 5}, {5, 5, 6}, {6, 5, 5}, {5, 0, 4, 1}, {7, 7, 1, 2}, {7, 1, 2, 7}, {8, 9, 4, 0, 8, 9}, {0, 8, 9, 8, 9, 4}, {11, 0, 10, 11, 4, 2}, {6, 6}, {7, 7, 1, 2}, {7, 7, 1, 2}};
 
     @OriginalMember(owner = "client!qb", name = "o", descriptor = "[[I")
-    public static final int[][] anIntArrayArray193 = {{2, 4, 6, 0}, {0, 2, 3, 5, 6, 4}, {0, 1, 4, 5}, {4, 6, 0, 2}, {2, 4, 0}, {0, 2, 4}, {6, 0, 1, 2, 4, 5}, {0, 1, 2, 4, 6, 7}, {4, 7, 6, 0}, {0, 8, 6, 1, 9, 2, 9, 4}, {2, 9, 4, 0, 8, 6}, {2, 11, 3, 7, 10, 10, 6, 6}, {2, 4, 6, 0}};
+    public static final int[][] BLENDED_FACE_B = {{2, 4, 6, 0}, {0, 2, 3, 5, 6, 4}, {0, 1, 4, 5}, {4, 6, 0, 2}, {2, 4, 0}, {0, 2, 4}, {6, 0, 1, 2, 4, 5}, {0, 1, 2, 4, 6, 7}, {4, 7, 6, 0}, {0, 8, 6, 1, 9, 2, 9, 4}, {2, 9, 4, 0, 8, 6}, {2, 11, 3, 7, 10, 10, 6, 6}, {2, 4, 6, 0}};
 
     @OriginalMember(owner = "client!he", name = "f", descriptor = "[[I")
-    public static final int[][] anIntArrayArray90 = {{0, 2, 4, 6}, {6, 0, 2, 3, 5, 3}, {6, 0, 2, 4}, {2, 5, 6, 1}, {0, 2, 6}, {6, 0, 2}, {5, 6, 0, 1, 2, 4}, {7, 7, 1, 2, 4, 6}, {2, 4, 4, 7}, {6, 6, 4, 0, 1, 1, 3, 3}, {0, 2, 2, 6, 6, 4}, {0, 2, 2, 3, 7, 0, 4, 3}, {0, 2, 4, 6}};
+    public static final int[][] BLENDED_FACE_A = {{0, 2, 4, 6}, {6, 0, 2, 3, 5, 3}, {6, 0, 2, 4}, {2, 5, 6, 1}, {0, 2, 6}, {6, 0, 2}, {5, 6, 0, 1, 2, 4}, {7, 7, 1, 2, 4, 6}, {2, 4, 4, 7}, {6, 6, 4, 0, 1, 1, 3, 3}, {0, 2, 2, 6, 6, 4}, {0, 2, 2, 3, 7, 0, 4, 3}, {0, 2, 4, 6}};
 
     @OriginalMember(owner = "client!gka", name = "q", descriptor = "[[I")
-    public static final int[][] anIntArrayArray86 = {{12, 12, 12, 12}, {12, 12, 12, 12, 12, 5}, {5, 5, 1, 1}, {5, 1, 1, 5}, {5, 5, 5}, {5, 5, 5}, {12, 12, 12, 12, 12, 12}, {1, 12, 12, 12, 12, 12}, {1, 1, 7, 1}, {8, 9, 9, 8, 8, 3, 1, 9}, {8, 8, 9, 8, 9, 9}, {10, 10, 11, 11, 11, 7, 3, 7}, {12, 12, 12, 12}};
+    public static final int[][] BLENDED_FACE_C = {{12, 12, 12, 12}, {12, 12, 12, 12, 12, 5}, {5, 5, 1, 1}, {5, 1, 1, 5}, {5, 5, 5}, {5, 5, 5}, {12, 12, 12, 12, 12, 12}, {1, 12, 12, 12, 12, 12}, {1, 1, 7, 1}, {8, 9, 9, 8, 8, 3, 1, 9}, {8, 8, 9, 8, 9, 9}, {10, 10, 11, 11, 11, 7, 3, 7}, {12, 12, 12, 12}};
 
     @OriginalMember(owner = "client!kv", name = "C", descriptor = "[I")
-    public static final int[] anIntArray424 = {4, 2, 1, 1, 2, 2, 3, 1, 3, 3, 3, 2, 0};
+    public static final int[] BLENDED_OVERLAY_FACE_COUNT = {4, 2, 1, 1, 2, 2, 3, 1, 3, 3, 3, 2, 0};
 
     @OriginalMember(owner = "client!dd", name = "F", descriptor = "[I")
     public static final int[] UNDERLAY_FACE_COUNT = {0, 1, 2, 2, 1, 1, 2, 3, 1, 3, 3, 4, 2, 0, 4};
 
     @OriginalMember(owner = "client!uw", name = "y", descriptor = "[I")
-    public static final int[] anIntArray468 = {0, 4, 3, 3, 1, 1, 3, 5, 1, 5, 3, 6, 4};
+    public static final int[] BLENDED_UNDERLAY_FACE_COUNT = {0, 4, 3, 3, 1, 1, 3, 5, 1, 5, 3, 6, 4};
 
     @OriginalMember(owner = "client!rga", name = "j", descriptor = "[[I")
-    public static final int[][] anIntArrayArray206 = {{0, 1, 2, 3}, {1, -1, -1, 0}, {-1, 2, -1, 0}, {-1, 0, -1, 2}, {0, 1, -1, 2}, {1, 2, -1, 0}, {-1, 4, -1, 1}, {-1, 3, 4, -1}, {-1, 0, 2, -1}, {-1, -1, 2, 0}, {0, 2, 5, 3}, {0, -1, 6, -1}, {0, 1, 2, 3}};
+    public static final int[][] BLENDED_EDGE_FACE = {{0, 1, 2, 3}, {1, -1, -1, 0}, {-1, 2, -1, 0}, {-1, 0, -1, 2}, {0, 1, -1, 2}, {1, 2, -1, 0}, {-1, 4, -1, 1}, {-1, 3, 4, -1}, {-1, 0, 2, -1}, {-1, -1, 2, 0}, {0, 2, 5, 3}, {0, -1, 6, -1}, {0, 1, 2, 3}};
 
     @OriginalMember(owner = "client!lw", name = "j", descriptor = "[I")
-    public static final int[] anIntArray464 = {0, 2, 2, 2, 1, 1, 3, 3, 1, 3, 3, 4, 4};
+    public static final int[] SPLIT_UNDERLAY_FACE_COUNT = {0, 2, 2, 2, 1, 1, 3, 3, 1, 3, 3, 4, 4};
 
     @OriginalMember(owner = "client!sha", name = "k", descriptor = "[[I")
     public static final int[][] TILE_FACE_B = new int[][]{{2, 4}, {2, 4}, {5, 2, 4}, {4, 5, 2}, {2, 4, 5}, {5, 2, 4}, {1, 6, 2, 5}, {1, 6, 7, 1}, {6, 7, 1, 1}, {0, 8, 9, 8, 9, 4}, {8, 9, 4, 0, 8, 9}, {2, 10, 0, 10, 11, 11}, {2, 4}, {1, 6, 7, 1}, {1, 6, 7, 1}};
@@ -54,10 +54,10 @@ public class Class306 {
     public static final int[] OVERLAY_BLEND_PRIORITIES = new int[13];
 
     @OriginalMember(owner = "client!oka", name = "c", descriptor = "[[Z")
-    public static final boolean[][] aBooleanArrayArray6 = new boolean[][]{new boolean[4], {false, true, true, false}, {true, false, true, false}, {true, false, true, false}, {false, false, true, false}, {false, false, true, false}, {true, false, true, false}, {true, false, false, true}, {true, false, false, true}, {true, true, false, false}, new boolean[4], {false, true, false, true}, new boolean[4]};
+    public static final boolean[][] BLENDED_EDGE_SPLITS = new boolean[][]{new boolean[4], {false, true, true, false}, {true, false, true, false}, {true, false, true, false}, {false, false, true, false}, {false, false, true, false}, {true, false, true, false}, {true, false, false, true}, {true, false, false, true}, {true, true, false, false}, new boolean[4], {false, true, false, true}, new boolean[4]};
 
     @OriginalMember(owner = "client!nm", name = "B", descriptor = "[[Z")
-    public static final boolean[][] aBooleanArrayArray5 = new boolean[][]{new boolean[4], new boolean[4], {false, false, true, false}, {false, false, true, false}, {false, false, true, false}, {false, false, true, false}, {true, false, true, false}, {true, false, false, true}, {true, false, false, true}, new boolean[4], new boolean[4], new boolean[4], new boolean[4]};
+    public static final boolean[][] UNBLENDED_EDGE_SPLITS = new boolean[][]{new boolean[4], new boolean[4], {false, false, true, false}, {false, false, true, false}, {false, false, true, false}, {false, false, true, false}, {true, false, true, false}, {true, false, false, true}, {true, false, false, true}, new boolean[4], new boolean[4], new boolean[4], new boolean[4]};
 
     @OriginalMember(owner = "client!kba", name = "H", descriptor = "[I")
     public static final int[] OVERLAY_COLOURS = new int[13];
@@ -69,22 +69,27 @@ public class Class306 {
     public static final int[] OVERLAY_TEXTURES = new int[13];
 
     @OriginalMember(owner = "client!pn", name = "db", descriptor = "[[Z")
-    public static final boolean[][] aBooleanArrayArray7 = new boolean[][]{{true, true, true, true, true, true, true, true, true, true, true, true, true}, {true, true, true, false, false, false, true, true, false, false, false, false, true}, {true, false, false, false, false, true, true, true, false, false, false, false, false}, {false, false, true, true, true, true, false, false, false, false, false, false, false}, {true, true, true, true, true, true, false, false, false, false, false, false, false}, {true, true, true, false, false, true, true, true, false, false, false, false, false}, {true, true, false, false, false, true, true, true, false, false, false, false, true}, {true, true, false, false, false, false, false, true, false, false, false, false, false}, {false, true, true, true, true, true, true, true, false, false, false, false, false}, {true, false, false, false, true, true, true, true, true, true, false, false, false}, {true, true, true, true, true, false, false, false, true, true, false, false, false}, {true, true, true, false, false, false, false, false, false, false, true, true, false}, new boolean[13], {true, true, true, true, true, true, true, true, true, true, true, true, true}, new boolean[13]};
+    public static final boolean[][] OVERLAY_VERTICES = new boolean[][]{{true, true, true, true, true, true, true, true, true, true, true, true, true}, {true, true, true, false, false, false, true, true, false, false, false, false, true}, {true, false, false, false, false, true, true, true, false, false, false, false, false}, {false, false, true, true, true, true, false, false, false, false, false, false, false}, {true, true, true, true, true, true, false, false, false, false, false, false, false}, {true, true, true, false, false, true, true, true, false, false, false, false, false}, {true, true, false, false, false, true, true, true, false, false, false, false, true}, {true, true, false, false, false, false, false, true, false, false, false, false, false}, {false, true, true, true, true, true, true, true, false, false, false, false, false}, {true, false, false, false, true, true, true, true, true, true, false, false, false}, {true, true, true, true, true, false, false, false, true, true, false, false, false}, {true, true, true, false, false, false, false, false, false, false, true, true, false}, new boolean[13], {true, true, true, true, true, true, true, true, true, true, true, true, true}, new boolean[13]};
 
     @OriginalMember(owner = "client!hm", name = "b", descriptor = "[I")
-    public static final int[] anIntArray313 = new int[13];
+    public static final int[] OVERLAY_BLEND_SOURCES = new int[13];
 
     @OriginalMember(owner = "client!pka", name = "d", descriptor = "[I")
-    public static final int[] anIntArray601 = new int[]{4, 2, 1, 1, 2, 2, 3, 1, 3, 3, 3, 2, 0};
+    public static final int[] SPLIT_OVERLAY_FACE_COUNT = new int[]{4, 2, 1, 1, 2, 2, 3, 1, 3, 3, 3, 2, 0};
 
     @OriginalMember(owner = "client!pi", name = "c", descriptor = "[[I")
-    public static final int[][] anIntArrayArray257 = new int[][]{{12, 12, 12, 12}, {12, 12, 12, 12}, {5, 5, 5}, {5, 5, 5}, {5, 5, 5}, {5, 5, 5}, {12, 12, 12, 12, 12, 12}, {1, 1, 1, 7}, {1, 1, 7, 1}, {8, 9, 9, 8, 8, 9}, {8, 8, 9, 8, 9, 9}, {10, 10, 11, 11, 11, 10}, {12, 12, 12, 12}};
+    public static final int[][] SPLIT_FACE_C = new int[][]{{12, 12, 12, 12}, {12, 12, 12, 12}, {5, 5, 5}, {5, 5, 5}, {5, 5, 5}, {5, 5, 5}, {12, 12, 12, 12, 12, 12}, {1, 1, 1, 7}, {1, 1, 7, 1}, {8, 9, 9, 8, 8, 9}, {8, 8, 9, 8, 9, 9}, {10, 10, 11, 11, 11, 10}, {12, 12, 12, 12}};
 
     @OriginalMember(owner = "client!ww", name = "c", descriptor = "[I")
     public static int[] OVERLAY_SIZES = new int[13];
 
     @OriginalMember(owner = "client!ska", name = "H", descriptor = "[I")
-    public static int[] anIntArray695 = new int[6];
+    public static int[] faceVertices = new int[6];
+
+    /**
+     * Half-width of the box filter that averages neighbouring underlay colours, in tiles.
+     */
+    private static final int UNDERLAY_BLEND_RADIUS = 5;
 
     @OriginalMember(owner = "client!qja", name = "e", descriptor = "[[[B")
     public byte[][][] aByteArrayArrayArray12;
@@ -132,13 +137,13 @@ public class Class306 {
     public final int[][][] tileHeights;
 
     @OriginalMember(owner = "client!qja", name = "<init>", descriptor = "(IIIZLclient!ef;Lclient!dh;)V")
-    protected Class306(@OriginalArg(0) int levels, @OriginalArg(1) int width, @OriginalArg(2) int length, @OriginalArg(3) boolean underwater, @OriginalArg(4) FloorOverlayTypeList arg4, @OriginalArg(5) FloorUnderlayTypeList arg5) {
-        this.underlayTypeList = arg5;
+    protected Terrain(@OriginalArg(0) int levels, @OriginalArg(1) int width, @OriginalArg(2) int length, @OriginalArg(3) boolean underwater, @OriginalArg(4) FloorOverlayTypeList floorOverlayTypeList, @OriginalArg(5) FloorUnderlayTypeList underlayTypeList) {
+        this.underlayTypeList = underlayTypeList;
         this.length = length;
         this.levels = levels;
         this.underwater = underwater;
         this.width = width;
-        this.floorOverlayTypeList = arg4;
+        this.floorOverlayTypeList = floorOverlayTypeList;
         this.tileDirections = new byte[this.levels][this.width][this.length];
         this.underlay = new byte[this.levels][this.width][this.length];
         this.occluderFlags = new byte[this.levels][this.width + 1][this.length + 1];
@@ -185,52 +190,52 @@ public class Class306 {
     }
 
     @OriginalMember(owner = "client!qja", name = "a", descriptor = "(I[[[ILclient!ha;[Lclient!eq;)V")
-    public final void method7881(@OriginalArg(1) int[][][] arg0, @OriginalArg(2) Toolkit arg1, @OriginalArg(3) CollisionMap[] arg2) {
-        @Pc(4) int local4;
-        @Pc(7) int local7;
-        @Pc(10) int local10;
+    public final void method7881(@OriginalArg(1) int[][][] waterHeights, @OriginalArg(2) Toolkit toolkit, @OriginalArg(3) CollisionMap[] collisionMaps) {
+        @Pc(4) int level;
+        @Pc(7) int groundFlags;
+        @Pc(10) int featureFlags;
         if (!this.underwater) {
-            for (local4 = 0; local4 < 4; local4++) {
-                for (local7 = 0; local7 < this.width; local7++) {
-                    for (local10 = 0; local10 < this.length; local10++) {
-                        if ((Static280.tileFlags[local4][local7][local10] & 0x1) != 0) {
-                            @Pc(26) int local26 = local4;
-                            if ((Static280.tileFlags[1][local7][local10] & 0x2) != 0) {
-                                local26 = local4 - 1;
+            for (level = 0; level < 4; level++) {
+                for (groundFlags = 0; groundFlags < this.width; groundFlags++) {
+                    for (featureFlags = 0; featureFlags < this.length; featureFlags++) {
+                        if ((Static280.tileFlags[level][groundFlags][featureFlags] & 0x1) != 0) {
+                            @Pc(26) int blockedLevel = level;
+                            if ((Static280.tileFlags[1][groundFlags][featureFlags] & 0x2) != 0) {
+                                blockedLevel = level - 1;
                             }
-                            if (local26 >= 0) {
-                                arg2[local26].flagBlocked(local10, local7);
+                            if (blockedLevel >= 0) {
+                                collisionMaps[blockedLevel].flagBlocked(featureFlags, groundFlags);
                             }
                         }
                     }
                 }
             }
         }
-        for (local4 = 0; local4 < this.levels; local4++) {
-            local7 = 0;
-            local10 = 0;
+        for (level = 0; level < this.levels; level++) {
+            groundFlags = 0;
+            featureFlags = 0;
             if (!this.underwater) {
                 if (Static50.aBoolean566) {
-                    local10 = 8;
+                    featureFlags = 8;
                 }
                 if (Static305.aBoolean371) {
-                    local7 = 2;
+                    groundFlags = 2;
                 }
                 if (Static439.anInt6674 != 0) {
-                    local7 |= 0x1;
-                    if (local4 == 0 | Static428.aBoolean487) {
-                        local10 |= 0x10;
+                    groundFlags |= 0x1;
+                    if (level == 0 | Static428.aBoolean487) {
+                        featureFlags |= 0x10;
                     }
                 }
             }
             if (Static305.aBoolean371) {
-                local10 |= 0x7;
+                featureFlags |= 0x7;
             }
             if (!Static196.aBoolean262) {
-                local10 |= 0x20;
+                featureFlags |= 0x20;
             }
-            @Pc(165) int[][] local165 = arg0 == null || local4 >= arg0.length ? this.tileHeights[local4] : arg0[local4];
-            Static429.method5805(local4, arg1.createGround(this.width, this.length, this.tileHeights[local4], local165, local7, local10));
+            @Pc(165) int[][] heights = waterHeights == null || level >= waterHeights.length ? this.tileHeights[level] : waterHeights[level];
+            Static429.method5805(level, toolkit.createGround(this.width, this.length, this.tileHeights[level], heights, groundFlags, featureFlags));
         }
     }
 
@@ -251,9 +256,9 @@ public class Class306 {
                     }
 
                     @Pc(93) FloorUnderlayType underlayType = underlay == 0 ? null : this.underlayTypeList.list(underlay - 1);
-                    @Pc(95) FloorOverlayType local95 = overlayType;
+                    @Pc(95) FloorOverlayType occluderOverlayType = overlayType;
                     if (overlayType != null && overlayType.colour == -1 && overlayType.blendColour == -1) {
-                        local95 = overlayType;
+                        occluderOverlayType = overlayType;
                         overlayType = null;
                     }
 
@@ -337,14 +342,14 @@ public class Class306 {
                                 offsetY[i] = deltaX;
                             }
 
-                            if (offsetLevel != null && aBooleanArrayArray7[shape][i]) {
+                            if (offsetLevel != null && OVERLAY_VERTICES[shape][i]) {
                                 @Pc(477) int waterX = offsetX[i] + (x << 9);
                                 @Pc(485) int waterY = (z << 9) + offsetY[i];
                                 offsetLevel[i] = surfaceGround.averageHeight(waterX, waterY) - ground.averageHeight(waterX, waterY);
                             }
 
                             if (depths != null) {
-                                if (surfaceGround != null && !aBooleanArrayArray7[shape][i]) {
+                                if (surfaceGround != null && !OVERLAY_VERTICES[shape][i]) {
                                     @Pc(477) int waterX = offsetX[i] + (x << 9);
                                     @Pc(485) int waterY = (z << 9) + offsetY[i];
                                     depths[i] = ground.averageHeight(waterX, waterY) - surfaceGround.averageHeight(waterX, waterY);
@@ -368,7 +373,7 @@ public class Class306 {
                                 occlused = false;
                             } else if (underlay == 0 && shape != 0) {
                                 occlused = false;
-                            } else if (overlay > 0 && local95 != null && !local95.occludes) {
+                            } else if (overlay > 0 && occluderOverlayType != null && !occluderOverlayType.occludes) {
                                 occlused = false;
                             }
 
@@ -396,8 +401,8 @@ public class Class306 {
     }
 
     @OriginalMember(owner = "client!qja", name = "a", descriptor = "(ILclient!re;[[BIIIIILclient!ha;I[ZLclient!nq;[[B[[B)V")
-    public void blendOverlay(@OriginalArg(0) int shape, @OriginalArg(1) FloorOverlayType overlayType, @OriginalArg(2) byte[][] directions, @OriginalArg(3) int width, @OriginalArg(5) int x, @OriginalArg(6) int direction, @OriginalArg(7) int length, @OriginalArg(8) Toolkit toolkit, @OriginalArg(9) int z, @OriginalArg(10) boolean[] arg9, @OriginalArg(11) FloorUnderlayType underlayType, @OriginalArg(12) byte[][] shapes, @OriginalArg(13) byte[][] overlays) {
-        @Pc(19) boolean[] local19 = overlayType != null && overlayType.blendable ? aBooleanArrayArray6[shape] : aBooleanArrayArray5[shape];
+    public void blendOverlay(@OriginalArg(0) int shape, @OriginalArg(1) FloorOverlayType overlayType, @OriginalArg(2) byte[][] directions, @OriginalArg(3) int width, @OriginalArg(5) int x, @OriginalArg(6) int direction, @OriginalArg(7) int length, @OriginalArg(8) Toolkit toolkit, @OriginalArg(9) int z, @OriginalArg(10) boolean[] edgeSplits, @OriginalArg(11) FloorUnderlayType underlayType, @OriginalArg(12) byte[][] shapes, @OriginalArg(13) byte[][] overlays) {
+        @Pc(19) boolean[] tileEdgeSplits = overlayType != null && overlayType.blendable ? BLENDED_EDGE_SPLITS[shape] : UNBLENDED_EDGE_SPLITS[shape];
 
         if (z > 0) {
             if (x > 0) {
@@ -410,13 +415,13 @@ public class Class306 {
                         @Pc(86) int directionSW = ((directions[x - 1][z - 1] * 2) + 4) & 0x7;
                         @Pc(91) int colourSW = Static718.blendColour(overlayTypeSW, toolkit);
 
-                        if (aBooleanArrayArray7[shapeSW][directionSW]) {
+                        if (OVERLAY_VERTICES[shapeSW][directionSW]) {
                             OVERLAY_COLOURS[0] = overlayTypeSW.colour;
                             OVERLAY_BLEND_COLOURS[0] = colourSW;
                             OVERLAY_TEXTURES[0] = overlayTypeSW.texture;
                             OVERLAY_SIZES[0] = overlayTypeSW.size;
                             OVERLAY_BLEND_PRIORITIES[0] = overlayTypeSW.blendPriority;
-                            anIntArray313[0] = 256;
+                            OVERLAY_BLEND_SOURCES[0] = 256;
                         }
                     }
                 }
@@ -432,13 +437,13 @@ public class Class306 {
                         @Pc(70) byte shapeSE = shapes[x + 1][z - 1];
                         @Pc(86) int directionSE = ((directions[x + 1][z - 1] * 2) + 6) & 0x7;
                         @Pc(91) int colourSE = Static718.blendColour(overlayTypeSE, toolkit);
-                        if (aBooleanArrayArray7[shapeSE][directionSE]) {
+                        if (OVERLAY_VERTICES[shapeSE][directionSE]) {
                             OVERLAY_COLOURS[2] = overlayTypeSE.colour;
                             OVERLAY_BLEND_COLOURS[2] = colourSE;
                             OVERLAY_TEXTURES[2] = overlayTypeSE.texture;
                             OVERLAY_SIZES[2] = overlayTypeSE.size;
                             OVERLAY_BLEND_PRIORITIES[2] = overlayTypeSE.blendPriority;
-                            anIntArray313[2] = 512;
+                            OVERLAY_BLEND_SOURCES[2] = 512;
                         }
                     }
                 }
@@ -457,13 +462,13 @@ public class Class306 {
                         @Pc(86) int directionNW = directions[x - 1][z + 1] * 2 + 2 & 0x7;
                         @Pc(91) int colourNW = Static718.blendColour(overlayTypeNW, toolkit);
 
-                        if (aBooleanArrayArray7[shapeNW][directionNW]) {
+                        if (OVERLAY_VERTICES[shapeNW][directionNW]) {
                             OVERLAY_COLOURS[6] = overlayTypeNW.colour;
                             OVERLAY_BLEND_COLOURS[6] = colourNW;
                             OVERLAY_TEXTURES[6] = overlayTypeNW.texture;
                             OVERLAY_SIZES[6] = overlayTypeNW.size;
                             OVERLAY_BLEND_PRIORITIES[6] = overlayTypeNW.blendPriority;
-                            anIntArray313[6] = 64;
+                            OVERLAY_BLEND_SOURCES[6] = 64;
                         }
                     }
                 }
@@ -480,13 +485,13 @@ public class Class306 {
                         @Pc(86) int directionNE = (directions[x + 1][z + 1] * 2) & 0x7;
                         @Pc(91) int colourNE = Static718.blendColour(overlayTypeNE, toolkit);
 
-                        if (aBooleanArrayArray7[shapeNE][directionNE]) {
+                        if (OVERLAY_VERTICES[shapeNE][directionNE]) {
                             OVERLAY_COLOURS[4] = overlayTypeNE.colour;
                             OVERLAY_BLEND_COLOURS[4] = colourNE;
                             OVERLAY_TEXTURES[4] = overlayTypeNE.texture;
                             OVERLAY_SIZES[4] = overlayTypeNE.size;
                             OVERLAY_BLEND_PRIORITIES[4] = overlayTypeNE.blendPriority;
-                            anIntArray313[4] = 128;
+                            OVERLAY_BLEND_SOURCES[4] = 128;
                         }
                     }
                 }
@@ -504,38 +509,38 @@ public class Class306 {
                     @Pc(498) byte directionSouth = directions[x][z - 1];
 
                     if (overlayTypeSouth.blendable) {
-                        @Pc(91) int colour = 2;
-                        @Pc(509) int local509 = (directionSouth * 2) + 4;
-                        @Pc(514) int local514 = Static718.blendColour(overlayTypeSouth, toolkit);
+                        @Pc(91) int vertex = 2;
+                        @Pc(509) int neighbourVertex = (directionSouth * 2) + 4;
+                        @Pc(514) int blendColour = Static718.blendColour(overlayTypeSouth, toolkit);
 
                         for (@Pc(516) int i = 0; i < 3; i++) {
-                            colour &= 0x7;
-                            local509 &= 0x7;
+                            vertex &= 0x7;
+                            neighbourVertex &= 0x7;
 
-                            if (aBooleanArrayArray7[shapeSouth][local509] && overlayTypeSouth.blendPriority >= OVERLAY_BLEND_PRIORITIES[colour]) {
-                                OVERLAY_COLOURS[colour] = overlayTypeSouth.colour;
-                                OVERLAY_BLEND_COLOURS[colour] = local514;
-                                OVERLAY_TEXTURES[colour] = overlayTypeSouth.texture;
-                                OVERLAY_SIZES[colour] = overlayTypeSouth.size;
+                            if (OVERLAY_VERTICES[shapeSouth][neighbourVertex] && overlayTypeSouth.blendPriority >= OVERLAY_BLEND_PRIORITIES[vertex]) {
+                                OVERLAY_COLOURS[vertex] = overlayTypeSouth.colour;
+                                OVERLAY_BLEND_COLOURS[vertex] = blendColour;
+                                OVERLAY_TEXTURES[vertex] = overlayTypeSouth.texture;
+                                OVERLAY_SIZES[vertex] = overlayTypeSouth.size;
 
-                                if (OVERLAY_BLEND_PRIORITIES[colour] == overlayTypeSouth.blendPriority) {
-                                    anIntArray313[colour] |= 0x20;
+                                if (OVERLAY_BLEND_PRIORITIES[vertex] == overlayTypeSouth.blendPriority) {
+                                    OVERLAY_BLEND_SOURCES[vertex] |= 0x20;
                                 } else {
-                                    anIntArray313[colour] = 0x20;
+                                    OVERLAY_BLEND_SOURCES[vertex] = 0x20;
                                 }
 
-                                OVERLAY_BLEND_PRIORITIES[colour] = overlayTypeSouth.blendPriority;
+                                OVERLAY_BLEND_PRIORITIES[vertex] = overlayTypeSouth.blendPriority;
                             }
 
-                            colour--;
-                            local509++;
+                            vertex--;
+                            neighbourVertex++;
                         }
 
-                        if (!local19[direction & 0x3]) {
-                            arg9[0] = aBooleanArrayArray6[shapeSouth][(directionSouth + 2) & 0x3];
+                        if (!tileEdgeSplits[direction & 0x3]) {
+                            edgeSplits[0] = BLENDED_EDGE_SPLITS[shapeSouth][(directionSouth + 2) & 0x3];
                         }
-                    } else if (!local19[direction & 0x3]) {
-                        arg9[0] = aBooleanArrayArray5[shapeSouth][(directionSouth + 2) & 0x3];
+                    } else if (!tileEdgeSplits[direction & 0x3]) {
+                        edgeSplits[0] = UNBLENDED_EDGE_SPLITS[shapeSouth][(directionSouth + 2) & 0x3];
                     }
                 }
             }
@@ -552,38 +557,38 @@ public class Class306 {
                     @Pc(498) byte directionNorth = directions[x][z + 1];
 
                     if (overlayTypeNorth.blendable) {
-                        @Pc(91) int colour = 4;
-                        @Pc(509) int local509 = directionNorth * 2 + 2;
-                        @Pc(514) int local514 = Static718.blendColour(overlayTypeNorth, toolkit);
+                        @Pc(91) int vertex = 4;
+                        @Pc(509) int neighbourVertex = directionNorth * 2 + 2;
+                        @Pc(514) int blendColour = Static718.blendColour(overlayTypeNorth, toolkit);
 
                         for (@Pc(516) int i = 0; i < 3; i++) {
-                            colour &= 0x7;
-                            local509 &= 0x7;
+                            vertex &= 0x7;
+                            neighbourVertex &= 0x7;
 
-                            if (aBooleanArrayArray7[shapeNorth][local509] && OVERLAY_BLEND_PRIORITIES[colour] <= overlayTypeNorth.blendPriority) {
-                                OVERLAY_COLOURS[colour] = overlayTypeNorth.colour;
-                                OVERLAY_BLEND_COLOURS[colour] = local514;
-                                OVERLAY_TEXTURES[colour] = overlayTypeNorth.texture;
-                                OVERLAY_SIZES[colour] = overlayTypeNorth.size;
+                            if (OVERLAY_VERTICES[shapeNorth][neighbourVertex] && OVERLAY_BLEND_PRIORITIES[vertex] <= overlayTypeNorth.blendPriority) {
+                                OVERLAY_COLOURS[vertex] = overlayTypeNorth.colour;
+                                OVERLAY_BLEND_COLOURS[vertex] = blendColour;
+                                OVERLAY_TEXTURES[vertex] = overlayTypeNorth.texture;
+                                OVERLAY_SIZES[vertex] = overlayTypeNorth.size;
 
-                                if (OVERLAY_BLEND_PRIORITIES[colour] == overlayTypeNorth.blendPriority) {
-                                    anIntArray313[colour] |= 0x10;
+                                if (OVERLAY_BLEND_PRIORITIES[vertex] == overlayTypeNorth.blendPriority) {
+                                    OVERLAY_BLEND_SOURCES[vertex] |= 0x10;
                                 } else {
-                                    anIntArray313[colour] = 0x10;
+                                    OVERLAY_BLEND_SOURCES[vertex] = 0x10;
                                 }
 
-                                OVERLAY_BLEND_PRIORITIES[colour] = overlayTypeNorth.blendPriority;
+                                OVERLAY_BLEND_PRIORITIES[vertex] = overlayTypeNorth.blendPriority;
                             }
 
-                            colour++;
-                            local509--;
+                            vertex++;
+                            neighbourVertex--;
                         }
 
-                        if (!local19[(direction + 2) & 0x3]) {
-                            arg9[2] = aBooleanArrayArray6[shapeNorth][--directionNorth & 0x3];
+                        if (!tileEdgeSplits[(direction + 2) & 0x3]) {
+                            edgeSplits[2] = BLENDED_EDGE_SPLITS[shapeNorth][--directionNorth & 0x3];
                         }
-                    } else if (!local19[(direction + 2) & 0x3]) {
-                        arg9[2] = aBooleanArrayArray5[shapeNorth][directionNorth & 0x3];
+                    } else if (!tileEdgeSplits[(direction + 2) & 0x3]) {
+                        edgeSplits[2] = UNBLENDED_EDGE_SPLITS[shapeNorth][directionNorth & 0x3];
                     }
                 }
             }
@@ -600,38 +605,38 @@ public class Class306 {
                     @Pc(498) byte directionWest = directions[x - 1][z];
 
                     if (overlayTypeWest.blendable) {
-                        @Pc(91) int colour = 6;
-                        @Pc(509) int local509 = directionWest * 2 + 4;
-                        @Pc(514) int local514 = Static718.blendColour(overlayTypeWest, toolkit);
+                        @Pc(91) int vertex = 6;
+                        @Pc(509) int neighbourVertex = directionWest * 2 + 4;
+                        @Pc(514) int blendColour = Static718.blendColour(overlayTypeWest, toolkit);
 
                         for (@Pc(516) int i = 0; i < 3; i++) {
-                            colour &= 0x7;
-                            local509 &= 0x7;
+                            vertex &= 0x7;
+                            neighbourVertex &= 0x7;
 
-                            if (aBooleanArrayArray7[shapeWest][local509] && OVERLAY_BLEND_PRIORITIES[colour] <= overlayTypeWest.blendPriority) {
-                                OVERLAY_COLOURS[colour] = overlayTypeWest.colour;
-                                OVERLAY_BLEND_COLOURS[colour] = local514;
-                                OVERLAY_TEXTURES[colour] = overlayTypeWest.texture;
-                                OVERLAY_SIZES[colour] = overlayTypeWest.size;
+                            if (OVERLAY_VERTICES[shapeWest][neighbourVertex] && OVERLAY_BLEND_PRIORITIES[vertex] <= overlayTypeWest.blendPriority) {
+                                OVERLAY_COLOURS[vertex] = overlayTypeWest.colour;
+                                OVERLAY_BLEND_COLOURS[vertex] = blendColour;
+                                OVERLAY_TEXTURES[vertex] = overlayTypeWest.texture;
+                                OVERLAY_SIZES[vertex] = overlayTypeWest.size;
 
-                                if (overlayTypeWest.blendPriority == OVERLAY_BLEND_PRIORITIES[colour]) {
-                                    anIntArray313[colour] |= 0x8;
+                                if (overlayTypeWest.blendPriority == OVERLAY_BLEND_PRIORITIES[vertex]) {
+                                    OVERLAY_BLEND_SOURCES[vertex] |= 0x8;
                                 } else {
-                                    anIntArray313[colour] = 0x8;
+                                    OVERLAY_BLEND_SOURCES[vertex] = 0x8;
                                 }
 
-                                OVERLAY_BLEND_PRIORITIES[colour] = overlayTypeWest.blendPriority;
+                                OVERLAY_BLEND_PRIORITIES[vertex] = overlayTypeWest.blendPriority;
                             }
 
-                            colour++;
-                            local509--;
+                            vertex++;
+                            neighbourVertex--;
                         }
 
-                        if (!local19[(direction + 3) & 0x3]) {
-                            arg9[3] = aBooleanArrayArray6[shapeWest][(directionWest + 1) & 0x3];
+                        if (!tileEdgeSplits[(direction + 3) & 0x3]) {
+                            edgeSplits[3] = BLENDED_EDGE_SPLITS[shapeWest][(directionWest + 1) & 0x3];
                         }
-                    } else if (!local19[(direction + 3) & 0x3]) {
-                        arg9[3] = aBooleanArrayArray5[shapeWest][(directionWest + 1) & 0x3];
+                    } else if (!tileEdgeSplits[(direction + 3) & 0x3]) {
+                        edgeSplits[3] = UNBLENDED_EDGE_SPLITS[shapeWest][(directionWest + 1) & 0x3];
                     }
                 }
             }
@@ -644,89 +649,84 @@ public class Class306 {
                 @Pc(50) FloorOverlayType overlayTypeEast = this.floorOverlayTypeList.list(overlayEast - 1);
 
                 if (overlayTypeEast.colour != -1) {
-                    @Pc(70) byte local70 = shapes[x + 1][z];
-                    @Pc(498) byte local498 = directions[x + 1][z];
+                    @Pc(70) byte shapeEast = shapes[x + 1][z];
+                    @Pc(498) byte directionEast = directions[x + 1][z];
 
                     if (overlayTypeEast.blendable) {
-                        @Pc(91) int colour = 4;
-                        @Pc(509) int local509 = local498 * 2 + 6;
-                        @Pc(514) int local514 = Static718.blendColour(overlayTypeEast, toolkit);
+                        @Pc(91) int vertex = 4;
+                        @Pc(509) int neighbourVertex = directionEast * 2 + 6;
+                        @Pc(514) int blendColour = Static718.blendColour(overlayTypeEast, toolkit);
 
-                        for (@Pc(516) int local516 = 0; local516 < 3; local516++) {
-                            local509 &= 0x7;
-                            colour &= 0x7;
+                        for (@Pc(516) int i = 0; i < 3; i++) {
+                            neighbourVertex &= 0x7;
+                            vertex &= 0x7;
 
-                            if (aBooleanArrayArray7[local70][local509] && overlayTypeEast.blendPriority >= OVERLAY_BLEND_PRIORITIES[colour]) {
-                                OVERLAY_COLOURS[colour] = overlayTypeEast.colour;
-                                OVERLAY_BLEND_COLOURS[colour] = local514;
-                                OVERLAY_TEXTURES[colour] = overlayTypeEast.texture;
-                                OVERLAY_SIZES[colour] = overlayTypeEast.size;
+                            if (OVERLAY_VERTICES[shapeEast][neighbourVertex] && overlayTypeEast.blendPriority >= OVERLAY_BLEND_PRIORITIES[vertex]) {
+                                OVERLAY_COLOURS[vertex] = overlayTypeEast.colour;
+                                OVERLAY_BLEND_COLOURS[vertex] = blendColour;
+                                OVERLAY_TEXTURES[vertex] = overlayTypeEast.texture;
+                                OVERLAY_SIZES[vertex] = overlayTypeEast.size;
 
-                                if (OVERLAY_BLEND_PRIORITIES[colour] == overlayTypeEast.blendPriority) {
-                                    anIntArray313[colour] |= 0x4;
+                                if (OVERLAY_BLEND_PRIORITIES[vertex] == overlayTypeEast.blendPriority) {
+                                    OVERLAY_BLEND_SOURCES[vertex] |= 0x4;
                                 } else {
-                                    anIntArray313[colour] = 0x4;
+                                    OVERLAY_BLEND_SOURCES[vertex] = 0x4;
                                 }
 
-                                OVERLAY_BLEND_PRIORITIES[colour] = overlayTypeEast.blendPriority;
+                                OVERLAY_BLEND_PRIORITIES[vertex] = overlayTypeEast.blendPriority;
                             }
 
-                            colour--;
-                            local509++;
+                            vertex--;
+                            neighbourVertex++;
                         }
 
-                        if (!local19[(direction + 1) & 0x3]) {
-                            arg9[1] = aBooleanArrayArray6[local70][(local498 + 3) & 0x3];
+                        if (!tileEdgeSplits[(direction + 1) & 0x3]) {
+                            edgeSplits[1] = BLENDED_EDGE_SPLITS[shapeEast][(directionEast + 3) & 0x3];
                         }
 
-                    } else if (!local19[(direction + 1) & 0x3]) {
-                        arg9[1] = aBooleanArrayArray5[local70][(local498 + 3) & 0x3];
+                    } else if (!tileEdgeSplits[(direction + 1) & 0x3]) {
+                        edgeSplits[1] = UNBLENDED_EDGE_SPLITS[shapeEast][(directionEast + 3) & 0x3];
                     }
                 }
             }
         }
 
-        if (overlayType == null) {
-            return;
-        }
+        if (overlayType != null && overlayType.blendable) {
+            @Pc(37) int blendColour = Static718.blendColour(overlayType, toolkit);
 
-        @Pc(37) int local37 = Static718.blendColour(overlayType, toolkit);
-        if (!overlayType.blendable) {
-            return;
-        }
+            for (@Pc(1245) int i = 0; i < 8; i++) {
+                @Pc(1255) int blendVertex = (i - (direction * 2)) & 0x7;
 
-        for (@Pc(1245) int i = 0; i < 8; i++) {
-            @Pc(1255) int local1255 = (i - (direction * 2)) & 0x7;
+                if (OVERLAY_VERTICES[shape][i] && overlayType.blendPriority >= OVERLAY_BLEND_PRIORITIES[blendVertex]) {
+                    OVERLAY_COLOURS[blendVertex] = overlayType.colour;
+                    OVERLAY_BLEND_COLOURS[blendVertex] = blendColour;
+                    OVERLAY_TEXTURES[blendVertex] = overlayType.texture;
+                    OVERLAY_SIZES[blendVertex] = overlayType.size;
 
-            if (aBooleanArrayArray7[shape][i] && overlayType.blendPriority >= OVERLAY_BLEND_PRIORITIES[local1255]) {
-                OVERLAY_COLOURS[local1255] = overlayType.colour;
-                OVERLAY_BLEND_COLOURS[local1255] = local37;
-                OVERLAY_TEXTURES[local1255] = overlayType.texture;
-                OVERLAY_SIZES[local1255] = overlayType.size;
+                    if (overlayType.blendPriority == OVERLAY_BLEND_PRIORITIES[blendVertex]) {
+                        OVERLAY_BLEND_SOURCES[blendVertex] |= 0x2;
+                    } else {
+                        OVERLAY_BLEND_SOURCES[blendVertex] = 2;
+                    }
 
-                if (overlayType.blendPriority == OVERLAY_BLEND_PRIORITIES[local1255]) {
-                    anIntArray313[local1255] |= 0x2;
-                } else {
-                    anIntArray313[local1255] = 2;
+                    OVERLAY_BLEND_PRIORITIES[blendVertex] = overlayType.blendPriority;
                 }
-
-                OVERLAY_BLEND_PRIORITIES[local1255] = overlayType.blendPriority;
             }
         }
     }
 
     @OriginalMember(owner = "client!qja", name = "a", descriptor = "([[IBI)V")
-    public final void method7885(@OriginalArg(0) int[][] arg0) {
-        @Pc(16) int[][] local16 = this.tileHeights[0];
-        for (@Pc(18) int local18 = 0; local18 < this.width + 1; local18++) {
-            for (@Pc(21) int local21 = 0; local21 < this.length + 1; local21++) {
-                local16[local18][local21] += arg0[local18][local21];
+    public final void method7885(@OriginalArg(0) int[][] heightOffsets) {
+        @Pc(16) int[][] heights = this.tileHeights[0];
+        for (@Pc(18) int x = 0; x < this.width + 1; x++) {
+            for (@Pc(21) int z = 0; z < this.length + 1; z++) {
+                heights[x][z] += heightOffsets[x][z];
             }
         }
     }
 
     @OriginalMember(owner = "client!qja", name = "a", descriptor = "(IIIIILclient!ge;IIIIZ)V")
-    public void decodeTile(@OriginalArg(5) Packet packet, @OriginalArg(3) int x, @OriginalArg(1) int z, @OriginalArg(4) int localX, @OriginalArg(7) int localZ, @OriginalArg(6) int offsetX, @OriginalArg(2) int offsetZ, @OriginalArg(8) int level, @OriginalArg(0) int rotation, @OriginalArg(10) boolean arg9) {
+    public void decodeTile(@OriginalArg(5) Packet packet, @OriginalArg(3) int x, @OriginalArg(1) int z, @OriginalArg(4) int localX, @OriginalArg(7) int localZ, @OriginalArg(6) int offsetX, @OriginalArg(2) int offsetZ, @OriginalArg(8) int level, @OriginalArg(0) int rotation, @OriginalArg(10) boolean heightsOnly) {
         if (rotation == 1) {
             offsetZ = 1;
         } else if (rotation == 2) {
@@ -754,7 +754,7 @@ public class Class306 {
             return;
         }
 
-        if (!this.underwater && !arg9) {
+        if (!this.underwater && !heightsOnly) {
             Static280.tileFlags[level][x][z] = 0;
         }
 
@@ -772,24 +772,24 @@ public class Class306 {
             }
 
             if (code == 1) {
-                @Pc(194) int local194 = packet.g1();
+                @Pc(194) int height = packet.g1();
                 if (this.underwater) {
-                    this.tileHeights[0][offsetX + x][offsetZ + z] = local194 * 8 << 2;
+                    this.tileHeights[0][offsetX + x][offsetZ + z] = height * 8 << 2;
                 } else {
-                    if (local194 == 1) {
-                        local194 = 0;
+                    if (height == 1) {
+                        height = 0;
                     }
                     if (level == 0) {
-                        this.tileHeights[0][offsetX + x][offsetZ + z] = -local194 * 8 << 2;
+                        this.tileHeights[0][offsetX + x][offsetZ + z] = -height * 8 << 2;
                     } else {
-                        this.tileHeights[level][offsetX + x][z + offsetZ] = this.tileHeights[level - 1][x + offsetX][offsetZ + z] - (local194 * 8 << 2);
+                        this.tileHeights[level][offsetX + x][z + offsetZ] = this.tileHeights[level - 1][x + offsetX][offsetZ + z] - (height * 8 << 2);
                     }
                 }
                 break;
             }
 
             if (code <= 49) {
-                if (arg9) {
+                if (heightsOnly) {
                     packet.g1();
                 } else {
                     this.overlay[level][x][z] = packet.g1b();
@@ -797,10 +797,10 @@ public class Class306 {
                     this.tileDirections[level][x][z] = (byte) (code + rotation - 2 & 0x3);
                 }
             } else if (code <= 81) {
-                if (!this.underwater && !arg9) {
+                if (!this.underwater && !heightsOnly) {
                     Static280.tileFlags[level][x][z] = (byte) (code - 49);
                 }
-            } else if (!arg9) {
+            } else if (!heightsOnly) {
                 this.underlay[level][x][z] = (byte) (code - 81);
             }
         }
@@ -816,71 +816,66 @@ public class Class306 {
             Static467.anIntArray568 = new int[this.length];
         }
         @Pc(45) int[][] colour = new int[this.width][this.length];
-        @Pc(50) int local50;
         for (@Pc(47) int level = 0; level < this.levels; level++) {
-            for (local50 = 0; local50 < this.length; local50++) {
-                Static397.anIntArray482[local50] = 0;
-                Static467.anIntArray568[local50] = 0;
-                Static501.anIntArray606[local50] = 0;
-                Static359.anIntArray449[local50] = 0;
-                Static418.anIntArray704[local50] = 0;
+            for (@Pc(50) int z = 0; z < this.length; z++) {
+                Static397.anIntArray482[z] = 0;
+                Static467.anIntArray568[z] = 0;
+                Static501.anIntArray606[z] = 0;
+                Static359.anIntArray449[z] = 0;
+                Static418.anIntArray704[z] = 0;
             }
-            for (@Pc(78) int local78 = -5; local78 < this.width; local78++) {
-                @Pc(86) int local86;
-                @Pc(101) int local101;
-                @Pc(170) int local170;
-                for (@Pc(81) int local81 = 0; local81 < this.length; local81++) {
-                    local86 = local78 + 5;
-                    @Pc(150) int local150;
-                    if (local86 < this.width) {
-                        local101 = this.underlay[level][local86][local81] & 0xFF;
-                        if (local101 > 0) {
-                            @Pc(114) FloorUnderlayType local114 = this.underlayTypeList.list(local101 - 1);
-                            Static397.anIntArray482[local81] += local114.anInt6630;
-                            Static467.anIntArray568[local81] += local114.anInt6637;
-                            Static501.anIntArray606[local81] += local114.anInt6639;
-                            Static359.anIntArray449[local81] += local114.anInt6632;
-                            local150 = Static418.anIntArray704[local81]++;
+            for (@Pc(78) int x = -UNDERLAY_BLEND_RADIUS; x < this.width; x++) {
+                for (@Pc(81) int columnZ = 0; columnZ < this.length; columnZ++) {
+                    @Pc(86) int addedX = x + UNDERLAY_BLEND_RADIUS;
+                    if (addedX < this.width) {
+                        @Pc(101) int addedUnderlay = this.underlay[level][addedX][columnZ] & 0xFF;
+                        if (addedUnderlay > 0) {
+                            @Pc(114) FloorUnderlayType addedType = this.underlayTypeList.list(addedUnderlay - 1);
+                            Static397.anIntArray482[columnZ] += addedType.anInt6630;
+                            Static467.anIntArray568[columnZ] += addedType.anInt6637;
+                            Static501.anIntArray606[columnZ] += addedType.anInt6639;
+                            Static359.anIntArray449[columnZ] += addedType.anInt6632;
+                            Static418.anIntArray704[columnZ]++;
                         }
                     }
-                    local101 = local78 - 5;
-                    if (local101 >= 0) {
-                        local170 = this.underlay[level][local101][local81] & 0xFF;
-                        if (local170 > 0) {
-                            @Pc(180) FloorUnderlayType local180 = this.underlayTypeList.list(local170 - 1);
-                            Static397.anIntArray482[local81] -= local180.anInt6630;
-                            Static467.anIntArray568[local81] -= local180.anInt6637;
-                            Static501.anIntArray606[local81] -= local180.anInt6639;
-                            Static359.anIntArray449[local81] -= local180.anInt6632;
-                            local150 = Static418.anIntArray704[local81]--;
+                    @Pc(101) int removedX = x - UNDERLAY_BLEND_RADIUS;
+                    if (removedX >= 0) {
+                        @Pc(170) int removedUnderlay = this.underlay[level][removedX][columnZ] & 0xFF;
+                        if (removedUnderlay > 0) {
+                            @Pc(180) FloorUnderlayType removedType = this.underlayTypeList.list(removedUnderlay - 1);
+                            Static397.anIntArray482[columnZ] -= removedType.anInt6630;
+                            Static467.anIntArray568[columnZ] -= removedType.anInt6637;
+                            Static501.anIntArray606[columnZ] -= removedType.anInt6639;
+                            Static359.anIntArray449[columnZ] -= removedType.anInt6632;
+                            Static418.anIntArray704[columnZ]--;
                         }
                     }
                 }
-                if (local78 >= 0) {
-                    local86 = 0;
-                    local101 = 0;
-                    local170 = 0;
-                    @Pc(240) int local240 = 0;
-                    @Pc(242) int local242 = 0;
-                    for (@Pc(244) int local244 = -5; local244 < this.length; local244++) {
-                        @Pc(249) int local249 = local244 + 5;
-                        if (this.length > local249) {
-                            local101 += Static467.anIntArray568[local249];
-                            local86 += Static397.anIntArray482[local249];
-                            local240 += Static359.anIntArray449[local249];
-                            local170 += Static501.anIntArray606[local249];
-                            local242 += Static418.anIntArray704[local249];
+                if (x >= 0) {
+                    @Pc(86) int hue = 0;
+                    @Pc(101) int saturation = 0;
+                    @Pc(170) int lightness = 0;
+                    @Pc(240) int hueWeight = 0;
+                    @Pc(242) int count = 0;
+                    for (@Pc(244) int z = -UNDERLAY_BLEND_RADIUS; z < this.length; z++) {
+                        @Pc(249) int addedZ = z + UNDERLAY_BLEND_RADIUS;
+                        if (this.length > addedZ) {
+                            saturation += Static467.anIntArray568[addedZ];
+                            hue += Static397.anIntArray482[addedZ];
+                            hueWeight += Static359.anIntArray449[addedZ];
+                            lightness += Static501.anIntArray606[addedZ];
+                            count += Static418.anIntArray704[addedZ];
                         }
-                        @Pc(291) int local291 = local244 - 5;
-                        if (local291 >= 0) {
-                            local170 -= Static501.anIntArray606[local291];
-                            local240 -= Static359.anIntArray449[local291];
-                            local86 -= Static397.anIntArray482[local291];
-                            local242 -= Static418.anIntArray704[local291];
-                            local101 -= Static467.anIntArray568[local291];
+                        @Pc(291) int removedZ = z - UNDERLAY_BLEND_RADIUS;
+                        if (removedZ >= 0) {
+                            lightness -= Static501.anIntArray606[removedZ];
+                            hueWeight -= Static359.anIntArray449[removedZ];
+                            hue -= Static397.anIntArray482[removedZ];
+                            count -= Static418.anIntArray704[removedZ];
+                            saturation -= Static467.anIntArray568[removedZ];
                         }
-                        if (local244 >= 0 && local240 > 0 && local242 > 0) {
-                            colour[local78][local244] = Static318.method8555(local170 / local242, local101 / local242, local86 * 256 / local240);
+                        if (z >= 0 && hueWeight > 0 && count > 0) {
+                            colour[x][z] = Static318.method8555(lightness / count, saturation / count, hue * 256 / hueWeight);
                         }
                     }
                 }
@@ -903,8 +898,8 @@ public class Class306 {
                 Static358.method9182();
             }
         }
-        for (local50 = 0; local50 < this.levels; local50++) {
-            Static246.ground[local50].YA();
+        for (@Pc(50) int level = 0; level < this.levels; level++) {
+            Static246.ground[level].YA();
         }
     }
 
@@ -934,39 +929,22 @@ public class Class306 {
             }
         }
 
-        if (x < 0 || z < 0 || this.width <= x || this.length <= z) {
-            return;
-        }
-
-        if (level == 0) {
-            if (x > 0 && this.tileHeights[level][x - 1][z] != 0) {
+        if (x >= 0 && z >= 0 && x < this.width && z < this.length) {
+            if (level == 0) {
+                if (x > 0 && this.tileHeights[level][x - 1][z] != 0) {
+                    this.tileHeights[level][x][z] = this.tileHeights[level][x - 1][z];
+                } else if (z > 0 && this.tileHeights[level][x][z - 1] != 0) {
+                    this.tileHeights[level][x][z] = this.tileHeights[level][x][z - 1];
+                } else if (x > 0 && z > 0 && this.tileHeights[level][x - 1][z - 1] != 0) {
+                    this.tileHeights[level][x][z] = this.tileHeights[level][x - 1][z - 1];
+                }
+            } else if (x > 0 && this.tileHeights[level][x - 1][z] != this.tileHeights[level - 1][x - 1][z]) {
                 this.tileHeights[level][x][z] = this.tileHeights[level][x - 1][z];
-                return;
-            }
-            if (z > 0 && this.tileHeights[level][x][z - 1] != 0) {
+            } else if (z > 0 && this.tileHeights[level][x][z - 1] != this.tileHeights[level - 1][x][z - 1]) {
                 this.tileHeights[level][x][z] = this.tileHeights[level][x][z - 1];
-                return;
-            }
-            if (x > 0 && z > 0 && this.tileHeights[level][x - 1][z - 1] != 0) {
+            } else if (x > 0 && z > 0 && this.tileHeights[level - 1][x - 1][z - 1] != this.tileHeights[level][x - 1][z - 1]) {
                 this.tileHeights[level][x][z] = this.tileHeights[level][x - 1][z - 1];
-                return;
             }
-            return;
-        }
-
-        if (x > 0 && this.tileHeights[level][x - 1][z] != this.tileHeights[level - 1][x - 1][z]) {
-            this.tileHeights[level][x][z] = this.tileHeights[level][x - 1][z];
-            return;
-        }
-
-        if (z > 0 && this.tileHeights[level][x][z - 1] != this.tileHeights[level - 1][x][z - 1]) {
-            this.tileHeights[level][x][z] = this.tileHeights[level][x][z - 1];
-            return;
-        }
-
-        if (x > 0 && z > 0 && this.tileHeights[level - 1][x - 1][z - 1] != this.tileHeights[level][x - 1][z - 1]) {
-            this.tileHeights[level][x][z] = this.tileHeights[level][x - 1][z - 1];
-            return;
         }
     }
 
@@ -986,7 +964,7 @@ public class Class306 {
                 if (AnimatedBackground.level == -1 || Static696.isTileVisibleFrom(z, AnimatedBackground.level, x, level)) {
                     @Pc(83) boolean allowShadow = false;
                     @Pc(85) boolean blendable = false;
-                    @Pc(88) boolean[] local88 = new boolean[4];
+                    @Pc(88) boolean[] edgeSplits = new boolean[4];
 
                     @Pc(94) int shape = shapes[x][z];
                     @Pc(100) int direction = directions[x][z];
@@ -1004,189 +982,184 @@ public class Class306 {
                             shape = 12;
                         }
 
-                        @Pc(187) FloorOverlayType local187 = overlayType;
+                        @Pc(187) FloorOverlayType occluderOverlayType = overlayType;
                         if (overlayType != null) {
                             if (overlayType.colour != -1 || overlayType.blendColour != -1) {
                                 if (underlayType != null && shape != 0) {
                                     blendable = overlayType.blendable;
                                 }
                             } else {
-                                local187 = overlayType;
+                                occluderOverlayType = overlayType;
                                 overlayType = null;
                             }
                         }
 
                         if ((shape == 0 || shape == 12) && x > 0 && z > 0 && x < this.width && this.length > z) {
-                            @Pc(276) int local276 = underlaySW == underlay[nextX][z - 1] ? 1 : -1;
-                            @Pc(294) int local294 = underlay[x - 1][z - 1] == underlaySW ? 1 : -1;
-                            @Pc(308) int local308 = underlaySW == underlay[nextX][nextZ] ? 1 : -1;
+                            @Pc(276) int matchSE = underlaySW == underlay[nextX][z - 1] ? 1 : -1;
+                            @Pc(294) int matchSW = underlay[x - 1][z - 1] == underlaySW ? 1 : -1;
+                            @Pc(308) int matchNE = underlaySW == underlay[nextX][nextZ] ? 1 : -1;
 
                             if (underlay[x][z - 1] == underlaySW) {
-                                local276++;
-                                local294++;
+                                matchSE++;
+                                matchSW++;
                             } else {
-                                local276--;
-                                local294--;
+                                matchSE--;
+                                matchSW--;
                             }
 
-                            @Pc(345) int local345 = underlay[x - 1][nextZ] == underlaySW ? 1 : -1;
+                            @Pc(345) int matchNW = underlay[x - 1][nextZ] == underlaySW ? 1 : -1;
 
                             if (underlaySW == underlay[nextX][z]) {
-                                local308++;
-                                local276++;
+                                matchNE++;
+                                matchSE++;
                             } else {
-                                local276--;
-                                local308--;
+                                matchSE--;
+                                matchNE--;
                             }
 
                             if (underlaySW == underlay[x][nextZ]) {
-                                local308++;
-                                local345++;
+                                matchNE++;
+                                matchNW++;
                             } else {
-                                local308--;
-                                local345--;
+                                matchNE--;
+                                matchNW--;
                             }
 
                             if (underlaySW == underlay[x - 1][z]) {
-                                local294++;
-                                local345++;
+                                matchSW++;
+                                matchNW++;
                             } else {
-                                local294--;
-                                local345--;
+                                matchSW--;
+                                matchNW--;
                             }
 
-                            @Pc(391) int local391 = local294 - local308;
-                            if (local391 < 0) {
-                                local391 = -local391;
+                            @Pc(391) int diagonalSWNE = matchSW - matchNE;
+                            if (diagonalSWNE < 0) {
+                                diagonalSWNE = -diagonalSWNE;
                             }
 
-                            @Pc(403) int local403 = local276 - local345;
-                            if (local403 < 0) {
-                                local403 = -local403;
+                            @Pc(403) int diagonalSENW = matchSE - matchNW;
+                            if (diagonalSENW < 0) {
+                                diagonalSENW = -diagonalSENW;
                             }
 
-                            if (local391 == local403) {
-                                local391 = ground.getHeight(x, z) - ground.getHeight(nextX, nextZ);
-                                if (local391 < 0) {
-                                    local391 = -local391;
+                            if (diagonalSWNE == diagonalSENW) {
+                                diagonalSWNE = ground.getHeight(x, z) - ground.getHeight(nextX, nextZ);
+                                if (diagonalSWNE < 0) {
+                                    diagonalSWNE = -diagonalSWNE;
                                 }
 
-                                local403 = ground.getHeight(nextX, z) - ground.getHeight(x, nextZ);
-                                if (local403 < 0) {
-                                    local403 = -local403;
+                                diagonalSENW = ground.getHeight(nextX, z) - ground.getHeight(x, nextZ);
+                                if (diagonalSENW < 0) {
+                                    diagonalSENW = -diagonalSENW;
                                 }
                             }
 
-                            direction = local403 > local391 ? 1 : 0;
+                            direction = diagonalSENW > diagonalSWNE ? 1 : 0;
                         }
 
                         for (@Pc(294) int i = 0; i < 13; i++) {
                             OVERLAY_BLEND_PRIORITIES[i] = -1;
-                            anIntArray313[i] = 1;
+                            OVERLAY_BLEND_SOURCES[i] = 1;
                         }
 
-                        @Pc(496) boolean[] local496 = overlayType != null && overlayType.blendable ? aBooleanArrayArray6[shape] : aBooleanArrayArray5[shape];
-                        this.blendOverlay(shape, overlayType, directions, this.width, x, direction, this.length, toolkit, z, local88, underlayType, shapes, overlay);
+                        @Pc(496) boolean[] tileEdgeSplits = overlayType != null && overlayType.blendable ? BLENDED_EDGE_SPLITS[shape] : UNBLENDED_EDGE_SPLITS[shape];
+                        this.blendOverlay(shape, overlayType, directions, this.width, x, direction, this.length, toolkit, z, edgeSplits, underlayType, shapes, overlay);
 
                         @Pc(532) boolean blendOverlay = overlayType != null && overlayType.colour != overlayType.blendColour;
-                        if (!blendOverlay) {
-                            for (@Pc(345) int local345 = 0; local345 < 8; local345++) {
-                                if (OVERLAY_BLEND_PRIORITIES[local345] >= 0 && OVERLAY_BLEND_COLOURS[local345] != OVERLAY_COLOURS[local345]) {
-                                    blendOverlay = true;
-                                    break;
-                                }
-                            }
+                        for (@Pc(345) int vertex = 0; vertex < 8 && !blendOverlay; vertex++) {
+                            blendOverlay = OVERLAY_BLEND_PRIORITIES[vertex] >= 0 && OVERLAY_BLEND_COLOURS[vertex] != OVERLAY_COLOURS[vertex];
                         }
 
-                        if (!local496[(direction + 1) & 0x3]) {
-                            local88[1] = Static588.method7712(local88[1], (anIntArray313[2] & anIntArray313[4]) == 0);
+                        if (!tileEdgeSplits[(direction + 1) & 0x3]) {
+                            edgeSplits[1] = Static588.method7712(edgeSplits[1], (OVERLAY_BLEND_SOURCES[2] & OVERLAY_BLEND_SOURCES[4]) == 0);
                         }
-                        if (!local496[(direction + 3) & 0x3]) {
-                            local88[3] = Static588.method7712(local88[3], (anIntArray313[6] & anIntArray313[0]) == 0);
+                        if (!tileEdgeSplits[(direction + 3) & 0x3]) {
+                            edgeSplits[3] = Static588.method7712(edgeSplits[3], (OVERLAY_BLEND_SOURCES[6] & OVERLAY_BLEND_SOURCES[0]) == 0);
                         }
-                        if (!local496[direction & 0x3]) {
-                            local88[0] = Static588.method7712(local88[0], (anIntArray313[0] & anIntArray313[2]) == 0);
+                        if (!tileEdgeSplits[direction & 0x3]) {
+                            edgeSplits[0] = Static588.method7712(edgeSplits[0], (OVERLAY_BLEND_SOURCES[0] & OVERLAY_BLEND_SOURCES[2]) == 0);
                         }
-                        if (!local496[(direction + 2) & 0x3]) {
-                            local88[2] = Static588.method7712(local88[2], (anIntArray313[6] & anIntArray313[4]) == 0);
+                        if (!tileEdgeSplits[(direction + 2) & 0x3]) {
+                            edgeSplits[2] = Static588.method7712(edgeSplits[2], (OVERLAY_BLEND_SOURCES[6] & OVERLAY_BLEND_SOURCES[4]) == 0);
                         }
 
                         if (!blendable && (shape == 0 || shape == 12)) {
-                            if (local88[0] && !local88[1] && !local88[2] && local88[3]) {
-                                local88[0] = local88[3] = false;
+                            if (edgeSplits[0] && !edgeSplits[1] && !edgeSplits[2] && edgeSplits[3]) {
+                                edgeSplits[0] = edgeSplits[3] = false;
                                 shape = shape == 0 ? 13 : 14;
                                 direction = 0;
-                            } else if (local88[0] && local88[1] && !local88[2] && !local88[3]) {
+                            } else if (edgeSplits[0] && edgeSplits[1] && !edgeSplits[2] && !edgeSplits[3]) {
                                 shape = shape == 0 ? 13 : 14;
                                 direction = 3;
-                                local88[0] = local88[1] = false;
-                            } else if (!local88[0] && local88[1] && local88[2] && !local88[3]) {
+                                edgeSplits[0] = edgeSplits[1] = false;
+                            } else if (!edgeSplits[0] && edgeSplits[1] && edgeSplits[2] && !edgeSplits[3]) {
                                 shape = shape == 0 ? 13 : 14;
-                                local88[1] = local88[2] = false;
+                                edgeSplits[1] = edgeSplits[2] = false;
                                 direction = 2;
-                            } else if (!local88[0] && !local88[1] && local88[2] && local88[3]) {
+                            } else if (!edgeSplits[0] && !edgeSplits[1] && edgeSplits[2] && edgeSplits[3]) {
                                 shape = shape == 0 ? 13 : 14;
                                 direction = 1;
-                                local88[2] = local88[3] = false;
+                                edgeSplits[2] = edgeSplits[3] = false;
                             }
                         }
 
-                        @Pc(909) boolean local909 = !blendable && !local88[0] && !local88[2] && !local88[1] && !local88[3];
-                        @Pc(911) int[] local911 = null;
+                        @Pc(909) boolean simpleFaces = !blendable && !edgeSplits[0] && !edgeSplits[2] && !edgeSplits[1] && !edgeSplits[3];
+                        @Pc(911) int[] edgeFaces = null;
                         @Pc(917) int[] faceA;
                         @Pc(934) int[] faceB;
                         @Pc(930) int[] faceC;
-                        @Pc(391) int faceUnderlay;
-                        @Pc(403) int faceOverlay;
-                        if (local909) {
+                        @Pc(391) int underlayFaces;
+                        @Pc(403) int overlayFaces;
+                        if (simpleFaces) {
                             faceA = TILE_FACE_A[shape];
-                            faceOverlay = overlayType == null ? 0 : OVERLAY_FACE_COUNT[shape];
+                            overlayFaces = overlayType == null ? 0 : OVERLAY_FACE_COUNT[shape];
                             faceC = TILE_FACE_C[shape];
                             faceB = TILE_FACE_B[shape];
-                            faceUnderlay = underlayType == null ? 0 : UNDERLAY_FACE_COUNT[shape];
+                            underlayFaces = underlayType == null ? 0 : UNDERLAY_FACE_COUNT[shape];
                         } else if (blendable) {
-                            faceC = anIntArrayArray86[shape];
-                            faceOverlay = overlayType == null ? 0 : anIntArray424[shape];
-                            faceA = anIntArrayArray90[shape];
-                            local911 = anIntArrayArray206[shape];
-                            faceB = anIntArrayArray193[shape];
-                            faceUnderlay = underlayType == null ? 0 : anIntArray468[shape];
+                            faceC = BLENDED_FACE_C[shape];
+                            overlayFaces = overlayType == null ? 0 : BLENDED_OVERLAY_FACE_COUNT[shape];
+                            faceA = BLENDED_FACE_A[shape];
+                            edgeFaces = BLENDED_EDGE_FACE[shape];
+                            faceB = BLENDED_FACE_B[shape];
+                            underlayFaces = underlayType == null ? 0 : BLENDED_UNDERLAY_FACE_COUNT[shape];
                         } else {
-                            faceUnderlay = underlayType == null ? 0 : anIntArray464[shape];
-                            faceC = anIntArrayArray257[shape];
-                            faceOverlay = overlayType == null ? 0 : anIntArray601[shape];
+                            underlayFaces = underlayType == null ? 0 : SPLIT_UNDERLAY_FACE_COUNT[shape];
+                            faceC = SPLIT_FACE_C[shape];
+                            overlayFaces = overlayType == null ? 0 : SPLIT_OVERLAY_FACE_COUNT[shape];
                             faceA = Static115.anIntArrayArray56[shape];
-                            local911 = Static264.anIntArrayArray267[shape];
+                            edgeFaces = Static264.anIntArrayArray267[shape];
                             faceB = Static206.anIntArrayArray84[shape];
                         }
 
-                        @Pc(1021) int faceCount = faceOverlay + faceUnderlay;
+                        @Pc(1021) int faceCount = overlayFaces + underlayFaces;
                         if (faceCount <= 0) {
                             Static527.method7084(level, x, z);
                         } else {
-                            if (local88[0]) {
+                            if (edgeSplits[0]) {
                                 faceCount++;
                             }
-                            if (local88[2]) {
+                            if (edgeSplits[2]) {
                                 faceCount++;
                             }
-                            if (local88[1]) {
+                            if (edgeSplits[1]) {
                                 faceCount++;
                             }
-                            if (local88[3]) {
+                            if (edgeSplits[3]) {
                                 faceCount++;
                             }
 
-                            @Pc(1062) int local1062 = 0;
-                            @Pc(1064) int local1064 = 0;
+                            @Pc(1062) int face = 0;
+                            @Pc(1064) int vertexIndex = 0;
                             @Pc(1068) int vertexCount = faceCount * 3;
                             @Pc(1076) int[] overlayBlendColours = blendOverlay ? new int[vertexCount] : null;
-                            @Pc(1079) int[] local1079 = new int[vertexCount];
-                            @Pc(1082) int[] local1082 = new int[vertexCount];
+                            @Pc(1079) int[] offsetX = new int[vertexCount];
+                            @Pc(1082) int[] offsetY = new int[vertexCount];
                             @Pc(1085) int[] blendedColours = new int[vertexCount];
                             @Pc(1088) int[] blendedTextures = new int[vertexCount];
                             @Pc(1091) int[] blendedSizes = new int[vertexCount];
-                            @Pc(1099) int[] local1099 = surfaceGround == null ? null : new int[vertexCount];
+                            @Pc(1099) int[] offsetLevel = surfaceGround == null ? null : new int[vertexCount];
                             @Pc(1111) int[] waterDepths = surfaceGround == null && underwaterGround == null ? null : new int[vertexCount];
 
                             @Pc(1113) int colour = -1;
@@ -1194,126 +1167,126 @@ public class Class306 {
                             @Pc(1117) int size = 256;
 
                             if (overlayType == null) {
-                                if (local909) {
-                                    local1062 = OVERLAY_FACE_COUNT[shape];
+                                if (simpleFaces) {
+                                    face = OVERLAY_FACE_COUNT[shape];
                                 } else if (blendable) {
-                                    local1062 = anIntArray424[shape];
+                                    face = BLENDED_OVERLAY_FACE_COUNT[shape];
                                 } else {
-                                    local1062 = anIntArray601[shape];
+                                    face = SPLIT_OVERLAY_FACE_COUNT[shape];
                                 }
                             } else {
                                 size = overlayType.size;
                                 colour = overlayType.colour;
                                 texture = overlayType.texture;
 
-                                @Pc(1162) int local1162 = Static718.blendColour(overlayType, toolkit);
+                                @Pc(1162) int overlayBlendColour = Static718.blendColour(overlayType, toolkit);
 
-                                for (@Pc(1164) int local1164 = 0; local1164 < faceOverlay; local1164++) {
-                                    @Pc(1277) byte local1277;
+                                for (@Pc(1164) int i = 0; i < overlayFaces; i++) {
+                                    @Pc(1277) byte faceVertexCount;
 
-                                    if (local88[-direction & 0x3] && local911[0] == local1062) {
-                                        anIntArray695[0] = faceA[local1062];
-                                        anIntArray695[1] = 1;
-                                        anIntArray695[2] = faceC[local1062];
-                                        anIntArray695[3] = 1;
-                                        anIntArray695[4] = faceB[local1062];
-                                        anIntArray695[5] = faceC[local1062];
-                                        local1277 = 6;
-                                    } else if (local88[(2 - direction) & 0x3] && local911[2] == local1062) {
-                                        anIntArray695[0] = faceA[local1062];
-                                        anIntArray695[1] = 5;
-                                        anIntArray695[2] = faceC[local1062];
-                                        anIntArray695[3] = 5;
-                                        anIntArray695[4] = faceB[local1062];
-                                        anIntArray695[5] = faceC[local1062];
-                                        local1277 = 6;
-                                    } else if (local88[(1 - direction) & 0x3] && local911[1] == local1062) {
-                                        anIntArray695[0] = faceA[local1062];
-                                        anIntArray695[1] = 3;
-                                        anIntArray695[2] = faceC[local1062];
-                                        anIntArray695[3] = 3;
-                                        anIntArray695[4] = faceB[local1062];
-                                        local1277 = 6;
-                                        anIntArray695[5] = faceC[local1062];
-                                    } else if (local88[(3 - direction) & 0x3] && local911[3] == local1062) {
-                                        anIntArray695[0] = faceA[local1062];
-                                        anIntArray695[1] = 7;
-                                        anIntArray695[2] = faceC[local1062];
-                                        anIntArray695[3] = 7;
-                                        anIntArray695[4] = faceB[local1062];
-                                        local1277 = 6;
-                                        anIntArray695[5] = faceC[local1062];
+                                    if (edgeSplits[-direction & 0x3] && edgeFaces[0] == face) {
+                                        faceVertices[0] = faceA[face];
+                                        faceVertices[1] = 1;
+                                        faceVertices[2] = faceC[face];
+                                        faceVertices[3] = 1;
+                                        faceVertices[4] = faceB[face];
+                                        faceVertices[5] = faceC[face];
+                                        faceVertexCount = 6;
+                                    } else if (edgeSplits[(2 - direction) & 0x3] && edgeFaces[2] == face) {
+                                        faceVertices[0] = faceA[face];
+                                        faceVertices[1] = 5;
+                                        faceVertices[2] = faceC[face];
+                                        faceVertices[3] = 5;
+                                        faceVertices[4] = faceB[face];
+                                        faceVertices[5] = faceC[face];
+                                        faceVertexCount = 6;
+                                    } else if (edgeSplits[(1 - direction) & 0x3] && edgeFaces[1] == face) {
+                                        faceVertices[0] = faceA[face];
+                                        faceVertices[1] = 3;
+                                        faceVertices[2] = faceC[face];
+                                        faceVertices[3] = 3;
+                                        faceVertices[4] = faceB[face];
+                                        faceVertexCount = 6;
+                                        faceVertices[5] = faceC[face];
+                                    } else if (edgeSplits[(3 - direction) & 0x3] && edgeFaces[3] == face) {
+                                        faceVertices[0] = faceA[face];
+                                        faceVertices[1] = 7;
+                                        faceVertices[2] = faceC[face];
+                                        faceVertices[3] = 7;
+                                        faceVertices[4] = faceB[face];
+                                        faceVertexCount = 6;
+                                        faceVertices[5] = faceC[face];
                                     } else {
-                                        anIntArray695[0] = faceA[local1062];
-                                        anIntArray695[1] = faceB[local1062];
-                                        anIntArray695[2] = faceC[local1062];
-                                        local1277 = 3;
+                                        faceVertices[0] = faceA[face];
+                                        faceVertices[1] = faceB[face];
+                                        faceVertices[2] = faceC[face];
+                                        faceVertexCount = 3;
                                     }
 
-                                    for (@Pc(1411) int local1411 = 0; local1411 < local1277; local1411++) {
-                                        @Pc(1416) int local1416 = anIntArray695[local1411];
-                                        @Pc(1425) int local1425 = (local1416 - (direction * 2)) & 0x7;
-                                        @Pc(1430) int local1430 = this.tileOffsetX[local1416];
-                                        @Pc(1435) int local1435 = this.tileOffsetY[local1416];
+                                    for (@Pc(1411) int faceVertex = 0; faceVertex < faceVertexCount; faceVertex++) {
+                                        @Pc(1416) int vertex = faceVertices[faceVertex];
+                                        @Pc(1425) int blendVertex = (vertex - (direction * 2)) & 0x7;
+                                        @Pc(1430) int deltaX = this.tileOffsetX[vertex];
+                                        @Pc(1435) int deltaY = this.tileOffsetY[vertex];
 
-                                        @Pc(1452) int local1452;
-                                        @Pc(1448) int local1448;
+                                        @Pc(1452) int rotatedX;
+                                        @Pc(1448) int rotatedY;
                                         if (direction == 1) {
-                                            local1448 = 512 - local1430;
-                                            local1452 = local1435;
+                                            rotatedY = 512 - deltaX;
+                                            rotatedX = deltaY;
                                         } else if (direction == 2) {
-                                            local1448 = 512 - local1435;
-                                            local1452 = 512 - local1430;
+                                            rotatedY = 512 - deltaY;
+                                            rotatedX = 512 - deltaX;
                                         } else if (direction == 3) {
-                                            local1452 = 512 - local1435;
-                                            local1448 = local1430;
+                                            rotatedX = 512 - deltaY;
+                                            rotatedY = deltaX;
                                         } else {
-                                            local1452 = local1430;
-                                            local1448 = local1435;
+                                            rotatedX = deltaX;
+                                            rotatedY = deltaY;
                                         }
 
-                                        local1079[local1064] = local1452;
-                                        local1082[local1064] = local1448;
-                                        if (local1099 != null && aBooleanArrayArray7[shape][local1416]) {
-                                            @Pc(1501) int local1501 = local1452 + (x << 9);
-                                            @Pc(1508) int local1508 = (z << 9) + local1448;
-                                            local1099[local1064] = surfaceGround.averageHeight(local1501, local1508) - ground.averageHeight(local1501, local1508);
+                                        offsetX[vertexIndex] = rotatedX;
+                                        offsetY[vertexIndex] = rotatedY;
+                                        if (offsetLevel != null && OVERLAY_VERTICES[shape][vertex]) {
+                                            @Pc(1501) int worldX = rotatedX + (x << 9);
+                                            @Pc(1508) int worldY = (z << 9) + rotatedY;
+                                            offsetLevel[vertexIndex] = surfaceGround.averageHeight(worldX, worldY) - ground.averageHeight(worldX, worldY);
                                         }
 
                                         if (waterDepths != null) {
-                                            if (surfaceGround != null && !aBooleanArrayArray7[shape][local1416]) {
-                                                @Pc(1501) int local1501 = local1452 + (x << 9);
-                                                @Pc(1508) int local1508 = (z << 9) + local1448;
-                                                waterDepths[local1064] = ground.averageHeight(local1501, local1508) - surfaceGround.averageHeight(local1501, local1508);
-                                            } else if (underwaterGround != null && !Static355.aBooleanArrayArray4[shape][local1416]) {
-                                                @Pc(1501) int local1501 = local1452 + (x << 9);
-                                                @Pc(1508) int local1508 = local1448 + (z << 9);
-                                                waterDepths[local1064] = underwaterGround.averageHeight(local1501, local1508) - ground.averageHeight(local1501, local1508);
+                                            if (surfaceGround != null && !OVERLAY_VERTICES[shape][vertex]) {
+                                                @Pc(1501) int worldX = rotatedX + (x << 9);
+                                                @Pc(1508) int worldY = (z << 9) + rotatedY;
+                                                waterDepths[vertexIndex] = ground.averageHeight(worldX, worldY) - surfaceGround.averageHeight(worldX, worldY);
+                                            } else if (underwaterGround != null && !Static355.aBooleanArrayArray4[shape][vertex]) {
+                                                @Pc(1501) int worldX = rotatedX + (x << 9);
+                                                @Pc(1508) int worldY = rotatedY + (z << 9);
+                                                waterDepths[vertexIndex] = underwaterGround.averageHeight(worldX, worldY) - ground.averageHeight(worldX, worldY);
                                             }
                                         }
 
-                                        if (local1416 < 8 && OVERLAY_BLEND_PRIORITIES[local1425] > overlayType.blendPriority) {
+                                        if (vertex < 8 && OVERLAY_BLEND_PRIORITIES[blendVertex] > overlayType.blendPriority) {
                                             if (overlayBlendColours != null) {
-                                                overlayBlendColours[local1064] = OVERLAY_BLEND_COLOURS[local1425];
+                                                overlayBlendColours[vertexIndex] = OVERLAY_BLEND_COLOURS[blendVertex];
                                             }
 
-                                            blendedSizes[local1064] = OVERLAY_SIZES[local1425];
-                                            blendedTextures[local1064] = OVERLAY_TEXTURES[local1425];
-                                            blendedColours[local1064] = OVERLAY_COLOURS[local1425];
+                                            blendedSizes[vertexIndex] = OVERLAY_SIZES[blendVertex];
+                                            blendedTextures[vertexIndex] = OVERLAY_TEXTURES[blendVertex];
+                                            blendedColours[vertexIndex] = OVERLAY_COLOURS[blendVertex];
                                         } else {
                                             if (overlayBlendColours != null) {
-                                                overlayBlendColours[local1064] = local1162;
+                                                overlayBlendColours[vertexIndex] = overlayBlendColour;
                                             }
 
-                                            blendedTextures[local1064] = overlayType.texture;
-                                            blendedSizes[local1064] = overlayType.size;
-                                            blendedColours[local1064] = colour;
+                                            blendedTextures[vertexIndex] = overlayType.texture;
+                                            blendedSizes[vertexIndex] = overlayType.size;
+                                            blendedColours[vertexIndex] = colour;
                                         }
 
-                                        local1064++;
+                                        vertexIndex++;
                                     }
 
-                                    local1062++;
+                                    face++;
                                 }
 
                                 if (!this.underwater && level == 0) {
@@ -1343,150 +1316,150 @@ public class Class306 {
                                 @Pc(1766) FloorUnderlayType underlayTypeNE = this.underlayTypeList.list(underlayNE - 1);
                                 @Pc(1774) FloorUnderlayType underlayTypeSE = this.underlayTypeList.list(underlaySE - 1);
 
-                                for (@Pc(1425) int local1425 = 0; local1425 < faceUnderlay; local1425++) {
-                                    @Pc(1277) byte local1277;
+                                for (@Pc(1425) int i = 0; i < underlayFaces; i++) {
+                                    @Pc(1277) byte faceVertexCount;
 
-                                    if (local88[-direction & 0x3] && local911[0] == local1062) {
-                                        anIntArray695[0] = faceA[local1062];
-                                        anIntArray695[1] = 1;
-                                        anIntArray695[2] = faceC[local1062];
-                                        anIntArray695[3] = 1;
-                                        anIntArray695[4] = faceB[local1062];
-                                        local1277 = 6;
-                                        anIntArray695[5] = faceC[local1062];
-                                    } else if (local88[2 - direction & 0x3] && local911[2] == local1062) {
-                                        anIntArray695[0] = faceA[local1062];
-                                        anIntArray695[1] = 5;
-                                        anIntArray695[2] = faceC[local1062];
-                                        anIntArray695[3] = 5;
-                                        anIntArray695[4] = faceB[local1062];
-                                        local1277 = 6;
-                                        anIntArray695[5] = faceC[local1062];
-                                    } else if (local88[1 - direction & 0x3] && local911[1] == local1062) {
-                                        anIntArray695[0] = faceA[local1062];
-                                        anIntArray695[1] = 3;
-                                        anIntArray695[2] = faceC[local1062];
-                                        anIntArray695[3] = 3;
-                                        anIntArray695[4] = faceB[local1062];
-                                        local1277 = 6;
-                                        anIntArray695[5] = faceC[local1062];
-                                    } else if (local88[3 - direction & 0x3] && local911[3] == local1062) {
-                                        anIntArray695[0] = faceA[local1062];
-                                        anIntArray695[1] = 7;
-                                        anIntArray695[2] = faceC[local1062];
-                                        anIntArray695[3] = 7;
-                                        anIntArray695[4] = faceB[local1062];
-                                        anIntArray695[5] = faceC[local1062];
-                                        local1277 = 6;
+                                    if (edgeSplits[-direction & 0x3] && edgeFaces[0] == face) {
+                                        faceVertices[0] = faceA[face];
+                                        faceVertices[1] = 1;
+                                        faceVertices[2] = faceC[face];
+                                        faceVertices[3] = 1;
+                                        faceVertices[4] = faceB[face];
+                                        faceVertexCount = 6;
+                                        faceVertices[5] = faceC[face];
+                                    } else if (edgeSplits[2 - direction & 0x3] && edgeFaces[2] == face) {
+                                        faceVertices[0] = faceA[face];
+                                        faceVertices[1] = 5;
+                                        faceVertices[2] = faceC[face];
+                                        faceVertices[3] = 5;
+                                        faceVertices[4] = faceB[face];
+                                        faceVertexCount = 6;
+                                        faceVertices[5] = faceC[face];
+                                    } else if (edgeSplits[1 - direction & 0x3] && edgeFaces[1] == face) {
+                                        faceVertices[0] = faceA[face];
+                                        faceVertices[1] = 3;
+                                        faceVertices[2] = faceC[face];
+                                        faceVertices[3] = 3;
+                                        faceVertices[4] = faceB[face];
+                                        faceVertexCount = 6;
+                                        faceVertices[5] = faceC[face];
+                                    } else if (edgeSplits[3 - direction & 0x3] && edgeFaces[3] == face) {
+                                        faceVertices[0] = faceA[face];
+                                        faceVertices[1] = 7;
+                                        faceVertices[2] = faceC[face];
+                                        faceVertices[3] = 7;
+                                        faceVertices[4] = faceB[face];
+                                        faceVertices[5] = faceC[face];
+                                        faceVertexCount = 6;
                                     } else {
-                                        anIntArray695[0] = faceA[local1062];
-                                        anIntArray695[1] = faceB[local1062];
-                                        local1277 = 3;
-                                        anIntArray695[2] = faceC[local1062];
+                                        faceVertices[0] = faceA[face];
+                                        faceVertices[1] = faceB[face];
+                                        faceVertexCount = 3;
+                                        faceVertices[2] = faceC[face];
                                     }
 
-                                    local1062++;
+                                    face++;
 
-                                    for (@Pc(1430) int local1430 = 0; local1430 < local1277; local1430++) {
-                                        @Pc(1452) int local1452 = anIntArray695[local1430];
-                                        @Pc(1435) int local1435 = (local1452 - (direction * 2)) & 0x7;
-                                        @Pc(1448) int offsetX = this.tileOffsetX[local1452];
-                                        @Pc(1508) int offsetY = this.tileOffsetY[local1452];
+                                    for (@Pc(1430) int faceVertex = 0; faceVertex < faceVertexCount; faceVertex++) {
+                                        @Pc(1452) int vertex = faceVertices[faceVertex];
+                                        @Pc(1435) int blendVertex = (vertex - (direction * 2)) & 0x7;
+                                        @Pc(1448) int deltaX = this.tileOffsetX[vertex];
+                                        @Pc(1508) int deltaY = this.tileOffsetY[vertex];
 
-                                        @Pc(2056) int local2056;
-                                        @Pc(1501) int local1501;
+                                        @Pc(2056) int rotatedY;
+                                        @Pc(1501) int rotatedX;
                                         if (direction == 1) {
-                                            local1501 = offsetY;
-                                            local2056 = 512 - offsetX;
+                                            rotatedX = deltaY;
+                                            rotatedY = 512 - deltaX;
                                         } else if (direction == 2) {
-                                            local1501 = 512 - offsetX;
-                                            local2056 = 512 - offsetY;
+                                            rotatedX = 512 - deltaX;
+                                            rotatedY = 512 - deltaY;
                                         } else if (direction == 3) {
-                                            local2056 = offsetX;
-                                            local1501 = 512 - offsetY;
+                                            rotatedY = deltaX;
+                                            rotatedX = 512 - deltaY;
                                         } else {
-                                            local1501 = offsetX;
-                                            local2056 = offsetY;
+                                            rotatedX = deltaX;
+                                            rotatedY = deltaY;
                                         }
 
-                                        local1079[local1064] = local1501;
-                                        local1082[local1064] = local2056;
+                                        offsetX[vertexIndex] = rotatedX;
+                                        offsetY[vertexIndex] = rotatedY;
 
-                                        @Pc(2106) int local2106;
-                                        @Pc(2112) int local2112;
-                                        if (local1099 != null && aBooleanArrayArray7[shape][local1452]) {
-                                            local2106 = local1501 + (x << 9);
-                                            local2112 = local2056 + (z << 9);
-                                            local1099[local1064] = surfaceGround.averageHeight(local2106, local2112) - ground.averageHeight(local2106, local2112);
+                                        @Pc(2106) int worldX;
+                                        @Pc(2112) int worldY;
+                                        if (offsetLevel != null && OVERLAY_VERTICES[shape][vertex]) {
+                                            worldX = rotatedX + (x << 9);
+                                            worldY = rotatedY + (z << 9);
+                                            offsetLevel[vertexIndex] = surfaceGround.averageHeight(worldX, worldY) - ground.averageHeight(worldX, worldY);
                                         }
 
                                         if (waterDepths != null) {
-                                            if (surfaceGround != null && !aBooleanArrayArray7[shape][local1452]) {
-                                                local2106 = (x << 9) + local1501;
-                                                local2112 = local2056 + (z << 9);
-                                                waterDepths[local1064] = ground.averageHeight(local2106, local2112) - surfaceGround.averageHeight(local2106, local2112);
-                                            } else if (underwaterGround != null && !Static355.aBooleanArrayArray4[shape][local1452]) {
-                                                local2106 = local1501 + (x << 9);
-                                                local2112 = (z << 9) + local2056;
-                                                waterDepths[local1064] = underwaterGround.averageHeight(local2106, local2112) - ground.averageHeight(local2106, local2112);
+                                            if (surfaceGround != null && !OVERLAY_VERTICES[shape][vertex]) {
+                                                worldX = (x << 9) + rotatedX;
+                                                worldY = rotatedY + (z << 9);
+                                                waterDepths[vertexIndex] = ground.averageHeight(worldX, worldY) - surfaceGround.averageHeight(worldX, worldY);
+                                            } else if (underwaterGround != null && !Static355.aBooleanArrayArray4[shape][vertex]) {
+                                                worldX = rotatedX + (x << 9);
+                                                worldY = (z << 9) + rotatedY;
+                                                waterDepths[vertexIndex] = underwaterGround.averageHeight(worldX, worldY) - ground.averageHeight(worldX, worldY);
                                             }
                                         }
 
-                                        if (local1452 < 8 && OVERLAY_BLEND_PRIORITIES[local1435] >= 0) {
+                                        if (vertex < 8 && OVERLAY_BLEND_PRIORITIES[blendVertex] >= 0) {
                                             if (overlayBlendColours != null) {
-                                                overlayBlendColours[local1064] = OVERLAY_BLEND_COLOURS[local1435];
+                                                overlayBlendColours[vertexIndex] = OVERLAY_BLEND_COLOURS[blendVertex];
                                             }
-                                            blendedSizes[local1064] = OVERLAY_SIZES[local1435];
-                                            blendedTextures[local1064] = OVERLAY_TEXTURES[local1435];
-                                            blendedColours[local1064] = OVERLAY_COLOURS[local1435];
+                                            blendedSizes[vertexIndex] = OVERLAY_SIZES[blendVertex];
+                                            blendedTextures[vertexIndex] = OVERLAY_TEXTURES[blendVertex];
+                                            blendedColours[vertexIndex] = OVERLAY_COLOURS[blendVertex];
                                         } else {
-                                            if (blendable && aBooleanArrayArray7[shape][local1452]) {
-                                                blendedTextures[local1064] = texture;
-                                                blendedSizes[local1064] = size;
-                                                blendedColours[local1064] = colour;
-                                            } else if (local1501 == 0 && local2056 == 0) {
-                                                blendedColours[local1064] = colours[x][z];
-                                                blendedTextures[local1064] = underlayTypeSW.texture;
-                                                blendedSizes[local1064] = underlayTypeSW.size;
-                                            } else if (local1501 == 0 && local2056 == 512) {
-                                                blendedColours[local1064] = colours[x][nextZ];
-                                                blendedTextures[local1064] = underlayTypeNW.texture;
-                                                blendedSizes[local1064] = underlayTypeNW.size;
-                                            } else if (local1501 == 512 && local2056 == 512) {
-                                                blendedColours[local1064] = colours[nextX][nextZ];
-                                                blendedTextures[local1064] = underlayTypeNE.texture;
-                                                blendedSizes[local1064] = underlayTypeNE.size;
-                                            } else if (local1501 == 512 && local2056 == 0) {
-                                                blendedColours[local1064] = colours[nextX][z];
-                                                blendedTextures[local1064] = underlayTypeSE.texture;
-                                                blendedSizes[local1064] = underlayTypeSE.size;
+                                            if (blendable && OVERLAY_VERTICES[shape][vertex]) {
+                                                blendedTextures[vertexIndex] = texture;
+                                                blendedSizes[vertexIndex] = size;
+                                                blendedColours[vertexIndex] = colour;
+                                            } else if (rotatedX == 0 && rotatedY == 0) {
+                                                blendedColours[vertexIndex] = colours[x][z];
+                                                blendedTextures[vertexIndex] = underlayTypeSW.texture;
+                                                blendedSizes[vertexIndex] = underlayTypeSW.size;
+                                            } else if (rotatedX == 0 && rotatedY == 512) {
+                                                blendedColours[vertexIndex] = colours[x][nextZ];
+                                                blendedTextures[vertexIndex] = underlayTypeNW.texture;
+                                                blendedSizes[vertexIndex] = underlayTypeNW.size;
+                                            } else if (rotatedX == 512 && rotatedY == 512) {
+                                                blendedColours[vertexIndex] = colours[nextX][nextZ];
+                                                blendedTextures[vertexIndex] = underlayTypeNE.texture;
+                                                blendedSizes[vertexIndex] = underlayTypeNE.size;
+                                            } else if (rotatedX == 512 && rotatedY == 0) {
+                                                blendedColours[vertexIndex] = colours[nextX][z];
+                                                blendedTextures[vertexIndex] = underlayTypeSE.texture;
+                                                blendedSizes[vertexIndex] = underlayTypeSE.size;
                                             } else {
-                                                if (local1501 >= 256) {
-                                                    if (local2056 < 256) {
-                                                        blendedTextures[local1064] = underlayTypeSE.texture;
-                                                        blendedSizes[local1064] = underlayTypeSE.size;
+                                                if (rotatedX >= 256) {
+                                                    if (rotatedY < 256) {
+                                                        blendedTextures[vertexIndex] = underlayTypeSE.texture;
+                                                        blendedSizes[vertexIndex] = underlayTypeSE.size;
                                                     } else {
-                                                        blendedTextures[local1064] = underlayTypeNE.texture;
-                                                        blendedSizes[local1064] = underlayTypeNE.size;
+                                                        blendedTextures[vertexIndex] = underlayTypeNE.texture;
+                                                        blendedSizes[vertexIndex] = underlayTypeNE.size;
                                                     }
-                                                } else if (local2056 < 256) {
-                                                    blendedTextures[local1064] = underlayTypeSW.texture;
-                                                    blendedSizes[local1064] = underlayTypeSW.size;
+                                                } else if (rotatedY < 256) {
+                                                    blendedTextures[vertexIndex] = underlayTypeSW.texture;
+                                                    blendedSizes[vertexIndex] = underlayTypeSW.size;
                                                 } else {
-                                                    blendedTextures[local1064] = underlayTypeNW.texture;
-                                                    blendedSizes[local1064] = underlayTypeNW.size;
+                                                    blendedTextures[vertexIndex] = underlayTypeNW.texture;
+                                                    blendedSizes[vertexIndex] = underlayTypeNW.size;
                                                 }
-                                                local2106 = Static273.method3966(colours[nextX][z], local1501 << 7 >> 9, colours[x][z]);
-                                                local2112 = Static273.method3966(colours[nextX][nextZ], local1501 << 7 >> 9, colours[x][nextZ]);
-                                                blendedColours[local1064] = Static273.method3966(local2112, local2056 << 7 >> 9, local2106);
+                                                worldX = Static273.method3966(colours[nextX][z], rotatedX << 7 >> 9, colours[x][z]);
+                                                worldY = Static273.method3966(colours[nextX][nextZ], rotatedX << 7 >> 9, colours[x][nextZ]);
+                                                blendedColours[vertexIndex] = Static273.method3966(worldY, rotatedY << 7 >> 9, worldX);
                                             }
 
                                             if (overlayBlendColours != null) {
-                                                overlayBlendColours[local1064] = blendedColours[local1064];
+                                                overlayBlendColours[vertexIndex] = blendedColours[vertexIndex];
                                             }
                                         }
 
-                                        local1064++;
+                                        vertexIndex++;
                                     }
                                 }
 
@@ -1508,7 +1481,7 @@ public class Class306 {
                                     occludes = false;
                                 } else if (underlaySW == 0 && shape != 0) {
                                     occludes = false;
-                                } else if (overlaySW > 0 && local187 != null && !local187.occludes) {
+                                } else if (overlaySW > 0 && occluderOverlayType != null && !occluderOverlayType.occludes) {
                                     occludes = false;
                                 }
 
@@ -1526,7 +1499,7 @@ public class Class306 {
                                 waterBias = Static339.getWaterBias(x, z);
                             }
 
-                            ground.U(x, z, local1079, local1099, local1082, waterDepths, blendedColours, overlayBlendColours, blendedTextures, blendedSizes, waterColour, waterDepth, waterBias, allowShadow);
+                            ground.U(x, z, offsetX, offsetLevel, offsetY, waterDepths, blendedColours, overlayBlendColours, blendedTextures, blendedSizes, waterColour, waterDepth, waterBias, allowShadow);
                             Static527.method7084(level, x, z);
                         }
                     }
@@ -1554,8 +1527,8 @@ public class Class306 {
             }
         }
 
-        @Pc(117) int local117 = (pointerX & ~0x7) << 3;
-        @Pc(32) int local32 = (pointerZ & ~0x7) << 3;
+        @Pc(117) int baseX = (pointerX & ~0x7) << 3;
+        @Pc(32) int baseZ = (pointerZ & ~0x7) << 3;
         @Pc(125) byte offsetX = 0;
         @Pc(127) byte offsetZ = 0;
         if (pointerRotation == 1) {
@@ -1589,11 +1562,11 @@ public class Class306 {
                                 zoneX = x + pointerSquareZ + 8 - squareZ;
                             }
 
-                            this.decodeTile(packet, zoneX, zoneZ, squareX + local117, squareZ + local32, 0, 0, level, 0, true);
+                            this.decodeTile(packet, zoneX, zoneZ, squareX + baseX, squareZ + baseZ, 0, 0, level, 0, true);
                         } else {
                             zoneX = x + MapRegion.rotateZoneX(squareX & 0x7, squareZ & 0x7, pointerRotation);
                             zoneZ = MapRegion.rotateZoneY(squareX & 0x7, squareZ & 0x7, pointerRotation) + z;
-                            this.decodeTile(packet, zoneX, zoneZ, squareX + local117, squareZ + local32, offsetX, offsetZ, level, pointerRotation, false);
+                            this.decodeTile(packet, zoneX, zoneZ, squareX + baseX, squareZ + baseZ, offsetX, offsetZ, level, pointerRotation, false);
                         }
 
                         if (squareX == 63 || squareZ == 63) {

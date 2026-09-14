@@ -37,7 +37,7 @@ public final class StaticGroundDecor extends GroundDecor implements Location {
     public final boolean underwater;
 
     @OriginalMember(owner = "client!cu", name = "U", descriptor = "Z")
-    public boolean aBoolean180;
+    public boolean copyNormals;
 
     @OriginalMember(owner = "client!cu", name = "S", descriptor = "Z")
     public boolean hardShadow;
@@ -49,19 +49,19 @@ public final class StaticGroundDecor extends GroundDecor implements Location {
     public Model model;
 
     @OriginalMember(owner = "client!cu", name = "<init>", descriptor = "(Lclient!ha;Lclient!c;IIIIIZIZ)V")
-    public StaticGroundDecor(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) LocType type, @OriginalArg(2) int level, @OriginalArg(3) int virtualLevel, @OriginalArg(4) int x, @OriginalArg(5) int y, @OriginalArg(6) int z, @OriginalArg(7) boolean underwater, @OriginalArg(8) int arg8, @OriginalArg(9) boolean arg9) {
+    public StaticGroundDecor(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) LocType type, @OriginalArg(2) int level, @OriginalArg(3) int virtualLevel, @OriginalArg(4) int x, @OriginalArg(5) int y, @OriginalArg(6) int z, @OriginalArg(7) boolean underwater, @OriginalArg(8) int rotation, @OriginalArg(9) boolean copyNormals) {
         super(x, y, z, level, virtualLevel, type.offsetY);
         this.id = (short) type.id;
         super.z = z;
-        this.rotation = (byte) arg8;
+        this.rotation = (byte) rotation;
         this.interactive = type.active != LocInteractivity.NONINTERACTIVE && !underwater;
         super.x = x;
         this.underwater = underwater;
-        this.aBoolean180 = arg9;
+        this.copyNormals = copyNormals;
         this.hardShadow = toolkit.hardShadow() && type.hardshadow && !this.underwater && ClientOptions.instance.hardShadows.getValue() != 0;
 
         @Pc(68) int functionMask = 0x800;
-        if (this.aBoolean180) {
+        if (this.copyNormals) {
             functionMask |= 0x10000;
         }
 
@@ -70,7 +70,7 @@ public final class StaticGroundDecor extends GroundDecor implements Location {
             this.shadow = modelAndShadow.shadow;
             this.model = modelAndShadow.model;
 
-            if (this.aBoolean180) {
+            if (this.copyNormals) {
                 this.model = this.model.copy((byte) 0, functionMask, false);
             }
         }
@@ -88,17 +88,17 @@ public final class StaticGroundDecor extends GroundDecor implements Location {
 
     @OriginalMember(owner = "client!cu", name = "a", descriptor = "(ILclient!ha;)Lclient!pea;")
     @Override
-    public PickableEntity render(@OriginalArg(1) Toolkit arg0) {
+    public PickableEntity render(@OriginalArg(1) Toolkit toolkit) {
         if (this.model == null) {
             return null;
         }
-        @Pc(20) Matrix local20 = arg0.scratchMatrix();
-        local20.applyTranslation(super.x, super.y, super.z);
+        @Pc(20) Matrix matrix = toolkit.scratchMatrix();
+        matrix.applyTranslation(super.x, super.y, super.z);
         @Pc(34) PickableEntity entity = Static642.method8441(this.interactive, 1);
         if (OrthoMode.enabled) {
-            this.model.renderOrtho(local20, entity.pickingCylinders[0], OrthoMode.renderZoom, 0);
+            this.model.renderOrtho(matrix, entity.pickingCylinders[0], OrthoMode.renderZoom, 0);
         } else {
-            this.model.render(local20, entity.pickingCylinders[0], 0);
+            this.model.render(matrix, entity.pickingCylinders[0], 0);
         }
         return entity;
     }
@@ -115,17 +115,15 @@ public final class StaticGroundDecor extends GroundDecor implements Location {
 
     @OriginalMember(owner = "client!cu", name = "a", descriptor = "(IZLclient!ha;IBILclient!eo;)V")
     @Override
-    public void shareLight(@OriginalArg(0) int arg0, @OriginalArg(1) boolean arg1, @OriginalArg(2) Toolkit arg2, @OriginalArg(3) int arg3, @OriginalArg(4) byte arg4, @OriginalArg(5) int arg5, @OriginalArg(6) Entity arg6) {
+    public void shareLight(@OriginalArg(0) int offsetY, @OriginalArg(1) boolean arg1, @OriginalArg(2) Toolkit toolkit, @OriginalArg(3) int offsetZ, @OriginalArg(4) byte arg4, @OriginalArg(5) int offsetX, @OriginalArg(6) Entity entity) {
         if (arg4 <= 101) {
             this.modelAndShadow(-126, null, false);
         }
-        if (!(arg6 instanceof StaticGroundDecor)) {
-            return;
-        }
-        @Pc(21) StaticGroundDecor local21 = (StaticGroundDecor) arg6;
-        if (this.model != null && local21.model != null) {
-            this.model.method7481(local21.model, arg5, arg0, arg3, arg1);
-            return;
+        if (entity instanceof StaticGroundDecor) {
+            @Pc(21) StaticGroundDecor decor = (StaticGroundDecor) entity;
+            if (this.model != null && decor.model != null) {
+                this.model.method7481(decor.model, offsetX, offsetY, offsetZ, arg1);
+            }
         }
     }
 
@@ -164,25 +162,11 @@ public final class StaticGroundDecor extends GroundDecor implements Location {
     }
 
     @OriginalMember(owner = "client!cu", name = "a", descriptor = "(IILclient!ha;Z)Lclient!od;")
-    public ModelAndShadow modelAndShadow(@OriginalArg(0) int functionMask, @OriginalArg(2) Toolkit arg2, @OriginalArg(3) boolean arg3) {
+    public ModelAndShadow modelAndShadow(@OriginalArg(0) int functionMask, @OriginalArg(2) Toolkit toolkit, @OriginalArg(3) boolean addShadow) {
         @Pc(13) LocType type = LocTypeList.instance.list(this.id & 0xFFFF);
-        @Pc(29) Ground floor;
-        @Pc(35) Ground ceiling;
-
-        if (this.underwater) {
-            floor = Static693.underwaterGround[super.virtualLevel];
-            ceiling = Static706.floor[0];
-        } else {
-            floor = Static706.floor[super.virtualLevel];
-
-            if (super.virtualLevel >= 3) {
-                ceiling = null;
-            } else {
-                ceiling = Static706.floor[super.virtualLevel + 1];
-            }
-        }
-
-        return type.modelAndShadow(this.rotation, super.z, super.x, floor, arg3, super.y, LocShapes.GROUNDDECOR, arg2, null, functionMask, ceiling);
+        @Pc(29) Ground floor = LocGround.floor(this.underwater, super.virtualLevel);
+        @Pc(35) Ground ceiling = LocGround.ceiling(this.underwater, super.virtualLevel);
+        return type.modelAndShadow(this.rotation, super.z, super.x, floor, addShadow, super.y, LocShapes.GROUNDDECOR, toolkit, null, functionMask, ceiling);
     }
 
     @OriginalMember(owner = "client!cu", name = "h", descriptor = "(I)Z")
@@ -200,7 +184,7 @@ public final class StaticGroundDecor extends GroundDecor implements Location {
         if (arg0 != 0) {
             this.method6856();
         }
-        return this.aBoolean180;
+        return this.copyNormals;
     }
 
     @OriginalMember(owner = "client!cu", name = "c", descriptor = "(Lclient!ha;I)Lclient!ke;")
@@ -241,7 +225,7 @@ public final class StaticGroundDecor extends GroundDecor implements Location {
     @OriginalMember(owner = "client!cu", name = "j", descriptor = "(I)V")
     @Override
     public void stopSharingLight(@OriginalArg(0) int arg0) {
-        this.aBoolean180 = false;
+        this.copyNormals = false;
         if (arg0 == 27811 && this.model != null) {
             this.model.s(this.model.ua() & 0xFFFEFFFF);
         }
@@ -263,7 +247,7 @@ public final class StaticGroundDecor extends GroundDecor implements Location {
 
     @OriginalMember(owner = "client!cu", name = "d", descriptor = "(Lclient!ha;I)V")
     @Override
-    public void method9289(@OriginalArg(0) Toolkit arg0, @OriginalArg(1) int arg1) {
+    public void method9289(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) int arg1) {
         if (arg1 != -5) {
             LibraryManager.signLink = null;
         }
@@ -286,8 +270,8 @@ public final class StaticGroundDecor extends GroundDecor implements Location {
         if (this.model != null && toolkit.compareFunctionMasks(this.model.ua(), functionMask) == 0) {
             return this.model;
         } else {
-            @Pc(26) ModelAndShadow local26 = this.modelAndShadow(functionMask, toolkit, false);
-            return local26 != null ? local26.model : null;
+            @Pc(26) ModelAndShadow modelAndShadow = this.modelAndShadow(functionMask, toolkit, false);
+            return modelAndShadow != null ? modelAndShadow.model : null;
         }
     }
 

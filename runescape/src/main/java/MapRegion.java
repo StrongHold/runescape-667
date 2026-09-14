@@ -23,7 +23,7 @@ import org.openrs2.deob.annotation.OriginalMember;
 import org.openrs2.deob.annotation.Pc;
 
 @OriginalClass("client!taa")
-public final class MapRegion extends Class306 {
+public final class MapRegion extends Terrain {
 
     @OriginalMember(owner = "client!pf", name = "q", descriptor = "[I")
     public static final int[] WALLDECOR_STRAIGHT_XOFFSET = {1, 0, -1, 0};
@@ -87,53 +87,58 @@ public final class MapRegion extends Class306 {
     }
 
     @OriginalMember(owner = "client!wba", name = "a", descriptor = "(Lclient!th;)V")
-    public static void method9122(@OriginalArg(0) EnvironmentLight arg0) {
-        if (Static319.anInt5080 >= 65535) {
-            return;
-        }
-        @Pc(7) PointLight local7 = arg0.light;
-        EnvironmentLight.aEnvironmentLightArray1[Static319.anInt5080] = arg0;
-        Static279.aBooleanArray11[Static319.anInt5080] = false;
-        Static319.anInt5080++;
-        @Pc(22) int local22 = arg0.level;
-        if (arg0.aBoolean716) {
-            local22 = 0;
-        }
-        @Pc(30) int local30 = arg0.level;
-        if (arg0.aBoolean717) {
-            local30 = Static299.tileMaxLevel - 1;
-        }
-        for (@Pc(39) int local39 = local22; local39 <= local30; local39++) {
-            @Pc(42) int local42 = 0;
-            @Pc(54) int local54 = local7.getZ() + EnvironmentLight.anInt3993 - local7.getRange() >> EnvironmentLight.anInt1066;
-            if (local54 < 0) {
-                local42 = -local54;
-                local54 = 0;
+    public static void registerLight(@OriginalArg(0) EnvironmentLight environmentLight) {
+        if (Static319.anInt5080 < 65535) {
+            @Pc(7) PointLight light = environmentLight.light;
+            EnvironmentLight.aEnvironmentLightArray1[Static319.anInt5080] = environmentLight;
+            Static279.aBooleanArray11[Static319.anInt5080] = false;
+            Static319.anInt5080++;
+
+            @Pc(22) int minLevel = environmentLight.level;
+            if (environmentLight.aBoolean716) {
+                minLevel = 0;
             }
-            @Pc(74) int local74 = local7.getZ() + local7.getRange() - EnvironmentLight.anInt3993 >> EnvironmentLight.anInt1066;
-            if (local74 >= Static662.tileMaxZ) {
-                local74 = Static662.tileMaxZ - 1;
+
+            @Pc(30) int maxLevel = environmentLight.level;
+            if (environmentLight.aBoolean717) {
+                maxLevel = Static299.tileMaxLevel - 1;
             }
-            for (@Pc(83) int local83 = local54; local83 <= local74; local83++) {
-                @Pc(90) short local90 = arg0.aShortArray131[local42++];
-                @Pc(106) int local106 = (local7.getX() + EnvironmentLight.anInt3993 - local7.getRange() >> EnvironmentLight.anInt1066) + (local90 >>> 8);
-                @Pc(114) int local114 = local106 + (local90 & 0xFF) - 1;
-                if (local106 < 0) {
-                    local106 = 0;
+
+            for (@Pc(39) int level = minLevel; level <= maxLevel; level++) {
+                @Pc(42) int spanIndex = 0;
+                @Pc(54) int minZ = light.getZ() + EnvironmentLight.anInt3993 - light.getRange() >> EnvironmentLight.anInt1066;
+                if (minZ < 0) {
+                    spanIndex = -minZ;
+                    minZ = 0;
                 }
-                if (local114 >= Static619.tileMaxX) {
-                    local114 = Static619.tileMaxX - 1;
+
+                @Pc(74) int maxZ = light.getZ() + light.getRange() - EnvironmentLight.anInt3993 >> EnvironmentLight.anInt1066;
+                if (maxZ >= Static662.tileMaxZ) {
+                    maxZ = Static662.tileMaxZ - 1;
                 }
-                for (@Pc(127) int local127 = local106; local127 <= local114; local127++) {
-                    @Pc(136) long local136 = Client.tileLightFlags[local39][local127][local83];
-                    if ((local136 & 0xFFFFL) == 0L) {
-                        Client.tileLightFlags[local39][local127][local83] = local136 | (long) Static319.anInt5080;
-                    } else if ((local136 & 0xFFFF0000L) == 0L) {
-                        Client.tileLightFlags[local39][local127][local83] = local136 | (long) Static319.anInt5080 << 16;
-                    } else if ((local136 & 0xFFFF00000000L) == 0L) {
-                        Client.tileLightFlags[local39][local127][local83] = local136 | (long) Static319.anInt5080 << 32;
-                    } else if ((local136 & 0xFFFF000000000000L) == 0L) {
-                        Client.tileLightFlags[local39][local127][local83] = local136 | (long) Static319.anInt5080 << 48;
+
+                for (@Pc(83) int z = minZ; z <= maxZ; z++) {
+                    @Pc(90) short span = environmentLight.aShortArray131[spanIndex++];
+                    @Pc(106) int minX = (light.getX() + EnvironmentLight.anInt3993 - light.getRange() >> EnvironmentLight.anInt1066) + (span >>> 8);
+                    @Pc(114) int maxX = minX + (span & 0xFF) - 1;
+                    if (minX < 0) {
+                        minX = 0;
+                    }
+                    if (maxX >= Static619.tileMaxX) {
+                        maxX = Static619.tileMaxX - 1;
+                    }
+
+                    for (@Pc(127) int x = minX; x <= maxX; x++) {
+                        @Pc(136) long lightFlags = Client.tileLightFlags[level][x][z];
+                        if ((lightFlags & 0xFFFFL) == 0L) {
+                            Client.tileLightFlags[level][x][z] = lightFlags | (long) Static319.anInt5080;
+                        } else if ((lightFlags & 0xFFFF0000L) == 0L) {
+                            Client.tileLightFlags[level][x][z] = lightFlags | (long) Static319.anInt5080 << 16;
+                        } else if ((lightFlags & 0xFFFF00000000L) == 0L) {
+                            Client.tileLightFlags[level][x][z] = lightFlags | (long) Static319.anInt5080 << 32;
+                        } else if ((lightFlags & 0xFFFF000000000000L) == 0L) {
+                            Client.tileLightFlags[level][x][z] = lightFlags | (long) Static319.anInt5080 << 48;
+                        }
                     }
                 }
             }
@@ -209,8 +214,8 @@ public final class MapRegion extends Class306 {
     }
 
     @OriginalMember(owner = "client!taa", name = "a", descriptor = "(III[Lclient!eq;Lclient!ha;[B)V")
-    public void loadLocations(@OriginalArg(0) int offsetX, @OriginalArg(1) int offsetZ, @OriginalArg(3) CollisionMap[] arg2, @OriginalArg(4) Toolkit toolkit, @OriginalArg(5) byte[] arg4) {
-        @Pc(8) Packet packet = new Packet(arg4);
+    public void loadLocations(@OriginalArg(0) int offsetX, @OriginalArg(1) int offsetZ, @OriginalArg(3) CollisionMap[] collisionMaps, @OriginalArg(4) Toolkit toolkit, @OriginalArg(5) byte[] data) {
+        @Pc(8) Packet packet = new Packet(data);
         @Pc(18) int id = -1;
         while (true) {
             @Pc(22) int idOffset = packet.gExtended1or2();
@@ -243,7 +248,7 @@ public final class MapRegion extends Class306 {
                             actualLevel = locLevel - 1;
                         }
                         if (actualLevel >= 0) {
-                            collisionMap = arg2[actualLevel];
+                            collisionMap = collisionMaps[actualLevel];
                         }
                     }
                     this.loadLocation(x, z, locLevel, locLevel, id, locShape, locRotation, -1, collisionMap, toolkit);
@@ -253,190 +258,170 @@ public final class MapRegion extends Class306 {
     }
 
     @OriginalMember(owner = "client!taa", name = "a", descriptor = "(ILclient!ge;ILclient!ha;I)V")
-    public void method7893(@OriginalArg(0) int arg0, @OriginalArg(1) Packet arg1, @OriginalArg(2) int arg2, @OriginalArg(3) Toolkit arg3) {
+    public void method7893(@OriginalArg(0) int z, @OriginalArg(1) Packet packet, @OriginalArg(2) int x, @OriginalArg(3) Toolkit toolkit) {
         if (super.underwater) {
             return;
         }
-        @Pc(10) boolean local10 = false;
-        @Pc(12) Environment local12 = null;
-        while (true) {
-            while (true) {
-                while (true) {
-                    while (true) {
-                        @Pc(28) int local28;
-                        @Pc(86) int local86;
-                        @Pc(504) int local504;
-                        @Pc(143) int local143;
-                        @Pc(147) int local147;
-                        while (arg1.data.length > arg1.pos) {
-                            local28 = arg1.g1();
-                            if (local28 != 0) {
-                                @Pc(149) int local149;
-                                @Pc(153) int local153;
-                                @Pc(290) int local290;
-                                if (local28 == 1) {
-                                    local86 = arg1.g1();
-                                    if (local86 > 0) {
-                                        for (local504 = 0; local504 < local86; local504++) {
-                                            @Pc(512) EnvironmentLight local512 = new EnvironmentLight(arg3, arg1, 2);
-                                            if (local512.preset == 31) {
-                                                @Pc(523) LightType local523 = LightTypeList.instance.list(arg1.g2());
-                                                local512.updateParameters(local523.ambient, local523.pattern, local523.amplitude, local523.frequency);
-                                            }
-                                            if (arg3.getMaxLights() > 0) {
-                                                @Pc(543) PointLight local543 = local512.light;
-                                                local149 = (arg2 << 9) + local543.getX();
-                                                local153 = (arg0 << 9) + local543.getZ();
-                                                local290 = local149 >> 9;
-                                                @Pc(567) int local567 = local153 >> 9;
-                                                if (local290 >= 0 && local567 >= 0 && super.width > local290 && super.length > local567) {
-                                                    local543.setPosition(local149, local153, super.tileHeights[local512.level][local290][local567] - local543.getY());
-                                                    method9122(local512);
-                                                }
-                                            }
-                                        }
-                                    }
-                                } else if (local28 == 2) {
-                                    if (local12 == null) {
-                                        local12 = new Environment();
-                                    }
-                                    local12.decodeBloomParams(arg1);
-                                } else if (local28 == 128) {
-                                    if (local12 == null) {
-                                        local12 = new Environment();
-                                    }
-                                    local12.method8384(arg1);
-                                } else if (local28 == 129) {
-                                    if (super.aByteArrayArrayArray12 == null) {
-                                        super.aByteArrayArrayArray12 = new byte[4][][];
-                                    }
-                                    local10 = true;
-                                    for (local86 = 0; local86 < 4; local86++) {
-                                        @Pc(91) byte local91 = arg1.g1b();
-                                        if (local91 == 0 && super.aByteArrayArrayArray12[local86] != null) {
-                                            local143 = arg2;
-                                            local147 = arg2 + 64;
-                                            local149 = arg0;
-                                            local153 = arg0 + 64;
-                                            if (arg2 < 0) {
-                                                local143 = 0;
-                                            } else if (arg2 >= super.width) {
-                                                local143 = super.width;
-                                            }
-                                            if (arg0 < 0) {
-                                                local149 = 0;
-                                            } else if (arg0 >= super.length) {
-                                                local149 = super.length;
-                                            }
-                                            if (local147 < 0) {
-                                                local147 = 0;
-                                            } else if (super.width <= local147) {
-                                                local147 = super.width;
-                                            }
-                                            if (local153 < 0) {
-                                                local153 = 0;
-                                            } else if (local153 >= super.length) {
-                                                local153 = super.length;
-                                            }
-                                            while (local147 > local143) {
-                                                while (local149 < local153) {
-                                                    super.aByteArrayArrayArray12[local86][local143][local149] = 0;
-                                                    local149++;
-                                                }
-                                                local143++;
-                                            }
-                                        } else if (local91 == 1) {
-                                            if (super.aByteArrayArrayArray12[local86] == null) {
-                                                super.aByteArrayArrayArray12[local86] = new byte[super.width + 1][super.length + 1];
-                                            }
-                                            for (local143 = 0; local143 < 64; local143 += 4) {
-                                                for (local147 = 0; local147 < 64; local147 += 4) {
-                                                    @Pc(280) byte local280 = arg1.g1b();
-                                                    for (local153 = local143 + arg2; local153 < local143 + arg2 + 4; local153++) {
-                                                        for (local290 = arg0 + local147; local290 < arg0 + local147 + 4; local290++) {
-                                                            if (local153 >= 0 && super.width > local153 && local290 >= 0 && super.length > local290) {
-                                                                super.aByteArrayArrayArray12[local86][local153][local290] = local280;
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        } else if (local91 == 2) {
-                                            if (super.aByteArrayArrayArray12[local86] == null) {
-                                                super.aByteArrayArrayArray12[local86] = new byte[super.width + 1][super.length + 1];
-                                            }
-                                            if (local86 > 0) {
-                                                local143 = arg2;
-                                                local147 = arg2 + 64;
-                                                local149 = arg0;
-                                                local153 = arg0 + 64;
-                                                if (local147 < 0) {
-                                                    local147 = 0;
-                                                } else if (super.width <= local147) {
-                                                    local147 = super.width;
-                                                }
-                                                if (arg2 < 0) {
-                                                    local143 = 0;
-                                                } else if (arg2 >= super.width) {
-                                                    local143 = super.width;
-                                                }
-                                                if (arg0 < 0) {
-                                                    local149 = 0;
-                                                } else if (arg0 >= super.length) {
-                                                    local149 = super.length;
-                                                }
-                                                if (local153 < 0) {
-                                                    local153 = 0;
-                                                } else if (local153 >= super.length) {
-                                                    local153 = super.length;
-                                                }
-                                                while (local143 < local147) {
-                                                    while (local153 > local149) {
-                                                        super.aByteArrayArrayArray12[local86][local143][local149] = super.aByteArrayArrayArray12[local86 - 1][local143][local149];
-                                                        local149++;
-                                                    }
-                                                    local143++;
-                                                }
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    throw new IllegalStateException("");
-                                }
-                            } else if (local12 == null) {
-                                local12 = new Environment(arg1);
-                            } else {
-                                local12.method8386(arg1);
+        @Pc(10) boolean mapLoaded = false;
+        @Pc(12) Environment environment = null;
+        while (packet.data.length > packet.pos) {
+            @Pc(28) int code = packet.g1();
+            if (code != 0) {
+                if (code == 1) {
+                    @Pc(86) int count = packet.g1();
+                    for (@Pc(504) int i = 0; i < count; i++) {
+                        @Pc(512) EnvironmentLight environmentLight = new EnvironmentLight(toolkit, packet, 2);
+                        if (environmentLight.preset == 31) {
+                            @Pc(523) LightType lightType = LightTypeList.instance.list(packet.g2());
+                            environmentLight.updateParameters(lightType.ambient, lightType.pattern, lightType.amplitude, lightType.frequency);
+                        }
+                        if (toolkit.getMaxLights() > 0) {
+                            @Pc(543) PointLight light = environmentLight.light;
+                            @Pc(149) int worldX = (x << 9) + light.getX();
+                            @Pc(153) int worldZ = (z << 9) + light.getZ();
+                            @Pc(290) int lightX = worldX >> 9;
+                            @Pc(567) int lightZ = worldZ >> 9;
+                            if (lightX >= 0 && lightZ >= 0 && super.width > lightX && super.length > lightZ) {
+                                light.setPosition(worldX, worldZ, super.tileHeights[environmentLight.level][lightX][lightZ] - light.getY());
+                                registerLight(environmentLight);
                             }
                         }
-                        if (local12 != null) {
-                            for (local28 = 0; local28 < 8; local28++) {
-                                for (local86 = 0; local86 < 8; local86++) {
-                                    local504 = local28 + (arg2 >> 3);
-                                    local143 = local86 + (arg0 >> 3);
-                                    if (local504 >= 0 && super.width >> 3 > local504 && local143 >= 0 && super.length >> 3 > local143) {
-                                        Static108.method2064(local143, local504, local12);
-                                    }
-                                }
+                    }
+                } else if (code == 2) {
+                    if (environment == null) {
+                        environment = new Environment();
+                    }
+                    environment.decodeBloomParams(packet);
+                } else if (code == 128) {
+                    if (environment == null) {
+                        environment = new Environment();
+                    }
+                    environment.method8384(packet);
+                } else if (code == 129) {
+                    if (super.aByteArrayArrayArray12 == null) {
+                        super.aByteArrayArrayArray12 = new byte[4][][];
+                    }
+                    mapLoaded = true;
+                    for (@Pc(86) int level = 0; level < 4; level++) {
+                        @Pc(91) byte mode = packet.g1b();
+                        if (mode == 0 && super.aByteArrayArrayArray12[level] != null) {
+                            @Pc(143) int minX = x;
+                            @Pc(147) int maxX = x + 64;
+                            @Pc(149) int minZ = z;
+                            @Pc(153) int maxZ = z + 64;
+                            if (x < 0) {
+                                minX = 0;
+                            } else if (x >= super.width) {
+                                minX = super.width;
                             }
-                        }
-                        if (!local10 && super.aByteArrayArrayArray12 != null) {
-                            for (local28 = 0; local28 < 4; local28++) {
-                                if (super.aByteArrayArrayArray12[local28] != null) {
-                                    for (local86 = 0; local86 < 16; local86++) {
-                                        for (local504 = 0; local504 < 16; local504++) {
-                                            local143 = (arg2 >> 2) + local86;
-                                            local147 = (arg0 >> 2) + local504;
-                                            if (local143 >= 0 && local143 < 26 && local147 >= 0 && local147 < 26) {
-                                                super.aByteArrayArrayArray12[local28][local143][local147] = 0;
+                            if (z < 0) {
+                                minZ = 0;
+                            } else if (z >= super.length) {
+                                minZ = super.length;
+                            }
+                            if (maxX < 0) {
+                                maxX = 0;
+                            } else if (super.width <= maxX) {
+                                maxX = super.width;
+                            }
+                            if (maxZ < 0) {
+                                maxZ = 0;
+                            } else if (maxZ >= super.length) {
+                                maxZ = super.length;
+                            }
+                            while (maxX > minX) {
+                                while (minZ < maxZ) {
+                                    super.aByteArrayArrayArray12[level][minX][minZ] = 0;
+                                    minZ++;
+                                }
+                                minX++;
+                            }
+                        } else if (mode == 1) {
+                            if (super.aByteArrayArrayArray12[level] == null) {
+                                super.aByteArrayArrayArray12[level] = new byte[super.width + 1][super.length + 1];
+                            }
+                            for (@Pc(143) int localX = 0; localX < 64; localX += 4) {
+                                for (@Pc(147) int localZ = 0; localZ < 64; localZ += 4) {
+                                    @Pc(280) byte height = packet.g1b();
+                                    for (@Pc(153) int tileX = localX + x; tileX < localX + x + 4; tileX++) {
+                                        for (@Pc(290) int tileZ = z + localZ; tileZ < z + localZ + 4; tileZ++) {
+                                            if (tileX >= 0 && super.width > tileX && tileZ >= 0 && super.length > tileZ) {
+                                                super.aByteArrayArrayArray12[level][tileX][tileZ] = height;
                                             }
                                         }
                                     }
                                 }
                             }
-                            return;
+                        } else if (mode == 2) {
+                            if (super.aByteArrayArrayArray12[level] == null) {
+                                super.aByteArrayArrayArray12[level] = new byte[super.width + 1][super.length + 1];
+                            }
+                            if (level > 0) {
+                                @Pc(143) int minX = x;
+                                @Pc(147) int maxX = x + 64;
+                                @Pc(149) int minZ = z;
+                                @Pc(153) int maxZ = z + 64;
+                                if (maxX < 0) {
+                                    maxX = 0;
+                                } else if (super.width <= maxX) {
+                                    maxX = super.width;
+                                }
+                                if (x < 0) {
+                                    minX = 0;
+                                } else if (x >= super.width) {
+                                    minX = super.width;
+                                }
+                                if (z < 0) {
+                                    minZ = 0;
+                                } else if (z >= super.length) {
+                                    minZ = super.length;
+                                }
+                                if (maxZ < 0) {
+                                    maxZ = 0;
+                                } else if (maxZ >= super.length) {
+                                    maxZ = super.length;
+                                }
+                                while (minX < maxX) {
+                                    while (maxZ > minZ) {
+                                        super.aByteArrayArrayArray12[level][minX][minZ] = super.aByteArrayArrayArray12[level - 1][minX][minZ];
+                                        minZ++;
+                                    }
+                                    minX++;
+                                }
+                            }
                         }
-                        return;
+                    }
+                } else {
+                    throw new IllegalStateException("");
+                }
+            } else if (environment == null) {
+                environment = new Environment(packet);
+            } else {
+                environment.method8386(packet);
+            }
+        }
+        if (environment != null) {
+            for (@Pc(28) int zoneX = 0; zoneX < 8; zoneX++) {
+                for (@Pc(86) int zoneZ = 0; zoneZ < 8; zoneZ++) {
+                    @Pc(504) int mapZoneX = zoneX + (x >> 3);
+                    @Pc(143) int mapZoneZ = zoneZ + (z >> 3);
+                    if (mapZoneX >= 0 && super.width >> 3 > mapZoneX && mapZoneZ >= 0 && super.length >> 3 > mapZoneZ) {
+                        Static108.method2064(mapZoneZ, mapZoneX, environment);
+                    }
+                }
+            }
+        }
+        if (!mapLoaded && super.aByteArrayArrayArray12 != null) {
+            for (@Pc(28) int level = 0; level < 4; level++) {
+                if (super.aByteArrayArrayArray12[level] != null) {
+                    for (@Pc(86) int zoneX = 0; zoneX < 16; zoneX++) {
+                        for (@Pc(504) int zoneZ = 0; zoneZ < 16; zoneZ++) {
+                            @Pc(143) int mapZoneX = (x >> 2) + zoneX;
+                            @Pc(147) int mapZoneZ = (z >> 2) + zoneZ;
+                            if (mapZoneX >= 0 && mapZoneX < 26 && mapZoneZ >= 0 && mapZoneZ < 26) {
+                                super.aByteArrayArrayArray12[level][mapZoneX][mapZoneZ] = 0;
+                            }
+                        }
                     }
                 }
             }
@@ -836,14 +821,14 @@ public final class MapRegion extends Class306 {
         } else if (shape == LocShapes.WALLDECOR_STRAIGHT_OFFSET) {
             @Pc(1813) WallDecor decor;
 
-            @Pc(1844) int local1844 = 65;
+            @Pc(1844) int wallOffset = 65;
             @Pc(1850) Location wall = (Location) Static302.getWall(level, x, z);
             if (wall != null) {
-                local1844 = LocTypeList.instance.list(wall.getId()).walloff + 1;
+                wallOffset = LocTypeList.instance.list(wall.getId()).walloff + 1;
             }
 
             if (isStatic) {
-                @Pc(1916) StaticWallDecor staticDecor = new StaticWallDecor(toolkit, locType, level, virtualLevel, absX, averageHeight, absZ, super.underwater, WALLDECOR_STRAIGHT_XOFFSET[rotation] * local1844, WALLDECOR_STRAIGHT_ZOFFSET[rotation] * local1844, shape, rotation);
+                @Pc(1916) StaticWallDecor staticDecor = new StaticWallDecor(toolkit, locType, level, virtualLevel, absX, averageHeight, absZ, super.underwater, WALLDECOR_STRAIGHT_XOFFSET[rotation] * wallOffset, WALLDECOR_STRAIGHT_ZOFFSET[rotation] * wallOffset, shape, rotation);
 
                 if (staticDecor.hardShadow()) {
                     staticDecor.addShadow(toolkit);
@@ -851,28 +836,28 @@ public final class MapRegion extends Class306 {
 
                 decor = staticDecor;
             } else {
-                decor = new DynamicWallDecor(toolkit, locType, level, virtualLevel, absX, averageHeight, absZ, super.underwater, WALLDECOR_STRAIGHT_XOFFSET[rotation] * local1844, local1844 * WALLDECOR_STRAIGHT_ZOFFSET[rotation], shape, rotation, animation);
+                decor = new DynamicWallDecor(toolkit, locType, level, virtualLevel, absX, averageHeight, absZ, super.underwater, WALLDECOR_STRAIGHT_XOFFSET[rotation] * wallOffset, wallOffset * WALLDECOR_STRAIGHT_ZOFFSET[rotation], shape, rotation, animation);
             }
 
             Static177.setWallDecor(level, x, z, decor, null);
         } else if (shape == LocShapes.WALLDECOR_DIAGONAL_OFFSET) {
             @Pc(1813) WallDecor decor;
 
-            @Pc(1844) int local1844 = 33;
+            @Pc(1844) int wallOffset = 33;
             @Pc(1850) Location wall = (Location) Static302.getWall(level, x, z);
             if (wall != null) {
-                local1844 = (LocTypeList.instance.list(wall.getId()).walloff / 2) + 1;
+                wallOffset = (LocTypeList.instance.list(wall.getId()).walloff / 2) + 1;
             }
 
             if (isStatic) {
-                @Pc(1916) StaticWallDecor staticDecor = new StaticWallDecor(toolkit, locType, level, virtualLevel, absX, averageHeight, absZ, super.underwater, WALLDECOR_STRAIGHT_XOFFSET[rotation] * local1844, local1844 * WALLDECOR_STRAIGHT_ZOFFSET[rotation], shape, rotation + 4);
+                @Pc(1916) StaticWallDecor staticDecor = new StaticWallDecor(toolkit, locType, level, virtualLevel, absX, averageHeight, absZ, super.underwater, WALLDECOR_STRAIGHT_XOFFSET[rotation] * wallOffset, wallOffset * WALLDECOR_STRAIGHT_ZOFFSET[rotation], shape, rotation + 4);
                 decor = staticDecor;
 
                 if (staticDecor.hardShadow()) {
                     staticDecor.addShadow(toolkit);
                 }
             } else {
-                decor = new DynamicWallDecor(toolkit, locType, level, virtualLevel, absX, averageHeight, absZ, super.underwater, WALLDECOR_DIAGONAL_XOFFSET[rotation] * local1844, WALLDECOR_DIAGONAL_ZOFFSET[rotation] * local1844, shape, rotation + 4, animation);
+                decor = new DynamicWallDecor(toolkit, locType, level, virtualLevel, absX, averageHeight, absZ, super.underwater, WALLDECOR_DIAGONAL_XOFFSET[rotation] * wallOffset, WALLDECOR_DIAGONAL_ZOFFSET[rotation] * wallOffset, shape, rotation + 4, animation);
             }
 
             Static177.setWallDecor(level, x, z, decor, null);
@@ -895,16 +880,16 @@ public final class MapRegion extends Class306 {
         } else if (shape == LocShapes.WALLDECOR_DIAGONAL_BOTH) {
             @Pc(492) int oppositeRotation = rotation + 2 & 0x3;
 
-            @Pc(495) int local495 = 33;
+            @Pc(495) int wallOffset = 33;
             @Pc(2134) Location wall = (Location) Static302.getWall(level, x, z);
             if (wall != null) {
-                local495 = (LocTypeList.instance.list(wall.getId()).walloff / 2) + 1;
+                wallOffset = (LocTypeList.instance.list(wall.getId()).walloff / 2) + 1;
             }
 
             @Pc(2178) WallDecor primaryDecor;
             @Pc(2200) WallDecor secondaryDecor;
             if (isStatic) {
-                primaryDecor = new StaticWallDecor(toolkit, locType, level, virtualLevel, absX, averageHeight, absZ, super.underwater, WALLDECOR_DIAGONAL_XOFFSET[rotation] * local495, WALLDECOR_DIAGONAL_ZOFFSET[rotation] * local495, shape, rotation + 4);
+                primaryDecor = new StaticWallDecor(toolkit, locType, level, virtualLevel, absX, averageHeight, absZ, super.underwater, WALLDECOR_DIAGONAL_XOFFSET[rotation] * wallOffset, WALLDECOR_DIAGONAL_ZOFFSET[rotation] * wallOffset, shape, rotation + 4);
                 secondaryDecor = new StaticWallDecor(toolkit, locType, level, virtualLevel, absX, averageHeight, absZ, super.underwater, 0, 0, shape, oppositeRotation + 4);
 
                 if (primaryDecor.hardShadow()) {
@@ -915,7 +900,7 @@ public final class MapRegion extends Class306 {
                     secondaryDecor.addShadow(toolkit);
                 }
             } else {
-                primaryDecor = new DynamicWallDecor(toolkit, locType, level, virtualLevel, absX, averageHeight, absZ, super.underwater, WALLDECOR_DIAGONAL_XOFFSET[rotation] * local495, WALLDECOR_DIAGONAL_ZOFFSET[rotation] * local495, shape, rotation + 4, animation);
+                primaryDecor = new DynamicWallDecor(toolkit, locType, level, virtualLevel, absX, averageHeight, absZ, super.underwater, WALLDECOR_DIAGONAL_XOFFSET[rotation] * wallOffset, WALLDECOR_DIAGONAL_ZOFFSET[rotation] * wallOffset, shape, rotation + 4, animation);
                 secondaryDecor = new DynamicWallDecor(toolkit, locType, level, virtualLevel, absX, averageHeight, absZ, super.underwater, 0, 0, shape, oppositeRotation + 4, animation);
             }
 
@@ -928,122 +913,120 @@ public final class MapRegion extends Class306 {
         if (super.underwater) {
             return;
         }
-        @Pc(10) boolean local10 = false;
+        @Pc(10) boolean mapLoaded = false;
         @Pc(12) Environment environment = null;
         @Pc(18) int absX = (pointerX & 0x7) * 8;
         @Pc(24) int absZ = (pointerZ & 0x7) * 8;
-        while (true) {
-            while (packet.pos < packet.data.length) {
-                @Pc(35) int code = packet.g1();
+        while (packet.pos < packet.data.length) {
+            @Pc(35) int code = packet.g1();
 
-                if (code == 0) {
-                    if (environment == null) {
-                        environment = new Environment(packet);
-                    } else {
-                        environment.method8386(packet);
+            if (code == 0) {
+                if (environment == null) {
+                    environment = new Environment(packet);
+                } else {
+                    environment.method8386(packet);
+                }
+            } else if (code == 1) {
+                @Pc(63) int count = packet.g1();
+                if (count <= 0) {
+                    continue;
+                }
+
+                for (@Pc(70) int i = 0; i < count; i++) {
+                    @Pc(78) EnvironmentLight envLight = new EnvironmentLight(toolkit, packet, 2);
+                    if (envLight.preset == 31) {
+                        @Pc(91) LightType type = LightTypeList.instance.list(packet.g2());
+                        envLight.updateParameters(type.ambient, type.pattern, type.amplitude, type.frequency);
                     }
-                } else if (code == 1) {
-                    @Pc(63) int count = packet.g1();
-                    if (count <= 0) {
-                        continue;
-                    }
 
-                    for (@Pc(70) int i = 0; i < count; i++) {
-                        @Pc(78) EnvironmentLight envLight = new EnvironmentLight(toolkit, packet, 2);
-                        if (envLight.preset == 31) {
-                            @Pc(91) LightType type = LightTypeList.instance.list(packet.g2());
-                            envLight.updateParameters(type.ambient, type.pattern, type.amplitude, type.frequency);
-                        }
+                    if (toolkit.getMaxLights() > 0) {
+                        @Pc(108) PointLight light = envLight.light;
+                        @Pc(116) int lightX = light.getX() >> 9;
+                        @Pc(122) int lightZ = light.getZ() >> 9;
 
-                        if (toolkit.getMaxLights() > 0) {
-                            @Pc(108) PointLight light = envLight.light;
-                            @Pc(116) int lightX = light.getX() >> 9;
-                            @Pc(122) int lightZ = light.getZ() >> 9;
+                        if ((pointerLevel == envLight.level) && (lightX >= absX) && (lightX < (absX + 8)) && (lightZ >= absZ) && (lightZ < (absZ + 8))) {
+                            @Pc(176) int rx = (x << 9) + rotateLightX(light.getX() & 0xFFF, light.getZ() & 0xFFF, pointerRotation);
+                            lightX = rx >> 9;
 
-                            if ((pointerLevel == envLight.level) && (lightX >= absX) && (lightX < (absX + 8)) && (lightZ >= absZ) && (lightZ < (absZ + 8))) {
-                                @Pc(176) int rx = (x << 9) + rotateLightX(light.getX() & 0xFFF, light.getZ() & 0xFFF, pointerRotation);
-                                lightX = rx >> 9;
+                            @Pc(200) int rz = (z << 9) + rotateLightZ(light.getX() & 0xFFF, light.getZ() & 0xFFF, pointerRotation);
+                            lightZ = rz >> 9;
 
-                                @Pc(200) int rz = (z << 9) + rotateLightZ(light.getX() & 0xFFF, light.getZ() & 0xFFF, pointerRotation);
-                                lightZ = rz >> 9;
-
-                                if (lightX >= 0 && lightZ >= 0 && lightX < super.width && lightZ < super.length) {
-                                    light.setPosition(rx, rz, super.tileHeights[pointerLevel][lightX][lightZ] - light.getY());
-                                    method9122(envLight);
-                                }
+                            if (lightX >= 0 && lightZ >= 0 && lightX < super.width && lightZ < super.length) {
+                                light.setPosition(rx, rz, super.tileHeights[pointerLevel][lightX][lightZ] - light.getY());
+                                registerLight(envLight);
                             }
                         }
                     }
-                } else if (code == 2) {
-                    if (environment == null) {
-                        environment = new Environment();
-                    }
-                    environment.decodeBloomParams(packet);
-                } else if (code == 128) {
-                    if (environment == null) {
-                        environment = new Environment();
-                    }
-                    environment.method8384(packet);
-                } else if (code == 129) {
-                    if (super.aByteArrayArrayArray12 == null) {
-                        super.aByteArrayArrayArray12 = new byte[4][][];
-                    }
-                    for (@Pc(63) int local63 = 0; local63 < 4; local63++) {
-                        @Pc(311) byte local311 = packet.g1b();
-                        if (local311 == 0 && super.aByteArrayArrayArray12[level] != null) {
-                            if (pointerLevel >= local63) {
-                                @Pc(327) int local327 = x;
-                                @Pc(331) int local331 = x + 7;
-                                @Pc(116) int local116 = z;
-                                if (x < 0) {
-                                    local327 = 0;
-                                } else if (x >= super.width) {
-                                    local327 = super.width;
-                                }
-                                if (local331 < 0) {
-                                    local331 = 0;
-                                } else if (local331 >= super.width) {
-                                    local331 = super.width;
-                                }
-
-                                @Pc(122) int local122 = z + 7;
-                                if (z < 0) {
-                                    local116 = 0;
-                                } else if (z >= super.length) {
-                                    local116 = super.length;
-                                }
-
-                                if (local122 < 0) {
-                                    local122 = 0;
-                                } else if (super.length <= local122) {
-                                    local122 = super.length;
-                                }
-                                while (local331 > local327) {
-                                    while (local122 > local116) {
-                                        super.aByteArrayArrayArray12[level][local327][local116] = 0;
-                                        local116++;
-                                    }
-                                    local327++;
-                                }
+                }
+            } else if (code == 2) {
+                if (environment == null) {
+                    environment = new Environment();
+                }
+                environment.decodeBloomParams(packet);
+            } else if (code == 128) {
+                if (environment == null) {
+                    environment = new Environment();
+                }
+                environment.method8384(packet);
+            } else if (code == 129) {
+                if (super.aByteArrayArrayArray12 == null) {
+                    super.aByteArrayArrayArray12 = new byte[4][][];
+                }
+                for (@Pc(63) int mapLevel = 0; mapLevel < 4; mapLevel++) {
+                    @Pc(311) byte mode = packet.g1b();
+                    if (mode == 0 && super.aByteArrayArrayArray12[level] != null) {
+                        if (pointerLevel >= mapLevel) {
+                            @Pc(327) int minX = x;
+                            @Pc(331) int maxX = x + 7;
+                            @Pc(116) int minZ = z;
+                            if (x < 0) {
+                                minX = 0;
+                            } else if (x >= super.width) {
+                                minX = super.width;
                             }
-                        } else if (local311 == 1) {
-                            if (super.aByteArrayArrayArray12[level] == null) {
-                                super.aByteArrayArrayArray12[level] = new byte[super.width + 1][super.length + 1];
+                            if (maxX < 0) {
+                                maxX = 0;
+                            } else if (maxX >= super.width) {
+                                maxX = super.width;
                             }
 
-                            for (@Pc(327) int local327 = 0; local327 < 64; local327 += 4) {
-                                for (@Pc(331) int local331 = 0; local331 < 64; local331 += 4) {
-                                    @Pc(466) byte local466 = packet.g1b();
-                                    if (local63 <= pointerLevel) {
-                                        for (@Pc(122) int local122 = local327; local122 < local327 + 4; local122++) {
-                                            for (@Pc(176) int local176 = local331; local176 < local331 + 4; local176++) {
-                                                if (local122 >= absX && absX + 8 > local122 && local176 >= absZ && absZ + 8 > local176) {
-                                                    @Pc(200) int rx = x + rotateZoneX(local122 & 0x7, local176 & 0x7, pointerRotation);
-                                                    @Pc(534) int ry = z + rotateZoneY(local122 & 0x7, local176 & 0x7, pointerRotation);
-                                                    if (rx >= 0 && rx < super.width && ry >= 0 && ry < super.length) {
-                                                        super.aByteArrayArrayArray12[level][rx][ry] = local466;
-                                                        local10 = true;
-                                                    }
+                            @Pc(122) int maxZ = z + 7;
+                            if (z < 0) {
+                                minZ = 0;
+                            } else if (z >= super.length) {
+                                minZ = super.length;
+                            }
+
+                            if (maxZ < 0) {
+                                maxZ = 0;
+                            } else if (super.length <= maxZ) {
+                                maxZ = super.length;
+                            }
+                            while (maxX > minX) {
+                                while (maxZ > minZ) {
+                                    super.aByteArrayArrayArray12[level][minX][minZ] = 0;
+                                    minZ++;
+                                }
+                                minX++;
+                            }
+                        }
+                    } else if (mode == 1) {
+                        if (super.aByteArrayArrayArray12[level] == null) {
+                            super.aByteArrayArrayArray12[level] = new byte[super.width + 1][super.length + 1];
+                        }
+
+                        for (@Pc(327) int blockX = 0; blockX < 64; blockX += 4) {
+                            for (@Pc(331) int blockZ = 0; blockZ < 64; blockZ += 4) {
+                                @Pc(466) byte height = packet.g1b();
+                                if (mapLevel <= pointerLevel) {
+                                    for (@Pc(122) int localX = blockX; localX < blockX + 4; localX++) {
+                                        for (@Pc(176) int localZ = blockZ; localZ < blockZ + 4; localZ++) {
+                                            if (localX >= absX && absX + 8 > localX && localZ >= absZ && absZ + 8 > localZ) {
+                                                @Pc(200) int rx = x + rotateZoneX(localX & 0x7, localZ & 0x7, pointerRotation);
+                                                @Pc(534) int ry = z + rotateZoneY(localX & 0x7, localZ & 0x7, pointerRotation);
+                                                if (rx >= 0 && rx < super.width && ry >= 0 && ry < super.length) {
+                                                    super.aByteArrayArrayArray12[level][rx][ry] = height;
+                                                    mapLoaded = true;
                                                 }
                                             }
                                         }
@@ -1052,26 +1035,24 @@ public final class MapRegion extends Class306 {
                             }
                         }
                     }
-                } else {
-                    throw new IllegalStateException("");
+                }
+            } else {
+                throw new IllegalStateException("");
+            }
+        }
+
+        if (environment != null) {
+            Static108.method2064(z >> 3, x >> 3, environment);
+        }
+
+        if (!mapLoaded && super.aByteArrayArrayArray12 != null && super.aByteArrayArrayArray12[level] != null) {
+            @Pc(35) int maxX = x + 7;
+            @Pc(63) int maxZ = z + 7;
+            for (@Pc(70) int tileX = x; tileX < maxX; tileX++) {
+                for (@Pc(327) int tileZ = z; tileZ < maxZ; tileZ++) {
+                    super.aByteArrayArrayArray12[level][tileX][tileZ] = 0;
                 }
             }
-
-            if (environment != null) {
-                Static108.method2064(z >> 3, x >> 3, environment);
-            }
-
-            if (!local10 && super.aByteArrayArrayArray12 != null && super.aByteArrayArrayArray12[level] != null) {
-                @Pc(35) int local35 = x + 7;
-                @Pc(63) int local63 = z + 7;
-                for (@Pc(70) int local70 = x; local70 < local35; local70++) {
-                    for (@Pc(327) int local327 = z; local327 < local63; local327++) {
-                        super.aByteArrayArrayArray12[level][local70][local327] = 0;
-                    }
-                }
-                return;
-            }
-            return;
         }
     }
 
@@ -1141,10 +1122,10 @@ public final class MapRegion extends Class306 {
     }
 
     @OriginalMember(owner = "client!taa", name = "a", descriptor = "(ZLclient!ha;B)V")
-    public void method7898(@OriginalArg(0) boolean arg0, @OriginalArg(1) Toolkit arg1) {
+    public void method7898(@OriginalArg(0) boolean skipOccluders, @OriginalArg(1) Toolkit toolkit) {
         Static323.method4624();
 
-        if (!arg0) {
+        if (!skipOccluders) {
             if (super.levels > 1) {
                 for (@Pc(23) int x = 0; x < super.width; x++) {
                     for (@Pc(26) int z = 0; super.length > z; z++) {
@@ -1164,31 +1145,31 @@ public final class MapRegion extends Class306 {
 
                             @Pc(92) int z1 = z;
                             @Pc(94) int z2 = z;
-                            while (z1 > 0 && (super.occluderFlags[level][x][z1 - 1] & 0x4) != 0 && z - z1 < 10) {
+                            while (z1 > 0 && (super.occluderFlags[level][x][z1 - 1] & TileFlag.REMOVE_ROOF) != 0 && z - z1 < 10) {
                                 z1--;
                             }
-                            while (z2 < super.length && (super.occluderFlags[level][x][z2 + 1] & 0x4) != 0 && z2 - z1 < 10) {
+                            while (z2 < super.length && (super.occluderFlags[level][x][z2 + 1] & TileFlag.REMOVE_ROOF) != 0 && z2 - z1 < 10) {
                                 z2++;
                             }
 
-                            label111:
-                            while (x1 > 0 && x - x1 < 10) {
-                                for (@Pc(163) int local163 = z1; local163 <= z2; local163++) {
-                                    if ((super.occluderFlags[level][x1 - 1][local163] & 0x4) == 0) {
-                                        break label111;
-                                    }
+                            @Pc(163) boolean extendable = true;
+                            while (extendable && x1 > 0 && x - x1 < 10) {
+                                for (@Pc(163) int localZ = z1; localZ <= z2 && extendable; localZ++) {
+                                    extendable = (super.occluderFlags[level][x1 - 1][localZ] & TileFlag.REMOVE_ROOF) != 0;
                                 }
-                                x1--;
+                                if (extendable) {
+                                    x1--;
+                                }
                             }
 
-                            label98:
-                            while (super.width > x2 && x2 - x1 < 10) {
-                                for (@Pc(163) int local163 = z1; local163 <= z2; local163++) {
-                                    if ((super.occluderFlags[level][x2 + 1][local163] & 0x4) == 0) {
-                                        break label98;
-                                    }
+                            extendable = true;
+                            while (extendable && super.width > x2 && x2 - x1 < 10) {
+                                for (@Pc(163) int localZ = z1; localZ <= z2 && extendable; localZ++) {
+                                    extendable = (super.occluderFlags[level][x2 + 1][localZ] & TileFlag.REMOVE_ROOF) != 0;
                                 }
-                                x2++;
+                                if (extendable) {
+                                    x2++;
+                                }
                             }
 
                             if ((x2 + 1 - x1) * (z2 + 1 - z1) >= 4) {
@@ -1215,32 +1196,32 @@ public final class MapRegion extends Class306 {
 
     @OriginalMember(owner = "client!taa", name = "a", descriptor = "(IBILclient!eq;IILclient!ha;)V")
     public void removeLoc(@OriginalArg(4) int level, @OriginalArg(5) int x, @OriginalArg(2) int z, @OriginalArg(0) int layer, @OriginalArg(3) CollisionMap collisionMap, @OriginalArg(6) Toolkit toolkit) {
-        @Pc(13) Location local13 = this.getLoc(level, x, z, layer);
-        if (local13 == null) {
+        @Pc(13) Location loc = this.getLoc(level, x, z, layer);
+        if (loc == null) {
             return;
         }
-        @Pc(22) LocType local22 = LocTypeList.instance.list(local13.getId());
-        @Pc(26) int local26 = local13.getShape();
-        @Pc(30) int local30 = local13.getRotation();
-        if (local22.hasSounds()) {
-            SoundManager.method8312(x, z, level, local22);
+        @Pc(22) LocType locType = LocTypeList.instance.list(loc.getId());
+        @Pc(26) int shape = loc.getShape();
+        @Pc(30) int rotation = loc.getRotation();
+        if (locType.hasSounds()) {
+            SoundManager.method8312(x, z, level, locType);
         }
-        if (local13.hardShadow()) {
-            local13.removeShadow(toolkit);
+        if (loc.hardShadow()) {
+            loc.removeShadow(toolkit);
         }
         if (layer == 0) {
             Static26.method717(level, x, z);
-            if (local22.blockwalk != 0) {
-                collisionMap.unflagWall(z, local30, local26, !local22.breakroutefinding, x, local22.blockrange);
+            if (locType.blockwalk != 0) {
+                collisionMap.unflagWall(z, rotation, shape, !locType.breakroutefinding, x, locType.blockrange);
             }
-            if (local22.occlude == 1) {
-                if (local30 == 0) {
+            if (locType.occlude == 1) {
+                if (rotation == 0) {
                     Static687.method8958(x, level, 1, z);
-                } else if (local30 == 1) {
+                } else if (rotation == 1) {
                     Static687.method8958(x, level, 2, z + 1);
-                } else if (local30 == 2) {
+                } else if (rotation == 2) {
                     Static687.method8958(x + 1, level, 1, z);
-                } else if (local30 == 3) {
+                } else if (rotation == 3) {
                     Static687.method8958(x, level, 2, z);
                 }
             }
@@ -1248,11 +1229,11 @@ public final class MapRegion extends Class306 {
             Static173.method2692(level, x, z);
         } else if (layer == 2) {
             Static10.method130(level, x, z, locClass == null ? (locClass = getClass("com.jagex.game.Location")) : locClass);
-            if (local22.blockwalk != 0 && super.width > local22.width + x && super.length > local22.width + z && x + local22.length < super.width && local22.length + z < super.length) {
-                collisionMap.unflagLoc(x, z, local22.width, local22.length, local30, local22.blockrange, !local22.breakroutefinding);
+            if (locType.blockwalk != 0 && super.width > locType.width + x && super.length > locType.width + z && x + locType.length < super.width && locType.length + z < super.length) {
+                collisionMap.unflagLoc(x, z, locType.width, locType.length, rotation, locType.blockrange, !locType.breakroutefinding);
             }
-            if (local26 == 9) {
-                if ((local30 & 0x1) == 0) {
+            if (shape == 9) {
+                if ((rotation & 0x1) == 0) {
                     Static687.method8958(x, level, 8, z);
                 } else {
                     Static687.method8958(x, level, 16, z);
@@ -1260,7 +1241,7 @@ public final class MapRegion extends Class306 {
             }
         } else if (layer == 3) {
             Static609.method8212(level, x, z);
-            if (local22.blockwalk == 1) {
+            if (locType.blockwalk == 1) {
                 collisionMap.unflagGroundDecor(x, z);
             }
         }

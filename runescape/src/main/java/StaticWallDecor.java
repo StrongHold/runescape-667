@@ -46,8 +46,8 @@ public final class StaticWallDecor extends WallDecor implements Location {
     public Shadow shadow;
 
     @OriginalMember(owner = "client!im", name = "<init>", descriptor = "(Lclient!ha;Lclient!c;IIIIIZIIII)V")
-    public StaticWallDecor(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) LocType type, @OriginalArg(2) int level, @OriginalArg(3) int virtualLevel, @OriginalArg(4) int x, @OriginalArg(5) int y, @OriginalArg(6) int z, @OriginalArg(7) boolean underwater, @OriginalArg(8) int arg8, @OriginalArg(9) int arg9, @OriginalArg(10) int shape, @OriginalArg(11) int rotation) {
-        super(x, y, z, level, virtualLevel, arg8, arg9);
+    public StaticWallDecor(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) LocType type, @OriginalArg(2) int level, @OriginalArg(3) int virtualLevel, @OriginalArg(4) int x, @OriginalArg(5) int y, @OriginalArg(6) int z, @OriginalArg(7) boolean underwater, @OriginalArg(8) int offsetX, @OriginalArg(9) int offsetZ, @OriginalArg(10) int shape, @OriginalArg(11) int rotation) {
+        super(x, y, z, level, virtualLevel, offsetX, offsetZ);
         super.z = z;
         this.id = (short) type.id;
         this.rotation = (byte) rotation;
@@ -71,12 +71,12 @@ public final class StaticWallDecor extends WallDecor implements Location {
     }
 
     @OriginalMember(owner = "client!im", name = "a", descriptor = "(IILclient!ha;)Lclient!ka;")
-    public Model method4041(@OriginalArg(0) int arg0, @OriginalArg(2) Toolkit arg1) {
-        if (this.model != null && arg1.compareFunctionMasks(this.model.ua(), arg0) == 0) {
+    public Model getModel(@OriginalArg(0) int functionMask, @OriginalArg(2) Toolkit toolkit) {
+        if (this.model != null && toolkit.compareFunctionMasks(this.model.ua(), functionMask) == 0) {
             return this.model;
         } else {
-            @Pc(35) ModelAndShadow local35 = this.modelAndShadow(arg1, arg0, false);
-            return local35 == null ? null : local35.model;
+            @Pc(35) ModelAndShadow modelAndShadow = this.modelAndShadow(toolkit, functionMask, false);
+            return modelAndShadow == null ? null : modelAndShadow.model;
         }
     }
 
@@ -109,13 +109,13 @@ public final class StaticWallDecor extends WallDecor implements Location {
         if (arg2) {
             this.removeShadow(null);
         }
-        @Pc(18) Model local18 = this.method4041(131072, toolkit);
-        if (local18 == null) {
+        @Pc(18) Model model = this.getModel(131072, toolkit);
+        if (model == null) {
             return false;
         } else {
-            @Pc(23) Matrix local23 = toolkit.scratchMatrix();
-            local23.applyTranslation(super.x, super.y, super.z);
-            return OrthoMode.enabled ? local18.pickedOrtho(y, x, local23, false, 0, OrthoMode.renderZoom) : local18.picked(y, x, local23, false, 0);
+            @Pc(23) Matrix matrix = toolkit.scratchMatrix();
+            matrix.applyTranslation(super.x, super.y, super.z);
+            return OrthoMode.enabled ? model.pickedOrtho(y, x, matrix, false, 0, OrthoMode.renderZoom) : model.picked(y, x, matrix, false, 0);
         }
     }
 
@@ -123,7 +123,7 @@ public final class StaticWallDecor extends WallDecor implements Location {
     @Override
     public BoundingCylinder getCylinder(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) int arg1) {
         if (this.cylinder == null) {
-            this.cylinder = BoundingCylinder.create(super.y, super.x, this.method4041(0, toolkit), super.z);
+            this.cylinder = BoundingCylinder.create(super.y, super.x, this.getModel(0, toolkit), super.z);
         }
         return this.cylinder;
     }
@@ -131,22 +131,22 @@ public final class StaticWallDecor extends WallDecor implements Location {
     @OriginalMember(owner = "client!im", name = "b", descriptor = "(Lclient!ha;I)V")
     @Override
     public void addShadow(@OriginalArg(0) Toolkit toolkit) {
-        @Pc(37) Shadow local37;
+        @Pc(37) Shadow shadow;
         if (this.shadow == null && this.hardShadow) {
-            @Pc(29) ModelAndShadow local29 = this.modelAndShadow(toolkit, 0x40000, true);
-            local37 = local29 == null ? null : local29.shadow;
+            @Pc(29) ModelAndShadow modelAndShadow = this.modelAndShadow(toolkit, 0x40000, true);
+            shadow = modelAndShadow == null ? null : modelAndShadow.shadow;
         } else {
-            local37 = this.shadow;
+            shadow = this.shadow;
             this.shadow = null;
         }
-        if (local37 != null) {
-            Static630.method8357(local37, super.virtualLevel, super.x, super.z, null);
+        if (shadow != null) {
+            Static630.method8357(shadow, super.virtualLevel, super.x, super.z, null);
         }
     }
 
     @OriginalMember(owner = "client!im", name = "d", descriptor = "(Lclient!ha;I)V")
     @Override
-    public void method9289(@OriginalArg(0) Toolkit arg0, @OriginalArg(1) int arg1) {
+    public void method9289(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) int arg1) {
         if (arg1 != -5) {
             this.rotation = 89;
         }
@@ -165,16 +165,16 @@ public final class StaticWallDecor extends WallDecor implements Location {
     @OriginalMember(owner = "client!im", name = "a", descriptor = "(Lclient!ha;I)V")
     @Override
     public void removeShadow(@OriginalArg(0) Toolkit toolkit) {
-        @Pc(28) Shadow local28;
+        @Pc(28) Shadow shadow;
         if (this.shadow == null && this.hardShadow) {
-            @Pc(20) ModelAndShadow local20 = this.modelAndShadow(toolkit, 0x40000, true);
-            local28 = local20 == null ? null : local20.shadow;
+            @Pc(20) ModelAndShadow modelAndShadow = this.modelAndShadow(toolkit, 0x40000, true);
+            shadow = modelAndShadow == null ? null : modelAndShadow.shadow;
         } else {
-            local28 = this.shadow;
+            shadow = this.shadow;
             this.shadow = null;
         }
-        if (local28 != null) {
-            Static292.method4618(local28, super.virtualLevel, super.x, super.z, null);
+        if (shadow != null) {
+            Static292.method4618(shadow, super.virtualLevel, super.x, super.z, null);
         }
     }
 
@@ -197,21 +197,8 @@ public final class StaticWallDecor extends WallDecor implements Location {
     @OriginalMember(owner = "client!im", name = "a", descriptor = "(BLclient!ha;IZ)Lclient!od;")
     public ModelAndShadow modelAndShadow(@OriginalArg(1) Toolkit toolkit, @OriginalArg(2) int functionMask, @OriginalArg(3) boolean addShadow) {
         @Pc(17) LocType type = LocTypeList.instance.list(this.id & 0xFFFF);
-        @Pc(29) Ground floor;
-        @Pc(24) Ground ceiling;
-
-        if (this.underwater) {
-            ceiling = Static706.floor[0];
-            floor = Static693.underwaterGround[super.virtualLevel];
-        } else {
-            floor = Static706.floor[super.virtualLevel];
-            if (super.virtualLevel < 3) {
-                ceiling = Static706.floor[super.virtualLevel + 1];
-            } else {
-                ceiling = null;
-            }
-        }
-
+        @Pc(29) Ground floor = LocGround.floor(this.underwater, super.virtualLevel);
+        @Pc(24) Ground ceiling = LocGround.ceiling(this.underwater, super.virtualLevel);
         return type.modelAndShadow(this.rotation, super.z, super.x, floor, addShadow, super.y, this.shape, toolkit, null, functionMask, ceiling);
     }
 
@@ -223,11 +210,11 @@ public final class StaticWallDecor extends WallDecor implements Location {
 
     @OriginalMember(owner = "client!im", name = "a", descriptor = "(ILclient!ha;)Lclient!pea;")
     @Override
-    public PickableEntity render(@OriginalArg(1) Toolkit arg0) {
+    public PickableEntity render(@OriginalArg(1) Toolkit toolkit) {
         if (this.model == null) {
             return null;
         }
-        @Pc(12) Matrix matrix = arg0.scratchMatrix();
+        @Pc(12) Matrix matrix = toolkit.scratchMatrix();
         matrix.applyTranslation(super.x + super.aShort101, super.y, super.aShort102 + super.z);
         @Pc(41) PickableEntity entity = Static642.method8441(this.interactive, 1);
         if (OrthoMode.enabled) {

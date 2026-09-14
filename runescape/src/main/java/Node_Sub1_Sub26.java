@@ -43,7 +43,7 @@ public final class Node_Sub1_Sub26 extends TextureOp {
             this.method7742(arg1.g3());
         }
         if (arg0) {
-            Class306.anIntArray695 = null;
+            Terrain.faceVertices = null;
         }
     }
 

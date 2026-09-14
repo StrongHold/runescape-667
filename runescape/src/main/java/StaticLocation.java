@@ -21,7 +21,7 @@ import org.openrs2.deob.annotation.Pc;
 public final class StaticLocation extends PositionEntity implements Location {
 
     @OriginalMember(owner = "client!g", name = "a", descriptor = "(IBI)B")
-    public static byte method2904(@OriginalArg(0) int shape, @OriginalArg(2) int rotation) {
+    public static byte diagonalAxis(@OriginalArg(0) int shape, @OriginalArg(2) int rotation) {
         if (shape == LocShapes.WALL_DIAGONAL) {
             return (byte) ((rotation & 0x1) == 0 ? 1 : 2);
         } else {
@@ -51,7 +51,7 @@ public final class StaticLocation extends PositionEntity implements Location {
     public boolean copyNormals;
 
     @OriginalMember(owner = "client!jda", name = "ib", descriptor = "Z")
-    public final boolean castsShadow;
+    public final boolean hardShadow;
 
     @OriginalMember(owner = "client!jda", name = "gb", descriptor = "Lclient!ka;")
     public Model model;
@@ -61,7 +61,7 @@ public final class StaticLocation extends PositionEntity implements Location {
 
     @OriginalMember(owner = "client!jda", name = "<init>", descriptor = "(Lclient!ha;Lclient!c;IIIIIZIIIIIIZ)V")
     public StaticLocation(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) LocType type, @OriginalArg(2) int level, @OriginalArg(3) int virtualLevel, @OriginalArg(4) int x, @OriginalArg(5) int y, @OriginalArg(6) int z, @OriginalArg(7) boolean underwater, @OriginalArg(8) int x1, @OriginalArg(9) int x2, @OriginalArg(10) int z1, @OriginalArg(11) int z2, @OriginalArg(12) int shape, @OriginalArg(13) int rotation, @OriginalArg(14) boolean copyNormals) {
-        super(level, virtualLevel, x, y, z, x1, x2, z1, z2, type.raiseobject == 1, method2904(shape, rotation));
+        super(level, virtualLevel, x, y, z, x1, x2, z1, z2, type.raiseobject == 1, diagonalAxis(shape, rotation));
         this.interactive = type.active != LocInteractivity.NONINTERACTIVE && !underwater;
         this.underwater = underwater;
         this.rotation = (byte) rotation;
@@ -69,14 +69,14 @@ public final class StaticLocation extends PositionEntity implements Location {
         this.shape = (byte) shape;
         super.virtualLevel = (byte) virtualLevel;
         this.copyNormals = copyNormals;
-        this.castsShadow = toolkit.hardShadow() && type.hardshadow && !this.underwater && ClientOptions.instance.hardShadows.getValue() != 0;
+        this.hardShadow = toolkit.hardShadow() && type.hardshadow && !this.underwater && ClientOptions.instance.hardShadows.getValue() != 0;
 
         @Pc(83) int functionMask = 0x800;
         if (this.copyNormals) {
             functionMask |= 0x10000;
         }
 
-        @Pc(98) ModelAndShadow modelAndShadow = this.method4223(toolkit, this.castsShadow, functionMask);
+        @Pc(98) ModelAndShadow modelAndShadow = this.modelAndShadow(toolkit, this.hardShadow, functionMask);
         if (modelAndShadow != null) {
             this.model = modelAndShadow.model;
             this.shadow = modelAndShadow.shadow;
@@ -98,23 +98,23 @@ public final class StaticLocation extends PositionEntity implements Location {
     @OriginalMember(owner = "client!jda", name = "a", descriptor = "(Lclient!ha;I)V")
     @Override
     public void removeShadow(@OriginalArg(0) Toolkit toolkit) {
-        @Pc(16) Shadow local16;
-        if (this.shadow == null && this.castsShadow) {
-            @Pc(27) ModelAndShadow local27 = this.method4223(toolkit, true, 262144);
-            local16 = local27 == null ? null : local27.shadow;
+        @Pc(16) Shadow shadow;
+        if (this.shadow == null && this.hardShadow) {
+            @Pc(27) ModelAndShadow modelAndShadow = this.modelAndShadow(toolkit, true, 262144);
+            shadow = modelAndShadow == null ? null : modelAndShadow.shadow;
         } else {
-            local16 = this.shadow;
+            shadow = this.shadow;
             this.shadow = null;
         }
-        if (local16 != null) {
-            Static292.method4618(local16, super.virtualLevel, super.x, super.z, null);
+        if (shadow != null) {
+            Static292.method4618(shadow, super.virtualLevel, super.x, super.z, null);
         }
     }
 
     @OriginalMember(owner = "client!jda", name = "e", descriptor = "(I)Z")
     @Override
     public boolean hardShadow() {
-        return this.castsShadow;
+        return this.hardShadow;
     }
 
     @OriginalMember(owner = "client!jda", name = "b", descriptor = "(B)Z")
@@ -146,12 +146,12 @@ public final class StaticLocation extends PositionEntity implements Location {
     }
 
     @OriginalMember(owner = "client!jda", name = "a", descriptor = "(BLclient!ha;I)Lclient!ka;")
-    public Model method4221(@OriginalArg(1) Toolkit arg0, @OriginalArg(2) int arg1) {
-        if (this.model != null && arg0.compareFunctionMasks(this.model.ua(), arg1) == 0) {
+    public Model getModel(@OriginalArg(1) Toolkit toolkit, @OriginalArg(2) int functionMask) {
+        if (this.model != null && toolkit.compareFunctionMasks(this.model.ua(), functionMask) == 0) {
             return this.model;
         } else {
-            @Pc(34) ModelAndShadow local34 = this.method4223(arg0, false, arg1);
-            return local34 == null ? null : local34.model;
+            @Pc(34) ModelAndShadow modelAndShadow = this.modelAndShadow(toolkit, false, functionMask);
+            return modelAndShadow == null ? null : modelAndShadow.model;
         }
     }
 
@@ -164,13 +164,13 @@ public final class StaticLocation extends PositionEntity implements Location {
     @OriginalMember(owner = "client!jda", name = "a", descriptor = "(IIZLclient!ha;)Z")
     @Override
     public boolean picked(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) boolean arg2, @OriginalArg(3) Toolkit toolkit) {
-        @Pc(9) Model local9 = this.method4221(toolkit, 131072);
-        if (local9 == null) {
+        @Pc(9) Model model = this.getModel(toolkit, 131072);
+        if (model == null) {
             return arg2 ? false : false;
         } else {
-            @Pc(14) Matrix local14 = toolkit.scratchMatrix();
-            local14.applyTranslation(super.x, super.y, super.z);
-            return OrthoMode.enabled ? local9.pickedOrtho(y, x, local14, false, 0, OrthoMode.renderZoom) : local9.picked(y, x, local14, false, 0);
+            @Pc(14) Matrix matrix = toolkit.scratchMatrix();
+            matrix.applyTranslation(super.x, super.y, super.z);
+            return OrthoMode.enabled ? model.pickedOrtho(y, x, matrix, false, 0, OrthoMode.renderZoom) : model.picked(y, x, matrix, false, 0);
         }
     }
 
@@ -204,7 +204,7 @@ public final class StaticLocation extends PositionEntity implements Location {
             return null;
         } else {
             if (this.cylinder == null) {
-                this.cylinder = BoundingCylinder.create(super.y, super.x, this.method4221(toolkit, 0), super.z);
+                this.cylinder = BoundingCylinder.create(super.y, super.x, this.getModel(toolkit, 0), super.z);
             }
             return this.cylinder;
         }
@@ -214,8 +214,8 @@ public final class StaticLocation extends PositionEntity implements Location {
     @Override
     public void addShadow(@OriginalArg(0) Toolkit toolkit) {
         @Pc(21) Shadow shadow;
-        if (this.shadow == null && this.castsShadow) {
-            @Pc(32) ModelAndShadow modelAndShadow = this.method4223(toolkit, true, 262144);
+        if (this.shadow == null && this.hardShadow) {
+            @Pc(32) ModelAndShadow modelAndShadow = this.modelAndShadow(toolkit, true, 262144);
             shadow = modelAndShadow == null ? null : modelAndShadow.shadow;
         } else {
             shadow = this.shadow;
@@ -238,7 +238,7 @@ public final class StaticLocation extends PositionEntity implements Location {
 
     @OriginalMember(owner = "client!jda", name = "d", descriptor = "(Lclient!ha;I)V")
     @Override
-    public void method9289(@OriginalArg(0) Toolkit arg0, @OriginalArg(1) int arg1) {
+    public void method9289(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) int arg1) {
         if (arg1 == -5) {
             ;
         }
@@ -255,33 +255,33 @@ public final class StaticLocation extends PositionEntity implements Location {
 
     @OriginalMember(owner = "client!jda", name = "a", descriptor = "(ILclient!ha;)Lclient!pea;")
     @Override
-    public PickableEntity render(@OriginalArg(1) Toolkit arg0) {
+    public PickableEntity render(@OriginalArg(1) Toolkit toolkit) {
         if (this.model == null) {
             return null;
         }
-        @Pc(20) Matrix local20 = arg0.scratchMatrix();
-        local20.applyTranslation(super.x, super.y, super.z);
-        @Pc(34) PickableEntity local34 = Static642.method8441(this.interactive, 1);
+        @Pc(20) Matrix matrix = toolkit.scratchMatrix();
+        matrix.applyTranslation(super.x, super.y, super.z);
+        @Pc(34) PickableEntity entity = Static642.method8441(this.interactive, 1);
         if (OrthoMode.enabled) {
-            this.model.renderOrtho(local20, local34.pickingCylinders[0], OrthoMode.renderZoom, 0);
+            this.model.renderOrtho(matrix, entity.pickingCylinders[0], OrthoMode.renderZoom, 0);
         } else {
-            this.model.render(local20, local34.pickingCylinders[0], 0);
+            this.model.render(matrix, entity.pickingCylinders[0], 0);
         }
-        return local34;
+        return entity;
     }
 
     @OriginalMember(owner = "client!jda", name = "a", descriptor = "(IZLclient!ha;IBILclient!eo;)V")
     @Override
-    public void shareLight(@OriginalArg(0) int arg0, @OriginalArg(1) boolean arg1, @OriginalArg(2) Toolkit arg2, @OriginalArg(3) int arg3, @OriginalArg(4) byte arg4, @OriginalArg(5) int arg5, @OriginalArg(6) Entity arg6) {
-        if (arg6 instanceof StaticWall) {
-            @Pc(38) StaticWall local38 = (StaticWall) arg6;
-            if (this.model != null && local38.model != null) {
-                this.model.method7481(local38.model, arg5, arg0, arg3, arg1);
+    public void shareLight(@OriginalArg(0) int offsetY, @OriginalArg(1) boolean arg1, @OriginalArg(2) Toolkit toolkit, @OriginalArg(3) int offsetZ, @OriginalArg(4) byte arg4, @OriginalArg(5) int offsetX, @OriginalArg(6) Entity entity) {
+        if (entity instanceof StaticWall) {
+            @Pc(38) StaticWall wall = (StaticWall) entity;
+            if (this.model != null && wall.model != null) {
+                this.model.method7481(wall.model, offsetX, offsetY, offsetZ, arg1);
             }
-        } else if (arg6 instanceof StaticLocation) {
-            @Pc(14) StaticLocation local14 = (StaticLocation) arg6;
-            if (this.model != null && local14.model != null) {
-                this.model.method7481(local14.model, arg5, arg0, arg3, arg1);
+        } else if (entity instanceof StaticLocation) {
+            @Pc(14) StaticLocation loc = (StaticLocation) entity;
+            if (this.model != null && loc.model != null) {
+                this.model.method7481(loc.model, offsetX, offsetY, offsetZ, arg1);
             }
         }
         if (arg4 <= 101) {
@@ -290,22 +290,11 @@ public final class StaticLocation extends PositionEntity implements Location {
     }
 
     @OriginalMember(owner = "client!jda", name = "a", descriptor = "(Lclient!ha;BZI)Lclient!od;")
-    public ModelAndShadow method4223(@OriginalArg(0) Toolkit arg0, @OriginalArg(2) boolean arg1, @OriginalArg(3) int arg2) {
-        @Pc(11) LocType local11 = LocTypeList.instance.list(this.id & 0xFFFF);
-        @Pc(27) Ground local27;
-        @Pc(33) Ground local33;
-        if (this.underwater) {
-            local27 = Static693.underwaterGround[super.virtualLevel];
-            local33 = Static706.floor[0];
-        } else {
-            local27 = Static706.floor[super.virtualLevel];
-            if (super.virtualLevel >= 3) {
-                local33 = null;
-            } else {
-                local33 = Static706.floor[super.virtualLevel + 1];
-            }
-        }
-        return local11.modelAndShadow(this.shape == 11 ? this.rotation + 4 : this.rotation, super.z, super.x, local27, arg1, super.y, this.shape == 11 ? 10 : this.shape, arg0, null, arg2, local33);
+    public ModelAndShadow modelAndShadow(@OriginalArg(0) Toolkit toolkit, @OriginalArg(2) boolean addShadow, @OriginalArg(3) int functionMask) {
+        @Pc(11) LocType type = LocTypeList.instance.list(this.id & 0xFFFF);
+        @Pc(27) Ground floor = LocGround.floor(this.underwater, super.virtualLevel);
+        @Pc(33) Ground ceiling = LocGround.ceiling(this.underwater, super.virtualLevel);
+        return type.modelAndShadow(this.shape == LocShapes.CENTREPIECE_DIAGONAL ? this.rotation + 4 : this.rotation, super.z, super.x, floor, addShadow, super.y, this.shape == LocShapes.CENTREPIECE_DIAGONAL ? LocShapes.CENTREPIECE_STRAIGHT : this.shape, toolkit, null, functionMask, ceiling);
     }
 
     @OriginalMember(owner = "client!jda", name = "c", descriptor = "(I)I")
