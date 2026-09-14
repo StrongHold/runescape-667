@@ -3,99 +3,125 @@ import org.openrs2.deob.annotation.OriginalClass;
 import org.openrs2.deob.annotation.OriginalMember;
 import org.openrs2.deob.annotation.Pc;
 
+/**
+ * Owns one {@link TextureEffect} per {@code TextureMetrics.effectType} and switches between them as textures change.
+ */
 @OriginalClass("client!eg")
 public final class Class98 {
 
+    private static final int EFFECT_NONE = 0;
+
+    private static final int EFFECT_NORMAL_MAP_SPECULAR = 1;
+
+    private static final int EFFECT_TURBULENT_WATER = 2;
+
+    private static final int EFFECT_UNDERWATER = 3;
+
+    private static final int EFFECT_FIXED_FUNCTION_WATER = 4;
+
+    private static final int EFFECT_FLOWING_WATER = 5;
+
+    private static final int EFFECT_UNLIT = 6;
+
+    private static final int EFFECT_REFLECTION_MAP = 7;
+
+    private static final int EFFECT_SHADER_WATER = 8;
+
+    private static final int EFFECT_SHADER_WAVE_WATER = 9;
+
+    private static final int EFFECT_COUNT = 10;
+
+    /**
+     * Packed into the active effect alongside the effect type so that a change of lighting restarts the effect.
+     */
+    private static final int LIT_FLAG = Integer.MIN_VALUE;
+
+    private static final int EFFECT_MASK = Integer.MAX_VALUE;
+
     @OriginalMember(owner = "client!eg", name = "a", descriptor = "I")
-    public int anInt2519 = 0;
+    public int activeEffect = EFFECT_NONE;
 
     @OriginalMember(owner = "client!eg", name = "c", descriptor = "I")
-    public int anInt2520 = 0;
+    public int activeParam2 = 0;
 
     @OriginalMember(owner = "client!eg", name = "k", descriptor = "I")
-    public int anInt2522 = 0;
+    public int activeParam1 = 0;
 
     @OriginalMember(owner = "client!eg", name = "g", descriptor = "Lclient!qha;")
-    public final GlToolkit aClass19_Sub3_5;
+    public final GlToolkit toolkit;
 
     @OriginalMember(owner = "client!eg", name = "f", descriptor = "Lclient!sa;")
-    public final Class329 aClass329_1;
+    public final Class329 textures;
 
     @OriginalMember(owner = "client!eg", name = "l", descriptor = "[Lclient!ua;")
-    public final Class101[] aClass101Array1;
+    public final TextureEffect[] effects;
 
     @OriginalMember(owner = "client!eg", name = "h", descriptor = "Lclient!nia;")
-    public final Class101_Sub6 aClass101_Sub6_1;
+    public final UnderwaterEffect aClass101_Sub6_1;
 
     @OriginalMember(owner = "client!eg", name = "<init>", descriptor = "(Lclient!qha;)V")
-    public Class98(@OriginalArg(0) GlToolkit arg0) {
-        this.aClass19_Sub3_5 = arg0;
-        this.aClass329_1 = new Class329(arg0);
-        this.aClass101Array1 = new Class101[10];
-        this.aClass101Array1[1] = new Class101_Sub1(arg0);
-        this.aClass101Array1[2] = new Class101_Sub9(arg0, this.aClass329_1);
-        this.aClass101Array1[4] = new Class101_Sub2(arg0, this.aClass329_1);
-        this.aClass101Array1[5] = new Class101_Sub5(arg0, this.aClass329_1);
-        this.aClass101Array1[6] = new Class101_Sub8(arg0);
-        this.aClass101Array1[7] = new Class101_Sub3(arg0);
-        this.aClass101Array1[3] = this.aClass101_Sub6_1 = new Class101_Sub6(arg0);
-        this.aClass101Array1[8] = new Class101_Sub4(arg0, this.aClass329_1);
-        this.aClass101Array1[9] = new Class101_Sub7(arg0, this.aClass329_1);
-        if (!this.aClass101Array1[8].method9431()) {
-            this.aClass101Array1[8] = this.aClass101Array1[4];
+    public Class98(@OriginalArg(0) GlToolkit toolkit) {
+        this.toolkit = toolkit;
+        this.textures = new Class329(toolkit);
+        this.effects = new TextureEffect[EFFECT_COUNT];
+        this.effects[EFFECT_NORMAL_MAP_SPECULAR] = new NormalMapSpecularEffect(toolkit);
+        this.effects[EFFECT_TURBULENT_WATER] = new TurbulentWaterEffect(toolkit, this.textures);
+        this.effects[EFFECT_FIXED_FUNCTION_WATER] = new FixedFunctionWaterEffect(toolkit, this.textures);
+        this.effects[EFFECT_FLOWING_WATER] = new FlowingWaterEffect(toolkit, this.textures);
+        this.effects[EFFECT_UNLIT] = new UnlitEffect(toolkit);
+        this.effects[EFFECT_REFLECTION_MAP] = new ReflectionMapEffect(toolkit);
+        this.effects[EFFECT_UNDERWATER] = this.aClass101_Sub6_1 = new UnderwaterEffect(toolkit);
+        this.effects[EFFECT_SHADER_WATER] = new ShaderWaterEffect(toolkit, this.textures);
+        this.effects[EFFECT_SHADER_WAVE_WATER] = new ShaderWaveWaterEffect(toolkit, this.textures);
+        if (!this.effects[EFFECT_SHADER_WATER].isSupported()) {
+            this.effects[EFFECT_SHADER_WATER] = this.effects[EFFECT_FIXED_FUNCTION_WATER];
         }
-        if (!this.aClass101Array1[9].method9431()) {
-            this.aClass101Array1[9] = this.aClass101Array1[8];
+        if (!this.effects[EFFECT_SHADER_WAVE_WATER].isSupported()) {
+            this.effects[EFFECT_SHADER_WAVE_WATER] = this.effects[EFFECT_SHADER_WATER];
         }
     }
 
     @OriginalMember(owner = "client!eg", name = "a", descriptor = "(IB)Z")
     public boolean method2357() {
-        return this.aClass101Array1[3].method9431();
+        return this.effects[EFFECT_UNDERWATER].isSupported();
     }
 
     @OriginalMember(owner = "client!eg", name = "a", descriptor = "(BILclient!kd;)Z")
-    public boolean method2359(@OriginalArg(1) int arg0, @OriginalArg(2) Class93 arg1) {
-        if (this.anInt2519 == 0) {
+    public boolean method2359(@OriginalArg(1) int colourOp, @OriginalArg(2) Class93 texture) {
+        if (this.activeEffect == EFFECT_NONE) {
             return false;
         } else {
-            this.aClass101Array1[Integer.MAX_VALUE & this.anInt2519].method9426(arg1, arg0);
+            this.effects[EFFECT_MASK & this.activeEffect].bindTexture(texture, colourOp);
             return true;
         }
     }
 
     @OriginalMember(owner = "client!eg", name = "a", descriptor = "(IIZZII)V")
-    public void method2360(@OriginalArg(1) int arg0, @OriginalArg(2) boolean arg1, @OriginalArg(3) boolean arg2, @OriginalArg(4) int arg3, @OriginalArg(5) int arg4) {
-        @Pc(9) boolean local9 = arg1 & this.aClass19_Sub3_5.method7990();
-        if (!local9 && (arg4 == 4 || arg4 == 8 || arg4 == 9)) {
-            if (arg4 == 4) {
-                arg0 = arg3;
+    public void method2360(@OriginalArg(1) int effectParam2, @OriginalArg(2) boolean waterPlaneActive, @OriginalArg(3) boolean lit, @OriginalArg(4) int effectParam1, @OriginalArg(5) int effectType) {
+        @Pc(9) boolean waterSupported = waterPlaneActive & this.toolkit.method7990();
+        boolean fallback = !waterSupported && (effectType == EFFECT_FIXED_FUNCTION_WATER || effectType == EFFECT_SHADER_WATER || effectType == EFFECT_SHADER_WAVE_WATER);
+        int param2 = fallback && effectType == EFFECT_FIXED_FUNCTION_WATER ? effectParam1 : effectParam2;
+        int effect = fallback ? EFFECT_TURBULENT_WATER : effectType;
+        int requested = effect != EFFECT_NONE && lit ? effect | LIT_FLAG : effect;
+        if (requested != this.activeEffect) {
+            if (this.activeEffect != EFFECT_NONE) {
+                this.effects[this.activeEffect & EFFECT_MASK].disable();
             }
-            arg4 = 2;
-        }
-        if (arg4 != 0 && arg2) {
-            arg4 |= Integer.MIN_VALUE;
-        }
-        if (arg4 != this.anInt2519) {
-            if (this.anInt2519 != 0) {
-                this.aClass101Array1[this.anInt2519 & Integer.MAX_VALUE].method9427();
+            if (requested != EFFECT_NONE) {
+                this.effects[EFFECT_MASK & requested].enable(lit);
+                this.effects[requested & EFFECT_MASK].applyTextureCombine(lit);
+                this.effects[requested & EFFECT_MASK].setEffectParams(param2, effectParam1);
             }
-            if (arg4 != 0) {
-                this.aClass101Array1[Integer.MAX_VALUE & arg4].method9432(arg2);
-                this.aClass101Array1[arg4 & Integer.MAX_VALUE].method9429(arg2);
-                this.aClass101Array1[arg4 & Integer.MAX_VALUE].method9428(arg0, arg3);
+            this.activeParam2 = param2;
+            this.activeParam1 = effectParam1;
+            this.activeEffect = requested;
+        } else if (this.activeEffect != EFFECT_NONE) {
+            this.effects[this.activeEffect & EFFECT_MASK].applyTextureCombine(lit);
+            if (this.activeParam1 != effectParam1 || this.activeParam2 != param2) {
+                this.effects[this.activeEffect & EFFECT_MASK].setEffectParams(param2, effectParam1);
+                this.activeParam2 = param2;
+                this.activeParam1 = effectParam1;
             }
-            this.anInt2520 = arg0;
-            this.anInt2522 = arg3;
-            this.anInt2519 = arg4;
-        } else if (this.anInt2519 != 0) {
-            this.aClass101Array1[this.anInt2519 & Integer.MAX_VALUE].method9429(arg2);
-            if (this.anInt2522 != arg3 || this.anInt2520 != arg0) {
-                this.aClass101Array1[this.anInt2519 & Integer.MAX_VALUE].method9428(arg0, arg3);
-                this.anInt2520 = arg0;
-                this.anInt2522 = arg3;
-            }
-            return;
         }
     }
 }
