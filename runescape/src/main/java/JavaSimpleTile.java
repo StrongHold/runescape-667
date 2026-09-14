@@ -2,26 +2,26 @@ import org.openrs2.deob.annotation.OriginalClass;
 import org.openrs2.deob.annotation.OriginalMember;
 
 @OriginalClass("client!fg")
-public final class Class127 {
+public final class JavaSimpleTile {
 
     @OriginalMember(owner = "client!fg", name = "c", descriptor = "S")
-    public short aShort38;
+    public short texture;
 
     @OriginalMember(owner = "client!fg", name = "b", descriptor = "S")
-    public short aShort39;
+    public short hslSe;
 
     @OriginalMember(owner = "client!fg", name = "g", descriptor = "S")
-    public short aShort40;
+    public short hslNw;
 
     @OriginalMember(owner = "client!fg", name = "a", descriptor = "B")
-    public byte aByte59;
+    public byte flags;
 
     @OriginalMember(owner = "client!fg", name = "d", descriptor = "S")
-    public short aShort41;
+    public short hslNe;
 
     @OriginalMember(owner = "client!fg", name = "e", descriptor = "S")
-    public short aShort42;
+    public short hslSw;
 
     @OriginalMember(owner = "client!fg", name = "f", descriptor = "I")
-    public int anInt2898 = -1;
+    public int blendedColour = -1;
 }

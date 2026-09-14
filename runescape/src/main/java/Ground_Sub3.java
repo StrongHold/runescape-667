@@ -12,123 +12,123 @@ import org.openrs2.deob.annotation.Pc;
 public final class Ground_Sub3 extends Ground {
 
     @OriginalMember(owner = "client!qs", name = "H", descriptor = "F")
-    public float aFloat162;
+    public float cameraE1_3;
 
     @OriginalMember(owner = "client!qs", name = "Q", descriptor = "F")
-    public float aFloat163;
+    public float cameraE2_2;
 
     @OriginalMember(owner = "client!qs", name = "R", descriptor = "F")
-    public float aFloat164;
+    public float cameraE3_1;
 
     @OriginalMember(owner = "client!qs", name = "L", descriptor = "F")
-    public float aFloat165;
+    public float cameraE3_3;
 
     @OriginalMember(owner = "client!qs", name = "S", descriptor = "F")
-    public float aFloat166;
+    public float cameraE2_3;
 
     @OriginalMember(owner = "client!qs", name = "M", descriptor = "[[Lclient!fg;")
-    public Class127[][] simpleTiles;
+    public JavaSimpleTile[][] simpleTiles;
 
     @OriginalMember(owner = "client!qs", name = "F", descriptor = "F")
-    public float aFloat167;
+    public float cameraE1_2;
 
     @OriginalMember(owner = "client!qs", name = "P", descriptor = "[[Lclient!qh;")
     public JavaSimpleBlendedTile[][] simpleBlendedTiles;
 
     @OriginalMember(owner = "client!qs", name = "O", descriptor = "F")
-    public float aFloat168;
+    public float cameraE2_1;
 
     @OriginalMember(owner = "client!qs", name = "J", descriptor = "[[Lclient!vg;")
     public JavaComplexBlendedTile[][] complexBlendedTiles;
 
     @OriginalMember(owner = "client!qs", name = "A", descriptor = "F")
-    public float aFloat169;
+    public float cameraTy;
 
     @OriginalMember(owner = "client!qs", name = "T", descriptor = "F")
-    public float aFloat170;
+    public float cameraE1_1;
 
     @OriginalMember(owner = "client!qs", name = "U", descriptor = "F")
-    public float aFloat171;
+    public float cameraTx;
 
     @OriginalMember(owner = "client!qs", name = "W", descriptor = "F")
-    public float aFloat172;
+    public float cameraE3_2;
 
     @OriginalMember(owner = "client!qs", name = "K", descriptor = "[[Lclient!rh;")
     public JavaGenericBlendedTile[][] genericBlendedTiles;
 
     @OriginalMember(owner = "client!qs", name = "E", descriptor = "[[Lclient!em;")
-    public Class107[][] aClass107ArrayArray1;
+    public JavaComplexTile[][] complexTiles;
 
     @OriginalMember(owner = "client!qs", name = "G", descriptor = "F")
-    public float aFloat173;
+    public float cameraTz;
 
     @OriginalMember(owner = "client!qs", name = "V", descriptor = "I")
-    public int anInt8145 = -1;
+    public int depthOverride = -1;
 
     @OriginalMember(owner = "client!qs", name = "I", descriptor = "Lclient!iaa;")
-    public final JavaToolkit aClass19_Sub2_8;
+    public final JavaToolkit toolkit;
 
     @OriginalMember(owner = "client!qs", name = "D", descriptor = "I")
-    public final int anInt8146;
+    public final int featureFlags;
 
     @OriginalMember(owner = "client!qs", name = "N", descriptor = "[[B")
-    public byte[][] aByteArrayArray31;
+    public byte[][] lightLevels;
 
     @OriginalMember(owner = "client!qs", name = "B", descriptor = "[[B")
-    public byte[][] aByteArrayArray30;
+    public byte[][] shadowLevels;
 
     @OriginalMember(owner = "client!qs", name = "<init>", descriptor = "(Lclient!iaa;IIII[[I[[II)V")
-    public Ground_Sub3(@OriginalArg(0) JavaToolkit arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int[][] arg5, @OriginalArg(6) int[][] arg6, @OriginalArg(7) int arg7) {
-        super(arg3, arg4, arg7, arg5);
-        this.aClass19_Sub2_8 = arg0;
-        this.anInt8146 = arg2;
-        this.aByteArrayArray31 = new byte[arg3 + 1][arg4 + 1];
-        @Pc(29) int local29 = this.aClass19_Sub2_8.ambient >> 9;
-        for (@Pc(31) int local31 = 1; local31 < arg4; local31++) {
-            for (@Pc(34) int local34 = 1; local34 < arg3; local34++) {
-                @Pc(53) int local53 = arg6[local34 + 1][local31] - arg6[local34 - 1][local31];
-                @Pc(69) int local69 = arg6[local34][local31 + 1] - arg6[local34][local31 - 1];
-                @Pc(84) int local84 = (int) Math.sqrt(local53 * local53 + arg7 * 512 + local69 * local69);
+    public Ground_Sub3(@OriginalArg(0) JavaToolkit toolkit, @OriginalArg(1) int groundFlags, @OriginalArg(2) int featureFlags, @OriginalArg(3) int width, @OriginalArg(4) int length, @OriginalArg(5) int[][] tileHeights, @OriginalArg(6) int[][] heights, @OriginalArg(7) int tileSize) {
+        super(width, length, tileSize, tileHeights);
+        this.toolkit = toolkit;
+        this.featureFlags = featureFlags;
+        this.lightLevels = new byte[width + 1][length + 1];
+        @Pc(29) int local29 = this.toolkit.ambient >> 9;
+        for (@Pc(31) int local31 = 1; local31 < length; local31++) {
+            for (@Pc(34) int local34 = 1; local34 < width; local34++) {
+                @Pc(53) int local53 = heights[local34 + 1][local31] - heights[local34 - 1][local31];
+                @Pc(69) int local69 = heights[local34][local31 + 1] - heights[local34][local31 - 1];
+                @Pc(84) int local84 = (int) Math.sqrt(local53 * local53 + tileSize * 512 + local69 * local69);
                 @Pc(90) int local90 = (local53 << 8) / local84;
-                @Pc(96) int local96 = arg7 * -512 / local84;
+                @Pc(96) int local96 = tileSize * -512 / local84;
                 @Pc(102) int local102 = (local69 << 8) / local84;
-                @Pc(124) int local124 = local29 + (this.aClass19_Sub2_8.sunX * local90 + this.aClass19_Sub2_8.sunY * local96 + this.aClass19_Sub2_8.sunZ * local102 >> 17);
+                @Pc(124) int local124 = local29 + (this.toolkit.sunX * local90 + this.toolkit.sunY * local96 + this.toolkit.sunZ * local102 >> 17);
                 local124 >>= 0x1;
                 if (local124 < 2) {
                     local124 = 2;
                 } else if (local124 > 126) {
                     local124 = 126;
                 }
-                this.aByteArrayArray31[local34][local31] = (byte) local124;
+                this.lightLevels[local34][local31] = (byte) local124;
             }
         }
-        this.aByteArrayArray30 = new byte[arg3 + 1][arg4 + 1];
+        this.shadowLevels = new byte[width + 1][length + 1];
     }
 
     @OriginalMember(owner = "client!qs", name = "a", descriptor = "(III[[ZZI)V")
     @Override
-    public void method7870(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) boolean[][] arg3, @OriginalArg(4) boolean arg4, @OriginalArg(5) int arg5) {
-        @Pc(3) JavaMatrix local3 = this.aClass19_Sub2_8.camera;
-        this.anInt8145 = -1;
-        this.aFloat170 = local3.e1_1;
-        this.aFloat167 = local3.e1_2;
-        this.aFloat162 = local3.e1_3;
-        this.aFloat171 = local3.tx;
-        this.aFloat168 = local3.e2_1;
-        this.aFloat163 = local3.e2_2;
-        this.aFloat166 = local3.e2_3;
-        this.aFloat169 = local3.ty;
-        this.aFloat164 = local3.e3_1;
-        this.aFloat172 = local3.e3_2;
-        this.aFloat165 = local3.e3_3;
-        this.aFloat173 = local3.tz;
-        for (@Pc(56) int local56 = 0; local56 < arg2 + arg2; local56++) {
-            for (@Pc(59) int local59 = 0; local59 < arg2 + arg2; local59++) {
-                if (arg3[local56][local59]) {
-                    @Pc(72) int local72 = arg0 + local56 - arg2;
-                    @Pc(78) int local78 = arg1 + local59 - arg2;
+    public void method7870(@OriginalArg(0) int x, @OriginalArg(1) int z, @OriginalArg(2) int radius, @OriginalArg(3) boolean[][] visibility, @OriginalArg(4) boolean arg4, @OriginalArg(5) int skipFlags) {
+        @Pc(3) JavaMatrix local3 = this.toolkit.camera;
+        this.depthOverride = -1;
+        this.cameraE1_1 = local3.e1_1;
+        this.cameraE1_2 = local3.e1_2;
+        this.cameraE1_3 = local3.e1_3;
+        this.cameraTx = local3.tx;
+        this.cameraE2_1 = local3.e2_1;
+        this.cameraE2_2 = local3.e2_2;
+        this.cameraE2_3 = local3.e2_3;
+        this.cameraTy = local3.ty;
+        this.cameraE3_1 = local3.e3_1;
+        this.cameraE3_2 = local3.e3_2;
+        this.cameraE3_3 = local3.e3_3;
+        this.cameraTz = local3.tz;
+        for (@Pc(56) int local56 = 0; local56 < radius + radius; local56++) {
+            for (@Pc(59) int local59 = 0; local59 < radius + radius; local59++) {
+                if (visibility[local56][local59]) {
+                    @Pc(72) int local72 = x + local56 - radius;
+                    @Pc(78) int local78 = z + local59 - radius;
                     if (local72 >= 0 && local72 < super.anInt8894 && local78 >= 0 && local78 < super.anInt8892) {
-                        this.method7168(local72, local78, arg5);
+                        this.renderTile(local72, local78, skipFlags);
                     }
                 }
             }
@@ -152,9 +152,9 @@ public final class Ground_Sub3 extends Ground {
     }
 
     @OriginalMember(owner = "client!qs", name = "a", descriptor = "(IIZLclient!wf;Lclient!lb;[I[I[I[II)V")
-    public void method7161(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) boolean arg2, @OriginalArg(3) JavaThreadResource arg3, @OriginalArg(4) Rasterizer arg4, @OriginalArg(5) int[] arg5, @OriginalArg(6) int[] arg6, @OriginalArg(7) int[] arg7, @OriginalArg(8) int[] arg8, @OriginalArg(9) int arg9) {
-        @Pc(6) JavaGenericBlendedTile local6 = this.genericBlendedTiles[arg0][arg1];
-        if (arg9 != 0 && (arg9 & 0x2) != 0 || local6 == null) {
+    public void renderGenericBlendedTile(@OriginalArg(0) int x, @OriginalArg(1) int z, @OriginalArg(2) boolean water, @OriginalArg(3) JavaThreadResource resource, @OriginalArg(4) Rasterizer rasterizer, @OriginalArg(5) int[] screenX, @OriginalArg(6) int[] screenY, @OriginalArg(7) int[] depths, @OriginalArg(8) int[] fogLevels, @OriginalArg(9) int skipFlags) {
+        @Pc(6) JavaGenericBlendedTile local6 = this.genericBlendedTiles[x][z];
+        if (skipFlags != 0 && (skipFlags & 0x2) != 0 || local6 == null) {
             return;
         }
         @Pc(37) int local37;
@@ -166,76 +166,76 @@ public final class Ground_Sub3 extends Ground {
         @Pc(26) int local26;
         @Pc(95) int local95;
         @Pc(115) int local115;
-        if (this.anInt8145 == -1) {
+        if (this.depthOverride == -1) {
             for (local26 = 0; local26 < local6.aShort110; local26++) {
-                local37 = local6.aShortArray116[local26] + (arg0 << super.anInt8895);
+                local37 = local6.aShortArray116[local26] + (x << super.anInt8895);
                 local42 = local6.aShortArray117[local26];
-                local52 = local6.aShortArray113[local26] + (arg1 << super.anInt8895);
-                local73 = this.aFloat173 + this.aFloat164 * (float) local37 + this.aFloat172 * (float) local42 + this.aFloat165 * (float) local52;
-                if (local73 <= (float) this.aClass19_Sub2_8.zNear) {
+                local52 = local6.aShortArray113[local26] + (z << super.anInt8895);
+                local73 = this.cameraTz + this.cameraE3_1 * (float) local37 + this.cameraE3_2 * (float) local42 + this.cameraE3_3 * (float) local52;
+                if (local73 <= (float) this.toolkit.zNear) {
                     return;
                 }
-                arg8[local26] = 0;
-                if (arg2) {
-                    local95 = (int) (local73 - (float) arg3.fogPlane);
+                fogLevels[local26] = 0;
+                if (water) {
+                    local95 = (int) (local73 - (float) resource.fogPlane);
                     if (local95 > 255) {
                         local95 = 255;
                     }
                     if (local95 > 0) {
-                        arg8[local26] = local95;
+                        fogLevels[local26] = local95;
                         local115 = local6.aShortArray114[local26] * local95 / 255;
                         if (local115 > 0) {
                             local42 -= local115;
                         }
                     }
-                } else if (arg3.fogActive) {
-                    local95 = (int) (local73 - (float) arg3.fogPlane);
+                } else if (resource.fogActive) {
+                    local95 = (int) (local73 - (float) resource.fogPlane);
                     if (local95 > 0) {
-                        arg8[local26] = local95;
-                        if (arg8[local26] > 255) {
-                            arg8[local26] = 255;
+                        fogLevels[local26] = local95;
+                        if (fogLevels[local26] > 255) {
+                            fogLevels[local26] = 255;
                         }
                     }
                 }
-                local172 = this.aFloat171 + this.aFloat170 * (float) local37 + this.aFloat167 * (float) local42 + this.aFloat162 * (float) local52;
-                local193 = this.aFloat169 + this.aFloat168 * (float) local37 + this.aFloat163 * (float) local42 + this.aFloat166 * (float) local52;
-                arg5[local26] = arg4.minX + (int) (local172 * (float) this.aClass19_Sub2_8.projectionScaleX / local73);
-                arg6[local26] = arg4.minY + (int) (local193 * (float) this.aClass19_Sub2_8.projectionScaleY / local73);
-                arg7[local26] = (int) local73;
+                local172 = this.cameraTx + this.cameraE1_1 * (float) local37 + this.cameraE1_2 * (float) local42 + this.cameraE1_3 * (float) local52;
+                local193 = this.cameraTy + this.cameraE2_1 * (float) local37 + this.cameraE2_2 * (float) local42 + this.cameraE2_3 * (float) local52;
+                screenX[local26] = rasterizer.minX + (int) (local172 * (float) this.toolkit.projectionScaleX / local73);
+                screenY[local26] = rasterizer.minY + (int) (local193 * (float) this.toolkit.projectionScaleY / local73);
+                depths[local26] = (int) local73;
             }
         } else {
             for (local26 = 0; local26 < local6.aShort110; local26++) {
-                local37 = local6.aShortArray116[local26] + (arg0 << super.anInt8895);
+                local37 = local6.aShortArray116[local26] + (x << super.anInt8895);
                 local42 = local6.aShortArray117[local26];
-                local52 = local6.aShortArray113[local26] + (arg1 << super.anInt8895);
-                local73 = this.aFloat173 + this.aFloat164 * (float) local37 + this.aFloat172 * (float) local42 + this.aFloat165 * (float) local52;
-                arg8[local26] = 0;
-                if (arg2) {
-                    local95 = this.anInt8145 - arg3.fogPlane;
+                local52 = local6.aShortArray113[local26] + (z << super.anInt8895);
+                local73 = this.cameraTz + this.cameraE3_1 * (float) local37 + this.cameraE3_2 * (float) local42 + this.cameraE3_3 * (float) local52;
+                fogLevels[local26] = 0;
+                if (water) {
+                    local95 = this.depthOverride - resource.fogPlane;
                     if (local95 > 255) {
                         local95 = 255;
                     }
                     if (local95 > 0) {
-                        arg8[local26] = local95;
+                        fogLevels[local26] = local95;
                         local115 = local6.aShortArray114[local26] * local95 / 255;
                         if (local115 > 0) {
                             local42 -= local115;
                         }
                     }
-                } else if (arg3.fogActive) {
-                    local95 = this.anInt8145 - arg3.fogPlane;
+                } else if (resource.fogActive) {
+                    local95 = this.depthOverride - resource.fogPlane;
                     if (local95 > 0) {
-                        arg8[local26] = local95;
-                        if (arg8[local26] > 255) {
-                            arg8[local26] = 255;
+                        fogLevels[local26] = local95;
+                        if (fogLevels[local26] > 255) {
+                            fogLevels[local26] = 255;
                         }
                     }
                 }
-                local172 = this.aFloat171 + this.aFloat170 * (float) local37 + this.aFloat167 * (float) local42 + this.aFloat162 * (float) local52;
-                local193 = this.aFloat169 + this.aFloat168 * (float) local37 + this.aFloat163 * (float) local42 + this.aFloat166 * (float) local52;
-                arg5[local26] = arg4.minX + (int) (local172 * (float) this.aClass19_Sub2_8.projectionScaleX / (float) this.anInt8145);
-                arg6[local26] = arg4.minY + (int) (local193 * (float) this.aClass19_Sub2_8.projectionScaleY / (float) this.anInt8145);
-                arg7[local26] = (int) local73;
+                local172 = this.cameraTx + this.cameraE1_1 * (float) local37 + this.cameraE1_2 * (float) local42 + this.cameraE1_3 * (float) local52;
+                local193 = this.cameraTy + this.cameraE2_1 * (float) local37 + this.cameraE2_2 * (float) local42 + this.cameraE2_3 * (float) local52;
+                screenX[local26] = rasterizer.minX + (int) (local172 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
+                screenY[local26] = rasterizer.minY + (int) (local193 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
+                depths[local26] = (int) local73;
             }
         }
         @Pc(441) float local441 = (float) super.anInt8888;
@@ -243,26 +243,26 @@ public final class Ground_Sub3 extends Ground {
             local115 = local95 * 3;
             @Pc(452) int local452 = local115 + 1;
             @Pc(456) int local456 = local452 + 1;
-            @Pc(460) int local460 = arg5[local115];
-            @Pc(464) int local464 = arg5[local452];
-            @Pc(468) int local468 = arg5[local456];
-            @Pc(472) int local472 = arg6[local115];
-            @Pc(476) int local476 = arg6[local452];
-            @Pc(480) int local480 = arg6[local456];
+            @Pc(460) int local460 = screenX[local115];
+            @Pc(464) int local464 = screenX[local452];
+            @Pc(468) int local468 = screenX[local456];
+            @Pc(472) int local472 = screenY[local115];
+            @Pc(476) int local476 = screenY[local452];
+            @Pc(480) int local480 = screenY[local456];
             if ((local460 - local464) * (local480 - local476) - (local472 - local476) * (local468 - local464) > 0) {
-                arg4.clamp = local460 < 0 || local464 < 0 || local468 < 0 || local460 > arg4.width || local464 > arg4.width || local468 > arg4.width;
-                if (arg8[local115] + arg8[local452] + arg8[local456] < 765) {
-                    @Pc(550) int local550 = arg0 << super.anInt8895;
-                    @Pc(555) int local555 = arg1 << super.anInt8895;
+                rasterizer.clamp = local460 < 0 || local464 < 0 || local468 < 0 || local460 > rasterizer.width || local464 > rasterizer.width || local468 > rasterizer.width;
+                if (fogLevels[local115] + fogLevels[local452] + fogLevels[local456] < 765) {
+                    @Pc(550) int local550 = x << super.anInt8895;
+                    @Pc(555) int local555 = z << super.anInt8895;
                     if ((local6.anIntArray646[local115] & 0xFFFFFF) != 0) {
                         if (local6.aShortArray115[local115] == local6.aShortArray115[local452] && local6.aShortArray115[local115] == local6.aShortArray115[local456] && local6.aShortArray118[local115] == local6.aShortArray118[local452] && local6.aShortArray118[local115] == local6.aShortArray118[local456]) {
-                            arg4.renderTexturedTriangle((float) local472, (float) local476, (float) local480, (float) local460, (float) local464, (float) local468, (float) arg7[local115], (float) arg7[local452], (float) arg7[local456], (float) (local550 + local6.aShortArray116[local115]) / (float) local6.aShortArray118[local115], (float) (local550 + local6.aShortArray116[local452]) / (float) local6.aShortArray118[local452], (float) (local550 + local6.aShortArray116[local456]) / (float) local6.aShortArray118[local456], (float) (local555 + local6.aShortArray113[local115]) / (float) local6.aShortArray118[local115], (float) (local555 + local6.aShortArray113[local452]) / (float) local6.aShortArray118[local452], (float) (local555 + local6.aShortArray113[local456]) / (float) local6.aShortArray118[local456], local6.anIntArray646[local115], local6.anIntArray646[local452], local6.anIntArray646[local456], arg3.fogColour, arg8[local115], arg8[local452], arg8[local456], local6.aShortArray115[local115]);
+                            rasterizer.renderTexturedTriangle((float) local472, (float) local476, (float) local480, (float) local460, (float) local464, (float) local468, (float) depths[local115], (float) depths[local452], (float) depths[local456], (float) (local550 + local6.aShortArray116[local115]) / (float) local6.aShortArray118[local115], (float) (local550 + local6.aShortArray116[local452]) / (float) local6.aShortArray118[local452], (float) (local550 + local6.aShortArray116[local456]) / (float) local6.aShortArray118[local456], (float) (local555 + local6.aShortArray113[local115]) / (float) local6.aShortArray118[local115], (float) (local555 + local6.aShortArray113[local452]) / (float) local6.aShortArray118[local452], (float) (local555 + local6.aShortArray113[local456]) / (float) local6.aShortArray118[local456], local6.anIntArray646[local115], local6.anIntArray646[local452], local6.anIntArray646[local456], resource.fogColour, fogLevels[local115], fogLevels[local452], fogLevels[local456], local6.aShortArray115[local115]);
                         } else {
-                            arg4.method5155((float) local472, (float) local476, (float) local480, (float) local460, (float) local464, (float) local468, (float) arg7[local115], (float) arg7[local452], (float) arg7[local456], (float) (local550 + local6.aShortArray116[local115]) / local441, (float) (local550 + local6.aShortArray116[local452]) / local441, (float) (local550 + local6.aShortArray116[local456]) / local441, (float) (local555 + local6.aShortArray113[local115]) / local441, (float) (local555 + local6.aShortArray113[local452]) / local441, (float) (local555 + local6.aShortArray113[local456]) / local441, local6.anIntArray646[local115], local6.anIntArray646[local452], local6.anIntArray646[local456], arg3.fogColour, arg8[local115], arg8[local452], arg8[local456], local6.aShortArray115[local115], local441 / (float) local6.aShortArray118[local115], local6.aShortArray115[local452], local441 / (float) local6.aShortArray118[local452], local6.aShortArray115[local456], local441 / (float) local6.aShortArray118[local456]);
+                            rasterizer.method5155((float) local472, (float) local476, (float) local480, (float) local460, (float) local464, (float) local468, (float) depths[local115], (float) depths[local452], (float) depths[local456], (float) (local550 + local6.aShortArray116[local115]) / local441, (float) (local550 + local6.aShortArray116[local452]) / local441, (float) (local550 + local6.aShortArray116[local456]) / local441, (float) (local555 + local6.aShortArray113[local115]) / local441, (float) (local555 + local6.aShortArray113[local452]) / local441, (float) (local555 + local6.aShortArray113[local456]) / local441, local6.anIntArray646[local115], local6.anIntArray646[local452], local6.anIntArray646[local456], resource.fogColour, fogLevels[local115], fogLevels[local452], fogLevels[local456], local6.aShortArray115[local115], local441 / (float) local6.aShortArray118[local115], local6.aShortArray115[local452], local441 / (float) local6.aShortArray118[local452], local6.aShortArray115[local456], local441 / (float) local6.aShortArray118[local456]);
                         }
                     }
                 } else {
-                    arg4.renderFlatTriangleRgb((float) local472, (float) local476, (float) local480, (float) local460, (float) local464, (float) local468, (float) arg7[local115], (float) arg7[local452], (float) arg7[local456], arg3.fogColour);
+                    rasterizer.renderFlatTriangleRgb((float) local472, (float) local476, (float) local480, (float) local460, (float) local464, (float) local468, (float) depths[local115], (float) depths[local452], (float) depths[local456], resource.fogColour);
                 }
             }
         }
@@ -270,21 +270,21 @@ public final class Ground_Sub3 extends Ground {
 
     @OriginalMember(owner = "client!qs", name = "a", descriptor = "(II)V")
     @Override
-    public void method7875(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) {
-        this.method7168(arg0, arg1, 0);
+    public void method7875(@OriginalArg(0) int x, @OriginalArg(1) int z) {
+        this.renderTile(x, z, 0);
     }
 
     @OriginalMember(owner = "client!qs", name = "YA", descriptor = "()V")
     @Override
     public void YA() {
-        this.aByteArrayArray31 = null;
-        this.aByteArrayArray30 = null;
+        this.lightLevels = null;
+        this.shadowLevels = null;
     }
 
     @OriginalMember(owner = "client!qs", name = "U", descriptor = "(II[I[I[I[I[I[I[I[IIIIZ)V")
     @Override
-    public void U(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int[] arg2, @OriginalArg(3) int[] arg3, @OriginalArg(4) int[] arg4, @OriginalArg(5) int[] arg5, @OriginalArg(6) int[] arg6, @OriginalArg(7) int[] arg7, @OriginalArg(8) int[] arg8, @OriginalArg(9) int[] arg9, @OriginalArg(10) int arg10, @OriginalArg(11) int arg11, @OriginalArg(12) int arg12, @OriginalArg(13) boolean arg13) {
-        @Pc(9) boolean allTexturesEnabled = (this.anInt8146 & 0x20) == 0;
+    public void U(@OriginalArg(0) int x, @OriginalArg(1) int z, @OriginalArg(2) int[] offsetX, @OriginalArg(3) int[] offsetLevel, @OriginalArg(4) int[] offsetY, @OriginalArg(5) int[] waterDepths, @OriginalArg(6) int[] blendedColours, @OriginalArg(7) int[] overlayBlendColours, @OriginalArg(8) int[] blendedTextures, @OriginalArg(9) int[] blendedSizes, @OriginalArg(10) int waterColour, @OriginalArg(11) int waterDepth, @OriginalArg(12) int waterBias, @OriginalArg(13) boolean allowShadow) {
+        @Pc(9) boolean allTexturesEnabled = (this.featureFlags & 0x20) == 0;
 
         if (this.simpleBlendedTiles == null && !allTexturesEnabled) {
             this.simpleBlendedTiles = new JavaSimpleBlendedTile[super.anInt8894][super.anInt8892];
@@ -295,24 +295,24 @@ public final class Ground_Sub3 extends Ground {
             throw new IllegalStateException();
         }
 
-        if (arg2 == null || arg2.length == 0) {
+        if (offsetX == null || offsetX.length == 0) {
             return;
         }
 
-        for (@Pc(67) int local67 = 0; local67 < arg6.length; local67++) {
-            if (arg6[local67] == -1) {
-                arg6[local67] = 0;
+        for (@Pc(67) int local67 = 0; local67 < blendedColours.length; local67++) {
+            if (blendedColours[local67] == -1) {
+                blendedColours[local67] = 0;
             } else {
-                arg6[local67] = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(arg6[local67]) & 0xFFFF] << 8 | 0xFF;
+                blendedColours[local67] = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(blendedColours[local67]) & 0xFFFF] << 8 | 0xFF;
             }
         }
 
-        if (arg7 != null) {
-            for (@Pc(106) int local106 = 0; local106 < arg7.length; local106++) {
-                if (arg7[local106] == -1) {
-                    arg7[local106] = 0;
+        if (overlayBlendColours != null) {
+            for (@Pc(106) int local106 = 0; local106 < overlayBlendColours.length; local106++) {
+                if (overlayBlendColours[local106] == -1) {
+                    overlayBlendColours[local106] = 0;
                 } else {
-                    arg7[local106] = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(arg7[local106]) & 0xFFFF] << 8 | 0xFF;
+                    overlayBlendColours[local106] = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(overlayBlendColours[local106]) & 0xFFFF] << 8 | 0xFF;
                 }
             }
         }
@@ -327,8 +327,8 @@ public final class Ground_Sub3 extends Ground {
         @Pc(530) int local530;
         if (allTexturesEnabled) {
             @Pc(147) JavaGenericBlendedTile tile = new JavaGenericBlendedTile();
-            tile.aShort110 = (short) arg2.length;
-            tile.aShort109 = (short) (arg2.length / 3);
+            tile.aShort110 = (short) offsetX.length;
+            tile.aShort109 = (short) (offsetX.length / 3);
             tile.aShortArray116 = new short[tile.aShort110];
             tile.aShortArray117 = new short[tile.aShort110];
             tile.aShortArray113 = new short[tile.aShort110];
@@ -337,49 +337,49 @@ public final class Ground_Sub3 extends Ground {
             tile.aShortArray118 = new short[tile.aShort110];
             tile.aByteArray92 = new byte[tile.aShort110];
 
-            if (arg5 != null) {
+            if (waterDepths != null) {
                 tile.aShortArray114 = new short[tile.aShort110];
             }
 
             for (local205 = 0; local205 < tile.aShort110; local205++) {
-                local210 = arg2[local205];
-                local214 = arg4[local205];
+                local210 = offsetX[local205];
+                local214 = offsetY[local205];
                 if (local210 == 0 && local214 == 0) {
-                    local236 = this.aByteArrayArray31[arg0][arg1] - this.aByteArrayArray30[arg0][arg1];
+                    local236 = this.lightLevels[x][z] - this.shadowLevels[x][z];
                 } else if (local210 == 0 && local214 == super.anInt8888) {
-                    local236 = this.aByteArrayArray31[arg0][arg1 + 1] - this.aByteArrayArray30[arg0][arg1 + 1];
+                    local236 = this.lightLevels[x][z + 1] - this.shadowLevels[x][z + 1];
                 } else if (local210 == super.anInt8888 && local214 == super.anInt8888) {
-                    local236 = this.aByteArrayArray31[arg0 + 1][arg1 + 1] - this.aByteArrayArray30[arg0 + 1][arg1 + 1];
+                    local236 = this.lightLevels[x + 1][z + 1] - this.shadowLevels[x + 1][z + 1];
                 } else if (local210 == super.anInt8888 && local214 == 0) {
-                    local236 = this.aByteArrayArray31[arg0 + 1][arg1] - this.aByteArrayArray30[arg0 + 1][arg1];
+                    local236 = this.lightLevels[x + 1][z] - this.shadowLevels[x + 1][z];
                 } else {
-                    local363 = (this.aByteArrayArray31[arg0][arg1] - this.aByteArrayArray30[arg0][arg1]) * (super.anInt8888 - local210) + (this.aByteArrayArray31[arg0 + 1][arg1] - this.aByteArrayArray30[arg0 + 1][arg1]) * local210;
-                    local410 = (this.aByteArrayArray31[arg0][arg1 + 1] - this.aByteArrayArray30[arg0][arg1 + 1]) * (super.anInt8888 - local210) + (this.aByteArrayArray31[arg0 + 1][arg1 + 1] - this.aByteArrayArray30[arg0 + 1][arg1 + 1]) * local210;
+                    local363 = (this.lightLevels[x][z] - this.shadowLevels[x][z]) * (super.anInt8888 - local210) + (this.lightLevels[x + 1][z] - this.shadowLevels[x + 1][z]) * local210;
+                    local410 = (this.lightLevels[x][z + 1] - this.shadowLevels[x][z + 1]) * (super.anInt8888 - local210) + (this.lightLevels[x + 1][z + 1] - this.shadowLevels[x + 1][z + 1]) * local210;
                     local236 = local363 * (super.anInt8888 - local214) + local410 * local214 >> super.anInt8895 * 2;
                 }
 
-                local363 = (arg0 << super.anInt8895) + local210;
-                local410 = (arg1 << super.anInt8895) + local214;
+                local363 = (x << super.anInt8895) + local210;
+                local410 = (z << super.anInt8895) + local214;
 
                 tile.aShortArray116[local205] = (short) local210;
                 tile.aShortArray113[local205] = (short) local214;
-                tile.aShortArray117[local205] = (short) (this.averageHeight(local363, local410) + (arg3 == null ? 0 : arg3[local205]));
+                tile.aShortArray117[local205] = (short) (this.averageHeight(local363, local410) + (offsetLevel == null ? 0 : offsetLevel[local205]));
 
                 if (local236 < 0) {
                     local236 = 0;
                 }
 
-                if (arg6[local205] == 0) {
+                if (blendedColours[local205] == 0) {
                     tile.anIntArray646[local205] = 0;
-                    if (arg7 != null) {
+                    if (overlayBlendColours != null) {
                         tile.aByteArray92[local205] = (byte) local236;
                     }
                 } else {
                     local498 = 0;
-                    if (arg5 != null) {
-                        @Pc(510) short local510 = tile.aShortArray114[local205] = (short) arg5[local205];
-                        if (arg11 != 0) {
-                            local498 = local510 * 255 / arg11;
+                    if (waterDepths != null) {
+                        @Pc(510) short local510 = tile.aShortArray114[local205] = (short) waterDepths[local205];
+                        if (waterDepth != 0) {
+                            local498 = local510 * 255 / waterDepth;
                             if (local498 < 0) {
                                 local498 = 0;
                             } else if (local498 > 255) {
@@ -389,33 +389,33 @@ public final class Ground_Sub3 extends Ground {
                     }
 
                     local530 = -16777216;
-                    if (arg8[local205] != -1 && this.method7162(this.aClass19_Sub2_8.textureSource.getMetrics(arg8[local205]).effectType)) {
+                    if (blendedTextures[local205] != -1 && this.isWaterEffect(this.toolkit.textureSource.getMetrics(blendedTextures[local205]).effectType)) {
                         local530 = -1694498816;
                     }
 
-                    tile.anIntArray646[local205] = local530 | Static572.method7867(arg10, Static732.method7167(arg6[local205] >> 8, local236), local498);
-                    if (arg7 != null) {
+                    tile.anIntArray646[local205] = local530 | Static572.lerpRgb(waterColour, Static732.scaleRgb(blendedColours[local205] >> 8, local236), local498);
+                    if (overlayBlendColours != null) {
                         tile.aByteArray92[local205] = (byte) local236;
                     }
                 }
 
-                tile.aShortArray115[local205] = (short) arg8[local205];
-                tile.aShortArray118[local205] = (short) arg9[local205];
+                tile.aShortArray115[local205] = (short) blendedTextures[local205];
+                tile.aShortArray118[local205] = (short) blendedSizes[local205];
             }
 
-            if (arg7 != null) {
+            if (overlayBlendColours != null) {
                 tile.anIntArray647 = new int[tile.aShort109];
             }
 
             for (local210 = 0; local210 < tile.aShort109; local210++) {
                 local214 = local210 * 3;
 
-                if (arg7 != null && arg7[local214] != 0) {
-                    tile.anIntArray647[local210] = arg7[local214] >> 8 | 0xFF000000;
+                if (overlayBlendColours != null && overlayBlendColours[local214] != 0) {
+                    tile.anIntArray647[local210] = overlayBlendColours[local214] >> 8 | 0xFF000000;
                 }
             }
 
-            this.genericBlendedTiles[arg0][arg1] = tile;
+            this.genericBlendedTiles[x][z] = tile;
             return;
         }
 
@@ -425,31 +425,31 @@ public final class Ground_Sub3 extends Ground {
         local214 = -1;
         local236 = -1;
 
-        if (arg2.length == 6) {
+        if (offsetX.length == 6) {
             for (local363 = 0; local363 < 6; local363++) {
-                if (arg2[local363] == 0 && arg4[local363] == 0) {
-                    if (local205 != -1 && arg6[local205] != arg6[local363]) {
+                if (offsetX[local363] == 0 && offsetY[local363] == 0) {
+                    if (local205 != -1 && blendedColours[local205] != blendedColours[local363]) {
                         local654 = false;
                         break;
                     }
 
                     local205 = local363;
-                } else if (arg2[local363] == super.anInt8888 && arg4[local363] == 0) {
-                    if (local210 != -1 && arg6[local210] != arg6[local363]) {
+                } else if (offsetX[local363] == super.anInt8888 && offsetY[local363] == 0) {
+                    if (local210 != -1 && blendedColours[local210] != blendedColours[local363]) {
                         local654 = false;
                         break;
                     }
 
                     local210 = local363;
-                } else if (arg2[local363] == super.anInt8888 && arg4[local363] == super.anInt8888) {
-                    if (local214 != -1 && arg6[local214] != arg6[local363]) {
+                } else if (offsetX[local363] == super.anInt8888 && offsetY[local363] == super.anInt8888) {
+                    if (local214 != -1 && blendedColours[local214] != blendedColours[local363]) {
                         local654 = false;
                         break;
                     }
 
                     local214 = local363;
-                } else if (arg2[local363] == 0 && arg4[local363] == super.anInt8888) {
-                    if (local236 != -1 && arg6[local236] != arg6[local363]) {
+                } else if (offsetX[local363] == 0 && offsetY[local363] == super.anInt8888) {
+                    if (local236 != -1 && blendedColours[local236] != blendedColours[local363]) {
                         local654 = false;
                         break;
                     }
@@ -463,9 +463,9 @@ public final class Ground_Sub3 extends Ground {
             }
 
             if (local654) {
-                if (arg3 != null) {
+                if (offsetLevel != null) {
                     for (local410 = 0; local410 < 4; local410++) {
-                        if (arg3[local410] != 0) {
+                        if (offsetLevel[local410] != 0) {
                             local654 = false;
                             break;
                         }
@@ -474,12 +474,12 @@ public final class Ground_Sub3 extends Ground {
 
                 if (local654) {
                     for (local410 = 1; local410 < 4; local410++) {
-                        if (arg2[local410] != arg2[0] && arg2[local410] != arg2[0] + super.anInt8888 && arg2[local410] != arg2[0] - super.anInt8888) {
+                        if (offsetX[local410] != offsetX[0] && offsetX[local410] != offsetX[0] + super.anInt8888 && offsetX[local410] != offsetX[0] - super.anInt8888) {
                             local654 = false;
                             break;
                         }
 
-                        if (arg4[local410] != arg4[0] && arg4[local410] != arg4[0] + super.anInt8888 && arg4[local410] != arg4[0] - super.anInt8888) {
+                        if (offsetY[local410] != offsetY[0] && offsetY[local410] != offsetY[0] + super.anInt8888 && offsetY[local410] != offsetY[0] - super.anInt8888) {
                             local654 = false;
                             break;
                         }
@@ -492,13 +492,13 @@ public final class Ground_Sub3 extends Ground {
 
         if (!local654) {
             @Pc(1760) JavaComplexBlendedTile local1760 = new JavaComplexBlendedTile();
-            local1760.aShort128 = (short) arg2.length;
-            local1760.aShort129 = (short) (arg2.length / 3);
+            local1760.aShort128 = (short) offsetX.length;
+            local1760.aShort129 = (short) (offsetX.length / 3);
             local1760.aShortArray142 = new short[local1760.aShort128];
             local1760.aShortArray143 = new short[local1760.aShort128];
             local1760.aShortArray141 = new short[local1760.aShort128];
             local1760.anIntArray802 = new int[local1760.aShort128];
-            if (arg5 != null) {
+            if (waterDepths != null) {
                 local1760.aShortArray138 = new short[local1760.aShort128];
             }
 
@@ -507,38 +507,38 @@ public final class Ground_Sub3 extends Ground {
             @Pc(2008) int local2008;
             @Pc(2098) int local2098;
             for (local410 = 0; local410 < local1760.aShort128; local410++) {
-                local498 = arg2[local410];
-                local530 = arg4[local410];
+                local498 = offsetX[local410];
+                local530 = offsetY[local410];
 
                 if (local498 == 0 && local530 == 0) {
-                    local1834 = this.aByteArrayArray31[arg0][arg1] - this.aByteArrayArray30[arg0][arg1];
+                    local1834 = this.lightLevels[x][z] - this.shadowLevels[x][z];
                 } else if (local498 == 0 && local530 == super.anInt8888) {
-                    local1834 = this.aByteArrayArray31[arg0][arg1 + 1] - this.aByteArrayArray30[arg0][arg1 + 1];
+                    local1834 = this.lightLevels[x][z + 1] - this.shadowLevels[x][z + 1];
                 } else if (local498 == super.anInt8888 && local530 == super.anInt8888) {
-                    local1834 = this.aByteArrayArray31[arg0 + 1][arg1 + 1] - this.aByteArrayArray30[arg0 + 1][arg1 + 1];
+                    local1834 = this.lightLevels[x + 1][z + 1] - this.shadowLevels[x + 1][z + 1];
                 } else if (local498 == super.anInt8888 && local530 == 0) {
-                    local1834 = this.aByteArrayArray31[arg0 + 1][arg1] - this.aByteArrayArray30[arg0 + 1][arg1];
+                    local1834 = this.lightLevels[x + 1][z] - this.shadowLevels[x + 1][z];
                 } else {
-                    local1961 = (this.aByteArrayArray31[arg0][arg1] - this.aByteArrayArray30[arg0][arg1]) * (super.anInt8888 - local498) + (this.aByteArrayArray31[arg0 + 1][arg1] - this.aByteArrayArray30[arg0 + 1][arg1]) * local498;
-                    local2008 = (this.aByteArrayArray31[arg0][arg1 + 1] - this.aByteArrayArray30[arg0][arg1 + 1]) * (super.anInt8888 - local498) + (this.aByteArrayArray31[arg0 + 1][arg1 + 1] - this.aByteArrayArray30[arg0 + 1][arg1 + 1]) * local498;
+                    local1961 = (this.lightLevels[x][z] - this.shadowLevels[x][z]) * (super.anInt8888 - local498) + (this.lightLevels[x + 1][z] - this.shadowLevels[x + 1][z]) * local498;
+                    local2008 = (this.lightLevels[x][z + 1] - this.shadowLevels[x][z + 1]) * (super.anInt8888 - local498) + (this.lightLevels[x + 1][z + 1] - this.shadowLevels[x + 1][z + 1]) * local498;
                     local1834 = local1961 * (super.anInt8888 - local530) + local2008 * local530 >> super.anInt8895 * 2;
                 }
 
-                local1961 = (arg0 << super.anInt8895) + local498;
-                local2008 = (arg1 << super.anInt8895) + local530;
+                local1961 = (x << super.anInt8895) + local498;
+                local2008 = (z << super.anInt8895) + local530;
                 local1760.aShortArray142[local410] = (short) local498;
                 local1760.aShortArray141[local410] = (short) local530;
-                local1760.aShortArray143[local410] = (short) (this.averageHeight(local1961, local2008) + (arg3 == null ? 0 : arg3[local410]));
+                local1760.aShortArray143[local410] = (short) (this.averageHeight(local1961, local2008) + (offsetLevel == null ? 0 : offsetLevel[local410]));
                 if (local1834 < 0) {
                     local1834 = 0;
                 }
 
-                if (arg6[local410] != 0) {
+                if (blendedColours[local410] != 0) {
                     local2098 = 0;
-                    if (arg5 != null) {
-                        @Pc(2110) short local2110 = local1760.aShortArray138[local410] = (short) arg5[local410];
-                        if (arg11 != 0) {
-                            local2098 = local2110 * 255 / arg11;
+                    if (waterDepths != null) {
+                        @Pc(2110) short local2110 = local1760.aShortArray138[local410] = (short) waterDepths[local410];
+                        if (waterDepth != 0) {
+                            local2098 = local2110 * 255 / waterDepth;
                             if (local2098 < 0) {
                                 local2098 = 0;
                             } else if (local2098 > 255) {
@@ -547,11 +547,11 @@ public final class Ground_Sub3 extends Ground {
                         }
                     }
 
-                    local1760.anIntArray802[local410] = Static572.method7867(arg10, Static732.method7167(arg6[local410] >> 8, local1834), local2098);
-                    if (arg7 != null) {
+                    local1760.anIntArray802[local410] = Static572.lerpRgb(waterColour, Static732.scaleRgb(blendedColours[local410] >> 8, local1834), local2098);
+                    if (overlayBlendColours != null) {
                         local1760.anIntArray802[local410] |= local1834 << 25;
                     }
-                } else if (arg7 == null) {
+                } else if (overlayBlendColours == null) {
                     local1760.anIntArray802[local410] = 0;
                 } else {
                     local1760.anIntArray802[local410] = local1834 << 25;
@@ -560,12 +560,12 @@ public final class Ground_Sub3 extends Ground {
 
             @Pc(2164) boolean local2164 = false;
             for (local530 = 0; local530 < local1760.aShort129; local530++) {
-                if (arg8[local530 * 3] != -1 && !this.aClass19_Sub2_8.textureSource.getMetrics(arg8[local530 * 3]).disableable) {
+                if (blendedTextures[local530 * 3] != -1 && !this.toolkit.textureSource.getMetrics(blendedTextures[local530 * 3]).disableable) {
                     local2164 = true;
                 }
             }
 
-            if (arg7 != null) {
+            if (overlayBlendColours != null) {
                 local1760.anIntArray801 = new int[local1760.aShort129];
             }
 
@@ -576,8 +576,8 @@ public final class Ground_Sub3 extends Ground {
 
             for (local1834 = 0; local1834 < local1760.aShort129; local1834++) {
                 local1961 = local1834 * 3;
-                if (arg7 != null && arg7[local1961] != 0) {
-                    local1760.anIntArray801[local1834] = arg7[local1961] >> 8;
+                if (overlayBlendColours != null && overlayBlendColours[local1961] != 0) {
+                    local1760.anIntArray801[local1834] = overlayBlendColours[local1961] >> 8;
                 }
 
                 if (local2164) {
@@ -585,22 +585,22 @@ public final class Ground_Sub3 extends Ground {
                     local2098 = local2008 + 1;
                     @Pc(2258) boolean local2258 = false;
                     @Pc(2260) boolean local2260 = true;
-                    @Pc(2264) int local2264 = arg8[local1961];
-                    if (local2264 == -1 || this.aClass19_Sub2_8.textureSource.getMetrics(local2264).disableable) {
+                    @Pc(2264) int local2264 = blendedTextures[local1961];
+                    if (local2264 == -1 || this.toolkit.textureSource.getMetrics(local2264).disableable) {
                         local2260 = false;
                     } else {
                         local2258 = true;
                     }
 
-                    local2264 = arg8[local2008];
-                    if (local2264 == -1 || this.aClass19_Sub2_8.textureSource.getMetrics(local2264).disableable) {
+                    local2264 = blendedTextures[local2008];
+                    if (local2264 == -1 || this.toolkit.textureSource.getMetrics(local2264).disableable) {
                         local2260 = false;
                     } else {
                         local2258 = true;
                     }
 
-                    local2264 = arg8[local2098];
-                    if (local2264 == -1 || this.aClass19_Sub2_8.textureSource.getMetrics(local2264).disableable) {
+                    local2264 = blendedTextures[local2098];
+                    if (local2264 == -1 || this.toolkit.textureSource.getMetrics(local2264).disableable) {
                         local2260 = false;
                     } else {
                         local2258 = true;
@@ -608,20 +608,20 @@ public final class Ground_Sub3 extends Ground {
 
                     if (local2260) {
                         local1760.aShortArray139[local1834] = (short) local2264;
-                        local1760.aShortArray140[local1834] = (short) arg9[local1961];
+                        local1760.aShortArray140[local1834] = (short) blendedSizes[local1961];
                     } else {
                         if (local2258) {
-                            local2264 = arg8[local1961];
-                            if (local2264 != -1 && !this.aClass19_Sub2_8.textureSource.getMetrics(local2264).disableable) {
-                                local1760.anIntArray802[local1961] = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(this.aClass19_Sub2_8.textureSource.getMetrics(local2264).aShort37 & 0xFFFF) & 0xFFFF];
+                            local2264 = blendedTextures[local1961];
+                            if (local2264 != -1 && !this.toolkit.textureSource.getMetrics(local2264).disableable) {
+                                local1760.anIntArray802[local1961] = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(this.toolkit.textureSource.getMetrics(local2264).aShort37 & 0xFFFF) & 0xFFFF];
                             }
-                            local2264 = arg8[local2008];
-                            if (local2264 != -1 && !this.aClass19_Sub2_8.textureSource.getMetrics(local2264).disableable) {
-                                local1760.anIntArray802[local2008] = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(this.aClass19_Sub2_8.textureSource.getMetrics(local2264).aShort37 & 0xFFFF) & 0xFFFF];
+                            local2264 = blendedTextures[local2008];
+                            if (local2264 != -1 && !this.toolkit.textureSource.getMetrics(local2264).disableable) {
+                                local1760.anIntArray802[local2008] = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(this.toolkit.textureSource.getMetrics(local2264).aShort37 & 0xFFFF) & 0xFFFF];
                             }
-                            local2264 = arg8[local2098];
-                            if (local2264 != -1 && !this.aClass19_Sub2_8.textureSource.getMetrics(local2264).disableable) {
-                                local1760.anIntArray802[local2098] = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(this.aClass19_Sub2_8.textureSource.getMetrics(local2264).aShort37 & 0xFFFF) & 0xFFFF];
+                            local2264 = blendedTextures[local2098];
+                            if (local2264 != -1 && !this.toolkit.textureSource.getMetrics(local2264).disableable) {
+                                local1760.anIntArray802[local2098] = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(this.toolkit.textureSource.getMetrics(local2264).aShort37 & 0xFFFF) & 0xFFFF];
                             }
                         }
                         local1760.aShortArray139[local1834] = -1;
@@ -629,16 +629,16 @@ public final class Ground_Sub3 extends Ground {
                 }
             }
 
-            this.complexBlendedTiles[arg0][arg1] = local1760;
+            this.complexBlendedTiles[x][z] = local1760;
             return;
         }
 
         @Pc(931) JavaSimpleBlendedTile local931 = new JavaSimpleBlendedTile();
-        local410 = arg6[0];
-        local498 = arg8[0];
+        local410 = blendedColours[0];
+        local498 = blendedTextures[0];
 
-        if (arg7 != null) {
-            local931.anInt7770 = arg7[0] >> 8;
+        if (overlayBlendColours != null) {
+            local931.anInt7770 = overlayBlendColours[0] >> 8;
 
             if (local410 == 0) {
                 local931.aByte126 = (byte) (local931.aByte126 | 0x2);
@@ -647,15 +647,15 @@ public final class Ground_Sub3 extends Ground {
             return;
         }
 
-        if (super.tileHeights[arg0][arg1] == super.tileHeights[arg0 + 1][arg1] && super.tileHeights[arg0][arg1] == super.tileHeights[arg0 + 1][arg1 + 1] && super.tileHeights[arg0][arg1] == super.tileHeights[arg0][arg1 + 1]) {
+        if (super.tileHeights[x][z] == super.tileHeights[x + 1][z] && super.tileHeights[x][z] == super.tileHeights[x + 1][z + 1] && super.tileHeights[x][z] == super.tileHeights[x][z + 1]) {
             local931.aByte126 = (byte) (local931.aByte126 | 0x1);
         }
 
-        if (local498 == -1 || (local931.aByte126 & 0x2) != 0 || this.aClass19_Sub2_8.textureSource.getMetrics(local498).disableable) {
-            if (arg5 == null || arg11 == 0) {
+        if (local498 == -1 || (local931.aByte126 & 0x2) != 0 || this.toolkit.textureSource.getMetrics(local498).disableable) {
+            if (waterDepths == null || waterDepth == 0) {
                 local530 = 0;
             } else {
-                local530 = arg5[local205] * 255 / arg11;
+                local530 = waterDepths[local205] * 255 / waterDepth;
 
                 if (local530 < 0) {
                     local530 = 0;
@@ -664,15 +664,15 @@ public final class Ground_Sub3 extends Ground {
                 }
             }
 
-            local931.anInt7768 = Static572.method7867(arg10, Static732.method7167(arg6[local205] >> 8, this.aByteArrayArray31[arg0][arg1] - this.aByteArrayArray30[arg0][arg1]), local530);
+            local931.anInt7768 = Static572.lerpRgb(waterColour, Static732.scaleRgb(blendedColours[local205] >> 8, this.lightLevels[x][z] - this.shadowLevels[x][z]), local530);
             if (local931.anInt7770 != 0) {
-                local931.anInt7768 |= this.aByteArrayArray30[arg0][arg1] + 255 - this.aByteArrayArray31[arg0][arg1] << 25;
+                local931.anInt7768 |= this.shadowLevels[x][z] + 255 - this.lightLevels[x][z] << 25;
             }
 
-            if (arg5 == null || arg11 == 0) {
+            if (waterDepths == null || waterDepth == 0) {
                 local530 = 0;
             } else {
-                local530 = arg5[local210] * 255 / arg11;
+                local530 = waterDepths[local210] * 255 / waterDepth;
 
                 if (local530 < 0) {
                     local530 = 0;
@@ -681,15 +681,15 @@ public final class Ground_Sub3 extends Ground {
                 }
             }
 
-            local931.anInt7771 = Static572.method7867(arg10, Static732.method7167(arg6[local210] >> 8, this.aByteArrayArray31[arg0 + 1][arg1] - this.aByteArrayArray30[arg0 + 1][arg1]), local530);
+            local931.anInt7771 = Static572.lerpRgb(waterColour, Static732.scaleRgb(blendedColours[local210] >> 8, this.lightLevels[x + 1][z] - this.shadowLevels[x + 1][z]), local530);
             if (local931.anInt7770 != 0) {
-                local931.anInt7771 |= this.aByteArrayArray30[arg0 + 1][arg1] + 255 - this.aByteArrayArray31[arg0 + 1][arg1] << 25;
+                local931.anInt7771 |= this.shadowLevels[x + 1][z] + 255 - this.lightLevels[x + 1][z] << 25;
             }
 
-            if (arg5 == null || arg11 == 0) {
+            if (waterDepths == null || waterDepth == 0) {
                 local530 = 0;
             } else {
-                local530 = arg5[local214] * 255 / arg11;
+                local530 = waterDepths[local214] * 255 / waterDepth;
 
                 if (local530 < 0) {
                     local530 = 0;
@@ -698,15 +698,15 @@ public final class Ground_Sub3 extends Ground {
                 }
             }
 
-            local931.anInt7767 = Static572.method7867(arg10, Static732.method7167(arg6[local214] >> 8, this.aByteArrayArray31[arg0 + 1][arg1 + 1] - this.aByteArrayArray30[arg0 + 1][arg1 + 1]), local530);
+            local931.anInt7767 = Static572.lerpRgb(waterColour, Static732.scaleRgb(blendedColours[local214] >> 8, this.lightLevels[x + 1][z + 1] - this.shadowLevels[x + 1][z + 1]), local530);
             if (local931.anInt7770 != 0) {
-                local931.anInt7767 |= this.aByteArrayArray30[arg0 + 1][arg1 + 1] + 255 - this.aByteArrayArray31[arg0 + 1][arg1 + 1] << 25;
+                local931.anInt7767 |= this.shadowLevels[x + 1][z + 1] + 255 - this.lightLevels[x + 1][z + 1] << 25;
             }
 
-            if (arg5 == null || arg11 == 0) {
+            if (waterDepths == null || waterDepth == 0) {
                 local530 = 0;
             } else {
-                local530 = arg5[local236] * 255 / arg11;
+                local530 = waterDepths[local236] * 255 / waterDepth;
                 if (local530 < 0) {
                     local530 = 0;
                 } else if (local530 > 255) {
@@ -714,17 +714,17 @@ public final class Ground_Sub3 extends Ground {
                 }
             }
 
-            local931.anInt7769 = Static572.method7867(arg10, Static732.method7167(arg6[local236] >> 8, this.aByteArrayArray31[arg0][arg1 + 1] - this.aByteArrayArray30[arg0][arg1 + 1]), local530);
+            local931.anInt7769 = Static572.lerpRgb(waterColour, Static732.scaleRgb(blendedColours[local236] >> 8, this.lightLevels[x][z + 1] - this.shadowLevels[x][z + 1]), local530);
             if (local931.anInt7770 != 0) {
-                local931.anInt7769 |= this.aByteArrayArray30[arg0][arg1 + 1] + 255 - this.aByteArrayArray31[arg0][arg1 + 1] << 25;
+                local931.anInt7769 |= this.shadowLevels[x][z + 1] + 255 - this.lightLevels[x][z + 1] << 25;
             }
 
             local931.aShort105 = -1;
         } else {
-            if (arg5 == null || arg11 == 0) {
+            if (waterDepths == null || waterDepth == 0) {
                 local530 = 0;
             } else {
-                local530 = arg5[local205] * 255 / arg11;
+                local530 = waterDepths[local205] * 255 / waterDepth;
 
                 if (local530 < 0) {
                     local530 = 0;
@@ -733,15 +733,15 @@ public final class Ground_Sub3 extends Ground {
                 }
             }
 
-            local931.anInt7768 = Static572.method7867(arg10, Static732.method7167(arg6[local205] >> 8, this.aByteArrayArray31[arg0][arg1] - this.aByteArrayArray30[arg0][arg1]), local530);
+            local931.anInt7768 = Static572.lerpRgb(waterColour, Static732.scaleRgb(blendedColours[local205] >> 8, this.lightLevels[x][z] - this.shadowLevels[x][z]), local530);
             if (local931.anInt7770 != 0) {
-                local931.anInt7768 |= this.aByteArrayArray30[arg0][arg1] + 255 - this.aByteArrayArray31[arg0][arg1] << 25;
+                local931.anInt7768 |= this.shadowLevels[x][z] + 255 - this.lightLevels[x][z] << 25;
             }
 
-            if (arg5 == null || arg11 == 0) {
+            if (waterDepths == null || waterDepth == 0) {
                 local530 = 0;
             } else {
-                local530 = arg5[local210] * 255 / arg11;
+                local530 = waterDepths[local210] * 255 / waterDepth;
                 if (local530 < 0) {
                     local530 = 0;
                 } else if (local530 > 255) {
@@ -749,15 +749,15 @@ public final class Ground_Sub3 extends Ground {
                 }
             }
 
-            local931.anInt7771 = Static572.method7867(arg10, Static732.method7167(arg6[local210] >> 8, this.aByteArrayArray31[arg0 + 1][arg1] - this.aByteArrayArray30[arg0 + 1][arg1]), local530);
+            local931.anInt7771 = Static572.lerpRgb(waterColour, Static732.scaleRgb(blendedColours[local210] >> 8, this.lightLevels[x + 1][z] - this.shadowLevels[x + 1][z]), local530);
             if (local931.anInt7770 != 0) {
-                local931.anInt7771 |= this.aByteArrayArray30[arg0 + 1][arg1] + 255 - this.aByteArrayArray31[arg0 + 1][arg1] << 25;
+                local931.anInt7771 |= this.shadowLevels[x + 1][z] + 255 - this.lightLevels[x + 1][z] << 25;
             }
 
-            if (arg5 == null || arg11 == 0) {
+            if (waterDepths == null || waterDepth == 0) {
                 local530 = 0;
             } else {
-                local530 = arg5[local214] * 255 / arg11;
+                local530 = waterDepths[local214] * 255 / waterDepth;
                 if (local530 < 0) {
                     local530 = 0;
                 } else if (local530 > 255) {
@@ -765,15 +765,15 @@ public final class Ground_Sub3 extends Ground {
                 }
             }
 
-            local931.anInt7767 = Static572.method7867(arg10, Static732.method7167(arg6[local214] >> 8, this.aByteArrayArray31[arg0 + 1][arg1 + 1] - this.aByteArrayArray30[arg0 + 1][arg1 + 1]), local530);
+            local931.anInt7767 = Static572.lerpRgb(waterColour, Static732.scaleRgb(blendedColours[local214] >> 8, this.lightLevels[x + 1][z + 1] - this.shadowLevels[x + 1][z + 1]), local530);
             if (local931.anInt7770 != 0) {
-                local931.anInt7767 |= this.aByteArrayArray30[arg0 + 1][arg1 + 1] + 255 - this.aByteArrayArray31[arg0 + 1][arg1 + 1] << 25;
+                local931.anInt7767 |= this.shadowLevels[x + 1][z + 1] + 255 - this.lightLevels[x + 1][z + 1] << 25;
             }
 
-            if (arg5 == null || arg11 == 0) {
+            if (waterDepths == null || waterDepth == 0) {
                 local530 = 0;
             } else {
-                local530 = arg5[local236] * 255 / arg11;
+                local530 = waterDepths[local236] * 255 / waterDepth;
 
                 if (local530 < 0) {
                     local530 = 0;
@@ -782,86 +782,86 @@ public final class Ground_Sub3 extends Ground {
                 }
             }
 
-            local931.anInt7769 = Static572.method7867(arg10, Static732.method7167(arg6[local236] >> 8, this.aByteArrayArray31[arg0][arg1 + 1] - this.aByteArrayArray30[arg0][arg1 + 1]), local530);
+            local931.anInt7769 = Static572.lerpRgb(waterColour, Static732.scaleRgb(blendedColours[local236] >> 8, this.lightLevels[x][z + 1] - this.shadowLevels[x][z + 1]), local530);
             local931.aShort105 = (short) local498;
         }
 
-        if (arg5 != null) {
-            local931.aShort106 = (short) arg5[local214];
-            local931.aShort104 = (short) arg5[local236];
-            local931.aShort103 = (short) arg5[local210];
-            local931.aShort107 = (short) arg5[local205];
+        if (waterDepths != null) {
+            local931.aShort106 = (short) waterDepths[local214];
+            local931.aShort104 = (short) waterDepths[local236];
+            local931.aShort103 = (short) waterDepths[local210];
+            local931.aShort107 = (short) waterDepths[local205];
         }
 
-        this.simpleBlendedTiles[arg0][arg1] = local931;
+        this.simpleBlendedTiles[x][z] = local931;
     }
 
     @OriginalMember(owner = "client!qs", name = "a", descriptor = "(I)Z")
-    public boolean method7162(@OriginalArg(0) int arg0) {
-        if ((this.anInt8146 & 0x8) == 0) {
+    public boolean isWaterEffect(@OriginalArg(0) int effectType) {
+        if ((this.featureFlags & 0x8) == 0) {
             return false;
-        } else if (arg0 == 4) {
+        } else if (effectType == 4) {
             return true;
-        } else if (arg0 == 8) {
+        } else if (effectType == 8) {
             return true;
         } else {
-            return arg0 == 9;
+            return effectType == 9;
         }
     }
 
     @OriginalMember(owner = "client!qs", name = "a", descriptor = "(IIIIIII[[ZLclient!wf;Lclient!lb;[I[I)V")
-    public void method7163(@OriginalArg(3) int arg0, @OriginalArg(4) int arg1, @OriginalArg(5) int arg2, @OriginalArg(6) int arg3, @OriginalArg(7) boolean[][] arg4, @OriginalArg(8) JavaThreadResource arg5, @OriginalArg(9) Rasterizer arg6, @OriginalArg(10) int[] arg7, @OriginalArg(11) int[] arg8) {
-        @Pc(7) int local7 = (arg3 - arg1) * 1024 / 256;
-        @Pc(14) boolean local14 = arg5.zWrite;
-        this.aClass19_Sub2_8.C(false);
-        arg6.fastScanline = false;
-        arg6.halfBlend = false;
+    public void drawUnblendedMinimapTiles(@OriginalArg(3) int x1, @OriginalArg(4) int z1, @OriginalArg(5) int x2, @OriginalArg(6) int z2, @OriginalArg(7) boolean[][] visibility, @OriginalArg(8) JavaThreadResource resource, @OriginalArg(9) Rasterizer rasterizer, @OriginalArg(10) int[] screenX, @OriginalArg(11) int[] screenY) {
+        @Pc(7) int local7 = (z2 - z1) * 1024 / 256;
+        @Pc(14) boolean local14 = resource.zWrite;
+        this.toolkit.C(false);
+        rasterizer.fastScanline = false;
+        rasterizer.halfBlend = false;
         @Pc(26) int local26 = 0;
         @Pc(30) int local30 = local7;
-        for (@Pc(32) int local32 = arg0; local32 < arg2; local32++) {
-            for (@Pc(35) int local35 = arg1; local35 < arg3; local35++) {
-                if (arg4[local32 - arg0][local35 - arg1]) {
+        for (@Pc(32) int local32 = x1; local32 < x2; local32++) {
+            for (@Pc(35) int local35 = z1; local35 < z2; local35++) {
+                if (visibility[local32 - x1][local35 - z1]) {
                     @Pc(85) int local85;
                     if (this.simpleTiles[local32][local35] != null) {
-                        @Pc(62) Class127 local62 = this.simpleTiles[local32][local35];
-                        if (local62.aShort38 != -1 && (local62.aByte59 & 0x2) == 0 && local62.anInt2898 == -1) {
-                            local85 = this.aClass19_Sub2_8.method3793(local62.aShort38);
-                            arg6.method5156((float) (local30 - 4), (float) (local30 - 4), (float) local30, (float) (local26 + 4), (float) local26, (float) (local26 + 4), 100.0F, 100.0F, 100.0F, (float) Static244.method3513(local62.aShort41 & 0xFFFF, local85), (float) Static244.method3513(local62.aShort40 & 0xFFFF, local85), (float) Static244.method3513(local62.aShort39 & 0xFFFF, local85));
-                            arg6.method5156((float) local30, (float) local30, (float) (local30 - 4), (float) local26, (float) (local26 + 4), (float) local26, 100.0F, 100.0F, 100.0F, (float) Static244.method3513(local62.aShort42 & 0xFFFF, local85), (float) Static244.method3513(local62.aShort39 & 0xFFFF, local85), (float) Static244.method3513(local62.aShort40 & 0xFFFF, local85));
-                        } else if (local62.anInt2898 == -1) {
-                            arg6.method5156((float) (local30 - 4), (float) (local30 - 4), (float) local30, (float) (local26 + 4), (float) local26, (float) (local26 + 4), 100.0F, 100.0F, 100.0F, (float) (local62.aShort41 & 0xFFFF), (float) (local62.aShort40 & 0xFFFF), (float) (local62.aShort39 & 0xFFFF));
-                            arg6.method5156((float) local30, (float) local30, (float) (local30 - 4), (float) local26, (float) (local26 + 4), (float) local26, 100.0F, 100.0F, 100.0F, (float) (local62.aShort42 & 0xFFFF), (float) (local62.aShort39 & 0xFFFF), (float) (local62.aShort40 & 0xFFFF));
+                        @Pc(62) JavaSimpleTile local62 = this.simpleTiles[local32][local35];
+                        if (local62.texture != -1 && (local62.flags & 0x2) == 0 && local62.blendedColour == -1) {
+                            local85 = this.toolkit.method3793(local62.texture);
+                            rasterizer.method5156((float) (local30 - 4), (float) (local30 - 4), (float) local30, (float) (local26 + 4), (float) local26, (float) (local26 + 4), 100.0F, 100.0F, 100.0F, (float) Static244.scaleHslLightness(local62.hslNe & 0xFFFF, local85), (float) Static244.scaleHslLightness(local62.hslNw & 0xFFFF, local85), (float) Static244.scaleHslLightness(local62.hslSe & 0xFFFF, local85));
+                            rasterizer.method5156((float) local30, (float) local30, (float) (local30 - 4), (float) local26, (float) (local26 + 4), (float) local26, 100.0F, 100.0F, 100.0F, (float) Static244.scaleHslLightness(local62.hslSw & 0xFFFF, local85), (float) Static244.scaleHslLightness(local62.hslSe & 0xFFFF, local85), (float) Static244.scaleHslLightness(local62.hslNw & 0xFFFF, local85));
+                        } else if (local62.blendedColour == -1) {
+                            rasterizer.method5156((float) (local30 - 4), (float) (local30 - 4), (float) local30, (float) (local26 + 4), (float) local26, (float) (local26 + 4), 100.0F, 100.0F, 100.0F, (float) (local62.hslNe & 0xFFFF), (float) (local62.hslNw & 0xFFFF), (float) (local62.hslSe & 0xFFFF));
+                            rasterizer.method5156((float) local30, (float) local30, (float) (local30 - 4), (float) local26, (float) (local26 + 4), (float) local26, 100.0F, 100.0F, 100.0F, (float) (local62.hslSw & 0xFFFF), (float) (local62.hslSe & 0xFFFF), (float) (local62.hslNw & 0xFFFF));
                         } else {
-                            local85 = local62.anInt2898;
-                            arg6.method5156((float) (local30 - 4), (float) (local30 - 4), (float) local30, (float) (local26 + 4), (float) local26, (float) (local26 + 4), 100.0F, 100.0F, 100.0F, (float) local85, (float) local85, (float) local85);
-                            arg6.method5156((float) local30, (float) local30, (float) (local30 - 4), (float) local26, (float) (local26 + 4), (float) local26, 100.0F, 100.0F, 100.0F, (float) local85, (float) local85, (float) local85);
+                            local85 = local62.blendedColour;
+                            rasterizer.method5156((float) (local30 - 4), (float) (local30 - 4), (float) local30, (float) (local26 + 4), (float) local26, (float) (local26 + 4), 100.0F, 100.0F, 100.0F, (float) local85, (float) local85, (float) local85);
+                            rasterizer.method5156((float) local30, (float) local30, (float) (local30 - 4), (float) local26, (float) (local26 + 4), (float) local26, 100.0F, 100.0F, 100.0F, (float) local85, (float) local85, (float) local85);
                         }
-                    } else if (this.aClass107ArrayArray1[local32][local35] != null) {
-                        @Pc(338) Class107 local338 = this.aClass107ArrayArray1[local32][local35];
-                        for (local85 = 0; local85 < local338.aShort34; local85++) {
-                            arg7[local85] = local26 + local338.aShortArray32[local85] * 4 / super.anInt8888;
-                            arg8[local85] = local30 - local338.aShortArray38[local85] * 4 / super.anInt8888;
+                    } else if (this.complexTiles[local32][local35] != null) {
+                        @Pc(338) JavaComplexTile local338 = this.complexTiles[local32][local35];
+                        for (local85 = 0; local85 < local338.vertexCount; local85++) {
+                            screenX[local85] = local26 + local338.verticesX[local85] * 4 / super.anInt8888;
+                            screenY[local85] = local30 - local338.verticesZ[local85] * 4 / super.anInt8888;
                         }
-                        for (@Pc(376) int local376 = 0; local376 < local338.aShort33; local376++) {
-                            @Pc(382) short local382 = local338.aShortArray34[local376];
-                            @Pc(387) short local387 = local338.aShortArray37[local376];
-                            @Pc(392) short local392 = local338.aShortArray36[local376];
-                            @Pc(396) int local396 = arg7[local382];
-                            @Pc(400) int local400 = arg7[local387];
-                            @Pc(404) int local404 = arg7[local392];
-                            @Pc(408) int local408 = arg8[local382];
-                            @Pc(412) int local412 = arg8[local387];
-                            @Pc(416) int local416 = arg8[local392];
+                        for (@Pc(376) int local376 = 0; local376 < local338.faceCount; local376++) {
+                            @Pc(382) short local382 = local338.faceA[local376];
+                            @Pc(387) short local387 = local338.faceB[local376];
+                            @Pc(392) short local392 = local338.faceC[local376];
+                            @Pc(396) int local396 = screenX[local382];
+                            @Pc(400) int local400 = screenX[local387];
+                            @Pc(404) int local404 = screenX[local392];
+                            @Pc(408) int local408 = screenY[local382];
+                            @Pc(412) int local412 = screenY[local387];
+                            @Pc(416) int local416 = screenY[local392];
                             @Pc(432) int local432;
-                            if (local338.anIntArray231 != null && local338.anIntArray231[local376] != -1) {
-                                local432 = local338.anIntArray231[local376];
-                                arg6.method5156((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, (float) Static244.method3513(local338.aShortArray35[local382], local432), (float) Static244.method3513(local338.aShortArray35[local387], local432), (float) Static244.method3513(local338.aShortArray35[local392], local432));
-                            } else if (local338.aShortArray30 == null || local338.aShortArray30[local376] == -1) {
-                                local432 = local338.anIntArray230[local376];
-                                arg6.method5156((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, (float) Static244.method3513(local338.aShortArray35[local382], local432), (float) Static244.method3513(local338.aShortArray35[local387], local432), (float) Static244.method3513(local338.aShortArray35[local392], local432));
+                            if (local338.faceBlendedColours != null && local338.faceBlendedColours[local376] != -1) {
+                                local432 = local338.faceBlendedColours[local376];
+                                rasterizer.method5156((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, (float) Static244.scaleHslLightness(local338.verticesLight[local382], local432), (float) Static244.scaleHslLightness(local338.verticesLight[local387], local432), (float) Static244.scaleHslLightness(local338.verticesLight[local392], local432));
+                            } else if (local338.faceTextures == null || local338.faceTextures[local376] == -1) {
+                                local432 = local338.faceColours[local376];
+                                rasterizer.method5156((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, (float) Static244.scaleHslLightness(local338.verticesLight[local382], local432), (float) Static244.scaleHslLightness(local338.verticesLight[local387], local432), (float) Static244.scaleHslLightness(local338.verticesLight[local392], local432));
                             } else {
-                                local432 = this.aClass19_Sub2_8.method3793(local338.aShortArray30[local376]);
-                                arg6.method5156((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, (float) Static244.method3513(local338.aShortArray35[local382], local432), (float) Static244.method3513(local338.aShortArray35[local387], local432), (float) Static244.method3513(local338.aShortArray35[local392], local432));
+                                local432 = this.toolkit.method3793(local338.faceTextures[local376]);
+                                rasterizer.method5156((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, (float) Static244.scaleHslLightness(local338.verticesLight[local382], local432), (float) Static244.scaleHslLightness(local338.verticesLight[local387], local432), (float) Static244.scaleHslLightness(local338.verticesLight[local392], local432));
                             }
                         }
                     }
@@ -871,22 +871,22 @@ public final class Ground_Sub3 extends Ground {
             local30 = local7;
             local26 += 4;
         }
-        arg6.fastScanline = true;
-        this.aClass19_Sub2_8.C(local14);
+        rasterizer.fastScanline = true;
+        this.toolkit.C(local14);
     }
 
     @OriginalMember(owner = "client!qs", name = "b", descriptor = "(IIIIIII[[ZLclient!wf;Lclient!lb;[I[I)V")
-    public void method7164(@OriginalArg(3) int arg0, @OriginalArg(4) int arg1, @OriginalArg(5) int arg2, @OriginalArg(6) int arg3, @OriginalArg(7) boolean[][] arg4, @OriginalArg(8) JavaThreadResource arg5, @OriginalArg(9) Rasterizer arg6, @OriginalArg(10) int[] arg7, @OriginalArg(11) int[] arg8) {
-        @Pc(7) int local7 = (arg3 - arg1) * 1024 / 256;
-        @Pc(14) boolean local14 = arg5.zWrite;
-        this.aClass19_Sub2_8.C(false);
-        arg6.fastScanline = false;
-        arg6.halfBlend = false;
+    public void drawBlendedMinimapTiles(@OriginalArg(3) int x1, @OriginalArg(4) int z1, @OriginalArg(5) int x2, @OriginalArg(6) int z2, @OriginalArg(7) boolean[][] visibility, @OriginalArg(8) JavaThreadResource resource, @OriginalArg(9) Rasterizer rasterizer, @OriginalArg(10) int[] screenX, @OriginalArg(11) int[] screenY) {
+        @Pc(7) int local7 = (z2 - z1) * 1024 / 256;
+        @Pc(14) boolean local14 = resource.zWrite;
+        this.toolkit.C(false);
+        rasterizer.fastScanline = false;
+        rasterizer.halfBlend = false;
         @Pc(26) int local26 = 0;
         @Pc(30) int local30 = local7;
-        for (@Pc(32) int local32 = arg0; local32 < arg2; local32++) {
-            for (@Pc(35) int local35 = arg1; local35 < arg3; local35++) {
-                if (arg4[local32 - arg0][local35 - arg1]) {
+        for (@Pc(32) int local32 = x1; local32 < x2; local32++) {
+            for (@Pc(35) int local35 = z1; local35 < z2; local35++) {
+                if (visibility[local32 - x1][local35 - z1]) {
                     @Pc(89) int local89;
                     @Pc(379) int local379;
                     @Pc(384) int local384;
@@ -903,65 +903,65 @@ public final class Ground_Sub3 extends Ground {
                         if (this.genericBlendedTiles[local32][local35] != null) {
                             @Pc(593) JavaGenericBlendedTile local593 = this.genericBlendedTiles[local32][local35];
                             for (local89 = 0; local89 < local593.aShort110; local89++) {
-                                arg7[local89] = local26 + local593.aShortArray116[local89] * 4 / super.anInt8888;
-                                arg8[local89] = local30 - local593.aShortArray113[local89] * 4 / super.anInt8888;
+                                screenX[local89] = local26 + local593.aShortArray116[local89] * 4 / super.anInt8888;
+                                screenY[local89] = local30 - local593.aShortArray113[local89] * 4 / super.anInt8888;
                             }
                             for (local379 = 0; local379 < local593.aShort109; local379++) {
                                 local384 = local379 * 3;
                                 local388 = local384 + 1;
                                 local392 = local388 + 1;
-                                local396 = arg7[local384];
-                                local400 = arg7[local388];
-                                local404 = arg7[local392];
-                                local408 = arg8[local384];
-                                local412 = arg8[local388];
-                                local416 = arg8[local392];
+                                local396 = screenX[local384];
+                                local400 = screenX[local388];
+                                local404 = screenX[local392];
+                                local408 = screenY[local384];
+                                local412 = screenY[local388];
+                                local416 = screenY[local392];
                                 if (local593.anIntArray647 == null || local593.anIntArray647[local379] == 0) {
-                                    arg6.renderTriangleRgb((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, local593.anIntArray646[local384], local593.anIntArray646[local388], local593.anIntArray646[local392]);
+                                    rasterizer.renderTriangleRgb((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, local593.anIntArray646[local384], local593.anIntArray646[local388], local593.anIntArray646[local392]);
                                 } else {
                                     local449 = local593.anIntArray647[local379];
-                                    arg6.renderTriangleRgb((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, local449, local449, local449);
+                                    rasterizer.renderTriangleRgb((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, local449, local449, local449);
                                 }
                             }
                         }
                     } else if (this.simpleBlendedTiles[local32][local35] != null) {
                         @Pc(67) JavaSimpleBlendedTile local67 = this.simpleBlendedTiles[local32][local35];
                         if (local67.aShort105 != -1 && (local67.aByte126 & 0x2) == 0 && local67.anInt7770 == 0) {
-                            local89 = this.aClass19_Sub2_8.method3793(local67.aShort105);
-                            arg6.method5156((float) (local30 - 4), (float) (local30 - 4), (float) local30, (float) (local26 + 4), (float) local26, (float) (local26 + 4), 100.0F, 100.0F, 100.0F, (float) Static244.method3513(local67.anInt7767, local89), (float) Static244.method3513(local67.anInt7769, local89), (float) Static244.method3513(local67.anInt7771, local89));
-                            arg6.method5156((float) local30, (float) local30, (float) (local30 - 4), (float) local26, (float) (local26 + 4), (float) local26, 100.0F, 100.0F, 100.0F, (float) Static244.method3513(local67.anInt7768, local89), (float) Static244.method3513(local67.anInt7771, local89), (float) Static244.method3513(local67.anInt7769, local89));
+                            local89 = this.toolkit.method3793(local67.aShort105);
+                            rasterizer.method5156((float) (local30 - 4), (float) (local30 - 4), (float) local30, (float) (local26 + 4), (float) local26, (float) (local26 + 4), 100.0F, 100.0F, 100.0F, (float) Static244.scaleHslLightness(local67.anInt7767, local89), (float) Static244.scaleHslLightness(local67.anInt7769, local89), (float) Static244.scaleHslLightness(local67.anInt7771, local89));
+                            rasterizer.method5156((float) local30, (float) local30, (float) (local30 - 4), (float) local26, (float) (local26 + 4), (float) local26, 100.0F, 100.0F, 100.0F, (float) Static244.scaleHslLightness(local67.anInt7768, local89), (float) Static244.scaleHslLightness(local67.anInt7771, local89), (float) Static244.scaleHslLightness(local67.anInt7769, local89));
                         } else if (local67.anInt7770 == 0) {
-                            arg6.renderTriangleRgb((float) (local30 - 4), (float) (local30 - 4), (float) local30, (float) (local26 + 4), (float) local26, (float) (local26 + 4), 100.0F, 100.0F, 100.0F, local67.anInt7767, local67.anInt7769, local67.anInt7771);
-                            arg6.renderTriangleRgb((float) local30, (float) local30, (float) (local30 - 4), (float) local26, (float) (local26 + 4), (float) local26, 100.0F, 100.0F, 100.0F, local67.anInt7768, local67.anInt7771, local67.anInt7769);
+                            rasterizer.renderTriangleRgb((float) (local30 - 4), (float) (local30 - 4), (float) local30, (float) (local26 + 4), (float) local26, (float) (local26 + 4), 100.0F, 100.0F, 100.0F, local67.anInt7767, local67.anInt7769, local67.anInt7771);
+                            rasterizer.renderTriangleRgb((float) local30, (float) local30, (float) (local30 - 4), (float) local26, (float) (local26 + 4), (float) local26, 100.0F, 100.0F, 100.0F, local67.anInt7768, local67.anInt7771, local67.anInt7769);
                         } else {
                             local89 = local67.anInt7770;
-                            arg6.renderTriangleRgb((float) (local30 - 4), (float) (local30 - 4), (float) local30, (float) (local26 + 4), (float) local26, (float) (local26 + 4), 100.0F, 100.0F, 100.0F, Static462.method6270(local67.anInt7767 & 0xFF000000, local89), Static462.method6270(local67.anInt7769 & 0xFF000000, local89), Static462.method6270(local67.anInt7771 & 0xFF000000, local89));
-                            arg6.renderTriangleRgb((float) local30, (float) local30, (float) (local30 - 4), (float) local26, (float) (local26 + 4), (float) local26, 100.0F, 100.0F, 100.0F, Static462.method6270(local67.anInt7768 & 0xFF000000, local89), Static462.method6270(local67.anInt7771 & 0xFF000000, local89), Static462.method6270(local67.anInt7769 & 0xFF000000, local89));
+                            rasterizer.renderTriangleRgb((float) (local30 - 4), (float) (local30 - 4), (float) local30, (float) (local26 + 4), (float) local26, (float) (local26 + 4), 100.0F, 100.0F, 100.0F, Static462.blendArgb(local67.anInt7767 & 0xFF000000, local89), Static462.blendArgb(local67.anInt7769 & 0xFF000000, local89), Static462.blendArgb(local67.anInt7771 & 0xFF000000, local89));
+                            rasterizer.renderTriangleRgb((float) local30, (float) local30, (float) (local30 - 4), (float) local26, (float) (local26 + 4), (float) local26, 100.0F, 100.0F, 100.0F, Static462.blendArgb(local67.anInt7768 & 0xFF000000, local89), Static462.blendArgb(local67.anInt7771 & 0xFF000000, local89), Static462.blendArgb(local67.anInt7769 & 0xFF000000, local89));
                         }
                     } else if (this.complexBlendedTiles[local32][local35] != null) {
                         @Pc(341) JavaComplexBlendedTile local341 = this.complexBlendedTiles[local32][local35];
                         for (local89 = 0; local89 < local341.aShort128; local89++) {
-                            arg7[local89] = local26 + local341.aShortArray142[local89] * 4 / super.anInt8888;
-                            arg8[local89] = local30 - local341.aShortArray141[local89] * 4 / super.anInt8888;
+                            screenX[local89] = local26 + local341.aShortArray142[local89] * 4 / super.anInt8888;
+                            screenY[local89] = local30 - local341.aShortArray141[local89] * 4 / super.anInt8888;
                         }
                         for (local379 = 0; local379 < local341.aShort129; local379++) {
                             local384 = local379 * 3;
                             local388 = local384 + 1;
                             local392 = local388 + 1;
-                            local396 = arg7[local384];
-                            local400 = arg7[local388];
-                            local404 = arg7[local392];
-                            local408 = arg8[local384];
-                            local412 = arg8[local388];
-                            local416 = arg8[local392];
+                            local396 = screenX[local384];
+                            local400 = screenX[local388];
+                            local404 = screenX[local392];
+                            local408 = screenY[local384];
+                            local412 = screenY[local388];
+                            local416 = screenY[local392];
                             if (local341.anIntArray801 != null && local341.anIntArray801[local379] != 0 && (local341.aShortArray139 == null || local341.aShortArray139 != null && local341.aShortArray139[local379] == -1)) {
                                 local449 = local341.anIntArray801[local379];
-                                arg6.renderTriangleRgb((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, Static462.method6270(-(local341.anIntArray802[local384] & -16777216) - 16777216, local449), Static462.method6270(-(local341.anIntArray802[local388] & -16777216) - 16777216, local449), Static462.method6270(-(local341.anIntArray802[local392] & -16777216) - 16777216, local449));
+                                rasterizer.renderTriangleRgb((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, Static462.blendArgb(-(local341.anIntArray802[local384] & -16777216) - 16777216, local449), Static462.blendArgb(-(local341.anIntArray802[local388] & -16777216) - 16777216, local449), Static462.blendArgb(-(local341.anIntArray802[local392] & -16777216) - 16777216, local449));
                             } else if (local341.aShortArray139 == null || local341.aShortArray139[local379] == -1) {
-                                arg6.renderTriangleRgb((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, local341.anIntArray802[local384], local341.anIntArray802[local388], local341.anIntArray802[local392]);
+                                rasterizer.renderTriangleRgb((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, local341.anIntArray802[local384], local341.anIntArray802[local388], local341.anIntArray802[local392]);
                             } else {
-                                local449 = this.aClass19_Sub2_8.method3793(local341.aShortArray139[local379]);
-                                arg6.method5156((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, (float) local449, (float) local449, (float) local449);
+                                local449 = this.toolkit.method3793(local341.aShortArray139[local379]);
+                                rasterizer.method5156((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, (float) local449, (float) local449, (float) local449);
                             }
                         }
                     }
@@ -971,26 +971,26 @@ public final class Ground_Sub3 extends Ground {
             local30 = local7;
             local26 += 4;
         }
-        arg6.fastScanline = true;
-        this.aClass19_Sub2_8.C(local14);
+        rasterizer.fastScanline = true;
+        this.toolkit.C(local14);
     }
 
     @OriginalMember(owner = "client!qs", name = "a", descriptor = "(IILclient!lb;[I[I[I[II)V")
-    public void method7165(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) Rasterizer arg2, @OriginalArg(3) int[] arg3, @OriginalArg(4) int[] arg4, @OriginalArg(5) int[] arg5, @OriginalArg(6) int[] arg6, @OriginalArg(7) int arg7) {
-        @Pc(6) Class127 local6 = this.simpleTiles[arg0][arg1];
+    public void renderUnblendedTile(@OriginalArg(0) int x, @OriginalArg(1) int z, @OriginalArg(2) Rasterizer rasterizer, @OriginalArg(3) int[] screenX, @OriginalArg(4) int[] screenY, @OriginalArg(5) int[] depths, @OriginalArg(6) int[] arg6, @OriginalArg(7) int skipFlags) {
+        @Pc(6) JavaSimpleTile local6 = this.simpleTiles[x][z];
         @Pc(50) int local50;
         @Pc(60) int local60;
         @Pc(480) int local480;
         @Pc(510) int local510;
         if (local6 == null) {
-            @Pc(2204) Class107 local2204 = this.aClass107ArrayArray1[arg0][arg1];
+            @Pc(2204) JavaComplexTile local2204 = this.complexTiles[x][z];
             if (local2204 != null) {
-                if (arg7 != 0) {
-                    if ((local2204.aByte51 & 0x4) == 0) {
-                        if ((arg7 & 0x2) != 0) {
+                if (skipFlags != 0) {
+                    if ((local2204.flags & 0x4) == 0) {
+                        if ((skipFlags & 0x2) != 0) {
                             return;
                         }
-                    } else if ((arg7 & 0x1) != 0) {
+                    } else if ((skipFlags & 0x1) != 0) {
                         return;
                     }
                 }
@@ -998,32 +998,32 @@ public final class Ground_Sub3 extends Ground {
                 @Pc(2314) float local2314;
                 @Pc(2335) float local2335;
                 @Pc(2284) float local2284;
-                if (this.anInt8145 == -1) {
-                    for (local480 = 0; local480 < local2204.aShort34; local480++) {
-                        local50 = local2204.aShortArray32[local480] + (arg0 << super.anInt8895);
-                        local2253 = local2204.aShortArray33[local480];
-                        local60 = local2204.aShortArray38[local480] + (arg1 << super.anInt8895);
-                        local2284 = this.aFloat173 + this.aFloat164 * (float) local50 + this.aFloat172 * (float) local2253 + this.aFloat165 * (float) local60;
-                        if (local2284 <= (float) this.aClass19_Sub2_8.zNear) {
+                if (this.depthOverride == -1) {
+                    for (local480 = 0; local480 < local2204.vertexCount; local480++) {
+                        local50 = local2204.verticesX[local480] + (x << super.anInt8895);
+                        local2253 = local2204.verticesY[local480];
+                        local60 = local2204.verticesZ[local480] + (z << super.anInt8895);
+                        local2284 = this.cameraTz + this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local2253 + this.cameraE3_3 * (float) local60;
+                        if (local2284 <= (float) this.toolkit.zNear) {
                             return;
                         }
-                        local2314 = this.aFloat171 + this.aFloat170 * (float) local50 + this.aFloat167 * (float) local2253 + this.aFloat162 * (float) local60;
-                        local2335 = this.aFloat169 + this.aFloat168 * (float) local50 + this.aFloat163 * (float) local2253 + this.aFloat166 * (float) local60;
-                        arg3[local480] = arg2.minX + (int) (local2314 * (float) this.aClass19_Sub2_8.projectionScaleX / local2284);
-                        arg4[local480] = arg2.minY + (int) (local2335 * (float) this.aClass19_Sub2_8.projectionScaleY / local2284);
-                        arg5[local480] = (int) local2284;
+                        local2314 = this.cameraTx + this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local2253 + this.cameraE1_3 * (float) local60;
+                        local2335 = this.cameraTy + this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local2253 + this.cameraE2_3 * (float) local60;
+                        screenX[local480] = rasterizer.minX + (int) (local2314 * (float) this.toolkit.projectionScaleX / local2284);
+                        screenY[local480] = rasterizer.minY + (int) (local2335 * (float) this.toolkit.projectionScaleY / local2284);
+                        depths[local480] = (int) local2284;
                     }
                 } else {
-                    for (local480 = 0; local480 < local2204.aShort34; local480++) {
-                        local50 = local2204.aShortArray32[local480] + (arg0 << super.anInt8895);
-                        local2253 = local2204.aShortArray33[local480];
-                        local60 = local2204.aShortArray38[local480] + (arg1 << super.anInt8895);
-                        local2284 = this.aFloat173 + this.aFloat164 * (float) local50 + this.aFloat172 * (float) local2253 + this.aFloat165 * (float) local60;
-                        local2314 = this.aFloat171 + this.aFloat170 * (float) local50 + this.aFloat167 * (float) local2253 + this.aFloat162 * (float) local60;
-                        local2335 = this.aFloat169 + this.aFloat168 * (float) local50 + this.aFloat163 * (float) local2253 + this.aFloat166 * (float) local60;
-                        arg3[local480] = arg2.minX + (int) (local2314 * (float) this.aClass19_Sub2_8.projectionScaleX / (float) this.anInt8145);
-                        arg4[local480] = arg2.minY + (int) (local2335 * (float) this.aClass19_Sub2_8.projectionScaleY / (float) this.anInt8145);
-                        arg5[local480] = (int) local2284;
+                    for (local480 = 0; local480 < local2204.vertexCount; local480++) {
+                        local50 = local2204.verticesX[local480] + (x << super.anInt8895);
+                        local2253 = local2204.verticesY[local480];
+                        local60 = local2204.verticesZ[local480] + (z << super.anInt8895);
+                        local2284 = this.cameraTz + this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local2253 + this.cameraE3_3 * (float) local60;
+                        local2314 = this.cameraTx + this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local2253 + this.cameraE1_3 * (float) local60;
+                        local2335 = this.cameraTy + this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local2253 + this.cameraE2_3 * (float) local60;
+                        screenX[local480] = rasterizer.minX + (int) (local2314 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
+                        screenY[local480] = rasterizer.minY + (int) (local2335 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
+                        depths[local480] = (int) local2284;
                     }
                 }
                 @Pc(2531) short local2531;
@@ -1034,92 +1034,92 @@ public final class Ground_Sub3 extends Ground {
                 @Pc(2557) int local2557;
                 @Pc(2561) int local2561;
                 @Pc(2565) int local2565;
-                if (local2204.aShortArray30 != null) {
+                if (local2204.faceTextures != null) {
                     @Pc(2753) int local2753;
                     @Pc(2622) short local2622;
-                    if (this.anInt8145 == -1) {
-                        for (local480 = 0; local480 < local2204.aShort33; local480++) {
-                            local2531 = local2204.aShortArray34[local480];
-                            local2536 = local2204.aShortArray37[local480];
-                            local2541 = local2204.aShortArray36[local480];
-                            local510 = arg3[local2531];
-                            local2549 = arg3[local2536];
-                            local2553 = arg3[local2541];
-                            local2557 = arg4[local2531];
-                            local2561 = arg4[local2536];
-                            local2565 = arg4[local2541];
+                    if (this.depthOverride == -1) {
+                        for (local480 = 0; local480 < local2204.faceCount; local480++) {
+                            local2531 = local2204.faceA[local480];
+                            local2536 = local2204.faceB[local480];
+                            local2541 = local2204.faceC[local480];
+                            local510 = screenX[local2531];
+                            local2549 = screenX[local2536];
+                            local2553 = screenX[local2541];
+                            local2557 = screenY[local2531];
+                            local2561 = screenY[local2536];
+                            local2565 = screenY[local2541];
                             if ((local510 - local2549) * (local2565 - local2561) - (local2557 - local2561) * (local2553 - local2549) > 0) {
-                                arg2.clamp = local510 < 0 || local2549 < 0 || local2553 < 0 || local510 > arg2.width || local2549 > arg2.width || local2553 > arg2.width;
-                                local2622 = local2204.aShortArray30[local480];
+                                rasterizer.clamp = local510 < 0 || local2549 < 0 || local2553 < 0 || local510 > rasterizer.width || local2549 > rasterizer.width || local2553 > rasterizer.width;
+                                local2622 = local2204.faceTextures[local480];
                                 if (local2622 == -1) {
-                                    local2753 = local2204.anIntArray230[local480];
+                                    local2753 = local2204.faceColours[local480];
                                     if (local2753 != -1) {
-                                        arg2.method5156((float) local2557, (float) local2561, (float) local2565, (float) local510, (float) local2549, (float) local2553, (float) arg5[local2531], (float) arg5[local2536], (float) arg5[local2541], (float) Static244.method3513(local2204.aShortArray35[local2531], local2753), (float) Static244.method3513(local2204.aShortArray35[local2536], local2753), (float) Static244.method3513(local2204.aShortArray35[local2541], local2753));
+                                        rasterizer.method5156((float) local2557, (float) local2561, (float) local2565, (float) local510, (float) local2549, (float) local2553, (float) depths[local2531], (float) depths[local2536], (float) depths[local2541], (float) Static244.scaleHslLightness(local2204.verticesLight[local2531], local2753), (float) Static244.scaleHslLightness(local2204.verticesLight[local2536], local2753), (float) Static244.scaleHslLightness(local2204.verticesLight[local2541], local2753));
                                     }
                                 } else {
-                                    arg2.renderTexturedTriangle((float) local2557, (float) local2561, (float) local2565, (float) local510, (float) local2549, (float) local2553, (float) arg5[local2531], (float) arg5[local2536], (float) arg5[local2541], (float) local2204.aShortArray32[local2531] / (float) super.anInt8888, (float) local2204.aShortArray32[local2536] / (float) super.anInt8888, (float) local2204.aShortArray32[local2541] / (float) super.anInt8888, (float) local2204.aShortArray38[local2531] / (float) super.anInt8888, (float) local2204.aShortArray38[local2536] / (float) super.anInt8888, (float) local2204.aShortArray38[local2541] / (float) super.anInt8888, ColourUtils.HSV_TO_RGB[local2204.aShortArray35[local2531] & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local2204.aShortArray35[local2536] & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local2204.aShortArray35[local2541] & 0xFFFF] & 0xFFFFFF | 0xFF000000, 0, 0, 0, 0, local2622);
+                                    rasterizer.renderTexturedTriangle((float) local2557, (float) local2561, (float) local2565, (float) local510, (float) local2549, (float) local2553, (float) depths[local2531], (float) depths[local2536], (float) depths[local2541], (float) local2204.verticesX[local2531] / (float) super.anInt8888, (float) local2204.verticesX[local2536] / (float) super.anInt8888, (float) local2204.verticesX[local2541] / (float) super.anInt8888, (float) local2204.verticesZ[local2531] / (float) super.anInt8888, (float) local2204.verticesZ[local2536] / (float) super.anInt8888, (float) local2204.verticesZ[local2541] / (float) super.anInt8888, ColourUtils.HSV_TO_RGB[local2204.verticesLight[local2531] & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local2204.verticesLight[local2536] & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local2204.verticesLight[local2541] & 0xFFFF] & 0xFFFFFF | 0xFF000000, 0, 0, 0, 0, local2622);
                                 }
                             }
                         }
                         return;
                     }
-                    for (local480 = 0; local480 < local2204.aShort33; local480++) {
-                        local2531 = local2204.aShortArray34[local480];
-                        local2536 = local2204.aShortArray37[local480];
-                        local2541 = local2204.aShortArray36[local480];
-                        local510 = arg3[local2531];
-                        local2549 = arg3[local2536];
-                        local2553 = arg3[local2541];
-                        local2557 = arg4[local2531];
-                        local2561 = arg4[local2536];
-                        local2565 = arg4[local2541];
+                    for (local480 = 0; local480 < local2204.faceCount; local480++) {
+                        local2531 = local2204.faceA[local480];
+                        local2536 = local2204.faceB[local480];
+                        local2541 = local2204.faceC[local480];
+                        local510 = screenX[local2531];
+                        local2549 = screenX[local2536];
+                        local2553 = screenX[local2541];
+                        local2557 = screenY[local2531];
+                        local2561 = screenY[local2536];
+                        local2565 = screenY[local2541];
                         if ((local510 - local2549) * (local2565 - local2561) - (local2557 - local2561) * (local2553 - local2549) > 0) {
-                            arg2.clamp = local510 < 0 || local2549 < 0 || local2553 < 0 || local510 > arg2.width || local2549 > arg2.width || local2553 > arg2.width;
-                            local2622 = local2204.aShortArray30[local480];
+                            rasterizer.clamp = local510 < 0 || local2549 < 0 || local2553 < 0 || local510 > rasterizer.width || local2549 > rasterizer.width || local2553 > rasterizer.width;
+                            local2622 = local2204.faceTextures[local480];
                             if (local2622 == -1) {
-                                local2753 = local2204.anIntArray230[local480];
+                                local2753 = local2204.faceColours[local480];
                                 if (local2753 != -1) {
-                                    arg2.method5156((float) local2557, (float) local2561, (float) local2565, (float) local510, (float) local2549, (float) local2553, (float) arg5[local2531], (float) arg5[local2536], (float) arg5[local2541], (float) Static244.method3513(local2204.aShortArray35[local2531], local2753), (float) Static244.method3513(local2204.aShortArray35[local2536], local2753), (float) Static244.method3513(local2204.aShortArray35[local2541], local2753));
+                                    rasterizer.method5156((float) local2557, (float) local2561, (float) local2565, (float) local510, (float) local2549, (float) local2553, (float) depths[local2531], (float) depths[local2536], (float) depths[local2541], (float) Static244.scaleHslLightness(local2204.verticesLight[local2531], local2753), (float) Static244.scaleHslLightness(local2204.verticesLight[local2536], local2753), (float) Static244.scaleHslLightness(local2204.verticesLight[local2541], local2753));
                                 }
                             } else {
-                                arg2.renderTexturedTriangle((float) local2557, (float) local2561, (float) local2565, (float) local510, (float) local2549, (float) local2553, (float) arg5[local2531], (float) arg5[local2536], (float) arg5[local2541], (float) local2204.aShortArray32[local2531] / (float) super.anInt8888, (float) local2204.aShortArray32[local2536] / (float) super.anInt8888, (float) local2204.aShortArray32[local2541] / (float) super.anInt8888, (float) local2204.aShortArray38[local2531] / (float) super.anInt8888, (float) local2204.aShortArray38[local2536] / (float) super.anInt8888, (float) local2204.aShortArray38[local2541] / (float) super.anInt8888, ColourUtils.HSV_TO_RGB[local2204.aShortArray35[local2531] & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local2204.aShortArray35[local2536] & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local2204.aShortArray35[local2541] & 0xFFFF] & 0xFFFFFF | 0xFF000000, 0, 0, 0, 0, local2622);
+                                rasterizer.renderTexturedTriangle((float) local2557, (float) local2561, (float) local2565, (float) local510, (float) local2549, (float) local2553, (float) depths[local2531], (float) depths[local2536], (float) depths[local2541], (float) local2204.verticesX[local2531] / (float) super.anInt8888, (float) local2204.verticesX[local2536] / (float) super.anInt8888, (float) local2204.verticesX[local2541] / (float) super.anInt8888, (float) local2204.verticesZ[local2531] / (float) super.anInt8888, (float) local2204.verticesZ[local2536] / (float) super.anInt8888, (float) local2204.verticesZ[local2541] / (float) super.anInt8888, ColourUtils.HSV_TO_RGB[local2204.verticesLight[local2531] & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local2204.verticesLight[local2536] & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local2204.verticesLight[local2541] & 0xFFFF] & 0xFFFFFF | 0xFF000000, 0, 0, 0, 0, local2622);
                             }
                         }
                     }
                     return;
                 }
-                for (local480 = 0; local480 < local2204.aShort33; local480++) {
-                    local2531 = local2204.aShortArray34[local480];
-                    local2536 = local2204.aShortArray37[local480];
-                    local2541 = local2204.aShortArray36[local480];
-                    local510 = arg3[local2531];
-                    local2549 = arg3[local2536];
-                    local2553 = arg3[local2541];
-                    local2557 = arg4[local2531];
-                    local2561 = arg4[local2536];
-                    local2565 = arg4[local2541];
+                for (local480 = 0; local480 < local2204.faceCount; local480++) {
+                    local2531 = local2204.faceA[local480];
+                    local2536 = local2204.faceB[local480];
+                    local2541 = local2204.faceC[local480];
+                    local510 = screenX[local2531];
+                    local2549 = screenX[local2536];
+                    local2553 = screenX[local2541];
+                    local2557 = screenY[local2531];
+                    local2561 = screenY[local2536];
+                    local2565 = screenY[local2541];
                     if ((local510 - local2549) * (local2565 - local2561) - (local2557 - local2561) * (local2553 - local2549) > 0) {
-                        @Pc(3170) int local3170 = local2204.anIntArray230[local480];
+                        @Pc(3170) int local3170 = local2204.faceColours[local480];
                         if (local3170 != -1) {
-                            arg2.clamp = local510 < 0 || local2549 < 0 || local2553 < 0 || local510 > arg2.width || local2549 > arg2.width || local2553 > arg2.width;
-                            arg2.method5156((float) local2557, (float) local2561, (float) local2565, (float) local510, (float) local2549, (float) local2553, (float) arg5[local2531], (float) arg5[local2536], (float) arg5[local2541], (float) Static244.method3513(local2204.aShortArray35[local2531], local3170), (float) Static244.method3513(local2204.aShortArray35[local2536], local3170), (float) Static244.method3513(local2204.aShortArray35[local2541], local3170));
+                            rasterizer.clamp = local510 < 0 || local2549 < 0 || local2553 < 0 || local510 > rasterizer.width || local2549 > rasterizer.width || local2553 > rasterizer.width;
+                            rasterizer.method5156((float) local2557, (float) local2561, (float) local2565, (float) local510, (float) local2549, (float) local2553, (float) depths[local2531], (float) depths[local2536], (float) depths[local2541], (float) Static244.scaleHslLightness(local2204.verticesLight[local2531], local3170), (float) Static244.scaleHslLightness(local2204.verticesLight[local2536], local3170), (float) Static244.scaleHslLightness(local2204.verticesLight[local2541], local3170));
                         }
                     }
                 }
             }
-        } else if ((local6.aByte59 & 0x2) == 0) {
-            if (arg7 != 0) {
-                if ((local6.aByte59 & 0x4) == 0) {
-                    if ((arg7 & 0x2) != 0) {
+        } else if ((local6.flags & 0x2) == 0) {
+            if (skipFlags != 0) {
+                if ((local6.flags & 0x4) == 0) {
+                    if ((skipFlags & 0x2) != 0) {
                         return;
                     }
-                } else if ((arg7 & 0x1) != 0) {
+                } else if ((skipFlags & 0x1) != 0) {
                     return;
                 }
             }
-            @Pc(45) int local45 = arg0 * super.anInt8888;
+            @Pc(45) int local45 = x * super.anInt8888;
             local50 = local45 + super.anInt8888;
-            @Pc(55) int local55 = arg1 * super.anInt8888;
+            @Pc(55) int local55 = z * super.anInt8888;
             local60 = local55 + super.anInt8888;
             @Pc(497) float local497;
             @Pc(99) float local99;
@@ -1140,164 +1140,164 @@ public final class Ground_Sub3 extends Ground {
             @Pc(317) float local317;
             @Pc(377) float local377;
             @Pc(437) float local437;
-            if ((local6.aByte59 & 0x1) == 0) {
-                local72 = super.tileHeights[arg0][arg1];
-                @Pc(784) int local784 = super.tileHeights[arg0 + 1][arg1];
-                @Pc(795) int local795 = super.tileHeights[arg0 + 1][arg1 + 1];
-                @Pc(804) int local804 = super.tileHeights[arg0][arg1 + 1];
-                if (this.anInt8145 == -1) {
-                    local99 = this.aFloat173 + this.aFloat164 * (float) local45 + this.aFloat172 * (float) local72 + this.aFloat165 * (float) local55;
-                    if (local99 <= (float) this.aClass19_Sub2_8.zNear) {
+            if ((local6.flags & 0x1) == 0) {
+                local72 = super.tileHeights[x][z];
+                @Pc(784) int local784 = super.tileHeights[x + 1][z];
+                @Pc(795) int local795 = super.tileHeights[x + 1][z + 1];
+                @Pc(804) int local804 = super.tileHeights[x][z + 1];
+                if (this.depthOverride == -1) {
+                    local99 = this.cameraTz + this.cameraE3_1 * (float) local45 + this.cameraE3_2 * (float) local72 + this.cameraE3_3 * (float) local55;
+                    if (local99 <= (float) this.toolkit.zNear) {
                         return;
                     }
-                    local125 = this.aFloat173 + this.aFloat164 * (float) local50 + this.aFloat172 * (float) local784 + this.aFloat165 * (float) local55;
-                    if (local125 <= (float) this.aClass19_Sub2_8.zNear) {
+                    local125 = this.cameraTz + this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local784 + this.cameraE3_3 * (float) local55;
+                    if (local125 <= (float) this.toolkit.zNear) {
                         return;
                     }
-                    local151 = this.aFloat173 + this.aFloat164 * (float) local50 + this.aFloat172 * (float) local795 + this.aFloat165 * (float) local60;
-                    if (local151 <= (float) this.aClass19_Sub2_8.zNear) {
+                    local151 = this.cameraTz + this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local795 + this.cameraE3_3 * (float) local60;
+                    if (local151 <= (float) this.toolkit.zNear) {
                         return;
                     }
-                    local177 = this.aFloat173 + this.aFloat164 * (float) local45 + this.aFloat172 * (float) local804 + this.aFloat165 * (float) local60;
-                    if (local177 <= (float) this.aClass19_Sub2_8.zNear) {
+                    local177 = this.cameraTz + this.cameraE3_1 * (float) local45 + this.cameraE3_2 * (float) local804 + this.cameraE3_3 * (float) local60;
+                    if (local177 <= (float) this.toolkit.zNear) {
                         return;
                     }
-                    local287 = this.aFloat171 + this.aFloat170 * (float) local45 + this.aFloat167 * (float) local72 + this.aFloat162 * (float) local55;
-                    local300 = arg2.minX + (int) (local287 * (float) this.aClass19_Sub2_8.projectionScaleX / local99);
-                    local317 = this.aFloat169 + this.aFloat168 * (float) local45 + this.aFloat163 * (float) local72 + this.aFloat166 * (float) local55;
-                    local330 = arg2.minY + (int) (local317 * (float) this.aClass19_Sub2_8.projectionScaleY / local99);
-                    local347 = this.aFloat171 + this.aFloat170 * (float) local50 + this.aFloat167 * (float) local784 + this.aFloat162 * (float) local55;
-                    local360 = arg2.minX + (int) (local347 * (float) this.aClass19_Sub2_8.projectionScaleX / local125);
-                    local377 = this.aFloat169 + this.aFloat168 * (float) local50 + this.aFloat163 * (float) local784 + this.aFloat166 * (float) local55;
-                    local390 = arg2.minY + (int) (local377 * (float) this.aClass19_Sub2_8.projectionScaleY / local125);
-                    local407 = this.aFloat171 + this.aFloat170 * (float) local50 + this.aFloat167 * (float) local795 + this.aFloat162 * (float) local60;
-                    local420 = arg2.minX + (int) (local407 * (float) this.aClass19_Sub2_8.projectionScaleX / local151);
-                    local437 = this.aFloat169 + this.aFloat168 * (float) local50 + this.aFloat163 * (float) local795 + this.aFloat166 * (float) local60;
-                    local450 = arg2.minY + (int) (local437 * (float) this.aClass19_Sub2_8.projectionScaleY / local151);
-                    local467 = this.aFloat171 + this.aFloat170 * (float) local45 + this.aFloat167 * (float) local804 + this.aFloat162 * (float) local60;
-                    local480 = arg2.minX + (int) (local467 * (float) this.aClass19_Sub2_8.projectionScaleX / local177);
-                    local497 = this.aFloat169 + this.aFloat168 * (float) local45 + this.aFloat163 * (float) local804 + this.aFloat166 * (float) local60;
-                    local510 = arg2.minY + (int) (local497 * (float) this.aClass19_Sub2_8.projectionScaleY / local177);
+                    local287 = this.cameraTx + this.cameraE1_1 * (float) local45 + this.cameraE1_2 * (float) local72 + this.cameraE1_3 * (float) local55;
+                    local300 = rasterizer.minX + (int) (local287 * (float) this.toolkit.projectionScaleX / local99);
+                    local317 = this.cameraTy + this.cameraE2_1 * (float) local45 + this.cameraE2_2 * (float) local72 + this.cameraE2_3 * (float) local55;
+                    local330 = rasterizer.minY + (int) (local317 * (float) this.toolkit.projectionScaleY / local99);
+                    local347 = this.cameraTx + this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local784 + this.cameraE1_3 * (float) local55;
+                    local360 = rasterizer.minX + (int) (local347 * (float) this.toolkit.projectionScaleX / local125);
+                    local377 = this.cameraTy + this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local784 + this.cameraE2_3 * (float) local55;
+                    local390 = rasterizer.minY + (int) (local377 * (float) this.toolkit.projectionScaleY / local125);
+                    local407 = this.cameraTx + this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local795 + this.cameraE1_3 * (float) local60;
+                    local420 = rasterizer.minX + (int) (local407 * (float) this.toolkit.projectionScaleX / local151);
+                    local437 = this.cameraTy + this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local795 + this.cameraE2_3 * (float) local60;
+                    local450 = rasterizer.minY + (int) (local437 * (float) this.toolkit.projectionScaleY / local151);
+                    local467 = this.cameraTx + this.cameraE1_1 * (float) local45 + this.cameraE1_2 * (float) local804 + this.cameraE1_3 * (float) local60;
+                    local480 = rasterizer.minX + (int) (local467 * (float) this.toolkit.projectionScaleX / local177);
+                    local497 = this.cameraTy + this.cameraE2_1 * (float) local45 + this.cameraE2_2 * (float) local804 + this.cameraE2_3 * (float) local60;
+                    local510 = rasterizer.minY + (int) (local497 * (float) this.toolkit.projectionScaleY / local177);
                 } else {
-                    local99 = this.aFloat173 + this.aFloat164 * (float) local45 + this.aFloat172 * (float) local72 + this.aFloat165 * (float) local55;
-                    local125 = this.aFloat173 + this.aFloat164 * (float) local50 + this.aFloat172 * (float) local784 + this.aFloat165 * (float) local55;
-                    local151 = this.aFloat173 + this.aFloat164 * (float) local50 + this.aFloat172 * (float) local795 + this.aFloat165 * (float) local60;
-                    local177 = this.aFloat173 + this.aFloat164 * (float) local45 + this.aFloat172 * (float) local804 + this.aFloat165 * (float) local60;
-                    local287 = this.aFloat171 + this.aFloat170 * (float) local45 + this.aFloat167 * (float) local72 + this.aFloat162 * (float) local55;
-                    local300 = arg2.minX + (int) (local287 * (float) this.aClass19_Sub2_8.projectionScaleX / (float) this.anInt8145);
-                    local317 = this.aFloat169 + this.aFloat168 * (float) local45 + this.aFloat163 * (float) local72 + this.aFloat166 * (float) local55;
-                    local330 = arg2.minY + (int) (local317 * (float) this.aClass19_Sub2_8.projectionScaleY / (float) this.anInt8145);
-                    local347 = this.aFloat171 + this.aFloat170 * (float) local50 + this.aFloat167 * (float) local784 + this.aFloat162 * (float) local55;
-                    local360 = arg2.minX + (int) (local347 * (float) this.aClass19_Sub2_8.projectionScaleX / (float) this.anInt8145);
-                    local377 = this.aFloat169 + this.aFloat168 * (float) local50 + this.aFloat163 * (float) local784 + this.aFloat166 * (float) local55;
-                    local390 = arg2.minY + (int) (local377 * (float) this.aClass19_Sub2_8.projectionScaleY / (float) this.anInt8145);
-                    local407 = this.aFloat171 + this.aFloat170 * (float) local50 + this.aFloat167 * (float) local795 + this.aFloat162 * (float) local60;
-                    local420 = arg2.minX + (int) (local407 * (float) this.aClass19_Sub2_8.projectionScaleX / (float) this.anInt8145);
-                    local437 = this.aFloat169 + this.aFloat168 * (float) local50 + this.aFloat163 * (float) local795 + this.aFloat166 * (float) local60;
-                    local450 = arg2.minY + (int) (local437 * (float) this.aClass19_Sub2_8.projectionScaleY / (float) this.anInt8145);
-                    local467 = this.aFloat171 + this.aFloat170 * (float) local45 + this.aFloat167 * (float) local804 + this.aFloat162 * (float) local60;
-                    local480 = arg2.minX + (int) (local467 * (float) this.aClass19_Sub2_8.projectionScaleX / (float) this.anInt8145);
-                    local497 = this.aFloat169 + this.aFloat168 * (float) local45 + this.aFloat163 * (float) local804 + this.aFloat166 * (float) local60;
-                    local510 = arg2.minY + (int) (local497 * (float) this.aClass19_Sub2_8.projectionScaleY / (float) this.anInt8145);
+                    local99 = this.cameraTz + this.cameraE3_1 * (float) local45 + this.cameraE3_2 * (float) local72 + this.cameraE3_3 * (float) local55;
+                    local125 = this.cameraTz + this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local784 + this.cameraE3_3 * (float) local55;
+                    local151 = this.cameraTz + this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local795 + this.cameraE3_3 * (float) local60;
+                    local177 = this.cameraTz + this.cameraE3_1 * (float) local45 + this.cameraE3_2 * (float) local804 + this.cameraE3_3 * (float) local60;
+                    local287 = this.cameraTx + this.cameraE1_1 * (float) local45 + this.cameraE1_2 * (float) local72 + this.cameraE1_3 * (float) local55;
+                    local300 = rasterizer.minX + (int) (local287 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
+                    local317 = this.cameraTy + this.cameraE2_1 * (float) local45 + this.cameraE2_2 * (float) local72 + this.cameraE2_3 * (float) local55;
+                    local330 = rasterizer.minY + (int) (local317 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
+                    local347 = this.cameraTx + this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local784 + this.cameraE1_3 * (float) local55;
+                    local360 = rasterizer.minX + (int) (local347 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
+                    local377 = this.cameraTy + this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local784 + this.cameraE2_3 * (float) local55;
+                    local390 = rasterizer.minY + (int) (local377 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
+                    local407 = this.cameraTx + this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local795 + this.cameraE1_3 * (float) local60;
+                    local420 = rasterizer.minX + (int) (local407 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
+                    local437 = this.cameraTy + this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local795 + this.cameraE2_3 * (float) local60;
+                    local450 = rasterizer.minY + (int) (local437 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
+                    local467 = this.cameraTx + this.cameraE1_1 * (float) local45 + this.cameraE1_2 * (float) local804 + this.cameraE1_3 * (float) local60;
+                    local480 = rasterizer.minX + (int) (local467 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
+                    local497 = this.cameraTy + this.cameraE2_1 * (float) local45 + this.cameraE2_2 * (float) local804 + this.cameraE2_3 * (float) local60;
+                    local510 = rasterizer.minY + (int) (local497 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
                 }
             } else {
-                local72 = super.tileHeights[arg0][arg1];
-                @Pc(78) float local78 = this.aFloat172 * (float) local72;
-                if (this.anInt8145 == -1) {
-                    local99 = this.aFloat173 + this.aFloat164 * (float) local45 + local78 + this.aFloat165 * (float) local55;
-                    if (local99 <= (float) this.aClass19_Sub2_8.zNear) {
+                local72 = super.tileHeights[x][z];
+                @Pc(78) float local78 = this.cameraE3_2 * (float) local72;
+                if (this.depthOverride == -1) {
+                    local99 = this.cameraTz + this.cameraE3_1 * (float) local45 + local78 + this.cameraE3_3 * (float) local55;
+                    if (local99 <= (float) this.toolkit.zNear) {
                         return;
                     }
-                    local125 = this.aFloat173 + this.aFloat164 * (float) local50 + local78 + this.aFloat165 * (float) local55;
-                    if (local125 <= (float) this.aClass19_Sub2_8.zNear) {
+                    local125 = this.cameraTz + this.cameraE3_1 * (float) local50 + local78 + this.cameraE3_3 * (float) local55;
+                    if (local125 <= (float) this.toolkit.zNear) {
                         return;
                     }
-                    local151 = this.aFloat173 + this.aFloat164 * (float) local50 + local78 + this.aFloat165 * (float) local60;
-                    if (local151 <= (float) this.aClass19_Sub2_8.zNear) {
+                    local151 = this.cameraTz + this.cameraE3_1 * (float) local50 + local78 + this.cameraE3_3 * (float) local60;
+                    if (local151 <= (float) this.toolkit.zNear) {
                         return;
                     }
-                    local177 = this.aFloat173 + this.aFloat164 * (float) local45 + local78 + this.aFloat165 * (float) local60;
-                    if (local177 <= (float) this.aClass19_Sub2_8.zNear) {
+                    local177 = this.cameraTz + this.cameraE3_1 * (float) local45 + local78 + this.cameraE3_3 * (float) local60;
+                    if (local177 <= (float) this.toolkit.zNear) {
                         return;
                     }
                 } else {
-                    local99 = this.aFloat173 + this.aFloat164 * (float) local45 + local78 + this.aFloat165 * (float) local55;
-                    local125 = this.aFloat173 + this.aFloat164 * (float) local50 + local78 + this.aFloat165 * (float) local55;
-                    local151 = this.aFloat173 + this.aFloat164 * (float) local50 + local78 + this.aFloat165 * (float) local60;
-                    local177 = this.aFloat173 + this.aFloat164 * (float) local45 + local78 + this.aFloat165 * (float) local60;
+                    local99 = this.cameraTz + this.cameraE3_1 * (float) local45 + local78 + this.cameraE3_3 * (float) local55;
+                    local125 = this.cameraTz + this.cameraE3_1 * (float) local50 + local78 + this.cameraE3_3 * (float) local55;
+                    local151 = this.cameraTz + this.cameraE3_1 * (float) local50 + local78 + this.cameraE3_3 * (float) local60;
+                    local177 = this.cameraTz + this.cameraE3_1 * (float) local45 + local78 + this.cameraE3_3 * (float) local60;
                 }
-                @Pc(260) float local260 = this.aFloat167 * (float) local72;
-                @Pc(266) float local266 = this.aFloat163 * (float) local72;
-                if (this.anInt8145 == -1) {
-                    local287 = this.aFloat171 + this.aFloat170 * (float) local45 + local260 + this.aFloat162 * (float) local55;
-                    local300 = arg2.minX + (int) (local287 * (float) this.aClass19_Sub2_8.projectionScaleX / local99);
-                    local317 = this.aFloat169 + this.aFloat168 * (float) local45 + local266 + this.aFloat166 * (float) local55;
-                    local330 = arg2.minY + (int) (local317 * (float) this.aClass19_Sub2_8.projectionScaleY / local99);
-                    local347 = this.aFloat171 + this.aFloat170 * (float) local50 + local260 + this.aFloat162 * (float) local55;
-                    local360 = arg2.minX + (int) (local347 * (float) this.aClass19_Sub2_8.projectionScaleX / local125);
-                    local377 = this.aFloat169 + this.aFloat168 * (float) local50 + local266 + this.aFloat166 * (float) local55;
-                    local390 = arg2.minY + (int) (local377 * (float) this.aClass19_Sub2_8.projectionScaleY / local125);
-                    local407 = this.aFloat171 + this.aFloat170 * (float) local50 + local260 + this.aFloat162 * (float) local60;
-                    local420 = arg2.minX + (int) (local407 * (float) this.aClass19_Sub2_8.projectionScaleX / local151);
-                    local437 = this.aFloat169 + this.aFloat168 * (float) local50 + local266 + this.aFloat166 * (float) local60;
-                    local450 = arg2.minY + (int) (local437 * (float) this.aClass19_Sub2_8.projectionScaleY / local151);
-                    local467 = this.aFloat171 + this.aFloat170 * (float) local45 + local260 + this.aFloat162 * (float) local60;
-                    local480 = arg2.minX + (int) (local467 * (float) this.aClass19_Sub2_8.projectionScaleX / local177);
-                    local497 = this.aFloat169 + this.aFloat168 * (float) local45 + local266 + this.aFloat166 * (float) local60;
-                    local510 = arg2.minY + (int) (local497 * (float) this.aClass19_Sub2_8.projectionScaleY / local177);
+                @Pc(260) float local260 = this.cameraE1_2 * (float) local72;
+                @Pc(266) float local266 = this.cameraE2_2 * (float) local72;
+                if (this.depthOverride == -1) {
+                    local287 = this.cameraTx + this.cameraE1_1 * (float) local45 + local260 + this.cameraE1_3 * (float) local55;
+                    local300 = rasterizer.minX + (int) (local287 * (float) this.toolkit.projectionScaleX / local99);
+                    local317 = this.cameraTy + this.cameraE2_1 * (float) local45 + local266 + this.cameraE2_3 * (float) local55;
+                    local330 = rasterizer.minY + (int) (local317 * (float) this.toolkit.projectionScaleY / local99);
+                    local347 = this.cameraTx + this.cameraE1_1 * (float) local50 + local260 + this.cameraE1_3 * (float) local55;
+                    local360 = rasterizer.minX + (int) (local347 * (float) this.toolkit.projectionScaleX / local125);
+                    local377 = this.cameraTy + this.cameraE2_1 * (float) local50 + local266 + this.cameraE2_3 * (float) local55;
+                    local390 = rasterizer.minY + (int) (local377 * (float) this.toolkit.projectionScaleY / local125);
+                    local407 = this.cameraTx + this.cameraE1_1 * (float) local50 + local260 + this.cameraE1_3 * (float) local60;
+                    local420 = rasterizer.minX + (int) (local407 * (float) this.toolkit.projectionScaleX / local151);
+                    local437 = this.cameraTy + this.cameraE2_1 * (float) local50 + local266 + this.cameraE2_3 * (float) local60;
+                    local450 = rasterizer.minY + (int) (local437 * (float) this.toolkit.projectionScaleY / local151);
+                    local467 = this.cameraTx + this.cameraE1_1 * (float) local45 + local260 + this.cameraE1_3 * (float) local60;
+                    local480 = rasterizer.minX + (int) (local467 * (float) this.toolkit.projectionScaleX / local177);
+                    local497 = this.cameraTy + this.cameraE2_1 * (float) local45 + local266 + this.cameraE2_3 * (float) local60;
+                    local510 = rasterizer.minY + (int) (local497 * (float) this.toolkit.projectionScaleY / local177);
                 } else {
-                    local287 = this.aFloat171 + this.aFloat170 * (float) local45 + local260 + this.aFloat162 * (float) local55;
-                    local300 = arg2.minX + (int) (local287 * (float) this.aClass19_Sub2_8.projectionScaleX / (float) this.anInt8145);
-                    local317 = this.aFloat169 + this.aFloat168 * (float) local45 + local266 + this.aFloat166 * (float) local55;
-                    local330 = arg2.minY + (int) (local317 * (float) this.aClass19_Sub2_8.projectionScaleY / (float) this.anInt8145);
-                    local347 = this.aFloat171 + this.aFloat170 * (float) local50 + local260 + this.aFloat162 * (float) local55;
-                    local360 = arg2.minX + (int) (local347 * (float) this.aClass19_Sub2_8.projectionScaleX / (float) this.anInt8145);
-                    local377 = this.aFloat169 + this.aFloat168 * (float) local50 + local266 + this.aFloat166 * (float) local55;
-                    local390 = arg2.minY + (int) (local377 * (float) this.aClass19_Sub2_8.projectionScaleY / (float) this.anInt8145);
-                    local407 = this.aFloat171 + this.aFloat170 * (float) local50 + local260 + this.aFloat162 * (float) local60;
-                    local420 = arg2.minX + (int) (local407 * (float) this.aClass19_Sub2_8.projectionScaleX / (float) this.anInt8145);
-                    local437 = this.aFloat169 + this.aFloat168 * (float) local50 + local266 + this.aFloat166 * (float) local60;
-                    local450 = arg2.minY + (int) (local437 * (float) this.aClass19_Sub2_8.projectionScaleY / (float) this.anInt8145);
-                    local467 = this.aFloat171 + this.aFloat170 * (float) local45 + local260 + this.aFloat162 * (float) local60;
-                    local480 = arg2.minX + (int) (local467 * (float) this.aClass19_Sub2_8.projectionScaleX / (float) this.anInt8145);
-                    local497 = this.aFloat169 + this.aFloat168 * (float) local45 + local266 + this.aFloat166 * (float) local60;
-                    local510 = arg2.minY + (int) (local497 * (float) this.aClass19_Sub2_8.projectionScaleY / (float) this.anInt8145);
+                    local287 = this.cameraTx + this.cameraE1_1 * (float) local45 + local260 + this.cameraE1_3 * (float) local55;
+                    local300 = rasterizer.minX + (int) (local287 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
+                    local317 = this.cameraTy + this.cameraE2_1 * (float) local45 + local266 + this.cameraE2_3 * (float) local55;
+                    local330 = rasterizer.minY + (int) (local317 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
+                    local347 = this.cameraTx + this.cameraE1_1 * (float) local50 + local260 + this.cameraE1_3 * (float) local55;
+                    local360 = rasterizer.minX + (int) (local347 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
+                    local377 = this.cameraTy + this.cameraE2_1 * (float) local50 + local266 + this.cameraE2_3 * (float) local55;
+                    local390 = rasterizer.minY + (int) (local377 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
+                    local407 = this.cameraTx + this.cameraE1_1 * (float) local50 + local260 + this.cameraE1_3 * (float) local60;
+                    local420 = rasterizer.minX + (int) (local407 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
+                    local437 = this.cameraTy + this.cameraE2_1 * (float) local50 + local266 + this.cameraE2_3 * (float) local60;
+                    local450 = rasterizer.minY + (int) (local437 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
+                    local467 = this.cameraTx + this.cameraE1_1 * (float) local45 + local260 + this.cameraE1_3 * (float) local60;
+                    local480 = rasterizer.minX + (int) (local467 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
+                    local497 = this.cameraTy + this.cameraE2_1 * (float) local45 + local266 + this.cameraE2_3 * (float) local60;
+                    local510 = rasterizer.minY + (int) (local497 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
                 }
             }
-            if (this.anInt8145 == -1) {
+            if (this.depthOverride == -1) {
                 if ((local420 - local480) * (local390 - local510) - (local450 - local510) * (local360 - local480) > 0) {
-                    arg2.clamp = local420 < 0 || local480 < 0 || local360 < 0 || local420 > arg2.width || local480 > arg2.width || local360 > arg2.width;
-                    if (local6.aShort38 >= 0) {
-                        arg2.renderTexturedTriangle((float) local450, (float) local510, (float) local390, (float) local420, (float) local480, (float) local360, local151, local177, local125, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, ColourUtils.HSV_TO_RGB[local6.aShort41 & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.aShort40 & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.aShort39 & 0xFFFF] & 0xFFFFFF | 0xFF000000, 0, 0, 0, 0, local6.aShort38);
+                    rasterizer.clamp = local420 < 0 || local480 < 0 || local360 < 0 || local420 > rasterizer.width || local480 > rasterizer.width || local360 > rasterizer.width;
+                    if (local6.texture >= 0) {
+                        rasterizer.renderTexturedTriangle((float) local450, (float) local510, (float) local390, (float) local420, (float) local480, (float) local360, local151, local177, local125, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, ColourUtils.HSV_TO_RGB[local6.hslNe & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.hslNw & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.hslSe & 0xFFFF] & 0xFFFFFF | 0xFF000000, 0, 0, 0, 0, local6.texture);
                     } else {
-                        arg2.method5156((float) local450, (float) local510, (float) local390, (float) local420, (float) local480, (float) local360, (float) (int) local151, (float) (int) local177, (float) (int) local125, (float) (local6.aShort41 & 0xFFFF), (float) (local6.aShort40 & 0xFFFF), (float) (local6.aShort39 & 0xFFFF));
+                        rasterizer.method5156((float) local450, (float) local510, (float) local390, (float) local420, (float) local480, (float) local360, (float) (int) local151, (float) (int) local177, (float) (int) local125, (float) (local6.hslNe & 0xFFFF), (float) (local6.hslNw & 0xFFFF), (float) (local6.hslSe & 0xFFFF));
                     }
                 }
                 if ((local300 - local360) * (local510 - local390) - (local330 - local390) * (local480 - local360) > 0) {
-                    arg2.clamp = local300 < 0 || local360 < 0 || local480 < 0 || local300 > arg2.width || local360 > arg2.width || local480 > arg2.width;
-                    if (local6.aShort38 >= 0) {
-                        arg2.renderTexturedTriangle((float) local330, (float) local390, (float) local510, (float) local300, (float) local360, (float) local480, local99, local125, local177, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, ColourUtils.HSV_TO_RGB[local6.aShort42 & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.aShort39 & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.aShort40 & 0xFFFF] & 0xFFFFFF | 0xFF000000, 0, 0, 0, 0, local6.aShort38);
+                    rasterizer.clamp = local300 < 0 || local360 < 0 || local480 < 0 || local300 > rasterizer.width || local360 > rasterizer.width || local480 > rasterizer.width;
+                    if (local6.texture >= 0) {
+                        rasterizer.renderTexturedTriangle((float) local330, (float) local390, (float) local510, (float) local300, (float) local360, (float) local480, local99, local125, local177, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, ColourUtils.HSV_TO_RGB[local6.hslSw & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.hslSe & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.hslNw & 0xFFFF] & 0xFFFFFF | 0xFF000000, 0, 0, 0, 0, local6.texture);
                         return;
                     }
-                    arg2.method5156((float) local330, (float) local390, (float) local510, (float) local300, (float) local360, (float) local480, (float) (int) local99, (float) (int) local125, (float) (int) local177, (float) (local6.aShort42 & 0xFFFF), (float) (local6.aShort39 & 0xFFFF), (float) (local6.aShort40 & 0xFFFF));
+                    rasterizer.method5156((float) local330, (float) local390, (float) local510, (float) local300, (float) local360, (float) local480, (float) (int) local99, (float) (int) local125, (float) (int) local177, (float) (local6.hslSw & 0xFFFF), (float) (local6.hslSe & 0xFFFF), (float) (local6.hslNw & 0xFFFF));
                     return;
                 }
             } else {
                 if ((local420 - local480) * (local390 - local510) - (local450 - local510) * (local360 - local480) > 0) {
-                    arg2.clamp = local420 < 0 || local480 < 0 || local360 < 0 || local420 > arg2.width || local480 > arg2.width || local360 > arg2.width;
-                    if (local6.aShort38 >= 0) {
-                        arg2.renderTexturedTriangle((float) local450, (float) local510, (float) local390, (float) local420, (float) local480, (float) local360, local151, local177, local125, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, ColourUtils.HSV_TO_RGB[local6.aShort41 & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.aShort40 & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.aShort39 & 0xFFFF] & 0xFFFFFF | 0xFF000000, 0, 0, 0, 0, local6.aShort38);
+                    rasterizer.clamp = local420 < 0 || local480 < 0 || local360 < 0 || local420 > rasterizer.width || local480 > rasterizer.width || local360 > rasterizer.width;
+                    if (local6.texture >= 0) {
+                        rasterizer.renderTexturedTriangle((float) local450, (float) local510, (float) local390, (float) local420, (float) local480, (float) local360, local151, local177, local125, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, ColourUtils.HSV_TO_RGB[local6.hslNe & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.hslNw & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.hslSe & 0xFFFF] & 0xFFFFFF | 0xFF000000, 0, 0, 0, 0, local6.texture);
                     } else {
-                        arg2.method5156((float) local450, (float) local510, (float) local390, (float) local420, (float) local480, (float) local360, (float) (int) local151, (float) (int) local177, (float) (int) local125, (float) (local6.aShort41 & 0xFFFF), (float) (local6.aShort40 & 0xFFFF), (float) (local6.aShort39 & 0xFFFF));
+                        rasterizer.method5156((float) local450, (float) local510, (float) local390, (float) local420, (float) local480, (float) local360, (float) (int) local151, (float) (int) local177, (float) (int) local125, (float) (local6.hslNe & 0xFFFF), (float) (local6.hslNw & 0xFFFF), (float) (local6.hslSe & 0xFFFF));
                     }
                 }
                 if ((local300 - local360) * (local510 - local390) - (local330 - local390) * (local480 - local360) > 0) {
-                    arg2.clamp = local300 < 0 || local360 < 0 || local480 < 0 || local300 > arg2.width || local360 > arg2.width || local480 > arg2.width;
-                    if (local6.aShort38 >= 0) {
-                        arg2.renderTexturedTriangle((float) local330, (float) local390, (float) local510, (float) local300, (float) local360, (float) local480, local99, local125, local177, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, ColourUtils.HSV_TO_RGB[local6.aShort42 & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.aShort39 & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.aShort40 & 0xFFFF] & 0xFFFFFF | 0xFF000000, 0, 0, 0, 0, local6.aShort38);
+                    rasterizer.clamp = local300 < 0 || local360 < 0 || local480 < 0 || local300 > rasterizer.width || local360 > rasterizer.width || local480 > rasterizer.width;
+                    if (local6.texture >= 0) {
+                        rasterizer.renderTexturedTriangle((float) local330, (float) local390, (float) local510, (float) local300, (float) local360, (float) local480, local99, local125, local177, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, ColourUtils.HSV_TO_RGB[local6.hslSw & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.hslSe & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.hslNw & 0xFFFF] & 0xFFFFFF | 0xFF000000, 0, 0, 0, 0, local6.texture);
                         return;
                     }
-                    arg2.method5156((float) local330, (float) local390, (float) local510, (float) local300, (float) local360, (float) local480, (float) (int) local99, (float) (int) local125, (float) (int) local177, (float) (local6.aShort42 & 0xFFFF), (float) (local6.aShort39 & 0xFFFF), (float) (local6.aShort40 & 0xFFFF));
+                    rasterizer.method5156((float) local330, (float) local390, (float) local510, (float) local300, (float) local360, (float) local480, (float) (int) local99, (float) (int) local125, (float) (int) local177, (float) (local6.hslSw & 0xFFFF), (float) (local6.hslSe & 0xFFFF), (float) (local6.hslNw & 0xFFFF));
                 }
             }
         }
@@ -1305,28 +1305,28 @@ public final class Ground_Sub3 extends Ground {
 
     @OriginalMember(owner = "client!qs", name = "a", descriptor = "(III[[ZZII)V")
     @Override
-    public void method7877(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) boolean[][] arg3, @OriginalArg(4) boolean arg4, @OriginalArg(5) int arg5, @OriginalArg(6) int arg6) {
-        @Pc(3) JavaMatrix local3 = this.aClass19_Sub2_8.camera;
-        this.anInt8145 = arg5;
-        this.aFloat170 = local3.e1_1;
-        this.aFloat167 = local3.e1_2;
-        this.aFloat162 = local3.e1_3;
-        this.aFloat171 = local3.tx;
-        this.aFloat168 = local3.e2_1;
-        this.aFloat163 = local3.e2_2;
-        this.aFloat166 = local3.e2_3;
-        this.aFloat169 = local3.ty;
-        this.aFloat164 = local3.e3_1;
-        this.aFloat172 = local3.e3_2;
-        this.aFloat165 = local3.e3_3;
-        this.aFloat173 = local3.tz;
-        for (@Pc(56) int local56 = 0; local56 < arg2 + arg2; local56++) {
-            for (@Pc(59) int local59 = 0; local59 < arg2 + arg2; local59++) {
-                if (arg3[local56][local59]) {
-                    @Pc(72) int local72 = arg0 + local56 - arg2;
-                    @Pc(78) int local78 = arg1 + local59 - arg2;
+    public void method7877(@OriginalArg(0) int x, @OriginalArg(1) int z, @OriginalArg(2) int radius, @OriginalArg(3) boolean[][] visibility, @OriginalArg(4) boolean arg4, @OriginalArg(5) int depth, @OriginalArg(6) int skipFlags) {
+        @Pc(3) JavaMatrix local3 = this.toolkit.camera;
+        this.depthOverride = depth;
+        this.cameraE1_1 = local3.e1_1;
+        this.cameraE1_2 = local3.e1_2;
+        this.cameraE1_3 = local3.e1_3;
+        this.cameraTx = local3.tx;
+        this.cameraE2_1 = local3.e2_1;
+        this.cameraE2_2 = local3.e2_2;
+        this.cameraE2_3 = local3.e2_3;
+        this.cameraTy = local3.ty;
+        this.cameraE3_1 = local3.e3_1;
+        this.cameraE3_2 = local3.e3_2;
+        this.cameraE3_3 = local3.e3_3;
+        this.cameraTz = local3.tz;
+        for (@Pc(56) int local56 = 0; local56 < radius + radius; local56++) {
+            for (@Pc(59) int local59 = 0; local59 < radius + radius; local59++) {
+                if (visibility[local56][local59]) {
+                    @Pc(72) int local72 = x + local56 - radius;
+                    @Pc(78) int local78 = z + local59 - radius;
                     if (local72 >= 0 && local72 < super.anInt8894 && local78 >= 0 && local78 < super.anInt8892) {
-                        this.method7168(local72, local78, arg6);
+                        this.renderTile(local72, local78, skipFlags);
                     }
                 }
             }
@@ -1336,15 +1336,15 @@ public final class Ground_Sub3 extends Ground {
     @OriginalMember(owner = "client!qs", name = "a", descriptor = "(IIIIIII[[Z)V")
     @Override
     public void method7873(@OriginalArg(3) int x1, @OriginalArg(4) int y1, @OriginalArg(5) int x2, @OriginalArg(6) int y2, @OriginalArg(7) boolean[][] visibility) {
-        @Pc(4) JavaThreadResource local4 = this.aClass19_Sub2_8.threadResource(Thread.currentThread());
+        @Pc(4) JavaThreadResource local4 = this.toolkit.threadResource(Thread.currentThread());
         @Pc(7) Rasterizer local7 = local4.rasterizer;
         local7.alpha = 0;
         local7.clamp = true;
-        this.aClass19_Sub2_8.ya();
+        this.toolkit.ya();
         if (this.simpleBlendedTiles != null || this.genericBlendedTiles != null) {
-            this.method7164(x1, y1, x2, y2, visibility, local4, local7, local4.anIntArray840, local4.anIntArray843);
+            this.drawBlendedMinimapTiles(x1, y1, x2, y2, visibility, local4, local7, local4.anIntArray840, local4.anIntArray843);
         } else if (this.simpleTiles != null) {
-            this.method7163(x1, y1, x2, y2, visibility, local4, local7, local4.anIntArray840, local4.anIntArray843);
+            this.drawUnblendedMinimapTiles(x1, y1, x2, y2, visibility, local4, local7, local4.anIntArray840, local4.anIntArray843);
         }
     }
 
@@ -1355,21 +1355,21 @@ public final class Ground_Sub3 extends Ground {
 
     @OriginalMember(owner = "client!qs", name = "a", descriptor = "(II[I[I[I[I[I[I[I[I[I[I[IIIIZ)V")
     @Override
-    public void addTile(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int[] arg2, @OriginalArg(3) int[] arg3, @OriginalArg(4) int[] arg4, @OriginalArg(5) int[] arg5, @OriginalArg(6) int[] arg6, @OriginalArg(7) int[] arg7, @OriginalArg(8) int[] arg8, @OriginalArg(9) int[] arg9, @OriginalArg(10) int[] arg10, @OriginalArg(11) int[] arg11, @OriginalArg(12) int[] arg12, @OriginalArg(13) int arg13, @OriginalArg(14) int arg14, @OriginalArg(15) int arg15) {
+    public void addTile(@OriginalArg(0) int x, @OriginalArg(1) int z, @OriginalArg(2) int[] offsetX, @OriginalArg(3) int[] offsetLevel, @OriginalArg(4) int[] offsetY, @OriginalArg(5) int[] depths, @OriginalArg(6) int[] faceA, @OriginalArg(7) int[] faceB, @OriginalArg(8) int[] faceC, @OriginalArg(9) int[] colours, @OriginalArg(10) int[] blendedColours, @OriginalArg(11) int[] textures, @OriginalArg(12) int[] sizes, @OriginalArg(13) int waterColour, @OriginalArg(14) int waterDepth, @OriginalArg(15) int waterBias) {
         if (this.simpleTiles == null) {
-            this.simpleTiles = new Class127[super.anInt8894][super.anInt8892];
-            this.aClass107ArrayArray1 = new Class107[super.anInt8894][super.anInt8892];
+            this.simpleTiles = new JavaSimpleTile[super.anInt8894][super.anInt8892];
+            this.complexTiles = new JavaComplexTile[super.anInt8894][super.anInt8892];
         } else if (this.simpleBlendedTiles != null || this.genericBlendedTiles != null) {
             throw new IllegalStateException();
         }
         @Pc(33) boolean local33 = false;
         @Pc(79) int local79;
         @Pc(85) int local85;
-        if (arg9.length == 2 && arg6.length == 2 && (arg9[0] == arg9[1] || arg11[0] != -1 && arg11[0] == arg11[1])) {
+        if (colours.length == 2 && faceA.length == 2 && (colours[0] == colours[1] || textures[0] != -1 && textures[0] == textures[1])) {
             local33 = true;
             for (@Pc(72) int local72 = 1; local72 < 2; local72++) {
-                local79 = arg2[arg6[local72]];
-                local85 = arg4[arg6[local72]];
+                local79 = offsetX[faceA[local72]];
+                local85 = offsetY[faceA[local72]];
                 if (local79 != 0 && local79 != super.anInt8888 || local85 != 0 && local85 != super.anInt8888) {
                     local33 = false;
                     break;
@@ -1377,148 +1377,148 @@ public final class Ground_Sub3 extends Ground {
             }
         }
         if (!local33) {
-            @Pc(118) Class107 local118 = new Class107();
-            @Pc(122) short local122 = (short) arg2.length;
-            @Pc(126) short local126 = (short) arg9.length;
-            local118.aShort34 = local122;
-            local118.aShortArray35 = new short[local122];
-            local118.aShortArray32 = new short[local122];
-            local118.aShortArray33 = new short[local122];
-            local118.aShortArray38 = new short[local122];
+            @Pc(118) JavaComplexTile local118 = new JavaComplexTile();
+            @Pc(122) short local122 = (short) offsetX.length;
+            @Pc(126) short local126 = (short) colours.length;
+            local118.vertexCount = local122;
+            local118.verticesLight = new short[local122];
+            local118.verticesX = new short[local122];
+            local118.verticesY = new short[local122];
+            local118.verticesZ = new short[local122];
             @Pc(156) int local156;
             @Pc(323) int local323;
             @Pc(370) int local370;
             for (@Pc(147) int local147 = 0; local147 < local122; local147++) {
-                @Pc(152) int local152 = arg2[local147];
-                local156 = arg4[local147];
+                @Pc(152) int local152 = offsetX[local147];
+                local156 = offsetY[local147];
                 if (local152 == 0 && local156 == 0) {
-                    local118.aShortArray35[local147] = (short) (this.aByteArrayArray31[arg0][arg1] - this.aByteArrayArray30[arg0][arg1]);
+                    local118.verticesLight[local147] = (short) (this.lightLevels[x][z] - this.shadowLevels[x][z]);
                 } else if (local152 == 0 && local156 == super.anInt8888) {
-                    local118.aShortArray35[local147] = (short) (this.aByteArrayArray31[arg0][arg1 + 1] - this.aByteArrayArray30[arg0][arg1 + 1]);
+                    local118.verticesLight[local147] = (short) (this.lightLevels[x][z + 1] - this.shadowLevels[x][z + 1]);
                 } else if (local152 == super.anInt8888 && local156 == super.anInt8888) {
-                    local118.aShortArray35[local147] = (short) (this.aByteArrayArray31[arg0 + 1][arg1 + 1] - this.aByteArrayArray30[arg0 + 1][arg1 + 1]);
+                    local118.verticesLight[local147] = (short) (this.lightLevels[x + 1][z + 1] - this.shadowLevels[x + 1][z + 1]);
                 } else if (local152 == super.anInt8888 && local156 == 0) {
-                    local118.aShortArray35[local147] = (short) (this.aByteArrayArray31[arg0 + 1][arg1] - this.aByteArrayArray30[arg0 + 1][arg1]);
+                    local118.verticesLight[local147] = (short) (this.lightLevels[x + 1][z] - this.shadowLevels[x + 1][z]);
                 } else {
-                    local323 = (this.aByteArrayArray31[arg0][arg1] - this.aByteArrayArray30[arg0][arg1]) * (super.anInt8888 - local152) + (this.aByteArrayArray31[arg0 + 1][arg1] - this.aByteArrayArray30[arg0 + 1][arg1]) * local152;
-                    local370 = (this.aByteArrayArray31[arg0][arg1 + 1] - this.aByteArrayArray30[arg0][arg1 + 1]) * (super.anInt8888 - local152) + (this.aByteArrayArray31[arg0 + 1][arg1 + 1] - this.aByteArrayArray30[arg0 + 1][arg1 + 1]) * local152;
-                    local118.aShortArray35[local147] = (short) (local323 * (super.anInt8888 - local156) + local370 * local156 >> super.anInt8895 * 2);
+                    local323 = (this.lightLevels[x][z] - this.shadowLevels[x][z]) * (super.anInt8888 - local152) + (this.lightLevels[x + 1][z] - this.shadowLevels[x + 1][z]) * local152;
+                    local370 = (this.lightLevels[x][z + 1] - this.shadowLevels[x][z + 1]) * (super.anInt8888 - local152) + (this.lightLevels[x + 1][z + 1] - this.shadowLevels[x + 1][z + 1]) * local152;
+                    local118.verticesLight[local147] = (short) (local323 * (super.anInt8888 - local156) + local370 * local156 >> super.anInt8895 * 2);
                 }
-                local323 = (arg0 << super.anInt8895) + local152;
-                local370 = (arg1 << super.anInt8895) + local156;
-                local118.aShortArray32[local147] = (short) local152;
-                local118.aShortArray38[local147] = (short) local156;
-                local118.aShortArray33[local147] = (short) (this.averageHeight(local323, local370) + (arg3 == null ? 0 : arg3[local147]));
-                if (local118.aShortArray35[local147] < 2) {
-                    local118.aShortArray35[local147] = 2;
+                local323 = (x << super.anInt8895) + local152;
+                local370 = (z << super.anInt8895) + local156;
+                local118.verticesX[local147] = (short) local152;
+                local118.verticesZ[local147] = (short) local156;
+                local118.verticesY[local147] = (short) (this.averageHeight(local323, local370) + (offsetLevel == null ? 0 : offsetLevel[local147]));
+                if (local118.verticesLight[local147] < 2) {
+                    local118.verticesLight[local147] = 2;
                 }
             }
             @Pc(454) boolean local454 = false;
             local156 = 0;
             for (local323 = 0; local323 < local126; local323++) {
-                if (arg9[local323] >= 0 || arg10 != null && arg10[local323] >= 0) {
+                if (colours[local323] >= 0 || blendedColours != null && blendedColours[local323] >= 0) {
                     local156++;
                 }
-                local370 = arg11[local323];
+                local370 = textures[local323];
                 if (local370 != -1) {
-                    @Pc(490) TextureMetrics local490 = this.aClass19_Sub2_8.textureSource.getMetrics(local370);
+                    @Pc(490) TextureMetrics local490 = this.toolkit.textureSource.getMetrics(local370);
                     if (!local490.disableable) {
                         local454 = true;
-                        if (this.method7162(local490.effectType) || local490.speedU != 0 || local490.speedV != 0) {
-                            local118.aByte51 = (byte) (local118.aByte51 | 0x4);
+                        if (this.isWaterEffect(local490.effectType) || local490.speedU != 0 || local490.speedV != 0) {
+                            local118.flags = (byte) (local118.flags | 0x4);
                         }
                     }
                 }
             }
-            local118.anIntArray230 = new int[local156];
-            if (arg10 != null) {
-                local118.anIntArray231 = new int[local156];
+            local118.faceColours = new int[local156];
+            if (blendedColours != null) {
+                local118.faceBlendedColours = new int[local156];
             }
-            local118.aShortArray34 = new short[local156];
-            local118.aShortArray37 = new short[local156];
-            local118.aShortArray36 = new short[local156];
+            local118.faceA = new short[local156];
+            local118.faceB = new short[local156];
+            local118.faceC = new short[local156];
             if (local454) {
-                local118.aShortArray30 = new short[local156];
-                local118.aShortArray31 = new short[local156];
+                local118.faceTextures = new short[local156];
+                local118.faceSizes = new short[local156];
             }
             for (local370 = 0; local370 < local126; local370++) {
-                if (arg9[local370] >= 0 || arg10 != null && arg10[local370] >= 0) {
-                    if (arg9[local370] >= 0) {
-                        local118.anIntArray230[local118.aShort33] = ColourUtils.hslToHsv(arg9[local370]);
+                if (colours[local370] >= 0 || blendedColours != null && blendedColours[local370] >= 0) {
+                    if (colours[local370] >= 0) {
+                        local118.faceColours[local118.faceCount] = ColourUtils.hslToHsv(colours[local370]);
                     } else {
-                        local118.anIntArray230[local118.aShort33] = -1;
+                        local118.faceColours[local118.faceCount] = -1;
                     }
-                    if (arg10 != null) {
-                        if (arg10[local370] == -1) {
-                            local118.anIntArray231[local118.aShort33] = -1;
+                    if (blendedColours != null) {
+                        if (blendedColours[local370] == -1) {
+                            local118.faceBlendedColours[local118.faceCount] = -1;
                         } else {
-                            local118.anIntArray231[local118.aShort33] = ColourUtils.hslToHsv(arg10[local370]);
+                            local118.faceBlendedColours[local118.faceCount] = ColourUtils.hslToHsv(blendedColours[local370]);
                         }
                     }
-                    local118.aShortArray34[local118.aShort33] = (short) arg6[local370];
-                    local118.aShortArray37[local118.aShort33] = (short) arg7[local370];
-                    local118.aShortArray36[local118.aShort33] = (short) arg8[local370];
+                    local118.faceA[local118.faceCount] = (short) faceA[local370];
+                    local118.faceB[local118.faceCount] = (short) faceB[local370];
+                    local118.faceC[local118.faceCount] = (short) faceC[local370];
                     if (local454) {
-                        if (arg11[local370] == -1 || this.aClass19_Sub2_8.textureSource.getMetrics(arg11[local370]).disableable) {
-                            local118.aShortArray30[local118.aShort33] = -1;
+                        if (textures[local370] == -1 || this.toolkit.textureSource.getMetrics(textures[local370]).disableable) {
+                            local118.faceTextures[local118.faceCount] = -1;
                         } else {
-                            local118.aShortArray30[local118.aShort33] = (short) arg11[local370];
-                            local118.aShortArray31[local118.aShort33] = (short) arg12[local370];
+                            local118.faceTextures[local118.faceCount] = (short) textures[local370];
+                            local118.faceSizes[local118.faceCount] = (short) sizes[local370];
                         }
                     }
-                    local118.aShort33++;
+                    local118.faceCount++;
                 }
             }
-            this.aClass107ArrayArray1[arg0][arg1] = local118;
-        } else if (arg9[0] >= 0 || arg10 != null && arg10[0] >= 0) {
-            @Pc(741) Class127 local741 = new Class127();
-            local79 = arg9[0];
-            local85 = arg11[0];
-            if (arg10 != null) {
-                local741.anInt2898 = Static244.method3513(this.aByteArrayArray31[arg0][arg1] - this.aByteArrayArray30[arg0][arg1], ColourUtils.hslToHsv(arg10[0]));
+            this.complexTiles[x][z] = local118;
+        } else if (colours[0] >= 0 || blendedColours != null && blendedColours[0] >= 0) {
+            @Pc(741) JavaSimpleTile local741 = new JavaSimpleTile();
+            local79 = colours[0];
+            local85 = textures[0];
+            if (blendedColours != null) {
+                local741.blendedColour = Static244.scaleHslLightness(this.lightLevels[x][z] - this.shadowLevels[x][z], ColourUtils.hslToHsv(blendedColours[0]));
                 if (local79 == -1) {
-                    local741.aByte59 = (byte) (local741.aByte59 | 0x2);
+                    local741.flags = (byte) (local741.flags | 0x2);
                 }
             }
-            if (super.tileHeights[arg0][arg1] == super.tileHeights[arg0 + 1][arg1] && super.tileHeights[arg0][arg1] == super.tileHeights[arg0 + 1][arg1 + 1] && super.tileHeights[arg0][arg1] == super.tileHeights[arg0][arg1 + 1]) {
-                local741.aByte59 = (byte) (local741.aByte59 | 0x1);
+            if (super.tileHeights[x][z] == super.tileHeights[x + 1][z] && super.tileHeights[x][z] == super.tileHeights[x + 1][z + 1] && super.tileHeights[x][z] == super.tileHeights[x][z + 1]) {
+                local741.flags = (byte) (local741.flags | 0x1);
             }
             @Pc(849) TextureMetrics local849 = null;
             if (local85 != -1) {
-                local849 = this.aClass19_Sub2_8.textureSource.getMetrics(local85);
+                local849 = this.toolkit.textureSource.getMetrics(local85);
             }
-            if (local849 == null || (local741.aByte59 & 0x2) != 0 || local849.disableable) {
+            if (local849 == null || (local741.flags & 0x2) != 0 || local849.disableable) {
                 @Pc(987) short local987 = ColourUtils.hslToHsv(local79);
-                local741.aShort42 = (short) Static244.method3513(this.aByteArrayArray31[arg0][arg1] - this.aByteArrayArray30[arg0][arg1], local987);
-                local741.aShort39 = (short) Static244.method3513(this.aByteArrayArray31[arg0 + 1][arg1] - this.aByteArrayArray30[arg0 + 1][arg1], local987);
-                local741.aShort41 = (short) Static244.method3513(this.aByteArrayArray31[arg0 + 1][arg1 + 1] - this.aByteArrayArray30[arg0 + 1][arg1 + 1], local987);
-                local741.aShort40 = (short) Static244.method3513(this.aByteArrayArray31[arg0][arg1 + 1] - this.aByteArrayArray30[arg0][arg1 + 1], local987);
-                local741.aShort38 = -1;
+                local741.hslSw = (short) Static244.scaleHslLightness(this.lightLevels[x][z] - this.shadowLevels[x][z], local987);
+                local741.hslSe = (short) Static244.scaleHslLightness(this.lightLevels[x + 1][z] - this.shadowLevels[x + 1][z], local987);
+                local741.hslNe = (short) Static244.scaleHslLightness(this.lightLevels[x + 1][z + 1] - this.shadowLevels[x + 1][z + 1], local987);
+                local741.hslNw = (short) Static244.scaleHslLightness(this.lightLevels[x][z + 1] - this.shadowLevels[x][z + 1], local987);
+                local741.texture = -1;
             } else {
-                local741.aShort42 = (short) (this.aByteArrayArray31[arg0][arg1] - this.aByteArrayArray30[arg0][arg1]);
-                local741.aShort39 = (short) (this.aByteArrayArray31[arg0 + 1][arg1] - this.aByteArrayArray30[arg0 + 1][arg1]);
-                local741.aShort41 = (short) (this.aByteArrayArray31[arg0 + 1][arg1 + 1] - this.aByteArrayArray30[arg0 + 1][arg1 + 1]);
-                local741.aShort40 = (short) (this.aByteArrayArray31[arg0][arg1 + 1] - this.aByteArrayArray30[arg0][arg1 + 1]);
-                local741.aShort38 = (short) local85;
-                if (this.method7162(local849.effectType) || local849.speedU != 0 || local849.speedV != 0) {
-                    local741.aByte59 = (byte) (local741.aByte59 | 0x4);
+                local741.hslSw = (short) (this.lightLevels[x][z] - this.shadowLevels[x][z]);
+                local741.hslSe = (short) (this.lightLevels[x + 1][z] - this.shadowLevels[x + 1][z]);
+                local741.hslNe = (short) (this.lightLevels[x + 1][z + 1] - this.shadowLevels[x + 1][z + 1]);
+                local741.hslNw = (short) (this.lightLevels[x][z + 1] - this.shadowLevels[x][z + 1]);
+                local741.texture = (short) local85;
+                if (this.isWaterEffect(local849.effectType) || local849.speedU != 0 || local849.speedV != 0) {
+                    local741.flags = (byte) (local741.flags | 0x4);
                 }
             }
-            this.simpleTiles[arg0][arg1] = local741;
+            this.simpleTiles[x][z] = local741;
         }
     }
 
     @OriginalMember(owner = "client!qs", name = "ka", descriptor = "(III)V")
     @Override
-    public void ka(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
-        if (this.aByteArrayArray30[arg0][arg1] < arg2) {
-            this.aByteArrayArray30[arg0][arg1] = (byte) arg2;
+    public void ka(@OriginalArg(0) int x, @OriginalArg(1) int z, @OriginalArg(2) int shadow) {
+        if (this.shadowLevels[x][z] < shadow) {
+            this.shadowLevels[x][z] = (byte) shadow;
         }
     }
 
     @OriginalMember(owner = "client!qs", name = "b", descriptor = "(IIZLclient!wf;Lclient!lb;[I[I[I[II)V")
-    public void method7166(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) boolean arg2, @OriginalArg(3) JavaThreadResource arg3, @OriginalArg(4) Rasterizer arg4, @OriginalArg(5) int[] arg5, @OriginalArg(6) int[] arg6, @OriginalArg(7) int[] arg7, @OriginalArg(8) int[] arg8, @OriginalArg(9) int arg9) {
-        @Pc(6) JavaSimpleBlendedTile simpleTile = this.simpleBlendedTiles[arg0][arg1];
+    public void renderBlendedTile(@OriginalArg(0) int x, @OriginalArg(1) int z, @OriginalArg(2) boolean water, @OriginalArg(3) JavaThreadResource resource, @OriginalArg(4) Rasterizer rasterizer, @OriginalArg(5) int[] screenX, @OriginalArg(6) int[] screenY, @OriginalArg(7) int[] depths, @OriginalArg(8) int[] fogLevels, @OriginalArg(9) int skipFlags) {
+        @Pc(6) JavaSimpleBlendedTile simpleTile = this.simpleBlendedTiles[x][z];
         @Pc(50) int local50;
         @Pc(55) int local55;
         @Pc(60) int local60;
@@ -1530,19 +1530,19 @@ public final class Ground_Sub3 extends Ground {
 
         if (simpleTile != null) {
             if ((simpleTile.aByte126 & 0x2) == 0) {
-                if (arg9 != 0) {
+                if (skipFlags != 0) {
                     if ((simpleTile.aByte126 & 0x4) == 0) {
-                        if ((arg9 & 0x2) != 0) {
+                        if ((skipFlags & 0x2) != 0) {
                             return;
                         }
-                    } else if ((arg9 & 0x1) != 0) {
+                    } else if ((skipFlags & 0x1) != 0) {
                         return;
                     }
                 }
 
-                @Pc(45) int local45 = arg0 * super.anInt8888;
+                @Pc(45) int local45 = x * super.anInt8888;
                 local50 = local45 + super.anInt8888;
-                local55 = arg1 * super.anInt8888;
+                local55 = z * super.anInt8888;
                 local60 = local55 + super.anInt8888;
                 @Pc(62) int local62 = 0;
                 @Pc(64) int local64 = 0;
@@ -1568,57 +1568,57 @@ public final class Ground_Sub3 extends Ground {
                 @Pc(516) float local516;
                 @Pc(576) float local576;
 
-                if ((simpleTile.aByte126 & 0x1) != 0 && !arg2) {
-                    local84 = super.tileHeights[arg0][arg1];
-                    @Pc(90) float local90 = this.aFloat172 * (float) local84;
+                if ((simpleTile.aByte126 & 0x1) != 0 && !water) {
+                    local84 = super.tileHeights[x][z];
+                    @Pc(90) float local90 = this.cameraE3_2 * (float) local84;
 
-                    if (this.anInt8145 == -1) {
-                        local111 = this.aFloat173 + this.aFloat164 * (float) local45 + local90 + this.aFloat165 * (float) local55;
-                        if (local111 <= (float) this.aClass19_Sub2_8.zNear) {
+                    if (this.depthOverride == -1) {
+                        local111 = this.cameraTz + this.cameraE3_1 * (float) local45 + local90 + this.cameraE3_3 * (float) local55;
+                        if (local111 <= (float) this.toolkit.zNear) {
                             return;
                         }
-                        local137 = this.aFloat173 + this.aFloat164 * (float) local50 + local90 + this.aFloat165 * (float) local55;
-                        if (local137 <= (float) this.aClass19_Sub2_8.zNear) {
+                        local137 = this.cameraTz + this.cameraE3_1 * (float) local50 + local90 + this.cameraE3_3 * (float) local55;
+                        if (local137 <= (float) this.toolkit.zNear) {
                             return;
                         }
-                        local163 = this.aFloat173 + this.aFloat164 * (float) local50 + local90 + this.aFloat165 * (float) local60;
-                        if (local163 <= (float) this.aClass19_Sub2_8.zNear) {
+                        local163 = this.cameraTz + this.cameraE3_1 * (float) local50 + local90 + this.cameraE3_3 * (float) local60;
+                        if (local163 <= (float) this.toolkit.zNear) {
                             return;
                         }
-                        local189 = this.aFloat173 + this.aFloat164 * (float) local45 + local90 + this.aFloat165 * (float) local60;
-                        if (local189 <= (float) this.aClass19_Sub2_8.zNear) {
+                        local189 = this.cameraTz + this.cameraE3_1 * (float) local45 + local90 + this.cameraE3_3 * (float) local60;
+                        if (local189 <= (float) this.toolkit.zNear) {
                             return;
                         }
                     } else {
-                        local111 = this.aFloat173 + this.aFloat164 * (float) local45 + local90 + this.aFloat165 * (float) local55;
-                        local137 = this.aFloat173 + this.aFloat164 * (float) local50 + local90 + this.aFloat165 * (float) local55;
-                        local163 = this.aFloat173 + this.aFloat164 * (float) local50 + local90 + this.aFloat165 * (float) local60;
-                        local189 = this.aFloat173 + this.aFloat164 * (float) local45 + local90 + this.aFloat165 * (float) local60;
+                        local111 = this.cameraTz + this.cameraE3_1 * (float) local45 + local90 + this.cameraE3_3 * (float) local55;
+                        local137 = this.cameraTz + this.cameraE3_1 * (float) local50 + local90 + this.cameraE3_3 * (float) local55;
+                        local163 = this.cameraTz + this.cameraE3_1 * (float) local50 + local90 + this.cameraE3_3 * (float) local60;
+                        local189 = this.cameraTz + this.cameraE3_1 * (float) local45 + local90 + this.cameraE3_3 * (float) local60;
                     }
 
-                    if (arg3.fogActive) {
-                        local276 = (int) (local111 - (float) arg3.fogPlane);
+                    if (resource.fogActive) {
+                        local276 = (int) (local111 - (float) resource.fogPlane);
                         if (local276 > 0) {
                             local62 = local276;
                             if (local276 > 255) {
                                 local62 = 255;
                             }
                         }
-                        local276 = (int) (local137 - (float) arg3.fogPlane);
+                        local276 = (int) (local137 - (float) resource.fogPlane);
                         if (local276 > 0) {
                             local64 = local276;
                             if (local276 > 255) {
                                 local64 = 255;
                             }
                         }
-                        local276 = (int) (local163 - (float) arg3.fogPlane);
+                        local276 = (int) (local163 - (float) resource.fogPlane);
                         if (local276 > 0) {
                             local66 = local276;
                             if (local276 > 255) {
                                 local66 = 255;
                             }
                         }
-                        local276 = (int) (local189 - (float) arg3.fogPlane);
+                        local276 = (int) (local189 - (float) resource.fogPlane);
                         if (local276 > 0) {
                             local68 = local276;
                             if (local276 > 255) {
@@ -1627,75 +1627,75 @@ public final class Ground_Sub3 extends Ground {
                         }
                     }
 
-                    @Pc(339) float local339 = this.aFloat167 * (float) local84;
-                    @Pc(345) float local345 = this.aFloat163 * (float) local84;
-                    if (this.anInt8145 == -1) {
-                        local366 = this.aFloat171 + this.aFloat170 * (float) local45 + local339 + this.aFloat162 * (float) local55;
-                        local379 = arg4.minX + (int) (local366 * (float) this.aClass19_Sub2_8.projectionScaleX / local111);
-                        local396 = this.aFloat169 + this.aFloat168 * (float) local45 + local345 + this.aFloat166 * (float) local55;
-                        local409 = arg4.minY + (int) (local396 * (float) this.aClass19_Sub2_8.projectionScaleY / local111);
-                        local426 = this.aFloat171 + this.aFloat170 * (float) local50 + local339 + this.aFloat162 * (float) local55;
-                        local439 = arg4.minX + (int) (local426 * (float) this.aClass19_Sub2_8.projectionScaleX / local137);
-                        local456 = this.aFloat169 + this.aFloat168 * (float) local50 + local345 + this.aFloat166 * (float) local55;
-                        local469 = arg4.minY + (int) (local456 * (float) this.aClass19_Sub2_8.projectionScaleY / local137);
-                        local486 = this.aFloat171 + this.aFloat170 * (float) local50 + local339 + this.aFloat162 * (float) local60;
-                        local499 = arg4.minX + (int) (local486 * (float) this.aClass19_Sub2_8.projectionScaleX / local163);
-                        local516 = this.aFloat169 + this.aFloat168 * (float) local50 + local345 + this.aFloat166 * (float) local60;
-                        local529 = arg4.minY + (int) (local516 * (float) this.aClass19_Sub2_8.projectionScaleY / local163);
-                        local546 = this.aFloat171 + this.aFloat170 * (float) local45 + local339 + this.aFloat162 * (float) local60;
-                        local559 = arg4.minX + (int) (local546 * (float) this.aClass19_Sub2_8.projectionScaleX / local189);
-                        local576 = this.aFloat169 + this.aFloat168 * (float) local45 + local345 + this.aFloat166 * (float) local60;
-                        local589 = arg4.minY + (int) (local576 * (float) this.aClass19_Sub2_8.projectionScaleY / local189);
+                    @Pc(339) float local339 = this.cameraE1_2 * (float) local84;
+                    @Pc(345) float local345 = this.cameraE2_2 * (float) local84;
+                    if (this.depthOverride == -1) {
+                        local366 = this.cameraTx + this.cameraE1_1 * (float) local45 + local339 + this.cameraE1_3 * (float) local55;
+                        local379 = rasterizer.minX + (int) (local366 * (float) this.toolkit.projectionScaleX / local111);
+                        local396 = this.cameraTy + this.cameraE2_1 * (float) local45 + local345 + this.cameraE2_3 * (float) local55;
+                        local409 = rasterizer.minY + (int) (local396 * (float) this.toolkit.projectionScaleY / local111);
+                        local426 = this.cameraTx + this.cameraE1_1 * (float) local50 + local339 + this.cameraE1_3 * (float) local55;
+                        local439 = rasterizer.minX + (int) (local426 * (float) this.toolkit.projectionScaleX / local137);
+                        local456 = this.cameraTy + this.cameraE2_1 * (float) local50 + local345 + this.cameraE2_3 * (float) local55;
+                        local469 = rasterizer.minY + (int) (local456 * (float) this.toolkit.projectionScaleY / local137);
+                        local486 = this.cameraTx + this.cameraE1_1 * (float) local50 + local339 + this.cameraE1_3 * (float) local60;
+                        local499 = rasterizer.minX + (int) (local486 * (float) this.toolkit.projectionScaleX / local163);
+                        local516 = this.cameraTy + this.cameraE2_1 * (float) local50 + local345 + this.cameraE2_3 * (float) local60;
+                        local529 = rasterizer.minY + (int) (local516 * (float) this.toolkit.projectionScaleY / local163);
+                        local546 = this.cameraTx + this.cameraE1_1 * (float) local45 + local339 + this.cameraE1_3 * (float) local60;
+                        local559 = rasterizer.minX + (int) (local546 * (float) this.toolkit.projectionScaleX / local189);
+                        local576 = this.cameraTy + this.cameraE2_1 * (float) local45 + local345 + this.cameraE2_3 * (float) local60;
+                        local589 = rasterizer.minY + (int) (local576 * (float) this.toolkit.projectionScaleY / local189);
                     } else {
-                        local366 = this.aFloat171 + this.aFloat170 * (float) local45 + local339 + this.aFloat162 * (float) local55;
-                        local379 = arg4.minX + (int) (local366 * (float) this.aClass19_Sub2_8.projectionScaleX / (float) this.anInt8145);
-                        local396 = this.aFloat169 + this.aFloat168 * (float) local45 + local345 + this.aFloat166 * (float) local55;
-                        local409 = arg4.minY + (int) (local396 * (float) this.aClass19_Sub2_8.projectionScaleY / (float) this.anInt8145);
-                        local426 = this.aFloat171 + this.aFloat170 * (float) local50 + local339 + this.aFloat162 * (float) local55;
-                        local439 = arg4.minX + (int) (local426 * (float) this.aClass19_Sub2_8.projectionScaleX / (float) this.anInt8145);
-                        local456 = this.aFloat169 + this.aFloat168 * (float) local50 + local345 + this.aFloat166 * (float) local55;
-                        local469 = arg4.minY + (int) (local456 * (float) this.aClass19_Sub2_8.projectionScaleY / (float) this.anInt8145);
-                        local486 = this.aFloat171 + this.aFloat170 * (float) local50 + local339 + this.aFloat162 * (float) local60;
-                        local499 = arg4.minX + (int) (local486 * (float) this.aClass19_Sub2_8.projectionScaleX / (float) this.anInt8145);
-                        local516 = this.aFloat169 + this.aFloat168 * (float) local50 + local345 + this.aFloat166 * (float) local60;
-                        local529 = arg4.minY + (int) (local516 * (float) this.aClass19_Sub2_8.projectionScaleY / (float) this.anInt8145);
-                        local546 = this.aFloat171 + this.aFloat170 * (float) local45 + local339 + this.aFloat162 * (float) local60;
-                        local559 = arg4.minX + (int) (local546 * (float) this.aClass19_Sub2_8.projectionScaleX / (float) this.anInt8145);
-                        local576 = this.aFloat169 + this.aFloat168 * (float) local45 + local345 + this.aFloat166 * (float) local60;
-                        local589 = arg4.minY + (int) (local576 * (float) this.aClass19_Sub2_8.projectionScaleY / (float) this.anInt8145);
+                        local366 = this.cameraTx + this.cameraE1_1 * (float) local45 + local339 + this.cameraE1_3 * (float) local55;
+                        local379 = rasterizer.minX + (int) (local366 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
+                        local396 = this.cameraTy + this.cameraE2_1 * (float) local45 + local345 + this.cameraE2_3 * (float) local55;
+                        local409 = rasterizer.minY + (int) (local396 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
+                        local426 = this.cameraTx + this.cameraE1_1 * (float) local50 + local339 + this.cameraE1_3 * (float) local55;
+                        local439 = rasterizer.minX + (int) (local426 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
+                        local456 = this.cameraTy + this.cameraE2_1 * (float) local50 + local345 + this.cameraE2_3 * (float) local55;
+                        local469 = rasterizer.minY + (int) (local456 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
+                        local486 = this.cameraTx + this.cameraE1_1 * (float) local50 + local339 + this.cameraE1_3 * (float) local60;
+                        local499 = rasterizer.minX + (int) (local486 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
+                        local516 = this.cameraTy + this.cameraE2_1 * (float) local50 + local345 + this.cameraE2_3 * (float) local60;
+                        local529 = rasterizer.minY + (int) (local516 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
+                        local546 = this.cameraTx + this.cameraE1_1 * (float) local45 + local339 + this.cameraE1_3 * (float) local60;
+                        local559 = rasterizer.minX + (int) (local546 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
+                        local576 = this.cameraTy + this.cameraE2_1 * (float) local45 + local345 + this.cameraE2_3 * (float) local60;
+                        local589 = rasterizer.minY + (int) (local576 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
                     }
                 } else {
-                    local84 = super.tileHeights[arg0][arg1];
-                    local863 = super.tileHeights[arg0 + 1][arg1];
-                    local874 = super.tileHeights[arg0 + 1][arg1 + 1];
-                    @Pc(883) int local883 = super.tileHeights[arg0][arg1 + 1];
+                    local84 = super.tileHeights[x][z];
+                    local863 = super.tileHeights[x + 1][z];
+                    local874 = super.tileHeights[x + 1][z + 1];
+                    @Pc(883) int local883 = super.tileHeights[x][z + 1];
 
-                    if (this.anInt8145 == -1) {
-                        local111 = this.aFloat173 + this.aFloat164 * (float) local45 + this.aFloat172 * (float) local84 + this.aFloat165 * (float) local55;
-                        if (local111 <= (float) this.aClass19_Sub2_8.zNear) {
+                    if (this.depthOverride == -1) {
+                        local111 = this.cameraTz + this.cameraE3_1 * (float) local45 + this.cameraE3_2 * (float) local84 + this.cameraE3_3 * (float) local55;
+                        if (local111 <= (float) this.toolkit.zNear) {
                             return;
                         }
-                        local137 = this.aFloat173 + this.aFloat164 * (float) local50 + this.aFloat172 * (float) local863 + this.aFloat165 * (float) local55;
-                        if (local137 <= (float) this.aClass19_Sub2_8.zNear) {
+                        local137 = this.cameraTz + this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local863 + this.cameraE3_3 * (float) local55;
+                        if (local137 <= (float) this.toolkit.zNear) {
                             return;
                         }
-                        local163 = this.aFloat173 + this.aFloat164 * (float) local50 + this.aFloat172 * (float) local874 + this.aFloat165 * (float) local60;
-                        if (local163 <= (float) this.aClass19_Sub2_8.zNear) {
+                        local163 = this.cameraTz + this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local874 + this.cameraE3_3 * (float) local60;
+                        if (local163 <= (float) this.toolkit.zNear) {
                             return;
                         }
-                        local189 = this.aFloat173 + this.aFloat164 * (float) local45 + this.aFloat172 * (float) local883 + this.aFloat165 * (float) local60;
-                        if (local189 <= (float) this.aClass19_Sub2_8.zNear) {
+                        local189 = this.cameraTz + this.cameraE3_1 * (float) local45 + this.cameraE3_2 * (float) local883 + this.cameraE3_3 * (float) local60;
+                        if (local189 <= (float) this.toolkit.zNear) {
                             return;
                         }
                     } else {
-                        local111 = this.aFloat173 + this.aFloat164 * (float) local45 + this.aFloat172 * (float) local84 + this.aFloat165 * (float) local55;
-                        local137 = this.aFloat173 + this.aFloat164 * (float) local50 + this.aFloat172 * (float) local863 + this.aFloat165 * (float) local55;
-                        local163 = this.aFloat173 + this.aFloat164 * (float) local50 + this.aFloat172 * (float) local874 + this.aFloat165 * (float) local60;
-                        local189 = this.aFloat173 + this.aFloat164 * (float) local45 + this.aFloat172 * (float) local883 + this.aFloat165 * (float) local60;
+                        local111 = this.cameraTz + this.cameraE3_1 * (float) local45 + this.cameraE3_2 * (float) local84 + this.cameraE3_3 * (float) local55;
+                        local137 = this.cameraTz + this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local863 + this.cameraE3_3 * (float) local55;
+                        local163 = this.cameraTz + this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local874 + this.cameraE3_3 * (float) local60;
+                        local189 = this.cameraTz + this.cameraE3_1 * (float) local45 + this.cameraE3_2 * (float) local883 + this.cameraE3_3 * (float) local60;
                     }
 
-                    if (arg2) {
-                        local276 = (int) (local111 - (float) arg3.fogPlane);
+                    if (water) {
+                        local276 = (int) (local111 - (float) resource.fogPlane);
                         if (local276 > 255) {
                             local276 = 255;
                         }
@@ -1707,7 +1707,7 @@ public final class Ground_Sub3 extends Ground {
                                 local84 -= local1116;
                             }
                         }
-                        local276 = (int) (local137 - (float) arg3.fogPlane);
+                        local276 = (int) (local137 - (float) resource.fogPlane);
                         if (local276 > 255) {
                             local276 = 255;
                         }
@@ -1718,7 +1718,7 @@ public final class Ground_Sub3 extends Ground {
                                 local863 -= local1116;
                             }
                         }
-                        local276 = (int) (local163 - (float) arg3.fogPlane);
+                        local276 = (int) (local163 - (float) resource.fogPlane);
                         if (local276 > 255) {
                             local276 = 255;
                         }
@@ -1729,7 +1729,7 @@ public final class Ground_Sub3 extends Ground {
                                 local874 -= local1116;
                             }
                         }
-                        local276 = (int) (local189 - (float) arg3.fogPlane);
+                        local276 = (int) (local189 - (float) resource.fogPlane);
                         if (local276 > 255) {
                             local276 = 255;
                         }
@@ -1740,29 +1740,29 @@ public final class Ground_Sub3 extends Ground {
                                 local883 -= local1116;
                             }
                         }
-                    } else if (arg3.fogActive) {
-                        local276 = (int) (local111 - (float) arg3.fogPlane);
+                    } else if (resource.fogActive) {
+                        local276 = (int) (local111 - (float) resource.fogPlane);
                         if (local276 > 0) {
                             local62 = local276;
                             if (local276 > 255) {
                                 local62 = 255;
                             }
                         }
-                        local276 = (int) (local137 - (float) arg3.fogPlane);
+                        local276 = (int) (local137 - (float) resource.fogPlane);
                         if (local276 > 0) {
                             local64 = local276;
                             if (local276 > 255) {
                                 local64 = 255;
                             }
                         }
-                        local276 = (int) (local163 - (float) arg3.fogPlane);
+                        local276 = (int) (local163 - (float) resource.fogPlane);
                         if (local276 > 0) {
                             local66 = local276;
                             if (local276 > 255) {
                                 local66 = 255;
                             }
                         }
-                        local276 = (int) (local189 - (float) arg3.fogPlane);
+                        local276 = (int) (local189 - (float) resource.fogPlane);
                         if (local276 > 0) {
                             local68 = local276;
                             if (local276 > 255) {
@@ -1771,91 +1771,91 @@ public final class Ground_Sub3 extends Ground {
                         }
                     }
 
-                    if (this.anInt8145 == -1) {
-                        local366 = this.aFloat171 + this.aFloat170 * (float) local45 + this.aFloat167 * (float) local84 + this.aFloat162 * (float) local55;
-                        local379 = arg4.minX + (int) (local366 * (float) this.aClass19_Sub2_8.projectionScaleX / local111);
-                        local396 = this.aFloat169 + this.aFloat168 * (float) local45 + this.aFloat163 * (float) local84 + this.aFloat166 * (float) local55;
-                        local409 = arg4.minY + (int) (local396 * (float) this.aClass19_Sub2_8.projectionScaleY / local111);
-                        local426 = this.aFloat171 + this.aFloat170 * (float) local50 + this.aFloat167 * (float) local863 + this.aFloat162 * (float) local55;
-                        local439 = arg4.minX + (int) (local426 * (float) this.aClass19_Sub2_8.projectionScaleX / local137);
-                        local456 = this.aFloat169 + this.aFloat168 * (float) local50 + this.aFloat163 * (float) local863 + this.aFloat166 * (float) local55;
-                        local469 = arg4.minY + (int) (local456 * (float) this.aClass19_Sub2_8.projectionScaleY / local137);
-                        local486 = this.aFloat171 + this.aFloat170 * (float) local50 + this.aFloat167 * (float) local874 + this.aFloat162 * (float) local60;
-                        local499 = arg4.minX + (int) (local486 * (float) this.aClass19_Sub2_8.projectionScaleX / local163);
-                        local516 = this.aFloat169 + this.aFloat168 * (float) local50 + this.aFloat163 * (float) local874 + this.aFloat166 * (float) local60;
-                        local529 = arg4.minY + (int) (local516 * (float) this.aClass19_Sub2_8.projectionScaleY / local163);
-                        local546 = this.aFloat171 + this.aFloat170 * (float) local45 + this.aFloat167 * (float) local883 + this.aFloat162 * (float) local60;
-                        local559 = arg4.minX + (int) (local546 * (float) this.aClass19_Sub2_8.projectionScaleX / local189);
-                        local576 = this.aFloat169 + this.aFloat168 * (float) local45 + this.aFloat163 * (float) local883 + this.aFloat166 * (float) local60;
-                        local589 = arg4.minY + (int) (local576 * (float) this.aClass19_Sub2_8.projectionScaleY / local189);
+                    if (this.depthOverride == -1) {
+                        local366 = this.cameraTx + this.cameraE1_1 * (float) local45 + this.cameraE1_2 * (float) local84 + this.cameraE1_3 * (float) local55;
+                        local379 = rasterizer.minX + (int) (local366 * (float) this.toolkit.projectionScaleX / local111);
+                        local396 = this.cameraTy + this.cameraE2_1 * (float) local45 + this.cameraE2_2 * (float) local84 + this.cameraE2_3 * (float) local55;
+                        local409 = rasterizer.minY + (int) (local396 * (float) this.toolkit.projectionScaleY / local111);
+                        local426 = this.cameraTx + this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local863 + this.cameraE1_3 * (float) local55;
+                        local439 = rasterizer.minX + (int) (local426 * (float) this.toolkit.projectionScaleX / local137);
+                        local456 = this.cameraTy + this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local863 + this.cameraE2_3 * (float) local55;
+                        local469 = rasterizer.minY + (int) (local456 * (float) this.toolkit.projectionScaleY / local137);
+                        local486 = this.cameraTx + this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local874 + this.cameraE1_3 * (float) local60;
+                        local499 = rasterizer.minX + (int) (local486 * (float) this.toolkit.projectionScaleX / local163);
+                        local516 = this.cameraTy + this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local874 + this.cameraE2_3 * (float) local60;
+                        local529 = rasterizer.minY + (int) (local516 * (float) this.toolkit.projectionScaleY / local163);
+                        local546 = this.cameraTx + this.cameraE1_1 * (float) local45 + this.cameraE1_2 * (float) local883 + this.cameraE1_3 * (float) local60;
+                        local559 = rasterizer.minX + (int) (local546 * (float) this.toolkit.projectionScaleX / local189);
+                        local576 = this.cameraTy + this.cameraE2_1 * (float) local45 + this.cameraE2_2 * (float) local883 + this.cameraE2_3 * (float) local60;
+                        local589 = rasterizer.minY + (int) (local576 * (float) this.toolkit.projectionScaleY / local189);
                     } else {
-                        local366 = this.aFloat171 + this.aFloat170 * (float) local45 + this.aFloat167 * (float) local84 + this.aFloat162 * (float) local55;
-                        local379 = arg4.minX + (int) (local366 * (float) this.aClass19_Sub2_8.projectionScaleX / (float) this.anInt8145);
-                        local396 = this.aFloat169 + this.aFloat168 * (float) local45 + this.aFloat163 * (float) local84 + this.aFloat166 * (float) local55;
-                        local409 = arg4.minY + (int) (local396 * (float) this.aClass19_Sub2_8.projectionScaleY / (float) this.anInt8145);
-                        local426 = this.aFloat171 + this.aFloat170 * (float) local50 + this.aFloat167 * (float) local863 + this.aFloat162 * (float) local55;
-                        local439 = arg4.minX + (int) (local426 * (float) this.aClass19_Sub2_8.projectionScaleX / (float) this.anInt8145);
-                        local456 = this.aFloat169 + this.aFloat168 * (float) local50 + this.aFloat163 * (float) local863 + this.aFloat166 * (float) local55;
-                        local469 = arg4.minY + (int) (local456 * (float) this.aClass19_Sub2_8.projectionScaleY / (float) this.anInt8145);
-                        local486 = this.aFloat171 + this.aFloat170 * (float) local50 + this.aFloat167 * (float) local874 + this.aFloat162 * (float) local60;
-                        local499 = arg4.minX + (int) (local486 * (float) this.aClass19_Sub2_8.projectionScaleX / (float) this.anInt8145);
-                        local516 = this.aFloat169 + this.aFloat168 * (float) local50 + this.aFloat163 * (float) local874 + this.aFloat166 * (float) local60;
-                        local529 = arg4.minY + (int) (local516 * (float) this.aClass19_Sub2_8.projectionScaleY / (float) this.anInt8145);
-                        local546 = this.aFloat171 + this.aFloat170 * (float) local45 + this.aFloat167 * (float) local883 + this.aFloat162 * (float) local60;
-                        local559 = arg4.minX + (int) (local546 * (float) this.aClass19_Sub2_8.projectionScaleX / (float) this.anInt8145);
-                        local576 = this.aFloat169 + this.aFloat168 * (float) local45 + this.aFloat163 * (float) local883 + this.aFloat166 * (float) local60;
-                        local589 = arg4.minY + (int) (local576 * (float) this.aClass19_Sub2_8.projectionScaleY / (float) this.anInt8145);
+                        local366 = this.cameraTx + this.cameraE1_1 * (float) local45 + this.cameraE1_2 * (float) local84 + this.cameraE1_3 * (float) local55;
+                        local379 = rasterizer.minX + (int) (local366 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
+                        local396 = this.cameraTy + this.cameraE2_1 * (float) local45 + this.cameraE2_2 * (float) local84 + this.cameraE2_3 * (float) local55;
+                        local409 = rasterizer.minY + (int) (local396 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
+                        local426 = this.cameraTx + this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local863 + this.cameraE1_3 * (float) local55;
+                        local439 = rasterizer.minX + (int) (local426 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
+                        local456 = this.cameraTy + this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local863 + this.cameraE2_3 * (float) local55;
+                        local469 = rasterizer.minY + (int) (local456 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
+                        local486 = this.cameraTx + this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local874 + this.cameraE1_3 * (float) local60;
+                        local499 = rasterizer.minX + (int) (local486 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
+                        local516 = this.cameraTy + this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local874 + this.cameraE2_3 * (float) local60;
+                        local529 = rasterizer.minY + (int) (local516 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
+                        local546 = this.cameraTx + this.cameraE1_1 * (float) local45 + this.cameraE1_2 * (float) local883 + this.cameraE1_3 * (float) local60;
+                        local559 = rasterizer.minX + (int) (local546 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
+                        local576 = this.cameraTy + this.cameraE2_1 * (float) local45 + this.cameraE2_2 * (float) local883 + this.cameraE2_3 * (float) local60;
+                        local589 = rasterizer.minY + (int) (local576 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
                     }
                 }
 
-                @Pc(1864) boolean local1864 = simpleTile.aShort105 != -1 && this.method7162(this.aClass19_Sub2_8.textureSource.getMetrics(simpleTile.aShort105).effectType);
+                @Pc(1864) boolean local1864 = simpleTile.aShort105 != -1 && this.isWaterEffect(this.toolkit.textureSource.getMetrics(simpleTile.aShort105).effectType);
 
-                if (this.anInt8145 == -1) {
+                if (this.depthOverride == -1) {
                     local863 = local64 + local66 + local68;
                     if ((local499 - local559) * (local469 - local589) - (local529 - local589) * (local439 - local559) > 0) {
-                        arg4.clamp = local499 < 0 || local559 < 0 || local439 < 0 || local499 > arg4.width || local559 > arg4.width || local439 > arg4.width;
+                        rasterizer.clamp = local499 < 0 || local559 < 0 || local439 < 0 || local499 > rasterizer.width || local559 > rasterizer.width || local439 > rasterizer.width;
 
                         if (local863 >= 765) {
-                            arg4.renderFlatTriangleRgb((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, (float) (int) local163, (float) (int) local189, (float) (int) local137, arg3.fogColour);
+                            rasterizer.renderFlatTriangleRgb((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, (float) (int) local163, (float) (int) local189, (float) (int) local137, resource.fogColour);
                         } else if (local863 > 0) {
                             if (simpleTile.aShort105 >= 0) {
                                 local874 = -16777216;
                                 if (local1864) {
                                     local874 = -1694498816;
                                 }
-                                arg4.renderTexturedTriangle((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, local163, local189, local137, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, local874 | simpleTile.anInt7767 & 0xFFFFFF, local874 | simpleTile.anInt7769 & 0xFFFFFF, local874 | simpleTile.anInt7771 & 0xFFFFFF, arg3.fogColour, local66, local68, local64, simpleTile.aShort105);
+                                rasterizer.renderTexturedTriangle((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, local163, local189, local137, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, local874 | simpleTile.anInt7767 & 0xFFFFFF, local874 | simpleTile.anInt7769 & 0xFFFFFF, local874 | simpleTile.anInt7771 & 0xFFFFFF, resource.fogColour, local66, local68, local64, simpleTile.aShort105);
                             } else {
                                 if (local1864) {
-                                    arg4.alpha = 100;
+                                    rasterizer.alpha = 100;
                                 }
-                                arg4.renderTriangleRgb((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, (float) (int) local163, (float) (int) local189, (float) (int) local137, Static462.method6270(local66 << 24 | arg3.fogColour, simpleTile.anInt7767), Static462.method6270(local68 << 24 | arg3.fogColour, simpleTile.anInt7769), Static462.method6270(local64 << 24 | arg3.fogColour, simpleTile.anInt7771));
-                                arg4.alpha = 0;
+                                rasterizer.renderTriangleRgb((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, (float) (int) local163, (float) (int) local189, (float) (int) local137, Static462.blendArgb(local66 << 24 | resource.fogColour, simpleTile.anInt7767), Static462.blendArgb(local68 << 24 | resource.fogColour, simpleTile.anInt7769), Static462.blendArgb(local64 << 24 | resource.fogColour, simpleTile.anInt7771));
+                                rasterizer.alpha = 0;
                             }
                         } else if (simpleTile.aShort105 >= 0) {
                             local874 = -16777216;
                             if (local1864) {
                                 local874 = -1694498816;
                             }
-                            arg4.renderTexturedTriangle((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, local163, local189, local137, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, local874 | simpleTile.anInt7767 & 0xFFFFFF, local874 | simpleTile.anInt7769 & 0xFFFFFF, local874 | simpleTile.anInt7771 & 0xFFFFFF, 0, 0, 0, 0, simpleTile.aShort105);
+                            rasterizer.renderTexturedTriangle((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, local163, local189, local137, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, local874 | simpleTile.anInt7767 & 0xFFFFFF, local874 | simpleTile.anInt7769 & 0xFFFFFF, local874 | simpleTile.anInt7771 & 0xFFFFFF, 0, 0, 0, 0, simpleTile.aShort105);
                         } else {
                             if (local1864) {
-                                arg4.alpha = 100;
+                                rasterizer.alpha = 100;
                             }
-                            arg4.renderTriangleRgb((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, (float) (int) local163, (float) (int) local189, (float) (int) local137, simpleTile.anInt7767, simpleTile.anInt7769, simpleTile.anInt7771);
-                            arg4.alpha = 0;
+                            rasterizer.renderTriangleRgb((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, (float) (int) local163, (float) (int) local189, (float) (int) local137, simpleTile.anInt7767, simpleTile.anInt7769, simpleTile.anInt7771);
+                            rasterizer.alpha = 0;
                         }
                     }
 
                     local863 = local62 + local64 + local68;
 
                     if ((local379 - local439) * (local589 - local469) - (local409 - local469) * (local559 - local439) > 0) {
-                        arg4.clamp = local379 < 0 || local439 < 0 || local559 < 0 || local379 > arg4.width || local439 > arg4.width || local559 > arg4.width;
+                        rasterizer.clamp = local379 < 0 || local439 < 0 || local559 < 0 || local379 > rasterizer.width || local439 > rasterizer.width || local559 > rasterizer.width;
 
                         if (local863 >= 765) {
-                            arg4.renderFlatTriangleRgb((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, (float) (int) local111, (float) (int) local137, (float) (int) local189, arg3.fogColour);
+                            rasterizer.renderFlatTriangleRgb((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, (float) (int) local111, (float) (int) local137, (float) (int) local189, resource.fogColour);
                         } else {
                             if (local1864) {
-                                arg4.alpha = -1694498816;
+                                rasterizer.alpha = -1694498816;
                             }
 
                             if (local863 > 0) {
@@ -1865,14 +1865,14 @@ public final class Ground_Sub3 extends Ground {
                                         local874 = -1694498816;
                                     }
 
-                                    arg4.renderTexturedTriangle((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, local111, local137, local189, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, local874 | simpleTile.anInt7768 & 0xFFFFFF, local874 | simpleTile.anInt7771 & 0xFFFFFF, local874 | simpleTile.anInt7769 & 0xFFFFFF, arg3.fogColour, local62, local64, local68, simpleTile.aShort105);
+                                    rasterizer.renderTexturedTriangle((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, local111, local137, local189, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, local874 | simpleTile.anInt7768 & 0xFFFFFF, local874 | simpleTile.anInt7771 & 0xFFFFFF, local874 | simpleTile.anInt7769 & 0xFFFFFF, resource.fogColour, local62, local64, local68, simpleTile.aShort105);
                                 } else {
                                     if (local1864) {
-                                        arg4.alpha = 100;
+                                        rasterizer.alpha = 100;
                                     }
 
-                                    arg4.renderTriangleRgb((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, (float) (int) local111, (float) (int) local137, (float) (int) local189, Static462.method6270(local62 << 24 | arg3.fogColour, simpleTile.anInt7768), Static462.method6270(local64 << 24 | arg3.fogColour, simpleTile.anInt7771), Static462.method6270(local68 << 24 | arg3.fogColour, simpleTile.anInt7769));
-                                    arg4.alpha = 0;
+                                    rasterizer.renderTriangleRgb((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, (float) (int) local111, (float) (int) local137, (float) (int) local189, Static462.blendArgb(local62 << 24 | resource.fogColour, simpleTile.anInt7768), Static462.blendArgb(local64 << 24 | resource.fogColour, simpleTile.anInt7771), Static462.blendArgb(local68 << 24 | resource.fogColour, simpleTile.anInt7769));
+                                    rasterizer.alpha = 0;
                                 }
                             } else if (simpleTile.aShort105 >= 0) {
                                 local874 = -16777216;
@@ -1880,27 +1880,27 @@ public final class Ground_Sub3 extends Ground {
                                     local874 = -1694498816;
                                 }
 
-                                arg4.renderTexturedTriangle((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, local111, local137, local189, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, local874 | simpleTile.anInt7768 & 0xFFFFFF, local874 | simpleTile.anInt7771 & 0xFFFFFF, local874 | simpleTile.anInt7769 & 0xFFFFFF, 0, 0, 0, 0, simpleTile.aShort105);
+                                rasterizer.renderTexturedTriangle((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, local111, local137, local189, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, local874 | simpleTile.anInt7768 & 0xFFFFFF, local874 | simpleTile.anInt7771 & 0xFFFFFF, local874 | simpleTile.anInt7769 & 0xFFFFFF, 0, 0, 0, 0, simpleTile.aShort105);
                             } else {
                                 if (local1864) {
-                                    arg4.alpha = 100;
+                                    rasterizer.alpha = 100;
                                 }
 
-                                arg4.renderTriangleRgb((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, (float) (int) local111, (float) (int) local137, (float) (int) local189, simpleTile.anInt7768, simpleTile.anInt7771, simpleTile.anInt7769);
-                                arg4.alpha = 0;
+                                rasterizer.renderTriangleRgb((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, (float) (int) local111, (float) (int) local137, (float) (int) local189, simpleTile.anInt7768, simpleTile.anInt7771, simpleTile.anInt7769);
+                                rasterizer.alpha = 0;
                             }
                         }
                     }
                 } else {
                     local863 = local64 + local66 + local68;
                     if ((local499 - local559) * (local469 - local589) - (local529 - local589) * (local439 - local559) > 0) {
-                        arg4.clamp = local499 < 0 || local559 < 0 || local439 < 0 || local499 > arg4.width || local559 > arg4.width || local439 > arg4.width;
+                        rasterizer.clamp = local499 < 0 || local559 < 0 || local439 < 0 || local499 > rasterizer.width || local559 > rasterizer.width || local439 > rasterizer.width;
 
                         if (local863 >= 765) {
-                            arg4.renderFlatTriangleRgb((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, (float) (int) local163, (float) (int) local189, (float) (int) local137, arg3.fogColour);
+                            rasterizer.renderFlatTriangleRgb((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, (float) (int) local163, (float) (int) local189, (float) (int) local137, resource.fogColour);
                         } else {
                             if (local1864) {
-                                arg4.alpha = -1694498816;
+                                rasterizer.alpha = -1694498816;
                             }
 
                             if (local863 > 0) {
@@ -1910,14 +1910,14 @@ public final class Ground_Sub3 extends Ground {
                                         local874 = -1694498816;
                                     }
 
-                                    arg4.renderTexturedTriangle((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, local163, local189, local137, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, local874 | simpleTile.anInt7767 & 0xFFFFFF, local874 | simpleTile.anInt7769 & 0xFFFFFF, local874 | simpleTile.anInt7771 & 0xFFFFFF, arg3.fogColour, local66, local68, local64, simpleTile.aShort105);
+                                    rasterizer.renderTexturedTriangle((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, local163, local189, local137, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, local874 | simpleTile.anInt7767 & 0xFFFFFF, local874 | simpleTile.anInt7769 & 0xFFFFFF, local874 | simpleTile.anInt7771 & 0xFFFFFF, resource.fogColour, local66, local68, local64, simpleTile.aShort105);
                                 } else {
                                     if (local1864) {
-                                        arg4.alpha = 100;
+                                        rasterizer.alpha = 100;
                                     }
 
-                                    arg4.renderTriangleRgb((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, (float) (int) local163, (float) (int) local189, (float) (int) local137, Static462.method6270(local66 << 24 | arg3.fogColour, simpleTile.anInt7767), Static462.method6270(local68 << 24 | arg3.fogColour, simpleTile.anInt7769), Static462.method6270(local64 << 24 | arg3.fogColour, simpleTile.anInt7771));
-                                    arg4.alpha = 0;
+                                    rasterizer.renderTriangleRgb((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, (float) (int) local163, (float) (int) local189, (float) (int) local137, Static462.blendArgb(local66 << 24 | resource.fogColour, simpleTile.anInt7767), Static462.blendArgb(local68 << 24 | resource.fogColour, simpleTile.anInt7769), Static462.blendArgb(local64 << 24 | resource.fogColour, simpleTile.anInt7771));
+                                    rasterizer.alpha = 0;
                                 }
                             } else if (simpleTile.aShort105 >= 0) {
                                 local874 = -16777216;
@@ -1925,14 +1925,14 @@ public final class Ground_Sub3 extends Ground {
                                     local874 = -1694498816;
                                 }
 
-                                arg4.renderTexturedTriangle((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, local163, local189, local137, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, local874 | simpleTile.anInt7767 & 0xFFFFFF, local874 | simpleTile.anInt7769 & 0xFFFFFF, local874 | simpleTile.anInt7771 & 0xFFFFFF, 0, 0, 0, 0, simpleTile.aShort105);
+                                rasterizer.renderTexturedTriangle((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, local163, local189, local137, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, local874 | simpleTile.anInt7767 & 0xFFFFFF, local874 | simpleTile.anInt7769 & 0xFFFFFF, local874 | simpleTile.anInt7771 & 0xFFFFFF, 0, 0, 0, 0, simpleTile.aShort105);
                             } else {
                                 if (local1864) {
-                                    arg4.alpha = 100;
+                                    rasterizer.alpha = 100;
                                 }
 
-                                arg4.renderTriangleRgb((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, (float) (int) local163, (float) (int) local189, (float) (int) local137, simpleTile.anInt7767, simpleTile.anInt7769, simpleTile.anInt7771);
-                                arg4.alpha = 0;
+                                rasterizer.renderTriangleRgb((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, (float) (int) local163, (float) (int) local189, (float) (int) local137, simpleTile.anInt7767, simpleTile.anInt7769, simpleTile.anInt7771);
+                                rasterizer.alpha = 0;
                             }
                         }
                     }
@@ -1940,13 +1940,13 @@ public final class Ground_Sub3 extends Ground {
                     local863 = local62 + local64 + local68;
 
                     if ((local379 - local439) * (local589 - local469) - (local409 - local469) * (local559 - local439) > 0) {
-                        arg4.clamp = local379 < 0 || local439 < 0 || local559 < 0 || local379 > arg4.width || local439 > arg4.width || local559 > arg4.width;
+                        rasterizer.clamp = local379 < 0 || local439 < 0 || local559 < 0 || local379 > rasterizer.width || local439 > rasterizer.width || local559 > rasterizer.width;
 
                         if (local863 >= 765) {
-                            arg4.renderFlatTriangleRgb((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, (float) (int) local111, (float) (int) local137, (float) (int) local189, arg3.fogColour);
+                            rasterizer.renderFlatTriangleRgb((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, (float) (int) local111, (float) (int) local137, (float) (int) local189, resource.fogColour);
                         } else {
                             if (local1864) {
-                                arg4.alpha = -1694498816;
+                                rasterizer.alpha = -1694498816;
                             }
 
                             if (local863 > 0) {
@@ -1956,14 +1956,14 @@ public final class Ground_Sub3 extends Ground {
                                         local874 = -1694498816;
                                     }
 
-                                    arg4.renderTexturedTriangle((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, local111, local137, local189, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, local874 | simpleTile.anInt7768 & 0xFFFFFF, local874 | simpleTile.anInt7771 & 0xFFFFFF, local874 | simpleTile.anInt7769 & 0xFFFFFF, arg3.fogColour, local62, local64, local68, simpleTile.aShort105);
+                                    rasterizer.renderTexturedTriangle((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, local111, local137, local189, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, local874 | simpleTile.anInt7768 & 0xFFFFFF, local874 | simpleTile.anInt7771 & 0xFFFFFF, local874 | simpleTile.anInt7769 & 0xFFFFFF, resource.fogColour, local62, local64, local68, simpleTile.aShort105);
                                 } else {
                                     if (local1864) {
-                                        arg4.alpha = 100;
+                                        rasterizer.alpha = 100;
                                     }
 
-                                    arg4.renderTriangleRgb((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, (float) (int) local111, (float) (int) local137, (float) (int) local189, Static462.method6270(local62 << 24 | arg3.fogColour, simpleTile.anInt7768), Static462.method6270(local64 << 24 | arg3.fogColour, simpleTile.anInt7771), Static462.method6270(local68 << 24 | arg3.fogColour, simpleTile.anInt7769));
-                                    arg4.alpha = 0;
+                                    rasterizer.renderTriangleRgb((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, (float) (int) local111, (float) (int) local137, (float) (int) local189, Static462.blendArgb(local62 << 24 | resource.fogColour, simpleTile.anInt7768), Static462.blendArgb(local64 << 24 | resource.fogColour, simpleTile.anInt7771), Static462.blendArgb(local68 << 24 | resource.fogColour, simpleTile.anInt7769));
+                                    rasterizer.alpha = 0;
                                 }
                             } else if (simpleTile.aShort105 >= 0) {
                                 local874 = -16777216;
@@ -1971,29 +1971,29 @@ public final class Ground_Sub3 extends Ground {
                                     local874 = -1694498816;
                                 }
 
-                                arg4.renderTexturedTriangle((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, local111, local137, local189, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, local874 | simpleTile.anInt7768 & 0xFFFFFF, local874 | simpleTile.anInt7771 & 0xFFFFFF, local874 | simpleTile.anInt7769 & 0xFFFFFF, 0, 0, 0, 0, simpleTile.aShort105);
+                                rasterizer.renderTexturedTriangle((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, local111, local137, local189, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, local874 | simpleTile.anInt7768 & 0xFFFFFF, local874 | simpleTile.anInt7771 & 0xFFFFFF, local874 | simpleTile.anInt7769 & 0xFFFFFF, 0, 0, 0, 0, simpleTile.aShort105);
                             } else {
                                 if (local1864) {
-                                    arg4.alpha = 100;
+                                    rasterizer.alpha = 100;
                                 }
 
-                                arg4.renderTriangleRgb((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, (float) (int) local111, (float) (int) local137, (float) (int) local189, simpleTile.anInt7768, simpleTile.anInt7771, simpleTile.anInt7769);
-                                arg4.alpha = 0;
+                                rasterizer.renderTriangleRgb((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, (float) (int) local111, (float) (int) local137, (float) (int) local189, simpleTile.anInt7768, simpleTile.anInt7771, simpleTile.anInt7769);
+                                rasterizer.alpha = 0;
                             }
                         }
                     }
                 }
             }
         } else {
-            @Pc(3142) JavaComplexBlendedTile complexTile = this.complexBlendedTiles[arg0][arg1];
+            @Pc(3142) JavaComplexBlendedTile complexTile = this.complexBlendedTiles[x][z];
 
             if (complexTile != null) {
-                if (arg9 != 0) {
+                if (skipFlags != 0) {
                     if ((complexTile.aByte141 & 0x4) == 0) {
-                        if ((arg9 & 0x2) != 0) {
+                        if ((skipFlags & 0x2) != 0) {
                             return;
                         }
-                    } else if ((arg9 & 0x1) != 0) {
+                    } else if ((skipFlags & 0x1) != 0) {
                         return;
                     }
                 }
@@ -2001,84 +2001,84 @@ public final class Ground_Sub3 extends Ground {
                 @Pc(3321) float local3321;
                 @Pc(3342) float local3342;
                 @Pc(3222) float local3222;
-                if (this.anInt8145 == -1) {
+                if (this.depthOverride == -1) {
                     for (local559 = 0; local559 < complexTile.aShort128; local559++) {
-                        local50 = complexTile.aShortArray142[local559] + (arg0 << super.anInt8895);
+                        local50 = complexTile.aShortArray142[local559] + (x << super.anInt8895);
                         local55 = complexTile.aShortArray143[local559];
-                        local60 = complexTile.aShortArray141[local559] + (arg1 << super.anInt8895);
-                        local3222 = this.aFloat173 + this.aFloat164 * (float) local50 + this.aFloat172 * (float) local55 + this.aFloat165 * (float) local60;
-                        if (local3222 <= (float) this.aClass19_Sub2_8.zNear) {
+                        local60 = complexTile.aShortArray141[local559] + (z << super.anInt8895);
+                        local3222 = this.cameraTz + this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local55 + this.cameraE3_3 * (float) local60;
+                        if (local3222 <= (float) this.toolkit.zNear) {
                             return;
                         }
 
-                        arg8[local559] = 0;
-                        if (arg2) {
-                            local409 = (int) (local3222 - (float) arg3.fogPlane);
+                        fogLevels[local559] = 0;
+                        if (water) {
+                            local409 = (int) (local3222 - (float) resource.fogPlane);
                             if (local409 > 255) {
                                 local409 = 255;
                             }
 
                             if (local409 > 0) {
-                                arg8[local559] = local409;
+                                fogLevels[local559] = local409;
                                 local469 = complexTile.aShortArray138[local559] * local409 / 255;
 
                                 if (local469 > 0) {
                                     local55 -= local469;
                                 }
                             }
-                        } else if (arg3.fogActive) {
-                            local409 = (int) (local3222 - (float) arg3.fogPlane);
+                        } else if (resource.fogActive) {
+                            local409 = (int) (local3222 - (float) resource.fogPlane);
 
                             if (local409 > 0) {
-                                arg8[local559] = local409;
+                                fogLevels[local559] = local409;
 
-                                if (arg8[local559] > 255) {
-                                    arg8[local559] = 255;
+                                if (fogLevels[local559] > 255) {
+                                    fogLevels[local559] = 255;
                                 }
                             }
                         }
 
-                        local3321 = this.aFloat171 + this.aFloat170 * (float) local50 + this.aFloat167 * (float) local55 + this.aFloat162 * (float) local60;
-                        local3342 = this.aFloat169 + this.aFloat168 * (float) local50 + this.aFloat163 * (float) local55 + this.aFloat166 * (float) local60;
-                        arg5[local559] = arg4.minX + (int) (local3321 * (float) this.aClass19_Sub2_8.projectionScaleX / local3222);
-                        arg6[local559] = arg4.minY + (int) (local3342 * (float) this.aClass19_Sub2_8.projectionScaleY / local3222);
-                        arg7[local559] = (int) local3222;
+                        local3321 = this.cameraTx + this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local55 + this.cameraE1_3 * (float) local60;
+                        local3342 = this.cameraTy + this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local55 + this.cameraE2_3 * (float) local60;
+                        screenX[local559] = rasterizer.minX + (int) (local3321 * (float) this.toolkit.projectionScaleX / local3222);
+                        screenY[local559] = rasterizer.minY + (int) (local3342 * (float) this.toolkit.projectionScaleY / local3222);
+                        depths[local559] = (int) local3222;
                     }
                 } else {
                     for (local559 = 0; local559 < complexTile.aShort128; local559++) {
-                        local50 = complexTile.aShortArray142[local559] + (arg0 << super.anInt8895);
+                        local50 = complexTile.aShortArray142[local559] + (x << super.anInt8895);
                         local55 = complexTile.aShortArray143[local559];
-                        local60 = complexTile.aShortArray141[local559] + (arg1 << super.anInt8895);
-                        local3222 = this.aFloat173 + this.aFloat164 * (float) local50 + this.aFloat172 * (float) local55 + this.aFloat165 * (float) local60;
-                        arg8[local559] = 0;
+                        local60 = complexTile.aShortArray141[local559] + (z << super.anInt8895);
+                        local3222 = this.cameraTz + this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local55 + this.cameraE3_3 * (float) local60;
+                        fogLevels[local559] = 0;
 
-                        if (arg2) {
-                            local409 = this.anInt8145 - arg3.fogPlane;
+                        if (water) {
+                            local409 = this.depthOverride - resource.fogPlane;
                             if (local409 > 255) {
                                 local409 = 255;
                             }
                             if (local409 > 0) {
-                                arg8[local559] = local409;
+                                fogLevels[local559] = local409;
                                 local469 = complexTile.aShortArray138[local559] * local409 / 255;
                                 if (local469 > 0) {
                                     local55 -= local469;
                                 }
                             }
-                        } else if (arg3.fogActive) {
-                            local409 = this.anInt8145 - arg3.fogPlane;
+                        } else if (resource.fogActive) {
+                            local409 = this.depthOverride - resource.fogPlane;
                             if (local409 > 0) {
-                                arg8[local559] = local409;
-                                if (arg8[local559] > 255) {
-                                    arg8[local559] = 255;
+                                fogLevels[local559] = local409;
+                                if (fogLevels[local559] > 255) {
+                                    fogLevels[local559] = 255;
                                 }
                             }
                         }
 
-                        local3321 = this.aFloat171 + this.aFloat170 * (float) local50 + this.aFloat167 * (float) local55 + this.aFloat162 * (float) local60;
-                        local3342 = this.aFloat169 + this.aFloat168 * (float) local50 + this.aFloat163 * (float) local55 + this.aFloat166 * (float) local60;
-                        arg5[local559] = arg4.minX + (int) (local3321 * (float) this.aClass19_Sub2_8.projectionScaleX / (float) this.anInt8145);
-                        arg6[local559] = arg4.minY + (int) (local3342 * (float) this.aClass19_Sub2_8.projectionScaleY / (float) this.anInt8145);
-                        arg7[local559] = (int) local3222;
+                        local3321 = this.cameraTx + this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local55 + this.cameraE1_3 * (float) local60;
+                        local3342 = this.cameraTy + this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local55 + this.cameraE2_3 * (float) local60;
+                        screenX[local559] = rasterizer.minX + (int) (local3321 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
+                        screenY[local559] = rasterizer.minY + (int) (local3342 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
+                        depths[local559] = (int) local3222;
                     }
                 }
 
@@ -2087,76 +2087,76 @@ public final class Ground_Sub3 extends Ground {
                         local409 = local559 * 3;
                         local469 = local409 + 1;
                         local529 = local469 + 1;
-                        local589 = arg5[local409];
-                        @Pc(3620) int local3620 = arg5[local469];
-                        @Pc(3624) int local3624 = arg5[local529];
-                        @Pc(3628) int local3628 = arg6[local409];
-                        @Pc(3632) int local3632 = arg6[local469];
-                        @Pc(3636) int local3636 = arg6[local529];
-                        @Pc(3648) int local3648 = arg8[local409] + arg8[local469] + arg8[local529];
+                        local589 = screenX[local409];
+                        @Pc(3620) int local3620 = screenX[local469];
+                        @Pc(3624) int local3624 = screenX[local529];
+                        @Pc(3628) int local3628 = screenY[local409];
+                        @Pc(3632) int local3632 = screenY[local469];
+                        @Pc(3636) int local3636 = screenY[local529];
+                        @Pc(3648) int local3648 = fogLevels[local409] + fogLevels[local469] + fogLevels[local529];
                         if ((local589 - local3620) * (local3636 - local3632) - (local3628 - local3632) * (local3624 - local3620) > 0) {
-                            arg4.clamp = local589 < 0 || local3620 < 0 || local3624 < 0 || local589 > arg4.width || local3620 > arg4.width || local3624 > arg4.width;
+                            rasterizer.clamp = local589 < 0 || local3620 < 0 || local3624 < 0 || local589 > rasterizer.width || local3620 > rasterizer.width || local3624 > rasterizer.width;
 
                             if (local3648 >= 765) {
-                                arg4.renderFlatTriangleRgb((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) arg7[local409], (float) arg7[local469], (float) arg7[local529], arg3.fogColour);
+                                rasterizer.renderFlatTriangleRgb((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) depths[local409], (float) depths[local469], (float) depths[local529], resource.fogColour);
                             } else if (local3648 > 0) {
                                 if ((complexTile.anIntArray802[local409] & 0xFFFFFF) != 0) {
-                                    arg4.renderTriangleRgb((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) arg7[local409], (float) arg7[local469], (float) arg7[local529], Static572.method7867(arg3.fogColour, complexTile.anIntArray802[local409], arg8[local409]), Static572.method7867(arg3.fogColour, complexTile.anIntArray802[local469], arg8[local469]), Static572.method7867(arg3.fogColour, complexTile.anIntArray802[local529], arg8[local529]));
+                                    rasterizer.renderTriangleRgb((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) depths[local409], (float) depths[local469], (float) depths[local529], Static572.lerpRgb(resource.fogColour, complexTile.anIntArray802[local409], fogLevels[local409]), Static572.lerpRgb(resource.fogColour, complexTile.anIntArray802[local469], fogLevels[local469]), Static572.lerpRgb(resource.fogColour, complexTile.anIntArray802[local529], fogLevels[local529]));
                                 }
                             } else if ((complexTile.anIntArray802[local409] & 0xFFFFFF) != 0) {
-                                arg4.renderTriangleRgb((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) arg7[local409], (float) arg7[local469], (float) arg7[local529], complexTile.anIntArray802[local409], complexTile.anIntArray802[local469], complexTile.anIntArray802[local529]);
+                                rasterizer.renderTriangleRgb((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) depths[local409], (float) depths[local469], (float) depths[local529], complexTile.anIntArray802[local409], complexTile.anIntArray802[local469], complexTile.anIntArray802[local529]);
                             }
                         }
                     }
-                } else if (this.anInt8145 == -1) {
+                } else if (this.depthOverride == -1) {
                     for (local559 = 0; local559 < complexTile.aShort129; local559++) {
                         local409 = local559 * 3;
                         local469 = local409 + 1;
                         local529 = local469 + 1;
-                        local589 = arg5[local409];
-                        @Pc(3620) int local3620 = arg5[local469];
-                        @Pc(3624) int local3624 = arg5[local529];
-                        @Pc(3628) int local3628 = arg6[local409];
-                        @Pc(3632) int local3632 = arg6[local469];
-                        @Pc(3636) int local3636 = arg6[local529];
-                        @Pc(3648) int local3648 = arg8[local409] + arg8[local469] + arg8[local529];
+                        local589 = screenX[local409];
+                        @Pc(3620) int local3620 = screenX[local469];
+                        @Pc(3624) int local3624 = screenX[local529];
+                        @Pc(3628) int local3628 = screenY[local409];
+                        @Pc(3632) int local3632 = screenY[local469];
+                        @Pc(3636) int local3636 = screenY[local529];
+                        @Pc(3648) int local3648 = fogLevels[local409] + fogLevels[local469] + fogLevels[local529];
                         if ((local589 - local3620) * (local3636 - local3632) - (local3628 - local3632) * (local3624 - local3620) > 0) {
-                            arg4.clamp = local589 < 0 || local3620 < 0 || local3624 < 0 || local589 > arg4.width || local3620 > arg4.width || local3624 > arg4.width;
+                            rasterizer.clamp = local589 < 0 || local3620 < 0 || local3624 < 0 || local589 > rasterizer.width || local3620 > rasterizer.width || local3624 > rasterizer.width;
                             @Pc(3705) short local3705 = complexTile.aShortArray139[local559];
 
                             if (local3648 >= 765) {
-                                arg4.renderFlatTriangleRgb((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) arg7[local409], (float) arg7[local469], (float) arg7[local529], arg3.fogColour);
+                                rasterizer.renderFlatTriangleRgb((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) depths[local409], (float) depths[local469], (float) depths[local529], resource.fogColour);
                             } else {
                                 if (local3648 > 0) {
                                     if (local3705 != -1) {
                                         @Pc(3719) int local3719 = -16777216;
-                                        if (local3705 != -1 && this.method7162(this.aClass19_Sub2_8.textureSource.getMetrics(local3705).effectType)) {
+                                        if (local3705 != -1 && this.isWaterEffect(this.toolkit.textureSource.getMetrics(local3705).effectType)) {
                                             local3719 = -1694498816;
                                         }
 
-                                        arg4.renderTexturedTriangle((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) arg7[local409], (float) arg7[local469], (float) arg7[local529], (float) complexTile.aShortArray142[local409] / (float) super.anInt8888, (float) complexTile.aShortArray142[local469] / (float) super.anInt8888, (float) complexTile.aShortArray142[local529] / (float) super.anInt8888, (float) complexTile.aShortArray141[local409] / (float) super.anInt8888, (float) complexTile.aShortArray141[local469] / (float) super.anInt8888, (float) complexTile.aShortArray141[local529] / (float) super.anInt8888, local3719 | complexTile.anIntArray802[local409] & 0xFFFFFF, local3719 | complexTile.anIntArray802[local469] & 0xFFFFFF, local3719 | complexTile.anIntArray802[local529] & 0xFFFFFF, arg3.fogColour, arg8[local409], arg8[local469], arg8[local529], local3705);
+                                        rasterizer.renderTexturedTriangle((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) depths[local409], (float) depths[local469], (float) depths[local529], (float) complexTile.aShortArray142[local409] / (float) super.anInt8888, (float) complexTile.aShortArray142[local469] / (float) super.anInt8888, (float) complexTile.aShortArray142[local529] / (float) super.anInt8888, (float) complexTile.aShortArray141[local409] / (float) super.anInt8888, (float) complexTile.aShortArray141[local469] / (float) super.anInt8888, (float) complexTile.aShortArray141[local529] / (float) super.anInt8888, local3719 | complexTile.anIntArray802[local409] & 0xFFFFFF, local3719 | complexTile.anIntArray802[local469] & 0xFFFFFF, local3719 | complexTile.anIntArray802[local529] & 0xFFFFFF, resource.fogColour, fogLevels[local409], fogLevels[local469], fogLevels[local529], local3705);
                                     } else if ((complexTile.anIntArray802[local409] & 0xFFFFFF) != 0) {
-                                        if (local3705 != -1 && this.method7162(this.aClass19_Sub2_8.textureSource.getMetrics(local3705).effectType)) {
-                                            arg4.alpha = -1694498816;
+                                        if (local3705 != -1 && this.isWaterEffect(this.toolkit.textureSource.getMetrics(local3705).effectType)) {
+                                            rasterizer.alpha = -1694498816;
                                         }
 
-                                        arg4.renderTriangleRgb((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) arg7[local409], (float) arg7[local469], (float) arg7[local529], Static462.method6270(arg8[local409] << 24 | arg3.fogColour, complexTile.anIntArray802[local409]), Static462.method6270(arg8[local469] << 24 | arg3.fogColour, complexTile.anIntArray802[local469]), Static462.method6270(arg8[local529] << 24 | arg3.fogColour, complexTile.anIntArray802[local529]));
-                                        arg4.alpha = 0;
+                                        rasterizer.renderTriangleRgb((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) depths[local409], (float) depths[local469], (float) depths[local529], Static462.blendArgb(fogLevels[local409] << 24 | resource.fogColour, complexTile.anIntArray802[local409]), Static462.blendArgb(fogLevels[local469] << 24 | resource.fogColour, complexTile.anIntArray802[local469]), Static462.blendArgb(fogLevels[local529] << 24 | resource.fogColour, complexTile.anIntArray802[local529]));
+                                        rasterizer.alpha = 0;
                                     }
                                 } else if (local3705 != -1) {
                                     @Pc(3719) int local3719 = -16777216;
-                                    if (local3705 != -1 && this.method7162(this.aClass19_Sub2_8.textureSource.getMetrics(local3705).effectType)) {
+                                    if (local3705 != -1 && this.isWaterEffect(this.toolkit.textureSource.getMetrics(local3705).effectType)) {
                                         local3719 = -1694498816;
                                     }
 
-                                    arg4.renderTexturedTriangle((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) arg7[local409], (float) arg7[local469], (float) arg7[local529], (float) complexTile.aShortArray142[local409] / (float) super.anInt8888, (float) complexTile.aShortArray142[local469] / (float) super.anInt8888, (float) complexTile.aShortArray142[local529] / (float) super.anInt8888, (float) complexTile.aShortArray141[local409] / (float) super.anInt8888, (float) complexTile.aShortArray141[local469] / (float) super.anInt8888, (float) complexTile.aShortArray141[local529] / (float) super.anInt8888, local3719 | complexTile.anIntArray802[local409] & 0xFFFFFF, local3719 | complexTile.anIntArray802[local469] & 0xFFFFFF, local3719 | complexTile.anIntArray802[local529] & 0xFFFFFF, 0, 0, 0, 0, local3705);
+                                    rasterizer.renderTexturedTriangle((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) depths[local409], (float) depths[local469], (float) depths[local529], (float) complexTile.aShortArray142[local409] / (float) super.anInt8888, (float) complexTile.aShortArray142[local469] / (float) super.anInt8888, (float) complexTile.aShortArray142[local529] / (float) super.anInt8888, (float) complexTile.aShortArray141[local409] / (float) super.anInt8888, (float) complexTile.aShortArray141[local469] / (float) super.anInt8888, (float) complexTile.aShortArray141[local529] / (float) super.anInt8888, local3719 | complexTile.anIntArray802[local409] & 0xFFFFFF, local3719 | complexTile.anIntArray802[local469] & 0xFFFFFF, local3719 | complexTile.anIntArray802[local529] & 0xFFFFFF, 0, 0, 0, 0, local3705);
                                 } else if ((complexTile.anIntArray802[local409] & 0xFFFFFF) != 0) {
-                                    if (local3705 != -1 && this.method7162(this.aClass19_Sub2_8.textureSource.getMetrics(local3705).effectType)) {
-                                        arg4.alpha = -1694498816;
+                                    if (local3705 != -1 && this.isWaterEffect(this.toolkit.textureSource.getMetrics(local3705).effectType)) {
+                                        rasterizer.alpha = -1694498816;
                                     }
 
-                                    arg4.renderTriangleRgb((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) arg7[local409], (float) arg7[local469], (float) arg7[local529], complexTile.anIntArray802[local409], complexTile.anIntArray802[local469], complexTile.anIntArray802[local529]);
-                                    arg4.alpha = 0;
+                                    rasterizer.renderTriangleRgb((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) depths[local409], (float) depths[local469], (float) depths[local529], complexTile.anIntArray802[local409], complexTile.anIntArray802[local469], complexTile.anIntArray802[local529]);
+                                    rasterizer.alpha = 0;
                                 }
                             }
                         }
@@ -2166,57 +2166,57 @@ public final class Ground_Sub3 extends Ground {
                         local409 = local559 * 3;
                         local469 = local409 + 1;
                         local529 = local469 + 1;
-                        local589 = arg5[local409];
-                        @Pc(3620) int local3620 = arg5[local469];
-                        @Pc(3624) int local3624 = arg5[local529];
-                        @Pc(3628) int local3628 = arg6[local409];
-                        @Pc(3632) int local3632 = arg6[local469];
-                        @Pc(3636) int local3636 = arg6[local529];
-                        @Pc(3648) int local3648 = arg8[local409] + arg8[local469] + arg8[local529];
+                        local589 = screenX[local409];
+                        @Pc(3620) int local3620 = screenX[local469];
+                        @Pc(3624) int local3624 = screenX[local529];
+                        @Pc(3628) int local3628 = screenY[local409];
+                        @Pc(3632) int local3632 = screenY[local469];
+                        @Pc(3636) int local3636 = screenY[local529];
+                        @Pc(3648) int local3648 = fogLevels[local409] + fogLevels[local469] + fogLevels[local529];
                         if ((local589 - local3620) * (local3636 - local3632) - (local3628 - local3632) * (local3624 - local3620) > 0) {
-                            arg4.clamp = local589 < 0 || local3620 < 0 || local3624 < 0 || local589 > arg4.width || local3620 > arg4.width || local3624 > arg4.width;
+                            rasterizer.clamp = local589 < 0 || local3620 < 0 || local3624 < 0 || local589 > rasterizer.width || local3620 > rasterizer.width || local3624 > rasterizer.width;
                             @Pc(3705) short local3705 = complexTile.aShortArray139[local559];
 
                             if (local3648 >= 765) {
-                                arg4.renderFlatTriangleRgb((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) arg7[local409], (float) arg7[local469], (float) arg7[local529], arg3.fogColour);
+                                rasterizer.renderFlatTriangleRgb((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) depths[local409], (float) depths[local469], (float) depths[local529], resource.fogColour);
                             } else {
-                                if (local3705 != -1 && this.method7162(this.aClass19_Sub2_8.textureSource.getMetrics(local3705).effectType)) {
-                                    arg4.alpha = -1694498816;
+                                if (local3705 != -1 && this.isWaterEffect(this.toolkit.textureSource.getMetrics(local3705).effectType)) {
+                                    rasterizer.alpha = -1694498816;
                                 }
 
                                 if (local3648 > 0) {
                                     if (local3705 != -1) {
                                         @Pc(3719) int local3719 = -16777216;
-                                        if (local3705 != -1 && this.method7162(this.aClass19_Sub2_8.textureSource.getMetrics(local3705).effectType)) {
+                                        if (local3705 != -1 && this.isWaterEffect(this.toolkit.textureSource.getMetrics(local3705).effectType)) {
                                             local3719 = -1694498816;
                                         }
 
-                                        arg4.renderTexturedTriangle((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) arg7[local409], (float) arg7[local469], (float) arg7[local529], (float) complexTile.aShortArray142[local409] / (float) super.anInt8888, (float) complexTile.aShortArray142[local469] / (float) super.anInt8888, (float) complexTile.aShortArray142[local529] / (float) super.anInt8888, (float) complexTile.aShortArray141[local409] / (float) super.anInt8888, (float) complexTile.aShortArray141[local469] / (float) super.anInt8888, (float) complexTile.aShortArray141[local529] / (float) super.anInt8888, local3719 | complexTile.anIntArray802[local409] & 0xFFFFFF, local3719 | complexTile.anIntArray802[local469] & 0xFFFFFF, local3719 | complexTile.anIntArray802[local529] & 0xFFFFFF, arg3.fogColour, arg8[local409], arg8[local469], arg8[local529], local3705);
+                                        rasterizer.renderTexturedTriangle((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) depths[local409], (float) depths[local469], (float) depths[local529], (float) complexTile.aShortArray142[local409] / (float) super.anInt8888, (float) complexTile.aShortArray142[local469] / (float) super.anInt8888, (float) complexTile.aShortArray142[local529] / (float) super.anInt8888, (float) complexTile.aShortArray141[local409] / (float) super.anInt8888, (float) complexTile.aShortArray141[local469] / (float) super.anInt8888, (float) complexTile.aShortArray141[local529] / (float) super.anInt8888, local3719 | complexTile.anIntArray802[local409] & 0xFFFFFF, local3719 | complexTile.anIntArray802[local469] & 0xFFFFFF, local3719 | complexTile.anIntArray802[local529] & 0xFFFFFF, resource.fogColour, fogLevels[local409], fogLevels[local469], fogLevels[local529], local3705);
                                     } else if ((complexTile.anIntArray802[local409] & 0xFFFFFF) != 0) {
-                                        if (local3705 != -1 && this.method7162(this.aClass19_Sub2_8.textureSource.getMetrics(local3705).effectType)) {
-                                            arg4.alpha = -1694498816;
+                                        if (local3705 != -1 && this.isWaterEffect(this.toolkit.textureSource.getMetrics(local3705).effectType)) {
+                                            rasterizer.alpha = -1694498816;
                                         }
 
-                                        arg4.renderTriangleRgb((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) arg7[local409], (float) arg7[local469], (float) arg7[local529], Static462.method6270(arg8[local409] << 24 | arg3.fogColour, complexTile.anIntArray802[local409]), Static462.method6270(arg8[local469] << 24 | arg3.fogColour, complexTile.anIntArray802[local469]), Static462.method6270(arg8[local529] << 24 | arg3.fogColour, complexTile.anIntArray802[local529]));
-                                        arg4.alpha = 0;
+                                        rasterizer.renderTriangleRgb((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) depths[local409], (float) depths[local469], (float) depths[local529], Static462.blendArgb(fogLevels[local409] << 24 | resource.fogColour, complexTile.anIntArray802[local409]), Static462.blendArgb(fogLevels[local469] << 24 | resource.fogColour, complexTile.anIntArray802[local469]), Static462.blendArgb(fogLevels[local529] << 24 | resource.fogColour, complexTile.anIntArray802[local529]));
+                                        rasterizer.alpha = 0;
                                     }
                                 } else if (local3705 != -1) {
                                     @Pc(3719) int local3719 = -16777216;
-                                    if (local3705 != -1 && this.method7162(this.aClass19_Sub2_8.textureSource.getMetrics(local3705).effectType)) {
+                                    if (local3705 != -1 && this.isWaterEffect(this.toolkit.textureSource.getMetrics(local3705).effectType)) {
                                         local3719 = -1694498816;
                                     }
 
-                                    arg4.renderTexturedTriangle((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) arg7[local409], (float) arg7[local469], (float) arg7[local529], (float) complexTile.aShortArray142[local409] / (float) super.anInt8888, (float) complexTile.aShortArray142[local469] / (float) super.anInt8888, (float) complexTile.aShortArray142[local529] / (float) super.anInt8888, (float) complexTile.aShortArray141[local409] / (float) super.anInt8888, (float) complexTile.aShortArray141[local469] / (float) super.anInt8888, (float) complexTile.aShortArray141[local529] / (float) super.anInt8888, local3719 | complexTile.anIntArray802[local409] & 0xFFFFFF, local3719 | complexTile.anIntArray802[local469] & 0xFFFFFF, local3719 | complexTile.anIntArray802[local529] & 0xFFFFFF, 0, 0, 0, 0, local3705);
+                                    rasterizer.renderTexturedTriangle((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) depths[local409], (float) depths[local469], (float) depths[local529], (float) complexTile.aShortArray142[local409] / (float) super.anInt8888, (float) complexTile.aShortArray142[local469] / (float) super.anInt8888, (float) complexTile.aShortArray142[local529] / (float) super.anInt8888, (float) complexTile.aShortArray141[local409] / (float) super.anInt8888, (float) complexTile.aShortArray141[local469] / (float) super.anInt8888, (float) complexTile.aShortArray141[local529] / (float) super.anInt8888, local3719 | complexTile.anIntArray802[local409] & 0xFFFFFF, local3719 | complexTile.anIntArray802[local469] & 0xFFFFFF, local3719 | complexTile.anIntArray802[local529] & 0xFFFFFF, 0, 0, 0, 0, local3705);
                                 } else if ((complexTile.anIntArray802[local409] & 0xFFFFFF) != 0) {
-                                    if (local3705 != -1 && this.method7162(this.aClass19_Sub2_8.textureSource.getMetrics(local3705).effectType)) {
-                                        arg4.alpha = -1694498816;
+                                    if (local3705 != -1 && this.isWaterEffect(this.toolkit.textureSource.getMetrics(local3705).effectType)) {
+                                        rasterizer.alpha = -1694498816;
                                     }
 
-                                    arg4.renderTriangleRgb((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) arg7[local409], (float) arg7[local469], (float) arg7[local529], complexTile.anIntArray802[local409], complexTile.anIntArray802[local469], complexTile.anIntArray802[local529]);
-                                    arg4.alpha = 0;
+                                    rasterizer.renderTriangleRgb((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) depths[local409], (float) depths[local469], (float) depths[local529], complexTile.anIntArray802[local409], complexTile.anIntArray802[local469], complexTile.anIntArray802[local529]);
+                                    rasterizer.alpha = 0;
                                 }
 
-                                arg4.alpha = 0;
+                                rasterizer.alpha = 0;
                             }
                         }
                     }
@@ -2226,15 +2226,15 @@ public final class Ground_Sub3 extends Ground {
     }
 
     @OriginalMember(owner = "client!qs", name = "c", descriptor = "(III)V")
-    public void method7168(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
-        @Pc(4) JavaThreadResource local4 = this.aClass19_Sub2_8.threadResource(Thread.currentThread());
+    public void renderTile(@OriginalArg(0) int x, @OriginalArg(1) int z, @OriginalArg(2) int skipFlags) {
+        @Pc(4) JavaThreadResource local4 = this.toolkit.threadResource(Thread.currentThread());
         local4.rasterizer.alpha = 0;
         if (this.simpleBlendedTiles != null) {
-            this.method7166(arg0, arg1, local4.aBoolean805, local4, local4.rasterizer, local4.anIntArray840, local4.anIntArray843, local4.anIntArray852, local4.anIntArray855, arg2);
+            this.renderBlendedTile(x, z, local4.aBoolean805, local4, local4.rasterizer, local4.anIntArray840, local4.anIntArray843, local4.anIntArray852, local4.anIntArray855, skipFlags);
         } else if (this.simpleTiles != null) {
-            this.method7165(arg0, arg1, local4.rasterizer, local4.anIntArray840, local4.anIntArray843, local4.anIntArray852, local4.anIntArray855, arg2);
+            this.renderUnblendedTile(x, z, local4.rasterizer, local4.anIntArray840, local4.anIntArray843, local4.anIntArray852, local4.anIntArray855, skipFlags);
         } else if (this.genericBlendedTiles != null) {
-            this.method7161(arg0, arg1, local4.aBoolean805, local4, local4.rasterizer, local4.anIntArray840, local4.anIntArray843, local4.anIntArray852, local4.anIntArray855, arg2);
+            this.renderGenericBlendedTile(x, z, local4.aBoolean805, local4, local4.rasterizer, local4.anIntArray840, local4.anIntArray843, local4.anIntArray852, local4.anIntArray855, skipFlags);
         }
     }
 

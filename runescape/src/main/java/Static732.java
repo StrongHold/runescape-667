@@ -5,20 +5,20 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static732 {
 
     @OriginalMember(owner = "client!qs", name = "b", descriptor = "(II)I")
-    public static int method7167(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) {
-        @Pc(7) int local7 = (arg0 & 0xFF0000) * arg1 >> 23;
+    public static int scaleRgb(@OriginalArg(0) int rgb, @OriginalArg(1) int light) {
+        @Pc(7) int local7 = (rgb & 0xFF0000) * light >> 23;
         if (local7 < 2) {
             local7 = 2;
         } else if (local7 > 253) {
             local7 = 253;
         }
-        @Pc(26) int local26 = (arg0 & 0xFF00) * arg1 >> 15;
+        @Pc(26) int local26 = (rgb & 0xFF00) * light >> 15;
         if (local26 < 2) {
             local26 = 2;
         } else if (local26 > 253) {
             local26 = 253;
         }
-        @Pc(45) int local45 = (arg0 & 0xFF) * arg1 >> 7;
+        @Pc(45) int local45 = (rgb & 0xFF) * light >> 7;
         if (local45 < 2) {
             local45 = 2;
         } else if (local45 > 253) {

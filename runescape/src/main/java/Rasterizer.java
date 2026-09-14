@@ -3003,7 +3003,7 @@ public final class Rasterizer {
         if (arg22 != this.anInt5732) {
             this.anIntArray442 = this.aClass19_Sub2_5.getArgbTexture(arg22);
             if (this.anIntArray442 == null) {
-                this.renderTriangleRgb((float) (int) arg0, (float) (int) arg1, (float) (int) arg2, (float) (int) arg3, (float) (int) arg4, (float) (int) arg5, (float) (int) arg6, (float) (int) arg7, (float) (int) arg8, Static462.method6270(arg18 | arg19 << 24, arg15), Static462.method6270(arg18 | arg20 << 24, arg16), Static462.method6270(arg18 | arg21 << 24, arg17));
+                this.renderTriangleRgb((float) (int) arg0, (float) (int) arg1, (float) (int) arg2, (float) (int) arg3, (float) (int) arg4, (float) (int) arg5, (float) (int) arg6, (float) (int) arg7, (float) (int) arg8, Static462.blendArgb(arg18 | arg19 << 24, arg15), Static462.blendArgb(arg18 | arg20 << 24, arg16), Static462.blendArgb(arg18 | arg21 << 24, arg17));
                 return;
             }
             this.anInt5730 = this.aClass19_Sub2_5.smallTexture(arg22) ? 64 : this.aClass19_Sub2_5.textureSize;
@@ -4942,7 +4942,7 @@ public final class Rasterizer {
         if (arg22 != this.anInt5732) {
             this.anIntArray442 = this.aClass19_Sub2_5.getArgbTexture(arg22);
             if (this.anIntArray442 == null) {
-                this.method5143((float) (int) arg0, (float) (int) arg1, (float) (int) arg2, (float) (int) arg3, (float) (int) arg4, (float) (int) arg5, (float) (int) arg6, (float) (int) arg7, (float) (int) arg8, Static462.method6270(arg18 | arg19 << 24, arg15), Static462.method6270(arg18 | arg20 << 24, arg16), Static462.method6270(arg18 | arg21 << 24, arg17));
+                this.method5143((float) (int) arg0, (float) (int) arg1, (float) (int) arg2, (float) (int) arg3, (float) (int) arg4, (float) (int) arg5, (float) (int) arg6, (float) (int) arg7, (float) (int) arg8, Static462.blendArgb(arg18 | arg19 << 24, arg15), Static462.blendArgb(arg18 | arg20 << 24, arg16), Static462.blendArgb(arg18 | arg21 << 24, arg17));
                 return;
             }
             this.anInt5730 = this.aClass19_Sub2_5.smallTexture(arg22) ? 64 : this.aClass19_Sub2_5.textureSize;
@@ -5910,7 +5910,7 @@ public final class Rasterizer {
         if (arg22 != this.anInt5732) {
             this.anIntArray442 = this.aClass19_Sub2_5.method3792(arg22);
             if (this.anIntArray442 == null) {
-                this.renderTriangleRgb((float) (int) arg0, (float) (int) arg1, (float) (int) arg2, (float) (int) arg3, (float) (int) arg4, (float) (int) arg5, (float) (int) arg6, (float) (int) arg7, (float) (int) arg8, Static462.method6270(arg18 | arg19 << 24, arg15), Static462.method6270(arg18 | arg20 << 24, arg16), Static462.method6270(arg18 | arg21 << 24, arg17));
+                this.renderTriangleRgb((float) (int) arg0, (float) (int) arg1, (float) (int) arg2, (float) (int) arg3, (float) (int) arg4, (float) (int) arg5, (float) (int) arg6, (float) (int) arg7, (float) (int) arg8, Static462.blendArgb(arg18 | arg19 << 24, arg15), Static462.blendArgb(arg18 | arg20 << 24, arg16), Static462.blendArgb(arg18 | arg21 << 24, arg17));
                 return;
             }
             this.anInt5730 = this.aClass19_Sub2_5.smallTexture(arg22) ? 64 : this.aClass19_Sub2_5.textureSize;
@@ -5921,7 +5921,7 @@ public final class Rasterizer {
         if (arg24 != this.anInt5737) {
             this.anIntArray440 = this.aClass19_Sub2_5.method3792(arg24);
             if (this.anIntArray440 == null) {
-                this.renderTriangleRgb((float) (int) arg0, (float) (int) arg1, (float) (int) arg2, (float) (int) arg3, (float) (int) arg4, (float) (int) arg5, (float) (int) arg6, (float) (int) arg7, (float) (int) arg8, Static462.method6270(arg18 | arg19 << 24, arg15), Static462.method6270(arg18 | arg20 << 24, arg16), Static462.method6270(arg18 | arg21 << 24, arg17));
+                this.renderTriangleRgb((float) (int) arg0, (float) (int) arg1, (float) (int) arg2, (float) (int) arg3, (float) (int) arg4, (float) (int) arg5, (float) (int) arg6, (float) (int) arg7, (float) (int) arg8, Static462.blendArgb(arg18 | arg19 << 24, arg15), Static462.blendArgb(arg18 | arg20 << 24, arg16), Static462.blendArgb(arg18 | arg21 << 24, arg17));
                 return;
             }
             this.anInt5734 = this.aClass19_Sub2_5.smallTexture(arg24) ? 64 : this.aClass19_Sub2_5.textureSize;
@@ -5931,7 +5931,7 @@ public final class Rasterizer {
         if (arg26 != this.anInt5736) {
             this.anIntArray441 = this.aClass19_Sub2_5.method3792(arg26);
             if (this.anIntArray441 == null) {
-                this.renderTriangleRgb((float) (int) arg0, (float) (int) arg1, (float) (int) arg2, (float) (int) arg3, (float) (int) arg4, (float) (int) arg5, (float) (int) arg6, (float) (int) arg7, (float) (int) arg8, Static462.method6270(arg18 | arg19 << 24, arg15), Static462.method6270(arg18 | arg20 << 24, arg16), Static462.method6270(arg18 | arg21 << 24, arg17));
+                this.renderTriangleRgb((float) (int) arg0, (float) (int) arg1, (float) (int) arg2, (float) (int) arg3, (float) (int) arg4, (float) (int) arg5, (float) (int) arg6, (float) (int) arg7, (float) (int) arg8, Static462.blendArgb(arg18 | arg19 << 24, arg15), Static462.blendArgb(arg18 | arg20 << 24, arg16), Static462.blendArgb(arg18 | arg21 << 24, arg17));
                 return;
             }
             this.anInt5727 = this.aClass19_Sub2_5.smallTexture(arg26) ? 64 : this.aClass19_Sub2_5.textureSize;

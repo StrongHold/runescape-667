@@ -2,47 +2,47 @@ import org.openrs2.deob.annotation.OriginalClass;
 import org.openrs2.deob.annotation.OriginalMember;
 
 @OriginalClass("client!em")
-public final class Class107 {
+public final class JavaComplexTile {
 
     @OriginalMember(owner = "client!em", name = "k", descriptor = "[S")
-    public short[] aShortArray30;
+    public short[] faceTextures;
 
     @OriginalMember(owner = "client!em", name = "h", descriptor = "[S")
-    public short[] aShortArray31;
+    public short[] faceSizes;
 
     @OriginalMember(owner = "client!em", name = "g", descriptor = "S")
-    public short aShort33;
+    public short faceCount;
 
     @OriginalMember(owner = "client!em", name = "f", descriptor = "[S")
-    public short[] aShortArray32;
+    public short[] verticesX;
 
     @OriginalMember(owner = "client!em", name = "c", descriptor = "[S")
-    public short[] aShortArray33;
+    public short[] verticesY;
 
     @OriginalMember(owner = "client!em", name = "i", descriptor = "[S")
-    public short[] aShortArray34;
+    public short[] faceA;
 
     @OriginalMember(owner = "client!em", name = "b", descriptor = "[I")
-    public int[] anIntArray230;
+    public int[] faceColours;
 
     @OriginalMember(owner = "client!em", name = "a", descriptor = "[S")
-    public short[] aShortArray35;
+    public short[] verticesLight;
 
     @OriginalMember(owner = "client!em", name = "m", descriptor = "[I")
-    public int[] anIntArray231;
+    public int[] faceBlendedColours;
 
     @OriginalMember(owner = "client!em", name = "l", descriptor = "[S")
-    public short[] aShortArray36;
+    public short[] faceC;
 
     @OriginalMember(owner = "client!em", name = "e", descriptor = "[S")
-    public short[] aShortArray37;
+    public short[] faceB;
 
     @OriginalMember(owner = "client!em", name = "j", descriptor = "S")
-    public short aShort34;
+    public short vertexCount;
 
     @OriginalMember(owner = "client!em", name = "n", descriptor = "[S")
-    public short[] aShortArray38;
+    public short[] verticesZ;
 
     @OriginalMember(owner = "client!em", name = "d", descriptor = "B")
-    public byte aByte51;
+    public byte flags;
 }
