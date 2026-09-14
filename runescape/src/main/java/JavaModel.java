@@ -260,16 +260,16 @@ public final class JavaModel extends Model {
     public final JavaToolkit toolkit;
 
     @OriginalMember(owner = "client!rs", name = "<init>", descriptor = "(Lclient!iaa;)V")
-    public JavaModel(@OriginalArg(0) JavaToolkit arg0) {
-        this.toolkit = arg0;
+    public JavaModel(@OriginalArg(0) JavaToolkit toolkit) {
+        this.toolkit = toolkit;
     }
 
     @OriginalMember(owner = "client!rs", name = "<init>", descriptor = "(Lclient!iaa;Lclient!dv;IIII)V")
-    public JavaModel(@OriginalArg(0) JavaToolkit toolkit, @OriginalArg(1) Mesh base, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int featureMask) {
+    public JavaModel(@OriginalArg(0) JavaToolkit toolkit, @OriginalArg(1) Mesh base, @OriginalArg(2) int functionMask, @OriginalArg(3) int ambient, @OriginalArg(4) int contrast, @OriginalArg(5) int featureMask) {
         this.toolkit = toolkit;
-        this.functionMask = arg2;
-        this.ambient = arg3;
-        this.contrast = arg4;
+        this.functionMask = functionMask;
+        this.ambient = ambient;
+        this.contrast = contrast;
         @Pc(47) TextureSource source = this.toolkit.textureSource;
         this.vertexCount = base.vertexCount;
         this.maxVertex = base.maxVertex;
@@ -385,7 +385,7 @@ public final class JavaModel extends Model {
         this.texCoordV = new float[this.faceCount][];
         @Pc(500) TextureUniverse universe = TextureUniverse.fromMesh(base, this.faceCount, faceIndex);
         @Pc(505) JavaThreadResource local505 = this.toolkit.threadResource(Thread.currentThread());
-        @Pc(508) float[] fs = local505.aFloatArray82;
+        @Pc(508) float[] fs = local505.texCoordScratch;
         @Pc(510) boolean hasTextureCoords = false;
         @Pc(517) int local517;
         @Pc(539) short tex;
@@ -681,17 +681,17 @@ public final class JavaModel extends Model {
 
     @OriginalMember(owner = "client!rs", name = "O", descriptor = "(III)V")
     @Override
-    public void O(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
-        if (arg0 != 128 && (this.functionMask & 0x1) != 1) {
+    public void O(@OriginalArg(0) int scaleX, @OriginalArg(1) int scaleY, @OriginalArg(2) int scaleZ) {
+        if (scaleX != 128 && (this.functionMask & 0x1) != 1) {
             throw new IllegalStateException();
-        } else if (arg1 != 128 && (this.functionMask & 0x2) != 2) {
+        } else if (scaleY != 128 && (this.functionMask & 0x2) != 2) {
             throw new IllegalStateException();
-        } else if (arg2 == 128 || (this.functionMask & 0x4) == 4) {
+        } else if (scaleZ == 128 || (this.functionMask & 0x4) == 4) {
             synchronized (this) {
                 for (@Pc(53) int local53 = 0; local53 < this.vertexCount; local53++) {
-                    this.vertexX[local53] = this.vertexX[local53] * arg0 >> 7;
-                    this.vertexY[local53] = this.vertexY[local53] * arg1 >> 7;
-                    this.vertexZ[local53] = this.vertexZ[local53] * arg2 >> 7;
+                    this.vertexX[local53] = this.vertexX[local53] * scaleX >> 7;
+                    this.vertexY[local53] = this.vertexY[local53] * scaleY >> 7;
+                    this.vertexZ[local53] = this.vertexZ[local53] * scaleZ >> 7;
                 }
                 this.boundsValid = false;
             }
@@ -786,18 +786,18 @@ public final class JavaModel extends Model {
 
     @OriginalMember(owner = "client!rs", name = "a", descriptor = "(I)V")
     @Override
-    public void a(@OriginalArg(0) int arg0) {
+    public void a(@OriginalArg(0) int angle) {
         if ((this.functionMask & 0x5) != 5) {
             throw new IllegalStateException();
-        } else if (arg0 == 4096) {
+        } else if (angle == 4096) {
             this.rotate90();
-        } else if (arg0 == 8192) {
+        } else if (angle == 8192) {
             this.rotate180();
-        } else if (arg0 == 12288) {
+        } else if (angle == 12288) {
             this.rotate270();
         } else {
-            @Pc(35) int local35 = Trig1.SIN[arg0];
-            @Pc(39) int local39 = Trig1.COS[arg0];
+            @Pc(35) int local35 = Trig1.SIN[angle];
+            @Pc(39) int local39 = Trig1.COS[angle];
             synchronized (this) {
                 for (@Pc(45) int local45 = 0; local45 < this.vertexCount; local45++) {
                     @Pc(62) int local62 = this.vertexZ[local45] * local35 + this.vertexX[local45] * local39 >> 14;
@@ -853,14 +853,14 @@ public final class JavaModel extends Model {
                 }
                 if (this.faceColourC[face] == -1) {
                     local333 = local81 | this.faceColourA[face] & 0xFFFFFF;
-                    this.rasterizer.method5154((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local333, local333, local333, this.threadResource.fogColour, fogA, fogB, fogC, this.faceTextures[face]);
+                    this.rasterizer.renderTexturedTriangleArgb((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local333, local333, local333, this.threadResource.fogColour, fogA, fogB, fogC, this.faceTextures[face]);
                 } else {
-                    this.rasterizer.method5154((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local81 | this.faceColourA[face] & 0xFFFFFF, local81 | this.faceColourB[face] & 0xFFFFFF, local81 | this.faceColourC[face] & 0xFFFFFF, this.threadResource.fogColour, fogA, fogB, fogC, this.faceTextures[face]);
+                    this.rasterizer.renderTexturedTriangleArgb((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local81 | this.faceColourA[face] & 0xFFFFFF, local81 | this.faceColourB[face] & 0xFFFFFF, local81 | this.faceColourC[face] & 0xFFFFFF, this.threadResource.fogColour, fogA, fogB, fogC, this.faceTextures[face]);
                 }
             } else if (this.faceColourC[face] == -1) {
-                this.rasterizer.method5143((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], Static462.blendArgb(fogA << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]), Static462.blendArgb(fogB << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]), Static462.blendArgb(fogC << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]));
+                this.rasterizer.renderTriangleArgb((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], Static462.blendArgb(fogA << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]), Static462.blendArgb(fogB << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]), Static462.blendArgb(fogC << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]));
             } else {
-                this.rasterizer.method5143((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], Static462.blendArgb(fogA << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]), Static462.blendArgb(fogB << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourB[face] & 0xFFFF]), Static462.blendArgb(fogC << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourC[face] & 0xFFFF]));
+                this.rasterizer.renderTriangleArgb((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], Static462.blendArgb(fogA << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]), Static462.blendArgb(fogB << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourB[face] & 0xFFFF]), Static462.blendArgb(fogC << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourC[face] & 0xFFFF]));
             }
             return;
         }
@@ -905,14 +905,14 @@ public final class JavaModel extends Model {
             }
             if (this.faceColourC[face] == -1) {
                 @Pc(362) int local362 = local333 | this.faceColourA[face] & 0xFFFFFF;
-                this.rasterizer.method5154((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local362, local362, local362, this.threadResource.fogColour, fogA, fogB, fogC, this.faceTextures[face]);
+                this.rasterizer.renderTexturedTriangleArgb((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local362, local362, local362, this.threadResource.fogColour, fogA, fogB, fogC, this.faceTextures[face]);
             } else {
-                this.rasterizer.method5154((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local333 | this.faceColourA[face] & 0xFFFFFF, local333 | this.faceColourB[face] & 0xFFFFFF, local333 | this.faceColourC[face] & 0xFFFFFF, this.threadResource.fogColour, fogA, fogB, fogC, this.faceTextures[face]);
+                this.rasterizer.renderTexturedTriangleArgb((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local333 | this.faceColourA[face] & 0xFFFFFF, local333 | this.faceColourB[face] & 0xFFFFFF, local333 | this.faceColourC[face] & 0xFFFFFF, this.threadResource.fogColour, fogA, fogB, fogC, this.faceTextures[face]);
             }
         } else if (this.faceColourC[face] == -1) {
-            this.rasterizer.method5143((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], Static462.blendArgb(fogA << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]), Static462.blendArgb(fogB << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]), Static462.blendArgb(fogC << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]));
+            this.rasterizer.renderTriangleArgb((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], Static462.blendArgb(fogA << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]), Static462.blendArgb(fogB << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]), Static462.blendArgb(fogC << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]));
         } else {
-            this.rasterizer.method5143((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], Static462.blendArgb(fogA << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]), Static462.blendArgb(fogB << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourB[face] & 0xFFFF]), Static462.blendArgb(fogC << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourC[face] & 0xFFFF]));
+            this.rasterizer.renderTriangleArgb((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], Static462.blendArgb(fogA << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]), Static462.blendArgb(fogB << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourB[face] & 0xFFFF]), Static462.blendArgb(fogC << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourC[face] & 0xFFFF]));
         }
     }
 
@@ -981,17 +981,17 @@ public final class JavaModel extends Model {
 
     @OriginalMember(owner = "client!rs", name = "I", descriptor = "(I[IIIIZI[I)V")
     @Override
-    protected void I(@OriginalArg(0) int arg0, @OriginalArg(1) int[] arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) boolean arg5, @OriginalArg(6) int arg6, @OriginalArg(7) int[] arg7) {
-        @Pc(2) int local2 = arg1.length;
+    protected void I(@OriginalArg(0) int type, @OriginalArg(1) int[] labels, @OriginalArg(2) int x, @OriginalArg(3) int y, @OriginalArg(4) int z, @OriginalArg(5) boolean arg5, @OriginalArg(6) int originMask, @OriginalArg(7) int[] matrix) {
+        @Pc(2) int local2 = labels.length;
         @Pc(21) int local21;
         @Pc(69) int local69;
         @Pc(91) int local91;
         @Pc(74) int local74;
         @Pc(86) int local86;
-        if (arg0 == 0) {
-            arg2 <<= 0x4;
-            arg3 <<= 0x4;
-            arg4 <<= 0x4;
+        if (type == 0) {
+            x <<= 0x4;
+            y <<= 0x4;
+            z <<= 0x4;
             if (!this.highPrecisionVertices) {
                 for (local21 = 0; local21 < this.vertexCount; local21++) {
                     this.vertexX[local21] <<= 0x4;
@@ -1005,12 +1005,12 @@ public final class JavaModel extends Model {
             this.pivotY = 0;
             this.pivotZ = 0;
             for (local69 = 0; local69 < local2; local69++) {
-                local74 = arg1[local69];
+                local74 = labels[local69];
                 if (local74 < this.vertexLabels.length) {
                     @Pc(84) int[] local84 = this.vertexLabels[local74];
                     for (local86 = 0; local86 < local84.length; local86++) {
                         local91 = local84[local86];
-                        if (this.originModels == null || (arg6 & this.originModels[local91]) != 0) {
+                        if (this.originModels == null || (originMask & this.originModels[local91]) != 0) {
                             this.pivotX += this.vertexX[local91];
                             this.pivotY += this.vertexY[local91];
                             this.pivotZ += this.vertexZ[local91];
@@ -1020,31 +1020,31 @@ public final class JavaModel extends Model {
                 }
             }
             if (local21 > 0) {
-                this.pivotX = this.pivotX / local21 + arg2;
-                this.pivotY = this.pivotY / local21 + arg3;
-                this.pivotZ = this.pivotZ / local21 + arg4;
+                this.pivotX = this.pivotX / local21 + x;
+                this.pivotY = this.pivotY / local21 + y;
+                this.pivotZ = this.pivotZ / local21 + z;
                 this.pivotDirty = true;
             } else {
-                this.pivotX = arg2;
-                this.pivotY = arg3;
-                this.pivotZ = arg4;
+                this.pivotX = x;
+                this.pivotY = y;
+                this.pivotZ = z;
             }
             return;
         }
         @Pc(335) int[] local335;
         @Pc(337) int local337;
-        if (arg0 == 1) {
-            if (arg7 != null) {
-                local21 = arg7[0] * arg2 + arg7[1] * arg3 + arg7[2] * arg4 + 8192 >> 14;
-                local69 = arg7[3] * arg2 + arg7[4] * arg3 + arg7[5] * arg4 + 8192 >> 14;
-                local74 = arg7[6] * arg2 + arg7[7] * arg3 + arg7[8] * arg4 + 8192 >> 14;
-                arg2 = local21;
-                arg3 = local69;
-                arg4 = local74;
+        if (type == 1) {
+            if (matrix != null) {
+                local21 = matrix[0] * x + matrix[1] * y + matrix[2] * z + 8192 >> 14;
+                local69 = matrix[3] * x + matrix[4] * y + matrix[5] * z + 8192 >> 14;
+                local74 = matrix[6] * x + matrix[7] * y + matrix[8] * z + 8192 >> 14;
+                x = local21;
+                y = local69;
+                z = local74;
             }
-            arg2 <<= 0x4;
-            arg3 <<= 0x4;
-            arg4 <<= 0x4;
+            x <<= 0x4;
+            y <<= 0x4;
+            z <<= 0x4;
             if (!this.highPrecisionVertices) {
                 for (local21 = 0; local21 < this.vertexCount; local21++) {
                     this.vertexX[local21] <<= 0x4;
@@ -1054,15 +1054,15 @@ public final class JavaModel extends Model {
                 this.highPrecisionVertices = true;
             }
             for (local21 = 0; local21 < local2; local21++) {
-                local69 = arg1[local21];
+                local69 = labels[local21];
                 if (local69 < this.vertexLabels.length) {
                     local335 = this.vertexLabels[local69];
                     for (local337 = 0; local337 < local335.length; local337++) {
                         local86 = local335[local337];
-                        if (this.originModels == null || (arg6 & this.originModels[local86]) != 0) {
-                            this.vertexX[local86] += arg2;
-                            this.vertexY[local86] += arg3;
-                            this.vertexZ[local86] += arg4;
+                        if (this.originModels == null || (originMask & this.originModels[local86]) != 0) {
+                            this.vertexX[local86] += x;
+                            this.vertexY[local86] += y;
+                            this.vertexZ[local86] += z;
                         }
                     }
                 }
@@ -1092,35 +1092,35 @@ public final class JavaModel extends Model {
         @Pc(974) int local974;
         @Pc(976) int local976;
         @Pc(1103) int local1103;
-        if (arg0 == 2) {
-            if (arg7 == null) {
+        if (type == 2) {
+            if (matrix == null) {
                 for (local21 = 0; local21 < local2; local21++) {
-                    local69 = arg1[local21];
+                    local69 = labels[local21];
                     if (local69 < this.vertexLabels.length) {
                         local335 = this.vertexLabels[local69];
                         for (local337 = 0; local337 < local335.length; local337++) {
                             local86 = local335[local337];
-                            if (this.originModels == null || (arg6 & this.originModels[local86]) != 0) {
+                            if (this.originModels == null || (originMask & this.originModels[local86]) != 0) {
                                 this.vertexX[local86] -= this.pivotX;
                                 this.vertexY[local86] -= this.pivotY;
                                 this.vertexZ[local86] -= this.pivotZ;
-                                if (arg4 != 0) {
-                                    local91 = Trig1.SIN[arg4];
-                                    local506 = Trig1.COS[arg4];
+                                if (z != 0) {
+                                    local91 = Trig1.SIN[z];
+                                    local506 = Trig1.COS[z];
                                     local531 = this.vertexY[local86] * local91 + this.vertexX[local86] * local506 + 16383 >> 14;
                                     this.vertexY[local86] = this.vertexY[local86] * local506 + 16383 - this.vertexX[local86] * local91 >> 14;
                                     this.vertexX[local86] = local531;
                                 }
-                                if (arg2 != 0) {
-                                    local91 = Trig1.SIN[arg2];
-                                    local506 = Trig1.COS[arg2];
+                                if (x != 0) {
+                                    local91 = Trig1.SIN[x];
+                                    local506 = Trig1.COS[x];
                                     local531 = this.vertexY[local86] * local506 + 16383 - this.vertexZ[local86] * local91 >> 14;
                                     this.vertexZ[local86] = this.vertexY[local86] * local91 + this.vertexZ[local86] * local506 + 16383 >> 14;
                                     this.vertexY[local86] = local531;
                                 }
-                                if (arg3 != 0) {
-                                    local91 = Trig1.SIN[arg3];
-                                    local506 = Trig1.COS[arg3];
+                                if (y != 0) {
+                                    local91 = Trig1.SIN[y];
+                                    local506 = Trig1.COS[y];
                                     local531 = this.vertexZ[local86] * local91 + this.vertexX[local86] * local506 + 16383 >> 14;
                                     this.vertexZ[local86] = this.vertexZ[local86] * local506 + 16383 - this.vertexX[local86] * local91 >> 14;
                                     this.vertexX[local86] = local531;
@@ -1141,16 +1141,16 @@ public final class JavaModel extends Model {
                     }
                     this.highPrecisionVertices = true;
                 }
-                local21 = arg7[9] << 4;
-                local69 = arg7[10] << 4;
-                local74 = arg7[11] << 4;
-                local337 = arg7[12] << 4;
-                local86 = arg7[13] << 4;
-                local91 = arg7[14] << 4;
+                local21 = matrix[9] << 4;
+                local69 = matrix[10] << 4;
+                local74 = matrix[11] << 4;
+                local337 = matrix[12] << 4;
+                local86 = matrix[13] << 4;
+                local91 = matrix[14] << 4;
                 if (this.pivotDirty) {
-                    local506 = arg7[0] * this.pivotX + arg7[3] * this.pivotY + arg7[6] * this.pivotZ + 8192 >> 14;
-                    local531 = arg7[1] * this.pivotX + arg7[4] * this.pivotY + arg7[7] * this.pivotZ + 8192 >> 14;
-                    local556 = arg7[2] * this.pivotX + arg7[5] * this.pivotY + arg7[8] * this.pivotZ + 8192 >> 14;
+                    local506 = matrix[0] * this.pivotX + matrix[3] * this.pivotY + matrix[6] * this.pivotZ + 8192 >> 14;
+                    local531 = matrix[1] * this.pivotX + matrix[4] * this.pivotY + matrix[7] * this.pivotZ + 8192 >> 14;
+                    local556 = matrix[2] * this.pivotX + matrix[5] * this.pivotY + matrix[8] * this.pivotZ + 8192 >> 14;
                     local506 += local337;
                     local531 += local86;
                     local556 += local91;
@@ -1160,12 +1160,12 @@ public final class JavaModel extends Model {
                     this.pivotDirty = false;
                 }
                 @Pc(583) int[] local583 = new int[9];
-                local531 = Trig1.COS[arg2];
-                local556 = Trig1.SIN[arg2];
-                local595 = Trig1.COS[arg3];
-                local599 = Trig1.SIN[arg3];
-                local603 = Trig1.COS[arg4];
-                local607 = Trig1.SIN[arg4];
+                local531 = Trig1.COS[x];
+                local556 = Trig1.SIN[x];
+                local595 = Trig1.COS[y];
+                local599 = Trig1.SIN[y];
+                local603 = Trig1.COS[z];
+                local607 = Trig1.SIN[z];
                 local615 = local556 * local603 + 8192 >> 14;
                 local623 = local556 * local607 + 8192 >> 14;
                 local583[0] = local595 * local603 + local599 * local623 + 8192 >> 14;
@@ -1188,7 +1188,7 @@ public final class JavaModel extends Model {
                     for (local833 = 0; local833 < 3; local833++) {
                         local836 = 0;
                         for (local838 = 0; local838 < 3; local838++) {
-                            local836 += local583[local830 * 3 + local838] * arg7[local833 * 3 + local838];
+                            local836 += local583[local830 * 3 + local838] * matrix[local833 * 3 + local838];
                         }
                         local828[local830 * 3 + local833] = local836 + 8192 >> 14;
                     }
@@ -1204,24 +1204,24 @@ public final class JavaModel extends Model {
                     for (local971 = 0; local971 < 3; local971++) {
                         local974 = 0;
                         for (local976 = 0; local976 < 3; local976++) {
-                            local974 += arg7[local968 * 3 + local976] * local828[local971 + local976 * 3];
+                            local974 += matrix[local968 * 3 + local976] * local828[local971 + local976 * 3];
                         }
                         local966[local968 * 3 + local971] = local974 + 8192 >> 14;
                     }
                 }
-                local971 = arg7[0] * local833 + arg7[1] * local836 + arg7[2] * local838 + 8192 >> 14;
-                local974 = arg7[3] * local833 + arg7[4] * local836 + arg7[5] * local838 + 8192 >> 14;
-                local976 = arg7[6] * local833 + arg7[7] * local836 + arg7[8] * local838 + 8192 >> 14;
+                local971 = matrix[0] * local833 + matrix[1] * local836 + matrix[2] * local838 + 8192 >> 14;
+                local974 = matrix[3] * local833 + matrix[4] * local836 + matrix[5] * local838 + 8192 >> 14;
+                local976 = matrix[6] * local833 + matrix[7] * local836 + matrix[8] * local838 + 8192 >> 14;
                 local971 += local21;
                 local974 += local69;
                 local976 += local74;
                 for (local1103 = 0; local1103 < local2; local1103++) {
-                    @Pc(1108) int local1108 = arg1[local1103];
+                    @Pc(1108) int local1108 = labels[local1103];
                     if (local1108 < this.vertexLabels.length) {
                         @Pc(1118) int[] local1118 = this.vertexLabels[local1108];
                         for (@Pc(1120) int local1120 = 0; local1120 < local1118.length; local1120++) {
                             @Pc(1125) int local1125 = local1118[local1120];
-                            if (this.originModels == null || (arg6 & this.originModels[local1125]) != 0) {
+                            if (this.originModels == null || (originMask & this.originModels[local1125]) != 0) {
                                 @Pc(1168) int local1168 = local966[0] * this.vertexX[local1125] + local966[1] * this.vertexY[local1125] + local966[2] * this.vertexZ[local1125] + 8192 >> 14;
                                 @Pc(1199) int local1199 = local966[3] * this.vertexX[local1125] + local966[4] * this.vertexY[local1125] + local966[5] * this.vertexZ[local1125] + 8192 >> 14;
                                 @Pc(1230) int local1230 = local966[6] * this.vertexX[local1125] + local966[7] * this.vertexY[local1125] + local966[8] * this.vertexZ[local1125] + 8192 >> 14;
@@ -1236,19 +1236,19 @@ public final class JavaModel extends Model {
                     }
                 }
             }
-        } else if (arg0 != 3) {
+        } else if (type != 3) {
             @Pc(2482) JavaBillboardFace local2482;
             @Pc(2487) JavaBillboardAttributes local2487;
-            if (arg0 == 5) {
+            if (type == 5) {
                 if (this.faceLabels != null && this.faceAlpha != null) {
                     for (local21 = 0; local21 < local2; local21++) {
-                        local69 = arg1[local21];
+                        local69 = labels[local21];
                         if (local69 < this.faceLabels.length) {
                             local335 = this.faceLabels[local69];
                             for (local337 = 0; local337 < local335.length; local337++) {
                                 local86 = local335[local337];
-                                if (this.faceOriginModels == null || (arg6 & this.faceOriginModels[local86]) != 0) {
-                                    local91 = (this.faceAlpha[local86] & 0xFF) + arg2 * 8;
+                                if (this.faceOriginModels == null || (originMask & this.faceOriginModels[local86]) != 0) {
+                                    local91 = (this.faceAlpha[local86] & 0xFF) + x * 8;
                                     if (local91 < 0) {
                                         local91 = 0;
                                     } else if (local91 > 255) {
@@ -1267,68 +1267,68 @@ public final class JavaModel extends Model {
                         }
                     }
                 }
-            } else if (arg0 != 7) {
+            } else if (type != 7) {
                 @Pc(2723) JavaBillboardAttributes local2723;
-                if (arg0 == 8) {
+                if (type == 8) {
                     if (this.billboardLabels != null) {
                         for (local21 = 0; local21 < local2; local21++) {
-                            local69 = arg1[local21];
+                            local69 = labels[local21];
                             if (local69 < this.billboardLabels.length) {
                                 local335 = this.billboardLabels[local69];
                                 for (local337 = 0; local337 < local335.length; local337++) {
                                     local2723 = this.billboardAttributes[local335[local337]];
-                                    local2723.anInt6222 += arg2;
-                                    local2723.anInt6229 += arg3;
+                                    local2723.anInt6222 += x;
+                                    local2723.anInt6229 += y;
                                 }
                             }
                         }
                     }
-                } else if (arg0 == 10) {
+                } else if (type == 10) {
                     if (this.billboardLabels != null) {
                         for (local21 = 0; local21 < local2; local21++) {
-                            local69 = arg1[local21];
+                            local69 = labels[local21];
                             if (local69 < this.billboardLabels.length) {
                                 local335 = this.billboardLabels[local69];
                                 for (local337 = 0; local337 < local335.length; local337++) {
                                     local2723 = this.billboardAttributes[local335[local337]];
-                                    local2723.anInt6223 = local2723.anInt6223 * arg2 >> 7;
-                                    local2723.anInt6226 = local2723.anInt6226 * arg3 >> 7;
+                                    local2723.anInt6223 = local2723.anInt6223 * x >> 7;
+                                    local2723.anInt6226 = local2723.anInt6226 * y >> 7;
                                 }
                             }
                         }
                     }
-                } else if (arg0 == 9 && this.billboardLabels != null) {
+                } else if (type == 9 && this.billboardLabels != null) {
                     for (local21 = 0; local21 < local2; local21++) {
-                        local69 = arg1[local21];
+                        local69 = labels[local21];
                         if (local69 < this.billboardLabels.length) {
                             local335 = this.billboardLabels[local69];
                             for (local337 = 0; local337 < local335.length; local337++) {
                                 local2723 = this.billboardAttributes[local335[local337]];
-                                local2723.anInt6231 = local2723.anInt6231 + arg2 & 0x3FFF;
+                                local2723.anInt6231 = local2723.anInt6231 + x & 0x3FFF;
                             }
                         }
                     }
                 }
             } else if (this.faceLabels != null) {
                 for (local21 = 0; local21 < local2; local21++) {
-                    local69 = arg1[local21];
+                    local69 = labels[local21];
                     if (local69 < this.faceLabels.length) {
                         local335 = this.faceLabels[local69];
                         for (local337 = 0; local337 < local335.length; local337++) {
                             local86 = local335[local337];
-                            if (this.faceOriginModels == null || (arg6 & this.faceOriginModels[local86]) != 0) {
+                            if (this.faceOriginModels == null || (originMask & this.faceOriginModels[local86]) != 0) {
                                 local91 = this.faceColour[local86] & 0xFFFF;
                                 local506 = local91 >> 10 & 0x3F;
                                 local531 = local91 >> 7 & 0x7;
                                 local556 = local91 & 0x7F;
-                                @Pc(2585) int local2585 = local506 + arg2 & 0x3F;
-                                local531 += arg3;
+                                @Pc(2585) int local2585 = local506 + x & 0x3F;
+                                local531 += y;
                                 if (local531 < 0) {
                                     local531 = 0;
                                 } else if (local531 > 7) {
                                     local531 = 7;
                                 }
-                                local556 += arg4;
+                                local556 += z;
                                 if (local556 < 0) {
                                     local556 = 0;
                                 } else if (local556 > 127) {
@@ -1348,20 +1348,20 @@ public final class JavaModel extends Model {
                     }
                 }
             }
-        } else if (arg7 == null) {
+        } else if (matrix == null) {
             for (local21 = 0; local21 < local2; local21++) {
-                local69 = arg1[local21];
+                local69 = labels[local21];
                 if (local69 < this.vertexLabels.length) {
                     local335 = this.vertexLabels[local69];
                     for (local337 = 0; local337 < local335.length; local337++) {
                         local86 = local335[local337];
-                        if (this.originModels == null || (arg6 & this.originModels[local86]) != 0) {
+                        if (this.originModels == null || (originMask & this.originModels[local86]) != 0) {
                             this.vertexX[local86] -= this.pivotX;
                             this.vertexY[local86] -= this.pivotY;
                             this.vertexZ[local86] -= this.pivotZ;
-                            this.vertexX[local86] = this.vertexX[local86] * arg2 / 128;
-                            this.vertexY[local86] = this.vertexY[local86] * arg3 / 128;
-                            this.vertexZ[local86] = this.vertexZ[local86] * arg4 / 128;
+                            this.vertexX[local86] = this.vertexX[local86] * x / 128;
+                            this.vertexY[local86] = this.vertexY[local86] * y / 128;
+                            this.vertexZ[local86] = this.vertexZ[local86] * z / 128;
                             this.vertexX[local86] += this.pivotX;
                             this.vertexY[local86] += this.pivotY;
                             this.vertexZ[local86] += this.pivotZ;
@@ -1378,16 +1378,16 @@ public final class JavaModel extends Model {
                 }
                 this.highPrecisionVertices = true;
             }
-            local21 = arg7[9] << 4;
-            local69 = arg7[10] << 4;
-            local74 = arg7[11] << 4;
-            local337 = arg7[12] << 4;
-            local86 = arg7[13] << 4;
-            local91 = arg7[14] << 4;
+            local21 = matrix[9] << 4;
+            local69 = matrix[10] << 4;
+            local74 = matrix[11] << 4;
+            local337 = matrix[12] << 4;
+            local86 = matrix[13] << 4;
+            local91 = matrix[14] << 4;
             if (this.pivotDirty) {
-                local506 = arg7[0] * this.pivotX + arg7[3] * this.pivotY + arg7[6] * this.pivotZ + 8192 >> 14;
-                local531 = arg7[1] * this.pivotX + arg7[4] * this.pivotY + arg7[7] * this.pivotZ + 8192 >> 14;
-                local556 = arg7[2] * this.pivotX + arg7[5] * this.pivotY + arg7[8] * this.pivotZ + 8192 >> 14;
+                local506 = matrix[0] * this.pivotX + matrix[3] * this.pivotY + matrix[6] * this.pivotZ + 8192 >> 14;
+                local531 = matrix[1] * this.pivotX + matrix[4] * this.pivotY + matrix[7] * this.pivotZ + 8192 >> 14;
+                local556 = matrix[2] * this.pivotX + matrix[5] * this.pivotY + matrix[8] * this.pivotZ + 8192 >> 14;
                 local506 += local337;
                 local531 += local86;
                 local556 += local91;
@@ -1396,16 +1396,16 @@ public final class JavaModel extends Model {
                 this.pivotZ = local556;
                 this.pivotDirty = false;
             }
-            local506 = arg2 << 15 >> 7;
-            local531 = arg3 << 15 >> 7;
-            local556 = arg4 << 15 >> 7;
+            local506 = x << 15 >> 7;
+            local531 = y << 15 >> 7;
+            local556 = z << 15 >> 7;
             local595 = local506 * -this.pivotX + 8192 >> 14;
             local599 = local531 * -this.pivotY + 8192 >> 14;
             local603 = local556 * -this.pivotZ + 8192 >> 14;
             local607 = local595 + this.pivotX;
             local615 = local599 + this.pivotY;
             local623 = local603 + this.pivotZ;
-            @Pc(1790) int[] local1790 = new int[]{local506 * arg7[0] + 8192 >> 14, local506 * arg7[3] + 8192 >> 14, local506 * arg7[6] + 8192 >> 14, local531 * arg7[1] + 8192 >> 14, local531 * arg7[4] + 8192 >> 14, local531 * arg7[7] + 8192 >> 14, local556 * arg7[2] + 8192 >> 14, local556 * arg7[5] + 8192 >> 14, local556 * arg7[8] + 8192 >> 14};
+            @Pc(1790) int[] local1790 = new int[]{local506 * matrix[0] + 8192 >> 14, local506 * matrix[3] + 8192 >> 14, local506 * matrix[6] + 8192 >> 14, local531 * matrix[1] + 8192 >> 14, local531 * matrix[4] + 8192 >> 14, local531 * matrix[7] + 8192 >> 14, local556 * matrix[2] + 8192 >> 14, local556 * matrix[5] + 8192 >> 14, local556 * matrix[8] + 8192 >> 14};
             local782 = local506 * local337 + 8192 >> 14;
             local810 = local531 * local86 + 8192 >> 14;
             local815 = local556 * local91 + 8192 >> 14;
@@ -1418,24 +1418,24 @@ public final class JavaModel extends Model {
                 for (local1942 = 0; local1942 < 3; local1942++) {
                     local830 = 0;
                     for (local833 = 0; local833 < 3; local833++) {
-                        local830 += arg7[local825 * 3 + local833] * local1790[local1942 + local833 * 3];
+                        local830 += matrix[local825 * 3 + local833] * local1790[local1942 + local833 * 3];
                     }
                     local1937[local825 * 3 + local1942] = local830 + 8192 >> 14;
                 }
             }
-            local1942 = arg7[0] * local1926 + arg7[1] * local1930 + arg7[2] * local1934 + 8192 >> 14;
-            local830 = arg7[3] * local1926 + arg7[4] * local1930 + arg7[5] * local1934 + 8192 >> 14;
-            local833 = arg7[6] * local1926 + arg7[7] * local1930 + arg7[8] * local1934 + 8192 >> 14;
+            local1942 = matrix[0] * local1926 + matrix[1] * local1930 + matrix[2] * local1934 + 8192 >> 14;
+            local830 = matrix[3] * local1926 + matrix[4] * local1930 + matrix[5] * local1934 + 8192 >> 14;
+            local833 = matrix[6] * local1926 + matrix[7] * local1930 + matrix[8] * local1934 + 8192 >> 14;
             local1942 += local21;
             local830 += local69;
             local833 += local74;
             for (local836 = 0; local836 < local2; local836++) {
-                local838 = arg1[local836];
+                local838 = labels[local836];
                 if (local838 < this.vertexLabels.length) {
                     local966 = this.vertexLabels[local838];
                     for (local968 = 0; local968 < local966.length; local968++) {
                         local971 = local966[local968];
-                        if (this.originModels == null || (arg6 & this.originModels[local971]) != 0) {
+                        if (this.originModels == null || (originMask & this.originModels[local971]) != 0) {
                             local974 = local1937[0] * this.vertexX[local971] + local1937[1] * this.vertexY[local971] + local1937[2] * this.vertexZ[local971] + 8192 >> 14;
                             local976 = local1937[3] * this.vertexX[local971] + local1937[4] * this.vertexY[local971] + local1937[5] * this.vertexZ[local971] + 8192 >> 14;
                             local1103 = local1937[6] * this.vertexX[local971] + local1937[7] * this.vertexY[local971] + local1937[8] * this.vertexZ[local971] + 8192 >> 14;
@@ -1538,9 +1538,9 @@ public final class JavaModel extends Model {
                 }
                 if (this.faceColourC[face] == -1) {
                     local333 = local81 | this.faceColourA[face] & 0xFFFFFF;
-                    this.rasterizer.renderTexturedTriangle((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local333, local333, local333, this.threadResource.fogColour, fogA, fogB, fogC, this.faceTextures[face]);
+                    this.rasterizer.renderTexturedTriangleRgb((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local333, local333, local333, this.threadResource.fogColour, fogA, fogB, fogC, this.faceTextures[face]);
                 } else {
-                    this.rasterizer.renderTexturedTriangle((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local81 | this.faceColourA[face] & 0xFFFFFF, local81 | this.faceColourB[face] & 0xFFFFFF, local81 | this.faceColourC[face] & 0xFFFFFF, this.threadResource.fogColour, fogA, fogB, fogC, this.faceTextures[face]);
+                    this.rasterizer.renderTexturedTriangleRgb((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local81 | this.faceColourA[face] & 0xFFFFFF, local81 | this.faceColourB[face] & 0xFFFFFF, local81 | this.faceColourC[face] & 0xFFFFFF, this.threadResource.fogColour, fogA, fogB, fogC, this.faceTextures[face]);
                 }
             } else if (this.faceColourC[face] == -1) {
                 this.rasterizer.renderTriangleRgb((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], Static462.blendArgb(fogA << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]), Static462.blendArgb(fogB << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]), Static462.blendArgb(fogC << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]));
@@ -1590,9 +1590,9 @@ public final class JavaModel extends Model {
             }
             if (this.faceColourC[face] == -1) {
                 @Pc(362) int local362 = local333 | this.faceColourA[face] & 0xFFFFFF;
-                this.rasterizer.renderTexturedTriangle((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local362, local362, local362, this.threadResource.fogColour, fogA, fogB, fogC, this.faceTextures[face]);
+                this.rasterizer.renderTexturedTriangleRgb((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local362, local362, local362, this.threadResource.fogColour, fogA, fogB, fogC, this.faceTextures[face]);
             } else {
-                this.rasterizer.renderTexturedTriangle((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local333 | this.faceColourA[face] & 0xFFFFFF, local333 | this.faceColourB[face] & 0xFFFFFF, local333 | this.faceColourC[face] & 0xFFFFFF, this.threadResource.fogColour, fogA, fogB, fogC, this.faceTextures[face]);
+                this.rasterizer.renderTexturedTriangleRgb((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local333 | this.faceColourA[face] & 0xFFFFFF, local333 | this.faceColourB[face] & 0xFFFFFF, local333 | this.faceColourC[face] & 0xFFFFFF, this.threadResource.fogColour, fogA, fogB, fogC, this.faceTextures[face]);
             }
         } else if (this.faceColourC[face] == -1) {
             this.rasterizer.renderTriangleRgb((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], Static462.blendArgb(fogA << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]), Static462.blendArgb(fogB << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]), Static462.blendArgb(fogC << 24 | this.threadResource.fogColour, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]));
@@ -1603,19 +1603,19 @@ public final class JavaModel extends Model {
 
     @OriginalMember(owner = "client!rs", name = "a", descriptor = "(BIZ)Lclient!ka;")
     @Override
-    public Model copy(@OriginalArg(0) byte arg0, @OriginalArg(1) int functionMask, @OriginalArg(2) boolean arg2) {
+    public Model copy(@OriginalArg(0) byte slot, @OriginalArg(1) int functionMask, @OriginalArg(2) boolean ensureLit) {
         this.useThreadCopyCache(Thread.currentThread());
         @Pc(4) boolean local4 = false;
         @Pc(25) JavaModel local25;
         @Pc(18) JavaModel local18;
-        if (arg0 > 0 && arg0 <= 7) {
-            local18 = this.copyBuffers[arg0 - 1];
-            local25 = this.copyTargets[arg0 - 1];
+        if (slot > 0 && slot <= 7) {
+            local18 = this.copyBuffers[slot - 1];
+            local25 = this.copyTargets[slot - 1];
             local4 = true;
         } else {
             local25 = local18 = new JavaModel(this.toolkit);
         }
-        return this.copyTo(local25, local18, functionMask, local4, arg2);
+        return this.copyTo(local25, local18, functionMask, local4, ensureLit);
     }
 
     @OriginalMember(owner = "client!rs", name = "g", descriptor = "()V")
@@ -1644,10 +1644,10 @@ public final class JavaModel extends Model {
 
     @OriginalMember(owner = "client!rs", name = "P", descriptor = "(IIII)V")
     @Override
-    protected void P(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3) {
+    protected void P(@OriginalArg(0) int type, @OriginalArg(1) int x, @OriginalArg(2) int y, @OriginalArg(3) int z) {
         @Pc(3) int local3;
         @Pc(14) int local14;
-        if (arg0 == 0) {
+        if (type == 0) {
             local3 = 0;
             this.pivotX = 0;
             this.pivotY = 0;
@@ -1659,45 +1659,45 @@ public final class JavaModel extends Model {
                 local3++;
             }
             if (local3 > 0) {
-                this.pivotX = this.pivotX / local3 + arg1;
-                this.pivotY = this.pivotY / local3 + arg2;
-                this.pivotZ = this.pivotZ / local3 + arg3;
+                this.pivotX = this.pivotX / local3 + x;
+                this.pivotY = this.pivotY / local3 + y;
+                this.pivotZ = this.pivotZ / local3 + z;
             } else {
-                this.pivotX = arg1;
-                this.pivotY = arg2;
-                this.pivotZ = arg3;
+                this.pivotX = x;
+                this.pivotY = y;
+                this.pivotZ = z;
             }
-        } else if (arg0 == 1) {
+        } else if (type == 1) {
             for (local3 = 0; local3 < this.vertexCount; local3++) {
-                this.vertexX[local3] += arg1;
-                this.vertexY[local3] += arg2;
-                this.vertexZ[local3] += arg3;
+                this.vertexX[local3] += x;
+                this.vertexY[local3] += y;
+                this.vertexZ[local3] += z;
             }
         } else {
             @Pc(168) int local168;
             @Pc(186) int local186;
-            if (arg0 == 2) {
+            if (type == 2) {
                 for (local3 = 0; local3 < this.vertexCount; local3++) {
                     this.vertexX[local3] -= this.pivotX;
                     this.vertexY[local3] -= this.pivotY;
                     this.vertexZ[local3] -= this.pivotZ;
-                    if (arg3 != 0) {
-                        local14 = Trig1.SIN[arg3];
-                        local168 = Trig1.COS[arg3];
+                    if (z != 0) {
+                        local14 = Trig1.SIN[z];
+                        local168 = Trig1.COS[z];
                         local186 = this.vertexY[local3] * local14 + this.vertexX[local3] * local168 + 16383 >> 14;
                         this.vertexY[local3] = this.vertexY[local3] * local168 + 16383 - this.vertexX[local3] * local14 >> 14;
                         this.vertexX[local3] = local186;
                     }
-                    if (arg1 != 0) {
-                        local14 = Trig1.SIN[arg1];
-                        local168 = Trig1.COS[arg1];
+                    if (x != 0) {
+                        local14 = Trig1.SIN[x];
+                        local168 = Trig1.COS[x];
                         local186 = this.vertexY[local3] * local168 + 16383 - this.vertexZ[local3] * local14 >> 14;
                         this.vertexZ[local3] = this.vertexY[local3] * local14 + this.vertexZ[local3] * local168 + 16383 >> 14;
                         this.vertexY[local3] = local186;
                     }
-                    if (arg2 != 0) {
-                        local14 = Trig1.SIN[arg2];
-                        local168 = Trig1.COS[arg2];
+                    if (y != 0) {
+                        local14 = Trig1.SIN[y];
+                        local168 = Trig1.COS[y];
                         local186 = this.vertexZ[local3] * local14 + this.vertexX[local3] * local168 + 16383 >> 14;
                         this.vertexZ[local3] = this.vertexZ[local3] * local168 + 16383 - this.vertexX[local3] * local14 >> 14;
                         this.vertexX[local3] = local186;
@@ -1706,14 +1706,14 @@ public final class JavaModel extends Model {
                     this.vertexY[local3] += this.pivotY;
                     this.vertexZ[local3] += this.pivotZ;
                 }
-            } else if (arg0 == 3) {
+            } else if (type == 3) {
                 for (local3 = 0; local3 < this.vertexCount; local3++) {
                     this.vertexX[local3] -= this.pivotX;
                     this.vertexY[local3] -= this.pivotY;
                     this.vertexZ[local3] -= this.pivotZ;
-                    this.vertexX[local3] = this.vertexX[local3] * arg1 / 128;
-                    this.vertexY[local3] = this.vertexY[local3] * arg2 / 128;
-                    this.vertexZ[local3] = this.vertexZ[local3] * arg3 / 128;
+                    this.vertexX[local3] = this.vertexX[local3] * x / 128;
+                    this.vertexY[local3] = this.vertexY[local3] * y / 128;
+                    this.vertexZ[local3] = this.vertexZ[local3] * z / 128;
                     this.vertexX[local3] += this.pivotX;
                     this.vertexY[local3] += this.pivotY;
                     this.vertexZ[local3] += this.pivotZ;
@@ -1721,9 +1721,9 @@ public final class JavaModel extends Model {
             } else {
                 @Pc(508) JavaBillboardFace local508;
                 @Pc(513) JavaBillboardAttributes local513;
-                if (arg0 == 5) {
+                if (type == 5) {
                     for (local3 = 0; local3 < this.faceCount; local3++) {
-                        local14 = (this.faceAlpha[local3] & 0xFF) + arg1 * 8;
+                        local14 = (this.faceAlpha[local3] & 0xFF) + x * 8;
                         if (local14 < 0) {
                             local14 = 0;
                         } else if (local14 > 255) {
@@ -1738,20 +1738,20 @@ public final class JavaModel extends Model {
                             local513.anInt6225 = local513.anInt6225 & 0xFFFFFF | 255 - (this.faceAlpha[local508.anInt6139] & 0xFF) << 24;
                         }
                     }
-                } else if (arg0 == 7) {
+                } else if (type == 7) {
                     for (local3 = 0; local3 < this.faceCount; local3++) {
                         local14 = this.faceColour[local3] & 0xFFFF;
                         local168 = local14 >> 10 & 0x3F;
                         local186 = local14 >> 7 & 0x7;
                         @Pc(567) int local567 = local14 & 0x7F;
-                        @Pc(573) int local573 = local168 + arg1 & 0x3F;
-                        local186 += arg2;
+                        @Pc(573) int local573 = local168 + x & 0x3F;
+                        local186 += y;
                         if (local186 < 0) {
                             local186 = 0;
                         } else if (local186 > 7) {
                             local186 = 7;
                         }
-                        local567 += arg3;
+                        local567 += z;
                         if (local567 < 0) {
                             local567 = 0;
                         } else if (local567 > 127) {
@@ -1769,22 +1769,22 @@ public final class JavaModel extends Model {
                     }
                 } else {
                     @Pc(681) JavaBillboardAttributes local681;
-                    if (arg0 == 8) {
+                    if (type == 8) {
                         for (local3 = 0; local3 < this.billboardCount; local3++) {
                             local681 = this.billboardAttributes[local3];
-                            local681.anInt6222 += arg1;
-                            local681.anInt6229 += arg2;
+                            local681.anInt6222 += x;
+                            local681.anInt6229 += y;
                         }
-                    } else if (arg0 == 10) {
+                    } else if (type == 10) {
                         for (local3 = 0; local3 < this.billboardCount; local3++) {
                             local681 = this.billboardAttributes[local3];
-                            local681.anInt6223 = local681.anInt6223 * arg1 >> 7;
-                            local681.anInt6226 = local681.anInt6226 * arg2 >> 7;
+                            local681.anInt6223 = local681.anInt6223 * x >> 7;
+                            local681.anInt6226 = local681.anInt6226 * y >> 7;
                         }
-                    } else if (arg0 == 9) {
+                    } else if (type == 9) {
                         for (local3 = 0; local3 < this.billboardCount; local3++) {
                             local681 = this.billboardAttributes[local3];
-                            local681.anInt6231 = local681.anInt6231 + arg1 & 0x3FFF;
+                            local681.anInt6231 = local681.anInt6231 + x & 0x3FFF;
                         }
                     }
                 }
@@ -1804,8 +1804,8 @@ public final class JavaModel extends Model {
 
     @OriginalMember(owner = "client!rs", name = "a", descriptor = "(Lclient!tt;)V")
     @Override
-    public void apply(@OriginalArg(0) Matrix arg0) {
-        @Pc(2) JavaMatrix local2 = (JavaMatrix) arg0;
+    public void apply(@OriginalArg(0) Matrix matrix) {
+        @Pc(2) JavaMatrix local2 = (JavaMatrix) matrix;
         @Pc(7) int local7;
         if (this.emitters != null) {
             for (local7 = 0; local7 < this.emitters.length; local7++) {
@@ -1900,7 +1900,7 @@ public final class JavaModel extends Model {
                 if (!local280.aBoolean464) {
                     this.drawTriangleArgb(face);
                 }
-                this.toolkit.method3797(local285.anInt6221, local285.anInt6227, local285.anInt6224, local285.anInt6232, local285.anInt6220, local285.anInt6231, local280.aShort72 & 0xFFFF, local285.anInt6225, local280.aByte98, local280.aByte97);
+                this.toolkit.drawBillboardArgb(local285.anInt6221, local285.anInt6227, local285.anInt6224, local285.anInt6232, local285.anInt6220, local285.anInt6231, local280.aShort72 & 0xFFFF, local285.anInt6225, local280.aByte98, local280.aByte97);
                 return;
             }
             this.drawTriangleArgb(face);
@@ -1922,7 +1922,7 @@ public final class JavaModel extends Model {
 
     @OriginalMember(owner = "client!rs", name = "a", descriptor = "(B[B)V")
     @Override
-    public void updateAlphas(@OriginalArg(0) byte arg0, @OriginalArg(1) byte[] arg1) {
+    public void updateAlphas(@OriginalArg(0) byte alpha, @OriginalArg(1) byte[] alphas) {
         if ((this.functionMask & 0x100000) == 0) {
             throw new RuntimeException();
         }
@@ -1930,13 +1930,13 @@ public final class JavaModel extends Model {
             this.faceAlpha = new byte[this.faceCount];
         }
         @Pc(23) int local23;
-        if (arg1 == null) {
+        if (alphas == null) {
             for (local23 = 0; local23 < this.faceCount; local23++) {
-                this.faceAlpha[local23] = arg0;
+                this.faceAlpha[local23] = alpha;
             }
         } else {
             for (local23 = 0; local23 < this.faceCount; local23++) {
-                @Pc(57) int local57 = 255 - (255 - (arg1[local23] & 0xFF)) * (255 - (arg0 & 0xFF)) / 255;
+                @Pc(57) int local57 = 255 - (255 - (alphas[local23] & 0xFF)) * (255 - (alpha & 0xFF)) / 255;
                 this.faceAlpha[local23] = (byte) local57;
             }
         }
@@ -2043,8 +2043,8 @@ public final class JavaModel extends Model {
 
     @OriginalMember(owner = "client!rs", name = "a", descriptor = "(Lclient!tt;Lclient!ima;II)V")
     @Override
-    public void renderOrtho(@OriginalArg(0) Matrix arg0, @OriginalArg(1) PickingCylinder cylinder, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3) {
-        this.draw(arg0, cylinder, arg2, arg3);
+    public void renderOrtho(@OriginalArg(0) Matrix matrix, @OriginalArg(1) PickingCylinder cylinder, @OriginalArg(2) int orthoDepth, @OriginalArg(3) int flags) {
+        this.draw(matrix, cylinder, orthoDepth, flags);
     }
 
     @OriginalMember(owner = "client!rs", name = "c", descriptor = "()[Lclient!mn;")
@@ -2089,8 +2089,8 @@ public final class JavaModel extends Model {
 
     @OriginalMember(owner = "client!rs", name = "a", descriptor = "(Lclient!ka;IIIZ)V")
     @Override
-    public void method7481(@OriginalArg(0) Model arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) boolean arg4) {
-        @Pc(2) JavaModel local2 = (JavaModel) arg0;
+    public void method7481(@OriginalArg(0) Model other, @OriginalArg(1) int x, @OriginalArg(2) int y, @OriginalArg(3) int z, @OriginalArg(4) boolean arg4) {
+        @Pc(2) JavaModel local2 = (JavaModel) other;
         if ((this.functionMask & 0x10000) != 65536) {
             throw new IllegalStateException("");
         } else if ((local2.functionMask & 0x10000) == 65536) {
@@ -2107,11 +2107,11 @@ public final class JavaModel extends Model {
             for (@Pc(51) int local51 = 0; local51 < this.maxVertex; local51++) {
                 @Pc(57) VertexNormal local57 = this.vertexNormals[local51];
                 if (local57.magnitude != 0) {
-                    local67 = this.vertexY[local51] - arg2;
+                    local67 = this.vertexY[local51] - y;
                     if (local67 >= local2.minY && local67 <= local2.maxY) {
-                        @Pc(86) int local86 = this.vertexX[local51] - arg1;
+                        @Pc(86) int local86 = this.vertexX[local51] - x;
                         if (local86 >= local2.minX && local86 <= local2.maxX) {
-                            @Pc(105) int local105 = this.vertexZ[local51] - arg3;
+                            @Pc(105) int local105 = this.vertexZ[local51] - z;
                             if (local105 >= local2.minZ && local105 <= local2.maxZ) {
                                 for (@Pc(119) int local119 = 0; local119 < local49; local119++) {
                                     @Pc(125) VertexNormal local125 = local2.vertexNormals[local119];
@@ -2199,8 +2199,8 @@ public final class JavaModel extends Model {
 
     @OriginalMember(owner = "client!rs", name = "a", descriptor = "(I[IIIIIZ)V")
     @Override
-    protected void method7499(@OriginalArg(0) int arg0, @OriginalArg(1) int[] arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) boolean arg6) {
-        @Pc(2) int local2 = arg1.length;
+    protected void method7499(@OriginalArg(0) int type, @OriginalArg(1) int[] labels, @OriginalArg(2) int x, @OriginalArg(3) int y, @OriginalArg(4) int z, @OriginalArg(5) int arg5, @OriginalArg(6) boolean arg6) {
+        @Pc(2) int local2 = labels.length;
         @Pc(21) int local21;
         @Pc(69) int local69;
         @Pc(91) int local91;
@@ -2208,10 +2208,10 @@ public final class JavaModel extends Model {
         @Pc(12) int local12;
         @Pc(16) int local16;
         @Pc(86) int local86;
-        if (arg0 == 0) {
-            local8 = arg2 << 4;
-            local12 = arg3 << 4;
-            local16 = arg4 << 4;
+        if (type == 0) {
+            local8 = x << 4;
+            local12 = y << 4;
+            local16 = z << 4;
             if (!this.highPrecisionVertices) {
                 for (local21 = 0; local21 < this.vertexCount; local21++) {
                     this.vertexX[local21] <<= 0x4;
@@ -2225,7 +2225,7 @@ public final class JavaModel extends Model {
             this.pivotY = 0;
             this.pivotZ = 0;
             for (local69 = 0; local69 < local2; local69++) {
-                @Pc(74) int local74 = arg1[local69];
+                @Pc(74) int local74 = labels[local69];
                 if (local74 < this.vertexLabels.length) {
                     @Pc(84) int[] local84 = this.vertexLabels[local74];
                     for (local86 = 0; local86 < local84.length; local86++) {
@@ -2250,10 +2250,10 @@ public final class JavaModel extends Model {
         }
         @Pc(242) int[] local242;
         @Pc(244) int local244;
-        if (arg0 == 1) {
-            local8 = arg2 << 4;
-            local12 = arg3 << 4;
-            local16 = arg4 << 4;
+        if (type == 1) {
+            local8 = x << 4;
+            local12 = y << 4;
+            local16 = z << 4;
             if (!this.highPrecisionVertices) {
                 for (local21 = 0; local21 < this.vertexCount; local21++) {
                     this.vertexX[local21] <<= 0x4;
@@ -2263,7 +2263,7 @@ public final class JavaModel extends Model {
                 this.highPrecisionVertices = true;
             }
             for (local21 = 0; local21 < local2; local21++) {
-                local69 = arg1[local21];
+                local69 = labels[local21];
                 if (local69 < this.vertexLabels.length) {
                     local242 = this.vertexLabels[local69];
                     for (local244 = 0; local244 < local242.length; local244++) {
@@ -2278,9 +2278,9 @@ public final class JavaModel extends Model {
         }
         @Pc(354) int local354;
         @Pc(372) int local372;
-        if (arg0 == 2) {
+        if (type == 2) {
             for (local21 = 0; local21 < local2; local21++) {
-                local69 = arg1[local21];
+                local69 = labels[local21];
                 if (local69 < this.vertexLabels.length) {
                     local242 = this.vertexLabels[local69];
                     if ((arg5 & 0x1) == 0) {
@@ -2289,23 +2289,23 @@ public final class JavaModel extends Model {
                             this.vertexX[local86] -= this.pivotX;
                             this.vertexY[local86] -= this.pivotY;
                             this.vertexZ[local86] -= this.pivotZ;
-                            if (arg4 != 0) {
-                                local91 = Trig1.SIN[arg4];
-                                local354 = Trig1.COS[arg4];
+                            if (z != 0) {
+                                local91 = Trig1.SIN[z];
+                                local354 = Trig1.COS[z];
                                 local372 = this.vertexY[local86] * local91 + this.vertexX[local86] * local354 + 16383 >> 14;
                                 this.vertexY[local86] = this.vertexY[local86] * local354 + 16383 - this.vertexX[local86] * local91 >> 14;
                                 this.vertexX[local86] = local372;
                             }
-                            if (arg2 != 0) {
-                                local91 = Trig1.SIN[arg2];
-                                local354 = Trig1.COS[arg2];
+                            if (x != 0) {
+                                local91 = Trig1.SIN[x];
+                                local354 = Trig1.COS[x];
                                 local372 = this.vertexY[local86] * local354 + 16383 - this.vertexZ[local86] * local91 >> 14;
                                 this.vertexZ[local86] = this.vertexY[local86] * local91 + this.vertexZ[local86] * local354 + 16383 >> 14;
                                 this.vertexY[local86] = local372;
                             }
-                            if (arg3 != 0) {
-                                local91 = Trig1.SIN[arg3];
-                                local354 = Trig1.COS[arg3];
+                            if (y != 0) {
+                                local91 = Trig1.SIN[y];
+                                local354 = Trig1.COS[y];
                                 local372 = this.vertexZ[local86] * local91 + this.vertexX[local86] * local354 + 16383 >> 14;
                                 this.vertexZ[local86] = this.vertexZ[local86] * local354 + 16383 - this.vertexX[local86] * local91 >> 14;
                                 this.vertexX[local86] = local372;
@@ -2320,23 +2320,23 @@ public final class JavaModel extends Model {
                             this.vertexX[local86] -= this.pivotX;
                             this.vertexY[local86] -= this.pivotY;
                             this.vertexZ[local86] -= this.pivotZ;
-                            if (arg2 != 0) {
-                                local91 = Trig1.SIN[arg2];
-                                local354 = Trig1.COS[arg2];
+                            if (x != 0) {
+                                local91 = Trig1.SIN[x];
+                                local354 = Trig1.COS[x];
                                 local372 = this.vertexY[local86] * local354 + 16383 - this.vertexZ[local86] * local91 >> 14;
                                 this.vertexZ[local86] = this.vertexY[local86] * local91 + this.vertexZ[local86] * local354 + 16383 >> 14;
                                 this.vertexY[local86] = local372;
                             }
-                            if (arg4 != 0) {
-                                local91 = Trig1.SIN[arg4];
-                                local354 = Trig1.COS[arg4];
+                            if (z != 0) {
+                                local91 = Trig1.SIN[z];
+                                local354 = Trig1.COS[z];
                                 local372 = this.vertexY[local86] * local91 + this.vertexX[local86] * local354 + 16383 >> 14;
                                 this.vertexY[local86] = this.vertexY[local86] * local354 + 16383 - this.vertexX[local86] * local91 >> 14;
                                 this.vertexX[local86] = local372;
                             }
-                            if (arg3 != 0) {
-                                local91 = Trig1.SIN[arg3];
-                                local354 = Trig1.COS[arg3];
+                            if (y != 0) {
+                                local91 = Trig1.SIN[y];
+                                local354 = Trig1.COS[y];
                                 local372 = this.vertexZ[local86] * local91 + this.vertexX[local86] * local354 + 16383 >> 14;
                                 this.vertexZ[local86] = this.vertexZ[local86] * local354 + 16383 - this.vertexX[local86] * local91 >> 14;
                                 this.vertexX[local86] = local372;
@@ -2348,9 +2348,9 @@ public final class JavaModel extends Model {
                     }
                 }
             }
-        } else if (arg0 == 3) {
+        } else if (type == 3) {
             for (local21 = 0; local21 < local2; local21++) {
-                local69 = arg1[local21];
+                local69 = labels[local21];
                 if (local69 < this.vertexLabels.length) {
                     local242 = this.vertexLabels[local69];
                     for (local244 = 0; local244 < local242.length; local244++) {
@@ -2358,9 +2358,9 @@ public final class JavaModel extends Model {
                         this.vertexX[local86] -= this.pivotX;
                         this.vertexY[local86] -= this.pivotY;
                         this.vertexZ[local86] -= this.pivotZ;
-                        this.vertexX[local86] = this.vertexX[local86] * arg2 / 128;
-                        this.vertexY[local86] = this.vertexY[local86] * arg3 / 128;
-                        this.vertexZ[local86] = this.vertexZ[local86] * arg4 / 128;
+                        this.vertexX[local86] = this.vertexX[local86] * x / 128;
+                        this.vertexY[local86] = this.vertexY[local86] * y / 128;
+                        this.vertexZ[local86] = this.vertexZ[local86] * z / 128;
                         this.vertexX[local86] += this.pivotX;
                         this.vertexY[local86] += this.pivotY;
                         this.vertexZ[local86] += this.pivotZ;
@@ -2370,15 +2370,15 @@ public final class JavaModel extends Model {
         } else {
             @Pc(994) JavaBillboardFace local994;
             @Pc(999) JavaBillboardAttributes local999;
-            if (arg0 == 5) {
+            if (type == 5) {
                 if (this.faceLabels != null && this.faceAlpha != null) {
                     for (local21 = 0; local21 < local2; local21++) {
-                        local69 = arg1[local21];
+                        local69 = labels[local21];
                         if (local69 < this.faceLabels.length) {
                             local242 = this.faceLabels[local69];
                             for (local244 = 0; local244 < local242.length; local244++) {
                                 local86 = local242[local244];
-                                local91 = (this.faceAlpha[local86] & 0xFF) + arg2 * 8;
+                                local91 = (this.faceAlpha[local86] & 0xFF) + x * 8;
                                 if (local91 < 0) {
                                     local91 = 0;
                                 } else if (local91 > 255) {
@@ -2396,51 +2396,51 @@ public final class JavaModel extends Model {
                         }
                     }
                 }
-            } else if (arg0 != 7) {
+            } else if (type != 7) {
                 @Pc(1223) JavaBillboardAttributes local1223;
-                if (arg0 == 8) {
+                if (type == 8) {
                     if (this.billboardLabels != null) {
                         for (local21 = 0; local21 < local2; local21++) {
-                            local69 = arg1[local21];
+                            local69 = labels[local21];
                             if (local69 < this.billboardLabels.length) {
                                 local242 = this.billboardLabels[local69];
                                 for (local244 = 0; local244 < local242.length; local244++) {
                                     local1223 = this.billboardAttributes[local242[local244]];
-                                    local1223.anInt6222 += arg2;
-                                    local1223.anInt6229 += arg3;
+                                    local1223.anInt6222 += x;
+                                    local1223.anInt6229 += y;
                                 }
                             }
                         }
                     }
-                } else if (arg0 == 10) {
+                } else if (type == 10) {
                     if (this.billboardLabels != null) {
                         for (local21 = 0; local21 < local2; local21++) {
-                            local69 = arg1[local21];
+                            local69 = labels[local21];
                             if (local69 < this.billboardLabels.length) {
                                 local242 = this.billboardLabels[local69];
                                 for (local244 = 0; local244 < local242.length; local244++) {
                                     local1223 = this.billboardAttributes[local242[local244]];
-                                    local1223.anInt6223 = local1223.anInt6223 * arg2 >> 7;
-                                    local1223.anInt6226 = local1223.anInt6226 * arg3 >> 7;
+                                    local1223.anInt6223 = local1223.anInt6223 * x >> 7;
+                                    local1223.anInt6226 = local1223.anInt6226 * y >> 7;
                                 }
                             }
                         }
                     }
-                } else if (arg0 == 9 && this.billboardLabels != null) {
+                } else if (type == 9 && this.billboardLabels != null) {
                     for (local21 = 0; local21 < local2; local21++) {
-                        local69 = arg1[local21];
+                        local69 = labels[local21];
                         if (local69 < this.billboardLabels.length) {
                             local242 = this.billboardLabels[local69];
                             for (local244 = 0; local244 < local242.length; local244++) {
                                 local1223 = this.billboardAttributes[local242[local244]];
-                                local1223.anInt6231 = local1223.anInt6231 + arg2 & 0x3FFF;
+                                local1223.anInt6231 = local1223.anInt6231 + x & 0x3FFF;
                             }
                         }
                     }
                 }
             } else if (this.faceLabels != null) {
                 for (local21 = 0; local21 < local2; local21++) {
-                    local69 = arg1[local21];
+                    local69 = labels[local21];
                     if (local69 < this.faceLabels.length) {
                         local242 = this.faceLabels[local69];
                         for (local244 = 0; local244 < local242.length; local244++) {
@@ -2449,14 +2449,14 @@ public final class JavaModel extends Model {
                             local354 = local91 >> 10 & 0x3F;
                             local372 = local91 >> 7 & 0x7;
                             @Pc(1079) int local1079 = local91 & 0x7F;
-                            @Pc(1085) int local1085 = local354 + arg2 & 0x3F;
-                            local372 += arg3;
+                            @Pc(1085) int local1085 = local354 + x & 0x3F;
+                            local372 += y;
                             if (local372 < 0) {
                                 local372 = 0;
                             } else if (local372 > 7) {
                                 local372 = 7;
                             }
-                            local1079 += arg4;
+                            local1079 += z;
                             if (local1079 < 0) {
                                 local1079 = 0;
                             } else if (local1079 > 127) {
@@ -3068,20 +3068,20 @@ public final class JavaModel extends Model {
 
     @OriginalMember(owner = "client!rs", name = "k", descriptor = "(I)V")
     @Override
-    public void k(@OriginalArg(0) int arg0) {
+    public void k(@OriginalArg(0) int angle) {
         if ((this.functionMask & 0xD) != 13) {
             throw new IllegalStateException();
         } else if (this.vertexNormals == null) {
-            this.a(arg0);
-        } else if (arg0 == 4096) {
+            this.a(angle);
+        } else if (angle == 4096) {
             this.rotate90WithNormals();
-        } else if (arg0 == 8192) {
+        } else if (angle == 8192) {
             this.rotate180WithNormals();
-        } else if (arg0 == 12288) {
+        } else if (angle == 12288) {
             this.rotate270WithNormals();
         } else {
-            @Pc(40) int local40 = Trig1.SIN[arg0];
-            @Pc(44) int local44 = Trig1.COS[arg0];
+            @Pc(40) int local40 = Trig1.SIN[angle];
+            @Pc(44) int local44 = Trig1.COS[angle];
             synchronized (this) {
                 @Pc(67) int local67;
                 for (@Pc(50) int local50 = 0; local50 < this.maxVertex; local50++) {
@@ -3171,9 +3171,9 @@ public final class JavaModel extends Model {
             }
             if (this.faceColourC[face] == -1) {
                 @Pc(210) int argb = alphaBits | this.faceColourA[face] & 0xFFFFFF;
-                this.rasterizer.method5154((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], argb, argb, argb, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
+                this.rasterizer.renderTexturedTriangleArgb((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], argb, argb, argb, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
             } else {
-                this.rasterizer.method5154((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], alphaBits | this.faceColourA[face] & 0xFFFFFF, alphaBits | this.faceColourB[face] & 0xFFFFFF, alphaBits | this.faceColourC[face] & 0xFFFFFF, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
+                this.rasterizer.renderTexturedTriangleArgb((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], alphaBits | this.faceColourA[face] & 0xFFFFFF, alphaBits | this.faceColourB[face] & 0xFFFFFF, alphaBits | this.faceColourC[face] & 0xFFFFFF, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
             }
             return;
         }
@@ -3183,9 +3183,9 @@ public final class JavaModel extends Model {
             this.rasterizer.alpha = this.faceAlpha[face] & 0xFF;
         }
         if (this.faceColourC[face] == -1) {
-            this.rasterizer.method5144((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]);
+            this.rasterizer.renderFlatTriangleArgb((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]);
         } else {
-            this.rasterizer.method5153((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], (float) (this.faceColourA[face] & 0xFFFF), (float) (this.faceColourB[face] & 0xFFFF), (float) (this.faceColourC[face] & 0xFFFF));
+            this.rasterizer.renderTriangleHslArgb((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], (float) (this.faceColourA[face] & 0xFFFF), (float) (this.faceColourB[face] & 0xFFFF), (float) (this.faceColourC[face] & 0xFFFF));
         }
     }
 
@@ -3311,14 +3311,14 @@ public final class JavaModel extends Model {
                 }
                 local961 = local938 | this.faceColourA[face] & 0xFFFFFF;
                 if (this.faceColourC[face] == -1) {
-                    this.rasterizer.method5154((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local961, local961, local961, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
+                    this.rasterizer.renderTexturedTriangleArgb((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local961, local961, local961, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
                 } else {
-                    this.rasterizer.method5154((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local961, local961, local961, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
+                    this.rasterizer.renderTexturedTriangleArgb((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local961, local961, local961, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
                 }
             } else if (this.faceColourC[face] == -1) {
-                this.rasterizer.method5144((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]);
+                this.rasterizer.renderFlatTriangleArgb((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]);
             } else {
-                this.rasterizer.method5153((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, (float) this.clippedColour[0], (float) this.clippedColour[1], (float) this.clippedColour[2]);
+                this.rasterizer.renderTriangleHslArgb((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, (float) this.clippedColour[0], (float) this.clippedColour[1], (float) this.clippedColour[2]);
             }
         }
         if (count != 4) {
@@ -3330,12 +3330,12 @@ public final class JavaModel extends Model {
         if (this.faceTextures == null || this.faceTextures[face] == -1) {
             if (this.faceColourC[face] == -1) {
                 local938 = ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF];
-                this.rasterizer.method5144((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, local938);
-                this.rasterizer.method5144((float) local123, (float) local788, (float) this.clippedY[3], (float) local98, (float) local110, (float) this.clippedX[3], (float) depthA, (float) depthB, (float) this.clippedZ[3], local938);
+                this.rasterizer.renderFlatTriangleArgb((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, local938);
+                this.rasterizer.renderFlatTriangleArgb((float) local123, (float) local788, (float) this.clippedY[3], (float) local98, (float) local110, (float) this.clippedX[3], (float) depthA, (float) depthB, (float) this.clippedZ[3], local938);
                 return;
             } else {
-                this.rasterizer.method5153((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, (float) this.clippedColour[0], (float) this.clippedColour[1], (float) this.clippedColour[2]);
-                this.rasterizer.method5153((float) local123, (float) local788, (float) this.clippedY[3], (float) local98, (float) local110, (float) this.clippedX[3], (float) depthA, (float) depthB, (float) this.clippedZ[3], (float) this.clippedColour[0], (float) this.clippedColour[2], (float) this.clippedColour[3]);
+                this.rasterizer.renderTriangleHslArgb((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, (float) this.clippedColour[0], (float) this.clippedColour[1], (float) this.clippedColour[2]);
+                this.rasterizer.renderTriangleHslArgb((float) local123, (float) local788, (float) this.clippedY[3], (float) local98, (float) local110, (float) this.clippedX[3], (float) depthA, (float) depthB, (float) this.clippedZ[3], (float) this.clippedColour[0], (float) this.clippedColour[2], (float) this.clippedColour[3]);
                 return;
             }
         }
@@ -3345,12 +3345,12 @@ public final class JavaModel extends Model {
         }
         local961 = local938 | this.faceColourA[face] & 0xFFFFFF;
         if (this.faceColourC[face] == -1) {
-            this.rasterizer.method5154((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local961, local961, local961, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
-            this.rasterizer.method5154((float) local123, (float) local788, (float) this.clippedY[3], (float) local98, (float) local110, (float) this.clippedX[3], (float) depthA, (float) depthC, (float) this.clippedZ[3], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local961, local961, local961, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
+            this.rasterizer.renderTexturedTriangleArgb((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local961, local961, local961, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
+            this.rasterizer.renderTexturedTriangleArgb((float) local123, (float) local788, (float) this.clippedY[3], (float) local98, (float) local110, (float) this.clippedX[3], (float) depthA, (float) depthC, (float) this.clippedZ[3], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local961, local961, local961, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
             return;
         }
-        this.rasterizer.method5154((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local961, local961, local961, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
-        this.rasterizer.method5154((float) local123, (float) local788, (float) this.clippedY[3], (float) local98, (float) local110, (float) this.clippedX[3], (float) depthA, (float) depthC, (float) this.clippedZ[3], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local961, local961, local961, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
+        this.rasterizer.renderTexturedTriangleArgb((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local961, local961, local961, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
+        this.rasterizer.renderTexturedTriangleArgb((float) local123, (float) local788, (float) this.clippedY[3], (float) local98, (float) local110, (float) this.clippedX[3], (float) depthA, (float) depthC, (float) this.clippedZ[3], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local961, local961, local961, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
     }
 
     @OriginalMember(owner = "client!rs", name = "a", descriptor = "(Ljava/lang/Thread;)V")
@@ -3395,14 +3395,14 @@ public final class JavaModel extends Model {
 
     @OriginalMember(owner = "client!rs", name = "a", descriptor = "(Lclient!tt;IZ)V")
     @Override
-    public void transform(@OriginalArg(0) Matrix matrix, @OriginalArg(1) int arg1, @OriginalArg(2) boolean arg2) {
+    public void transform(@OriginalArg(0) Matrix matrix, @OriginalArg(1) int originMask, @OriginalArg(2) boolean relative) {
         if (this.originModels == null) {
             return;
         }
         @Pc(7) int[] local7 = new int[3];
         for (@Pc(9) int local9 = 0; local9 < this.maxVertex; local9++) {
-            if ((arg1 & this.originModels[local9]) != 0) {
-                if (arg2) {
+            if ((originMask & this.originModels[local9]) != 0) {
+                if (relative) {
                     matrix.projectRelative(this.vertexX[local9], this.vertexY[local9], this.vertexZ[local9], local7);
                 } else {
                     matrix.project(this.vertexX[local9], this.vertexY[local9], this.vertexZ[local9], local7);
@@ -3530,14 +3530,14 @@ public final class JavaModel extends Model {
                 }
                 local961 = local938 | this.faceColourA[face] & 0xFFFFFF;
                 if (this.faceColourC[face] == -1) {
-                    this.rasterizer.renderTexturedTriangle((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local961, local961, local961, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
+                    this.rasterizer.renderTexturedTriangleRgb((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local961, local961, local961, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
                 } else {
-                    this.rasterizer.renderTexturedTriangle((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local961, local961, local961, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
+                    this.rasterizer.renderTexturedTriangleRgb((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local961, local961, local961, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
                 }
             } else if (this.faceColourC[face] == -1) {
                 this.rasterizer.renderFlatTriangleRgb((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]);
             } else {
-                this.rasterizer.method5156((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, (float) this.clippedColour[0], (float) this.clippedColour[1], (float) this.clippedColour[2]);
+                this.rasterizer.renderTriangleHslRgb((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, (float) this.clippedColour[0], (float) this.clippedColour[1], (float) this.clippedColour[2]);
             }
         }
         if (count != 4) {
@@ -3553,8 +3553,8 @@ public final class JavaModel extends Model {
                 this.rasterizer.renderFlatTriangleRgb((float) local123, (float) local788, (float) this.clippedY[3], (float) local98, (float) local110, (float) this.clippedX[3], (float) depthA, (float) depthB, (float) this.clippedZ[3], local938);
                 return;
             } else {
-                this.rasterizer.method5156((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, (float) this.clippedColour[0], (float) this.clippedColour[1], (float) this.clippedColour[2]);
-                this.rasterizer.method5156((float) local123, (float) local788, (float) this.clippedY[3], (float) local98, (float) local110, (float) this.clippedX[3], (float) depthA, (float) depthB, (float) this.clippedZ[3], (float) this.clippedColour[0], (float) this.clippedColour[2], (float) this.clippedColour[3]);
+                this.rasterizer.renderTriangleHslRgb((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, (float) this.clippedColour[0], (float) this.clippedColour[1], (float) this.clippedColour[2]);
+                this.rasterizer.renderTriangleHslRgb((float) local123, (float) local788, (float) this.clippedY[3], (float) local98, (float) local110, (float) this.clippedX[3], (float) depthA, (float) depthB, (float) this.clippedZ[3], (float) this.clippedColour[0], (float) this.clippedColour[2], (float) this.clippedColour[3]);
                 return;
             }
         }
@@ -3564,12 +3564,12 @@ public final class JavaModel extends Model {
         }
         local961 = local938 | this.faceColourA[face] & 0xFFFFFF;
         if (this.faceColourC[face] == -1) {
-            this.rasterizer.renderTexturedTriangle((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local961, local961, local961, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
-            this.rasterizer.renderTexturedTriangle((float) local123, (float) local788, (float) this.clippedY[3], (float) local98, (float) local110, (float) this.clippedX[3], (float) depthA, (float) depthC, (float) this.clippedZ[3], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local961, local961, local961, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
+            this.rasterizer.renderTexturedTriangleRgb((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local961, local961, local961, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
+            this.rasterizer.renderTexturedTriangleRgb((float) local123, (float) local788, (float) this.clippedY[3], (float) local98, (float) local110, (float) this.clippedX[3], (float) depthA, (float) depthC, (float) this.clippedZ[3], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local961, local961, local961, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
             return;
         }
-        this.rasterizer.renderTexturedTriangle((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local961, local961, local961, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
-        this.rasterizer.renderTexturedTriangle((float) local123, (float) local788, (float) this.clippedY[3], (float) local98, (float) local110, (float) this.clippedX[3], (float) depthA, (float) depthC, (float) this.clippedZ[3], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local961, local961, local961, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
+        this.rasterizer.renderTexturedTriangleRgb((float) local123, (float) local783, (float) local788, (float) local98, (float) local103, (float) local110, (float) depthA, (float) depthB, (float) depthC, this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local961, local961, local961, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
+        this.rasterizer.renderTexturedTriangleRgb((float) local123, (float) local788, (float) this.clippedY[3], (float) local98, (float) local110, (float) this.clippedX[3], (float) depthA, (float) depthC, (float) this.clippedZ[3], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], local961, local961, local961, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
     }
 
     @OriginalMember(owner = "client!rs", name = "b", descriptor = "(IZZ)V")
@@ -3627,7 +3627,7 @@ public final class JavaModel extends Model {
                 if (!local280.aBoolean464) {
                     this.drawTriangleRgb(face);
                 }
-                this.toolkit.method3791(local285.anInt6221, local285.anInt6227, local285.anInt6224, local285.anInt6232, local285.anInt6220, local285.anInt6231, local280.aShort72 & 0xFFFF, local285.anInt6225, local280.aByte98, local280.aByte97);
+                this.toolkit.drawBillboardRgb(local285.anInt6221, local285.anInt6227, local285.anInt6224, local285.anInt6232, local285.anInt6220, local285.anInt6231, local280.aShort72 & 0xFFFF, local285.anInt6225, local280.aByte98, local280.aByte97);
                 return;
             }
             this.drawTriangleRgb(face);
@@ -3666,12 +3666,12 @@ public final class JavaModel extends Model {
 
     @OriginalMember(owner = "client!rs", name = "FA", descriptor = "(I)V")
     @Override
-    public void FA(@OriginalArg(0) int arg0) {
+    public void FA(@OriginalArg(0) int angle) {
         if ((this.functionMask & 0x6) != 6) {
             throw new IllegalStateException();
         }
-        @Pc(14) int local14 = Trig1.SIN[arg0];
-        @Pc(18) int local18 = Trig1.COS[arg0];
+        @Pc(14) int local14 = Trig1.SIN[angle];
+        @Pc(18) int local18 = Trig1.COS[angle];
         synchronized (this) {
             for (@Pc(24) int local24 = 0; local24 < this.vertexCount; local24++) {
                 @Pc(41) int local41 = this.vertexY[local24] * local18 - this.vertexZ[local24] * local14 >> 14;
@@ -3957,9 +3957,9 @@ public final class JavaModel extends Model {
         }
         this.useThreadBuffers(Thread.currentThread());
         if ((flags & 0x2) == 0) {
-            this.rasterizer.method5142(false);
+            this.rasterizer.setWireframe(false);
         } else {
-            this.rasterizer.method5142(true);
+            this.rasterizer.setWireframe(true);
         }
         @Pc(694) boolean local694 = false;
         @Pc(704) boolean local704 = local171 <= this.toolkit.zNear;
@@ -4339,12 +4339,12 @@ public final class JavaModel extends Model {
 
     @OriginalMember(owner = "client!rs", name = "VA", descriptor = "(I)V")
     @Override
-    public void VA(@OriginalArg(0) int arg0) {
+    public void VA(@OriginalArg(0) int angle) {
         if ((this.functionMask & 0x3) != 3) {
             throw new IllegalStateException();
         }
-        @Pc(14) int local14 = Trig1.SIN[arg0];
-        @Pc(18) int local18 = Trig1.COS[arg0];
+        @Pc(14) int local14 = Trig1.SIN[angle];
+        @Pc(18) int local18 = Trig1.COS[angle];
         synchronized (this) {
             for (@Pc(24) int local24 = 0; local24 < this.vertexCount; local24++) {
                 @Pc(41) int local41 = this.vertexY[local24] * local14 + this.vertexX[local24] * local18 >> 14;
@@ -4410,9 +4410,9 @@ public final class JavaModel extends Model {
             }
             if (this.faceColourC[face] == -1) {
                 @Pc(210) int argb = alphaBits | this.faceColourA[face] & 0xFFFFFF;
-                this.rasterizer.renderTexturedTriangle((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], argb, argb, argb, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
+                this.rasterizer.renderTexturedTriangleRgb((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], argb, argb, argb, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
             } else {
-                this.rasterizer.renderTexturedTriangle((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], alphaBits | this.faceColourA[face] & 0xFFFFFF, alphaBits | this.faceColourB[face] & 0xFFFFFF, alphaBits | this.faceColourC[face] & 0xFFFFFF, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
+                this.rasterizer.renderTexturedTriangleRgb((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], this.texCoordU[face][0], this.texCoordU[face][1], this.texCoordU[face][2], this.texCoordV[face][0], this.texCoordV[face][1], this.texCoordV[face][2], alphaBits | this.faceColourA[face] & 0xFFFFFF, alphaBits | this.faceColourB[face] & 0xFFFFFF, alphaBits | this.faceColourC[face] & 0xFFFFFF, this.threadResource.fogColour, 0, 0, 0, this.faceTextures[face]);
             }
             return;
         }
@@ -4424,7 +4424,7 @@ public final class JavaModel extends Model {
         if (this.faceColourC[face] == -1) {
             this.rasterizer.renderFlatTriangleRgb((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], ColourUtils.HSV_TO_RGB[this.faceColourA[face] & 0xFFFF]);
         } else {
-            this.rasterizer.method5156((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], (float) (this.faceColourA[face] & 0xFFFF), (float) (this.faceColourB[face] & 0xFFFF), (float) (this.faceColourC[face] & 0xFFFF));
+            this.rasterizer.renderTriangleHslRgb((float) this.screenY[a], (float) this.screenY[b], (float) this.screenY[c], (float) this.screenX[a], (float) this.screenX[b], (float) this.screenX[c], (float) this.screenZ[a], (float) this.screenZ[b], (float) this.screenZ[c], (float) (this.faceColourA[face] & 0xFFFF), (float) (this.faceColourB[face] & 0xFFFF), (float) (this.faceColourC[face] & 0xFFFF));
         }
     }
 
@@ -4667,8 +4667,8 @@ public final class JavaModel extends Model {
         @Pc(4) JavaThreadResource resource = this.toolkit.threadResource(thread);
         if (resource != this.copyThreadResource) {
             this.copyThreadResource = resource;
-            this.copyTargets = this.copyThreadResource.aClass114_Sub3Array4;
-            this.copyBuffers = this.copyThreadResource.aClass114_Sub3Array3;
+            this.copyTargets = this.copyThreadResource.copyTargetPool;
+            this.copyBuffers = this.copyThreadResource.copyBufferPool;
         }
     }
 }

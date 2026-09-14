@@ -710,7 +710,7 @@ public final class JavaToolkit extends Toolkit {
         }
 
         doubleSize++;
-        ((JavaSprite) this.sprite).method8208(x - size, y - size, z, doubleSize, doubleSize, 0, particle.colour, 1);
+        ((JavaSprite) this.sprite).renderDepthTestedRgb(x - size, y - size, z, doubleSize, doubleSize, 0, particle.colour, 1);
     }
 
     @OriginalMember(owner = "client!iaa", name = "F", descriptor = "(II)V")
@@ -1572,7 +1572,7 @@ public final class JavaToolkit extends Toolkit {
     @OriginalMember(owner = "client!iaa", name = "D", descriptor = "()V")
     public void reset() {
         for (@Pc(1) int i = 0; i < this.threadCount; i++) {
-            this.resources[i].method9194();
+            this.resources[i].resetRasterizer();
         }
         this.la();
     }
@@ -1585,7 +1585,7 @@ public final class JavaToolkit extends Toolkit {
     @OriginalMember(owner = "client!iaa", name = "k", descriptor = "(I)V")
     @Override
     public void linkThreads(@OriginalArg(0) int index) {
-        this.resources[index].method9196(Thread.currentThread());
+        this.resources[index].bindThread(Thread.currentThread());
     }
 
     @OriginalMember(owner = "client!iaa", name = "p", descriptor = "()Z")
@@ -1643,7 +1643,7 @@ public final class JavaToolkit extends Toolkit {
     @Override
     public void ra(@OriginalArg(0) int waterHeight, @OriginalArg(1) int fogColour, @OriginalArg(2) int waterDepth, @OriginalArg(3) int bias) {
         for (@Pc(1) int i = 0; i < this.resources.length; i++) {
-            this.resources[i].anInt10600 = this.resources[i].fogColour;
+            this.resources[i].savedFogColour = this.resources[i].fogColour;
             this.resources[i].waterHeight = waterHeight;
             this.resources[i].fogColour = fogColour;
             this.resources[i].waterDepth = waterDepth;
@@ -1951,7 +1951,7 @@ public final class JavaToolkit extends Toolkit {
     @OriginalMember(owner = "client!iaa", name = "c", descriptor = "(I)V")
     @Override
     public void method8016(@OriginalArg(0) int index) {
-        this.resources[index].method9196(null);
+        this.resources[index].bindThread(null);
     }
 
     @OriginalMember(owner = "client!iaa", name = "j", descriptor = "(I)V")
@@ -2043,7 +2043,7 @@ public final class JavaToolkit extends Toolkit {
     }
 
     @OriginalMember(owner = "client!iaa", name = "b", descriptor = "(IIIIIIIIII)V")
-    public void method3791(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int halfWidth, @OriginalArg(4) int halfHeight, @OriginalArg(5) int arg5, @OriginalArg(6) int id, @OriginalArg(7) int colour, @OriginalArg(8) int arg8, @OriginalArg(9) int mode) {
+    public void drawBillboardRgb(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int halfWidth, @OriginalArg(4) int halfHeight, @OriginalArg(5) int arg5, @OriginalArg(6) int id, @OriginalArg(7) int colour, @OriginalArg(8) int op, @OriginalArg(9) int mode) {
         if (halfWidth == 0 || halfHeight == 0) {
             return;
         }
@@ -2065,7 +2065,7 @@ public final class JavaToolkit extends Toolkit {
             this.textureId = id;
             this.sprite = sprite;
         }
-        ((JavaSprite) this.sprite).method8208(x - halfWidth, y - halfHeight, z, halfWidth << 1, halfHeight << 1, arg8, colour, mode);
+        ((JavaSprite) this.sprite).renderDepthTestedRgb(x - halfWidth, y - halfHeight, z, halfWidth << 1, halfHeight << 1, op, colour, mode);
     }
 
     @OriginalMember(owner = "client!iaa", name = "a", descriptor = "(IIIIZ)Lclient!st;")
@@ -2341,7 +2341,7 @@ public final class JavaToolkit extends Toolkit {
     }
 
     @OriginalMember(owner = "client!iaa", name = "l", descriptor = "(I)[I")
-    public int[] method3792(@OriginalArg(0) int id) {
+    public int[] getTexels(@OriginalArg(0) int id) {
         @Pc(2) ReferenceCache cache = this.textureCache;
         @Pc(12) JavaAnimatedTexture texture;
         synchronized (this.textureCache) {
@@ -2398,7 +2398,7 @@ public final class JavaToolkit extends Toolkit {
     @Override
     public void pa() {
         for (@Pc(1) int i = 0; i < this.resources.length; i++) {
-            this.resources[i].fogColour = this.resources[i].anInt10600;
+            this.resources[i].fogColour = this.resources[i].savedFogColour;
             this.resources[i].water = false;
         }
     }
@@ -2915,7 +2915,7 @@ public final class JavaToolkit extends Toolkit {
     }
 
     @OriginalMember(owner = "client!iaa", name = "a", descriptor = "(IIIIIIIIII)V")
-    public void method3797(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int halfWidth, @OriginalArg(4) int halfHeight, @OriginalArg(5) int arg5, @OriginalArg(6) int id, @OriginalArg(7) int colour, @OriginalArg(8) int arg8, @OriginalArg(9) int mode) {
+    public void drawBillboardArgb(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int halfWidth, @OriginalArg(4) int halfHeight, @OriginalArg(5) int arg5, @OriginalArg(6) int id, @OriginalArg(7) int colour, @OriginalArg(8) int op, @OriginalArg(9) int mode) {
         if (halfWidth == 0 || halfHeight == 0) {
             return;
         }
@@ -2937,7 +2937,7 @@ public final class JavaToolkit extends Toolkit {
             this.textureId = id;
             this.sprite = sprite;
         }
-        ((JavaSprite) this.sprite).method8207(x - halfWidth, y - halfHeight, z, halfWidth << 1, halfHeight << 1, arg8, colour, mode);
+        ((JavaSprite) this.sprite).renderDepthTestedArgb(x - halfWidth, y - halfHeight, z, halfWidth << 1, halfHeight << 1, op, colour, mode);
     }
 
     @OriginalMember(owner = "client!iaa", name = "la", descriptor = "()V")

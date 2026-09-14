@@ -11,197 +11,197 @@ import org.openrs2.deob.annotation.Pc;
 public final class JavaMonoFont extends Font {
 
     @OriginalMember(owner = "client!vh", name = "B", descriptor = "Lclient!iaa;")
-    public final JavaToolkit aClass19_Sub2_11;
+    public final JavaToolkit toolkit;
 
     @OriginalMember(owner = "client!vh", name = "C", descriptor = "[I")
-    public final int[] anIntArray805;
+    public final int[] glyphWidth;
 
     @OriginalMember(owner = "client!vh", name = "x", descriptor = "[I")
-    public final int[] anIntArray803;
+    public final int[] glyphHeight;
 
     @OriginalMember(owner = "client!vh", name = "D", descriptor = "[[B")
-    public final byte[][] aByteArrayArray35;
+    public final byte[][] glyphRaster;
 
     @OriginalMember(owner = "client!vh", name = "z", descriptor = "[I")
-    public final int[] anIntArray806;
+    public final int[] glyphOffsetY;
 
     @OriginalMember(owner = "client!vh", name = "y", descriptor = "[I")
-    public final int[] anIntArray804;
+    public final int[] glyphOffsetX;
 
     @OriginalMember(owner = "client!vh", name = "<init>", descriptor = "(Lclient!iaa;Lclient!ve;[Lclient!wp;[I[I)V")
-    public JavaMonoFont(@OriginalArg(0) JavaToolkit arg0, @OriginalArg(1) FontMetrics arg1, @OriginalArg(2) IndexedImage[] arg2, @OriginalArg(3) int[] arg3, @OriginalArg(4) int[] arg4) {
-        super(arg0, arg1);
-        this.aClass19_Sub2_11 = arg0;
-        this.anIntArray805 = arg3;
-        this.anIntArray803 = arg4;
-        this.aByteArrayArray35 = new byte[arg2.length][];
-        this.anIntArray806 = new int[arg2.length];
-        this.anIntArray804 = new int[arg2.length];
-        for (@Pc(29) int local29 = 0; local29 < arg2.length; local29++) {
-            this.aByteArrayArray35[local29] = arg2[local29].raster;
-            this.anIntArray806[local29] = arg2[local29].offY1;
-            this.anIntArray804[local29] = arg2[local29].offX1;
+    public JavaMonoFont(@OriginalArg(0) JavaToolkit toolkit, @OriginalArg(1) FontMetrics metrics, @OriginalArg(2) IndexedImage[] glyphs, @OriginalArg(3) int[] glyphWidth, @OriginalArg(4) int[] glyphHeight) {
+        super(toolkit, metrics);
+        this.toolkit = toolkit;
+        this.glyphWidth = glyphWidth;
+        this.glyphHeight = glyphHeight;
+        this.glyphRaster = new byte[glyphs.length][];
+        this.glyphOffsetY = new int[glyphs.length];
+        this.glyphOffsetX = new int[glyphs.length];
+        for (@Pc(29) int i = 0; i < glyphs.length; i++) {
+            this.glyphRaster[i] = glyphs[i].raster;
+            this.glyphOffsetY[i] = glyphs[i].offY1;
+            this.glyphOffsetX[i] = glyphs[i].offX1;
         }
     }
 
     @OriginalMember(owner = "client!vh", name = "a", descriptor = "([B[IIIIIIIIIIILclient!aa;II)V")
-    public void method8837(@OriginalArg(0) byte[] arg0, @OriginalArg(1) int[] arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) int arg6, @OriginalArg(7) int arg7, @OriginalArg(8) int arg8, @OriginalArg(9) int arg9, @OriginalArg(10) int arg10, @OriginalArg(11) int arg11, @OriginalArg(12) ClippingMask arg12, @OriginalArg(13) int arg13, @OriginalArg(14) int arg14) {
-        @Pc(2) JavaClippingMask local2 = (JavaClippingMask) arg12;
-        @Pc(5) int[] local5 = local2.lineOffsets;
-        @Pc(8) int[] local8 = local2.lineWidths;
-        @Pc(10) int local10 = arg10;
-        if (arg14 > arg10) {
-            local10 = arg14;
-            arg4 += (arg14 - arg10) * this.aClass19_Sub2_11.surfaceWidth;
-            arg3 += (arg14 - arg10) * arg11;
+    public void blitOpaqueMasked(@OriginalArg(0) byte[] src, @OriginalArg(1) int[] dst, @OriginalArg(2) int colour, @OriginalArg(3) int srcIndex, @OriginalArg(4) int dstIndex, @OriginalArg(5) int width, @OriginalArg(6) int height, @OriginalArg(7) int dstStep, @OriginalArg(8) int srcStep, @OriginalArg(9) int x, @OriginalArg(10) int y, @OriginalArg(11) int glyphWidth, @OriginalArg(12) ClippingMask mask, @OriginalArg(13) int maskX, @OriginalArg(14) int maskY) {
+        @Pc(2) JavaClippingMask javaMask = (JavaClippingMask) mask;
+        @Pc(5) int[] lineOffsets = javaMask.lineOffsets;
+        @Pc(8) int[] lineWidths = javaMask.lineWidths;
+        @Pc(10) int startY = y;
+        if (maskY > y) {
+            startY = maskY;
+            dstIndex += (maskY - y) * this.toolkit.surfaceWidth;
+            srcIndex += (maskY - y) * glyphWidth;
         }
-        @Pc(50) int local50 = arg14 + local5.length < arg10 + arg6 ? arg14 + local5.length : arg10 + arg6;
-        for (@Pc(52) int local52 = local10; local52 < local50; local52++) {
-            @Pc(61) int local61 = arg13 + local5[local52 - arg14];
-            @Pc(67) int local67 = local8[local52 - arg14];
-            @Pc(69) int local69 = arg5;
-            @Pc(76) int local76;
-            if (arg9 > local61) {
-                local76 = arg9 - local61;
-                if (local76 >= local67) {
-                    arg3 += arg5 + arg8;
-                    arg4 += arg5 + arg7;
+        @Pc(50) int endY = maskY + lineOffsets.length < y + height ? maskY + lineOffsets.length : y + height;
+        for (@Pc(52) int row = startY; row < endY; row++) {
+            @Pc(61) int lineX = maskX + lineOffsets[row - maskY];
+            @Pc(67) int lineWidth = lineWidths[row - maskY];
+            @Pc(69) int remaining = width;
+            @Pc(76) int skip;
+            if (x > lineX) {
+                skip = x - lineX;
+                if (skip >= lineWidth) {
+                    srcIndex += width + srcStep;
+                    dstIndex += width + dstStep;
                     continue;
                 }
-                local67 -= local76;
+                lineWidth -= skip;
             } else {
-                local76 = local61 - arg9;
-                if (local76 >= arg5) {
-                    arg3 += arg5 + arg8;
-                    arg4 += arg5 + arg7;
+                skip = lineX - x;
+                if (skip >= width) {
+                    srcIndex += width + srcStep;
+                    dstIndex += width + dstStep;
                     continue;
                 }
-                arg3 += local76;
-                local69 = arg5 - local76;
-                arg4 += local76;
+                srcIndex += skip;
+                remaining = width - skip;
+                dstIndex += skip;
             }
-            local76 = 0;
-            if (local69 < local67) {
-                local67 = local69;
+            skip = 0;
+            if (remaining < lineWidth) {
+                lineWidth = remaining;
             } else {
-                local76 = local69 - local67;
+                skip = remaining - lineWidth;
             }
-            for (@Pc(143) int local143 = 0; local143 < local67; local143++) {
-                if (arg0[arg3++] == 0) {
-                    arg4++;
+            for (@Pc(143) int column = 0; column < lineWidth; column++) {
+                if (src[srcIndex++] == 0) {
+                    dstIndex++;
                 } else {
-                    arg1[arg4++] = arg2;
+                    dst[dstIndex++] = colour;
                 }
             }
-            arg3 += local76 + arg8;
-            arg4 += local76 + arg7;
+            srcIndex += skip + srcStep;
+            dstIndex += skip + dstStep;
         }
     }
 
     @OriginalMember(owner = "client!vh", name = "b", descriptor = "([B[IIIIIIIIIIILclient!aa;II)V")
-    public void method8838(@OriginalArg(0) byte[] arg0, @OriginalArg(1) int[] arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) int arg6, @OriginalArg(7) int arg7, @OriginalArg(8) int arg8, @OriginalArg(9) int arg9, @OriginalArg(10) int arg10, @OriginalArg(11) int arg11, @OriginalArg(12) ClippingMask arg12, @OriginalArg(13) int arg13, @OriginalArg(14) int arg14) {
-        @Pc(2) JavaClippingMask local2 = (JavaClippingMask) arg12;
-        @Pc(5) int[] local5 = local2.lineOffsets;
-        @Pc(8) int[] local8 = local2.lineWidths;
-        @Pc(14) int local14 = arg9 - this.aClass19_Sub2_11.clipX1;
-        @Pc(16) int local16 = arg10;
-        if (arg14 > arg10) {
-            local16 = arg14;
-            arg4 += (arg14 - arg10) * this.aClass19_Sub2_11.surfaceWidth;
-            arg3 += (arg14 - arg10) * arg11;
+    public void blitBlendedMasked(@OriginalArg(0) byte[] src, @OriginalArg(1) int[] dst, @OriginalArg(2) int colour, @OriginalArg(3) int srcIndex, @OriginalArg(4) int dstIndex, @OriginalArg(5) int width, @OriginalArg(6) int height, @OriginalArg(7) int dstStep, @OriginalArg(8) int srcStep, @OriginalArg(9) int x, @OriginalArg(10) int y, @OriginalArg(11) int glyphWidth, @OriginalArg(12) ClippingMask mask, @OriginalArg(13) int maskX, @OriginalArg(14) int maskY) {
+        @Pc(2) JavaClippingMask javaMask = (JavaClippingMask) mask;
+        @Pc(5) int[] lineOffsets = javaMask.lineOffsets;
+        @Pc(8) int[] lineWidths = javaMask.lineWidths;
+        @Pc(14) int clipOffsetX = x - this.toolkit.clipX1;
+        @Pc(16) int startY = y;
+        if (maskY > y) {
+            startY = maskY;
+            dstIndex += (maskY - y) * this.toolkit.surfaceWidth;
+            srcIndex += (maskY - y) * glyphWidth;
         }
-        @Pc(56) int local56 = arg14 + local5.length < arg10 + arg6 ? arg14 + local5.length : arg10 + arg6;
-        @Pc(60) int local60 = arg2 >>> 24;
-        @Pc(64) int local64 = 255 - local60;
-        for (@Pc(66) int local66 = local16; local66 < local56; local66++) {
-            @Pc(75) int local75 = local5[local66 - arg14] + arg13;
-            @Pc(81) int local81 = local8[local66 - arg14];
-            @Pc(83) int local83 = arg5;
-            @Pc(90) int local90;
-            if (local14 > local75) {
-                local90 = local14 - local75;
-                if (local90 >= local81) {
-                    arg3 += arg5 + arg8;
-                    arg4 += arg5 + arg7;
+        @Pc(56) int endY = maskY + lineOffsets.length < y + height ? maskY + lineOffsets.length : y + height;
+        @Pc(60) int alpha = colour >>> 24;
+        @Pc(64) int invAlpha = 255 - alpha;
+        for (@Pc(66) int row = startY; row < endY; row++) {
+            @Pc(75) int lineX = lineOffsets[row - maskY] + maskX;
+            @Pc(81) int lineWidth = lineWidths[row - maskY];
+            @Pc(83) int remaining = width;
+            @Pc(90) int skip;
+            if (clipOffsetX > lineX) {
+                skip = clipOffsetX - lineX;
+                if (skip >= lineWidth) {
+                    srcIndex += width + srcStep;
+                    dstIndex += width + dstStep;
                     continue;
                 }
-                local81 -= local90;
+                lineWidth -= skip;
             } else {
-                local90 = local75 - local14;
-                if (local90 >= arg5) {
-                    arg3 += arg5 + arg8;
-                    arg4 += arg5 + arg7;
+                skip = lineX - clipOffsetX;
+                if (skip >= width) {
+                    srcIndex += width + srcStep;
+                    dstIndex += width + dstStep;
                     continue;
                 }
-                arg3 += local90;
-                local83 = arg5 - local90;
-                arg4 += local90;
+                srcIndex += skip;
+                remaining = width - skip;
+                dstIndex += skip;
             }
-            local90 = 0;
-            if (local83 < local81) {
-                local81 = local83;
+            skip = 0;
+            if (remaining < lineWidth) {
+                lineWidth = remaining;
             } else {
-                local90 = local83 - local81;
+                skip = remaining - lineWidth;
             }
-            for (@Pc(158) int local158 = -local81; local158 < 0; local158++) {
-                if (arg0[arg3++] == 0) {
-                    arg4++;
+            for (@Pc(158) int column = -lineWidth; column < 0; column++) {
+                if (src[srcIndex++] == 0) {
+                    dstIndex++;
                 } else {
-                    @Pc(182) int local182 = ((arg2 & 0xFF00FF) * local60 & 0xFF00FF00) + ((arg2 & 0xFF00) * local60 & 0xFF0000) >> 8;
-                    @Pc(186) int local186 = arg1[arg4];
-                    arg1[arg4++] = (((local186 & 0xFF00FF) * local64 & 0xFF00FF00) + ((local186 & 0xFF00) * local64 & 0xFF0000) >> 8) + local182;
+                    @Pc(182) int blendedColour = ((colour & 0xFF00FF) * alpha & 0xFF00FF00) + ((colour & 0xFF00) * alpha & 0xFF0000) >> 8;
+                    @Pc(186) int background = dst[dstIndex];
+                    dst[dstIndex++] = (((background & 0xFF00FF) * invAlpha & 0xFF00FF00) + ((background & 0xFF00) * invAlpha & 0xFF0000) >> 8) + blendedColour;
                 }
             }
-            arg3 += local90 + arg8;
-            arg4 += local90 + arg7;
+            srcIndex += skip + srcStep;
+            dstIndex += skip + dstStep;
         }
     }
 
     @OriginalMember(owner = "client!vh", name = "fa", descriptor = "(CIIIZ)V")
     @Override
     protected void fa(@OriginalArg(0) char c, @OriginalArg(1) int x, @OriginalArg(2) int y, @OriginalArg(3) int colour, @OriginalArg(4) boolean shadow) {
-        x += this.anIntArray804[c];
-        y += this.anIntArray806[c];
-        @Pc(18) int local18 = this.anIntArray805[c];
-        @Pc(23) int local23 = this.anIntArray803[c];
-        @Pc(27) int local27 = this.aClass19_Sub2_11.surfaceWidth;
-        @Pc(33) int local33 = x + y * local27;
-        @Pc(37) int local37 = local27 - local18;
-        @Pc(39) int local39 = 0;
-        @Pc(41) int local41 = 0;
-        @Pc(52) int local52;
-        if (y < this.aClass19_Sub2_11.clipY1) {
-            local52 = this.aClass19_Sub2_11.clipY1 - y;
-            local23 -= local52;
-            y = this.aClass19_Sub2_11.clipY1;
-            local41 += local52 * local18;
-            local33 += local52 * local27;
+        x += this.glyphOffsetX[c];
+        y += this.glyphOffsetY[c];
+        @Pc(18) int width = this.glyphWidth[c];
+        @Pc(23) int height = this.glyphHeight[c];
+        @Pc(27) int dstStride = this.toolkit.surfaceWidth;
+        @Pc(33) int dstIndex = x + y * dstStride;
+        @Pc(37) int dstStep = dstStride - width;
+        @Pc(39) int srcStep = 0;
+        @Pc(41) int srcIndex = 0;
+        @Pc(52) int clip;
+        if (y < this.toolkit.clipY1) {
+            clip = this.toolkit.clipY1 - y;
+            height -= clip;
+            y = this.toolkit.clipY1;
+            srcIndex += clip * width;
+            dstIndex += clip * dstStride;
         }
-        if (y + local23 > this.aClass19_Sub2_11.clipY2) {
-            local23 -= y + local23 - this.aClass19_Sub2_11.clipY2;
+        if (y + height > this.toolkit.clipY2) {
+            height -= y + height - this.toolkit.clipY2;
         }
-        if (x < this.aClass19_Sub2_11.clipX1) {
-            local52 = this.aClass19_Sub2_11.clipX1 - x;
-            local18 -= local52;
-            x = this.aClass19_Sub2_11.clipX1;
-            local41 += local52;
-            local33 += local52;
-            local39 += local52;
-            local37 += local52;
+        if (x < this.toolkit.clipX1) {
+            clip = this.toolkit.clipX1 - x;
+            width -= clip;
+            x = this.toolkit.clipX1;
+            srcIndex += clip;
+            dstIndex += clip;
+            srcStep += clip;
+            dstStep += clip;
         }
-        if (x + local18 > this.aClass19_Sub2_11.clipX2) {
-            local52 = x + local18 - this.aClass19_Sub2_11.clipX2;
-            local18 -= local52;
-            local39 += local52;
-            local37 += local52;
+        if (x + width > this.toolkit.clipX2) {
+            clip = x + width - this.toolkit.clipX2;
+            width -= clip;
+            srcStep += clip;
+            dstStep += clip;
         }
-        if (local18 <= 0 || local23 <= 0) {
+        if (width <= 0 || height <= 0) {
             return;
         }
         if ((colour & -16777216) == -16777216) {
-            this.method8840(this.aByteArrayArray35[c], this.aClass19_Sub2_11.surfaceRaster, colour, local41, local33, local18, local23, local37, local39);
+            this.blitOpaque(this.glyphRaster[c], this.toolkit.surfaceRaster, colour, srcIndex, dstIndex, width, height, dstStep, srcStep);
         } else if ((colour & 0xFF000000) != 0) {
-            this.method8839(this.aByteArrayArray35[c], this.aClass19_Sub2_11.surfaceRaster, colour, local41, local33, local18, local23, local37, local39);
+            this.blitBlended(this.glyphRaster[c], this.toolkit.surfaceRaster, colour, srcIndex, dstIndex, width, height, dstStep, srcStep);
         }
     }
 
@@ -212,106 +212,106 @@ public final class JavaMonoFont extends Font {
             this.fa(c, x, y, colour, shadow);
             return;
         }
-        x += this.anIntArray804[c];
-        y += this.anIntArray806[c];
-        @Pc(28) int local28 = this.anIntArray805[c];
-        @Pc(33) int local33 = this.anIntArray803[c];
-        @Pc(37) int local37 = this.aClass19_Sub2_11.surfaceWidth;
-        @Pc(43) int local43 = x + y * local37;
-        @Pc(47) int local47 = local37 - local28;
-        @Pc(49) int local49 = 0;
-        @Pc(51) int local51 = 0;
-        @Pc(62) int local62;
-        if (y < this.aClass19_Sub2_11.clipY1) {
-            local62 = this.aClass19_Sub2_11.clipY1 - y;
-            local33 -= local62;
-            y = this.aClass19_Sub2_11.clipY1;
-            local51 = local62 * local28;
-            local43 += local62 * local37;
+        x += this.glyphOffsetX[c];
+        y += this.glyphOffsetY[c];
+        @Pc(28) int width = this.glyphWidth[c];
+        @Pc(33) int height = this.glyphHeight[c];
+        @Pc(37) int dstStride = this.toolkit.surfaceWidth;
+        @Pc(43) int dstIndex = x + y * dstStride;
+        @Pc(47) int dstStep = dstStride - width;
+        @Pc(49) int srcStep = 0;
+        @Pc(51) int srcIndex = 0;
+        @Pc(62) int clip;
+        if (y < this.toolkit.clipY1) {
+            clip = this.toolkit.clipY1 - y;
+            height -= clip;
+            y = this.toolkit.clipY1;
+            srcIndex = clip * width;
+            dstIndex += clip * dstStride;
         }
-        if (y + local33 > this.aClass19_Sub2_11.clipY2) {
-            local33 -= y + local33 - this.aClass19_Sub2_11.clipY2;
+        if (y + height > this.toolkit.clipY2) {
+            height -= y + height - this.toolkit.clipY2;
         }
-        if (x < this.aClass19_Sub2_11.clipX1) {
-            local62 = this.aClass19_Sub2_11.clipX1 - x;
-            local28 -= local62;
-            x = this.aClass19_Sub2_11.clipX1;
-            local51 += local62;
-            local43 += local62;
-            local49 = local62;
-            local47 += local62;
+        if (x < this.toolkit.clipX1) {
+            clip = this.toolkit.clipX1 - x;
+            width -= clip;
+            x = this.toolkit.clipX1;
+            srcIndex += clip;
+            dstIndex += clip;
+            srcStep = clip;
+            dstStep += clip;
         }
-        if (x + local28 > this.aClass19_Sub2_11.clipX2) {
-            local62 = x + local28 - this.aClass19_Sub2_11.clipX2;
-            local28 -= local62;
-            local49 += local62;
-            local47 += local62;
+        if (x + width > this.toolkit.clipX2) {
+            clip = x + width - this.toolkit.clipX2;
+            width -= clip;
+            srcStep += clip;
+            dstStep += clip;
         }
-        if (local28 <= 0 || local33 <= 0) {
+        if (width <= 0 || height <= 0) {
             return;
         }
         if ((colour & -16777216) == -16777216) {
-            this.method8837(this.aByteArrayArray35[c], this.aClass19_Sub2_11.surfaceRaster, colour, local51, local43, local28, local33, local47, local49, x, y, this.anIntArray805[c], mask, offsetX, offsetY);
+            this.blitOpaqueMasked(this.glyphRaster[c], this.toolkit.surfaceRaster, colour, srcIndex, dstIndex, width, height, dstStep, srcStep, x, y, this.glyphWidth[c], mask, offsetX, offsetY);
         } else {
-            this.method8838(this.aByteArrayArray35[c], this.aClass19_Sub2_11.surfaceRaster, colour, local51, local43, local28, local33, local47, local49, x, y, this.anIntArray805[c], mask, offsetX, offsetY);
+            this.blitBlendedMasked(this.glyphRaster[c], this.toolkit.surfaceRaster, colour, srcIndex, dstIndex, width, height, dstStep, srcStep, x, y, this.glyphWidth[c], mask, offsetX, offsetY);
         }
     }
 
     @OriginalMember(owner = "client!vh", name = "b", descriptor = "([B[IIIIIIII)V")
-    public void method8839(@OriginalArg(0) byte[] arg0, @OriginalArg(1) int[] arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) int arg6, @OriginalArg(7) int arg7, @OriginalArg(8) int arg8) {
-        @Pc(3) int local3 = arg2 >>> 24;
-        @Pc(7) int local7 = 255 - local3;
-        for (@Pc(10) int local10 = -arg6; local10 < 0; local10++) {
-            for (@Pc(14) int local14 = -arg5; local14 < 0; local14++) {
-                if (arg0[arg3++] == 0) {
-                    arg4++;
+    public void blitBlended(@OriginalArg(0) byte[] src, @OriginalArg(1) int[] dst, @OriginalArg(2) int colour, @OriginalArg(3) int srcIndex, @OriginalArg(4) int dstIndex, @OriginalArg(5) int width, @OriginalArg(6) int height, @OriginalArg(7) int dstStep, @OriginalArg(8) int srcStep) {
+        @Pc(3) int alpha = colour >>> 24;
+        @Pc(7) int invAlpha = 255 - alpha;
+        for (@Pc(10) int row = -height; row < 0; row++) {
+            for (@Pc(14) int column = -width; column < 0; column++) {
+                if (src[srcIndex++] == 0) {
+                    dstIndex++;
                 } else {
-                    @Pc(38) int local38 = ((arg2 & 0xFF00FF) * local3 & 0xFF00FF00) + ((arg2 & 0xFF00) * local3 & 0xFF0000) >> 8;
-                    @Pc(42) int local42 = arg1[arg4];
-                    arg1[arg4++] = (((local42 & 0xFF00FF) * local7 & 0xFF00FF00) + ((local42 & 0xFF00) * local7 & 0xFF0000) >> 8) + local38;
+                    @Pc(38) int blendedColour = ((colour & 0xFF00FF) * alpha & 0xFF00FF00) + ((colour & 0xFF00) * alpha & 0xFF0000) >> 8;
+                    @Pc(42) int background = dst[dstIndex];
+                    dst[dstIndex++] = (((background & 0xFF00FF) * invAlpha & 0xFF00FF00) + ((background & 0xFF00) * invAlpha & 0xFF0000) >> 8) + blendedColour;
                 }
             }
-            arg4 += arg7;
-            arg3 += arg8;
+            dstIndex += dstStep;
+            srcIndex += srcStep;
         }
     }
 
     @OriginalMember(owner = "client!vh", name = "a", descriptor = "([B[IIIIIIII)V")
-    public void method8840(@OriginalArg(0) byte[] arg0, @OriginalArg(1) int[] arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) int arg6, @OriginalArg(7) int arg7, @OriginalArg(8) int arg8) {
-        @Pc(4) int local4 = -(arg5 >> 2);
-        @Pc(9) int local9 = -(arg5 & 0x3);
-        for (@Pc(12) int local12 = -arg6; local12 < 0; local12++) {
-            for (@Pc(15) int local15 = local4; local15 < 0; local15++) {
-                if (arg0[arg3++] == 0) {
-                    arg4++;
+    public void blitOpaque(@OriginalArg(0) byte[] src, @OriginalArg(1) int[] dst, @OriginalArg(2) int colour, @OriginalArg(3) int srcIndex, @OriginalArg(4) int dstIndex, @OriginalArg(5) int width, @OriginalArg(6) int height, @OriginalArg(7) int dstStep, @OriginalArg(8) int srcStep) {
+        @Pc(4) int blocks = -(width >> 2);
+        @Pc(9) int remainder = -(width & 0x3);
+        for (@Pc(12) int row = -height; row < 0; row++) {
+            for (@Pc(15) int block = blocks; block < 0; block++) {
+                if (src[srcIndex++] == 0) {
+                    dstIndex++;
                 } else {
-                    arg1[arg4++] = arg2;
+                    dst[dstIndex++] = colour;
                 }
-                if (arg0[arg3++] == 0) {
-                    arg4++;
+                if (src[srcIndex++] == 0) {
+                    dstIndex++;
                 } else {
-                    arg1[arg4++] = arg2;
+                    dst[dstIndex++] = colour;
                 }
-                if (arg0[arg3++] == 0) {
-                    arg4++;
+                if (src[srcIndex++] == 0) {
+                    dstIndex++;
                 } else {
-                    arg1[arg4++] = arg2;
+                    dst[dstIndex++] = colour;
                 }
-                if (arg0[arg3++] == 0) {
-                    arg4++;
+                if (src[srcIndex++] == 0) {
+                    dstIndex++;
                 } else {
-                    arg1[arg4++] = arg2;
-                }
-            }
-            for (@Pc(69) int local69 = local9; local69 < 0; local69++) {
-                if (arg0[arg3++] == 0) {
-                    arg4++;
-                } else {
-                    arg1[arg4++] = arg2;
+                    dst[dstIndex++] = colour;
                 }
             }
-            arg4 += arg7;
-            arg3 += arg8;
+            for (@Pc(69) int column = remainder; column < 0; column++) {
+                if (src[srcIndex++] == 0) {
+                    dstIndex++;
+                } else {
+                    dst[dstIndex++] = colour;
+                }
+            }
+            dstIndex += dstStep;
+            srcIndex += srcStep;
         }
     }
 }

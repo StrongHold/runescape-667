@@ -256,9 +256,9 @@ public final class JavaGround extends Ground {
                     @Pc(555) int local555 = z << super.tileSizeShift;
                     if ((local6.vertexColours[local115] & 0xFFFFFF) != 0) {
                         if (local6.vertexTextures[local115] == local6.vertexTextures[local452] && local6.vertexTextures[local115] == local6.vertexTextures[local456] && local6.vertexSizes[local115] == local6.vertexSizes[local452] && local6.vertexSizes[local115] == local6.vertexSizes[local456]) {
-                            rasterizer.renderTexturedTriangle((float) local472, (float) local476, (float) local480, (float) local460, (float) local464, (float) local468, (float) depths[local115], (float) depths[local452], (float) depths[local456], (float) (local550 + local6.verticesX[local115]) / (float) local6.vertexSizes[local115], (float) (local550 + local6.verticesX[local452]) / (float) local6.vertexSizes[local452], (float) (local550 + local6.verticesX[local456]) / (float) local6.vertexSizes[local456], (float) (local555 + local6.verticesZ[local115]) / (float) local6.vertexSizes[local115], (float) (local555 + local6.verticesZ[local452]) / (float) local6.vertexSizes[local452], (float) (local555 + local6.verticesZ[local456]) / (float) local6.vertexSizes[local456], local6.vertexColours[local115], local6.vertexColours[local452], local6.vertexColours[local456], resource.fogColour, fogLevels[local115], fogLevels[local452], fogLevels[local456], local6.vertexTextures[local115]);
+                            rasterizer.renderTexturedTriangleRgb((float) local472, (float) local476, (float) local480, (float) local460, (float) local464, (float) local468, (float) depths[local115], (float) depths[local452], (float) depths[local456], (float) (local550 + local6.verticesX[local115]) / (float) local6.vertexSizes[local115], (float) (local550 + local6.verticesX[local452]) / (float) local6.vertexSizes[local452], (float) (local550 + local6.verticesX[local456]) / (float) local6.vertexSizes[local456], (float) (local555 + local6.verticesZ[local115]) / (float) local6.vertexSizes[local115], (float) (local555 + local6.verticesZ[local452]) / (float) local6.vertexSizes[local452], (float) (local555 + local6.verticesZ[local456]) / (float) local6.vertexSizes[local456], local6.vertexColours[local115], local6.vertexColours[local452], local6.vertexColours[local456], resource.fogColour, fogLevels[local115], fogLevels[local452], fogLevels[local456], local6.vertexTextures[local115]);
                         } else {
-                            rasterizer.method5155((float) local472, (float) local476, (float) local480, (float) local460, (float) local464, (float) local468, (float) depths[local115], (float) depths[local452], (float) depths[local456], (float) (local550 + local6.verticesX[local115]) / local441, (float) (local550 + local6.verticesX[local452]) / local441, (float) (local550 + local6.verticesX[local456]) / local441, (float) (local555 + local6.verticesZ[local115]) / local441, (float) (local555 + local6.verticesZ[local452]) / local441, (float) (local555 + local6.verticesZ[local456]) / local441, local6.vertexColours[local115], local6.vertexColours[local452], local6.vertexColours[local456], resource.fogColour, fogLevels[local115], fogLevels[local452], fogLevels[local456], local6.vertexTextures[local115], local441 / (float) local6.vertexSizes[local115], local6.vertexTextures[local452], local441 / (float) local6.vertexSizes[local452], local6.vertexTextures[local456], local441 / (float) local6.vertexSizes[local456]);
+                            rasterizer.renderBlendedTexturedTriangle((float) local472, (float) local476, (float) local480, (float) local460, (float) local464, (float) local468, (float) depths[local115], (float) depths[local452], (float) depths[local456], (float) (local550 + local6.verticesX[local115]) / local441, (float) (local550 + local6.verticesX[local452]) / local441, (float) (local550 + local6.verticesX[local456]) / local441, (float) (local555 + local6.verticesZ[local115]) / local441, (float) (local555 + local6.verticesZ[local452]) / local441, (float) (local555 + local6.verticesZ[local456]) / local441, local6.vertexColours[local115], local6.vertexColours[local452], local6.vertexColours[local456], resource.fogColour, fogLevels[local115], fogLevels[local452], fogLevels[local456], local6.vertexTextures[local115], local441 / (float) local6.vertexSizes[local115], local6.vertexTextures[local452], local441 / (float) local6.vertexSizes[local452], local6.vertexTextures[local456], local441 / (float) local6.vertexSizes[local456]);
                         }
                     }
                 } else {
@@ -826,15 +826,15 @@ public final class JavaGround extends Ground {
                         @Pc(62) JavaSimpleTile local62 = this.simpleTiles[local32][local35];
                         if (local62.texture != -1 && (local62.flags & 0x2) == 0 && local62.blendedColour == -1) {
                             local85 = this.toolkit.textureHsl(local62.texture);
-                            rasterizer.method5156((float) (local30 - 4), (float) (local30 - 4), (float) local30, (float) (local26 + 4), (float) local26, (float) (local26 + 4), 100.0F, 100.0F, 100.0F, (float) Static244.scaleHslLightness(local62.hslNe & 0xFFFF, local85), (float) Static244.scaleHslLightness(local62.hslNw & 0xFFFF, local85), (float) Static244.scaleHslLightness(local62.hslSe & 0xFFFF, local85));
-                            rasterizer.method5156((float) local30, (float) local30, (float) (local30 - 4), (float) local26, (float) (local26 + 4), (float) local26, 100.0F, 100.0F, 100.0F, (float) Static244.scaleHslLightness(local62.hslSw & 0xFFFF, local85), (float) Static244.scaleHslLightness(local62.hslSe & 0xFFFF, local85), (float) Static244.scaleHslLightness(local62.hslNw & 0xFFFF, local85));
+                            rasterizer.renderTriangleHslRgb((float) (local30 - 4), (float) (local30 - 4), (float) local30, (float) (local26 + 4), (float) local26, (float) (local26 + 4), 100.0F, 100.0F, 100.0F, (float) Static244.scaleHslLightness(local62.hslNe & 0xFFFF, local85), (float) Static244.scaleHslLightness(local62.hslNw & 0xFFFF, local85), (float) Static244.scaleHslLightness(local62.hslSe & 0xFFFF, local85));
+                            rasterizer.renderTriangleHslRgb((float) local30, (float) local30, (float) (local30 - 4), (float) local26, (float) (local26 + 4), (float) local26, 100.0F, 100.0F, 100.0F, (float) Static244.scaleHslLightness(local62.hslSw & 0xFFFF, local85), (float) Static244.scaleHslLightness(local62.hslSe & 0xFFFF, local85), (float) Static244.scaleHslLightness(local62.hslNw & 0xFFFF, local85));
                         } else if (local62.blendedColour == -1) {
-                            rasterizer.method5156((float) (local30 - 4), (float) (local30 - 4), (float) local30, (float) (local26 + 4), (float) local26, (float) (local26 + 4), 100.0F, 100.0F, 100.0F, (float) (local62.hslNe & 0xFFFF), (float) (local62.hslNw & 0xFFFF), (float) (local62.hslSe & 0xFFFF));
-                            rasterizer.method5156((float) local30, (float) local30, (float) (local30 - 4), (float) local26, (float) (local26 + 4), (float) local26, 100.0F, 100.0F, 100.0F, (float) (local62.hslSw & 0xFFFF), (float) (local62.hslSe & 0xFFFF), (float) (local62.hslNw & 0xFFFF));
+                            rasterizer.renderTriangleHslRgb((float) (local30 - 4), (float) (local30 - 4), (float) local30, (float) (local26 + 4), (float) local26, (float) (local26 + 4), 100.0F, 100.0F, 100.0F, (float) (local62.hslNe & 0xFFFF), (float) (local62.hslNw & 0xFFFF), (float) (local62.hslSe & 0xFFFF));
+                            rasterizer.renderTriangleHslRgb((float) local30, (float) local30, (float) (local30 - 4), (float) local26, (float) (local26 + 4), (float) local26, 100.0F, 100.0F, 100.0F, (float) (local62.hslSw & 0xFFFF), (float) (local62.hslSe & 0xFFFF), (float) (local62.hslNw & 0xFFFF));
                         } else {
                             local85 = local62.blendedColour;
-                            rasterizer.method5156((float) (local30 - 4), (float) (local30 - 4), (float) local30, (float) (local26 + 4), (float) local26, (float) (local26 + 4), 100.0F, 100.0F, 100.0F, (float) local85, (float) local85, (float) local85);
-                            rasterizer.method5156((float) local30, (float) local30, (float) (local30 - 4), (float) local26, (float) (local26 + 4), (float) local26, 100.0F, 100.0F, 100.0F, (float) local85, (float) local85, (float) local85);
+                            rasterizer.renderTriangleHslRgb((float) (local30 - 4), (float) (local30 - 4), (float) local30, (float) (local26 + 4), (float) local26, (float) (local26 + 4), 100.0F, 100.0F, 100.0F, (float) local85, (float) local85, (float) local85);
+                            rasterizer.renderTriangleHslRgb((float) local30, (float) local30, (float) (local30 - 4), (float) local26, (float) (local26 + 4), (float) local26, 100.0F, 100.0F, 100.0F, (float) local85, (float) local85, (float) local85);
                         }
                     } else if (this.complexTiles[local32][local35] != null) {
                         @Pc(338) JavaComplexTile local338 = this.complexTiles[local32][local35];
@@ -855,13 +855,13 @@ public final class JavaGround extends Ground {
                             @Pc(432) int local432;
                             if (local338.faceBlendedColours != null && local338.faceBlendedColours[local376] != -1) {
                                 local432 = local338.faceBlendedColours[local376];
-                                rasterizer.method5156((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, (float) Static244.scaleHslLightness(local338.verticesLight[local382], local432), (float) Static244.scaleHslLightness(local338.verticesLight[local387], local432), (float) Static244.scaleHslLightness(local338.verticesLight[local392], local432));
+                                rasterizer.renderTriangleHslRgb((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, (float) Static244.scaleHslLightness(local338.verticesLight[local382], local432), (float) Static244.scaleHslLightness(local338.verticesLight[local387], local432), (float) Static244.scaleHslLightness(local338.verticesLight[local392], local432));
                             } else if (local338.faceTextures == null || local338.faceTextures[local376] == -1) {
                                 local432 = local338.faceColours[local376];
-                                rasterizer.method5156((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, (float) Static244.scaleHslLightness(local338.verticesLight[local382], local432), (float) Static244.scaleHslLightness(local338.verticesLight[local387], local432), (float) Static244.scaleHslLightness(local338.verticesLight[local392], local432));
+                                rasterizer.renderTriangleHslRgb((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, (float) Static244.scaleHslLightness(local338.verticesLight[local382], local432), (float) Static244.scaleHslLightness(local338.verticesLight[local387], local432), (float) Static244.scaleHslLightness(local338.verticesLight[local392], local432));
                             } else {
                                 local432 = this.toolkit.textureHsl(local338.faceTextures[local376]);
-                                rasterizer.method5156((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, (float) Static244.scaleHslLightness(local338.verticesLight[local382], local432), (float) Static244.scaleHslLightness(local338.verticesLight[local387], local432), (float) Static244.scaleHslLightness(local338.verticesLight[local392], local432));
+                                rasterizer.renderTriangleHslRgb((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, (float) Static244.scaleHslLightness(local338.verticesLight[local382], local432), (float) Static244.scaleHslLightness(local338.verticesLight[local387], local432), (float) Static244.scaleHslLightness(local338.verticesLight[local392], local432));
                             }
                         }
                     }
@@ -928,8 +928,8 @@ public final class JavaGround extends Ground {
                         @Pc(67) JavaSimpleBlendedTile local67 = this.simpleBlendedTiles[local32][local35];
                         if (local67.texture != -1 && (local67.flags & 0x2) == 0 && local67.blendedColour == 0) {
                             local89 = this.toolkit.textureHsl(local67.texture);
-                            rasterizer.method5156((float) (local30 - 4), (float) (local30 - 4), (float) local30, (float) (local26 + 4), (float) local26, (float) (local26 + 4), 100.0F, 100.0F, 100.0F, (float) Static244.scaleHslLightness(local67.colourNe, local89), (float) Static244.scaleHslLightness(local67.colourNw, local89), (float) Static244.scaleHslLightness(local67.colourSe, local89));
-                            rasterizer.method5156((float) local30, (float) local30, (float) (local30 - 4), (float) local26, (float) (local26 + 4), (float) local26, 100.0F, 100.0F, 100.0F, (float) Static244.scaleHslLightness(local67.colourSw, local89), (float) Static244.scaleHslLightness(local67.colourSe, local89), (float) Static244.scaleHslLightness(local67.colourNw, local89));
+                            rasterizer.renderTriangleHslRgb((float) (local30 - 4), (float) (local30 - 4), (float) local30, (float) (local26 + 4), (float) local26, (float) (local26 + 4), 100.0F, 100.0F, 100.0F, (float) Static244.scaleHslLightness(local67.colourNe, local89), (float) Static244.scaleHslLightness(local67.colourNw, local89), (float) Static244.scaleHslLightness(local67.colourSe, local89));
+                            rasterizer.renderTriangleHslRgb((float) local30, (float) local30, (float) (local30 - 4), (float) local26, (float) (local26 + 4), (float) local26, 100.0F, 100.0F, 100.0F, (float) Static244.scaleHslLightness(local67.colourSw, local89), (float) Static244.scaleHslLightness(local67.colourSe, local89), (float) Static244.scaleHslLightness(local67.colourNw, local89));
                         } else if (local67.blendedColour == 0) {
                             rasterizer.renderTriangleRgb((float) (local30 - 4), (float) (local30 - 4), (float) local30, (float) (local26 + 4), (float) local26, (float) (local26 + 4), 100.0F, 100.0F, 100.0F, local67.colourNe, local67.colourNw, local67.colourSe);
                             rasterizer.renderTriangleRgb((float) local30, (float) local30, (float) (local30 - 4), (float) local26, (float) (local26 + 4), (float) local26, 100.0F, 100.0F, 100.0F, local67.colourSw, local67.colourSe, local67.colourNw);
@@ -961,7 +961,7 @@ public final class JavaGround extends Ground {
                                 rasterizer.renderTriangleRgb((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, local341.vertexColours[local384], local341.vertexColours[local388], local341.vertexColours[local392]);
                             } else {
                                 local449 = this.toolkit.textureHsl(local341.faceTextures[local379]);
-                                rasterizer.method5156((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, (float) local449, (float) local449, (float) local449);
+                                rasterizer.renderTriangleHslRgb((float) local408, (float) local412, (float) local416, (float) local396, (float) local400, (float) local404, 100.0F, 100.0F, 100.0F, (float) local449, (float) local449, (float) local449);
                             }
                         }
                     }
@@ -976,7 +976,7 @@ public final class JavaGround extends Ground {
     }
 
     @OriginalMember(owner = "client!qs", name = "a", descriptor = "(IILclient!lb;[I[I[I[II)V")
-    public void renderUnblendedTile(@OriginalArg(0) int x, @OriginalArg(1) int z, @OriginalArg(2) Rasterizer rasterizer, @OriginalArg(3) int[] screenX, @OriginalArg(4) int[] screenY, @OriginalArg(5) int[] depths, @OriginalArg(6) int[] arg6, @OriginalArg(7) int skipFlags) {
+    public void renderUnblendedTile(@OriginalArg(0) int x, @OriginalArg(1) int z, @OriginalArg(2) Rasterizer rasterizer, @OriginalArg(3) int[] screenX, @OriginalArg(4) int[] screenY, @OriginalArg(5) int[] depths, @OriginalArg(6) int[] fogLevels, @OriginalArg(7) int skipFlags) {
         @Pc(6) JavaSimpleTile local6 = this.simpleTiles[x][z];
         @Pc(50) int local50;
         @Pc(60) int local60;
@@ -1054,10 +1054,10 @@ public final class JavaGround extends Ground {
                                 if (local2622 == -1) {
                                     local2753 = local2204.faceColours[local480];
                                     if (local2753 != -1) {
-                                        rasterizer.method5156((float) local2557, (float) local2561, (float) local2565, (float) local510, (float) local2549, (float) local2553, (float) depths[local2531], (float) depths[local2536], (float) depths[local2541], (float) Static244.scaleHslLightness(local2204.verticesLight[local2531], local2753), (float) Static244.scaleHslLightness(local2204.verticesLight[local2536], local2753), (float) Static244.scaleHslLightness(local2204.verticesLight[local2541], local2753));
+                                        rasterizer.renderTriangleHslRgb((float) local2557, (float) local2561, (float) local2565, (float) local510, (float) local2549, (float) local2553, (float) depths[local2531], (float) depths[local2536], (float) depths[local2541], (float) Static244.scaleHslLightness(local2204.verticesLight[local2531], local2753), (float) Static244.scaleHslLightness(local2204.verticesLight[local2536], local2753), (float) Static244.scaleHslLightness(local2204.verticesLight[local2541], local2753));
                                     }
                                 } else {
-                                    rasterizer.renderTexturedTriangle((float) local2557, (float) local2561, (float) local2565, (float) local510, (float) local2549, (float) local2553, (float) depths[local2531], (float) depths[local2536], (float) depths[local2541], (float) local2204.verticesX[local2531] / (float) super.tileSize, (float) local2204.verticesX[local2536] / (float) super.tileSize, (float) local2204.verticesX[local2541] / (float) super.tileSize, (float) local2204.verticesZ[local2531] / (float) super.tileSize, (float) local2204.verticesZ[local2536] / (float) super.tileSize, (float) local2204.verticesZ[local2541] / (float) super.tileSize, ColourUtils.HSV_TO_RGB[local2204.verticesLight[local2531] & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local2204.verticesLight[local2536] & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local2204.verticesLight[local2541] & 0xFFFF] & 0xFFFFFF | 0xFF000000, 0, 0, 0, 0, local2622);
+                                    rasterizer.renderTexturedTriangleRgb((float) local2557, (float) local2561, (float) local2565, (float) local510, (float) local2549, (float) local2553, (float) depths[local2531], (float) depths[local2536], (float) depths[local2541], (float) local2204.verticesX[local2531] / (float) super.tileSize, (float) local2204.verticesX[local2536] / (float) super.tileSize, (float) local2204.verticesX[local2541] / (float) super.tileSize, (float) local2204.verticesZ[local2531] / (float) super.tileSize, (float) local2204.verticesZ[local2536] / (float) super.tileSize, (float) local2204.verticesZ[local2541] / (float) super.tileSize, ColourUtils.HSV_TO_RGB[local2204.verticesLight[local2531] & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local2204.verticesLight[local2536] & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local2204.verticesLight[local2541] & 0xFFFF] & 0xFFFFFF | 0xFF000000, 0, 0, 0, 0, local2622);
                                 }
                             }
                         }
@@ -1079,10 +1079,10 @@ public final class JavaGround extends Ground {
                             if (local2622 == -1) {
                                 local2753 = local2204.faceColours[local480];
                                 if (local2753 != -1) {
-                                    rasterizer.method5156((float) local2557, (float) local2561, (float) local2565, (float) local510, (float) local2549, (float) local2553, (float) depths[local2531], (float) depths[local2536], (float) depths[local2541], (float) Static244.scaleHslLightness(local2204.verticesLight[local2531], local2753), (float) Static244.scaleHslLightness(local2204.verticesLight[local2536], local2753), (float) Static244.scaleHslLightness(local2204.verticesLight[local2541], local2753));
+                                    rasterizer.renderTriangleHslRgb((float) local2557, (float) local2561, (float) local2565, (float) local510, (float) local2549, (float) local2553, (float) depths[local2531], (float) depths[local2536], (float) depths[local2541], (float) Static244.scaleHslLightness(local2204.verticesLight[local2531], local2753), (float) Static244.scaleHslLightness(local2204.verticesLight[local2536], local2753), (float) Static244.scaleHslLightness(local2204.verticesLight[local2541], local2753));
                                 }
                             } else {
-                                rasterizer.renderTexturedTriangle((float) local2557, (float) local2561, (float) local2565, (float) local510, (float) local2549, (float) local2553, (float) depths[local2531], (float) depths[local2536], (float) depths[local2541], (float) local2204.verticesX[local2531] / (float) super.tileSize, (float) local2204.verticesX[local2536] / (float) super.tileSize, (float) local2204.verticesX[local2541] / (float) super.tileSize, (float) local2204.verticesZ[local2531] / (float) super.tileSize, (float) local2204.verticesZ[local2536] / (float) super.tileSize, (float) local2204.verticesZ[local2541] / (float) super.tileSize, ColourUtils.HSV_TO_RGB[local2204.verticesLight[local2531] & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local2204.verticesLight[local2536] & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local2204.verticesLight[local2541] & 0xFFFF] & 0xFFFFFF | 0xFF000000, 0, 0, 0, 0, local2622);
+                                rasterizer.renderTexturedTriangleRgb((float) local2557, (float) local2561, (float) local2565, (float) local510, (float) local2549, (float) local2553, (float) depths[local2531], (float) depths[local2536], (float) depths[local2541], (float) local2204.verticesX[local2531] / (float) super.tileSize, (float) local2204.verticesX[local2536] / (float) super.tileSize, (float) local2204.verticesX[local2541] / (float) super.tileSize, (float) local2204.verticesZ[local2531] / (float) super.tileSize, (float) local2204.verticesZ[local2536] / (float) super.tileSize, (float) local2204.verticesZ[local2541] / (float) super.tileSize, ColourUtils.HSV_TO_RGB[local2204.verticesLight[local2531] & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local2204.verticesLight[local2536] & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local2204.verticesLight[local2541] & 0xFFFF] & 0xFFFFFF | 0xFF000000, 0, 0, 0, 0, local2622);
                             }
                         }
                     }
@@ -1102,7 +1102,7 @@ public final class JavaGround extends Ground {
                         @Pc(3170) int local3170 = local2204.faceColours[local480];
                         if (local3170 != -1) {
                             rasterizer.clamp = local510 < 0 || local2549 < 0 || local2553 < 0 || local510 > rasterizer.width || local2549 > rasterizer.width || local2553 > rasterizer.width;
-                            rasterizer.method5156((float) local2557, (float) local2561, (float) local2565, (float) local510, (float) local2549, (float) local2553, (float) depths[local2531], (float) depths[local2536], (float) depths[local2541], (float) Static244.scaleHslLightness(local2204.verticesLight[local2531], local3170), (float) Static244.scaleHslLightness(local2204.verticesLight[local2536], local3170), (float) Static244.scaleHslLightness(local2204.verticesLight[local2541], local3170));
+                            rasterizer.renderTriangleHslRgb((float) local2557, (float) local2561, (float) local2565, (float) local510, (float) local2549, (float) local2553, (float) depths[local2531], (float) depths[local2536], (float) depths[local2541], (float) Static244.scaleHslLightness(local2204.verticesLight[local2531], local3170), (float) Static244.scaleHslLightness(local2204.verticesLight[local2536], local3170), (float) Static244.scaleHslLightness(local2204.verticesLight[local2541], local3170));
                         }
                     }
                 }
@@ -1268,36 +1268,36 @@ public final class JavaGround extends Ground {
                 if ((local420 - local480) * (local390 - local510) - (local450 - local510) * (local360 - local480) > 0) {
                     rasterizer.clamp = local420 < 0 || local480 < 0 || local360 < 0 || local420 > rasterizer.width || local480 > rasterizer.width || local360 > rasterizer.width;
                     if (local6.texture >= 0) {
-                        rasterizer.renderTexturedTriangle((float) local450, (float) local510, (float) local390, (float) local420, (float) local480, (float) local360, local151, local177, local125, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, ColourUtils.HSV_TO_RGB[local6.hslNe & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.hslNw & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.hslSe & 0xFFFF] & 0xFFFFFF | 0xFF000000, 0, 0, 0, 0, local6.texture);
+                        rasterizer.renderTexturedTriangleRgb((float) local450, (float) local510, (float) local390, (float) local420, (float) local480, (float) local360, local151, local177, local125, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, ColourUtils.HSV_TO_RGB[local6.hslNe & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.hslNw & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.hslSe & 0xFFFF] & 0xFFFFFF | 0xFF000000, 0, 0, 0, 0, local6.texture);
                     } else {
-                        rasterizer.method5156((float) local450, (float) local510, (float) local390, (float) local420, (float) local480, (float) local360, (float) (int) local151, (float) (int) local177, (float) (int) local125, (float) (local6.hslNe & 0xFFFF), (float) (local6.hslNw & 0xFFFF), (float) (local6.hslSe & 0xFFFF));
+                        rasterizer.renderTriangleHslRgb((float) local450, (float) local510, (float) local390, (float) local420, (float) local480, (float) local360, (float) (int) local151, (float) (int) local177, (float) (int) local125, (float) (local6.hslNe & 0xFFFF), (float) (local6.hslNw & 0xFFFF), (float) (local6.hslSe & 0xFFFF));
                     }
                 }
                 if ((local300 - local360) * (local510 - local390) - (local330 - local390) * (local480 - local360) > 0) {
                     rasterizer.clamp = local300 < 0 || local360 < 0 || local480 < 0 || local300 > rasterizer.width || local360 > rasterizer.width || local480 > rasterizer.width;
                     if (local6.texture >= 0) {
-                        rasterizer.renderTexturedTriangle((float) local330, (float) local390, (float) local510, (float) local300, (float) local360, (float) local480, local99, local125, local177, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, ColourUtils.HSV_TO_RGB[local6.hslSw & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.hslSe & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.hslNw & 0xFFFF] & 0xFFFFFF | 0xFF000000, 0, 0, 0, 0, local6.texture);
+                        rasterizer.renderTexturedTriangleRgb((float) local330, (float) local390, (float) local510, (float) local300, (float) local360, (float) local480, local99, local125, local177, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, ColourUtils.HSV_TO_RGB[local6.hslSw & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.hslSe & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.hslNw & 0xFFFF] & 0xFFFFFF | 0xFF000000, 0, 0, 0, 0, local6.texture);
                         return;
                     }
-                    rasterizer.method5156((float) local330, (float) local390, (float) local510, (float) local300, (float) local360, (float) local480, (float) (int) local99, (float) (int) local125, (float) (int) local177, (float) (local6.hslSw & 0xFFFF), (float) (local6.hslSe & 0xFFFF), (float) (local6.hslNw & 0xFFFF));
+                    rasterizer.renderTriangleHslRgb((float) local330, (float) local390, (float) local510, (float) local300, (float) local360, (float) local480, (float) (int) local99, (float) (int) local125, (float) (int) local177, (float) (local6.hslSw & 0xFFFF), (float) (local6.hslSe & 0xFFFF), (float) (local6.hslNw & 0xFFFF));
                     return;
                 }
             } else {
                 if ((local420 - local480) * (local390 - local510) - (local450 - local510) * (local360 - local480) > 0) {
                     rasterizer.clamp = local420 < 0 || local480 < 0 || local360 < 0 || local420 > rasterizer.width || local480 > rasterizer.width || local360 > rasterizer.width;
                     if (local6.texture >= 0) {
-                        rasterizer.renderTexturedTriangle((float) local450, (float) local510, (float) local390, (float) local420, (float) local480, (float) local360, local151, local177, local125, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, ColourUtils.HSV_TO_RGB[local6.hslNe & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.hslNw & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.hslSe & 0xFFFF] & 0xFFFFFF | 0xFF000000, 0, 0, 0, 0, local6.texture);
+                        rasterizer.renderTexturedTriangleRgb((float) local450, (float) local510, (float) local390, (float) local420, (float) local480, (float) local360, local151, local177, local125, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, ColourUtils.HSV_TO_RGB[local6.hslNe & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.hslNw & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.hslSe & 0xFFFF] & 0xFFFFFF | 0xFF000000, 0, 0, 0, 0, local6.texture);
                     } else {
-                        rasterizer.method5156((float) local450, (float) local510, (float) local390, (float) local420, (float) local480, (float) local360, (float) (int) local151, (float) (int) local177, (float) (int) local125, (float) (local6.hslNe & 0xFFFF), (float) (local6.hslNw & 0xFFFF), (float) (local6.hslSe & 0xFFFF));
+                        rasterizer.renderTriangleHslRgb((float) local450, (float) local510, (float) local390, (float) local420, (float) local480, (float) local360, (float) (int) local151, (float) (int) local177, (float) (int) local125, (float) (local6.hslNe & 0xFFFF), (float) (local6.hslNw & 0xFFFF), (float) (local6.hslSe & 0xFFFF));
                     }
                 }
                 if ((local300 - local360) * (local510 - local390) - (local330 - local390) * (local480 - local360) > 0) {
                     rasterizer.clamp = local300 < 0 || local360 < 0 || local480 < 0 || local300 > rasterizer.width || local360 > rasterizer.width || local480 > rasterizer.width;
                     if (local6.texture >= 0) {
-                        rasterizer.renderTexturedTriangle((float) local330, (float) local390, (float) local510, (float) local300, (float) local360, (float) local480, local99, local125, local177, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, ColourUtils.HSV_TO_RGB[local6.hslSw & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.hslSe & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.hslNw & 0xFFFF] & 0xFFFFFF | 0xFF000000, 0, 0, 0, 0, local6.texture);
+                        rasterizer.renderTexturedTriangleRgb((float) local330, (float) local390, (float) local510, (float) local300, (float) local360, (float) local480, local99, local125, local177, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, ColourUtils.HSV_TO_RGB[local6.hslSw & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.hslSe & 0xFFFF] & 0xFFFFFF | 0xFF000000, ColourUtils.HSV_TO_RGB[local6.hslNw & 0xFFFF] & 0xFFFFFF | 0xFF000000, 0, 0, 0, 0, local6.texture);
                         return;
                     }
-                    rasterizer.method5156((float) local330, (float) local390, (float) local510, (float) local300, (float) local360, (float) local480, (float) (int) local99, (float) (int) local125, (float) (int) local177, (float) (local6.hslSw & 0xFFFF), (float) (local6.hslSe & 0xFFFF), (float) (local6.hslNw & 0xFFFF));
+                    rasterizer.renderTriangleHslRgb((float) local330, (float) local390, (float) local510, (float) local300, (float) local360, (float) local480, (float) (int) local99, (float) (int) local125, (float) (int) local177, (float) (local6.hslSw & 0xFFFF), (float) (local6.hslSe & 0xFFFF), (float) (local6.hslNw & 0xFFFF));
                 }
             }
         }
@@ -1823,7 +1823,7 @@ public final class JavaGround extends Ground {
                                 if (local1864) {
                                     local874 = -1694498816;
                                 }
-                                rasterizer.renderTexturedTriangle((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, local163, local189, local137, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, local874 | simpleTile.colourNe & 0xFFFFFF, local874 | simpleTile.colourNw & 0xFFFFFF, local874 | simpleTile.colourSe & 0xFFFFFF, resource.fogColour, local66, local68, local64, simpleTile.texture);
+                                rasterizer.renderTexturedTriangleRgb((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, local163, local189, local137, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, local874 | simpleTile.colourNe & 0xFFFFFF, local874 | simpleTile.colourNw & 0xFFFFFF, local874 | simpleTile.colourSe & 0xFFFFFF, resource.fogColour, local66, local68, local64, simpleTile.texture);
                             } else {
                                 if (local1864) {
                                     rasterizer.alpha = 100;
@@ -1836,7 +1836,7 @@ public final class JavaGround extends Ground {
                             if (local1864) {
                                 local874 = -1694498816;
                             }
-                            rasterizer.renderTexturedTriangle((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, local163, local189, local137, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, local874 | simpleTile.colourNe & 0xFFFFFF, local874 | simpleTile.colourNw & 0xFFFFFF, local874 | simpleTile.colourSe & 0xFFFFFF, 0, 0, 0, 0, simpleTile.texture);
+                            rasterizer.renderTexturedTriangleRgb((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, local163, local189, local137, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, local874 | simpleTile.colourNe & 0xFFFFFF, local874 | simpleTile.colourNw & 0xFFFFFF, local874 | simpleTile.colourSe & 0xFFFFFF, 0, 0, 0, 0, simpleTile.texture);
                         } else {
                             if (local1864) {
                                 rasterizer.alpha = 100;
@@ -1865,7 +1865,7 @@ public final class JavaGround extends Ground {
                                         local874 = -1694498816;
                                     }
 
-                                    rasterizer.renderTexturedTriangle((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, local111, local137, local189, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, local874 | simpleTile.colourSw & 0xFFFFFF, local874 | simpleTile.colourSe & 0xFFFFFF, local874 | simpleTile.colourNw & 0xFFFFFF, resource.fogColour, local62, local64, local68, simpleTile.texture);
+                                    rasterizer.renderTexturedTriangleRgb((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, local111, local137, local189, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, local874 | simpleTile.colourSw & 0xFFFFFF, local874 | simpleTile.colourSe & 0xFFFFFF, local874 | simpleTile.colourNw & 0xFFFFFF, resource.fogColour, local62, local64, local68, simpleTile.texture);
                                 } else {
                                     if (local1864) {
                                         rasterizer.alpha = 100;
@@ -1880,7 +1880,7 @@ public final class JavaGround extends Ground {
                                     local874 = -1694498816;
                                 }
 
-                                rasterizer.renderTexturedTriangle((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, local111, local137, local189, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, local874 | simpleTile.colourSw & 0xFFFFFF, local874 | simpleTile.colourSe & 0xFFFFFF, local874 | simpleTile.colourNw & 0xFFFFFF, 0, 0, 0, 0, simpleTile.texture);
+                                rasterizer.renderTexturedTriangleRgb((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, local111, local137, local189, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, local874 | simpleTile.colourSw & 0xFFFFFF, local874 | simpleTile.colourSe & 0xFFFFFF, local874 | simpleTile.colourNw & 0xFFFFFF, 0, 0, 0, 0, simpleTile.texture);
                             } else {
                                 if (local1864) {
                                     rasterizer.alpha = 100;
@@ -1910,7 +1910,7 @@ public final class JavaGround extends Ground {
                                         local874 = -1694498816;
                                     }
 
-                                    rasterizer.renderTexturedTriangle((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, local163, local189, local137, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, local874 | simpleTile.colourNe & 0xFFFFFF, local874 | simpleTile.colourNw & 0xFFFFFF, local874 | simpleTile.colourSe & 0xFFFFFF, resource.fogColour, local66, local68, local64, simpleTile.texture);
+                                    rasterizer.renderTexturedTriangleRgb((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, local163, local189, local137, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, local874 | simpleTile.colourNe & 0xFFFFFF, local874 | simpleTile.colourNw & 0xFFFFFF, local874 | simpleTile.colourSe & 0xFFFFFF, resource.fogColour, local66, local68, local64, simpleTile.texture);
                                 } else {
                                     if (local1864) {
                                         rasterizer.alpha = 100;
@@ -1925,7 +1925,7 @@ public final class JavaGround extends Ground {
                                     local874 = -1694498816;
                                 }
 
-                                rasterizer.renderTexturedTriangle((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, local163, local189, local137, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, local874 | simpleTile.colourNe & 0xFFFFFF, local874 | simpleTile.colourNw & 0xFFFFFF, local874 | simpleTile.colourSe & 0xFFFFFF, 0, 0, 0, 0, simpleTile.texture);
+                                rasterizer.renderTexturedTriangleRgb((float) local529, (float) local589, (float) local469, (float) local499, (float) local559, (float) local439, local163, local189, local137, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, local874 | simpleTile.colourNe & 0xFFFFFF, local874 | simpleTile.colourNw & 0xFFFFFF, local874 | simpleTile.colourSe & 0xFFFFFF, 0, 0, 0, 0, simpleTile.texture);
                             } else {
                                 if (local1864) {
                                     rasterizer.alpha = 100;
@@ -1956,7 +1956,7 @@ public final class JavaGround extends Ground {
                                         local874 = -1694498816;
                                     }
 
-                                    rasterizer.renderTexturedTriangle((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, local111, local137, local189, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, local874 | simpleTile.colourSw & 0xFFFFFF, local874 | simpleTile.colourSe & 0xFFFFFF, local874 | simpleTile.colourNw & 0xFFFFFF, resource.fogColour, local62, local64, local68, simpleTile.texture);
+                                    rasterizer.renderTexturedTriangleRgb((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, local111, local137, local189, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, local874 | simpleTile.colourSw & 0xFFFFFF, local874 | simpleTile.colourSe & 0xFFFFFF, local874 | simpleTile.colourNw & 0xFFFFFF, resource.fogColour, local62, local64, local68, simpleTile.texture);
                                 } else {
                                     if (local1864) {
                                         rasterizer.alpha = 100;
@@ -1971,7 +1971,7 @@ public final class JavaGround extends Ground {
                                     local874 = -1694498816;
                                 }
 
-                                rasterizer.renderTexturedTriangle((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, local111, local137, local189, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, local874 | simpleTile.colourSw & 0xFFFFFF, local874 | simpleTile.colourSe & 0xFFFFFF, local874 | simpleTile.colourNw & 0xFFFFFF, 0, 0, 0, 0, simpleTile.texture);
+                                rasterizer.renderTexturedTriangleRgb((float) local409, (float) local469, (float) local589, (float) local379, (float) local439, (float) local559, local111, local137, local189, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, local874 | simpleTile.colourSw & 0xFFFFFF, local874 | simpleTile.colourSe & 0xFFFFFF, local874 | simpleTile.colourNw & 0xFFFFFF, 0, 0, 0, 0, simpleTile.texture);
                             } else {
                                 if (local1864) {
                                     rasterizer.alpha = 100;
@@ -2134,7 +2134,7 @@ public final class JavaGround extends Ground {
                                             local3719 = -1694498816;
                                         }
 
-                                        rasterizer.renderTexturedTriangle((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) depths[local409], (float) depths[local469], (float) depths[local529], (float) complexTile.verticesX[local409] / (float) super.tileSize, (float) complexTile.verticesX[local469] / (float) super.tileSize, (float) complexTile.verticesX[local529] / (float) super.tileSize, (float) complexTile.verticesZ[local409] / (float) super.tileSize, (float) complexTile.verticesZ[local469] / (float) super.tileSize, (float) complexTile.verticesZ[local529] / (float) super.tileSize, local3719 | complexTile.vertexColours[local409] & 0xFFFFFF, local3719 | complexTile.vertexColours[local469] & 0xFFFFFF, local3719 | complexTile.vertexColours[local529] & 0xFFFFFF, resource.fogColour, fogLevels[local409], fogLevels[local469], fogLevels[local529], local3705);
+                                        rasterizer.renderTexturedTriangleRgb((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) depths[local409], (float) depths[local469], (float) depths[local529], (float) complexTile.verticesX[local409] / (float) super.tileSize, (float) complexTile.verticesX[local469] / (float) super.tileSize, (float) complexTile.verticesX[local529] / (float) super.tileSize, (float) complexTile.verticesZ[local409] / (float) super.tileSize, (float) complexTile.verticesZ[local469] / (float) super.tileSize, (float) complexTile.verticesZ[local529] / (float) super.tileSize, local3719 | complexTile.vertexColours[local409] & 0xFFFFFF, local3719 | complexTile.vertexColours[local469] & 0xFFFFFF, local3719 | complexTile.vertexColours[local529] & 0xFFFFFF, resource.fogColour, fogLevels[local409], fogLevels[local469], fogLevels[local529], local3705);
                                     } else if ((complexTile.vertexColours[local409] & 0xFFFFFF) != 0) {
                                         if (local3705 != -1 && this.isWaterEffect(this.toolkit.textureSource.getMetrics(local3705).effectType)) {
                                             rasterizer.alpha = -1694498816;
@@ -2149,7 +2149,7 @@ public final class JavaGround extends Ground {
                                         local3719 = -1694498816;
                                     }
 
-                                    rasterizer.renderTexturedTriangle((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) depths[local409], (float) depths[local469], (float) depths[local529], (float) complexTile.verticesX[local409] / (float) super.tileSize, (float) complexTile.verticesX[local469] / (float) super.tileSize, (float) complexTile.verticesX[local529] / (float) super.tileSize, (float) complexTile.verticesZ[local409] / (float) super.tileSize, (float) complexTile.verticesZ[local469] / (float) super.tileSize, (float) complexTile.verticesZ[local529] / (float) super.tileSize, local3719 | complexTile.vertexColours[local409] & 0xFFFFFF, local3719 | complexTile.vertexColours[local469] & 0xFFFFFF, local3719 | complexTile.vertexColours[local529] & 0xFFFFFF, 0, 0, 0, 0, local3705);
+                                    rasterizer.renderTexturedTriangleRgb((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) depths[local409], (float) depths[local469], (float) depths[local529], (float) complexTile.verticesX[local409] / (float) super.tileSize, (float) complexTile.verticesX[local469] / (float) super.tileSize, (float) complexTile.verticesX[local529] / (float) super.tileSize, (float) complexTile.verticesZ[local409] / (float) super.tileSize, (float) complexTile.verticesZ[local469] / (float) super.tileSize, (float) complexTile.verticesZ[local529] / (float) super.tileSize, local3719 | complexTile.vertexColours[local409] & 0xFFFFFF, local3719 | complexTile.vertexColours[local469] & 0xFFFFFF, local3719 | complexTile.vertexColours[local529] & 0xFFFFFF, 0, 0, 0, 0, local3705);
                                 } else if ((complexTile.vertexColours[local409] & 0xFFFFFF) != 0) {
                                     if (local3705 != -1 && this.isWaterEffect(this.toolkit.textureSource.getMetrics(local3705).effectType)) {
                                         rasterizer.alpha = -1694498816;
@@ -2191,7 +2191,7 @@ public final class JavaGround extends Ground {
                                             local3719 = -1694498816;
                                         }
 
-                                        rasterizer.renderTexturedTriangle((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) depths[local409], (float) depths[local469], (float) depths[local529], (float) complexTile.verticesX[local409] / (float) super.tileSize, (float) complexTile.verticesX[local469] / (float) super.tileSize, (float) complexTile.verticesX[local529] / (float) super.tileSize, (float) complexTile.verticesZ[local409] / (float) super.tileSize, (float) complexTile.verticesZ[local469] / (float) super.tileSize, (float) complexTile.verticesZ[local529] / (float) super.tileSize, local3719 | complexTile.vertexColours[local409] & 0xFFFFFF, local3719 | complexTile.vertexColours[local469] & 0xFFFFFF, local3719 | complexTile.vertexColours[local529] & 0xFFFFFF, resource.fogColour, fogLevels[local409], fogLevels[local469], fogLevels[local529], local3705);
+                                        rasterizer.renderTexturedTriangleRgb((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) depths[local409], (float) depths[local469], (float) depths[local529], (float) complexTile.verticesX[local409] / (float) super.tileSize, (float) complexTile.verticesX[local469] / (float) super.tileSize, (float) complexTile.verticesX[local529] / (float) super.tileSize, (float) complexTile.verticesZ[local409] / (float) super.tileSize, (float) complexTile.verticesZ[local469] / (float) super.tileSize, (float) complexTile.verticesZ[local529] / (float) super.tileSize, local3719 | complexTile.vertexColours[local409] & 0xFFFFFF, local3719 | complexTile.vertexColours[local469] & 0xFFFFFF, local3719 | complexTile.vertexColours[local529] & 0xFFFFFF, resource.fogColour, fogLevels[local409], fogLevels[local469], fogLevels[local529], local3705);
                                     } else if ((complexTile.vertexColours[local409] & 0xFFFFFF) != 0) {
                                         if (local3705 != -1 && this.isWaterEffect(this.toolkit.textureSource.getMetrics(local3705).effectType)) {
                                             rasterizer.alpha = -1694498816;
@@ -2206,7 +2206,7 @@ public final class JavaGround extends Ground {
                                         local3719 = -1694498816;
                                     }
 
-                                    rasterizer.renderTexturedTriangle((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) depths[local409], (float) depths[local469], (float) depths[local529], (float) complexTile.verticesX[local409] / (float) super.tileSize, (float) complexTile.verticesX[local469] / (float) super.tileSize, (float) complexTile.verticesX[local529] / (float) super.tileSize, (float) complexTile.verticesZ[local409] / (float) super.tileSize, (float) complexTile.verticesZ[local469] / (float) super.tileSize, (float) complexTile.verticesZ[local529] / (float) super.tileSize, local3719 | complexTile.vertexColours[local409] & 0xFFFFFF, local3719 | complexTile.vertexColours[local469] & 0xFFFFFF, local3719 | complexTile.vertexColours[local529] & 0xFFFFFF, 0, 0, 0, 0, local3705);
+                                    rasterizer.renderTexturedTriangleRgb((float) local3628, (float) local3632, (float) local3636, (float) local589, (float) local3620, (float) local3624, (float) depths[local409], (float) depths[local469], (float) depths[local529], (float) complexTile.verticesX[local409] / (float) super.tileSize, (float) complexTile.verticesX[local469] / (float) super.tileSize, (float) complexTile.verticesX[local529] / (float) super.tileSize, (float) complexTile.verticesZ[local409] / (float) super.tileSize, (float) complexTile.verticesZ[local469] / (float) super.tileSize, (float) complexTile.verticesZ[local529] / (float) super.tileSize, local3719 | complexTile.vertexColours[local409] & 0xFFFFFF, local3719 | complexTile.vertexColours[local469] & 0xFFFFFF, local3719 | complexTile.vertexColours[local529] & 0xFFFFFF, 0, 0, 0, 0, local3705);
                                 } else if ((complexTile.vertexColours[local409] & 0xFFFFFF) != 0) {
                                     if (local3705 != -1 && this.isWaterEffect(this.toolkit.textureSource.getMetrics(local3705).effectType)) {
                                         rasterizer.alpha = -1694498816;

@@ -37,7 +37,7 @@ public final class JavaThreadResource {
     public boolean water = false;
 
     @OriginalMember(owner = "client!wf", name = "j", descriptor = "I")
-    public int anInt10600 = 0;
+    public int savedFogColour = 0;
 
     @OriginalMember(owner = "client!wf", name = "M", descriptor = "Lclient!eaa;")
     public final JavaMatrix scratchMatrix = new JavaMatrix();
@@ -64,7 +64,7 @@ public final class JavaThreadResource {
     public final int[] worldY = new int[Static567.anInt8484];
 
     @OriginalMember(owner = "client!wf", name = "d", descriptor = "[F")
-    public final float[] aFloatArray82 = new float[2];
+    public final float[] texCoordScratch = new float[2];
 
     @OriginalMember(owner = "client!wf", name = "s", descriptor = "[I")
     public final int[] vertexScreenY = new int[Static567.anInt8484];
@@ -106,13 +106,13 @@ public final class JavaThreadResource {
     public final int[] clippedZ = new int[10];
 
     @OriginalMember(owner = "client!wf", name = "g", descriptor = "[Lclient!rs;")
-    public final JavaModel[] aClass114_Sub3Array4 = new JavaModel[7];
+    public final JavaModel[] copyTargetPool = new JavaModel[7];
 
     @OriginalMember(owner = "client!wf", name = "Q", descriptor = "[Lclient!rs;")
-    public final JavaModel[] aClass114_Sub3Array3 = new JavaModel[7];
+    public final JavaModel[] copyBufferPool = new JavaModel[7];
 
     @OriginalMember(owner = "client!wf", name = "y", descriptor = "Lclient!iaa;")
-    public final JavaToolkit aClass19_Sub2_12;
+    public final JavaToolkit toolkit;
 
     @OriginalMember(owner = "client!wf", name = "I", descriptor = "I")
     public int fogPlane;
@@ -124,27 +124,27 @@ public final class JavaThreadResource {
     public final int[] faceBillboard;
 
     @OriginalMember(owner = "client!wf", name = "<init>", descriptor = "(Lclient!iaa;)V")
-    public JavaThreadResource(@OriginalArg(0) JavaToolkit arg0) {
-        this.aClass19_Sub2_12 = arg0;
-        this.fogPlane = this.aClass19_Sub2_12.zFar - 255;
-        this.rasterizer = new Rasterizer(arg0, this);
-        for (@Pc(135) int local135 = 0; local135 < 7; local135++) {
-            this.aClass114_Sub3Array4[local135] = new JavaModel(this.aClass19_Sub2_12);
-            this.aClass114_Sub3Array3[local135] = new JavaModel(this.aClass19_Sub2_12);
+    public JavaThreadResource(@OriginalArg(0) JavaToolkit toolkit) {
+        this.toolkit = toolkit;
+        this.fogPlane = this.toolkit.zFar - 255;
+        this.rasterizer = new Rasterizer(toolkit, this);
+        for (@Pc(135) int i = 0; i < 7; i++) {
+            this.copyTargetPool[i] = new JavaModel(this.toolkit);
+            this.copyBufferPool[i] = new JavaModel(this.toolkit);
         }
         this.faceBillboard = new int[Static567.anInt8486];
-        for (@Pc(166) int local166 = 0; local166 < Static567.anInt8486; local166++) {
-            this.faceBillboard[local166] = -1;
+        for (@Pc(166) int i = 0; i < Static567.anInt8486; i++) {
+            this.faceBillboard[i] = -1;
         }
     }
 
     @OriginalMember(owner = "client!wf", name = "a", descriptor = "(Z)V")
-    public void method9194() {
-        this.rasterizer = new Rasterizer(this.aClass19_Sub2_12, this);
+    public void resetRasterizer() {
+        this.rasterizer = new Rasterizer(this.toolkit, this);
     }
 
     @OriginalMember(owner = "client!wf", name = "a", descriptor = "(Ljava/lang/Runnable;I)V")
-    public void method9196(@OriginalArg(0) Runnable arg0) {
-        this.thread = arg0;
+    public void bindThread(@OriginalArg(0) Runnable thread) {
+        this.thread = thread;
     }
 }

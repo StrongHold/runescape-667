@@ -60,7 +60,7 @@ public final class JavaRgbSprite extends JavaSprite {
 
     @OriginalMember(owner = "client!ap", name = "b", descriptor = "(IIIIIIIII)V")
     @Override
-    public void method8207(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int width, @OriginalArg(4) int height, @OriginalArg(5) int op, @OriginalArg(6) int colour, @OriginalArg(7) int mode) {
+    public void renderDepthTestedArgb(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int width, @OriginalArg(4) int height, @OriginalArg(5) int op, @OriginalArg(6) int colour, @OriginalArg(7) int mode) {
         if (width <= 0 || height <= 0) {
             return;
         }
@@ -476,7 +476,7 @@ public final class JavaRgbSprite extends JavaSprite {
 
     @OriginalMember(owner = "client!ap", name = "a", descriptor = "(IIIIIIIII)V")
     @Override
-    public void method8208(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int width, @OriginalArg(4) int height, @OriginalArg(5) int op, @OriginalArg(6) int colour, @OriginalArg(7) int mode) {
+    public void renderDepthTestedRgb(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int width, @OriginalArg(4) int height, @OriginalArg(5) int op, @OriginalArg(6) int colour, @OriginalArg(7) int mode) {
         if (width <= 0 || height <= 0) {
             return;
         }
