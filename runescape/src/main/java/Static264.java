@@ -10,15 +10,15 @@ public final class Static264 {
     @OriginalMember(owner = "client!ie", name = "a", descriptor = "(IIIIIIII)V")
     public static void fillAndOutlineRect(@OriginalArg(0) int fillColour, @OriginalArg(1) int x1, @OriginalArg(2) int lineColour, @OriginalArg(4) int y0, @OriginalArg(5) int y1, @OriginalArg(6) int x0, @OriginalArg(7) int lineWidth) {
         if (Static180.anInt2995 <= x0 && x1 <= Static111.anInt2219 && Static724.anInt10930 <= y0 && y1 <= Static273.anInt4395) {
-            Static446.method6094(y1, x1, lineColour, fillColour, x0, lineWidth, y0);
+            Static446.fillAndOutlineRectUnclipped(y1, x1, lineColour, fillColour, x0, lineWidth, y0);
         } else {
-            Static547.method7252(y1, x0, lineColour, y0, x1, lineWidth, fillColour);
+            Static547.fillAndOutlineRectClipped(y1, x0, lineColour, y0, x1, lineWidth, fillColour);
         }
     }
 
     /**
      * Scan converts a screen space triangle against the software occlusion depth buffer held in
-     * {@link Static485#anIntArray886}. {@link Static254#anInt4115} selects the mode: 1 writes the
+     * {@link Static485#anIntArray886}. {@link Static254#occlusionMode} selects the mode: 1 writes the
      * triangle's depth into the buffer and always answers true, 2 leaves the buffer alone and answers
      * whether every pixel of the triangle lies behind the depth already recorded there, so true means
      * the triangle is entirely hidden by the occluders drawn in mode 1.
@@ -28,7 +28,7 @@ public final class Static264 {
         if (yA > 2000 || yB > 2000 || yC > 2000 || xA > 2000 || xB > 2000 || xC > 2000) {
             return false;
         } else if (yA >= -2000 && yB >= -2000 && yC >= -2000 && xA >= -2000 && xB >= -2000 && xC >= -2000) {
-            if (Static254.anInt4115 == 2) {
+            if (Static254.occlusionMode == 2) {
                 int index = Static228.anInt3709 * yA + xA;
                 if (index >= 0 && index < Static485.anIntArray886.length && Static485.anIntArray886[index] > (zA << 8) - 38400) {
                     return false;

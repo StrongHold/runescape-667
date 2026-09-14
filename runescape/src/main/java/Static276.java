@@ -16,7 +16,7 @@ public final class Static276 {
         Static442.aBoolean499 = false;
         Static384.aLocOccluderArray2 = new LocOccluder[500];
         Static150.anInt2634 = 0;
-        Static446.anIntArrayArrayArray9 = new int[Static299.tileMaxLevel][Static619.tileMaxX + 1][Static662.tileMaxZ + 1];
+        Static446.tileOcclusionCache = new int[Static299.tileMaxLevel][Static619.tileMaxX + 1][Static662.tileMaxZ + 1];
         Static663.anInt9874 = Static340.anInt5586;
         Static86.anInt1803 = Static340.anInt5586;
         Static444.anInt6751 = 0;
@@ -44,21 +44,21 @@ public final class Static276 {
         }
         @Pc(21) byte staleStamp = (byte) (Static198.anInt3276 - 4 & 0xFF);
         @Pc(25) int resetTileX = Static198.anInt3276 % Static720.mapWidth;
-        @Pc(30) int local30;
+        @Pc(30) int i;
         for (@Pc(27) int level = 0; level < 4; level++) {
-            for (local30 = 0; local30 < Static501.mapLength; local30++) {
-                Static328.aByteArrayArrayArray4[level][resetTileX][local30] = staleStamp;
+            for (i = 0; i < Static501.mapLength; i++) {
+                Static328.aByteArrayArrayArray4[level][resetTileX][i] = staleStamp;
             }
         }
         if (Camera.renderingLevel == 3) {
             return;
         }
-        for (local30 = 0; local30 < 2; local30++) {
-            Static482.anIntArray588[local30] = -1000000;
-            Static9.anIntArray18[local30] = 1000000;
-            Static457.anIntArray552[local30] = 0;
-            Static682.anIntArray817[local30] = 1000000;
-            Static153.anIntArray235[local30] = 0;
+        for (i = 0; i < 2; i++) {
+            Static482.anIntArray588[i] = -1000000;
+            Static9.anIntArray18[i] = 1000000;
+            Static457.anIntArray552[i] = 0;
+            Static682.anIntArray817[i] = 1000000;
+            Static153.anIntArray235[i] = 0;
         }
         @Pc(92) int targetX = PlayerEntity.self.x;
         @Pc(95) int targetZ = PlayerEntity.self.z;

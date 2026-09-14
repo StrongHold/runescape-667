@@ -13,18 +13,18 @@ public final class Static34 {
         @Pc(22) long shader = OpenGL.glCreateShaderObjectARB(shaderType);
         OpenGL.glShaderSourceRawARB(shader, source);
         OpenGL.glCompileShaderARB(shader);
-        OpenGL.glGetObjectParameterivARB(shader, OpenGL.GL_COMPILE_STATUS, Static332.anIntArray405, 0);
-        if (Static332.anIntArray405[0] == 0) {
-            if (Static332.anIntArray405[0] == 0) {
+        OpenGL.glGetObjectParameterivARB(shader, OpenGL.GL_COMPILE_STATUS, Static332.shaderStatus, 0);
+        if (Static332.shaderStatus[0] == 0) {
+            if (Static332.shaderStatus[0] == 0) {
                 System.out.println("Shader compile failed:");
             }
-            OpenGL.glGetObjectParameterivARB(shader, OpenGL.GL_INFO_LOG_LENGTH, Static332.anIntArray405, 1);
-            if (Static332.anIntArray405[1] > 1) {
-                @Pc(69) byte[] log = new byte[Static332.anIntArray405[1]];
-                OpenGL.glGetInfoLogARB(shader, Static332.anIntArray405[1], Static332.anIntArray405, 0, log, 0);
+            OpenGL.glGetObjectParameterivARB(shader, OpenGL.GL_INFO_LOG_LENGTH, Static332.shaderStatus, 1);
+            if (Static332.shaderStatus[1] > 1) {
+                @Pc(69) byte[] log = new byte[Static332.shaderStatus[1]];
+                OpenGL.glGetInfoLogARB(shader, Static332.shaderStatus[1], Static332.shaderStatus, 0, log, 0);
                 System.out.println(new String(log));
             }
-            if (Static332.anIntArray405[0] == 0) {
+            if (Static332.shaderStatus[0] == 0) {
                 OpenGL.glDeleteObjectARB(shader);
                 return null;
             }
@@ -38,7 +38,7 @@ public final class Static34 {
      * clipped to the viewport width held in {@link Static228#anInt3709}, and index addresses the
      * start of the scanline's row in depthBuffer.
      * <p>
-     * {@link Static254#anInt4115} selects the mode: 1 keeps the nearer of the interpolated depth and
+     * {@link Static254#occlusionMode} selects the mode: 1 keeps the nearer of the interpolated depth and
      * the depth already recorded, and always answers true; 2 leaves the buffer alone and answers
      * whether every pixel of the span lies behind the recorded depth, so false means part of the span
      * is visible.
@@ -62,7 +62,7 @@ public final class Static34 {
         index += x0 - 1;
         @Pc(74) int nextZ;
         @Pc(61) int nextIndex;
-        if (Static254.anInt4115 == 1) {
+        if (Static254.occlusionMode == 1) {
             Static432.occludedPixelCount += count;
             while (true) {
                 count--;

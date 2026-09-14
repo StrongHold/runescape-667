@@ -3,29 +3,32 @@ import org.openrs2.deob.annotation.Pc;
 
 public final class Static370 {
 
+    /**
+     * Releases the occluders and the occlusion depth buffer when the scene is torn down.
+     */
     @OriginalMember(owner = "client!lm", name = "d", descriptor = "(I)V")
     public static void method5280() {
-        @Pc(12) int local12;
+        @Pc(12) int i;
         if (Static384.aLocOccluderArray2 != null) {
-            for (local12 = 0; local12 < Static317.anInt5046; local12++) {
-                Static384.aLocOccluderArray2[local12] = null;
+            for (i = 0; i < Static317.anInt5046; i++) {
+                Static384.aLocOccluderArray2[i] = null;
             }
             Static384.aLocOccluderArray2 = null;
         }
         if (Static607.aLocOccluderArray4 != null) {
-            for (local12 = 0; local12 < Static444.anInt6751; local12++) {
-                Static607.aLocOccluderArray4[local12] = null;
+            for (i = 0; i < Static444.anInt6751; i++) {
+                Static607.aLocOccluderArray4[i] = null;
             }
             Static607.aLocOccluderArray4 = null;
         }
         if (Static285.aLocOccluderArray1 != null) {
-            for (local12 = 0; local12 < Static150.anInt2634; local12++) {
-                Static285.aLocOccluderArray1[local12] = null;
+            for (i = 0; i < Static150.anInt2634; i++) {
+                Static285.aLocOccluderArray1[i] = null;
             }
             Static285.aLocOccluderArray1 = null;
         }
         Static560.aLocOccluderArray3 = null;
-        Static446.anIntArrayArrayArray9 = null;
+        Static446.tileOcclusionCache = null;
         Static485.anIntArray886 = null;
         Static624.anInt9461 = -1;
         Static228.anInt3709 = -1;

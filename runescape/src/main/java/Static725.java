@@ -60,13 +60,13 @@ public final class Static725 {
             while (index < length) {
                 Static485.anIntArray886[index++] = Integer.MAX_VALUE;
             }
-            Static254.anInt4115 = 1;
+            Static254.occlusionMode = 1;
             for (@Pc(289) int i = 0; i < Static469.activeOccluderCount; i++) {
                 @Pc(295) LocOccluder occluder = Static560.aLocOccluderArray3[i];
                 Static264.rasteriseTriangle(occluder.aShortArray17[0], occluder.aShortArray18[0], occluder.aShortArray19[3], occluder.aShortArray19[1], occluder.aShortArray18[3], occluder.aShortArray17[3], occluder.aShortArray18[1], occluder.aShortArray19[0], occluder.aShortArray17[1]);
                 Static264.rasteriseTriangle(occluder.aShortArray17[1], occluder.aShortArray18[1], occluder.aShortArray19[3], occluder.aShortArray19[2], occluder.aShortArray18[3], occluder.aShortArray17[3], occluder.aShortArray18[2], occluder.aShortArray19[1], occluder.aShortArray17[2]);
             }
-            Static254.anInt4115 = 2;
+            Static254.occlusionMode = 2;
         }
         if (Static703.aBoolean798) {
             Static666.occludeCalcElapsedMs = Static272.aClass13_1.method5161() - Static415.aLong205;

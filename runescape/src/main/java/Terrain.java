@@ -1072,16 +1072,16 @@ public class Terrain {
                         }
 
                         if (!tileEdgeSplits[(direction + 1) & 0x3]) {
-                            edgeSplits[1] = Static588.method7712(edgeSplits[1], (OVERLAY_BLEND_SOURCES[2] & OVERLAY_BLEND_SOURCES[4]) == 0);
+                            edgeSplits[1] = Static588.or(edgeSplits[1], (OVERLAY_BLEND_SOURCES[2] & OVERLAY_BLEND_SOURCES[4]) == 0);
                         }
                         if (!tileEdgeSplits[(direction + 3) & 0x3]) {
-                            edgeSplits[3] = Static588.method7712(edgeSplits[3], (OVERLAY_BLEND_SOURCES[6] & OVERLAY_BLEND_SOURCES[0]) == 0);
+                            edgeSplits[3] = Static588.or(edgeSplits[3], (OVERLAY_BLEND_SOURCES[6] & OVERLAY_BLEND_SOURCES[0]) == 0);
                         }
                         if (!tileEdgeSplits[direction & 0x3]) {
-                            edgeSplits[0] = Static588.method7712(edgeSplits[0], (OVERLAY_BLEND_SOURCES[0] & OVERLAY_BLEND_SOURCES[2]) == 0);
+                            edgeSplits[0] = Static588.or(edgeSplits[0], (OVERLAY_BLEND_SOURCES[0] & OVERLAY_BLEND_SOURCES[2]) == 0);
                         }
                         if (!tileEdgeSplits[(direction + 2) & 0x3]) {
-                            edgeSplits[2] = Static588.method7712(edgeSplits[2], (OVERLAY_BLEND_SOURCES[6] & OVERLAY_BLEND_SOURCES[4]) == 0);
+                            edgeSplits[2] = Static588.or(edgeSplits[2], (OVERLAY_BLEND_SOURCES[6] & OVERLAY_BLEND_SOURCES[4]) == 0);
                         }
 
                         if (!blendable && (shape == 0 || shape == 12)) {
