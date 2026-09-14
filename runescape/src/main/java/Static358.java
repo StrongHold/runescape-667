@@ -13,13 +13,13 @@ public final class Static358 {
 
     // $FF: synthetic field
     @OriginalMember(owner = "client!lf", name = "d", descriptor = "Ljava/lang/Class;")
-    public static Class aClass28;
+    public static Class positionEntityClass;
 
     @OriginalMember(owner = "client!lf", name = "a", descriptor = "(BI[S)[S")
-    public static short[] method9173(@OriginalArg(1) int arg0, @OriginalArg(2) short[] arg1) {
-        @Pc(14) short[] local14 = new short[arg0];
-        Arrays.copy(arg1, 0, local14, 0, arg0);
-        return local14;
+    public static short[] method9173(@OriginalArg(1) int length, @OriginalArg(2) short[] src) {
+        @Pc(14) short[] copy = new short[length];
+        Arrays.copy(src, 0, copy, 0, length);
+        return copy;
     }
 
     @OriginalMember(owner = "client!lf", name = "a", descriptor = "()V")
@@ -58,7 +58,7 @@ public final class Static358 {
                     }
                     for (@Pc(125) int local125 = local100; local125 <= local108; local125++) {
                         @Pc(128) byte local128 = 1;
-                        @Pc(144) PositionEntity local144 = Static578.getEntity(local16, local125, local78, aClass28 == null ? (aClass28 = getClass("PositionEntity")) : aClass28);
+                        @Pc(144) PositionEntity local144 = Static578.getEntity(local16, local125, local78, positionEntityClass == null ? (positionEntityClass = getClass("PositionEntity")) : positionEntityClass);
                         if (local144 != null && local144.aByte145 != 0) {
                             @Pc(169) boolean local169;
                             @Pc(179) boolean local179;
@@ -148,9 +148,9 @@ public final class Static358 {
         if (Static112.aBoolean197) {
             return;
         }
-        Static458.method6243(Static478.aTileArrayArrayArray3);
+        Static458.uploadLocationModels(Static478.aTileArrayArrayArray3);
         if (Static420.aTileArrayArrayArray2 != null) {
-            Static458.method6243(Static420.aTileArrayArrayArray2);
+            Static458.uploadLocationModels(Static420.aTileArrayArrayArray2);
         }
         Static112.aBoolean197 = true;
     }

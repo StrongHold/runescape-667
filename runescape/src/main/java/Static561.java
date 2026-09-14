@@ -10,17 +10,17 @@ public final class Static561 {
     public static Class locClass;
 
     @OriginalMember(owner = "client!rla", name = "a", descriptor = "(IIII)Z")
-    public static boolean hasMsi(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
+    public static boolean hasMsi(@OriginalArg(0) int x, @OriginalArg(1) int z, @OriginalArg(2) int level) {
         @Pc(5) boolean found = true;
-        @Pc(11) Location loc = (Location) Static302.getWall(arg2, arg0, arg1);
+        @Pc(11) Location loc = (Location) Static302.getWall(level, x, z);
         if (loc != null) {
             found = Static449.hasMsi(loc) & true;
         }
-        loc = (Location) Static578.getEntity(arg2, arg0, arg1, locClass == null ? (locClass = getClass("com.jagex.game.Location")) : locClass);
+        loc = (Location) Static578.getEntity(level, x, z, locClass == null ? (locClass = getClass("com.jagex.game.Location")) : locClass);
         if (loc != null) {
             found &= Static449.hasMsi(loc);
         }
-        loc = (Location) Static687.getGroundDecor(arg2, arg0, arg1);
+        loc = (Location) Static687.getGroundDecor(level, x, z);
         if (loc != null) {
             found &= Static449.hasMsi(loc);
         }

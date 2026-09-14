@@ -1215,13 +1215,13 @@ public final class MapRegion extends Terrain {
             }
             if (locType.occlude == LocOcclusionMode.ALL) {
                 if (rotation == 0) {
-                    Static687.method8958(x, level, 1, z);
+                    Static687.removeLocationOccluder(x, level, 1, z);
                 } else if (rotation == 1) {
-                    Static687.method8958(x, level, 2, z + 1);
+                    Static687.removeLocationOccluder(x, level, 2, z + 1);
                 } else if (rotation == 2) {
-                    Static687.method8958(x + 1, level, 1, z);
+                    Static687.removeLocationOccluder(x + 1, level, 1, z);
                 } else if (rotation == 3) {
-                    Static687.method8958(x, level, 2, z);
+                    Static687.removeLocationOccluder(x, level, 2, z);
                 }
             }
         } else if (layer == LocLayer.WALLDECOR) {
@@ -1233,9 +1233,9 @@ public final class MapRegion extends Terrain {
             }
             if (shape == LocShapes.WALL_DIAGONAL) {
                 if ((rotation & 0x1) == 0) {
-                    Static687.method8958(x, level, 8, z);
+                    Static687.removeLocationOccluder(x, level, 8, z);
                 } else {
-                    Static687.method8958(x, level, 16, z);
+                    Static687.removeLocationOccluder(x, level, 16, z);
                 }
             }
         } else if (layer == LocLayer.GROUNDDECOR) {

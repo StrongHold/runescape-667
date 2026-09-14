@@ -13,7 +13,7 @@ public abstract class CutsceneAction {
         @Pc(19) CutsceneActionType type = CutsceneActionType.fromId(typeId);
 
         @Pc(21) CutsceneAction action = null;
-        if (Static458.A_CUTSCENE_ACTION_TYPE___31 == type) {
+        if (Static458.LOC_ADD == type) {
             action = new CutsceneAction_Sub16(packet);
         } else if (Static569.A_CUTSCENE_ACTION_TYPE___38 == type) {
             action = new CutsceneAction_Sub3(packet);

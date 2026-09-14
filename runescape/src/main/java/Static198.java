@@ -9,7 +9,7 @@ public final class Static198 {
 
     // $FF: synthetic field
     @OriginalMember(owner = "client!gca", name = "l", descriptor = "Ljava/lang/Class;")
-    public static Class aClass9;
+    public static Class locClass;
 
     @OriginalMember(owner = "client!gca", name = "e", descriptor = "I")
     public static int anInt3276 = 0;
@@ -65,7 +65,7 @@ public final class Static198 {
                 }
             }
         } else if (layer == LocLayer.GROUND) {
-            @Pc(52) Location centrepiece = (Location) Static578.getEntity(level, x, z, aClass9 == null ? (aClass9 = getClass("com.jagex.game.Location")) : aClass9);
+            @Pc(52) Location centrepiece = (Location) Static578.getEntity(level, x, z, locClass == null ? (locClass = getClass("com.jagex.game.Location")) : locClass);
 
             if (centrepiece != null) {
                 if (shape == LocShapes.CENTREPIECE_DIAGONAL) {

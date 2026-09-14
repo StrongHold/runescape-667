@@ -5,8 +5,8 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static114 {
 
     @OriginalMember(owner = "client!dk", name = "a", descriptor = "(III)Lclient!tla;")
-    public static WallDecor getWallDecor(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
-        @Pc(7) Tile local7 = Static334.activeTiles[arg0][arg1][arg2];
-        return local7 == null ? null : local7.wallDecor;
+    public static WallDecor getWallDecor(@OriginalArg(0) int level, @OriginalArg(1) int x, @OriginalArg(2) int z) {
+        @Pc(7) Tile tile = Static334.activeTiles[level][x][z];
+        return tile == null ? null : tile.wallDecor;
     }
 }

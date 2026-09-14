@@ -6,35 +6,35 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static458 {
 
     @OriginalMember(owner = "client!oi", name = "o", descriptor = "Lclient!hc;")
-    public static final CutsceneActionType A_CUTSCENE_ACTION_TYPE___31 = new CutsceneActionType(20);
+    public static final CutsceneActionType LOC_ADD = new CutsceneActionType(20);
 
     @OriginalMember(owner = "client!oi", name = "a", descriptor = "(Z[[[Lclient!pha;)V")
-    public static void method6243(@OriginalArg(1) Tile[][][] arg0) {
-        for (@Pc(12) int local12 = 0; local12 < arg0.length; local12++) {
-            @Pc(17) Tile[][] local17 = arg0[local12];
-            for (@Pc(19) int local19 = 0; local19 < local17.length; local19++) {
-                for (@Pc(22) int local22 = 0; local22 < local17[local19].length; local22++) {
-                    @Pc(29) Tile local29 = local17[local19][local22];
-                    if (local29 != null) {
-                        if (local29.groundDecor instanceof Location) {
-                            ((Location) local29.groundDecor).method6856();
+    public static void uploadLocationModels(@OriginalArg(1) Tile[][][] tiles) {
+        for (@Pc(12) int level = 0; level < tiles.length; level++) {
+            @Pc(17) Tile[][] levelTiles = tiles[level];
+            for (@Pc(19) int x = 0; x < levelTiles.length; x++) {
+                for (@Pc(22) int z = 0; z < levelTiles[x].length; z++) {
+                    @Pc(29) Tile tile = levelTiles[x][z];
+                    if (tile != null) {
+                        if (tile.groundDecor instanceof Location) {
+                            ((Location) tile.groundDecor).method6856();
                         }
-                        if (local29.wallDecor instanceof Location) {
-                            local29.wallDecor.method6856();
+                        if (tile.wallDecor instanceof Location) {
+                            tile.wallDecor.method6856();
                         }
-                        if (local29.wallDecor2 instanceof Location) {
-                            local29.wallDecor2.method6856();
+                        if (tile.wallDecor2 instanceof Location) {
+                            tile.wallDecor2.method6856();
                         }
-                        if (local29.wall instanceof Location) {
-                            ((Location) local29.wall).method6856();
+                        if (tile.wall instanceof Location) {
+                            ((Location) tile.wall).method6856();
                         }
-                        if (local29.adjacentWall instanceof Location) {
-                            ((Location) local29.adjacentWall).method6856();
+                        if (tile.adjacentWall instanceof Location) {
+                            ((Location) tile.adjacentWall).method6856();
                         }
-                        for (@Pc(91) PositionEntityNode local91 = local29.head; local91 != null; local91 = local91.node) {
-                            @Pc(95) PositionEntity local95 = local91.entity;
-                            if (local95 instanceof Location) {
-                                ((Location) local95).method6856();
+                        for (@Pc(91) PositionEntityNode node = tile.head; node != null; node = node.node) {
+                            @Pc(95) PositionEntity entity = node.entity;
+                            if (entity instanceof Location) {
+                                ((Location) entity).method6856();
                             }
                         }
                     }

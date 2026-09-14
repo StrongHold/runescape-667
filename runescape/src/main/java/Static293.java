@@ -12,7 +12,7 @@ public final class Static293 {
 
     // $FF: synthetic field
     @OriginalMember(owner = "client!jfa", name = "Mb", descriptor = "Ljava/lang/Class;")
-    public static Class aClass10;
+    public static Class locClass;
 
     @OriginalMember(owner = "client!jfa", name = "a", descriptor = "(ILclient!hma;)V")
     public static void snapshotOriginal(@OriginalArg(1) ChangeLocationRequest request) {
@@ -28,7 +28,7 @@ public final class Static293 {
             location = Static114.getWallDecor(request.level, request.x, request.z);
         }
         if (request.layer == LocLayer.GROUND) {
-            location = (Location) Static578.getEntity(request.level, request.x, request.z, aClass10 == null ? (aClass10 = getClass("com.jagex.game.Location")) : aClass10);
+            location = (Location) Static578.getEntity(request.level, request.x, request.z, locClass == null ? (locClass = getClass("com.jagex.game.Location")) : locClass);
         }
         if (request.layer == LocLayer.GROUNDDECOR) {
             location = (Location) Static687.getGroundDecor(request.level, request.x, request.z);

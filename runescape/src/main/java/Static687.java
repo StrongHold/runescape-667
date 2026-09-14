@@ -6,24 +6,24 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static687 {
 
     @OriginalMember(owner = "client!vo", name = "a", descriptor = "(IIBII)V")
-    public static void method8958(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(3) int arg2, @OriginalArg(4) int arg3) {
-        if (arg2 != 8 && arg2 != 16) {
-            @Pc(28) Tile local28 = Static334.activeTiles[arg1][arg0][arg3];
-            if (local28 != null) {
-                if (arg2 == 1) {
-                    local28.aShort84 = 0;
-                } else if (arg2 == 2) {
-                    local28.aShort83 = 0;
+    public static void removeLocationOccluder(@OriginalArg(0) int x, @OriginalArg(1) int level, @OriginalArg(3) int type, @OriginalArg(4) int z) {
+        if (type != 8 && type != 16) {
+            @Pc(28) Tile tile = Static334.activeTiles[level][x][z];
+            if (tile != null) {
+                if (type == 1) {
+                    tile.aShort84 = 0;
+                } else if (type == 2) {
+                    tile.aShort83 = 0;
                 }
             }
             Static416.method5705();
             return;
         }
-        for (@Pc(61) int local61 = 0; local61 < Static150.anInt2634; local61++) {
-            @Pc(67) LocOccluder local67 = Static285.aLocOccluderArray1[local61];
-            if (local67.aByte43 == arg2 && arg0 == local67.aShort26 && arg3 == local67.aShort23 || local67.aShort24 == arg0 && arg3 == local67.aShort23) {
-                if (local61 != Static150.anInt2634) {
-                    Arrays.copy(Static285.aLocOccluderArray1, local61 + 1, Static285.aLocOccluderArray1, local61, Static285.aLocOccluderArray1.length - local61 - 1);
+        for (@Pc(61) int i = 0; i < Static150.anInt2634; i++) {
+            @Pc(67) LocOccluder occluder = Static285.aLocOccluderArray1[i];
+            if (occluder.aByte43 == type && x == occluder.aShort26 && z == occluder.aShort23 || occluder.aShort24 == x && z == occluder.aShort23) {
+                if (i != Static150.anInt2634) {
+                    Arrays.copy(Static285.aLocOccluderArray1, i + 1, Static285.aLocOccluderArray1, i, Static285.aLocOccluderArray1.length - i - 1);
                 }
                 Static150.anInt2634--;
                 return;
