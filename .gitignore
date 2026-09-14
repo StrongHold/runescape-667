@@ -1,6 +1,13 @@
 # Hidden files
 .*
 
+# Claude Code: track the refactor verifier only, not settings or other skills
+!.claude/
+.claude/*
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/verify-refactor/
+
 # Temporary files
 *~
 
