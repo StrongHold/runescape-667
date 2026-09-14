@@ -600,9 +600,9 @@ public final class ServerConnectionReader {
             context.currentProt = null;
             return true;
         } else if (context.currentProt == ServerProt.SERVER_PROT_141) {
-            @Pc(277) int local277 = bitPacket.ig2();
+            @Pc(277) int id = bitPacket.ig2();
             VerifyId.incrementAndTransmit();
-            VideoTypeList.method9267(local277);
+            VideoTypeList.method9267(id);
             context.currentProt = null;
             return true;
         } else if (context.currentProt == ServerProt.IF_SETTEXTFONT) {
@@ -650,11 +650,11 @@ public final class ServerConnectionReader {
             return true;
         } else if (context.currentProt == ServerProt.IF_SETPLAYERHEAD_IGNOREWORN) {
             @Pc(277) int idAndSlot = bitPacket.g4_alt3();
-            @Pc(100) int local100 = bitPacket.g2();
-            @Pc(526) int local526 = bitPacket.g2_alt3();
-            @Pc(1409) int local1409 = bitPacket.g2_alt2();
+            @Pc(100) int kit3 = bitPacket.g2();
+            @Pc(526) int kit2 = bitPacket.g2_alt3();
+            @Pc(1409) int kit1 = bitPacket.g2_alt2();
             VerifyId.incrementAndTransmit();
-            DelayedStateChange.interfaceSetModel(idAndSlot, Component.OBJ_TYPE_PLAYERHEAD_IGNOREWORN, (local1409 << 16) | local526, local100);
+            DelayedStateChange.interfaceSetModel(idAndSlot, Component.OBJ_TYPE_PLAYERHEAD_IGNOREWORN, (kit1 << 16) | kit2, kit3);
             context.currentProt = null;
             return true;
         } else if (context.currentProt == ServerProt.IF_SETPLAYERMODEL_SELF) {
@@ -668,7 +668,7 @@ public final class ServerConnectionReader {
             context.currentProt = null;
             return false;
         } else if (context.currentProt == ServerProt.REBUILD_REGION) {
-            Static466.rebuildRegion();
+            RebuildRegion.rebuildRegion();
             context.currentProt = null;
             return false;
         } else if (context.currentProt == ServerProt.UPDATE_INV_PARTIAL) {
@@ -780,10 +780,10 @@ public final class ServerConnectionReader {
             }
             return true;
         } else if (context.currentProt == ServerProt.VARP_LARGE) {
-            @Pc(277) int local277 = bitPacket.g4_alt3();
-            @Pc(100) int local100 = bitPacket.g2_alt2();
+            @Pc(277) int value = bitPacket.g4_alt3();
+            @Pc(100) int id = bitPacket.g2_alt2();
             // g.trace("Received big varp variable: " + var18 + " value:" + var4);
-            TimedVarDomain.instance.updateVarp(local100, local277);
+            TimedVarDomain.instance.updateVarp(id, value);
             context.currentProt = null;
             return true;
         } else if (context.currentProt == ServerProt.CLANCHANNEL_DELTA) {
@@ -1101,10 +1101,10 @@ public final class ServerConnectionReader {
             context.currentProt = null;
             return true;
         } else if (context.currentProt == ServerProt.SERVER_PROT_113) {
-            @Pc(277) int local277 = bitPacket.g1_alt3();
+            @Pc(277) int volume = bitPacket.g1_alt3();
             @Pc(100) int id = bitPacket.g2();
             VerifyId.incrementAndTransmit();
-            VideoTypeList.method6802(true, id, local277);
+            VideoTypeList.method6802(true, id, volume);
             context.currentProt = null;
             return true;
         } else if (context.currentProt == ServerProt.SHOW_FACE_HERE) {
@@ -1285,11 +1285,11 @@ public final class ServerConnectionReader {
             context.currentProt = null;
             return true;
         } else if (context.currentProt == ServerProt.SERVER_PROT_115) {
-            @Pc(277) int local277 = bitPacket.ig2();
-            @Pc(100) int local100 = bitPacket.g2_alt3();
-            @Pc(526) int local526 = bitPacket.g4();
+            @Pc(277) int valueLow = bitPacket.ig2();
+            @Pc(100) int valueHigh = bitPacket.g2_alt3();
+            @Pc(526) int idAndSlot = bitPacket.g4();
             VerifyId.incrementAndTransmit();
-            DelayedStateChange.method4347(local526, (local100 << 16) + local277);
+            DelayedStateChange.method4347(idAndSlot, (valueHigh << 16) + valueLow);
             context.currentProt = null;
             return true;
         } else if (context.currentProt == ServerProt.LOC_PREFETCH) {
@@ -1942,11 +1942,11 @@ public final class ServerConnectionReader {
             context.currentProt = null;
             return true;
         } else if (context.currentProt == ServerProt.SEND_PING) {
-            @Pc(277) int local277 = bitPacket.g4();
-            @Pc(100) int local100 = bitPacket.g4();
+            @Pc(277) int value1 = bitPacket.g4();
+            @Pc(100) int value2 = bitPacket.g4();
             @Pc(7309) ClientMessage message = ClientMessage.create(ClientProt.SEND_PING_REPLY, context.isaac);
-            message.bitPacket.p4(local277);
-            message.bitPacket.p4(local100);
+            message.bitPacket.p4(value1);
+            message.bitPacket.p4(value2);
             context.send(message);
             context.currentProt = null;
             return true;
@@ -2446,12 +2446,12 @@ public final class ServerConnectionReader {
 
     @OriginalMember(owner = "client!lma", name = "b", descriptor = "(I)V")
     public static void sendWindowStatus() {
-        @Pc(22) ClientMessage local22 = ClientMessage.create(ClientProt.WINDOW_STATUS, ServerConnection.GAME.isaac);
-        local22.bitPacket.p1(InterfaceManager.getWindowMode());
-        local22.bitPacket.p2(GameShell.canvasWid);
-        local22.bitPacket.p2(GameShell.canvasHei);
-        local22.bitPacket.p1(ClientOptions.instance.antialiasingQuality.getValue());
-        ServerConnection.GAME.send(local22);
+        @Pc(22) ClientMessage message = ClientMessage.create(ClientProt.WINDOW_STATUS, ServerConnection.GAME.isaac);
+        message.bitPacket.p1(InterfaceManager.getWindowMode());
+        message.bitPacket.p2(GameShell.canvasWid);
+        message.bitPacket.p2(GameShell.canvasHei);
+        message.bitPacket.p1(ClientOptions.instance.antialiasingQuality.getValue());
+        ServerConnection.GAME.send(message);
     }
 
     @OriginalMember(owner = "client!tba", name = "a", descriptor = "(ILclient!pc;)V")
@@ -2552,8 +2552,8 @@ public final class ServerConnectionReader {
                 @Pc(343) short[] retex = null;
                 if ((flags & 0x8) == 8) {
                     retex = new short[retexLength];
-                    for (@Pc(353) int local353 = 0; local353 < retexLength; local353++) {
-                        retex[local353] = (short) bitPacket.g2();
+                    for (@Pc(353) int i = 0; i < retexLength; i++) {
+                        retex[i] = (short) bitPacket.g2();
                     }
                 }
 
@@ -2847,11 +2847,11 @@ public final class ServerConnectionReader {
 
             if (zoneX >= 0 && zoneZ >= 0 && zoneX < Static720.mapWidth && Static501.mapLength > zoneZ) {
                 if (id == -1) {
-                    @Pc(2004) SpotAnimationNode local2004 = (SpotAnimationNode) Static346.spotAnimations.get(zoneX << 16 | zoneZ);
+                    @Pc(2004) SpotAnimationNode node = (SpotAnimationNode) Static346.spotAnimations.get(zoneX << 16 | zoneZ);
 
-                    if (local2004 != null) {
-                        local2004.spotAnimation.stopParticleSystem();
-                        local2004.unlink();
+                    if (node != null) {
+                        node.spotAnimation.stopParticleSystem();
+                        node.unlink();
                         return;
                     }
                 } else {

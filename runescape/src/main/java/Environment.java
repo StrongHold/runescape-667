@@ -16,10 +16,10 @@ public final class Environment {
     public static final ReferenceCache skyBoxCache = new ReferenceCache(8);
 
     @OriginalMember(owner = "client!ie", name = "j", descriptor = "Lclient!dla;")
-    public static final ReferenceCache A_WEIGHTED_CACHE___235 = new ReferenceCache(8);
+    public static final ReferenceCache cubeMapCache = new ReferenceCache(8);
 
     @OriginalMember(owner = "client!kr", name = "a", descriptor = "(ZIIII)Lclient!gm;")
-    public static SkyBox method5047(@OriginalArg(1) int sphereOffsetY, @OriginalArg(2) int id, @OriginalArg(3) int sphereOffsetX, @OriginalArg(4) int sphereOffsetZ) {
+    public static SkyBox skyBox(@OriginalArg(1) int sphereOffsetY, @OriginalArg(2) int id, @OriginalArg(3) int sphereOffsetX, @OriginalArg(4) int sphereOffsetZ) {
         @Pc(31) long key = ((long) id & 0xFFFFL) | (((long) sphereOffsetZ & 0xFFFFL) << 16) | (((long) sphereOffsetX << 48) & (0xFFFFL << 48)) | (((long) sphereOffsetY & 0xFFFFL) << 32);
         @Pc(43) SkyBox skyBox = (SkyBox) skyBoxCache.get(key);
         if (skyBox == null) {
@@ -30,21 +30,21 @@ public final class Environment {
     }
 
     @OriginalMember(owner = "client!lo", name = "a", descriptor = "(IIIIIII)Lclient!pu;")
-    public static Class67 method5301(@OriginalArg(0) int arg0, @OriginalArg(2) int arg1, @OriginalArg(3) int arg2, @OriginalArg(4) int arg3, @OriginalArg(5) int arg4, @OriginalArg(6) int arg5) {
-        @Pc(33) long key = (long) arg5 * 67481L ^ (long) arg1 * 97549L ^ (long) arg2 * 475427L ^ (long) arg3 * 986053L ^ (long) arg0 * 32147369L ^ (long) arg4 * 76724863L;
-        @Pc(39) Class67 local39 = (Class67) A_WEIGHTED_CACHE___235.get(key);
-        if (local39 == null) {
-            local39 = Static425.toolkit.method8008(arg5, arg1, arg2, arg3, arg0, arg4);
-            A_WEIGHTED_CACHE___235.put(local39, key);
-            return local39;
+    public static Class67 method5301(@OriginalArg(0) int texture4, @OriginalArg(2) int texture1, @OriginalArg(3) int texture2, @OriginalArg(4) int texture3, @OriginalArg(5) int texture5, @OriginalArg(6) int texture0) {
+        @Pc(33) long key = (long) texture0 * 67481L ^ (long) texture1 * 97549L ^ (long) texture2 * 475427L ^ (long) texture3 * 986053L ^ (long) texture4 * 32147369L ^ (long) texture5 * 76724863L;
+        @Pc(39) Class67 cubeMap = (Class67) cubeMapCache.get(key);
+        if (cubeMap == null) {
+            cubeMap = Static425.toolkit.method8008(texture0, texture1, texture2, texture3, texture4, texture5);
+            cubeMapCache.put(cubeMap, key);
+            return cubeMap;
         } else {
-            return local39;
+            return cubeMap;
         }
     }
 
     @OriginalMember(owner = "client!eu", name = "f", descriptor = "(I)V")
     public static void cacheReset() {
-        A_WEIGHTED_CACHE___235.reset();
+        cubeMapCache.reset();
         skyBoxCache.reset();
     }
 
@@ -101,109 +101,109 @@ public final class Environment {
         this.aFloat205 = 0.69921875F;
         this.aFloat204 = 1.1523438F;
         this.anInt9534 = -50;
-        this.anInt9538 = Static563.anInt8460;
+        this.anInt9538 = Scene.DEFAULT_FOG_COLOUR;
         this.anInt9539 = 0;
     }
 
     @OriginalMember(owner = "client!uc", name = "<init>", descriptor = "(Lclient!ge;)V")
-    public Environment(@OriginalArg(0) Packet arg0) {
-        this.method8386(arg0);
+    public Environment(@OriginalArg(0) Packet packet) {
+        this.method8386(packet);
     }
 
     @OriginalMember(owner = "client!uc", name = "a", descriptor = "(Lclient!ge;I)V")
-    public void method8384(@OriginalArg(0) Packet arg0) {
-        @Pc(17) int local17 = arg0.g2();
-        @Pc(21) int local21 = arg0.g2s();
-        @Pc(25) int local25 = arg0.g2s();
-        @Pc(29) int local29 = arg0.g2s();
-        @Pc(33) int local33 = arg0.g2();
-        Static436.anInt3852 = local33;
-        this.aSkyBox_5 = method5047(local25, local17, local21, local29);
+    public void method8384(@OriginalArg(0) Packet packet) {
+        @Pc(17) int id = packet.g2();
+        @Pc(21) int sphereOffsetX = packet.g2s();
+        @Pc(25) int sphereOffsetY = packet.g2s();
+        @Pc(29) int sphereOffsetZ = packet.g2s();
+        @Pc(33) int rotation = packet.g2();
+        Static436.anInt3852 = rotation;
+        this.aSkyBox_5 = skyBox(sphereOffsetY, id, sphereOffsetX, sphereOffsetZ);
     }
 
     @OriginalMember(owner = "client!uc", name = "a", descriptor = "(Lclient!ge;Z)V")
-    public void decodeBloomParams(@OriginalArg(0) Packet arg0) {
-        this.aFloat201 = (float) (arg0.g1() * 8) / 255.0F;
-        this.aFloat200 = (float) (arg0.g1() * 8) / 255.0F;
-        this.aFloat203 = (float) (arg0.g1() * 8) / 255.0F;
+    public void decodeBloomParams(@OriginalArg(0) Packet packet) {
+        this.aFloat201 = (float) (packet.g1() * 8) / 255.0F;
+        this.aFloat200 = (float) (packet.g1() * 8) / 255.0F;
+        this.aFloat203 = (float) (packet.g1() * 8) / 255.0F;
     }
 
     @OriginalMember(owner = "client!uc", name = "b", descriptor = "(Lclient!ge;I)V")
-    public void method8386(@OriginalArg(0) Packet arg0) {
-        @Pc(7) int local7 = arg0.g1();
+    public void method8386(@OriginalArg(0) Packet packet) {
+        @Pc(7) int flags = packet.g1();
         if (ClientOptions.instance.lightDetail.getValue() == 1 && Static425.toolkit.getMaxLights() > 0) {
-            if ((local7 & 0x1) == 0) {
+            if ((flags & 0x1) == 0) {
                 this.anInt9537 = Static68.anInt4096;
             } else {
-                this.anInt9537 = arg0.g4();
+                this.anInt9537 = packet.g4();
             }
-            if ((local7 & 0x2) == 0) {
+            if ((flags & 0x2) == 0) {
                 this.aFloat204 = 1.1523438F;
             } else {
-                this.aFloat204 = (float) arg0.g2() / 256.0F;
+                this.aFloat204 = (float) packet.g2() / 256.0F;
             }
-            if ((local7 & 0x4) == 0) {
+            if ((flags & 0x4) == 0) {
                 this.aFloat205 = 0.69921875F;
             } else {
-                this.aFloat205 = (float) arg0.g2() / 256.0F;
+                this.aFloat205 = (float) packet.g2() / 256.0F;
             }
-            if ((local7 & 0x8) == 0) {
+            if ((flags & 0x8) == 0) {
                 this.aFloat202 = 1.2F;
             } else {
-                this.aFloat202 = (float) arg0.g2() / 256.0F;
+                this.aFloat202 = (float) packet.g2() / 256.0F;
             }
         } else {
-            if ((local7 & 0x1) != 0) {
-                arg0.g4();
+            if ((flags & 0x1) != 0) {
+                packet.g4();
             }
-            if ((local7 & 0x2) != 0) {
-                arg0.g2();
+            if ((flags & 0x2) != 0) {
+                packet.g2();
             }
-            if ((local7 & 0x4) != 0) {
-                arg0.g2();
+            if ((flags & 0x4) != 0) {
+                packet.g2();
             }
-            if ((local7 & 0x8) != 0) {
-                arg0.g2();
+            if ((flags & 0x8) != 0) {
+                packet.g2();
             }
             this.aFloat202 = 1.2F;
             this.aFloat204 = 1.1523438F;
             this.aFloat205 = 0.69921875F;
             this.anInt9537 = Static68.anInt4096;
         }
-        if ((local7 & 0x10) == 0) {
+        if ((flags & 0x10) == 0) {
             this.anInt9535 = -50;
             this.anInt9534 = -50;
             this.anInt9533 = -60;
         } else {
-            this.anInt9535 = arg0.g2s();
-            this.anInt9533 = arg0.g2s();
-            this.anInt9534 = arg0.g2s();
+            this.anInt9535 = packet.g2s();
+            this.anInt9533 = packet.g2s();
+            this.anInt9534 = packet.g2s();
         }
-        if ((local7 & 0x20) == 0) {
-            this.anInt9538 = Static563.anInt8460;
+        if ((flags & 0x20) == 0) {
+            this.anInt9538 = Scene.DEFAULT_FOG_COLOUR;
         } else {
-            this.anInt9538 = arg0.g4();
+            this.anInt9538 = packet.g4();
         }
-        if ((local7 & 0x40) == 0) {
+        if ((flags & 0x40) == 0) {
             this.anInt9539 = 0;
         } else {
-            this.anInt9539 = arg0.g2();
+            this.anInt9539 = packet.g2();
         }
-        if ((local7 & 0x80) == 0) {
+        if ((flags & 0x80) == 0) {
             this.aClass67_10 = Static226.aClass67_9;
             return;
         }
-        @Pc(251) int local251 = arg0.g2();
-        @Pc(255) int local255 = arg0.g2();
-        @Pc(261) int local261 = arg0.g2();
-        @Pc(265) int local265 = arg0.g2();
-        @Pc(271) int local271 = arg0.g2();
-        @Pc(275) int local275 = arg0.g2();
-        this.aClass67_10 = method5301(local271, local255, local261, local265, local275, local251);
+        @Pc(251) int texture0 = packet.g2();
+        @Pc(255) int texture1 = packet.g2();
+        @Pc(261) int texture2 = packet.g2();
+        @Pc(265) int texture3 = packet.g2();
+        @Pc(271) int texture4 = packet.g2();
+        @Pc(275) int texture5 = packet.g2();
+        this.aClass67_10 = method5301(texture4, texture1, texture2, texture3, texture5, texture0);
     }
 
     @OriginalMember(owner = "client!uc", name = "a", descriptor = "(BLclient!uc;)Z")
-    public boolean method8388(@OriginalArg(1) Environment arg0) {
-        return this.anInt9537 == arg0.anInt9537 && arg0.aFloat204 == this.aFloat204 && this.aFloat205 == arg0.aFloat205 && this.aFloat202 == arg0.aFloat202 && arg0.aFloat200 == this.aFloat200 && this.aFloat201 == arg0.aFloat201 && this.aFloat203 == arg0.aFloat203 && this.anInt9538 == arg0.anInt9538 && arg0.anInt9539 == this.anInt9539 && arg0.aClass67_10 == this.aClass67_10 && arg0.aSkyBox_5 == this.aSkyBox_5;
+    public boolean method8388(@OriginalArg(1) Environment other) {
+        return this.anInt9537 == other.anInt9537 && other.aFloat204 == this.aFloat204 && this.aFloat205 == other.aFloat205 && this.aFloat202 == other.aFloat202 && other.aFloat200 == this.aFloat200 && this.aFloat201 == other.aFloat201 && this.aFloat203 == other.aFloat203 && this.anInt9538 == other.anInt9538 && other.anInt9539 == this.anInt9539 && other.aClass67_10 == this.aClass67_10 && other.aSkyBox_5 == this.aSkyBox_5;
     }
 }

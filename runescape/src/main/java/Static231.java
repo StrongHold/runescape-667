@@ -42,7 +42,7 @@ public final class Static231 {
             Static164.method2606();
         }
         Static514.activePickList.clear();
-        Static563.method7461();
+        Scene.free();
         Minimap.reset();
         MiniMenu.resetSprites();
         Static638.method8393();
@@ -52,19 +52,19 @@ public final class Static231 {
         Static203.resetStaticSprites();
         Static143.method3572();
         WorldMap.reset(false);
-        for (@Pc(34) int local34 = 0; local34 < 2048; local34++) {
-            @Pc(39) PlayerEntity local39 = PlayerList.highResolutionPlayers[local34];
-            if (local39 != null) {
-                for (@Pc(43) int local43 = 0; local43 < local39.aModelArray3.length; local43++) {
-                    local39.aModelArray3[local43] = null;
+        for (@Pc(34) int slot = 0; slot < PlayerList.COUNT; slot++) {
+            @Pc(39) PlayerEntity player = PlayerList.highResolutionPlayers[slot];
+            if (player != null) {
+                for (@Pc(43) int model = 0; model < player.aModelArray3.length; model++) {
+                    player.aModelArray3[model] = null;
                 }
             }
         }
-        for (@Pc(65) int local65 = 0; local65 < NPCList.newSize; local65++) {
-            @Pc(71) NPCEntity entity = NPCList.entities[local65].npc;
+        for (@Pc(65) int slot = 0; slot < NPCList.newSize; slot++) {
+            @Pc(71) NPCEntity entity = NPCList.entities[slot].npc;
             if (entity != null) {
-                for (@Pc(75) int local75 = 0; local75 < entity.aModelArray3.length; local75++) {
-                    entity.aModelArray3[local75] = null;
+                for (@Pc(75) int model = 0; model < entity.aModelArray3.length; model++) {
+                    entity.aModelArray3[model] = null;
                 }
             }
         }
@@ -75,20 +75,20 @@ public final class Static231 {
     }
 
     @OriginalMember(owner = "client!hd", name = "a", descriptor = "(II)Lclient!hd;")
-    public static Class157 method3377(@OriginalArg(0) int arg0) {
-        if (arg0 == 0) {
+    public static Class157 method3377(@OriginalArg(0) int id) {
+        if (id == 0) {
             return aClass157_1;
-        } else if (arg0 == 1) {
+        } else if (id == 1) {
             return aClass157_2;
-        } else if (arg0 == 2) {
+        } else if (id == 2) {
             return aClass157_3;
-        } else if (arg0 == 3) {
+        } else if (id == 3) {
             return aClass157_4;
-        } else if (arg0 == 4) {
+        } else if (id == 4) {
             return aClass157_5;
-        } else if (arg0 == 5) {
+        } else if (id == 5) {
             return aClass157_6;
-        } else if (arg0 == 6) {
+        } else if (id == 6) {
             return aClass157_7;
         } else {
             return null;

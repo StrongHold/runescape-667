@@ -3,24 +3,21 @@ import com.jagex.graphics.EnvironmentLight;
 import org.openrs2.deob.annotation.OriginalMember;
 import org.openrs2.deob.annotation.Pc;
 
-public final class Static563 {
+public final class Scene {
 
     @OriginalMember(owner = "client!ro", name = "h", descriptor = "I")
-    public static final int anInt8460 = 13156520;
+    public static final int DEFAULT_FOG_COLOUR = 13156520;
 
     @OriginalMember(owner = "client!ro", name = "a", descriptor = "()V")
-    public static void method7461() {
-        @Pc(3) int local3;
-        @Pc(6) int local6;
-        @Pc(9) int local9;
+    public static void free() {
         if (Static478.aTileArrayArrayArray3 != null) {
-            for (local3 = 0; local3 < Static478.aTileArrayArrayArray3.length; local3++) {
-                for (local6 = 0; local6 < Static619.tileMaxX; local6++) {
-                    for (local9 = 0; local9 < Static662.tileMaxZ; local9++) {
-                        if (Static478.aTileArrayArrayArray3[local3][local6][local9] != null) {
-                            Static478.aTileArrayArrayArray3[local3][local6][local9].method6550();
+            for (@Pc(3) int level = 0; level < Static478.aTileArrayArrayArray3.length; level++) {
+                for (@Pc(6) int x = 0; x < Static619.tileMaxX; x++) {
+                    for (@Pc(9) int z = 0; z < Static662.tileMaxZ; z++) {
+                        if (Static478.aTileArrayArrayArray3[level][x][z] != null) {
+                            Static478.aTileArrayArrayArray3[level][x][z].method6550();
                         }
-                        Static478.aTileArrayArrayArray3[local3][local6][local9] = null;
+                        Static478.aTileArrayArrayArray3[level][x][z] = null;
                     }
                 }
             }
@@ -28,13 +25,13 @@ public final class Static563 {
         Static478.aTileArrayArrayArray3 = null;
         Static706.floor = null;
         if (Static420.aTileArrayArrayArray2 != null) {
-            for (local3 = 0; local3 < Static420.aTileArrayArrayArray2.length; local3++) {
-                for (local6 = 0; local6 < Static619.tileMaxX; local6++) {
-                    for (local9 = 0; local9 < Static662.tileMaxZ; local9++) {
-                        if (Static420.aTileArrayArrayArray2[local3][local6][local9] != null) {
-                            Static420.aTileArrayArrayArray2[local3][local6][local9].method6550();
+            for (int level = 0; level < Static420.aTileArrayArrayArray2.length; level++) {
+                for (int x = 0; x < Static619.tileMaxX; x++) {
+                    for (int z = 0; z < Static662.tileMaxZ; z++) {
+                        if (Static420.aTileArrayArrayArray2[level][x][z] != null) {
+                            Static420.aTileArrayArrayArray2[level][x][z].method6550();
                         }
-                        Static420.aTileArrayArrayArray2[local3][local6][local9] = null;
+                        Static420.aTileArrayArrayArray2[level][x][z] = null;
                     }
                 }
             }
@@ -50,8 +47,8 @@ public final class Static563 {
         Static275.aBooleanArrayArrayArray4 = null;
         Static370.method5280();
         if (Static679.aPositionEntity != null) {
-            for (local3 = 0; local3 < Static125.dynamicEntityCount; local3++) {
-                Static679.aPositionEntity[local3] = null;
+            for (int i = 0; i < Static125.dynamicEntityCount; i++) {
+                Static679.aPositionEntity[i] = null;
             }
             Static125.dynamicEntityCount = 0;
         }
@@ -59,25 +56,25 @@ public final class Static563 {
         Static398.transparentStationaryEntities = null;
         Static468.dynamicEntities = null;
         if (Static48.aEntityArray3 != null) {
-            for (local3 = 0; local3 < Static48.aEntityArray3.length; local3++) {
-                Static48.aEntityArray3[local3] = null;
+            for (int i = 0; i < Static48.aEntityArray3.length; i++) {
+                Static48.aEntityArray3[i] = null;
             }
             Static546.onscreenOpaqueEntityCount = 0;
         }
         if (Static395.aEntityArray11 != null) {
-            for (local3 = 0; local3 < Static395.aEntityArray11.length; local3++) {
-                Static395.aEntityArray11[local3] = null;
+            for (int i = 0; i < Static395.aEntityArray11.length; i++) {
+                Static395.aEntityArray11[i] = null;
             }
             Static645.onscreenTransparentEntityCount = 0;
         }
         if (EnvironmentLight.aEnvironmentLightArray1 != null) {
-            for (local3 = 0; local3 < Static319.anInt5080; local3++) {
-                EnvironmentLight.aEnvironmentLightArray1[local3] = null;
+            for (int i = 0; i < Static319.anInt5080; i++) {
+                EnvironmentLight.aEnvironmentLightArray1[i] = null;
             }
-            for (local6 = 0; local6 < Static299.tileMaxLevel; local6++) {
-                for (local9 = 0; local9 < Static619.tileMaxX; local9++) {
-                    for (@Pc(217) int local217 = 0; local217 < Static662.tileMaxZ; local217++) {
-                        Client.tileLightFlags[local6][local9][local217] = 0L;
+            for (int level = 0; level < Static299.tileMaxLevel; level++) {
+                for (int x = 0; x < Static619.tileMaxX; x++) {
+                    for (@Pc(217) int z = 0; z < Static662.tileMaxZ; z++) {
+                        Client.tileLightFlags[level][x][z] = 0L;
                     }
                 }
             }

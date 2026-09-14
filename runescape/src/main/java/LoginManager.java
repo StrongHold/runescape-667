@@ -114,7 +114,7 @@ public final class LoginManager {
     public static int okLength;
 
     @OriginalMember(owner = "client!rla", name = "c", descriptor = "Z")
-    public static boolean aBoolean640 = false;
+    public static boolean ssoLogin = false;
 
     @OriginalMember(owner = "client!cj", name = "o", descriptor = "I")
     public static int lastGameLoginResponse = -2;
@@ -141,7 +141,7 @@ public final class LoginManager {
 
         reset();
         client.cacheReset();
-        Static563.method7461();
+        Scene.free();
 
         for (@Pc(36) int level = 0; level < 4; level++) {
             Client.collisionMaps[level].reset();
@@ -537,7 +537,7 @@ public final class LoginManager {
                     step = LoginStep.WAIT_FOR_QUEUE_POSITION;
                     setLoginResponse(responseCode);
                     return;
-                } else if (!aBoolean640 || socialNetworkLogin || socialNetworkId == -1 || responseCode != LoginResponseCode.INVALID_SINGLE_SIGNON) {
+                } else if (!ssoLogin || socialNetworkLogin || socialNetworkId == -1 || responseCode != LoginResponseCode.INVALID_SINGLE_SIGNON) {
                     step = LoginStep.DELAY;
                     setLoginResponse(responseCode);
                     ServerConnection.active.connection.close();
@@ -775,7 +775,7 @@ public final class LoginManager {
                     Static62.areaCenterX = -1;
 
                     if (ServerConnection.active.currentProt == ServerProt.REBUILD_REGION) {
-                        Static466.rebuildRegion();
+                        RebuildRegion.rebuildRegion();
                     } else {
                         Static434.rebuildNormal();
                     }
@@ -850,25 +850,25 @@ public final class LoginManager {
     }
 
     @OriginalMember(owner = "client!vfa", name = "a", descriptor = "(II)V")
-    public static void loginToGame(@OriginalArg(0) int arg0) {
+    public static void loginToGame(@OriginalArg(0) int anInt7113) {
         if (MainLogicManager.step == MainLogicStep.STEP_LOBBY_SCREEN && (step == LoginStep.DELAY && LobbyManager.step == LoginStep.DELAY)) {
-            anInt7113 = arg0;
+            LoginManager.anInt7113 = anInt7113;
             MainLogicManager.setStep(MainLogicStep.STEP_LOGGING_IN_FROM_LOBBYSCREEN_TO_GAME);
         }
     }
 
     @OriginalMember(owner = "client!hh", name = "a", descriptor = "(ZLjava/lang/String;ZZLjava/lang/String;)V")
-    public static void doLogin(@OriginalArg(0) boolean socialNetworkLogin, @OriginalArg(1) String username, @OriginalArg(3) boolean aBoolean640, @OriginalArg(4) String password) {
-        if (!aBoolean640) {
+    public static void doLogin(@OriginalArg(0) boolean socialNetworkLogin, @OriginalArg(1) String username, @OriginalArg(3) boolean ssoLogin, @OriginalArg(4) String password) {
+        if (!ssoLogin) {
             socialNetworkId = -1;
         }
 
         LoginManager.password = password;
         LoginManager.username = username;
         LoginManager.socialNetworkLogin = socialNetworkLogin;
-        LoginManager.aBoolean640 = aBoolean640;
+        LoginManager.ssoLogin = ssoLogin;
 
-        if (!LoginManager.aBoolean640 && (LoginManager.username.equals("") || LoginManager.password.equals(""))) {
+        if (!LoginManager.ssoLogin && (LoginManager.username.equals("") || LoginManager.password.equals(""))) {
             setLoginResponse(LoginResponseCode.INVALID_USERNAME_OR_PASSWORD);
             return;
         }
@@ -973,8 +973,8 @@ public final class LoginManager {
         Static508.anInt7627 = (int) (Math.random() * 100.0D) - 50;
         Camera.playerCameraYaw = (float) ((int) (Math.random() * 160.0D) - 80 & 0x3FFF);
         Minimap.resetToggle();
-        for (@Pc(8697) int local8697 = 0; local8697 < PlayerList.COUNT; local8697++) {
-            PlayerList.highResolutionPlayers[local8697] = null;
+        for (@Pc(8697) int i = 0; i < PlayerList.COUNT; i++) {
+            PlayerList.highResolutionPlayers[i] = null;
         }
         NPCList.size = 0;
         NPCList.newSize = 0;
@@ -1105,10 +1105,10 @@ public final class LoginManager {
     }
 
     @OriginalMember(owner = "client!fu", name = "a", descriptor = "(Ljava/lang/String;ILjava/lang/String;I)V")
-    public static void doGameLogin(@OriginalArg(0) String password, @OriginalArg(1) int arg1, @OriginalArg(2) String username) {
+    public static void doGameLogin(@OriginalArg(0) String password, @OriginalArg(1) int anInt7113, @OriginalArg(2) String username) {
         ServerConnection.active = ServerConnection.GAME;
         type = TYPE_GAME;
-        anInt7113 = arg1;
+        LoginManager.anInt7113 = anInt7113;
         doLogin(false, username, false, password);
     }
 
@@ -1121,10 +1121,10 @@ public final class LoginManager {
     }
 
     @OriginalMember(owner = "client!tk", name = "a", descriptor = "(II)V")
-    public static void checkGameSession(@OriginalArg(0) int arg0) {
+    public static void checkGameSession(@OriginalArg(0) int anInt7113) {
         type = TYPE_GAME;
         ServerConnection.active = ServerConnection.GAME;
-        anInt7113 = arg0;
+        LoginManager.anInt7113 = anInt7113;
 
         @Pc(18) String key = null;
         if (Client.ssKey != null) {
@@ -1169,10 +1169,10 @@ public final class LoginManager {
     }
 
     @OriginalMember(owner = "client!dja", name = "b", descriptor = "(II)V")
-    public static void doGameSnLogin(@OriginalArg(1) int arg0) {
+    public static void doGameSnLogin(@OriginalArg(1) int anInt7113) {
         ServerConnection.active = ServerConnection.GAME;
         type = TYPE_GAME;
-        anInt7113 = arg0;
+        LoginManager.anInt7113 = anInt7113;
         doLogin(previousUsername.equals(""), previousUsername, true, "");
     }
 
@@ -1229,14 +1229,14 @@ public final class LoginManager {
     }
 
     @OriginalMember(owner = "client!jka", name = "a", descriptor = "(IB)V")
-    public static void loginToLobby(@OriginalArg(0) int arg0) {
+    public static void loginToLobby(@OriginalArg(0) int socialNetworkId) {
         if (!isAtLoginScreen()) {
             return;
         }
-        if (socialNetworkId != arg0) {
+        if (LoginManager.socialNetworkId != socialNetworkId) {
             previousUsername = "";
         }
-        socialNetworkId = arg0;
+        LoginManager.socialNetworkId = socialNetworkId;
         ServerConnection.LOBBY.close();
         MainLogicManager.setStep(MainLogicStep.STEP_LOGGING_IN_FROM_LOGINSCREEN_TO_LOBBY);
     }

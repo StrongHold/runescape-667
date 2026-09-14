@@ -7,9 +7,9 @@ public final class Static700 {
 
     @OriginalMember(owner = "client!wca", name = "a", descriptor = "(B)V")
     public static void method9152() {
-        Static563.method7461();
-        for (@Pc(16) int local16 = 0; local16 < 4; local16++) {
-            Client.collisionMaps[local16].reset();
+        Scene.free();
+        for (@Pc(16) int level = 0; level < 4; level++) {
+            Client.collisionMaps[level].reset();
         }
         Minimap.reset();
         client.cacheReset();
