@@ -375,9 +375,9 @@ public final class client extends GameShell {
         Client.js5WorkerThread.close();
         Static66.aCachedResourceWorker_1.close();
 
-        if (Static151.aClass226_20 != null) {
-            Static151.aClass226_20.method5243();
-            Static151.aClass226_20 = null;
+        if (Static151.pingWorker != null) {
+            Static151.pingWorker.close();
+            Static151.pingWorker = null;
         }
 
         try {

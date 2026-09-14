@@ -188,11 +188,11 @@ public final class MainLogicManager {
 
         if (Static211.pingRequest == null) {
             if (Static675.nextPing <= SystemTimer.safetime()) {
-                Static211.pingRequest = Static151.aClass226_20.method5245(ConnectionInfo.login.address);
+                Static211.pingRequest = Static151.pingWorker.ping(ConnectionInfo.login.address);
             }
-        } else if (Static211.pingRequest.anInt1631 != -1) {
+        } else if (Static211.pingRequest.ping != -1) {
             @Pc(71) ClientMessage message = ClientMessage.create(ClientProt.PING_STATISTICS, ServerConnection.GAME.isaac);
-            message.bitPacket.p2(Static211.pingRequest.anInt1631);
+            message.bitPacket.p2(Static211.pingRequest.ping);
             ServerConnection.GAME.send(message);
             Static211.pingRequest = null;
             Static675.nextPing = SystemTimer.safetime() + 30000L;

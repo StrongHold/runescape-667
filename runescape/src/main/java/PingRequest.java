@@ -7,7 +7,7 @@ import org.openrs2.deob.annotation.OriginalMember;
 public final class PingRequest extends Node {
 
     @OriginalMember(owner = "client!cja", name = "o", descriptor = "I")
-    public volatile int anInt1631 = -1;
+    public volatile int ping = -1;
 
     @OriginalMember(owner = "client!cja", name = "n", descriptor = "Ljava/lang/String;")
     public final String address;

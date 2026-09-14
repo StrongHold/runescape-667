@@ -23,9 +23,9 @@ public final class Static587 {
                 @Pc(26) GameWorld local26 = WorldList.activeWorlds[Static419.anInt6434];
                 if (local26 != null && local26.ping == -1) {
                     if (Static522.pingRequest == null) {
-                        Static522.pingRequest = Static151.aClass226_20.method5245(local26.address);
+                        Static522.pingRequest = Static151.pingWorker.ping(local26.address);
                     }
-                    @Pc(54) int local54 = Static522.pingRequest.anInt1631;
+                    @Pc(54) int local54 = Static522.pingRequest.ping;
                     if (local54 == -1) {
                         return;
                     }

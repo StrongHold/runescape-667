@@ -50,12 +50,12 @@ public final class PingWorker implements Runnable {
             } catch (@Pc(71) Throwable ex) {
                 ping = 1000;
             }
-            request.anInt1631 = ping;
+            request.ping = ping;
         }
     }
 
     @OriginalMember(owner = "client!lha", name = "a", descriptor = "(I)V")
-    public void method5243() {
+    public void close() {
         if (this.thread == null) {
             return;
         }
@@ -78,7 +78,7 @@ public final class PingWorker implements Runnable {
     }
 
     @OriginalMember(owner = "client!lha", name = "a", descriptor = "(BLjava/lang/String;)Lclient!cja;")
-    public PingRequest method5245(@OriginalArg(1) String address) {
+    public PingRequest ping(@OriginalArg(1) String address) {
         if (this.thread == null) {
             throw new IllegalStateException("");
         } else if (address == null) {
