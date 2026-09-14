@@ -10,11 +10,11 @@ public final class Static412 {
     public static final int anInt6358 = 5000;
 
     @OriginalMember(owner = "client!naa", name = "a", descriptor = "(IIIBIII)V")
-    public static void method5692(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(4) int arg3, @OriginalArg(5) int arg4, @OriginalArg(6) int arg5) {
-        if (arg4 - arg1 >= Static180.anInt2995 && arg1 + arg4 <= Static111.anInt2219 && Static724.anInt10930 <= arg3 - arg1 && arg1 + arg3 <= Static273.anInt4395) {
-            Static123.method2210(arg2, arg5, arg3, arg1, arg4, arg0);
+    public static void method5692(@OriginalArg(0) int lineWidth, @OriginalArg(1) int radius, @OriginalArg(2) int lineColour, @OriginalArg(4) int centreY, @OriginalArg(5) int centreX, @OriginalArg(6) int fillColour) {
+        if (centreX - radius >= Static180.anInt2995 && radius + centreX <= Static111.anInt2219 && Static724.anInt10930 <= centreY - radius && radius + centreY <= Static273.anInt4395) {
+            Static123.method2210(lineColour, fillColour, centreY, radius, centreX, lineWidth);
         } else {
-            Static51.method1146(arg0, arg5, arg2, arg4, arg1, arg3);
+            Static51.fillAndOutlineCircleClipped(lineWidth, fillColour, lineColour, centreX, radius, centreY);
         }
     }
 

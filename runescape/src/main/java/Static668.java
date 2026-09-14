@@ -10,6 +10,10 @@ import java.awt.datatransfer.Transferable;
 
 public final class Static668 {
 
+    /**
+     * Advances the debug console for one frame: runs the next lines of a queued script, applies the
+     * mouse wheel to the scrollback, and folds this frame's key events into the current entry.
+     */
     @OriginalMember(owner = "client!vca", name = "c", descriptor = "(I)V")
     public static void method8703() {
         if (debugconsole.anInt8472 < 102) {
@@ -19,14 +23,15 @@ public final class Static668 {
         if (Static523.anInt3885 != -1 && Static305.aLong157 < SystemTimer.safetime()) {
             for (local26 = Static523.anInt3885; local26 < Static144.aStringArray7.length; local26++) {
                 if (Static144.aStringArray7[local26].startsWith("pause")) {
-                    @Pc(40) int local40 = 5;
+                    @Pc(40) int pauseSeconds = 5;
                     try {
-                        local40 = Integer.parseInt(Static144.aStringArray7[local26].substring(6));
-                    } catch (@Pc(49) Exception local49) {
+                        pauseSeconds = Integer.parseInt(Static144.aStringArray7[local26].substring(6));
+                    } catch (@Pc(49) Exception ignored) {
+                        /* empty */
                     }
-                    debugconsole.addline("Pausing for " + local40 + " seconds...");
+                    debugconsole.addline("Pausing for " + pauseSeconds + " seconds...");
                     Static523.anInt3885 = local26 + 1;
-                    Static305.aLong157 = (long) (local40 * 1000) + SystemTimer.safetime();
+                    Static305.aLong157 = (long) (pauseSeconds * 1000) + SystemTimer.safetime();
                     return;
                 }
                 debugconsole.currententry = Static144.aStringArray7[local26];
@@ -45,61 +50,62 @@ public final class Static668 {
             }
         }
         for (local26 = 0; local26 < Static671.anInt10026; local26++) {
-            @Pc(147) KeyLog local147 = Static194.AN_KEYBOARD_EVENT_ARRAY_1[local26];
-            @Pc(151) int local151 = local147.getKeyCode();
-            @Pc(155) char local155 = local147.getKeyChar();
-            @Pc(159) int local159 = local147.getModifierFlags();
-            if (local151 == 84) {
+            @Pc(147) KeyLog event = Static194.AN_KEYBOARD_EVENT_ARRAY_1[local26];
+            @Pc(151) int keyCode = event.getKeyCode();
+            @Pc(155) char keyChar = event.getKeyChar();
+            @Pc(159) int modifiers = event.getModifierFlags();
+            if (keyCode == 84) {
                 debugconsole.method3920(false);
             }
-            if (local151 == 80) {
+            if (keyCode == 80) {
                 debugconsole.method3920(true);
-            } else if (local151 == 66 && (local159 & 0x4) != 0) {
+            } else if (keyCode == 66 && (modifiers & 0x4) != 0) {
                 if (client.clipboard != null) {
-                    @Pc(467) String local467 = "";
-                    for (@Pc(472) int local472 = debugconsole.lines.length - 1; local472 >= 0; local472--) {
-                        if (debugconsole.lines[local472] != null && debugconsole.lines[local472].length() > 0) {
-                            local467 = local467 + debugconsole.lines[local472] + '\n';
+                    @Pc(467) String log = "";
+                    for (@Pc(472) int lineIndex = debugconsole.lines.length - 1; lineIndex >= 0; lineIndex--) {
+                        if (debugconsole.lines[lineIndex] != null && debugconsole.lines[lineIndex].length() > 0) {
+                            log = log + debugconsole.lines[lineIndex] + '\n';
                         }
                     }
-                    client.clipboard.setContents(new StringSelection(local467), null);
+                    client.clipboard.setContents(new StringSelection(log), null);
                 }
-            } else if (local151 == 67 && (local159 & 0x4) != 0) {
+            } else if (keyCode == 67 && (modifiers & 0x4) != 0) {
                 if (client.clipboard != null) {
                     try {
-                        @Pc(207) Transferable local207 = client.clipboard.getContents(null);
-                        if (local207 != null) {
-                            @Pc(214) String local214 = (String) local207.getTransferData(DataFlavor.stringFlavor);
-                            if (local214 != null) {
-                                @Pc(221) String[] local221 = StringTools.split(local214, '\n');
-                                Static363.method6234(local221);
+                        @Pc(207) Transferable contents = client.clipboard.getContents(null);
+                        if (contents != null) {
+                            @Pc(214) String pasted = (String) contents.getTransferData(DataFlavor.stringFlavor);
+                            if (pasted != null) {
+                                @Pc(221) String[] pastedLines = StringTools.split(pasted, '\n');
+                                Static363.method6234(pastedLines);
                             }
                         }
-                    } catch (@Pc(226) Exception local226) {
+                    } catch (@Pc(226) Exception ignored) {
+                        /* empty */
                     }
                 }
-            } else if (local151 == 85 && debugconsole.currententryLength > 0) {
+            } else if (keyCode == 85 && debugconsole.currententryLength > 0) {
                 debugconsole.currententry = debugconsole.currententry.substring(0, debugconsole.currententryLength - 1) + debugconsole.currententry.substring(debugconsole.currententryLength);
                 debugconsole.currententryLength--;
-            } else if (local151 == 101 && debugconsole.currententryLength < debugconsole.currententry.length()) {
+            } else if (keyCode == 101 && debugconsole.currententryLength < debugconsole.currententry.length()) {
                 debugconsole.currententry = debugconsole.currententry.substring(0, debugconsole.currententryLength) + debugconsole.currententry.substring(debugconsole.currententryLength + 1);
-            } else if (local151 == 96 && debugconsole.currententryLength > 0) {
+            } else if (keyCode == 96 && debugconsole.currententryLength > 0) {
                 debugconsole.currententryLength--;
-            } else if (local151 == 97 && debugconsole.currententryLength < debugconsole.currententry.length()) {
+            } else if (keyCode == 97 && debugconsole.currententryLength < debugconsole.currententry.length()) {
                 debugconsole.currententryLength++;
-            } else if (local151 == 102) {
+            } else if (keyCode == 102) {
                 debugconsole.currententryLength = 0;
-            } else if (local151 == 103) {
+            } else if (keyCode == 103) {
                 debugconsole.currententryLength = debugconsole.currententry.length();
-            } else if (local151 == 104 && debugconsole.lines.length > Static625.anInt9472) {
+            } else if (keyCode == 104 && debugconsole.lines.length > Static625.anInt9472) {
                 Static625.anInt9472++;
                 Static344.method5046();
                 debugconsole.currententryLength = debugconsole.currententry.length();
-            } else if (local151 == 105 && Static625.anInt9472 > 0) {
+            } else if (keyCode == 105 && Static625.anInt9472 > 0) {
                 Static625.anInt9472--;
                 Static344.method5046();
                 debugconsole.currententryLength = debugconsole.currententry.length();
-            } else if (StringTools.isAlphanumeric(local155) || "\\/.:, _-+[]~@".indexOf(local155) != -1) {
+            } else if (StringTools.isAlphanumeric(keyChar) || "\\/.:, _-+[]~@".indexOf(keyChar) != -1) {
                 debugconsole.currententry = debugconsole.currententry.substring(0, debugconsole.currententryLength) + Static194.AN_KEYBOARD_EVENT_ARRAY_1[local26].getKeyChar() + debugconsole.currententry.substring(debugconsole.currententryLength);
                 debugconsole.currententryLength++;
             }

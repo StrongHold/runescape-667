@@ -1,3 +1,4 @@
+import com.jagex.core.constants.TileFlag;
 import com.jagex.core.util.JagException;
 import com.jagex.game.camera.CameraMode;
 import org.openrs2.deob.annotation.OriginalMember;
@@ -5,6 +6,10 @@ import org.openrs2.deob.annotation.Pc;
 
 public final class Static276 {
 
+    /**
+     * Discards the occluders and the per tile occlusion state left over from the previous scene, and
+     * turns occlusion culling back on for every toolkit but the software one.
+     */
     @OriginalMember(owner = "client!ila", name = "a", descriptor = "(I)V")
     public static void method3986() {
         Static317.anInt5046 = 0;
@@ -26,17 +31,23 @@ public final class Static276 {
         }
     }
 
+    /**
+     * Hides the roofs the player is under and the roofs the camera looks through, for the frame about
+     * to be drawn. One column of the stamp array is aged out per frame so that stamps from earlier
+     * frames stop matching. Slot 0 of the bounds arrays holds the roof over the player, slot 1 the
+     * first roof the camera ray crosses on its way in.
+     */
     @OriginalMember(owner = "client!ila", name = "b", descriptor = "(I)V")
     public static void method3988() {
         if (ClientOptions.instance.removeRoofsOverride.getValue() != 2) {
             return;
         }
-        @Pc(21) byte local21 = (byte) (Static198.anInt3276 - 4 & 0xFF);
-        @Pc(25) int local25 = Static198.anInt3276 % Static720.mapWidth;
+        @Pc(21) byte staleStamp = (byte) (Static198.anInt3276 - 4 & 0xFF);
+        @Pc(25) int resetTileX = Static198.anInt3276 % Static720.mapWidth;
         @Pc(30) int local30;
-        for (@Pc(27) int local27 = 0; local27 < 4; local27++) {
+        for (@Pc(27) int level = 0; level < 4; level++) {
             for (local30 = 0; local30 < Static501.mapLength; local30++) {
-                Static328.aByteArrayArrayArray4[local27][local25][local30] = local21;
+                Static328.aByteArrayArrayArray4[level][resetTileX][local30] = staleStamp;
             }
         }
         if (Camera.renderingLevel == 3) {
@@ -49,104 +60,104 @@ public final class Static276 {
             Static682.anIntArray817[local30] = 1000000;
             Static153.anIntArray235[local30] = 0;
         }
-        @Pc(92) int local92 = PlayerEntity.self.x;
-        @Pc(95) int local95 = PlayerEntity.self.z;
+        @Pc(92) int targetX = PlayerEntity.self.x;
+        @Pc(95) int targetZ = PlayerEntity.self.z;
         @Pc(149) int local149;
         if (Camera.mode != CameraMode.MODE_DEFAULT && Camera.anInt10376 == -1) {
             local149 = Static102.averageHeight(Camera.renderingLevel, Camera.x, Camera.z);
-            if (local149 - Camera.y < 3200 && (Static280.tileFlags[Camera.renderingLevel][Camera.x >> 9][Camera.z >> 9] & 0x4) != 0) {
+            if (local149 - Camera.y < 3200 && (Static280.tileFlags[Camera.renderingLevel][Camera.x >> 9][Camera.z >> 9] & TileFlag.REMOVE_ROOF) != 0) {
                 Static409.method5656(Camera.z >> 9, Static334.activeTiles, 1, Camera.x >> 9, false);
                 return;
             }
             return;
         }
         if (Camera.mode != CameraMode.MODE_DEFAULT) {
-            local92 = Camera.anInt10376;
-            local95 = Camera.anInt10383;
+            targetX = Camera.anInt10376;
+            targetZ = Camera.anInt10383;
         }
-        if ((Static280.tileFlags[Camera.renderingLevel][local92 >> 9][local95 >> 9] & 0x4) != 0) {
-            Static409.method5656(local95 >> 9, Static334.activeTiles, 0, local92 >> 9, false);
+        if ((Static280.tileFlags[Camera.renderingLevel][targetX >> 9][targetZ >> 9] & TileFlag.REMOVE_ROOF) != 0) {
+            Static409.method5656(targetZ >> 9, Static334.activeTiles, 0, targetX >> 9, false);
         }
         if (Camera.pitch >= 2560) {
             return;
         }
         local149 = Camera.x >> 9;
-        @Pc(153) int local153 = Camera.z >> 9;
-        @Pc(157) int local157 = local92 >> 9;
-        @Pc(161) int local161 = local95 >> 9;
-        @Pc(169) int local169;
-        if (local157 > local149) {
-            local169 = local157 - local149;
+        @Pc(153) int rayZ = Camera.z >> 9;
+        @Pc(157) int targetTileX = targetX >> 9;
+        @Pc(161) int targetTileZ = targetZ >> 9;
+        @Pc(169) int deltaX;
+        if (targetTileX > local149) {
+            deltaX = targetTileX - local149;
         } else {
-            local169 = local149 - local157;
+            deltaX = local149 - targetTileX;
         }
-        @Pc(186) int local186;
-        if (local153 < local161) {
-            local186 = local161 - local153;
+        @Pc(186) int deltaZ;
+        if (rayZ < targetTileZ) {
+            deltaZ = targetTileZ - rayZ;
         } else {
-            local186 = local153 - local161;
+            deltaZ = rayZ - targetTileZ;
         }
-        if ((local169 != 0 || local186 != 0) && local169 > (-Static720.mapWidth) && local169 < Static720.mapWidth && -Static501.mapLength < local186 && Static501.mapLength > local186) {
-            @Pc(278) int local278;
-            @Pc(280) int local280;
-            if (local169 <= local186) {
-                local278 = local169 * 65536 / local186;
-                local280 = 32768;
-                while (local161 != local153) {
-                    if (local161 > local153) {
-                        local153++;
-                    } else if (local161 < local153) {
-                        local153--;
+        if ((deltaX != 0 || deltaZ != 0) && deltaX > (-Static720.mapWidth) && deltaX < Static720.mapWidth && -Static501.mapLength < deltaZ && Static501.mapLength > deltaZ) {
+            @Pc(278) int slope;
+            @Pc(280) int error;
+            if (deltaX <= deltaZ) {
+                slope = deltaX * 65536 / deltaZ;
+                error = 32768;
+                while (targetTileZ != rayZ) {
+                    if (targetTileZ > rayZ) {
+                        rayZ++;
+                    } else if (targetTileZ < rayZ) {
+                        rayZ--;
                     }
-                    if ((Static280.tileFlags[Camera.renderingLevel][local149][local153] & 0x4) != 0) {
-                        Static409.method5656(local153, Static334.activeTiles, 1, local149, false);
+                    if ((Static280.tileFlags[Camera.renderingLevel][local149][rayZ] & TileFlag.REMOVE_ROOF) != 0) {
+                        Static409.method5656(rayZ, Static334.activeTiles, 1, local149, false);
                         return;
                     }
-                    local280 += local278;
-                    if (local280 >= 65536) {
-                        local280 -= 65536;
-                        if (local149 < local157) {
+                    error += slope;
+                    if (error >= 65536) {
+                        error -= 65536;
+                        if (local149 < targetTileX) {
                             local149++;
-                        } else if (local149 > local157) {
+                        } else if (local149 > targetTileX) {
                             local149--;
                         }
-                        if ((Static280.tileFlags[Camera.renderingLevel][local149][local153] & 0x4) != 0) {
-                            Static409.method5656(local153, Static334.activeTiles, 1, local149, false);
+                        if ((Static280.tileFlags[Camera.renderingLevel][local149][rayZ] & TileFlag.REMOVE_ROOF) != 0) {
+                            Static409.method5656(rayZ, Static334.activeTiles, 1, local149, false);
                             return;
                         }
                     }
                 }
                 return;
             }
-            local278 = local186 * 65536 / local169;
-            local280 = 32768;
-            while (local157 != local149) {
-                if (local149 < local157) {
+            slope = deltaZ * 65536 / deltaX;
+            error = 32768;
+            while (targetTileX != local149) {
+                if (local149 < targetTileX) {
                     local149++;
-                } else if (local157 < local149) {
+                } else if (targetTileX < local149) {
                     local149--;
                 }
-                if ((Static280.tileFlags[Camera.renderingLevel][local149][local153] & 0x4) != 0) {
-                    Static409.method5656(local153, Static334.activeTiles, 1, local149, false);
+                if ((Static280.tileFlags[Camera.renderingLevel][local149][rayZ] & TileFlag.REMOVE_ROOF) != 0) {
+                    Static409.method5656(rayZ, Static334.activeTiles, 1, local149, false);
                     return;
                 }
-                local280 += local278;
-                if (local280 >= 65536) {
-                    if (local161 > local153) {
-                        local153++;
-                    } else if (local161 < local153) {
-                        local153--;
+                error += slope;
+                if (error >= 65536) {
+                    if (targetTileZ > rayZ) {
+                        rayZ++;
+                    } else if (targetTileZ < rayZ) {
+                        rayZ--;
                     }
-                    local280 -= 65536;
-                    if ((Static280.tileFlags[Camera.renderingLevel][local149][local153] & 0x4) != 0) {
-                        Static409.method5656(local153, Static334.activeTiles, 1, local149, false);
+                    error -= 65536;
+                    if ((Static280.tileFlags[Camera.renderingLevel][local149][rayZ] & TileFlag.REMOVE_ROOF) != 0) {
+                        Static409.method5656(rayZ, Static334.activeTiles, 1, local149, false);
                         return;
                     }
                 }
             }
             return;
         }
-        JagException.sendTrace(null, "RC: " + local149 + "," + local153 + " " + local157 + "," + local161 + " " + WorldMap.areaBaseX + "," + WorldMap.areaBaseZ);
+        JagException.sendTrace(null, "RC: " + local149 + "," + rayZ + " " + targetTileX + "," + targetTileZ + " " + WorldMap.areaBaseX + "," + WorldMap.areaBaseZ);
         return;
     }
 }

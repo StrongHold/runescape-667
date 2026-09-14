@@ -1,4 +1,5 @@
 import com.jagex.core.constants.LocShapes;
+import com.jagex.core.constants.TileFlag;
 import com.jagex.game.Location;
 import org.openrs2.deob.annotation.OriginalArg;
 import org.openrs2.deob.annotation.OriginalMember;
@@ -9,247 +10,261 @@ public final class Static409 {
     @OriginalMember(owner = "client!mt", name = "P", descriptor = "F")
     public static float aFloat118;
 
+    /**
+     * Flood fills the roof removal stamp outward from one tile, so that every tile of the roof the
+     * player or the camera is standing under is written with {@code roofStamp} and skipped by the
+     * scene renderer. The fill stops at tiles that are not flagged {@link TileFlag#REMOVE_ROOF} and
+     * at the roof edge locs packed into the queue entries, which keep the outer wall of the roof
+     * standing. The world space bounds of what was hidden are accumulated into slot
+     * {@code boundsIndex} of the five bounds arrays the renderer reads.
+     *
+     * @return whether any roof was hidden.
+     */
     @OriginalMember(owner = "client!mt", name = "a", descriptor = "(II[[[Lclient!pha;IIZ)Z")
-    public static boolean method5656(@OriginalArg(1) int arg0, @OriginalArg(2) Tile[][][] arg1, @OriginalArg(3) int arg2, @OriginalArg(4) int arg3, @OriginalArg(5) boolean arg4) {
-        @Pc(21) byte local21 = arg4 ? 1 : (byte) (Static198.anInt3276 & 0xFF);
-        if (Static328.aByteArrayArrayArray4[Camera.renderingLevel][arg3][arg0] == local21) {
+    public static boolean method5656(@OriginalArg(1) int z, @OriginalArg(2) Tile[][][] tiles, @OriginalArg(3) int boundsIndex, @OriginalArg(4) int x, @OriginalArg(5) boolean permanent) {
+        @Pc(21) byte roofStamp = permanent ? 1 : (byte) (Static198.anInt3276 & 0xFF);
+        if (Static328.aByteArrayArrayArray4[Camera.renderingLevel][x][z] == roofStamp) {
             return false;
-        } else if ((Static280.tileFlags[Camera.renderingLevel][arg3][arg0] & 0x4) == 0) {
+        } else if ((Static280.tileFlags[Camera.renderingLevel][x][z] & TileFlag.REMOVE_ROOF) == 0) {
             return false;
         } else {
-            @Pc(52) byte local52 = 0;
-            Static278.anIntArray351[0] = arg3;
-            @Pc(58) int local58 = 0;
-            @Pc(61) int local61 = local52 + 1;
-            Static98.anIntArray176[0] = arg0;
-            Static328.aByteArrayArrayArray4[Camera.renderingLevel][arg3][arg0] = local21;
-            while (local58 != local61) {
-                @Pc(78) int local78 = Static278.anIntArray351[local58] & 0xFFFF;
-                @Pc(86) int local86 = Static278.anIntArray351[local58] >> 16 & 0xFF;
-                @Pc(94) int local94 = Static278.anIntArray351[local58] >> 24 & 0xFF;
-                @Pc(100) int local100 = Static98.anIntArray176[local58] & 0xFFFF;
-                @Pc(108) int local108 = Static98.anIntArray176[local58] >> 16 & 0xFF;
-                local58 = local58 + 1 & 0xFFF;
-                @Pc(116) boolean local116 = false;
-                if ((Static280.tileFlags[Camera.renderingLevel][local78][local100] & 0x4) == 0) {
-                    local116 = true;
+            @Pc(52) byte queueStart = 0;
+            Static278.anIntArray351[0] = x;
+            @Pc(58) int readIndex = 0;
+            @Pc(61) int writeIndex = queueStart + 1;
+            Static98.anIntArray176[0] = z;
+            Static328.aByteArrayArrayArray4[Camera.renderingLevel][x][z] = roofStamp;
+            while (readIndex != writeIndex) {
+                @Pc(78) int tileX = Static278.anIntArray351[readIndex] & 0xFFFF;
+                @Pc(86) int edgeLoc0 = Static278.anIntArray351[readIndex] >> 16 & 0xFF;
+                @Pc(94) int edgeLoc1 = Static278.anIntArray351[readIndex] >> 24 & 0xFF;
+                @Pc(100) int tileZ = Static98.anIntArray176[readIndex] & 0xFFFF;
+                @Pc(108) int edgeLoc2 = Static98.anIntArray176[readIndex] >> 16 & 0xFF;
+                readIndex = readIndex + 1 & 0xFFF;
+                @Pc(116) boolean outsideRoof = false;
+                if ((Static280.tileFlags[Camera.renderingLevel][tileX][tileZ] & TileFlag.REMOVE_ROOF) == 0) {
+                    outsideRoof = true;
                 }
-                @Pc(133) boolean local133 = false;
+                @Pc(133) boolean stamped = false;
                 @Pc(139) int local139;
                 @Pc(185) int local185;
                 @Pc(235) int local235;
-                if (arg1 != null) {
+                if (tiles != null) {
                     label237:
                     for (local139 = Camera.renderingLevel + 1; local139 <= 3; local139++) {
-                        if (arg1[local139] != null && (Static280.tileFlags[local139][local78][local100] & 0x8) == 0) {
-                            @Pc(341) PositionEntity local341;
+                        if (tiles[local139] != null && (Static280.tileFlags[local139][tileX][tileZ] & TileFlag.ZERO_LEVEL) == 0) {
+                            @Pc(341) PositionEntity entity;
                             @Pc(351) int local351;
-                            @Pc(331) Tile local331;
-                            @Pc(337) PositionEntityNode local337;
-                            if (local116 && arg1[local139][local78][local100] != null) {
-                                if (arg1[local139][local78][local100].wall != null) {
-                                    local185 = Static239.method3474(local86);
-                                    if (arg1[local139][local78][local100].wall.aShort58 == local185 || arg1[local139][local78][local100].adjacentWall != null && local185 == arg1[local139][local78][local100].adjacentWall.aShort58) {
+                            @Pc(331) Tile tile;
+                            @Pc(337) PositionEntityNode node;
+                            if (outsideRoof && tiles[local139][tileX][tileZ] != null) {
+                                if (tiles[local139][tileX][tileZ].wall != null) {
+                                    local185 = Static239.method3474(edgeLoc0);
+                                    if (tiles[local139][tileX][tileZ].wall.aShort58 == local185 || tiles[local139][tileX][tileZ].adjacentWall != null && local185 == tiles[local139][tileX][tileZ].adjacentWall.aShort58) {
                                         continue;
                                     }
-                                    if (local94 != 0) {
-                                        local235 = Static239.method3474(local94);
-                                        if (arg1[local139][local78][local100].wall.aShort58 == local235 || arg1[local139][local78][local100].adjacentWall != null && local235 == arg1[local139][local78][local100].adjacentWall.aShort58) {
+                                    if (edgeLoc1 != 0) {
+                                        local235 = Static239.method3474(edgeLoc1);
+                                        if (tiles[local139][tileX][tileZ].wall.aShort58 == local235 || tiles[local139][tileX][tileZ].adjacentWall != null && local235 == tiles[local139][tileX][tileZ].adjacentWall.aShort58) {
                                             continue;
                                         }
                                     }
-                                    if (local108 != 0) {
-                                        local235 = Static239.method3474(local108);
-                                        if (arg1[local139][local78][local100].wall.aShort58 == local235 || arg1[local139][local78][local100].adjacentWall != null && arg1[local139][local78][local100].adjacentWall.aShort58 == local235) {
+                                    if (edgeLoc2 != 0) {
+                                        local235 = Static239.method3474(edgeLoc2);
+                                        if (tiles[local139][tileX][tileZ].wall.aShort58 == local235 || tiles[local139][tileX][tileZ].adjacentWall != null && tiles[local139][tileX][tileZ].adjacentWall.aShort58 == local235) {
                                             continue;
                                         }
                                     }
                                 }
-                                local331 = arg1[local139][local78][local100];
-                                if (local331.head != null) {
-                                    for (local337 = local331.head; local337 != null; local337 = local337.node) {
-                                        local341 = local337.entity;
-                                        if (local341 instanceof Location) {
-                                            @Pc(347) Location local347 = (Location) local341;
-                                            local351 = local347.getShape();
-                                            @Pc(355) int local355 = local347.getRotation();
+                                tile = tiles[local139][tileX][tileZ];
+                                if (tile.head != null) {
+                                    for (node = tile.head; node != null; node = node.node) {
+                                        entity = node.entity;
+                                        if (entity instanceof Location) {
+                                            @Pc(347) Location loc = (Location) entity;
+                                            local351 = loc.getShape();
+                                            @Pc(355) int rotation = loc.getRotation();
                                             if (local351 == LocShapes.ROOFEDGE_SQUARECORNER) {
                                                 local351 = LocShapes.ROOFEDGE_DIAGONALCORNER;
                                             }
-                                            @Pc(368) int local368 = local351 | local355 << 6;
-                                            if (local368 == local86 || local94 != 0 && local94 == local368 || local108 != 0 && local368 == local108) {
+                                            @Pc(368) int locCode = local351 | rotation << 6;
+                                            if (locCode == edgeLoc0 || edgeLoc1 != 0 && edgeLoc1 == locCode || edgeLoc2 != 0 && locCode == edgeLoc2) {
                                                 continue label237;
                                             }
                                         }
                                     }
                                 }
                             }
-                            local331 = arg1[local139][local78][local100];
-                            if (local331 != null && local331.head != null) {
-                                for (local337 = local331.head; local337 != null; local337 = local337.node) {
-                                    local341 = local337.entity;
-                                    if (local341.x2 != local341.x1 || local341.z1 != local341.z2) {
-                                        for (@Pc(444) int local444 = local341.x1; local444 <= local341.x2; local444++) {
-                                            for (local351 = local341.z1; local351 <= local341.z2; local351++) {
-                                                Static328.aByteArrayArrayArray4[local139][local444][local351] = local21;
+                            tile = tiles[local139][tileX][tileZ];
+                            if (tile != null && tile.head != null) {
+                                for (node = tile.head; node != null; node = node.node) {
+                                    entity = node.entity;
+                                    if (entity.x2 != entity.x1 || entity.z1 != entity.z2) {
+                                        for (@Pc(444) int entityX = entity.x1; entityX <= entity.x2; entityX++) {
+                                            for (local351 = entity.z1; local351 <= entity.z2; local351++) {
+                                                Static328.aByteArrayArrayArray4[local139][entityX][local351] = roofStamp;
                                             }
                                         }
                                     }
                                 }
                             }
-                            Static328.aByteArrayArrayArray4[local139][local78][local100] = local21;
-                            local133 = true;
+                            Static328.aByteArrayArrayArray4[local139][tileX][tileZ] = roofStamp;
+                            stamped = true;
                         }
                     }
                 }
-                if (local133) {
-                    local139 = Static246.ground[Camera.renderingLevel + 1].getHeight(local78, local100);
-                    if (Static482.anIntArray588[arg2] < local139) {
-                        Static482.anIntArray588[arg2] = local139;
+                if (stamped) {
+                    local139 = Static246.ground[Camera.renderingLevel + 1].getHeight(tileX, tileZ);
+                    if (Static482.anIntArray588[boundsIndex] < local139) {
+                        Static482.anIntArray588[boundsIndex] = local139;
                     }
-                    local185 = local78 << 9;
-                    local235 = local100 << 9;
-                    if (Static9.anIntArray18[arg2] > local185) {
-                        Static9.anIntArray18[arg2] = local185;
-                    } else if (Static457.anIntArray552[arg2] < local185) {
-                        Static457.anIntArray552[arg2] = local185;
+                    local185 = tileX << 9;
+                    local235 = tileZ << 9;
+                    if (Static9.anIntArray18[boundsIndex] > local185) {
+                        Static9.anIntArray18[boundsIndex] = local185;
+                    } else if (Static457.anIntArray552[boundsIndex] < local185) {
+                        Static457.anIntArray552[boundsIndex] = local185;
                     }
-                    if (local235 < Static682.anIntArray817[arg2]) {
-                        Static682.anIntArray817[arg2] = local235;
-                    } else if (local235 > Static153.anIntArray235[arg2]) {
-                        Static153.anIntArray235[arg2] = local235;
+                    if (local235 < Static682.anIntArray817[boundsIndex]) {
+                        Static682.anIntArray817[boundsIndex] = local235;
+                    } else if (local235 > Static153.anIntArray235[boundsIndex]) {
+                        Static153.anIntArray235[boundsIndex] = local235;
                     }
                 }
-                if (!local116) {
-                    if (local78 >= 1 && local21 != Static328.aByteArrayArrayArray4[Camera.renderingLevel][local78 - 1][local100]) {
-                        Static278.anIntArray351[local61] = 0xD3000000 | 0x120000 | local78 - 1;
-                        Static98.anIntArray176[local61] = local100 | 0x130000;
-                        Static328.aByteArrayArrayArray4[Camera.renderingLevel][local78 - 1][local100] = local21;
-                        local61 = local61 + 1 & 0xFFF;
+                if (!outsideRoof) {
+                    if (tileX >= 1 && roofStamp != Static328.aByteArrayArrayArray4[Camera.renderingLevel][tileX - 1][tileZ]) {
+                        Static278.anIntArray351[writeIndex] = 0xD3000000 | 0x120000 | tileX - 1;
+                        Static98.anIntArray176[writeIndex] = tileZ | 0x130000;
+                        Static328.aByteArrayArrayArray4[Camera.renderingLevel][tileX - 1][tileZ] = roofStamp;
+                        writeIndex = writeIndex + 1 & 0xFFF;
                     }
-                    local100++;
-                    if (local100 < Static501.mapLength) {
-                        if (local78 - 1 >= 0 && local21 != Static328.aByteArrayArrayArray4[Camera.renderingLevel][local78 - 1][local100] && (Static280.tileFlags[Camera.renderingLevel][local78][local100] & 0x4) == 0 && (Static280.tileFlags[Camera.renderingLevel][local78 - 1][local100 - 1] & 0x4) == 0) {
-                            Static278.anIntArray351[local61] = local78 - 1 | 0x120000 | 0x52000000;
-                            Static98.anIntArray176[local61] = local100 | 0x130000;
-                            local61 = local61 + 1 & 0xFFF;
-                            Static328.aByteArrayArrayArray4[Camera.renderingLevel][local78 - 1][local100] = local21;
+                    tileZ++;
+                    if (tileZ < Static501.mapLength) {
+                        if (tileX - 1 >= 0 && roofStamp != Static328.aByteArrayArrayArray4[Camera.renderingLevel][tileX - 1][tileZ] && (Static280.tileFlags[Camera.renderingLevel][tileX][tileZ] & TileFlag.REMOVE_ROOF) == 0 && (Static280.tileFlags[Camera.renderingLevel][tileX - 1][tileZ - 1] & TileFlag.REMOVE_ROOF) == 0) {
+                            Static278.anIntArray351[writeIndex] = tileX - 1 | 0x120000 | 0x52000000;
+                            Static98.anIntArray176[writeIndex] = tileZ | 0x130000;
+                            writeIndex = writeIndex + 1 & 0xFFF;
+                            Static328.aByteArrayArrayArray4[Camera.renderingLevel][tileX - 1][tileZ] = roofStamp;
                         }
-                        if (local21 != Static328.aByteArrayArrayArray4[Camera.renderingLevel][local78][local100]) {
-                            Static278.anIntArray351[local61] = 0x13000000 | 0x520000 | local78;
-                            Static98.anIntArray176[local61] = local100 | 0x530000;
-                            Static328.aByteArrayArrayArray4[Camera.renderingLevel][local78][local100] = local21;
-                            local61 = local61 + 1 & 0xFFF;
+                        if (roofStamp != Static328.aByteArrayArrayArray4[Camera.renderingLevel][tileX][tileZ]) {
+                            Static278.anIntArray351[writeIndex] = 0x13000000 | 0x520000 | tileX;
+                            Static98.anIntArray176[writeIndex] = tileZ | 0x530000;
+                            Static328.aByteArrayArrayArray4[Camera.renderingLevel][tileX][tileZ] = roofStamp;
+                            writeIndex = writeIndex + 1 & 0xFFF;
                         }
-                        if (Static720.mapWidth > local78 + 1 && local21 != Static328.aByteArrayArrayArray4[Camera.renderingLevel][local78 + 1][local100] && (Static280.tileFlags[Camera.renderingLevel][local78][local100] & 0x4) == 0 && (Static280.tileFlags[Camera.renderingLevel][local78 + 1][local100 - 1] & 0x4) == 0) {
-                            Static278.anIntArray351[local61] = 0x92000000 | 0x520000 | local78 + 1;
-                            Static98.anIntArray176[local61] = local100 | 0x530000;
-                            Static328.aByteArrayArrayArray4[Camera.renderingLevel][local78 + 1][local100] = local21;
-                            local61 = local61 + 1 & 0xFFF;
+                        if (Static720.mapWidth > tileX + 1 && roofStamp != Static328.aByteArrayArrayArray4[Camera.renderingLevel][tileX + 1][tileZ] && (Static280.tileFlags[Camera.renderingLevel][tileX][tileZ] & TileFlag.REMOVE_ROOF) == 0 && (Static280.tileFlags[Camera.renderingLevel][tileX + 1][tileZ - 1] & TileFlag.REMOVE_ROOF) == 0) {
+                            Static278.anIntArray351[writeIndex] = 0x92000000 | 0x520000 | tileX + 1;
+                            Static98.anIntArray176[writeIndex] = tileZ | 0x530000;
+                            Static328.aByteArrayArrayArray4[Camera.renderingLevel][tileX + 1][tileZ] = roofStamp;
+                            writeIndex = writeIndex + 1 & 0xFFF;
                         }
                     }
-                    local100--;
-                    if (local78 + 1 < Static720.mapWidth && Static328.aByteArrayArrayArray4[Camera.renderingLevel][local78 + 1][local100] != local21) {
-                        Static278.anIntArray351[local61] = local78 + 1 | 0x920000 | 0x53000000;
-                        Static98.anIntArray176[local61] = local100 | 0x930000;
-                        Static328.aByteArrayArrayArray4[Camera.renderingLevel][local78 + 1][local100] = local21;
-                        local61 = local61 + 1 & 0xFFF;
+                    tileZ--;
+                    if (tileX + 1 < Static720.mapWidth && Static328.aByteArrayArrayArray4[Camera.renderingLevel][tileX + 1][tileZ] != roofStamp) {
+                        Static278.anIntArray351[writeIndex] = tileX + 1 | 0x920000 | 0x53000000;
+                        Static98.anIntArray176[writeIndex] = tileZ | 0x930000;
+                        Static328.aByteArrayArrayArray4[Camera.renderingLevel][tileX + 1][tileZ] = roofStamp;
+                        writeIndex = writeIndex + 1 & 0xFFF;
                     }
-                    local100--;
-                    if (local100 >= 0) {
-                        if (local78 - 1 >= 0 && Static328.aByteArrayArrayArray4[Camera.renderingLevel][local78 - 1][local100] != local21 && (Static280.tileFlags[Camera.renderingLevel][local78][local100] & 0x4) == 0 && (Static280.tileFlags[Camera.renderingLevel][local78 - 1][local100 + 1] & 0x4) == 0) {
-                            Static278.anIntArray351[local61] = local78 - 1 | 0xD20000 | 0x12000000;
-                            Static98.anIntArray176[local61] = local100 | 0xD30000;
-                            local61 = local61 + 1 & 0xFFF;
-                            Static328.aByteArrayArrayArray4[Camera.renderingLevel][local78 - 1][local100] = local21;
+                    tileZ--;
+                    if (tileZ >= 0) {
+                        if (tileX - 1 >= 0 && Static328.aByteArrayArrayArray4[Camera.renderingLevel][tileX - 1][tileZ] != roofStamp && (Static280.tileFlags[Camera.renderingLevel][tileX][tileZ] & TileFlag.REMOVE_ROOF) == 0 && (Static280.tileFlags[Camera.renderingLevel][tileX - 1][tileZ + 1] & TileFlag.REMOVE_ROOF) == 0) {
+                            Static278.anIntArray351[writeIndex] = tileX - 1 | 0xD20000 | 0x12000000;
+                            Static98.anIntArray176[writeIndex] = tileZ | 0xD30000;
+                            writeIndex = writeIndex + 1 & 0xFFF;
+                            Static328.aByteArrayArrayArray4[Camera.renderingLevel][tileX - 1][tileZ] = roofStamp;
                         }
-                        if (Static328.aByteArrayArrayArray4[Camera.renderingLevel][local78][local100] != local21) {
-                            Static278.anIntArray351[local61] = 0x93000000 | 0xD20000 | local78;
-                            Static98.anIntArray176[local61] = local100 | 0xD30000;
-                            Static328.aByteArrayArrayArray4[Camera.renderingLevel][local78][local100] = local21;
-                            local61 = local61 + 1 & 0xFFF;
+                        if (Static328.aByteArrayArrayArray4[Camera.renderingLevel][tileX][tileZ] != roofStamp) {
+                            Static278.anIntArray351[writeIndex] = 0x93000000 | 0xD20000 | tileX;
+                            Static98.anIntArray176[writeIndex] = tileZ | 0xD30000;
+                            Static328.aByteArrayArrayArray4[Camera.renderingLevel][tileX][tileZ] = roofStamp;
+                            writeIndex = writeIndex + 1 & 0xFFF;
                         }
-                        if (local78 + 1 < Static720.mapWidth && Static328.aByteArrayArrayArray4[Camera.renderingLevel][local78 + 1][local100] != local21 && (Static280.tileFlags[Camera.renderingLevel][local78][local100] & 0x4) == 0 && (Static280.tileFlags[Camera.renderingLevel][local78 + 1][local100 + 1] & 0x4) == 0) {
-                            Static278.anIntArray351[local61] = local78 + 1 | 0x920000 | 0xD2000000;
-                            Static98.anIntArray176[local61] = local100 | 0x930000;
-                            Static328.aByteArrayArrayArray4[Camera.renderingLevel][local78 + 1][local100] = local21;
-                            local61 = local61 + 1 & 0xFFF;
+                        if (tileX + 1 < Static720.mapWidth && Static328.aByteArrayArrayArray4[Camera.renderingLevel][tileX + 1][tileZ] != roofStamp && (Static280.tileFlags[Camera.renderingLevel][tileX][tileZ] & TileFlag.REMOVE_ROOF) == 0 && (Static280.tileFlags[Camera.renderingLevel][tileX + 1][tileZ + 1] & TileFlag.REMOVE_ROOF) == 0) {
+                            Static278.anIntArray351[writeIndex] = tileX + 1 | 0x920000 | 0xD2000000;
+                            Static98.anIntArray176[writeIndex] = tileZ | 0x930000;
+                            Static328.aByteArrayArrayArray4[Camera.renderingLevel][tileX + 1][tileZ] = roofStamp;
+                            writeIndex = writeIndex + 1 & 0xFFF;
                         }
                     }
                 }
             }
-            if (Static482.anIntArray588[arg2] != -1000000) {
-                Static482.anIntArray588[arg2] += 40;
-                Static9.anIntArray18[arg2] -= 512;
-                Static457.anIntArray552[arg2] += 512;
-                Static153.anIntArray235[arg2] += 512;
-                Static682.anIntArray817[arg2] -= 512;
+            if (Static482.anIntArray588[boundsIndex] != -1000000) {
+                Static482.anIntArray588[boundsIndex] += 40;
+                Static9.anIntArray18[boundsIndex] -= 512;
+                Static457.anIntArray552[boundsIndex] += 512;
+                Static153.anIntArray235[boundsIndex] += 512;
+                Static682.anIntArray817[boundsIndex] -= 512;
             }
             return true;
         }
     }
 
+    /**
+     * Draws a one pixel Bresenham line into the texture plane rows. Both endpoints must already lie
+     * inside the clip bounds, because nothing here is clipped.
+     */
     @OriginalMember(owner = "client!mt", name = "a", descriptor = "(IIIBII)V")
-    public static void method5658(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(4) int arg3, @OriginalArg(5) int arg4) {
-        @Pc(8) int local8 = arg3 - arg4;
-        @Pc(13) int local13 = arg1 - arg0;
-        if (local13 == 0) {
-            if (local8 != 0) {
-                Static87.method1692(arg3, arg4, arg2, arg0);
+    public static void method5658(@OriginalArg(0) int x0, @OriginalArg(1) int x1, @OriginalArg(2) int rgb, @OriginalArg(4) int y1, @OriginalArg(5) int y0) {
+        @Pc(8) int dy = y1 - y0;
+        @Pc(13) int dx = x1 - x0;
+        if (dx == 0) {
+            if (dy != 0) {
+                Static87.method1692(y1, y0, rgb, x0);
             }
-        } else if (local8 == 0) {
-            Static297.method4371(arg4, arg1, arg2, arg0);
+        } else if (dy == 0) {
+            Static297.method4371(y0, x1, rgb, x0);
         } else {
-            if (local13 < 0) {
-                local13 = -local13;
+            if (dx < 0) {
+                dx = -dx;
             }
-            if (local8 < 0) {
-                local8 = -local8;
+            if (dy < 0) {
+                dy = -dy;
             }
-            @Pc(62) boolean local62 = local8 > local13;
+            @Pc(62) boolean steep = dy > dx;
             @Pc(66) int local66;
             @Pc(68) int local68;
-            if (local62) {
-                local66 = arg0;
-                local68 = arg1;
-                arg0 = arg4;
-                arg4 = local66;
-                arg1 = arg3;
-                arg3 = local68;
+            if (steep) {
+                local66 = x0;
+                local68 = x1;
+                x0 = y0;
+                y0 = local66;
+                x1 = y1;
+                y1 = local68;
             }
-            if (arg0 > arg1) {
-                local66 = arg0;
-                arg0 = arg1;
-                local68 = arg4;
-                arg4 = arg3;
-                arg1 = local66;
-                arg3 = local68;
+            if (x0 > x1) {
+                local66 = x0;
+                x0 = x1;
+                local68 = y0;
+                y0 = y1;
+                x1 = local66;
+                y1 = local68;
             }
-            local66 = arg4;
-            local68 = arg1 - arg0;
-            @Pc(111) int local111 = arg3 - arg4;
-            @Pc(116) int local116 = -(local68 >> 1);
-            @Pc(124) int local124 = arg3 > arg4 ? 1 : -1;
-            if (local111 < 0) {
-                local111 = -local111;
+            local66 = y0;
+            local68 = x1 - x0;
+            @Pc(111) int minorSpan = y1 - y0;
+            @Pc(116) int error = -(local68 >> 1);
+            @Pc(124) int step = y1 > y0 ? 1 : -1;
+            if (minorSpan < 0) {
+                minorSpan = -minorSpan;
             }
-            @Pc(133) int local133;
-            if (local62) {
-                for (local133 = arg0; local133 <= arg1; local133++) {
-                    Static723.anIntArrayArray266[local133][local66] = arg2;
-                    local116 += local111;
-                    if (local116 > 0) {
-                        local116 -= local68;
-                        local66 += local124;
+            @Pc(133) int major;
+            if (steep) {
+                for (major = x0; major <= x1; major++) {
+                    Static723.anIntArrayArray266[major][local66] = rgb;
+                    error += minorSpan;
+                    if (error > 0) {
+                        error -= local68;
+                        local66 += step;
                     }
                 }
             } else {
-                for (local133 = arg0; local133 <= arg1; local133++) {
-                    Static723.anIntArrayArray266[local66][local133] = arg2;
-                    local116 += local111;
-                    if (local116 > 0) {
-                        local116 -= local68;
-                        local66 += local124;
+                for (major = x0; major <= x1; major++) {
+                    Static723.anIntArrayArray266[local66][major] = rgb;
+                    error += minorSpan;
+                    if (error > 0) {
+                        error -= local68;
+                        local66 += step;
                     }
                 }
             }
