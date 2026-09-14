@@ -7,15 +7,15 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static12 {
 
     @OriginalMember(owner = "client!ah", name = "h", descriptor = "Lclient!fca;")
-    public static SoundCache aClass123_4;
+    public static SoundCache pendingSongSoundCache;
 
     @OriginalMember(owner = "client!ah", name = "a", descriptor = "(Lclient!ge;I)V")
-    public static void method5164(@OriginalArg(0) Packet arg0) {
+    public static void decodeCutsceneHeader(@OriginalArg(0) Packet packet) {
         while (true) {
-            @Pc(20) int local20 = arg0.g1();
+            @Pc(20) int local20 = packet.g1();
             if (local20 == 0) {
-                Static482.anInt7228 = arg0.g2();
-                Static134.anInt10330 = arg0.g2();
+                Static482.anInt7228 = packet.g2();
+                Static134.anInt10330 = packet.g2();
             } else if (local20 == 255) {
                 return;
             }

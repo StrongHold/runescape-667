@@ -11,8 +11,8 @@ public final class Static576 {
     public static Entity[] opaqueStationaryEntities;
 
     @OriginalMember(owner = "client!sba", name = "a", descriptor = "(III)Z")
-    public static boolean method7609(@OriginalArg(0) int arg0, @OriginalArg(2) int arg1) {
-        return Static69.method6335(arg1, arg0) & (Static526.method7073(arg0, arg1) | (arg1 & 0x2000) != 0 | Static220.method3197(arg1, arg0));
+    public static boolean normalBufferMutable(@OriginalArg(0) int flags, @OriginalArg(2) int functionMask) {
+        return Static69.usesNormalBuffer(functionMask, flags) & (Static526.normalsMutable(flags, functionMask) | (functionMask & 0x2000) != 0 | Static220.method3197(functionMask, flags));
     }
 
     @OriginalMember(owner = "client!sba", name = "b", descriptor = "(Z)Z")
@@ -25,14 +25,14 @@ public final class Static576 {
                         return false;
                     }
                 }
-                if (Static12.aClass123_4 == null) {
-                    Static12.aClass123_4 = new SoundCache(Static91.synthSoundsJs5, Static296.vorbisJs5);
+                if (Static12.pendingSongSoundCache == null) {
+                    Static12.pendingSongSoundCache = new SoundCache(Static91.synthSoundsJs5, Static296.vorbisJs5);
                 }
                 @Pc(36) MixBuss local36 = Static581.mixBuss;
                 if (SongManager.aClass2_Sub6_Sub1_2 != null) {
                     local36 = SongManager.aClass2_Sub6_Sub1_2;
                 }
-                if (local36.method944(Static12.aClass123_4, Static86.js5_15, Static62.aClass2_Sub8_3)) {
+                if (local36.method944(Static12.pendingSongSoundCache, Static86.js5_15, Static62.aClass2_Sub8_3)) {
                     Static581.mixBuss = local36;
                     Static581.mixBuss.method933();
                     @Pc(65) int local65;
@@ -62,7 +62,7 @@ public final class Static576 {
                         Static426.aPcmPlayer_2.method3582(Static581.mixBuss);
                     }
                     SongManager.aLong95 = 0L;
-                    Static12.aClass123_4 = null;
+                    Static12.pendingSongSoundCache = null;
                     Static62.aClass2_Sub8_3 = null;
                     SongManager.aClass2_Sub6_Sub1_2 = null;
                     SongManager.midiSongs = null;
@@ -72,7 +72,7 @@ public final class Static576 {
         } catch (@Pc(191) Exception local191) {
             local191.printStackTrace();
             Static581.mixBuss.method912();
-            Static12.aClass123_4 = null;
+            Static12.pendingSongSoundCache = null;
             SongManager.aClass2_Sub6_Sub1_2 = null;
             SongManager.midiSongs = null;
             Static62.aClass2_Sub8_3 = null;

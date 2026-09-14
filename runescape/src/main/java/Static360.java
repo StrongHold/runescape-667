@@ -27,7 +27,7 @@ public final class Static360 {
             }
 
             @Pc(46) Packet packet = new Packet(data);
-            Static12.method5164(packet);
+            Static12.decodeCutsceneHeader(packet);
             count = packet.g1();
             for (@Pc(55) int i = 0; i < count; i++) {
                 Static391.A_DEQUE___34.addLast(new Node_Sub35(packet));

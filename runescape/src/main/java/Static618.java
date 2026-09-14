@@ -15,8 +15,8 @@ public final class Static618 {
     public static final Deque A_DEQUE___68 = new Deque();
 
     @OriginalMember(owner = "client!tja", name = "a", descriptor = "(III)Z")
-    public static boolean method8316(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
-        return Static335.method4946(arg2, arg1) | (arg1 & 0x60000) != 0 || Static69.method6333(arg1, arg2);
+    public static boolean retainFaceIndices(@OriginalArg(0) int arg0, @OriginalArg(1) int functionMask, @OriginalArg(2) int flags) {
+        return Static335.faceIndicesMutable(flags, functionMask) | (functionMask & 0x60000) != 0 || Static69.indexBufferMutable(functionMask, flags);
     }
 
     @OriginalMember(owner = "client!tja", name = "a", descriptor = "(BLclient!ge;)V")

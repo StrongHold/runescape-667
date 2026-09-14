@@ -31,7 +31,7 @@ public final class Static232 {
                 Static581.mixBuss.method912();
                 Static581.mixBuss.method927();
 
-                Static12.aClass123_4 = null;
+                Static12.pendingSongSoundCache = null;
                 Static62.aClass2_Sub8_3 = null;
 
                 if (SongManager.midiSongs == null) {
@@ -64,7 +64,7 @@ public final class Static232 {
             Static62.aClass2_Sub8_3 = null;
             SongManager.anInt10171 = 0;
             SongManager.midiSongs = null;
-            Static12.aClass123_4 = null;
+            Static12.pendingSongSoundCache = null;
         }
     }
 

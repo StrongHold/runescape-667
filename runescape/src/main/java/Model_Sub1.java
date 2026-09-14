@@ -795,11 +795,11 @@ public final class Model_Sub1 extends Model {
         if (arg3 || Static280.method4087(this.anInt2765, this.anInt2756)) {
             this.aClass371_3 = new Class371(Static519.method6832(-89, this.anInt2756, this.anInt2765));
         }
-        if (arg3 || Static69.method6335(this.anInt2756, this.anInt2765)) {
-            this.aClass371_4 = new Class371(Static576.method7609(this.anInt2765, this.anInt2756));
+        if (arg3 || Static69.usesNormalBuffer(this.anInt2756, this.anInt2765)) {
+            this.aClass371_4 = new Class371(Static576.normalBufferMutable(this.anInt2765, this.anInt2756));
         }
         if (arg3 || Static652.method8532(this.anInt2756, this.anInt2765)) {
-            this.aClass359_1 = new Class359(Static69.method6333(this.anInt2756, this.anInt2765));
+            this.aClass359_1 = new Class359(Static69.indexBufferMutable(this.anInt2756, this.anInt2765));
         }
     }
 
@@ -1153,7 +1153,7 @@ public final class Model_Sub1 extends Model {
             this.aClass371_3.aBoolean735 = Static519.method6832(-90, functionMask, this.anInt2765);
         }
         if (this.aClass371_4 != null) {
-            this.aClass371_4.aBoolean735 = Static576.method7609(this.anInt2765, functionMask);
+            this.aClass371_4.aBoolean735 = Static576.normalBufferMutable(this.anInt2765, functionMask);
         }
         this.anInt2756 = functionMask;
         this.aBoolean229 = true;
@@ -1428,28 +1428,28 @@ public final class Model_Sub1 extends Model {
         Static499.anIntArray605[0] = local314;
         @Pc(351) int local351 = (local290 << arg2) + local307;
         Static172.anIntArray251[0] = local321;
-        Static399.anIntArray483[0] = local328;
+        Static399.boundsCornerZ[0] = local328;
         Static499.anIntArray605[1] = local335;
         Static172.anIntArray251[1] = local321;
-        Static399.anIntArray483[1] = local328;
+        Static399.boundsCornerZ[1] = local328;
         Static499.anIntArray605[2] = local314;
         Static172.anIntArray251[2] = local341;
-        Static399.anIntArray483[2] = local328;
+        Static399.boundsCornerZ[2] = local328;
         Static499.anIntArray605[3] = local335;
         Static172.anIntArray251[3] = local341;
         Static499.anIntArray605[4] = local314;
-        Static399.anIntArray483[3] = local328;
+        Static399.boundsCornerZ[3] = local328;
         Static172.anIntArray251[4] = local321;
-        Static399.anIntArray483[4] = local351;
+        Static399.boundsCornerZ[4] = local351;
         Static499.anIntArray605[5] = local335;
         Static172.anIntArray251[5] = local321;
         Static499.anIntArray605[6] = local314;
-        Static399.anIntArray483[5] = local351;
+        Static399.boundsCornerZ[5] = local351;
         Static172.anIntArray251[6] = local341;
-        Static399.anIntArray483[6] = local351;
+        Static399.boundsCornerZ[6] = local351;
         Static499.anIntArray605[7] = local335;
         Static172.anIntArray251[7] = local341;
-        Static399.anIntArray483[7] = local351;
+        Static399.boundsCornerZ[7] = local351;
         @Pc(478) float local478;
         @Pc(506) float local506;
         @Pc(492) float local492;
@@ -1458,7 +1458,7 @@ public final class Model_Sub1 extends Model {
         @Pc(459) float local459;
         for (@Pc(445) int local445 = 0; local445 < 8; local445++) {
             local454 = (float) Static499.anIntArray605[local445];
-            local459 = (float) Static399.anIntArray483[local445];
+            local459 = (float) Static399.boundsCornerZ[local445];
             local464 = (float) Static172.anIntArray251[local445];
             local478 = local459 * Static53.aFloat28 + local454 * Static305.aFloat86 + Static18.aFloat2 * local464 + local33;
             local492 = Static355.aFloat111 * local454 + Static624.aFloat198 * local464 + local459 * Static382.aFloat114 + local237;
@@ -2924,7 +2924,7 @@ public final class Model_Sub1 extends Model {
             arg4.aClass371_3 = null;
         }
         @Pc(711) int local711;
-        if (Static526.method7073(this.anInt2765, arg0)) {
+        if (Static526.normalsMutable(this.anInt2765, arg0)) {
             if (arg1.aShortArray47 == null || this.anInt2759 > arg1.aShortArray47.length) {
                 local226 = this.anInt2759;
                 arg4.aShortArray39 = arg1.aShortArray39 = new short[local226];
@@ -2972,12 +2972,12 @@ public final class Model_Sub1 extends Model {
             arg4.aShortArray49 = this.aShortArray49;
             arg4.aClass313_1 = this.aClass313_1;
         }
-        if (Static576.method7609(this.anInt2765, arg0)) {
+        if (Static576.normalBufferMutable(this.anInt2765, arg0)) {
             arg4.aClass371_4 = arg1.aClass371_4;
             arg4.aClass371_4.anInterface16_17 = this.aClass371_4.anInterface16_17;
             arg4.aClass371_4.aBoolean736 = this.aClass371_4.aBoolean736;
             arg4.aClass371_4.aBoolean735 = true;
-        } else if (Static69.method6335(arg0, this.anInt2765)) {
+        } else if (Static69.usesNormalBuffer(arg0, this.anInt2765)) {
             arg4.aClass371_4 = this.aClass371_4;
         } else {
             arg4.aClass371_4 = null;
@@ -3009,7 +3009,7 @@ public final class Model_Sub1 extends Model {
         } else {
             arg4.aClass371_1 = null;
         }
-        if (Static335.method4946(this.anInt2765, arg0)) {
+        if (Static335.faceIndicesMutable(this.anInt2765, arg0)) {
             if (arg1.aShortArray43 == null || this.anInt2715 > arg1.aShortArray43.length) {
                 local226 = this.anInt2715;
                 arg4.aShortArray51 = arg1.aShortArray51 = new short[local226];
@@ -3030,7 +3030,7 @@ public final class Model_Sub1 extends Model {
             arg4.aShortArray43 = this.aShortArray43;
             arg4.aShortArray44 = this.aShortArray44;
         }
-        if (Static69.method6333(arg0, this.anInt2765)) {
+        if (Static69.indexBufferMutable(arg0, this.anInt2765)) {
             arg4.aClass359_1 = arg1.aClass359_1;
             arg4.aClass359_1.aBoolean729 = this.aClass359_1.aBoolean729;
             arg4.aClass359_1.anInterface20_8 = this.aClass359_1.anInterface20_8;
@@ -3152,7 +3152,7 @@ public final class Model_Sub1 extends Model {
             this.aShortArray50 = null;
             this.anIntArray243 = null;
         }
-        if (this.aByteArray32 != null && !Static135.method7236(this.anInt2756, this.anInt2765)) {
+        if (this.aByteArray32 != null && !Static135.retainNormals(this.anInt2756, this.anInt2765)) {
             label205:
             {
                 label204:
@@ -3192,7 +3192,7 @@ public final class Model_Sub1 extends Model {
                 this.aBoolean229 = true;
             }
         }
-        if (this.aFloatArray18 != null && !Static399.method5572(this.anInt2756, this.anInt2765)) {
+        if (this.aFloatArray18 != null && !Static399.retainTexCoords(this.anInt2756, this.anInt2765)) {
             if (this.aClass371_1 == null || this.aClass371_1.method8448()) {
                 this.aFloatArray18 = this.lb = null;
             } else {
@@ -3206,7 +3206,7 @@ public final class Model_Sub1 extends Model {
                 this.aBoolean229 = true;
             }
         }
-        if (this.aShortArray43 != null && !Static618.method8316(262144 - 262144, this.anInt2756, this.anInt2765)) {
+        if (this.aShortArray43 != null && !Static618.retainFaceIndices(262144 - 262144, this.anInt2756, this.anInt2765)) {
             if ((this.aClass359_1 == null || this.aClass359_1.method8340()) && (this.aClass371_3 == null || this.aClass371_3.method8448())) {
                 this.aShortArray43 = this.aShortArray44 = this.aShortArray51 = null;
             } else {

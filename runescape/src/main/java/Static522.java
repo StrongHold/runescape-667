@@ -16,7 +16,7 @@ public final class Static522 {
         Static62.aClass2_Sub8_3 = null;
         SongManager.anInt10171 = 0;
         SongManager.aClass2_Sub6_Sub1_2 = null;
-        Static12.aClass123_4 = null;
+        Static12.pendingSongSoundCache = null;
         SongManager.midiSongs = null;
     }
 }
