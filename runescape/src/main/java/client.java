@@ -98,6 +98,10 @@ public final class client extends GameShell {
     @OriginalMember(owner = "client!fha", name = "c", descriptor = "Ljava/awt/datatransfer/Clipboard;")
     public static Clipboard clipboard;
 
+    // $FF: synthetic field
+    @OriginalMember(owner = "client!client", name = "Eb", descriptor = "Ljava/lang/Class;")
+    private static Class clientClass;
+
     @OriginalMember(owner = "client!client", name = "main", descriptor = "([Ljava/lang/String;)V")
     public static void main(@OriginalArg(0) String[] arg0) {
         try {
@@ -607,7 +611,7 @@ public final class client extends GameShell {
                                         local453 = (HookRequest) InterfaceManager.hookRequests.removeFirst();
                                         if (local453 == null) {
                                             if (InterfaceManager.dragSource != null) {
-                                                Static603.method7899();
+                                                InterfaceDrag.tick();
                                             }
                                             if (TimeUtils.clock % 1500 == 0) {
                                                 Static314.tbrefresh();
@@ -989,7 +993,7 @@ public final class client extends GameShell {
             Loading.update();
             Static199.doneslowupdate();
         } else if (MainLogicStep.isBuildingMap(MainLogicManager.step)) {
-            Static489.method6548();
+            MapBuilder.build();
         }
 
         if (MainLogicStep.isLoggedOut(MainLogicManager.step) && !MainLogicStep.isBuildingMap(MainLogicManager.step)) {
@@ -1144,7 +1148,7 @@ public final class client extends GameShell {
                     @Pc(284) Class local284 = Class.forName("java.lang.reflect.AccessibleObject");
                     @Pc(296) Method local296 = local284.getDeclaredMethod("setAccessible", Boolean.TYPE);
                     local296.invoke(local279, Boolean.TRUE);
-                    @Pc(322) Vector local322 = (Vector) local279.get((Static84.aClass5 == null ? (Static84.aClass5 = Class.forName("client")) : Static84.aClass5).getClassLoader());
+                    @Pc(322) Vector local322 = (Vector) local279.get((clientClass == null ? (clientClass = Class.forName("client")) : clientClass).getClassLoader());
                     for (@Pc(324) int local324 = 0; local324 < local322.size(); local324++) {
                         try {
                             @Pc(329) Object local329 = local322.elementAt(local324);

@@ -1938,7 +1938,7 @@ public final class InterfaceManager {
 
     @OriginalMember(owner = "client!sfa", name = "a", descriptor = "(Lclient!hda;Z)Lclient!hda;")
     public static Component getServerDragLayer(@OriginalArg(0) Component arg0) {
-        @Pc(15) Component local15 = Static84.method1657(arg0);
+        @Pc(15) Component local15 = InterfaceDrag.getDragDepthLayer(arg0);
         if (local15 == null) {
             local15 = arg0.dragLayer;
         }

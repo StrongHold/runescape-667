@@ -9,15 +9,15 @@ public final class Static710 {
     public static int varclanUpdateCount = 0;
 
     @OriginalMember(owner = "client!wha", name = "a", descriptor = "(ILclient!hda;Lclient!hda;)V")
-    public static void method6710(@OriginalArg(1) Component arg0, @OriginalArg(2) Component arg1) {
-        @Pc(15) ClientMessage local15 = ClientMessage.create(ClientProt.IF_BUTTOND, ServerConnection.GAME.isaac);
-        local15.bitPacket.p2(arg1.invObject);
-        local15.bitPacket.p2_alt1(arg0.id);
-        local15.bitPacket.p2_alt2(arg0.invObject);
-        local15.bitPacket.p4_alt2(arg0.slot);
-        local15.bitPacket.p2_alt1(arg1.id);
-        local15.bitPacket.p4_alt3(arg1.slot);
-        ServerConnection.GAME.send(local15);
+    public static void ifButtonDSend(@OriginalArg(1) Component source, @OriginalArg(2) Component target) {
+        @Pc(15) ClientMessage message = ClientMessage.create(ClientProt.IF_BUTTOND, ServerConnection.GAME.isaac);
+        message.bitPacket.p2(target.invObject);
+        message.bitPacket.p2_alt1(source.id);
+        message.bitPacket.p2_alt2(source.invObject);
+        message.bitPacket.p4_alt2(source.slot);
+        message.bitPacket.p2_alt1(target.id);
+        message.bitPacket.p4_alt3(target.slot);
+        ServerConnection.GAME.send(message);
     }
 
     @OriginalMember(owner = "client!wha", name = "a", descriptor = "(I)V")
@@ -37,19 +37,19 @@ public final class Static710 {
         @Pc(56) int local56;
         if (CutsceneManager.state == 3) {
             for (local56 = local36; local56 <= local38; local56++) {
-                Static84.method1654(local56);
+                EntitySceneBuilder.addTileAlignedEntities(local56);
             }
-            Static84.method1652();
+            EntitySceneBuilder.addOffCentreEntities();
             return;
         }
-        Static84.method1655();
+        EntitySceneBuilder.calculateDrawPriorities();
         for (local56 = local36; local56 <= local38; local56++) {
-            Static84.method1665();
-            Static84.method1670(local56);
-            Static84.method1654(local56);
+            EntitySceneBuilder.clearTilePriorities();
+            EntitySceneBuilder.recordTilePriorities(local56);
+            EntitySceneBuilder.addTileAlignedEntities(local56);
         }
-        Static84.method1664();
-        Static84.method1652();
+        EntitySceneBuilder.buildEntityStacks();
+        EntitySceneBuilder.addOffCentreEntities();
     }
 
     @OriginalMember(owner = "client!wha", name = "a", descriptor = "(III)Z")

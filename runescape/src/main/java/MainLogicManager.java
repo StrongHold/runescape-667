@@ -391,8 +391,8 @@ public final class MainLogicManager {
         }
 
         if (CutsceneManager.state == 0) {
-            Static82.method1593();
-            Static13.method158();
+            EntityTick.tickPlayers();
+            EntityTick.tickNpcs();
         } else {
             if (CutsceneManager.state == 1 && Static360.method5230(CutsceneManager.id)) {
                 Static266.method6774();
@@ -421,10 +421,10 @@ public final class MainLogicManager {
 
                 if (CutsceneManager.state == 3) {
                     for (@Pc(181) int local181 = 0; local181 < CutsceneManager.actors.length; local181++) {
-                        @Pc(1027) Actor local1027 = CutsceneManager.actors[local181];
-                        if (local1027.initialised) {
-                            @Pc(1034) PathingEntity local1034 = local1027.entity();
-                            Static489.tick(true, local1034);
+                        @Pc(1027) Actor actor = CutsceneManager.actors[local181];
+                        if (actor.initialised) {
+                            @Pc(1034) PathingEntity entity = actor.entity();
+                            EntityTick.tick(true, entity);
                         }
                     }
                 }
@@ -645,7 +645,7 @@ public final class MainLogicManager {
                                                 MiniMenu.anInt6964 = 0;
                                             }
                                             if (InterfaceManager.dragSource != null) {
-                                                Static603.method7899();
+                                                InterfaceDrag.tick();
                                             }
                                             if (Client.staffModLevel > 0 && KeyboardMonitor.instance.isPressed(82) && KeyboardMonitor.instance.isPressed(81) && Static611.mouseWheelRotation != 0) {
                                                 @Pc(541) int local541 = PlayerEntity.self.level - Static611.mouseWheelRotation;
