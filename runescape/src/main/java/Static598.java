@@ -5,10 +5,10 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static598 {
 
     @OriginalMember(owner = "client!ss", name = "i", descriptor = "S")
-    public static short aShort120 = 32767;
+    public static short maxFov = 32767;
 
     @OriginalMember(owner = "client!ss", name = "a", descriptor = "(Z)V")
-    public static void method7827() {
+    public static void updateSpotAnimations() {
         for (@Pc(13) SpotAnimationNode node = (SpotAnimationNode) Static346.spotAnimations.first(); node != null; node = (SpotAnimationNode) Static346.spotAnimations.next()) {
             @Pc(18) SpotAnimation spotAnimation = node.spotAnimation;
 

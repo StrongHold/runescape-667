@@ -23,8 +23,8 @@ public final class Static298 {
         Static457.anInt6933 = 1;
         Static482.anInt7228 = 0;
         if (Static354.aBoolean439) {
-            Static25.aShort1 = Static267.aShort47;
-            Static598.aShort120 = Static465.aShort81;
+            Static25.minFov = Static267.aShort47;
+            Static598.maxFov = Static465.aShort81;
             Static552.aShort123 = Static470.aShort82;
             Static306.aShort59 = Static322.aShort135;
             Static354.aBoolean439 = false;

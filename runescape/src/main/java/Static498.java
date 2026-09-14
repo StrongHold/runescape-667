@@ -10,88 +10,88 @@ public final class Static498 {
     public static final int[] statBaseLevels = new int[25];
 
     @OriginalMember(owner = "client!pm", name = "a", descriptor = "(IZIIBI)V")
-    public static void method6643(@OriginalArg(0) int arg0, @OriginalArg(1) boolean arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(5) int arg4) {
-        if (arg4 < 1) {
-            arg4 = 1;
+    public static void method6643(@OriginalArg(0) int x, @OriginalArg(1) boolean letterbox, @OriginalArg(2) int y, @OriginalArg(3) int height, @OriginalArg(5) int width) {
+        if (width < 1) {
+            width = 1;
         }
-        if (arg3 < 1) {
-            arg3 = 1;
+        if (height < 1) {
+            height = 1;
         }
-        @Pc(26) int local26 = arg3 - 334;
-        if (local26 < 0) {
-            local26 = 0;
-        } else if (local26 > 100) {
-            local26 = 100;
+        @Pc(26) int widePercent = height - 334;
+        if (widePercent < 0) {
+            widePercent = 0;
+        } else if (widePercent > 100) {
+            widePercent = 100;
         }
-        @Pc(49) int local49 = (Static640.wideFov - Static640.fov) * local26 / 100 + Static640.fov;
-        if (Static25.aShort1 > local49) {
-            local49 = Static25.aShort1;
-        } else if (Static598.aShort120 < local49) {
-            local49 = Static598.aShort120;
+        @Pc(49) int fov = (Static640.wideFov - Static640.fov) * widePercent / 100 + Static640.fov;
+        if (Static25.minFov > fov) {
+            fov = Static25.minFov;
+        } else if (Static598.maxFov < fov) {
+            fov = Static598.maxFov;
         }
-        @Pc(72) int local72 = arg3 * local49 * 512 / (arg4 * 334);
-        @Pc(115) int local115;
-        @Pc(122) int local122;
-        @Pc(86) short local86;
-        if (local72 < Static552.aShort123) {
-            local86 = Static552.aShort123;
-            local49 = local86 * arg4 * 334 / (arg3 * 512);
-            if (Static598.aShort120 < local49) {
-                local49 = Static598.aShort120;
-                local115 = local49 * arg3 * 512 / (local86 * 334);
-                local122 = (arg4 - local115) / 2;
-                if (arg1) {
+        @Pc(72) int horizontalFov = height * fov * 512 / (width * 334);
+        @Pc(115) int fittedSize;
+        @Pc(122) int barSize;
+        @Pc(86) short clampedHorizontalFov;
+        if (horizontalFov < Static552.aShort123) {
+            clampedHorizontalFov = Static552.aShort123;
+            fov = clampedHorizontalFov * width * 334 / (height * 512);
+            if (Static598.maxFov < fov) {
+                fov = Static598.maxFov;
+                fittedSize = fov * height * 512 / (clampedHorizontalFov * 334);
+                barSize = (width - fittedSize) / 2;
+                if (letterbox) {
                     Toolkit.active.la();
-                    Toolkit.active.fillRect(arg0, arg2, local122, arg3, -16777216);
-                    Toolkit.active.fillRect(arg4 + arg0 - local122, arg2, local122, arg3, -16777216);
+                    Toolkit.active.fillRect(x, y, barSize, height, -16777216);
+                    Toolkit.active.fillRect(width + x - barSize, y, barSize, height, -16777216);
                 }
-                arg0 += local122;
-                arg4 -= local122 * 2;
+                x += barSize;
+                width -= barSize * 2;
             }
-        } else if (Static306.aShort59 < local72) {
-            local86 = Static306.aShort59;
-            local49 = local86 * 334 * arg4 / (arg3 * 512);
-            if (Static25.aShort1 > local49) {
-                local49 = Static25.aShort1;
-                local115 = arg4 * 334 * local86 / (local49 * 512);
-                local122 = (arg3 - local115) / 2;
-                if (arg1) {
+        } else if (Static306.aShort59 < horizontalFov) {
+            clampedHorizontalFov = Static306.aShort59;
+            fov = clampedHorizontalFov * 334 * width / (height * 512);
+            if (Static25.minFov > fov) {
+                fov = Static25.minFov;
+                fittedSize = width * 334 * clampedHorizontalFov / (fov * 512);
+                barSize = (height - fittedSize) / 2;
+                if (letterbox) {
                     Toolkit.active.la();
-                    Toolkit.active.fillRect(arg0, arg2, arg4, local122, -16777216);
-                    Toolkit.active.fillRect(arg0, arg2 + arg3 - local122, arg4, local122, -16777216);
+                    Toolkit.active.fillRect(x, y, width, barSize, -16777216);
+                    Toolkit.active.fillRect(x, y + height - barSize, width, barSize, -16777216);
                 }
-                arg3 -= local122 * 2;
-                arg2 += local122;
+                height -= barSize * 2;
+                y += barSize;
             }
         }
-        Static32.anInt773 = arg0;
-        Static200.anInt3305 = (short) arg3;
-        Static428.anInt6495 = local49 * arg3 / 334;
-        Static290.anInt4657 = arg2;
-        Static242.anInt3971 = (short) arg4;
+        Static32.anInt773 = x;
+        Static200.anInt3305 = (short) height;
+        Static428.anInt6495 = fov * height / 334;
+        Static290.anInt4657 = y;
+        Static242.anInt3971 = (short) width;
     }
 
     @OriginalMember(owner = "client!pm", name = "a", descriptor = "([Lclient!eo;II)V")
-    public static void method6650(@OriginalArg(0) Entity[] arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
-        if (arg1 >= arg2) {
+    public static void method6650(@OriginalArg(0) Entity[] entities, @OriginalArg(1) int from, @OriginalArg(2) int to) {
+        if (from >= to) {
             return;
         }
-        @Pc(8) int local8 = (arg1 + arg2) / 2;
-        @Pc(10) int local10 = arg1;
-        @Pc(14) Entity local14 = arg0[local8];
-        arg0[local8] = arg0[arg2];
-        arg0[arg2] = local14;
-        @Pc(27) int local27 = local14.anInt10697;
-        for (@Pc(29) int local29 = arg1; local29 < arg2; local29++) {
-            if (arg0[local29].anInt10697 > local27 + (local29 & 0x1)) {
-                @Pc(44) Entity local44 = arg0[local29];
-                arg0[local29] = arg0[local10];
-                arg0[local10++] = local44;
+        @Pc(8) int pivotIndex = (from + to) / 2;
+        @Pc(10) int boundary = from;
+        @Pc(14) Entity pivot = entities[pivotIndex];
+        entities[pivotIndex] = entities[to];
+        entities[to] = pivot;
+        @Pc(27) int pivotKey = pivot.anInt10697;
+        for (@Pc(29) int i = from; i < to; i++) {
+            if (entities[i].anInt10697 > pivotKey + (i & 0x1)) {
+                @Pc(44) Entity entity = entities[i];
+                entities[i] = entities[boundary];
+                entities[boundary++] = entity;
             }
         }
-        arg0[arg2] = arg0[local10];
-        arg0[local10] = local14;
-        method6650(arg0, arg1, local10 - 1);
-        method6650(arg0, local10 + 1, arg2);
+        entities[to] = entities[boundary];
+        entities[boundary] = pivot;
+        method6650(entities, from, boundary - 1);
+        method6650(entities, boundary + 1, to);
     }
 }

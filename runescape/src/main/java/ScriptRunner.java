@@ -7066,15 +7066,15 @@ public final class ScriptRunner {
 
             if (opcode == VIEWPORT_CLAMPFOV) {
                 intStackPointer -= 4;
-                Static25.aShort1 = (short) intStack[intStackPointer];
-                if (Static25.aShort1 <= 0) {
-                    Static25.aShort1 = 1;
+                Static25.minFov = (short) intStack[intStackPointer];
+                if (Static25.minFov <= 0) {
+                    Static25.minFov = 1;
                 }
-                Static598.aShort120 = (short) intStack[intStackPointer + 1];
-                if (Static598.aShort120 <= 0) {
-                    Static598.aShort120 = 32767;
-                } else if (Static598.aShort120 < Static25.aShort1) {
-                    Static598.aShort120 = Static25.aShort1;
+                Static598.maxFov = (short) intStack[intStackPointer + 1];
+                if (Static598.maxFov <= 0) {
+                    Static598.maxFov = 32767;
+                } else if (Static598.maxFov < Static25.minFov) {
+                    Static598.maxFov = Static25.minFov;
                 }
                 Static552.aShort123 = (short) intStack[intStackPointer + 2];
                 if (Static552.aShort123 <= 0) {

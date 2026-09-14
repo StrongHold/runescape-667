@@ -404,7 +404,7 @@ public final class MainLogicManager {
                 Static440.anInt6680 = 0;
                 CutsceneManager.clock = TimeUtils.clock;
                 CutsceneManager.state = 3;
-                Static457.method6231();
+                Static457.applyCutsceneFovClamps();
             }
 
             if (CutsceneManager.state == 3) {
@@ -434,7 +434,7 @@ public final class MainLogicManager {
         Static90.method1733();
 
         if (!Static288.aBoolean356) {
-            Static598.method7827();
+            Static598.updateSpotAnimations();
             Static288.aBoolean356 = true;
         }
 
