@@ -8,34 +8,34 @@ import org.openrs2.deob.annotation.Pc;
 public final class CutsceneAction_Sub16 extends CutsceneAction {
 
     @OriginalMember(owner = "client!pe", name = "i", descriptor = "I")
-    public final int anInt7273;
+    public final int locIndex;
 
     @OriginalMember(owner = "client!pe", name = "o", descriptor = "I")
-    public final int anInt7275;
+    public final int z;
 
     @OriginalMember(owner = "client!pe", name = "p", descriptor = "I")
-    public final int anInt7278;
+    public final int x;
 
     @OriginalMember(owner = "client!pe", name = "n", descriptor = "I")
-    public final int anInt7280;
+    public final int level;
 
     @OriginalMember(owner = "client!pe", name = "g", descriptor = "I")
-    public final int anInt7279;
+    public final int rotation;
 
     @OriginalMember(owner = "client!pe", name = "<init>", descriptor = "(Lclient!ge;)V")
-    public CutsceneAction_Sub16(@OriginalArg(0) Packet arg0) {
-        super(arg0);
-        this.anInt7273 = arg0.g2();
-        @Pc(11) int local11 = arg0.g4();
-        this.anInt7275 = local11 & 0xFFFF;
-        this.anInt7278 = local11 >>> 16;
-        this.anInt7280 = arg0.g1();
-        this.anInt7279 = arg0.g1();
+    public CutsceneAction_Sub16(@OriginalArg(0) Packet packet) {
+        super(packet);
+        this.locIndex = packet.g2();
+        @Pc(11) int coord = packet.g4();
+        this.z = coord & 0xFFFF;
+        this.x = coord >>> 16;
+        this.level = packet.g1();
+        this.rotation = packet.g1();
     }
 
     @OriginalMember(owner = "client!pe", name = "b", descriptor = "(I)V")
     @Override
     public void execute() {
-        Static507.aClass394Array1[this.anInt7273].method9038(this.anInt7278, this.anInt7279, this.anInt7275, this.anInt7280);
+        Static507.cutsceneLocs[this.locIndex].add(this.x, this.rotation, this.z, this.level);
     }
 }

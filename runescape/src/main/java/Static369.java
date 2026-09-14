@@ -24,45 +24,45 @@ public final class Static369 {
 
     @OriginalMember(owner = "client!lla", name = "a", descriptor = "(I)V")
     public static void method3847() {
-        @Pc(11) int local11 = Static363.aByteArrayArray22.length;
-        for (@Pc(13) int local13 = 0; local13 < local11; local13++) {
-            if (Static363.aByteArrayArray22[local13] != null) {
-                @Pc(20) int local20 = -1;
-                for (@Pc(22) int local22 = 0; local22 < Static183.anInt3024; local22++) {
-                    if (Static89.zoneIds[local13] == Static119.anIntArray199[local22]) {
-                        local20 = local22;
+        @Pc(11) int zoneCount = Static363.aByteArrayArray22.length;
+        for (@Pc(13) int zone = 0; zone < zoneCount; zone++) {
+            if (Static363.aByteArrayArray22[zone] != null) {
+                @Pc(20) int zoneIndex = -1;
+                for (@Pc(22) int i = 0; i < Static183.npcZoneCount; i++) {
+                    if (Static89.zoneIds[zone] == Static119.anIntArray199[i]) {
+                        zoneIndex = i;
                         break;
                     }
                 }
-                if (local20 == -1) {
-                    Static119.anIntArray199[Static183.anInt3024] = Static89.zoneIds[local13];
-                    local20 = Static183.anInt3024++;
+                if (zoneIndex == -1) {
+                    Static119.anIntArray199[Static183.npcZoneCount] = Static89.zoneIds[zone];
+                    zoneIndex = Static183.npcZoneCount++;
                 }
-                @Pc(66) Packet local66 = new Packet(Static363.aByteArrayArray22[local13]);
-                @Pc(68) int local68 = 0;
-                while (Static363.aByteArrayArray22[local13].length > local66.pos && local68 < 511 && NPCList.size < 1023) {
-                    @Pc(88) int local88 = local20 | local68++ << 6;
-                    @Pc(94) int local94 = local66.g2();
-                    @Pc(98) int local98 = local94 >> 14;
-                    @Pc(104) int local104 = local94 >> 7 & 0x3F;
-                    @Pc(108) int local108 = local94 & 0x3F;
-                    @Pc(121) int local121 = local104 + (Static89.zoneIds[local13] >> 8) * 64 - WorldMap.areaBaseX;
-                    @Pc(135) int local135 = (Static89.zoneIds[local13] & 0xFF) * 64 + local108 - WorldMap.areaBaseZ;
-                    @Pc(142) NPCType local142 = NPCTypeList.instance.list(local66.g2());
-                    @Pc(149) NPCEntityNode local149 = (NPCEntityNode) NPCList.local.get(local88);
-                    if (local149 == null && (local142.movementCapabilities & 0x1) > 0 && local98 == Static164.areaLevel && local121 >= 0 && local142.size + local121 < Static720.mapWidth && local135 >= 0 && local135 + local142.size < Static501.mapLength) {
-                        @Pc(197) NPCEntity local197 = new NPCEntity();
-                        local197.slot = local88;
-                        @Pc(205) NPCEntityNode local205 = new NPCEntityNode(local197);
-                        NPCList.local.put(local88, local205);
-                        NPCList.entities[NPCList.newSize++] = local205;
-                        NPCList.slots[NPCList.size++] = local88;
-                        local197.cutsceneClock = TimeUtils.clock;
-                        local197.setupNewNPCType(local142);
-                        local197.setSize(local197.type.size);
-                        local197.yawSpeed = local197.type.yawSpeed << 3;
-                        local197.turn((local197.type.spawnDirection + 4 & 0x80600007) << 11, true);
-                        local197.clearPath(true, local135, local121, local98, local197.getSize());
+                @Pc(66) Packet packet = new Packet(Static363.aByteArrayArray22[zone]);
+                @Pc(68) int npcIndex = 0;
+                while (Static363.aByteArrayArray22[zone].length > packet.pos && npcIndex < 511 && NPCList.size < 1023) {
+                    @Pc(88) int slot = zoneIndex | npcIndex++ << 6;
+                    @Pc(94) int coord = packet.g2();
+                    @Pc(98) int level = coord >> 14;
+                    @Pc(104) int localX = coord >> 7 & 0x3F;
+                    @Pc(108) int localZ = coord & 0x3F;
+                    @Pc(121) int x = localX + (Static89.zoneIds[zone] >> 8) * 64 - WorldMap.areaBaseX;
+                    @Pc(135) int z = (Static89.zoneIds[zone] & 0xFF) * 64 + localZ - WorldMap.areaBaseZ;
+                    @Pc(142) NPCType type = NPCTypeList.instance.list(packet.g2());
+                    @Pc(149) NPCEntityNode existing = (NPCEntityNode) NPCList.local.get(slot);
+                    if (existing == null && (type.movementCapabilities & 0x1) > 0 && level == Static164.areaLevel && x >= 0 && type.size + x < Static720.mapWidth && z >= 0 && z + type.size < Static501.mapLength) {
+                        @Pc(197) NPCEntity npc = new NPCEntity();
+                        npc.slot = slot;
+                        @Pc(205) NPCEntityNode node = new NPCEntityNode(npc);
+                        NPCList.local.put(slot, node);
+                        NPCList.entities[NPCList.newSize++] = node;
+                        NPCList.slots[NPCList.size++] = slot;
+                        npc.cutsceneClock = TimeUtils.clock;
+                        npc.setupNewNPCType(type);
+                        npc.setSize(npc.type.size);
+                        npc.yawSpeed = npc.type.yawSpeed << 3;
+                        npc.turn((npc.type.spawnDirection + 4 & 0x80600007) << 11, true);
+                        npc.clearPath(true, z, x, level, npc.getSize());
                     }
                 }
             }

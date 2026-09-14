@@ -8,27 +8,27 @@ import org.openrs2.deob.annotation.Pc;
 public final class CutsceneAction_Sub21 extends CutsceneAction {
 
     @OriginalMember(owner = "client!sha", name = "j", descriptor = "I")
-    public final int anInt8669;
+    public final int actorIndex;
 
     @OriginalMember(owner = "client!sha", name = "g", descriptor = "I")
-    public final int anInt8671;
+    public final int pathIndex;
 
     @OriginalMember(owner = "client!sha", name = "i", descriptor = "I")
-    public final int anInt8668;
+    public final int level;
 
     @OriginalMember(owner = "client!sha", name = "<init>", descriptor = "(Lclient!ge;)V")
-    public CutsceneAction_Sub21(@OriginalArg(0) Packet arg0) {
-        super(arg0);
-        this.anInt8669 = arg0.g2();
-        this.anInt8671 = arg0.g2();
-        this.anInt8668 = arg0.g1();
+    public CutsceneAction_Sub21(@OriginalArg(0) Packet packet) {
+        super(packet);
+        this.actorIndex = packet.g2();
+        this.pathIndex = packet.g2();
+        this.level = packet.g1();
     }
 
     @OriginalMember(owner = "client!sha", name = "b", descriptor = "(I)V")
     @Override
     public void execute() {
-        @Pc(8) Actor local8 = CutsceneManager.actors[this.anInt8669];
-        @Pc(13) Class231 local13 = Static183.aClass231Array1[this.anInt8671];
-        local13.method5271(local8, this.anInt8668);
+        @Pc(8) Actor actor = CutsceneManager.actors[this.actorIndex];
+        @Pc(13) CutscenePath path = Static183.cutscenePaths[this.pathIndex];
+        path.walk(actor, this.level);
     }
 }

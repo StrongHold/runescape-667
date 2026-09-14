@@ -16,7 +16,7 @@ public final class Static298 {
     public static void method4385() {
         CutsceneVarDomain.cache.clear();
         Static391.A_DEQUE___34.clear();
-        Static507.aClass394Array1 = null;
+        Static507.cutsceneLocs = null;
         Camera.cutsceneSplines = null;
         CutsceneManager.actors = null;
         Static5.anInt92 = -1;
@@ -29,7 +29,7 @@ public final class Static298 {
             Static306.aShort59 = Static322.aShort135;
             Static354.aBoolean439 = false;
         }
-        Static183.aClass231Array1 = null;
+        Static183.cutscenePaths = null;
         Static134.anInt10330 = 0;
         Static178.aClass247_1 = null;
         Static401.aCutsceneActionArray1 = null;
