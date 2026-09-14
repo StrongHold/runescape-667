@@ -8,7 +8,7 @@ import org.openrs2.deob.annotation.OriginalMember;
 public final class VariableRateSoundPacket extends SoundPacket {
 
     @OriginalMember(owner = "client!sq", name = "m", descriptor = "Z")
-    public boolean aBoolean668;
+    public boolean pingPong;
 
     @OriginalMember(owner = "client!sq", name = "n", descriptor = "I")
     public int sampleRate;
@@ -31,12 +31,12 @@ public final class VariableRateSoundPacket extends SoundPacket {
     }
 
     @OriginalMember(owner = "client!sq", name = "<init>", descriptor = "(I[BIIZ)V")
-    public VariableRateSoundPacket(@OriginalArg(0) int sampleRate, @OriginalArg(1) byte[] data, @OriginalArg(2) int nominalBitRate, @OriginalArg(3) int minBitRate, @OriginalArg(4) boolean aBoolean668) {
+    public VariableRateSoundPacket(@OriginalArg(0) int sampleRate, @OriginalArg(1) byte[] data, @OriginalArg(2) int nominalBitRate, @OriginalArg(3) int minBitRate, @OriginalArg(4) boolean pingPong) {
         this.sampleRate = sampleRate;
         this.data = data;
         this.nominalBitRate = nominalBitRate;
         this.minBitRate = minBitRate;
-        this.aBoolean668 = aBoolean668;
+        this.pingPong = pingPong;
     }
 
     @OriginalMember(owner = "client!sq", name = "a", descriptor = "(Lclient!lg;)Lclient!sq;")

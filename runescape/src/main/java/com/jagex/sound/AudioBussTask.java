@@ -14,6 +14,7 @@ public abstract class AudioBussTask extends Node {
 
     @OriginalMember(owner = "client!ada", name = "<init>", descriptor = "()V")
     public AudioBussTask() {
+        /* empty */
     }
 
     @OriginalMember(owner = "client!ada", name = "a", descriptor = "()V")

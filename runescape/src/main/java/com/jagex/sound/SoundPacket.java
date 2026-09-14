@@ -12,5 +12,6 @@ public abstract class SoundPacket extends Node {
 
     @OriginalMember(owner = "client!rm", name = "<init>", descriptor = "()V")
     protected SoundPacket() {
+        /* empty */
     }
 }

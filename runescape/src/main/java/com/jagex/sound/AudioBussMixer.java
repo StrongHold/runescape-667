@@ -30,35 +30,35 @@ public final class AudioBussMixer extends AudioBuss {
 
     @OriginalMember(owner = "client!nn", name = "b", descriptor = "([III)V")
     @Override
-    public synchronized void fill(@OriginalArg(0) int[] arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
+    public synchronized void fill(@OriginalArg(0) int[] mix, @OriginalArg(1) int offset, @OriginalArg(2) int length) {
         do {
             if (this.nextTaskTime < 0) {
-                this.fillAll(arg0, arg1, arg2);
+                this.fillAll(mix, offset, length);
                 return;
             }
-            if (this.position + arg2 < this.nextTaskTime) {
-                this.position += arg2;
-                this.fillAll(arg0, arg1, arg2);
+            if (this.position + length < this.nextTaskTime) {
+                this.position += length;
+                this.fillAll(mix, offset, length);
                 return;
             }
-            @Pc(33) int local33 = this.nextTaskTime - this.position;
-            this.fillAll(arg0, arg1, local33);
-            arg1 += local33;
-            arg2 -= local33;
-            this.position += local33;
+            @Pc(33) int count = this.nextTaskTime - this.position;
+            this.fillAll(mix, offset, count);
+            offset += count;
+            length -= count;
+            this.position += count;
             this.rebaseTasks();
-            @Pc(60) AudioBussTask local60 = (AudioBussTask) this.tasks.first();
-            synchronized (local60) {
-                @Pc(68) int local68 = local60.run(this);
-                if (local68 < 0) {
-                    local60.time = 0;
-                    this.removeTask(local60);
+            @Pc(60) AudioBussTask task = (AudioBussTask) this.tasks.first();
+            synchronized (task) {
+                @Pc(68) int time = task.run(this);
+                if (time < 0) {
+                    task.time = 0;
+                    this.removeTask(task);
                 } else {
-                    local60.time = local68;
-                    this.insertTask(local60.next, local60);
+                    task.time = time;
+                    this.insertTask(task.next, task);
                 }
             }
-        } while (arg2 != 0);
+        } while (length != 0);
     }
 
     @OriginalMember(owner = "client!nn", name = "e", descriptor = "()I")
@@ -67,26 +67,26 @@ public final class AudioBussMixer extends AudioBuss {
     }
 
     @OriginalMember(owner = "client!nn", name = "a", descriptor = "(Lclient!dea;)V")
-    public synchronized void addFirst(@OriginalArg(0) AudioBuss arg0) {
-        this.busses.addFirst(arg0);
+    public synchronized void addFirst(@OriginalArg(0) AudioBuss buss) {
+        this.busses.addFirst(buss);
     }
 
     @OriginalMember(owner = "client!nn", name = "b", descriptor = "(Lclient!dea;)V")
-    public synchronized void remove(@OriginalArg(0) AudioBuss arg0) {
-        arg0.unlink();
+    public synchronized void remove(@OriginalArg(0) AudioBuss buss) {
+        buss.unlink();
     }
 
     @OriginalMember(owner = "client!nn", name = "b", descriptor = "(I)V")
-    public void skipAll(@OriginalArg(0) int arg0) {
-        for (@Pc(5) AudioBuss local5 = (AudioBuss) this.busses.first(); local5 != null; local5 = (AudioBuss) this.busses.next()) {
-            local5.skip(arg0);
+    public void skipAll(@OriginalArg(0) int length) {
+        for (@Pc(5) AudioBuss buss = (AudioBuss) this.busses.first(); buss != null; buss = (AudioBuss) this.busses.next()) {
+            buss.skip(length);
         }
     }
 
     @OriginalMember(owner = "client!nn", name = "c", descriptor = "([III)V")
-    public void fillAll(@OriginalArg(0) int[] arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
-        for (@Pc(5) AudioBuss local5 = (AudioBuss) this.busses.first(); local5 != null; local5 = (AudioBuss) this.busses.next()) {
-            local5.mix(arg0, arg1, arg2);
+    public void fillAll(@OriginalArg(0) int[] mix, @OriginalArg(1) int offset, @OriginalArg(2) int length) {
+        for (@Pc(5) AudioBuss buss = (AudioBuss) this.busses.first(); buss != null; buss = (AudioBuss) this.busses.next()) {
+            buss.mix(mix, offset, length);
         }
     }
 
@@ -97,11 +97,11 @@ public final class AudioBussMixer extends AudioBuss {
     }
 
     @OriginalMember(owner = "client!nn", name = "a", descriptor = "(Lclient!ie;Lclient!ada;)V")
-    public void insertTask(@OriginalArg(0) Node arg0, @OriginalArg(1) AudioBussTask arg1) {
-        while (arg0 != this.tasks.sentinel && ((AudioBussTask) arg0).time <= arg1.time) {
-            arg0 = arg0.next;
+    public void insertTask(@OriginalArg(0) Node node, @OriginalArg(1) AudioBussTask task) {
+        while (node != this.tasks.sentinel && ((AudioBussTask) node).time <= task.time) {
+            node = node.next;
         }
-        Node.addBefore(arg0, arg1);
+        Node.addBefore(node, task);
         this.nextTaskTime = ((AudioBussTask) this.tasks.sentinel.next).time;
     }
 
@@ -113,34 +113,34 @@ public final class AudioBussMixer extends AudioBuss {
 
     @OriginalMember(owner = "client!nn", name = "a", descriptor = "(I)V")
     @Override
-    public synchronized void skip(@OriginalArg(0) int arg0) {
+    public synchronized void skip(@OriginalArg(0) int length) {
         do {
             if (this.nextTaskTime < 0) {
-                this.skipAll(arg0);
+                this.skipAll(length);
                 return;
             }
-            if (this.position + arg0 < this.nextTaskTime) {
-                this.position += arg0;
-                this.skipAll(arg0);
+            if (this.position + length < this.nextTaskTime) {
+                this.position += length;
+                this.skipAll(length);
                 return;
             }
-            @Pc(29) int local29 = this.nextTaskTime - this.position;
-            this.skipAll(local29);
-            arg0 -= local29;
-            this.position += local29;
+            @Pc(29) int count = this.nextTaskTime - this.position;
+            this.skipAll(count);
+            length -= count;
+            this.position += count;
             this.rebaseTasks();
-            @Pc(50) AudioBussTask local50 = (AudioBussTask) this.tasks.first();
-            synchronized (local50) {
-                @Pc(58) int local58 = local50.run(this);
-                if (local58 < 0) {
-                    local50.time = 0;
-                    this.removeTask(local50);
+            @Pc(50) AudioBussTask task = (AudioBussTask) this.tasks.first();
+            synchronized (task) {
+                @Pc(58) int time = task.run(this);
+                if (time < 0) {
+                    task.time = 0;
+                    this.removeTask(task);
                 } else {
-                    local50.time = local58;
-                    this.insertTask(local50.next, local50);
+                    task.time = time;
+                    this.insertTask(task.next, task);
                 }
             }
-        } while (arg0 != 0);
+        } while (length != 0);
     }
 
     @OriginalMember(owner = "client!nn", name = "f", descriptor = "()V")
@@ -148,22 +148,22 @@ public final class AudioBussMixer extends AudioBuss {
         if (this.position <= 0) {
             return;
         }
-        for (@Pc(8) AudioBussTask local8 = (AudioBussTask) this.tasks.first(); local8 != null; local8 = (AudioBussTask) this.tasks.next()) {
-            local8.time -= this.position;
+        for (@Pc(8) AudioBussTask task = (AudioBussTask) this.tasks.first(); task != null; task = (AudioBussTask) this.tasks.next()) {
+            task.time -= this.position;
         }
         this.nextTaskTime -= this.position;
         this.position = 0;
     }
 
     @OriginalMember(owner = "client!nn", name = "a", descriptor = "(Lclient!ada;)V")
-    public void removeTask(@OriginalArg(0) AudioBussTask arg0) {
-        arg0.unlink();
-        arg0.close();
-        @Pc(9) Node local9 = this.tasks.sentinel.next;
-        if (local9 == this.tasks.sentinel) {
+    public void removeTask(@OriginalArg(0) AudioBussTask task) {
+        task.unlink();
+        task.close();
+        @Pc(9) Node node = this.tasks.sentinel.next;
+        if (node == this.tasks.sentinel) {
             this.nextTaskTime = -1;
         } else {
-            this.nextTaskTime = ((AudioBussTask) local9).time;
+            this.nextTaskTime = ((AudioBussTask) node).time;
         }
     }
 }
