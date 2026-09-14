@@ -21,10 +21,10 @@ public abstract class AudioBuss extends Node {
     public volatile boolean aBoolean793 = true;
 
     @OriginalMember(owner = "client!dea", name = "a", descriptor = "(I)V")
-    public abstract void method9130(@OriginalArg(0) int arg0);
+    public abstract void skip(@OriginalArg(0) int arg0);
 
     @OriginalMember(owner = "client!dea", name = "b", descriptor = "([III)V")
-    public abstract void method9131(@OriginalArg(0) int[] arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2);
+    public abstract void fill(@OriginalArg(0) int[] arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2);
 
     @OriginalMember(owner = "client!dea", name = "b", descriptor = "()I")
     public abstract int method9132();
@@ -33,11 +33,11 @@ public abstract class AudioBuss extends Node {
     public abstract AudioBuss method9133();
 
     @OriginalMember(owner = "client!dea", name = "a", descriptor = "([III)V")
-    protected final void method9134(@OriginalArg(0) int[] arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
+    protected final void mix(@OriginalArg(0) int[] arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
         if (this.aBoolean793) {
-            this.method9131(arg0, arg1, arg2);
+            this.fill(arg0, arg1, arg2);
         } else {
-            this.method9130(arg2);
+            this.skip(arg2);
         }
     }
 

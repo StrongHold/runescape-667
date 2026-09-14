@@ -1,7 +1,7 @@
 import com.jagex.game.runetek6.sound.Audio;
 import com.jagex.game.runetek6.sound.OggStream;
 import com.jagex.sound.DoublyLinkedNode_Sub2_Sub8;
-import com.jagex.sound.Node_Sub6_Sub5;
+import com.jagex.sound.QueueBuss;
 import com.jagex.sound.SampleRateConverter;
 import jagtheora.ogg.OggPacket;
 import jagtheora.ogg.OggStreamState;
@@ -18,7 +18,7 @@ import org.openrs2.deob.annotation.Pc;
 public final class OggVorbisStream extends OggStream {
 
     @OriginalMember(owner = "client!ik", name = "C", descriptor = "Lclient!wc;")
-    public Node_Sub6_Sub5 aClass2_Sub6_Sub5_1;
+    public QueueBuss aClass2_Sub6_Sub5_1;
 
     @OriginalMember(owner = "client!ik", name = "O", descriptor = "Lclient!jagtheora/vorbis/DSPState;")
     public DSPState dspState;
@@ -61,12 +61,12 @@ public final class OggVorbisStream extends OggStream {
         this.vorbisInfo.cleanUp();
 
         if (this.aClass2_Sub6_Sub5_1 != null) {
-            this.aClass2_Sub6_Sub5_1.method9141();
+            this.aClass2_Sub6_Sub5_1.finish();
         }
     }
 
     @OriginalMember(owner = "client!ik", name = "c", descriptor = "(I)Lclient!wc;")
-    public Node_Sub6_Sub5 method3960() {
+    public QueueBuss method3960() {
         return this.aClass2_Sub6_Sub5_1;
     }
 
@@ -86,7 +86,7 @@ public final class OggVorbisStream extends OggStream {
                 this.dspState = new DSPState(this.vorbisInfo);
                 this.vorbisBlock = new VorbisBlock(this.dspState);
                 this.converter = new SampleRateConverter(this.vorbisInfo.rate, Audio.sampleRate);
-                this.aClass2_Sub6_Sub5_1 = new Node_Sub6_Sub5(this.vorbisInfo.channels);
+                this.aClass2_Sub6_Sub5_1 = new QueueBuss(this.vorbisInfo.channels);
             }
             return;
         }
@@ -100,19 +100,19 @@ public final class OggVorbisStream extends OggStream {
         }
         this.dspState.read(local35[0].length);
         this.anInt4396 += local35[0].length;
-        @Pc(85) DoublyLinkedNode_Sub2_Sub8 local85 = this.aClass2_Sub6_Sub5_1.method9142(local35[0].length, this.aDouble14);
+        @Pc(85) DoublyLinkedNode_Sub2_Sub8 local85 = this.aClass2_Sub6_Sub5_1.allocBlock(local35[0].length, this.aDouble14);
         Static373.method5300(local35, local85.aShortArrayArray3);
         for (@Pc(93) int local93 = 0; local93 < this.vorbisInfo.channels; local93++) {
             local85.aShortArrayArray3[local93] = this.converter.convert(local85.aShortArrayArray3[local93]);
         }
-        this.aClass2_Sub6_Sub5_1.method9143(local85);
+        this.aClass2_Sub6_Sub5_1.add(local85);
     }
 
     @OriginalMember(owner = "client!ik", name = "b", descriptor = "(B)D")
     public double getTime() {
         @Pc(13) double local13 = this.aDouble14;
         if (this.aClass2_Sub6_Sub5_1 != null) {
-            local13 = this.aClass2_Sub6_Sub5_1.method9137(false);
+            local13 = this.aClass2_Sub6_Sub5_1.time(false);
             if (local13 < 0.0D) {
                 local13 = this.aDouble14;
             }
@@ -122,6 +122,6 @@ public final class OggVorbisStream extends OggStream {
 
     @OriginalMember(owner = "client!ik", name = "h", descriptor = "(I)I")
     public int method3965() {
-        return this.aClass2_Sub6_Sub5_1 == null ? 0 : this.aClass2_Sub6_Sub5_1.method9140();
+        return this.aClass2_Sub6_Sub5_1 == null ? 0 : this.aClass2_Sub6_Sub5_1.size();
     }
 }

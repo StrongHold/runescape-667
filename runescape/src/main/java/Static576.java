@@ -1,5 +1,5 @@
 import com.jagex.Entity;
-import com.jagex.sound.Class123;
+import com.jagex.sound.SoundCache;
 import com.jagex.sound.MixBuss;
 import org.openrs2.deob.annotation.OriginalArg;
 import org.openrs2.deob.annotation.OriginalMember;
@@ -26,7 +26,7 @@ public final class Static576 {
                     }
                 }
                 if (Static12.aClass123_4 == null) {
-                    Static12.aClass123_4 = new Class123(Static91.synthSoundsJs5, Static296.vorbisJs5);
+                    Static12.aClass123_4 = new SoundCache(Static91.synthSoundsJs5, Static296.vorbisJs5);
                 }
                 @Pc(36) MixBuss local36 = Static581.mixBuss;
                 if (SongManager.aClass2_Sub6_Sub1_2 != null) {

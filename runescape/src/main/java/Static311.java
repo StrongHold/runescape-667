@@ -1,4 +1,4 @@
-import com.jagex.sound.Class123;
+import com.jagex.sound.SoundCache;
 import com.jagex.sound.midi.MidiSong;
 import org.openrs2.deob.annotation.OriginalArg;
 import org.openrs2.deob.annotation.OriginalMember;
@@ -20,15 +20,15 @@ public final class Static311 {
         }
         SongManager.midiSongs = null;
         if (Static159.anInt2788 == 0) {
-            Static270.aClass123_2 = new Class123(Static91.synthSoundsJs5, Static296.vorbisJs5);
+            Static270.soundCache = new SoundCache(Static91.synthSoundsJs5, Static296.vorbisJs5);
             Static581.mixBuss.method927();
             Static159.anInt2788 = 1;
         }
         if (Static159.anInt2788 == 1) {
-            if (!Static581.mixBuss.method944(Static270.aClass123_2, Static86.js5_15, arg0)) {
+            if (!Static581.mixBuss.method944(Static270.soundCache, Static86.js5_15, arg0)) {
                 return false;
             }
-            Static270.aClass123_2 = null;
+            Static270.soundCache = null;
             Static62.aClass2_Sub8_2 = null;
             Static159.anInt2788 = 0;
         }

@@ -806,12 +806,12 @@ public final class SoundStream extends AudioBuss {
         do {
             if (this.anInt3684 <= 0) {
                 if (this.rate == -256 && (this.anInt3686 & 0xFF) == 0) {
-                    if (Node_Sub6_Sub5.stereo) {
+                    if (QueueBuss.stereo) {
                         return method3334(((VariableRateSoundPacket) super.aClass2_Sub49_6).data, arg0, this.anInt3686, arg1, this.anInt3680, this.anInt3677, arg3, arg2, this);
                     }
                     return method3343(((VariableRateSoundPacket) super.aClass2_Sub49_6).data, arg0, this.anInt3686, arg1, this.anInt3676, arg3, arg2, this);
                 }
-                if (Node_Sub6_Sub5.stereo) {
+                if (QueueBuss.stereo) {
                     return method3324(((VariableRateSoundPacket) super.aClass2_Sub49_6).data, arg0, this.anInt3686, arg1, this.anInt3680, this.anInt3677, arg3, arg2, this, this.rate, arg4);
                 }
                 return method3339(((VariableRateSoundPacket) super.aClass2_Sub49_6).data, arg0, this.anInt3686, arg1, this.anInt3676, arg3, arg2, this, this.rate, arg4);
@@ -822,12 +822,12 @@ public final class SoundStream extends AudioBuss {
             }
             this.anInt3684 += arg1;
             if (this.rate == -256 && (this.anInt3686 & 0xFF) == 0) {
-                if (Node_Sub6_Sub5.stereo) {
+                if (QueueBuss.stereo) {
                     arg1 = method3342(((VariableRateSoundPacket) super.aClass2_Sub49_6).data, arg0, this.anInt3686, arg1, this.anInt3680, this.anInt3677, this.anInt3683, this.anInt3687, local5, arg2, this);
                 } else {
                     arg1 = method3332(((VariableRateSoundPacket) super.aClass2_Sub49_6).data, arg0, this.anInt3686, arg1, this.anInt3676, this.anInt3678, local5, arg2, this);
                 }
-            } else if (Node_Sub6_Sub5.stereo) {
+            } else if (QueueBuss.stereo) {
                 arg1 = method3326(((VariableRateSoundPacket) super.aClass2_Sub49_6).data, arg0, this.anInt3686, arg1, this.anInt3680, this.anInt3677, this.anInt3683, this.anInt3687, local5, arg2, this, this.rate, arg4);
             } else {
                 arg1 = method3347(((VariableRateSoundPacket) super.aClass2_Sub49_6).data, arg0, this.anInt3686, arg1, this.anInt3676, this.anInt3678, local5, arg2, this, this.rate, arg4);
@@ -842,9 +842,9 @@ public final class SoundStream extends AudioBuss {
 
     @OriginalMember(owner = "client!haa", name = "b", descriptor = "([III)V")
     @Override
-    public synchronized void method9131(@OriginalArg(0) int[] arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
+    public synchronized void fill(@OriginalArg(0) int[] arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
         if (this.volume == 0 && this.anInt3684 == 0) {
-            this.method9130(arg2);
+            this.skip(arg2);
             return;
         }
         @Pc(13) VariableRateSoundPacket local13 = (VariableRateSoundPacket) super.aClass2_Sub49_6;
@@ -1022,12 +1022,12 @@ public final class SoundStream extends AudioBuss {
         do {
             if (this.anInt3684 <= 0) {
                 if (this.rate == 256 && (this.anInt3686 & 0xFF) == 0) {
-                    if (Node_Sub6_Sub5.stereo) {
+                    if (QueueBuss.stereo) {
                         return method3329(((VariableRateSoundPacket) super.aClass2_Sub49_6).data, arg0, this.anInt3686, arg1, this.anInt3680, this.anInt3677, arg3, arg2, this);
                     }
                     return method3310(((VariableRateSoundPacket) super.aClass2_Sub49_6).data, arg0, this.anInt3686, arg1, this.anInt3676, arg3, arg2, this);
                 }
-                if (Node_Sub6_Sub5.stereo) {
+                if (QueueBuss.stereo) {
                     return method3312(((VariableRateSoundPacket) super.aClass2_Sub49_6).data, arg0, this.anInt3686, arg1, this.anInt3680, this.anInt3677, arg3, arg2, this, this.rate, arg4);
                 }
                 return method3316(((VariableRateSoundPacket) super.aClass2_Sub49_6).data, arg0, this.anInt3686, arg1, this.anInt3676, arg3, arg2, this, this.rate, arg4);
@@ -1038,12 +1038,12 @@ public final class SoundStream extends AudioBuss {
             }
             this.anInt3684 += arg1;
             if (this.rate == 256 && (this.anInt3686 & 0xFF) == 0) {
-                if (Node_Sub6_Sub5.stereo) {
+                if (QueueBuss.stereo) {
                     arg1 = method3325(((VariableRateSoundPacket) super.aClass2_Sub49_6).data, arg0, this.anInt3686, arg1, this.anInt3680, this.anInt3677, this.anInt3683, this.anInt3687, local5, arg2, this);
                 } else {
                     arg1 = method3321(((VariableRateSoundPacket) super.aClass2_Sub49_6).data, arg0, this.anInt3686, arg1, this.anInt3676, this.anInt3678, local5, arg2, this);
                 }
-            } else if (Node_Sub6_Sub5.stereo) {
+            } else if (QueueBuss.stereo) {
                 arg1 = method3313(((VariableRateSoundPacket) super.aClass2_Sub49_6).data, arg0, this.anInt3686, arg1, this.anInt3680, this.anInt3677, this.anInt3683, this.anInt3687, local5, arg2, this, this.rate, arg4);
             } else {
                 arg1 = method3331(((VariableRateSoundPacket) super.aClass2_Sub49_6).data, arg0, this.anInt3686, arg1, this.anInt3676, this.anInt3678, local5, arg2, this, this.rate, arg4);
@@ -1217,7 +1217,7 @@ public final class SoundStream extends AudioBuss {
 
     @OriginalMember(owner = "client!haa", name = "a", descriptor = "(I)V")
     @Override
-    public synchronized void method9130(@OriginalArg(0) int arg0) {
+    public synchronized void skip(@OriginalArg(0) int arg0) {
         if (this.anInt3684 > 0) {
             if (arg0 >= this.anInt3684) {
                 if (this.volume == Integer.MIN_VALUE) {

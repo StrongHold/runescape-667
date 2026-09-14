@@ -5,23 +5,23 @@ import org.openrs2.deob.annotation.OriginalMember;
 import java.awt.Component;
 
 @OriginalClass("client!ei")
-public interface Interface7 {
+public interface PcmDevice {
 
     @OriginalMember(owner = "client!ei", name = "a", descriptor = "(II)I")
-    int method4094(@OriginalArg(0) int arg0);
+    int position(@OriginalArg(0) int arg0);
 
     @OriginalMember(owner = "client!ei", name = "a", descriptor = "(III)V")
-    void method4095(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) throws Exception;
+    void open(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) throws Exception;
 
     @OriginalMember(owner = "client!ei", name = "a", descriptor = "(IZLjava/awt/Component;B)V")
-    void method4096(@OriginalArg(0) int arg0, @OriginalArg(1) boolean arg1, @OriginalArg(2) Component arg2) throws Exception;
+    void init(@OriginalArg(0) int arg0, @OriginalArg(1) boolean arg1, @OriginalArg(2) Component arg2) throws Exception;
 
     @OriginalMember(owner = "client!ei", name = "a", descriptor = "(IB)V")
-    void method4097(@OriginalArg(0) int arg0);
+    void discardBuffer(@OriginalArg(0) int arg0);
 
     @OriginalMember(owner = "client!ei", name = "a", descriptor = "(I[I)V")
-    void method4098(@OriginalArg(0) int arg0, @OriginalArg(1) int[] arg1);
+    void write(@OriginalArg(0) int arg0, @OriginalArg(1) int[] arg1);
 
     @OriginalMember(owner = "client!ei", name = "a", descriptor = "(IZ)V")
-    void method4099(@OriginalArg(0) int arg0);
+    void close(@OriginalArg(0) int arg0);
 }

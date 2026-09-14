@@ -69,7 +69,7 @@ public final class MixBuss extends AudioBuss {
     public final int[] anIntArray53 = new int[16];
 
     @OriginalMember(owner = "client!bd", name = "Fb", descriptor = "[[Lclient!dha;")
-    public final Node_Sub16[][] aClass2_Sub16ArrayArray1 = new Node_Sub16[16][128];
+    public final MusicPatchNode[][] keyVoices = new MusicPatchNode[16][128];
 
     @OriginalMember(owner = "client!bd", name = "Q", descriptor = "[I")
     public final int[] anIntArray46 = new int[16];
@@ -87,7 +87,7 @@ public final class MixBuss extends AudioBuss {
     public final int[] anIntArray52 = new int[16];
 
     @OriginalMember(owner = "client!bd", name = "Mb", descriptor = "[[Lclient!dha;")
-    public final Node_Sub16[][] aClass2_Sub16ArrayArray2 = new Node_Sub16[16][128];
+    public final MusicPatchNode[][] groupVoices = new MusicPatchNode[16][128];
 
     @OriginalMember(owner = "client!bd", name = "nb", descriptor = "[I")
     public final int[] anIntArray51 = new int[16];
@@ -102,7 +102,7 @@ public final class MixBuss extends AudioBuss {
     public final MidiSequence midiSequence = new MidiSequence();
 
     @OriginalMember(owner = "client!bd", name = "rb", descriptor = "Lclient!uka;")
-    public final Node_Sub6_Sub4 aClass2_Sub6_Sub4_1 = new Node_Sub6_Sub4(this);
+    public final VoiceBuss voiceBuss = new VoiceBuss(this);
 
     @OriginalMember(owner = "client!bd", name = "q", descriptor = "Lclient!av;")
     public final IterableHashTable aIterableHashTable_7;
@@ -122,9 +122,9 @@ public final class MixBuss extends AudioBuss {
     }
 
     @OriginalMember(owner = "client!vja", name = "a", descriptor = "(Lclient!sb;IZ)Lclient!cea;")
-    public static Node_Sub11 method8917(@OriginalArg(0) js5 js5, @OriginalArg(1) int id) {
+    public static MusicPatch method8917(@OriginalArg(0) js5 js5, @OriginalArg(1) int id) {
         @Pc(8) byte[] data = js5.getfile(id);
-        return data == null ? null : new Node_Sub11(data);
+        return data == null ? null : new MusicPatch(data);
     }
 
     @OriginalMember(owner = "client!bd", name = "a", descriptor = "(IJ)V")
@@ -176,7 +176,7 @@ public final class MixBuss extends AudioBuss {
 
     @OriginalMember(owner = "client!bd", name = "b", descriptor = "([III)V")
     @Override
-    public synchronized void method9131(@OriginalArg(0) int[] arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
+    public synchronized void fill(@OriginalArg(0) int[] arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
         if (this.midiSequence.isPlaying()) {
             @Pc(14) int local14 = this.midiSequence.timeDivision * this.anInt815 / Audio.sampleRate;
             do {
@@ -187,19 +187,19 @@ public final class MixBuss extends AudioBuss {
                 }
                 @Pc(55) int local55 = (int) ((this.aLong28 + (long) local14 - this.aLong29 - 1L) / (long) local14);
                 this.aLong29 += (long) local55 * (long) local14;
-                this.aClass2_Sub6_Sub4_1.method9131(arg0, arg1, local55);
+                this.voiceBuss.fill(arg0, arg1, local55);
                 arg1 += local55;
                 this.method932((byte) -89);
                 arg2 -= local55;
             } while (this.midiSequence.isPlaying());
         }
-        this.aClass2_Sub6_Sub4_1.method9131(arg0, arg1, arg2);
+        this.voiceBuss.fill(arg0, arg1, arg2);
     }
 
     @OriginalMember(owner = "client!bd", name = "c", descriptor = "()Lclient!dea;")
     @Override
     public synchronized AudioBuss method9133() {
-        return this.aClass2_Sub6_Sub4_1;
+        return this.voiceBuss;
     }
 
     @OriginalMember(owner = "client!bd", name = "a", descriptor = "(Z)V")
@@ -228,39 +228,39 @@ public final class MixBuss extends AudioBuss {
     }
 
     @OriginalMember(owner = "client!bd", name = "a", descriptor = "(ILclient!dha;)I")
-    public int sampleRate(@OriginalArg(1) Node_Sub16 arg0) {
-        @Pc(14) int local14 = arg0.anInt2191 + (arg0.anInt2203 * arg0.anInt2197 >> 12);
-        local14 += (this.anIntArray48[arg0.anInt2187] - 8192) * this.anIntArray52[arg0.anInt2187] >> 12;
-        @Pc(35) Class269 local35 = arg0.aClass269_1;
+    public int sampleRate(@OriginalArg(1) MusicPatchNode arg0) {
+        @Pc(14) int local14 = arg0.pitch + (arg0.portamentoFraction * arg0.portamentoOffset >> 12);
+        local14 += (this.anIntArray48[arg0.channel] - 8192) * this.anIntArray52[arg0.channel] >> 12;
+        @Pc(35) MusicPatchEnvelope local35 = arg0.envelope;
         @Pc(65) int local65;
-        if (local35.anInt6776 > 0 && (local35.anInt6775 > 0 || this.anIntArray51[arg0.anInt2187] > 0)) {
-            local65 = local35.anInt6775 << 2;
-            @Pc(70) int local70 = local35.anInt6780 << 1;
-            if (local70 > arg0.anInt2201) {
-                local65 = arg0.anInt2201 * local65 / local70;
+        if (local35.vibratoRate > 0 && (local35.vibratoDepth > 0 || this.anIntArray51[arg0.channel] > 0)) {
+            local65 = local35.vibratoDepth << 2;
+            @Pc(70) int local70 = local35.vibratoDelay << 1;
+            if (local70 > arg0.elapsed) {
+                local65 = arg0.elapsed * local65 / local70;
             }
-            local65 += this.anIntArray51[arg0.anInt2187] >> 7;
-            @Pc(104) double local104 = Math.sin((double) (arg0.anInt2188 & 0x1FF) * 0.01227184630308513D);
+            local65 += this.anIntArray51[arg0.channel] >> 7;
+            @Pc(104) double local104 = Math.sin((double) (arg0.vibratoPhase & 0x1FF) * 0.01227184630308513D);
             local14 += (int) (local104 * (double) local65);
         }
-        local65 = (int) ((double) (arg0.aClass2_Sub49_Sub1_1.sampleRate * 256) * Math.pow(2.0D, (double) local14 * 3.255208333333333E-4D) / (double) Audio.sampleRate + 0.5D);
+        local65 = (int) ((double) (arg0.sound.sampleRate * 256) * Math.pow(2.0D, (double) local14 * 3.255208333333333E-4D) / (double) Audio.sampleRate + 0.5D);
         return local65 >= 1 ? local65 : 1;
     }
 
     @OriginalMember(owner = "client!bd", name = "a", descriptor = "(IIII)V")
     public void method915(@OriginalArg(0) int arg0, @OriginalArg(2) int arg1, @OriginalArg(3) int arg2) {
-        @Pc(12) Node_Sub16 local12 = this.aClass2_Sub16ArrayArray1[arg1][arg2];
+        @Pc(12) MusicPatchNode local12 = this.keyVoices[arg1][arg2];
         if (local12 == null) {
             return;
         }
-        this.aClass2_Sub16ArrayArray1[arg1][arg2] = null;
+        this.keyVoices[arg1][arg2] = null;
         if ((this.anIntArray56[arg1] & 0x2) == 0) {
-            local12.anInt2202 = 0;
+            local12.releasePhase = 0;
             return;
         }
-        for (@Pc(47) Node_Sub16 local47 = (Node_Sub16) this.aClass2_Sub6_Sub4_1.aDeque_72.first(); local47 != null; local47 = (Node_Sub16) this.aClass2_Sub6_Sub4_1.aDeque_72.next()) {
-            if (local12.anInt2187 == local47.anInt2187 && local47.anInt2202 < 0 && local12 != local47) {
-                local12.anInt2202 = 0;
+        for (@Pc(47) MusicPatchNode local47 = (MusicPatchNode) this.voiceBuss.voices.first(); local47 != null; local47 = (MusicPatchNode) this.voiceBuss.voices.next()) {
+            if (local12.channel == local47.channel && local47.releasePhase < 0 && local12 != local47) {
+                local12.releasePhase = 0;
                 break;
             }
         }
@@ -274,9 +274,9 @@ public final class MixBuss extends AudioBuss {
     @OriginalMember(owner = "client!bd", name = "c", descriptor = "(II)V")
     public void method917(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) {
         if ((this.anIntArray56[arg1] & 0x4) != 0) {
-            for (@Pc(22) Node_Sub16 local22 = (Node_Sub16) this.aClass2_Sub6_Sub4_1.aDeque_72.first(); local22 != null; local22 = (Node_Sub16) this.aClass2_Sub6_Sub4_1.aDeque_72.next()) {
-                if (arg1 == local22.anInt2187) {
-                    local22.anInt2183 = 0;
+            for (@Pc(22) MusicPatchNode local22 = (MusicPatchNode) this.voiceBuss.voices.first(); local22 != null; local22 = (MusicPatchNode) this.voiceBuss.voices.next()) {
+                if (arg1 == local22.channel) {
+                    local22.retriggerPhase = 0;
                 }
             }
         }
@@ -309,40 +309,40 @@ public final class MixBuss extends AudioBuss {
     }
 
     @OriginalMember(owner = "client!bd", name = "a", descriptor = "(Lclient!dha;B)I")
-    public int method920(@OriginalArg(0) Node_Sub16 arg0) {
-        if (this.anIntArray42[arg0.anInt2187] == 0) {
+    public int method920(@OriginalArg(0) MusicPatchNode arg0) {
+        if (this.anIntArray42[arg0.channel] == 0) {
             return 0;
         }
-        @Pc(18) Class269 local18 = arg0.aClass269_1;
-        @Pc(34) int local34 = this.anIntArray45[arg0.anInt2187] * this.anIntArray53[arg0.anInt2187] + 4096 >> 13;
+        @Pc(18) MusicPatchEnvelope local18 = arg0.envelope;
+        @Pc(34) int local34 = this.anIntArray45[arg0.channel] * this.anIntArray53[arg0.channel] + 4096 >> 13;
         @Pc(42) int local42 = local34 * local34 + 16384 >> 15;
-        @Pc(51) int local51 = arg0.anInt2199 * local42 + 16384 >> 15;
+        @Pc(51) int local51 = arg0.volume * local42 + 16384 >> 15;
         @Pc(60) int local60 = this.volume * local51 + 128 >> 8;
-        local34 = local60 * this.anIntArray42[arg0.anInt2187] + 128 >> 8;
-        if (local18.anInt6771 > 0) {
-            local34 = (int) ((double) local34 * Math.pow(0.5D, (double) arg0.anInt2204 * 1.953125E-5D * (double) local18.anInt6771) + 0.5D);
+        local34 = local60 * this.anIntArray42[arg0.channel] + 128 >> 8;
+        if (local18.decay > 0) {
+            local34 = (int) ((double) local34 * Math.pow(0.5D, (double) arg0.decayPhase * 1.953125E-5D * (double) local18.decay) + 0.5D);
         }
         @Pc(102) int local102;
         @Pc(110) int local110;
         @Pc(132) int local132;
         @Pc(144) int local144;
-        if (local18.aByteArray83 != null) {
-            local102 = arg0.anInt2190;
-            local110 = local18.aByteArray83[arg0.anInt2185 + 1];
-            if (local18.aByteArray83.length - 2 > arg0.anInt2185) {
-                local132 = (local18.aByteArray83[arg0.anInt2185] & 0xFF) << 8;
-                local144 = (local18.aByteArray83[arg0.anInt2185 + 2] & 0xFF) << 8;
-                local110 += (local18.aByteArray83[arg0.anInt2185 + 3] - local110) * (-local132 + local102) / (local144 - local132);
+        if (local18.envelope != null) {
+            local102 = arg0.envelopePhase;
+            local110 = local18.envelope[arg0.envelopeIndex + 1];
+            if (local18.envelope.length - 2 > arg0.envelopeIndex) {
+                local132 = (local18.envelope[arg0.envelopeIndex] & 0xFF) << 8;
+                local144 = (local18.envelope[arg0.envelopeIndex + 2] & 0xFF) << 8;
+                local110 += (local18.envelope[arg0.envelopeIndex + 3] - local110) * (-local132 + local102) / (local144 - local132);
             }
             local34 = local110 * local34 + 32 >> 6;
         }
-        if (arg0.anInt2202 > 0 && local18.aByteArray82 != null) {
-            local102 = arg0.anInt2202;
-            local110 = local18.aByteArray82[arg0.anInt2195 + 1];
-            if (local18.aByteArray82.length - 2 > arg0.anInt2195) {
-                local132 = (local18.aByteArray82[arg0.anInt2195] & 0xFF) << 8;
-                local144 = (local18.aByteArray82[arg0.anInt2195 + 2] & 0xFF) << 8;
-                local110 += (local102 - local132) * (local18.aByteArray82[arg0.anInt2195 + 3] - local110) / (local144 - local132);
+        if (arg0.releasePhase > 0 && local18.release != null) {
+            local102 = arg0.releasePhase;
+            local110 = local18.release[arg0.releaseIndex + 1];
+            if (local18.release.length - 2 > arg0.releaseIndex) {
+                local132 = (local18.release[arg0.releaseIndex] & 0xFF) << 8;
+                local144 = (local18.release[arg0.releaseIndex + 2] & 0xFF) << 8;
+                local110 += (local102 - local132) * (local18.release[arg0.releaseIndex + 3] - local110) / (local144 - local132);
             }
             local34 = local110 * local34 + 32 >> 6;
         }
@@ -356,14 +356,14 @@ public final class MixBuss extends AudioBuss {
     }
 
     @OriginalMember(owner = "client!bd", name = "b", descriptor = "(Lclient!dha;B)Z")
-    public boolean method921(@OriginalArg(0) Node_Sub16 arg0) {
-        if (arg0.aClass2_Sub6_Sub2_1 != null) {
+    public boolean method921(@OriginalArg(0) MusicPatchNode arg0) {
+        if (arg0.stream != null) {
             return false;
         }
-        if (arg0.anInt2202 >= 0) {
+        if (arg0.releasePhase >= 0) {
             arg0.unlink();
-            if (arg0.anInt2198 > 0 && this.aClass2_Sub16ArrayArray2[arg0.anInt2187][arg0.anInt2198] == arg0) {
-                this.aClass2_Sub16ArrayArray2[arg0.anInt2187][arg0.anInt2198] = null;
+            if (arg0.exclusiveGroup > 0 && this.groupVoices[arg0.channel][arg0.exclusiveGroup] == arg0) {
+                this.groupVoices[arg0.channel][arg0.exclusiveGroup] = null;
             }
         }
         return true;
@@ -381,9 +381,9 @@ public final class MixBuss extends AudioBuss {
     }
 
     @OriginalMember(owner = "client!bd", name = "b", descriptor = "(ILclient!dha;)I")
-    public int method923(@OriginalArg(1) Node_Sub16 arg0) {
-        @Pc(9) int local9 = this.anIntArray55[arg0.anInt2187];
-        return local9 < 8192 ? local9 * arg0.anInt2193 + 32 >> 6 : 16384 - ((128 - arg0.anInt2193) * (-local9 + 16384) + 32 >> 6);
+    public int method923(@OriginalArg(1) MusicPatchNode arg0) {
+        @Pc(9) int local9 = this.anIntArray55[arg0.channel];
+        return local9 < 8192 ? local9 * arg0.pan + 32 >> 6 : 16384 - ((128 - arg0.pan) * (-local9 + 16384) + 32 >> 6);
     }
 
     @OriginalMember(owner = "client!bd", name = "d", descriptor = "(II)V")
@@ -559,7 +559,7 @@ public final class MixBuss extends AudioBuss {
 
     @OriginalMember(owner = "client!bd", name = "b", descriptor = "(B)V")
     public synchronized void method927() {
-        for (@Pc(5) Node_Sub11 local5 = (Node_Sub11) this.aIterableHashTable_7.first(); local5 != null; local5 = (Node_Sub11) this.aIterableHashTable_7.next()) {
+        for (@Pc(5) MusicPatch local5 = (MusicPatch) this.aIterableHashTable_7.first(); local5 != null; local5 = (MusicPatch) this.aIterableHashTable_7.next()) {
             local5.unlink();
         }
     }
@@ -577,17 +577,17 @@ public final class MixBuss extends AudioBuss {
 
     @OriginalMember(owner = "client!bd", name = "a", descriptor = "(II)V")
     public void method930(@OriginalArg(1) int arg0) {
-        for (@Pc(14) Node_Sub16 local14 = (Node_Sub16) this.aClass2_Sub6_Sub4_1.aDeque_72.first(); local14 != null; local14 = (Node_Sub16) this.aClass2_Sub6_Sub4_1.aDeque_72.next()) {
-            if (arg0 < 0 || local14.anInt2187 == arg0) {
-                if (local14.aClass2_Sub6_Sub2_1 != null) {
-                    local14.aClass2_Sub6_Sub2_1.method3320(Audio.sampleRate / 100);
-                    if (local14.aClass2_Sub6_Sub2_1.method3336()) {
-                        this.aClass2_Sub6_Sub4_1.aClass2_Sub6_Sub3_2.addFirst(local14.aClass2_Sub6_Sub2_1);
+        for (@Pc(14) MusicPatchNode local14 = (MusicPatchNode) this.voiceBuss.voices.first(); local14 != null; local14 = (MusicPatchNode) this.voiceBuss.voices.next()) {
+            if (arg0 < 0 || local14.channel == arg0) {
+                if (local14.stream != null) {
+                    local14.stream.method3320(Audio.sampleRate / 100);
+                    if (local14.stream.method3336()) {
+                        this.voiceBuss.fadeOutBuss.addFirst(local14.stream);
                     }
-                    local14.method2083();
+                    local14.clear();
                 }
-                if (local14.anInt2202 < 0) {
-                    this.aClass2_Sub16ArrayArray1[local14.anInt2187][local14.anInt2196] = null;
+                if (local14.releasePhase < 0) {
+                    this.keyVoices[local14.channel][local14.key] = null;
                 }
                 local14.unlink();
             }
@@ -651,8 +651,8 @@ public final class MixBuss extends AudioBuss {
 
     @OriginalMember(owner = "client!bd", name = "b", descriptor = "(I)V")
     public synchronized void method933() {
-        for (@Pc(7) Node_Sub11 local7 = (Node_Sub11) this.aIterableHashTable_7.first(); local7 != null; local7 = (Node_Sub11) this.aIterableHashTable_7.next()) {
-            local7.method1521();
+        for (@Pc(7) MusicPatch local7 = (MusicPatch) this.aIterableHashTable_7.first(); local7 != null; local7 = (MusicPatch) this.aIterableHashTable_7.next()) {
+            local7.clearSoundIds();
         }
     }
 
@@ -665,61 +665,61 @@ public final class MixBuss extends AudioBuss {
     public void method936(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
         this.method915(64, arg0, arg1);
         if ((this.anIntArray56[arg0] & 0x2) != 0) {
-            for (@Pc(25) Node_Sub16 local25 = (Node_Sub16) this.aClass2_Sub6_Sub4_1.aDeque_72.last(); local25 != null; local25 = (Node_Sub16) this.aClass2_Sub6_Sub4_1.aDeque_72.previous()) {
-                if (arg0 == local25.anInt2187 && local25.anInt2202 < 0) {
-                    this.aClass2_Sub16ArrayArray1[arg0][local25.anInt2196] = null;
-                    this.aClass2_Sub16ArrayArray1[arg0][arg1] = local25;
-                    @Pc(72) int local72 = local25.anInt2191 + (local25.anInt2203 * local25.anInt2197 >> 12);
-                    local25.anInt2191 += arg1 - local25.anInt2196 << 8;
-                    local25.anInt2197 = local72 - local25.anInt2191;
-                    local25.anInt2203 = 4096;
-                    local25.anInt2196 = arg1;
+            for (@Pc(25) MusicPatchNode local25 = (MusicPatchNode) this.voiceBuss.voices.last(); local25 != null; local25 = (MusicPatchNode) this.voiceBuss.voices.previous()) {
+                if (arg0 == local25.channel && local25.releasePhase < 0) {
+                    this.keyVoices[arg0][local25.key] = null;
+                    this.keyVoices[arg0][arg1] = local25;
+                    @Pc(72) int local72 = local25.pitch + (local25.portamentoFraction * local25.portamentoOffset >> 12);
+                    local25.pitch += arg1 - local25.key << 8;
+                    local25.portamentoOffset = local72 - local25.pitch;
+                    local25.portamentoFraction = 4096;
+                    local25.key = arg1;
                     return;
                 }
             }
         }
-        @Pc(117) Node_Sub11 local117 = (Node_Sub11) this.aIterableHashTable_7.get(this.anIntArray54[arg0]);
+        @Pc(117) MusicPatch local117 = (MusicPatch) this.aIterableHashTable_7.get(this.anIntArray54[arg0]);
         if (local117 == null) {
             return;
         }
-        @Pc(126) VariableRateSoundPacket local126 = local117.aClass2_Sub49_Sub1Array1[arg1];
+        @Pc(126) VariableRateSoundPacket local126 = local117.sounds[arg1];
         if (local126 == null) {
             return;
         }
-        @Pc(142) Node_Sub16 local142 = new Node_Sub16();
-        local142.aClass2_Sub11_1 = local117;
-        local142.aClass2_Sub49_Sub1_1 = local126;
-        local142.anInt2187 = arg0;
-        local142.aClass269_1 = local117.aClass269Array1[arg1];
-        local142.anInt2198 = local117.aByteArray19[arg1];
-        local142.anInt2196 = arg1;
-        local142.anInt2199 = local117.aByteArray20[arg1] * arg2 * arg2 * local117.anInt1579 + 1024 >> 11;
-        local142.anInt2193 = local117.aByteArray18[arg1] & 0xFF;
-        local142.anInt2191 = (arg1 << 8) - (local117.aShortArray16[arg1] & 0x7FFF);
-        local142.anInt2204 = 0;
-        local142.anInt2195 = 0;
-        local142.anInt2202 = -1;
-        local142.anInt2190 = 0;
-        local142.anInt2185 = 0;
+        @Pc(142) MusicPatchNode local142 = new MusicPatchNode();
+        local142.patch = local117;
+        local142.sound = local126;
+        local142.channel = arg0;
+        local142.envelope = local117.envelopes[arg1];
+        local142.exclusiveGroup = local117.exclusiveGroups[arg1];
+        local142.key = arg1;
+        local142.volume = local117.volumes[arg1] * arg2 * arg2 * local117.volume + 1024 >> 11;
+        local142.pan = local117.pans[arg1] & 0xFF;
+        local142.pitch = (arg1 << 8) - (local117.pitchOffsets[arg1] & 0x7FFF);
+        local142.decayPhase = 0;
+        local142.releaseIndex = 0;
+        local142.releasePhase = -1;
+        local142.envelopePhase = 0;
+        local142.envelopeIndex = 0;
         if (this.anIntArray49[arg0] == 0) {
-            local142.aClass2_Sub6_Sub2_1 = SoundStream.create(local126, this.sampleRate(local142), this.method920(local142), this.method923(local142));
+            local142.stream = SoundStream.create(local126, this.sampleRate(local142), this.method920(local142), this.method923(local142));
         } else {
-            local142.aClass2_Sub6_Sub2_1 = SoundStream.create(local126, this.sampleRate(local142), 0, this.method923(local142));
-            this.method943(local117.aShortArray16[arg1] < 0, local142);
+            local142.stream = SoundStream.create(local126, this.sampleRate(local142), 0, this.method923(local142));
+            this.method943(local117.pitchOffsets[arg1] < 0, local142);
         }
-        if (local117.aShortArray16[arg1] < 0) {
-            local142.aClass2_Sub6_Sub2_1.setLoops(-1);
+        if (local117.pitchOffsets[arg1] < 0) {
+            local142.stream.setLoops(-1);
         }
-        if (local142.anInt2198 >= 0) {
-            @Pc(297) Node_Sub16 local297 = this.aClass2_Sub16ArrayArray2[arg0][local142.anInt2198];
-            if (local297 != null && local297.anInt2202 < 0) {
-                this.aClass2_Sub16ArrayArray1[arg0][local297.anInt2196] = null;
-                local297.anInt2202 = 0;
+        if (local142.exclusiveGroup >= 0) {
+            @Pc(297) MusicPatchNode local297 = this.groupVoices[arg0][local142.exclusiveGroup];
+            if (local297 != null && local297.releasePhase < 0) {
+                this.keyVoices[arg0][local297.key] = null;
+                local297.releasePhase = 0;
             }
-            this.aClass2_Sub16ArrayArray2[arg0][local142.anInt2198] = local142;
+            this.groupVoices[arg0][local142.exclusiveGroup] = local142;
         }
-        this.aClass2_Sub6_Sub4_1.aDeque_72.addLast(local142);
-        this.aClass2_Sub16ArrayArray1[arg0][arg1] = local142;
+        this.voiceBuss.voices.addLast(local142);
+        this.keyVoices[arg0][arg1] = local142;
     }
 
     @OriginalMember(owner = "client!bd", name = "b", descriptor = "(III)V")
@@ -732,10 +732,10 @@ public final class MixBuss extends AudioBuss {
 
     @OriginalMember(owner = "client!bd", name = "e", descriptor = "(II)V")
     public void method938(@OriginalArg(1) int arg0) {
-        for (@Pc(6) Node_Sub16 local6 = (Node_Sub16) this.aClass2_Sub6_Sub4_1.aDeque_72.first(); local6 != null; local6 = (Node_Sub16) this.aClass2_Sub6_Sub4_1.aDeque_72.next()) {
-            if ((arg0 < 0 || arg0 == local6.anInt2187) && local6.anInt2202 < 0) {
-                this.aClass2_Sub16ArrayArray1[local6.anInt2187][local6.anInt2196] = null;
-                local6.anInt2202 = 0;
+        for (@Pc(6) MusicPatchNode local6 = (MusicPatchNode) this.voiceBuss.voices.first(); local6 != null; local6 = (MusicPatchNode) this.voiceBuss.voices.next()) {
+            if ((arg0 < 0 || arg0 == local6.channel) && local6.releasePhase < 0) {
+                this.keyVoices[local6.channel][local6.key] = null;
+                local6.releasePhase = 0;
             }
         }
     }
@@ -756,9 +756,9 @@ public final class MixBuss extends AudioBuss {
         if ((this.anIntArray56[arg0] & 0x2) == 0) {
             return;
         }
-        for (@Pc(28) Node_Sub16 local28 = (Node_Sub16) this.aClass2_Sub6_Sub4_1.aDeque_72.first(); local28 != null; local28 = (Node_Sub16) this.aClass2_Sub6_Sub4_1.aDeque_72.next()) {
-            if (arg0 == local28.anInt2187 && this.aClass2_Sub16ArrayArray1[arg0][local28.anInt2196] == null && local28.anInt2202 < 0) {
-                local28.anInt2202 = 0;
+        for (@Pc(28) MusicPatchNode local28 = (MusicPatchNode) this.voiceBuss.voices.first(); local28 != null; local28 = (MusicPatchNode) this.voiceBuss.voices.next()) {
+            if (arg0 == local28.channel && this.keyVoices[arg0][local28.key] == null && local28.releasePhase < 0) {
+                local28.releasePhase = 0;
             }
         }
     }
@@ -780,32 +780,32 @@ public final class MixBuss extends AudioBuss {
     }
 
     @OriginalMember(owner = "client!bd", name = "a", descriptor = "(ZLclient!dha;I)V")
-    public void method943(@OriginalArg(0) boolean arg0, @OriginalArg(1) Node_Sub16 arg1) {
-        @Pc(13) int local13 = arg1.aClass2_Sub49_Sub1_1.data.length;
+    public void method943(@OriginalArg(0) boolean arg0, @OriginalArg(1) MusicPatchNode arg1) {
+        @Pc(13) int local13 = arg1.sound.data.length;
         @Pc(42) int local42;
-        if (arg0 && arg1.aClass2_Sub49_Sub1_1.aBoolean668) {
-            @Pc(29) int local29 = local13 + local13 - arg1.aClass2_Sub49_Sub1_1.nominalBitRate;
-            local42 = (int) ((long) local29 * (long) this.anIntArray49[arg1.anInt2187] >> 6);
+        if (arg0 && arg1.sound.aBoolean668) {
+            @Pc(29) int local29 = local13 + local13 - arg1.sound.nominalBitRate;
+            local42 = (int) ((long) local29 * (long) this.anIntArray49[arg1.channel] >> 6);
             local13 <<= 0x8;
             if (local13 <= local42) {
                 local42 = local13 + local13 - local42 - 1;
-                arg1.aClass2_Sub6_Sub2_1.method3323();
+                arg1.stream.method3323();
             }
         } else {
-            local42 = (int) ((long) this.anIntArray49[arg1.anInt2187] * (long) local13 >> 6);
+            local42 = (int) ((long) this.anIntArray49[arg1.channel] * (long) local13 >> 6);
         }
-        arg1.aClass2_Sub6_Sub2_1.method3344(local42);
+        arg1.stream.method3344(local42);
     }
 
     @OriginalMember(owner = "client!bd", name = "a", descriptor = "(Lclient!fca;Lclient!sb;IILclient!bn;)Z")
-    public synchronized boolean method944(@OriginalArg(0) Class123 arg0, @OriginalArg(1) js5 arg1, @OriginalArg(4) MidiSong song) {
+    public synchronized boolean method944(@OriginalArg(0) SoundCache arg0, @OriginalArg(1) js5 arg1, @OriginalArg(4) MidiSong song) {
         song.computePrograms();
 
         @Pc(15) boolean ready = true;
         @Pc(29) int[] maxSamples = new int[]{22050};
         for (@Pc(35) MidiProgramNode node = (MidiProgramNode) song.programs.first(); node != null; node = (MidiProgramNode) song.programs.next()) {
             @Pc(40) int program = (int) node.key;
-            @Pc(48) Node_Sub11 local48 = (Node_Sub11) this.aIterableHashTable_7.get(program);
+            @Pc(48) MusicPatch local48 = (MusicPatch) this.aIterableHashTable_7.get(program);
             if (local48 == null) {
                 local48 = method8917(arg1, program);
                 if (local48 == null) {
@@ -815,7 +815,7 @@ public final class MixBuss extends AudioBuss {
                 this.aIterableHashTable_7.put(program, local48);
             }
 
-            if (!local48.method1526(arg0, maxSamples, node.notes)) {
+            if (!local48.loadSounds(arg0, maxSamples, node.notes)) {
                 ready = false;
             }
         }
@@ -829,7 +829,7 @@ public final class MixBuss extends AudioBuss {
 
     @OriginalMember(owner = "client!bd", name = "a", descriptor = "(I)V")
     @Override
-    public synchronized void method9130(@OriginalArg(0) int arg0) {
+    public synchronized void skip(@OriginalArg(0) int arg0) {
         if (this.midiSequence.isPlaying()) {
             @Pc(18) int local18 = this.midiSequence.timeDivision * this.anInt815 / Audio.sampleRate;
             do {
@@ -840,93 +840,93 @@ public final class MixBuss extends AudioBuss {
                 }
                 @Pc(58) int local58 = (int) ((this.aLong28 + (long) local18 - this.aLong29 - 1L) / (long) local18);
                 this.aLong29 += (long) local58 * (long) local18;
-                this.aClass2_Sub6_Sub4_1.method9130(local58);
+                this.voiceBuss.skip(local58);
                 arg0 -= local58;
                 this.method932((byte) -117);
             } while (this.midiSequence.isPlaying());
         }
-        this.aClass2_Sub6_Sub4_1.method9130(arg0);
+        this.voiceBuss.skip(arg0);
     }
 
     @OriginalMember(owner = "client!bd", name = "a", descriptor = "(Lclient!dha;I[III)Z")
-    public boolean method945(@OriginalArg(0) Node_Sub16 arg0, @OriginalArg(2) int[] arg1, @OriginalArg(3) int arg2, @OriginalArg(4) int arg3) {
-        arg0.anInt2184 = Audio.sampleRate / 100;
-        if (arg0.anInt2202 >= 0 && (arg0.aClass2_Sub6_Sub2_1 == null || arg0.aClass2_Sub6_Sub2_1.method3311())) {
-            arg0.method2083();
+    public boolean method945(@OriginalArg(0) MusicPatchNode arg0, @OriginalArg(2) int[] arg1, @OriginalArg(3) int arg2, @OriginalArg(4) int arg3) {
+        arg0.samplesUntilUpdate = Audio.sampleRate / 100;
+        if (arg0.releasePhase >= 0 && (arg0.stream == null || arg0.stream.method3311())) {
+            arg0.clear();
             arg0.unlink();
-            if (arg0.anInt2198 > 0 && this.aClass2_Sub16ArrayArray2[arg0.anInt2187][arg0.anInt2198] == arg0) {
-                this.aClass2_Sub16ArrayArray2[arg0.anInt2187][arg0.anInt2198] = null;
+            if (arg0.exclusiveGroup > 0 && this.groupVoices[arg0.channel][arg0.exclusiveGroup] == arg0) {
+                this.groupVoices[arg0.channel][arg0.exclusiveGroup] = null;
             }
             return true;
         }
-        @Pc(70) int local70 = arg0.anInt2203;
+        @Pc(70) int local70 = arg0.portamentoFraction;
         if (local70 > 0) {
-            local70 -= (int) (Math.pow(2.0D, (double) this.anIntArray47[arg0.anInt2187] * 4.921259842519685E-4D) * 16.0D + 0.5D);
+            local70 -= (int) (Math.pow(2.0D, (double) this.anIntArray47[arg0.channel] * 4.921259842519685E-4D) * 16.0D + 0.5D);
             if (local70 < 0) {
                 local70 = 0;
             }
-            arg0.anInt2203 = local70;
+            arg0.portamentoFraction = local70;
         }
-        arg0.aClass2_Sub6_Sub2_1.setRate(this.sampleRate(arg0));
-        @Pc(113) Class269 local113 = arg0.aClass269_1;
-        arg0.anInt2188 += local113.anInt6776;
+        arg0.stream.setRate(this.sampleRate(arg0));
+        @Pc(113) MusicPatchEnvelope local113 = arg0.envelope;
+        arg0.vibratoPhase += local113.vibratoRate;
         @Pc(122) boolean local122 = false;
-        arg0.anInt2201++;
-        @Pc(147) double local147 = (double) ((arg0.anInt2196 - 60 << 8) + (arg0.anInt2197 * arg0.anInt2203 >> 12)) * 5.086263020833333E-6D;
-        if (local113.anInt6771 > 0) {
-            if (local113.anInt6772 > 0) {
-                arg0.anInt2204 += (int) (Math.pow(2.0D, (double) local113.anInt6772 * local147) * 128.0D + 0.5D);
+        arg0.elapsed++;
+        @Pc(147) double local147 = (double) ((arg0.key - 60 << 8) + (arg0.portamentoOffset * arg0.portamentoFraction >> 12)) * 5.086263020833333E-6D;
+        if (local113.decay > 0) {
+            if (local113.decayKeyScale > 0) {
+                arg0.decayPhase += (int) (Math.pow(2.0D, (double) local113.decayKeyScale * local147) * 128.0D + 0.5D);
             } else {
-                arg0.anInt2204 += 128;
+                arg0.decayPhase += 128;
             }
-            if (arg0.anInt2204 * local113.anInt6771 >= 819200) {
+            if (arg0.decayPhase * local113.decay >= 819200) {
                 local122 = true;
             }
         }
-        if (local113.aByteArray83 != null) {
-            if (local113.anInt6778 <= 0) {
-                arg0.anInt2190 += 128;
+        if (local113.envelope != null) {
+            if (local113.envelopeKeyScale <= 0) {
+                arg0.envelopePhase += 128;
             } else {
-                arg0.anInt2190 += (int) (Math.pow(2.0D, local147 * (double) local113.anInt6778) * 128.0D + 0.5D);
+                arg0.envelopePhase += (int) (Math.pow(2.0D, local147 * (double) local113.envelopeKeyScale) * 128.0D + 0.5D);
             }
-            while (arg0.anInt2185 < local113.aByteArray83.length - 2 && arg0.anInt2190 > (local113.aByteArray83[arg0.anInt2185 + 2] & 0xFF) << 8) {
-                arg0.anInt2185 += 2;
+            while (arg0.envelopeIndex < local113.envelope.length - 2 && arg0.envelopePhase > (local113.envelope[arg0.envelopeIndex + 2] & 0xFF) << 8) {
+                arg0.envelopeIndex += 2;
             }
-            if (arg0.anInt2185 == local113.aByteArray83.length - 2 && local113.aByteArray83[arg0.anInt2185 + 1] == 0) {
+            if (arg0.envelopeIndex == local113.envelope.length - 2 && local113.envelope[arg0.envelopeIndex + 1] == 0) {
                 local122 = true;
             }
         }
-        if (arg0.anInt2202 >= 0 && local113.aByteArray82 != null && (this.anIntArray56[arg0.anInt2187] & 0x1) == 0 && (arg0.anInt2198 < 0 || arg0 != this.aClass2_Sub16ArrayArray2[arg0.anInt2187][arg0.anInt2198])) {
-            if (local113.anInt6779 <= 0) {
-                arg0.anInt2202 += 128;
+        if (arg0.releasePhase >= 0 && local113.release != null && (this.anIntArray56[arg0.channel] & 0x1) == 0 && (arg0.exclusiveGroup < 0 || arg0 != this.groupVoices[arg0.channel][arg0.exclusiveGroup])) {
+            if (local113.releaseKeyScale <= 0) {
+                arg0.releasePhase += 128;
             } else {
-                arg0.anInt2202 += (int) (Math.pow(2.0D, local147 * (double) local113.anInt6779) * 128.0D + 0.5D);
+                arg0.releasePhase += (int) (Math.pow(2.0D, local147 * (double) local113.releaseKeyScale) * 128.0D + 0.5D);
             }
-            while (local113.aByteArray82.length - 2 > arg0.anInt2195 && arg0.anInt2202 > (local113.aByteArray82[arg0.anInt2195 + 2] & 0xFF) << 8) {
-                arg0.anInt2195 += 2;
+            while (local113.release.length - 2 > arg0.releaseIndex && arg0.releasePhase > (local113.release[arg0.releaseIndex + 2] & 0xFF) << 8) {
+                arg0.releaseIndex += 2;
             }
-            if (local113.aByteArray82.length - 2 == arg0.anInt2195) {
+            if (local113.release.length - 2 == arg0.releaseIndex) {
                 local122 = true;
             }
         }
         if (!local122) {
-            arg0.aClass2_Sub6_Sub2_1.method3338(arg0.anInt2184, this.method920(arg0), this.method923(arg0));
+            arg0.stream.method3338(arg0.samplesUntilUpdate, this.method920(arg0), this.method923(arg0));
             return false;
         }
-        arg0.aClass2_Sub6_Sub2_1.method3320(arg0.anInt2184);
+        arg0.stream.method3320(arg0.samplesUntilUpdate);
         if (arg1 == null) {
-            arg0.aClass2_Sub6_Sub2_1.method9130(arg3);
+            arg0.stream.skip(arg3);
         } else {
-            arg0.aClass2_Sub6_Sub2_1.method9131(arg1, arg2, arg3);
+            arg0.stream.fill(arg1, arg2, arg3);
         }
-        if (arg0.aClass2_Sub6_Sub2_1.method3336()) {
-            this.aClass2_Sub6_Sub4_1.aClass2_Sub6_Sub3_2.addFirst(arg0.aClass2_Sub6_Sub2_1);
+        if (arg0.stream.method3336()) {
+            this.voiceBuss.fadeOutBuss.addFirst(arg0.stream);
         }
-        arg0.method2083();
-        if (arg0.anInt2202 >= 0) {
+        arg0.clear();
+        if (arg0.releasePhase >= 0) {
             arg0.unlink();
-            if (arg0.anInt2198 > 0 && this.aClass2_Sub16ArrayArray2[arg0.anInt2187][arg0.anInt2198] == arg0) {
-                this.aClass2_Sub16ArrayArray2[arg0.anInt2187][arg0.anInt2198] = null;
+            if (arg0.exclusiveGroup > 0 && this.groupVoices[arg0.channel][arg0.exclusiveGroup] == arg0) {
+                this.groupVoices[arg0.channel][arg0.exclusiveGroup] = null;
             }
         }
         return true;
@@ -941,7 +941,7 @@ public final class MixBuss extends AudioBuss {
         if (this.anIntArray54[arg0] != arg1) {
             this.anIntArray54[arg0] = arg1;
             for (@Pc(16) int local16 = 0; local16 < 128; local16++) {
-                this.aClass2_Sub16ArrayArray2[arg0][local16] = null;
+                this.groupVoices[arg0][local16] = null;
             }
         }
     }

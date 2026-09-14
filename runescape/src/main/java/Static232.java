@@ -5,7 +5,7 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static232 {
 
     @OriginalMember(owner = "client!hda", name = "Tc", descriptor = "Lclient!faa;")
-    public static Class119 aClass119_1;
+    public static PcmPlayerThread pcmPlayerThread;
 
     @OriginalMember(owner = "client!hda", name = "id", descriptor = "I")
     public static int anInt3829;

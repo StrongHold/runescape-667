@@ -1,6 +1,6 @@
 import com.jagex.game.runetek6.sound.Audio;
 import com.jagex.math.IntMath;
-import com.jagex.sound.Node_Sub6_Sub5;
+import com.jagex.sound.QueueBuss;
 import org.openrs2.deob.annotation.OriginalArg;
 import org.openrs2.deob.annotation.OriginalClass;
 import org.openrs2.deob.annotation.OriginalMember;
@@ -40,7 +40,7 @@ public final class PcmPlayer_Sub1 extends PcmPlayer {
         }
         this.aSourceDataLine1.close();
         this.aSourceDataLine1 = null;
-        @Pc(38) Info local38 = new Info(Static64.aClass3 == null ? (Static64.aClass3 = getClass("javax.sound.sampled.SourceDataLine")) : Static64.aClass3, this.anAudioFormat1, this.anInt1519 << (Node_Sub6_Sub5.stereo ? 2 : 1));
+        @Pc(38) Info local38 = new Info(Static64.aClass3 == null ? (Static64.aClass3 = getClass("javax.sound.sampled.SourceDataLine")) : Static64.aClass3, this.anAudioFormat1, this.anInt1519 << (QueueBuss.stereo ? 2 : 1));
         this.aSourceDataLine1 = (SourceDataLine) AudioSystem.getLine(local38);
         this.aSourceDataLine1.open();
         this.aSourceDataLine1.start();
@@ -50,7 +50,7 @@ public final class PcmPlayer_Sub1 extends PcmPlayer {
     @Override
     protected void method3590() {
         @Pc(1) short local1 = 256;
-        if (Node_Sub6_Sub5.stereo) {
+        if (QueueBuss.stereo) {
             local1 = 512;
         }
         for (@Pc(9) int local9 = 0; local9 < local1; local9++) {
@@ -68,7 +68,7 @@ public final class PcmPlayer_Sub1 extends PcmPlayer {
     @Override
     public void method3588(@OriginalArg(0) int arg0) throws LineUnavailableException {
         try {
-            @Pc(23) Info local23 = new Info(Static64.aClass3 == null ? (Static64.aClass3 = getClass("javax.sound.sampled.SourceDataLine")) : Static64.aClass3, this.anAudioFormat1, arg0 << (Node_Sub6_Sub5.stereo ? 2 : 1));
+            @Pc(23) Info local23 = new Info(Static64.aClass3 == null ? (Static64.aClass3 = getClass("javax.sound.sampled.SourceDataLine")) : Static64.aClass3, this.anAudioFormat1, arg0 << (QueueBuss.stereo ? 2 : 1));
             this.aSourceDataLine1 = (SourceDataLine) AudioSystem.getLine(local23);
             this.aSourceDataLine1.open();
             this.aSourceDataLine1.start();
@@ -105,7 +105,7 @@ public final class PcmPlayer_Sub1 extends PcmPlayer {
     @OriginalMember(owner = "client!cb", name = "d", descriptor = "()I")
     @Override
     protected int method3587() {
-        return this.anInt1519 - (this.aSourceDataLine1.available() >> (Node_Sub6_Sub5.stereo ? 2 : 1));
+        return this.anInt1519 - (this.aSourceDataLine1.available() >> (QueueBuss.stereo ? 2 : 1));
     }
 
     @OriginalMember(owner = "client!cb", name = "a", descriptor = "(Ljava/awt/Component;)V")
@@ -123,7 +123,7 @@ public final class PcmPlayer_Sub1 extends PcmPlayer {
                 }
             }
         }
-        this.anAudioFormat1 = new AudioFormat((float) Audio.sampleRate, 16, Node_Sub6_Sub5.stereo ? 2 : 1, true, false);
-        this.aByteArray17 = new byte[0x100 << (Node_Sub6_Sub5.stereo ? 2 : 1)];
+        this.anAudioFormat1 = new AudioFormat((float) Audio.sampleRate, 16, QueueBuss.stereo ? 2 : 1, true, false);
+        this.aByteArray17 = new byte[0x100 << (QueueBuss.stereo ? 2 : 1)];
     }
 }

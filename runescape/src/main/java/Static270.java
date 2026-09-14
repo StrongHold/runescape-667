@@ -1,4 +1,4 @@
-import com.jagex.sound.Class123;
+import com.jagex.sound.SoundCache;
 import org.openrs2.deob.annotation.OriginalMember;
 
 public final class Static270 {
@@ -7,6 +7,6 @@ public final class Static270 {
     public static int updateZoneZ;
 
     @OriginalMember(owner = "client!iia", name = "m", descriptor = "Lclient!fca;")
-    public static Class123 aClass123_2 = null;
+    public static SoundCache soundCache = null;
 
 }

@@ -6,7 +6,7 @@ import com.jagex.game.runetek6.config.seqtype.SeqType;
 import com.jagex.game.runetek6.config.vartype.TimedVarDomain;
 import com.jagex.js5.js5;
 import com.jagex.sound.MixBuss;
-import com.jagex.sound.Node_Sub6_Sub3;
+import com.jagex.sound.AudioBussMixer;
 import com.jagex.sound.Sound;
 import com.jagex.sound.SoundStream;
 import com.jagex.sound.SoundType;
@@ -35,7 +35,7 @@ public final class SoundManager {
     public static int count = 0;
 
     @OriginalMember(owner = "client!kka", name = "d", descriptor = "Lclient!nn;")
-    public static Node_Sub6_Sub3 activeStreams;
+    public static AudioBussMixer activeStreams;
 
     @OriginalMember(owner = "client!lka", name = "b", descriptor = "(B)V")
     public static void reset() {

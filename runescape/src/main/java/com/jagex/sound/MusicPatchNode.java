@@ -1,83 +1,83 @@
 package com.jagex.sound;
 
 import com.jagex.core.datastruct.key.Node;
-import com.jagex.sound.Class269;
-import com.jagex.sound.Node_Sub11;
+import com.jagex.sound.MusicPatchEnvelope;
+import com.jagex.sound.MusicPatch;
 import com.jagex.sound.VariableRateSoundPacket;
 import org.openrs2.deob.annotation.OriginalClass;
 import org.openrs2.deob.annotation.OriginalMember;
 
 @OriginalClass("client!dha")
-public final class Node_Sub16 extends Node {
+public final class MusicPatchNode extends Node {
 
     @OriginalMember(owner = "client!dha", name = "E", descriptor = "I")
-    public int anInt2183;
+    public int retriggerPhase;
 
     @OriginalMember(owner = "client!dha", name = "K", descriptor = "I")
-    public int anInt2184;
+    public int samplesUntilUpdate;
 
     @OriginalMember(owner = "client!dha", name = "J", descriptor = "I")
-    public int anInt2185;
+    public int envelopeIndex;
 
     @OriginalMember(owner = "client!dha", name = "A", descriptor = "I")
-    public int anInt2187;
+    public int channel;
 
     @OriginalMember(owner = "client!dha", name = "H", descriptor = "I")
-    public int anInt2188;
+    public int vibratoPhase;
 
     @OriginalMember(owner = "client!dha", name = "m", descriptor = "I")
-    public int anInt2190;
+    public int envelopePhase;
 
     @OriginalMember(owner = "client!dha", name = "C", descriptor = "I")
-    public int anInt2191;
+    public int pitch;
 
     @OriginalMember(owner = "client!dha", name = "p", descriptor = "Lclient!sq;")
-    public VariableRateSoundPacket aClass2_Sub49_Sub1_1;
+    public VariableRateSoundPacket sound;
 
     @OriginalMember(owner = "client!dha", name = "r", descriptor = "I")
-    public int anInt2193;
+    public int pan;
 
     @OriginalMember(owner = "client!dha", name = "l", descriptor = "I")
-    public int anInt2195;
+    public int releaseIndex;
 
     @OriginalMember(owner = "client!dha", name = "D", descriptor = "I")
-    public int anInt2196;
+    public int key;
 
     @OriginalMember(owner = "client!dha", name = "x", descriptor = "I")
-    public int anInt2197;
+    public int portamentoOffset;
 
     @OriginalMember(owner = "client!dha", name = "z", descriptor = "I")
-    public int anInt2198;
+    public int exclusiveGroup;
 
     @OriginalMember(owner = "client!dha", name = "t", descriptor = "Lclient!oaa;")
-    public Class269 aClass269_1;
+    public MusicPatchEnvelope envelope;
 
     @OriginalMember(owner = "client!dha", name = "G", descriptor = "Lclient!haa;")
-    public SoundStream aClass2_Sub6_Sub2_1;
+    public SoundStream stream;
 
     @OriginalMember(owner = "client!dha", name = "k", descriptor = "I")
-    public int anInt2199;
+    public int volume;
 
     @OriginalMember(owner = "client!dha", name = "F", descriptor = "Lclient!cea;")
-    public Node_Sub11 aClass2_Sub11_1;
+    public MusicPatch patch;
 
     @OriginalMember(owner = "client!dha", name = "n", descriptor = "I")
-    public int anInt2201;
+    public int elapsed;
 
     @OriginalMember(owner = "client!dha", name = "I", descriptor = "I")
-    public int anInt2202;
+    public int releasePhase;
 
     @OriginalMember(owner = "client!dha", name = "q", descriptor = "I")
-    public int anInt2203;
+    public int portamentoFraction;
 
     @OriginalMember(owner = "client!dha", name = "o", descriptor = "I")
-    public int anInt2204;
+    public int decayPhase;
 
     @OriginalMember(owner = "client!dha", name = "a", descriptor = "(I)V")
-    public void method2083() {
-        this.aClass2_Sub6_Sub2_1 = null;
-        this.aClass269_1 = null;
-        this.aClass2_Sub49_Sub1_1 = null;
-        this.aClass2_Sub11_1 = null;
+    public void clear() {
+        this.stream = null;
+        this.envelope = null;
+        this.sound = null;
+        this.patch = null;
     }
 }

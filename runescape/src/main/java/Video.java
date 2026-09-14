@@ -3,7 +3,7 @@ import com.jagex.core.datastruct.key.IterableHashTable;
 import com.jagex.core.util.SystemTimer;
 import com.jagex.game.runetek6.sound.OggKateStream;
 import com.jagex.game.runetek6.sound.OggStream;
-import com.jagex.sound.Node_Sub6_Sub5;
+import com.jagex.sound.QueueBuss;
 import jagtheora.ogg.OggPacket;
 import jagtheora.ogg.OggPage;
 import jagtheora.ogg.OggStreamState;
@@ -142,10 +142,10 @@ public abstract class Video {
     @OriginalMember(owner = "client!lf", name = "a", descriptor = "(ZI)V")
     public final void method9174(@OriginalArg(0) boolean arg0) {
         if (this.audioStream != null) {
-            @Pc(7) Node_Sub6_Sub5 local7 = this.audioStream.method3960();
+            @Pc(7) QueueBuss local7 = this.audioStream.method3960();
 
             if (local7 != null) {
-                local7.method9146(arg0);
+                local7.setPaused(arg0);
             }
         }
 

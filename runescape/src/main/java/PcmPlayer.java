@@ -3,7 +3,7 @@ import com.jagex.core.util.SystemTimer;
 import com.jagex.core.util.TimeUtils;
 import com.jagex.game.runetek6.sound.Audio;
 import com.jagex.sound.AudioBuss;
-import com.jagex.sound.Node_Sub6_Sub5;
+import com.jagex.sound.QueueBuss;
 import com.jagex.sound.SoundPacket;
 import org.openrs2.deob.annotation.OriginalArg;
 import org.openrs2.deob.annotation.OriginalClass;
@@ -84,28 +84,28 @@ public class PcmPlayer {
             this.anInt4099 = 0;
         }
         if (this.aClass2_Sub6_6 != null) {
-            this.aClass2_Sub6_6.method9130(256);
+            this.aClass2_Sub6_6.skip(256);
         }
     }
 
     @OriginalMember(owner = "client!cd", name = "c", descriptor = "(I)V")
     public final synchronized void method3586() {
-        if (Static232.aClass119_1 != null) {
+        if (Static232.pcmPlayerThread != null) {
             @Pc(11) boolean local11 = true;
             for (@Pc(13) int local13 = 0; local13 < 2; local13++) {
-                if (Static232.aClass119_1.aPcmPlayerArray1[local13] == this) {
-                    Static232.aClass119_1.aPcmPlayerArray1[local13] = null;
+                if (Static232.pcmPlayerThread.players[local13] == this) {
+                    Static232.pcmPlayerThread.players[local13] = null;
                 }
-                if (Static232.aClass119_1.aPcmPlayerArray1[local13] != null) {
+                if (Static232.pcmPlayerThread.players[local13] != null) {
                     local11 = false;
                 }
             }
             if (local11) {
-                Static232.aClass119_1.aBoolean241 = true;
-                while (Static232.aClass119_1.aBoolean242) {
+                Static232.pcmPlayerThread.stopping = true;
+                while (Static232.pcmPlayerThread.running) {
                     TimeUtils.sleep(50L);
                 }
-                Static232.aClass119_1 = null;
+                Static232.pcmPlayerThread = null;
             }
         }
         this.method3596();
@@ -240,7 +240,7 @@ public class PcmPlayer {
     @OriginalMember(owner = "client!cd", name = "a", descriptor = "([II)V")
     public void method3595(@OriginalArg(0) int[] arg0) {
         @Pc(1) short local1 = 256;
-        if (Node_Sub6_Sub5.stereo) {
+        if (QueueBuss.stereo) {
             local1 = 512;
         }
         Arrays.clear(arg0, 0, local1);
@@ -338,7 +338,7 @@ public class PcmPlayer {
             this.anInt4099 = 0;
         }
         if (this.aClass2_Sub6_6 != null) {
-            this.aClass2_Sub6_6.method9131(arg0, 0, 256);
+            this.aClass2_Sub6_6.fill(arg0, 0, 256);
         }
         this.aLong128 = SystemTimer.safetime();
     }

@@ -1,7 +1,7 @@
 import com.jagex.sign.SignLink;
 import com.jagex.core.datastruct.LinkedList;
 import com.jagex.game.runetek6.sound.Audio;
-import com.jagex.sound.Node_Sub6_Sub5;
+import com.jagex.sound.QueueBuss;
 import org.openrs2.deob.annotation.OriginalArg;
 import org.openrs2.deob.annotation.OriginalMember;
 import org.openrs2.deob.annotation.Pc;
@@ -30,7 +30,7 @@ public final class Static638 {
         } else {
             try {
                 @Pc(41) PcmPlayer local41 = (PcmPlayer) Class.forName("PcmPlayer_Sub1").getDeclaredConstructor().newInstance();
-                local41.anIntArray315 = new int[(Node_Sub6_Sub5.stereo ? 2 : 1) * 256];
+                local41.anIntArray315 = new int[(QueueBuss.stereo ? 2 : 1) * 256];
                 local41.anInt4098 = arg2;
                 local41.method3593(arg3);
                 local41.anInt4097 = (-1024 & arg2) + 1024;
@@ -38,36 +38,36 @@ public final class Static638 {
                     local41.anInt4097 = 16384;
                 }
                 local41.method3588(local41.anInt4097);
-                if (Static156.anInt2679 > 0 && Static232.aClass119_1 == null) {
-                    Static232.aClass119_1 = new Class119();
-                    Static232.aClass119_1.aSignLink_2 = arg0;
-                    arg0.startThread(Static232.aClass119_1, Static156.anInt2679);
+                if (Static156.anInt2679 > 0 && Static232.pcmPlayerThread == null) {
+                    Static232.pcmPlayerThread = new PcmPlayerThread();
+                    Static232.pcmPlayerThread.signLink = arg0;
+                    arg0.startThread(Static232.pcmPlayerThread, Static156.anInt2679);
                 }
-                if (Static232.aClass119_1 != null) {
-                    if (Static232.aClass119_1.aPcmPlayerArray1[arg1] != null) {
+                if (Static232.pcmPlayerThread != null) {
+                    if (Static232.pcmPlayerThread.players[arg1] != null) {
                         throw new IllegalArgumentException();
                     }
-                    Static232.aClass119_1.aPcmPlayerArray1[arg1] = local41;
+                    Static232.pcmPlayerThread.players[arg1] = local41;
                 }
                 return local41;
             } catch (@Pc(135) Throwable local135) {
                 try {
                     @Pc(141) PcmPlayer_Sub2 local141 = new PcmPlayer_Sub2(arg0, arg1);
-                    local141.anIntArray315 = new int[(Node_Sub6_Sub5.stereo ? 2 : 1) * 256];
+                    local141.anIntArray315 = new int[(QueueBuss.stereo ? 2 : 1) * 256];
                     local141.anInt4098 = arg2;
                     local141.method3593(arg3);
                     local141.anInt4097 = 16384;
                     local141.method3588(local141.anInt4097);
-                    if (Static156.anInt2679 > 0 && Static232.aClass119_1 == null) {
-                        Static232.aClass119_1 = new Class119();
-                        Static232.aClass119_1.aSignLink_2 = arg0;
-                        arg0.startThread(Static232.aClass119_1, Static156.anInt2679);
+                    if (Static156.anInt2679 > 0 && Static232.pcmPlayerThread == null) {
+                        Static232.pcmPlayerThread = new PcmPlayerThread();
+                        Static232.pcmPlayerThread.signLink = arg0;
+                        arg0.startThread(Static232.pcmPlayerThread, Static156.anInt2679);
                     }
-                    if (Static232.aClass119_1 != null) {
-                        if (Static232.aClass119_1.aPcmPlayerArray1[arg1] != null) {
+                    if (Static232.pcmPlayerThread != null) {
+                        if (Static232.pcmPlayerThread.players[arg1] != null) {
                             throw new IllegalArgumentException();
                         }
-                        Static232.aClass119_1.aPcmPlayerArray1[arg1] = local141;
+                        Static232.pcmPlayerThread.players[arg1] = local141;
                     }
                     return local141;
                 } catch (@Pc(211) Throwable local211) {

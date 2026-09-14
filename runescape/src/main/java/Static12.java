@@ -1,5 +1,5 @@
 import com.jagex.core.io.Packet;
-import com.jagex.sound.Class123;
+import com.jagex.sound.SoundCache;
 import org.openrs2.deob.annotation.OriginalArg;
 import org.openrs2.deob.annotation.OriginalMember;
 import org.openrs2.deob.annotation.Pc;
@@ -7,7 +7,7 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static12 {
 
     @OriginalMember(owner = "client!ah", name = "h", descriptor = "Lclient!fca;")
-    public static Class123 aClass123_4;
+    public static SoundCache aClass123_4;
 
     @OriginalMember(owner = "client!ah", name = "a", descriptor = "(Lclient!ge;I)V")
     public static void method5164(@OriginalArg(0) Packet arg0) {

@@ -1,7 +1,7 @@
 import com.jagex.ClientProt;
 import com.jagex.trigger.ClientTriggerType;
 import com.jagex.core.util.JagException;
-import com.jagex.sound.Node_Sub6_Sub5;
+import com.jagex.sound.QueueBuss;
 import org.openrs2.deob.annotation.OriginalArg;
 import org.openrs2.deob.annotation.OriginalMember;
 import org.openrs2.deob.annotation.Pc;
@@ -38,10 +38,10 @@ public final class VideoManager {
                     @Pc(73) OggVorbisStream audio = type.js5.getAudioStream();
 
                     if (audio != null) {
-                        @Pc(79) Node_Sub6_Sub5 local79 = audio.method3960();
+                        @Pc(79) QueueBuss local79 = audio.method3960();
 
                         if (local79 != null) {
-                            local79.method9147(type.anInt180);
+                            local79.setVolume(type.anInt180);
                             SoundManager.activeStreams.addFirst(local79);
                             type.aBoolean14 = true;
                         }

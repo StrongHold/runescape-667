@@ -1,24 +1,24 @@
 package com.jagex.sound;
 
 import com.jagex.core.datastruct.key.Node;
-import com.jagex.sound.Node_Sub6_Sub3;
+import com.jagex.sound.AudioBussMixer;
 import org.openrs2.deob.annotation.OriginalArg;
 import org.openrs2.deob.annotation.OriginalClass;
 import org.openrs2.deob.annotation.OriginalMember;
 
 @OriginalClass("client!ada")
-public abstract class Node_Sub3 extends Node {
+public abstract class AudioBussTask extends Node {
 
     @OriginalMember(owner = "client!ada", name = "k", descriptor = "I")
-    public int anInt101;
+    public int time;
 
     @OriginalMember(owner = "client!ada", name = "<init>", descriptor = "()V")
-    public Node_Sub3() {
+    public AudioBussTask() {
     }
 
     @OriginalMember(owner = "client!ada", name = "a", descriptor = "()V")
-    public abstract void method113();
+    public abstract void close();
 
     @OriginalMember(owner = "client!ada", name = "a", descriptor = "(Lclient!nn;)I")
-    public abstract int method114(@OriginalArg(0) Node_Sub6_Sub3 arg0);
+    public abstract int run(@OriginalArg(0) AudioBussMixer arg0);
 }
