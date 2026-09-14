@@ -8,15 +8,15 @@ import org.openrs2.deob.annotation.Pc;
 public final class SceneRenderer {
 
     @OriginalMember(owner = "client!it", name = "a", descriptor = "(IIII[[[B[I[I[I[I[IIBIIZZIIZ)V")
-    public static void renderScene(@OriginalArg(0) int clock, @OriginalArg(1) int cameraX, @OriginalArg(2) int cameraY, @OriginalArg(3) int cameraZ, @OriginalArg(4) byte[][][] roofStamps, @OriginalArg(5) int[] arg5, @OriginalArg(6) int[] arg6, @OriginalArg(7) int[] arg7, @OriginalArg(8) int[] arg8, @OriginalArg(9) int[] arg9, @OriginalArg(10) int levels, @OriginalArg(11) byte roofStamp, @OriginalArg(12) int playerTileX, @OriginalArg(13) int playerTileZ, @OriginalArg(14) boolean flickerDisabled, @OriginalArg(16) int orthoZoom, @OriginalArg(17) int entitySkipFlags, @OriginalArg(18) boolean arg17) {
+    public static void renderScene(@OriginalArg(0) int clock, @OriginalArg(1) int cameraX, @OriginalArg(2) int cameraY, @OriginalArg(3) int cameraZ, @OriginalArg(4) byte[][][] roofStamps, @OriginalArg(5) int[] roofMaxY, @OriginalArg(6) int[] roofMinX, @OriginalArg(7) int[] roofMaxX, @OriginalArg(8) int[] roofMaxZ, @OriginalArg(9) int[] roofMinZ, @OriginalArg(10) int levels, @OriginalArg(11) byte roofStamp, @OriginalArg(12) int playerTileX, @OriginalArg(13) int playerTileZ, @OriginalArg(14) boolean flickerDisabled, @OriginalArg(16) int orthoZoom, @OriginalArg(17) int entitySkipFlags, @OriginalArg(18) boolean trackOrthoTiles) {
         Static29.aBoolean60 = true;
         Static442.aBoolean500 = Static665.aToolkit_15.getMaxLights() > 0;
         Static581.aBoolean657 = true;
         Static403.anInt6246 = cameraX >> EnvironmentLight.anInt1066;
         Static550.anInt8271 = cameraZ >> EnvironmentLight.anInt1066;
         Static499.anInt7492 = cameraX;
-        Static715.anInt10810 = cameraZ;
-        Static523.anInt3882 = cameraY;
+        Static715.cameraZ = cameraZ;
+        Static523.cameraY = cameraY;
         Static441.anInt6691 = Static403.anInt6246 - Static35.anInt813;
         if (Static441.anInt6691 < 0) {
             Static231.anInt3734 = -Static441.anInt6691;
@@ -78,11 +78,11 @@ public final class SceneRenderer {
             if (orthoZoom >= 0) {
                 Static29.aBoolean60 = false;
             } else {
-                Static617.anIntArray726 = arg5;
-                Static714.anIntArray880 = arg6;
-                Static419.anIntArray500 = arg7;
-                Static219.anIntArray288 = arg8;
-                Static665.anIntArray779 = arg9;
+                Static617.anIntArray726 = roofMaxY;
+                Static714.anIntArray880 = roofMinX;
+                Static419.roofMaxX = roofMaxX;
+                Static219.anIntArray288 = roofMaxZ;
+                Static665.anIntArray779 = roofMinZ;
                 Static725.buildOcclusionBuffer(Static665.aToolkit_15, levels);
             }
         } else {
@@ -132,14 +132,14 @@ public final class SceneRenderer {
             }
             Static379.method5355(true);
             Static665.aToolkit_15.ra(-1, 1583160, 40, 127);
-            Static517.renderScenePass(true, roofStamps, levels, roofStamp, orthoZoom, entitySkipFlags, arg17);
+            Static517.renderScenePass(true, roofStamps, levels, roofStamp, orthoZoom, entitySkipFlags, trackOrthoTiles);
             if (Static661.aBoolean457) {
                 Static245.method8630();
             }
             Static665.aToolkit_15.pa();
             Static379.method5355(false);
         }
-        Static517.renderScenePass(false, roofStamps, levels, roofStamp, orthoZoom, entitySkipFlags, arg17);
+        Static517.renderScenePass(false, roofStamps, levels, roofStamp, orthoZoom, entitySkipFlags, trackOrthoTiles);
         if (Static661.aBoolean457) {
             for (local85 = 0; local85 < Static299.tileMaxLevel; local85++) {
                 Static275.aBooleanArrayArrayArray4[local85] = Static433.aBooleanArrayArrayArray5[local85];

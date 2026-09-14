@@ -4,13 +4,13 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static419 {
 
     @OriginalMember(owner = "client!ne", name = "v", descriptor = "[I")
-    public static int[] anIntArray500;
+    public static int[] roofMaxX;
 
     @OriginalMember(owner = "client!ne", name = "w", descriptor = "I")
-    public static int anInt6434 = 0;
+    public static int pingWorldIndex = 0;
 
     @OriginalMember(owner = "client!ne", name = "b", descriptor = "(I)V")
-    public static void method5757() {
+    public static void stopLoadingRenderer() {
         if (Loading.renderer != null) {
             Loading.renderer.complete();
         }
@@ -21,7 +21,8 @@ public final class Static419 {
             try {
                 Loading.rendererThread.join();
                 return;
-            } catch (@Pc(26) InterruptedException local26) {
+            } catch (@Pc(26) InterruptedException ignored) {
+                /* empty */
             }
         }
     }

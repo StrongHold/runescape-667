@@ -3,6 +3,6 @@ import org.openrs2.deob.annotation.OriginalMember;
 public final class Static715 {
 
     @OriginalMember(owner = "client!wla", name = "j", descriptor = "I")
-    public static int anInt10810;
+    public static int cameraZ;
 
 }

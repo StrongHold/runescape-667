@@ -14,26 +14,26 @@ public final class Static587 {
     public static final int[] anIntArray689 = new int[]{16776960, 16711680, 65280, 65535, 16711935, 16777215};
 
     @OriginalMember(owner = "client!sia", name = "b", descriptor = "(I)V")
-    public static void method7704() {
+    public static void updateWorldPings() {
         if (!WorldList.pingWorlds) {
             return;
         }
         while (true) {
-            while (WorldList.activeWorlds.length > Static419.anInt6434) {
-                @Pc(26) GameWorld local26 = WorldList.activeWorlds[Static419.anInt6434];
-                if (local26 != null && local26.ping == -1) {
+            while (WorldList.activeWorlds.length > Static419.pingWorldIndex) {
+                @Pc(26) GameWorld world = WorldList.activeWorlds[Static419.pingWorldIndex];
+                if (world != null && world.ping == -1) {
                     if (Static522.pingRequest == null) {
-                        Static522.pingRequest = Static151.pingWorker.ping(local26.address);
+                        Static522.pingRequest = Static151.pingWorker.ping(world.address);
                     }
-                    @Pc(54) int local54 = Static522.pingRequest.ping;
-                    if (local54 == -1) {
+                    @Pc(54) int ping = Static522.pingRequest.ping;
+                    if (ping == -1) {
                         return;
                     }
-                    Static419.anInt6434++;
+                    Static419.pingWorldIndex++;
                     Static522.pingRequest = null;
-                    local26.ping = local54;
+                    world.ping = ping;
                 } else {
-                    Static419.anInt6434++;
+                    Static419.pingWorldIndex++;
                 }
             }
             return;

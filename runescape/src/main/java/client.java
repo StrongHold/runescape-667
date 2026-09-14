@@ -362,7 +362,7 @@ public final class client extends GameShell {
             Static266.saveVarcs();
         }
 
-        Static419.method5757();
+        Static419.stopLoadingRenderer();
 
         if (Toolkit.active != null) {
             Toolkit.active.free();
@@ -619,7 +619,7 @@ public final class client extends GameShell {
                                             if (MainLogicManager.step == 7 && !LoginManager.inProgress() || MainLogicManager.step == 9 && LoginManager.gameLoginResponse == 42) {
                                                 MiniMenu.update();
                                             }
-                                            Static587.method7704();
+                                            Static587.updateWorldPings();
                                             if (Static624.varcSaveRecommended && SystemTimer.safetime() - TimeUtils.MILLISECONDS_PER_MINUTE > Static98.lastVarcSave) {
                                                 Static266.saveVarcs();
                                             }
@@ -775,7 +775,7 @@ public final class client extends GameShell {
         }
 
         if (MainLogicStep.isLoading(MainLogicManager.step)) {
-            Static523.method3447(local209);
+            Static523.refreshLoadingScreen(local209);
         } else if (MainLogicStep.isAtLoadingScreen(MainLogicManager.step)) {
             InterfaceManager.method680();
         } else if (MainLogicStep.method5393(MainLogicManager.step)) {

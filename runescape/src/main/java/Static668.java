@@ -19,25 +19,25 @@ public final class Static668 {
         if (debugconsole.anInt8472 < 102) {
             debugconsole.anInt8472 += 6;
         }
-        @Pc(26) int local26;
-        if (Static523.anInt3885 != -1 && Static305.aLong157 < SystemTimer.safetime()) {
-            for (local26 = Static523.anInt3885; local26 < Static144.aStringArray7.length; local26++) {
-                if (Static144.aStringArray7[local26].startsWith("pause")) {
+        @Pc(26) int i;
+        if (Static523.consoleScriptLine != -1 && Static305.aLong157 < SystemTimer.safetime()) {
+            for (i = Static523.consoleScriptLine; i < Static144.aStringArray7.length; i++) {
+                if (Static144.aStringArray7[i].startsWith("pause")) {
                     @Pc(40) int pauseSeconds = 5;
                     try {
-                        pauseSeconds = Integer.parseInt(Static144.aStringArray7[local26].substring(6));
+                        pauseSeconds = Integer.parseInt(Static144.aStringArray7[i].substring(6));
                     } catch (@Pc(49) Exception ignored) {
                         /* empty */
                     }
                     debugconsole.addline("Pausing for " + pauseSeconds + " seconds...");
-                    Static523.anInt3885 = local26 + 1;
+                    Static523.consoleScriptLine = i + 1;
                     Static305.aLong157 = (long) (pauseSeconds * 1000) + SystemTimer.safetime();
                     return;
                 }
-                debugconsole.currententry = Static144.aStringArray7[local26];
+                debugconsole.currententry = Static144.aStringArray7[i];
                 debugconsole.method3920(false);
             }
-            Static523.anInt3885 = -1;
+            Static523.consoleScriptLine = -1;
         }
         if (Static611.mouseWheelRotation != 0) {
             debugconsole.anInt3471 -= Static611.mouseWheelRotation * 5;
@@ -49,8 +49,8 @@ public final class Static668 {
                 debugconsole.anInt3471 = 0;
             }
         }
-        for (local26 = 0; local26 < Static671.anInt10026; local26++) {
-            @Pc(147) KeyLog event = Static194.AN_KEYBOARD_EVENT_ARRAY_1[local26];
+        for (i = 0; i < Static671.anInt10026; i++) {
+            @Pc(147) KeyLog event = Static194.AN_KEYBOARD_EVENT_ARRAY_1[i];
             @Pc(151) int keyCode = event.getKeyCode();
             @Pc(155) char keyChar = event.getKeyChar();
             @Pc(159) int modifiers = event.getModifierFlags();
@@ -106,7 +106,7 @@ public final class Static668 {
                 Static344.method5046();
                 debugconsole.currententryLength = debugconsole.currententry.length();
             } else if (StringTools.isAlphanumeric(keyChar) || "\\/.:, _-+[]~@".indexOf(keyChar) != -1) {
-                debugconsole.currententry = debugconsole.currententry.substring(0, debugconsole.currententryLength) + Static194.AN_KEYBOARD_EVENT_ARRAY_1[local26].getKeyChar() + debugconsole.currententry.substring(debugconsole.currententryLength);
+                debugconsole.currententry = debugconsole.currententry.substring(0, debugconsole.currententryLength) + Static194.AN_KEYBOARD_EVENT_ARRAY_1[i].getKeyChar() + debugconsole.currententry.substring(debugconsole.currententryLength);
                 debugconsole.currententryLength++;
             }
         }

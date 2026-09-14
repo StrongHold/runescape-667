@@ -24,32 +24,33 @@ public final class Static363 {
     public static final Class259 aClass259_14 = new Class259();
 
     @OriginalMember(owner = "client!li", name = "a", descriptor = "(I[Ljava/lang/String;)V")
-    public static void method6234(@OriginalArg(1) String[] arg0) {
-        if (arg0.length <= 1) {
-            debugconsole.currententry = debugconsole.currententry + arg0[0];
-            debugconsole.currententryLength += arg0[0].length();
+    public static void method6234(@OriginalArg(1) String[] lines) {
+        if (lines.length <= 1) {
+            debugconsole.currententry = debugconsole.currententry + lines[0];
+            debugconsole.currententryLength += lines[0].length();
             return;
         }
-        for (@Pc(41) int local41 = 0; local41 < arg0.length; local41++) {
-            if (arg0[local41].startsWith("pause")) {
-                @Pc(61) int local61 = 5;
+        for (@Pc(41) int i = 0; i < lines.length; i++) {
+            if (lines[i].startsWith("pause")) {
+                @Pc(61) int pauseSeconds = 5;
                 try {
-                    local61 = Integer.parseInt(arg0[local41].substring(6));
-                } catch (@Pc(70) Exception local70) {
+                    pauseSeconds = Integer.parseInt(lines[i].substring(6));
+                } catch (@Pc(70) Exception ignored) {
+                    /* empty */
                 }
-                debugconsole.addline("Pausing for " + local61 + " seconds...");
-                Static144.aStringArray7 = arg0;
-                Static523.anInt3885 = local41 + 1;
-                Static305.aLong157 = (long) (local61 * 1000) + SystemTimer.safetime();
+                debugconsole.addline("Pausing for " + pauseSeconds + " seconds...");
+                Static144.aStringArray7 = lines;
+                Static523.consoleScriptLine = i + 1;
+                Static305.aLong157 = (long) (pauseSeconds * 1000) + SystemTimer.safetime();
                 return;
             }
-            debugconsole.currententry = arg0[local41];
+            debugconsole.currententry = lines[i];
             debugconsole.method3920(false);
         }
     }
 
     @OriginalMember(owner = "client!li", name = "a", descriptor = "(III)I")
-    public static int profileToolkit(@OriginalArg(0) int arg0, @OriginalArg(1) int toolkit) {
+    public static int profileToolkit(@OriginalArg(0) int timeLimit, @OriginalArg(1) int toolkit) {
         if (GraphicsDefaults.instance.profilingModel == -1) {
             return 1;
         }
@@ -63,40 +64,40 @@ public final class Static363 {
         }
 
         try {
-            @Pc(43) Dimension local43 = GameShell.canvas.getSize();
+            @Pc(43) Dimension size = GameShell.canvas.getSize();
             MessageBox.draw(Toolkit.active, LocalisedText.PROFILING.localise(Client.language), true, Fonts.p12Metrics, Fonts.p12);
-            @Pc(67) Mesh local67 = Mesh.load(GraphicsDefaults.instance.profilingModel, js5.MODELS);
-            @Pc(70) long local70 = SystemTimer.safetime();
+            @Pc(67) Mesh mesh = Mesh.load(GraphicsDefaults.instance.profilingModel, js5.MODELS);
+            @Pc(70) long start = SystemTimer.safetime();
             Toolkit.active.la();
             Static460.aMatrix_10.applyTranslation(0, EnvironmentLight.anInt3993, 0);
             Toolkit.active.setCamera(Static460.aMatrix_10);
-            Toolkit.active.DA(local43.width / 2, local43.height / 2, 512, 512);
+            Toolkit.active.DA(size.width / 2, size.height / 2, 512, 512);
             Toolkit.active.xa(1.0F);
             Toolkit.active.ZA(16777215, 0.5F, 0.5F, 20.0F, -50.0F, 30.0F);
-            @Pc(111) Model local111 = Toolkit.active.createModel(local67, 2048, 64, 64, 768);
-            @Pc(113) int local113 = 0;
+            @Pc(111) Model model = Toolkit.active.createModel(mesh, 2048, 64, 64, 768);
+            @Pc(113) int renderCount = 0;
             label41:
-            for (@Pc(115) int local115 = 0; local115 < 500; local115++) {
+            for (@Pc(115) int frame = 0; frame < 500; frame++) {
                 Toolkit.active.GA(0);
                 Toolkit.active.ya();
-                for (@Pc(123) int local123 = 15; local123 >= 0; local123--) {
-                    for (@Pc(126) int local126 = 0; local126 <= local123; local126++) {
-                        Static59.aMatrix_5.applyTranslation((int) ((float) Static340.anInt5586 * (-((float) local123 / 2.0F) + (float) local126)), 0, (local123 + 1) * Static340.anInt5586);
-                        local111.render(Static59.aMatrix_5, null, 0);
-                        local113++;
-                        if ((long) arg0 <= SystemTimer.safetime() - local70) {
+                for (@Pc(123) int row = 15; row >= 0; row--) {
+                    for (@Pc(126) int column = 0; column <= row; column++) {
+                        Static59.aMatrix_5.applyTranslation((int) ((float) Static340.anInt5586 * (-((float) row / 2.0F) + (float) column)), 0, (row + 1) * Static340.anInt5586);
+                        model.render(Static59.aMatrix_5, null, 0);
+                        renderCount++;
+                        if ((long) timeLimit <= SystemTimer.safetime() - start) {
                             break label41;
                         }
                     }
                 }
             }
             Toolkit.active.method7950();
-            @Pc(195) long local195 = (long) (local113 * 1000) / (SystemTimer.safetime() - local70);
+            @Pc(195) long rendersPerSecond = (long) (renderCount * 1000) / (SystemTimer.safetime() - start);
             Toolkit.active.GA(0);
             Toolkit.active.ya();
-            return (int) local195;
-        } catch (@Pc(204) Throwable local204) {
-            local204.printStackTrace();
+            return (int) rendersPerSecond;
+        } catch (@Pc(204) Throwable ex) {
+            ex.printStackTrace();
             return -1;
         }
     }

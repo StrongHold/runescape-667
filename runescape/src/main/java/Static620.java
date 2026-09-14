@@ -7,12 +7,12 @@ public final class Static620 {
     public static float aFloat197;
 
     @OriginalMember(owner = "client!tka", name = "a", descriptor = "(IIIIIII)V")
-    public static void method8324(@OriginalArg(0) int arg0, @OriginalArg(2) int arg1, @OriginalArg(3) int arg2, @OriginalArg(4) int arg3, @OriginalArg(5) int arg4, @OriginalArg(6) int arg5) {
-        Static271.anInt4363 = arg0;
-        Static427.anInt6480 = arg3;
-        Static524.anInt8044 = arg4;
-        Static428.anInt6487 = arg5;
-        Static707.anInt10641 = arg2;
-        Static523.anInt3888 = arg1;
+    public static void method8324(@OriginalArg(0) int rotateY, @OriginalArg(2) int z, @OriginalArg(3) int rotateZ, @OriginalArg(4) int y, @OriginalArg(5) int rotateX, @OriginalArg(6) int x) {
+        Static271.anInt4363 = rotateY;
+        Static427.anInt6480 = y;
+        Static524.anInt8044 = rotateX;
+        Static428.anInt6487 = x;
+        Static707.anInt10641 = rotateZ;
+        Static523.pickCameraZ = z;
     }
 }
