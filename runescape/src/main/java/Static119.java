@@ -10,8 +10,8 @@ public final class Static119 {
     public static final int[] anIntArray199 = new int[64];
 
     @OriginalMember(owner = "client!dma", name = "a", descriptor = "(Lclient!kn;)V")
-    public static void method2170(@OriginalArg(0) Class213 arg0) {
-        Static514.aClass213_2 = arg0;
+    public static void setActivePickList(@OriginalArg(0) PickList pickList) {
+        Static514.aClass213_2 = pickList;
     }
 
     @OriginalMember(owner = "client!dma", name = "b", descriptor = "(I)Lclient!fk;")

@@ -167,7 +167,7 @@ public final class Static294 {
             Static648.method8483(-Camera.yaw & 0x3FFF, -Camera.roll & 0x3FFF, -Camera.pitch & 0x3FFF);
             OrthoMode.method6324(local688, Camera.x, Camera.z, Camera.y, PlayerEntity.self.z >> 9, Static457.anIntArray552, Static682.anIntArray817, TimeUtils.clock, PlayerEntity.self.level + 1, Static482.anIntArray588, ClientOptions.instance.flickeringEffects.getValue() == 0, OrthoMode.renderZoom, Static9.anIntArray18, Static328.aByteArrayArrayArray4, Static153.anIntArray235, PlayerEntity.self.x >> 9);
         } else {
-            Static283.method4100(TimeUtils.clock, Camera.x, Camera.y, Camera.z, Static328.aByteArrayArrayArray4, Static482.anIntArray588, Static9.anIntArray18, Static457.anIntArray552, Static153.anIntArray235, Static682.anIntArray817, PlayerEntity.self.level + 1, local688, PlayerEntity.self.x >> 9, PlayerEntity.self.z >> 9, ClientOptions.instance.flickeringEffects.getValue() == 0, OrthoMode.enabled ? OrthoMode.renderZoom : -1, 0, false);
+            Static283.renderScene(TimeUtils.clock, Camera.x, Camera.y, Camera.z, Static328.aByteArrayArrayArray4, Static482.anIntArray588, Static9.anIntArray18, Static457.anIntArray552, Static153.anIntArray235, Static682.anIntArray817, PlayerEntity.self.level + 1, local688, PlayerEntity.self.x >> 9, PlayerEntity.self.z >> 9, ClientOptions.instance.flickeringEffects.getValue() == 0, OrthoMode.enabled ? OrthoMode.renderZoom : -1, 0, false);
         }
         Static557.method7331();
         if (MainLogicManager.step == 11) {

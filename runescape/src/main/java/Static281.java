@@ -7,17 +7,17 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static281 {
 
     @OriginalMember(owner = "client!iq", name = "a", descriptor = "(ILclient!pea;)V")
-    public static void method4092(@OriginalArg(1) PickableEntity arg0) {
-        arg0.aEntity_18 = null;
-        @Pc(10) int local10 = arg0.pickingCylinders.length;
-        for (@Pc(12) int local12 = 0; local12 < local10; local12++) {
-            arg0.pickingCylinders[local12].aBoolean352 = false;
+    public static void recycle(@OriginalArg(1) PickableEntity pickable) {
+        pickable.aEntity_18 = null;
+        @Pc(10) int cylinderCount = pickable.pickingCylinders.length;
+        for (@Pc(12) int index = 0; index < cylinderCount; index++) {
+            pickable.pickingCylinders[index].aBoolean352 = false;
         }
-        @Pc(25) LinkedList[] local25 = Class43.A_ENTITY_LIST_ARRAY_1;
+        @Pc(25) LinkedList[] pool = Class43.A_ENTITY_LIST_ARRAY_1;
         synchronized (Class43.A_ENTITY_LIST_ARRAY_1) {
-            if (local10 < Class43.A_ENTITY_LIST_ARRAY_1.length && Static159.anIntArray245[local10] < 200) {
-                Class43.A_ENTITY_LIST_ARRAY_1[local10].add(arg0);
-                @Pc(48) int local48 = Static159.anIntArray245[local10]++;
+            if (cylinderCount < Class43.A_ENTITY_LIST_ARRAY_1.length && Static159.anIntArray245[cylinderCount] < 200) {
+                Class43.A_ENTITY_LIST_ARRAY_1[cylinderCount].add(pickable);
+                @Pc(48) int pooled = Static159.anIntArray245[cylinderCount]++;
             }
         }
     }

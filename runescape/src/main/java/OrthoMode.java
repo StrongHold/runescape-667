@@ -18,7 +18,7 @@ import java.awt.Rectangle;
 public final class OrthoMode {
 
     @OriginalMember(owner = "client!afa", name = "p", descriptor = "Lclient!kn;")
-    public static final Class213 aClass213_1 = new Class213(true);
+    public static final PickList orthoPickList = new PickList(true);
 
     @OriginalMember(owner = "client!rw", name = "v", descriptor = "I")
     public static int anInt8534;
@@ -244,7 +244,7 @@ public final class OrthoMode {
         cameraRotateX = -1;
         anOffscreenSurfaceArray1 = null;
         aMatrix_11 = null;
-        aClass213_1.method5010();
+        orthoPickList.method5010();
     }
 
     @OriginalMember(owner = "client!pm", name = "b", descriptor = "(I)V")
@@ -471,7 +471,7 @@ public final class OrthoMode {
                     local395 = local252;
                     local388 = local393;
                 }
-                @Pc(451) LinkedList local451 = aClass213_1.entities;
+                @Pc(451) LinkedList local451 = orthoPickList.entities;
                 @Pc(465) int local465;
                 for (@Pc(456) PickableEntity local456 = (PickableEntity) local451.first(); local456 != null; local456 = (PickableEntity) local451.next()) {
                     @Pc(461) PickingCylinder[] local461 = local456.pickingCylinders;
@@ -509,7 +509,7 @@ public final class OrthoMode {
                     }
                     if (local463) {
                         local456.unlink();
-                        Static281.method4092(local456);
+                        Static281.recycle(local456);
                     }
                 }
                 if (anInt6796 == 0) {
@@ -532,18 +532,18 @@ public final class OrthoMode {
                     anInt6565 = scaleX;
                     toolkit.DA(anInt5759, anInt6134, anInt6565, anInt9621);
                 }
-                Static119.method2170(aClass213_1);
+                Static119.setActivePickList(orthoPickList);
                 if (local395 > 0) {
                     toolkit.KA(0, local388, anInt8534, local388 + local395);
                     toolkit.ya();
                     toolkit.GA(backgroundColour);
-                    Static283.method4100(arg7, arg1, arg3, arg2, arg13, arg9, arg12, arg5, arg14, arg6, arg8, arg0, arg15, arg4, arg10, arg11, 1, false);
+                    Static283.renderScene(arg7, arg1, arg3, arg2, arg13, arg9, arg12, arg5, arg14, arg6, arg8, arg0, arg15, arg4, arg10, arg11, 1, false);
                 }
                 if (local342 > 0) {
                     toolkit.KA(local344, local397, local342 + local344, local393 + local397);
                     toolkit.ya();
                     toolkit.GA(backgroundColour);
-                    Static283.method4100(arg7, arg1, arg3, arg2, arg13, arg9, arg12, arg5, arg14, arg6, arg8, arg0, arg15, arg4, arg10, arg11, 1, false);
+                    Static283.renderScene(arg7, arg1, arg3, arg2, arg13, arg9, arg12, arg5, arg14, arg6, arg8, arg0, arg15, arg4, arg10, arg11, 1, false);
                 }
                 toolkit.la();
                 Static102.method2021();
@@ -603,9 +603,9 @@ public final class OrthoMode {
                 toolkit.DA(anInt5759, anInt6134, anInt6565, anInt9621);
             }
             aDouble13 = 0.0D;
-            aClass213_1.method5010();
-            Static119.method2170(aClass213_1);
-            Static283.method4100(arg7, arg1, arg3, arg2, arg13, arg9, arg12, arg5, arg14, arg6, arg8, arg0, arg15, arg4, arg10, arg11, 1, false);
+            orthoPickList.method5010();
+            Static119.setActivePickList(orthoPickList);
+            Static283.renderScene(arg7, arg1, arg3, arg2, arg13, arg9, arg12, arg5, arg14, arg6, arg8, arg0, arg15, arg4, arg10, arg11, 1, false);
             Static102.method2021();
             Static75.hasOpaqueStationaryEntities = false;
             if (anInt6796 == 0) {
@@ -639,7 +639,7 @@ public final class OrthoMode {
             toolkit.DA(anInt3469, anInt8043, anInt1001, anInt3986);
             toolkit.KA(anInt45, anInt5001, anInt45 + orthoWidth, orthoHeight + anInt5001);
         }
-        Static283.method4100(arg7, arg1, arg3, arg2, arg13, arg9, arg12, arg5, arg14, arg6, arg8, arg0, arg15, arg4, arg10, arg11, anInt6796 == 2 ? 0 : 2, anInt6796 == 1);
+        Static283.renderScene(arg7, arg1, arg3, arg2, arg13, arg9, arg12, arg5, arg14, arg6, arg8, arg0, arg15, arg4, arg10, arg11, anInt6796 == 2 ? 0 : 2, anInt6796 == 1);
         toolkit.la();
         toolkit.DA(projectionCenterX, projectionCenterY, projectionScaleX, projectionScaleY);
     }

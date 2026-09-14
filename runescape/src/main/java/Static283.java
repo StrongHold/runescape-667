@@ -8,7 +8,7 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static283 {
 
     @OriginalMember(owner = "client!it", name = "a", descriptor = "(IIII[[[B[I[I[I[I[IIBIIZZIIZ)V")
-    public static void method4100(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) byte[][][] arg4, @OriginalArg(5) int[] arg5, @OriginalArg(6) int[] arg6, @OriginalArg(7) int[] arg7, @OriginalArg(8) int[] arg8, @OriginalArg(9) int[] arg9, @OriginalArg(10) int arg10, @OriginalArg(11) byte arg11, @OriginalArg(12) int arg12, @OriginalArg(13) int arg13, @OriginalArg(14) boolean arg14, @OriginalArg(16) int arg15, @OriginalArg(17) int arg16, @OriginalArg(18) boolean arg17) {
+    public static void renderScene(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) byte[][][] arg4, @OriginalArg(5) int[] arg5, @OriginalArg(6) int[] arg6, @OriginalArg(7) int[] arg7, @OriginalArg(8) int[] arg8, @OriginalArg(9) int[] arg9, @OriginalArg(10) int arg10, @OriginalArg(11) byte arg11, @OriginalArg(12) int arg12, @OriginalArg(13) int arg13, @OriginalArg(14) boolean arg14, @OriginalArg(16) int arg15, @OriginalArg(17) int arg16, @OriginalArg(18) boolean arg17) {
         Static29.aBoolean60 = true;
         Static442.aBoolean500 = Static665.aToolkit_15.getMaxLights() > 0;
         Static581.aBoolean657 = true;
@@ -103,11 +103,11 @@ public final class Static283 {
             Static29.aBoolean60 = false;
         }
         Static497.method6623(Static665.aToolkit_15);
-        if (!Static514.aClass213_2.aBoolean426) {
+        if (!Static514.aClass213_2.retained) {
             @Pc(387) LinkedList local387 = Static514.aClass213_2.entities;
             for (@Pc(392) PickableEntity local392 = (PickableEntity) local387.first(); local392 != null; local392 = (PickableEntity) local387.next()) {
                 local392.unlink();
-                Static281.method4092(local392);
+                Static281.recycle(local392);
             }
         }
         if (Static442.aBoolean500) {
