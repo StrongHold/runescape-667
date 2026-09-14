@@ -21,13 +21,13 @@ public final class ParticleSystem extends Node {
     public static final boolean[] activeEffectors = new boolean[8];
 
     @OriginalMember(owner = "client!hv", name = "b", descriptor = "(IZ)Lclient!hv;")
-    public static ParticleSystem create(@OriginalArg(0) int arg0, @OriginalArg(1) boolean arg1) {
+    public static ParticleSystem create(@OriginalArg(0) int clock, @OriginalArg(1) boolean arg1) {
         if (ParticleManager.systemFreePtr == ParticleManager.systemNextPtr) {
-            return new ParticleSystem(arg0, arg1);
+            return new ParticleSystem(clock, arg1);
         } else {
             @Pc(6) ParticleSystem system = ParticleManager.systems[ParticleManager.systemNextPtr];
             ParticleManager.systemNextPtr = ParticleManager.systemNextPtr + 1 & ParticleLimits.SYSTEMS[ParticleManager.option];
-            system.init(arg0, arg1);
+            system.init(clock, arg1);
             return system;
         }
     }
@@ -48,7 +48,7 @@ public final class ParticleSystem extends Node {
     public boolean stopped = false;
 
     @OriginalMember(owner = "client!hv", name = "l", descriptor = "I")
-    public int anInt4147 = 0;
+    public int nextParticleSlot = 0;
 
     @OriginalMember(owner = "client!hv", name = "h", descriptor = "Lclient!fla;")
     public LinkedList emitterCache = new LinkedList();
@@ -75,15 +75,15 @@ public final class ParticleSystem extends Node {
     public final MovingParticle[] movingParticles = new MovingParticle[8192];
 
     @OriginalMember(owner = "client!hv", name = "<init>", descriptor = "(IZ)V")
-    public ParticleSystem(@OriginalArg(0) int arg0, @OriginalArg(1) boolean arg1) {
-        this.init(arg0, arg1);
+    public ParticleSystem(@OriginalArg(0) int clock, @OriginalArg(1) boolean arg1) {
+        this.init(clock, arg1);
     }
 
     @OriginalMember(owner = "client!hv", name = "a", descriptor = "(Lclient!ha;J[Lclient!rv;[Lclient!mn;Z)V")
     public void update(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) long clock, @OriginalArg(2) ModelParticleEmitter[] emitters, @OriginalArg(3) ModelParticleEffector[] effectors) {
         if (!this.removed) {
-            this.method3651(toolkit, emitters);
-            this.method3648(effectors);
+            this.updateEmitters(toolkit, emitters);
+            this.updateEffectors(effectors);
             this.clock = clock;
         }
     }
@@ -99,15 +99,15 @@ public final class ParticleSystem extends Node {
     }
 
     @OriginalMember(owner = "client!hv", name = "a", descriptor = "(Lclient!ha;)V")
-    public void method3646(@OriginalArg(0) Toolkit arg0) {
+    public void method3646(@OriginalArg(0) Toolkit toolkit) {
         this.list.particles.clear();
-        for (@Pc(10) ParticleEmitter local10 = (ParticleEmitter) this.emitterCache.first(); local10 != null; local10 = (ParticleEmitter) this.emitterCache.next()) {
-            local10.method7263(this.lastTick, arg0);
+        for (@Pc(10) ParticleEmitter emitter = (ParticleEmitter) this.emitterCache.first(); emitter != null; emitter = (ParticleEmitter) this.emitterCache.next()) {
+            emitter.collideParticles(this.lastTick, toolkit);
         }
     }
 
     @OriginalMember(owner = "client!hv", name = "a", descriptor = "([Lclient!mn;Z)V")
-    public void method3648(@OriginalArg(0) ModelParticleEffector[] effectors) {
+    public void updateEffectors(@OriginalArg(0) ModelParticleEffector[] effectors) {
         for (@Pc(1) int i = 0; i < 8; i++) {
             activeEffectors[i] = false;
         }
@@ -118,7 +118,7 @@ public final class ParticleSystem extends Node {
                 for (@Pc(21) int i = 0; i < effectors.length; i++) {
                     if (effector.model == effectors[i] || effector.model == effectors[i].next) {
                         activeEffectors[i] = true;
-                        effector.method1707();
+                        effector.update();
                         continue label71;
                     }
                 }
@@ -139,16 +139,16 @@ public final class ParticleSystem extends Node {
 
         for (@Pc(21) int i = 0; i < effectors.length && i != 8 && this.effectorCount != 8; i++) {
             if (!activeEffectors[i]) {
-                @Pc(96) ParticleEffector local96 = null;
+                @Pc(96) ParticleEffector effector = null;
                 if (effectors[i].type().visibility == 1 && ParticleManager.effectorCount < 32) {
-                    local96 = new ParticleEffector(effectors[i], this);
-                    ParticleManager.effectorsCache.put(local96, effectors[i].type);
+                    effector = new ParticleEffector(effectors[i], this);
+                    ParticleManager.effectorsCache.put(effector, effectors[i].type);
                     ParticleManager.effectorCount++;
                 }
-                if (local96 == null) {
-                    local96 = new ParticleEffector(effectors[i], this);
+                if (effector == null) {
+                    effector = new ParticleEffector(effectors[i], this);
                 }
-                this.effectorCache.addLast(local96);
+                this.effectorCache.addLast(effector);
                 this.effectorCount++;
                 activeEffectors[i] = true;
             }
@@ -163,34 +163,34 @@ public final class ParticleSystem extends Node {
     @OriginalMember(owner = "client!hv", name = "b", descriptor = "()Lclient!lk;")
     public ParticleList method3650() {
         this.list.particles.clear();
-        for (@Pc(6) int local6 = 0; local6 < this.movingParticles.length; local6++) {
-            if (this.movingParticles[local6] != null && this.movingParticles[local6].emitter != null) {
-                this.list.particles.add(this.movingParticles[local6]);
+        for (@Pc(6) int i = 0; i < this.movingParticles.length; i++) {
+            if (this.movingParticles[i] != null && this.movingParticles[i].emitter != null) {
+                this.list.particles.add(this.movingParticles[i]);
             }
         }
         return this.list;
     }
 
     @OriginalMember(owner = "client!hv", name = "a", descriptor = "(Lclient!ha;[Lclient!rv;Z)V")
-    public void method3651(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) ModelParticleEmitter[] emitters) {
-        for (@Pc(1) int local1 = 0; local1 < 32; local1++) {
-            activeEmitters[local1] = false;
+    public void updateEmitters(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) ModelParticleEmitter[] emitters) {
+        for (@Pc(1) int i = 0; i < 32; i++) {
+            activeEmitters[i] = false;
         }
 
         label62:
         for (@Pc(16) ParticleEmitter emitter = (ParticleEmitter) this.emitterCache.first(); emitter != null; emitter = (ParticleEmitter) this.emitterCache.next()) {
             if (emitters != null) {
-                for (@Pc(21) int local21 = 0; local21 < emitters.length; local21++) {
-                    if (emitter.model == emitters[local21] || emitter.model == emitters[local21].next) {
-                        activeEmitters[local21] = true;
-                        emitter.method7264();
+                for (@Pc(21) int i = 0; i < emitters.length; i++) {
+                    if (emitter.model == emitters[i] || emitter.model == emitters[i].next) {
+                        activeEmitters[i] = true;
+                        emitter.updateTriangle();
                         emitter.inactive = false;
                         continue label62;
                     }
                 }
             }
 
-            if (emitter.anInt8268 == 0) {
+            if (emitter.particleCount == 0) {
                 emitter.unlink();
                 this.emitterCount--;
             } else {
@@ -229,7 +229,7 @@ public final class ParticleSystem extends Node {
             }
         }
 
-        this.anInt4147 = 0;
+        this.nextParticleSlot = 0;
         this.emitterCache = new LinkedList();
         this.emitterCount = 0;
         this.effectorCache = new Deque();

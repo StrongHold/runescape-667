@@ -15,13 +15,13 @@ public final class ParticleEffector extends Node2 {
     public int z;
 
     @OriginalMember(owner = "client!co", name = "x", descriptor = "I")
-    public int directionX;
+    public int directionZ;
 
     @OriginalMember(owner = "client!co", name = "y", descriptor = "I")
     public int y;
 
     @OriginalMember(owner = "client!co", name = "C", descriptor = "I")
-    public int directionZ;
+    public int directionX;
 
     @OriginalMember(owner = "client!co", name = "D", descriptor = "I")
     public int x;
@@ -33,21 +33,21 @@ public final class ParticleEffector extends Node2 {
     public final ParticleEffectorType type;
 
     @OriginalMember(owner = "client!co", name = "<init>", descriptor = "(Lclient!mn;Lclient!hv;)V")
-    public ParticleEffector(@OriginalArg(0) ModelParticleEffector arg0, @OriginalArg(1) ParticleSystem arg1) {
-        this.model = arg0;
+    public ParticleEffector(@OriginalArg(0) ModelParticleEffector model, @OriginalArg(1) ParticleSystem system) {
+        this.model = model;
         this.type = this.model.type();
-        this.method1707();
+        this.update();
     }
 
     @OriginalMember(owner = "client!co", name = "c", descriptor = "(B)V")
-    public void method1707() {
+    public void update() {
         this.x = this.model.x;
         this.y = this.model.y;
         this.z = this.model.z;
         if (this.model.matrix != null) {
             this.model.matrix.projectDirection(this.type.dirX, this.type.dirY, this.type.dirZ, PROJECTION);
         }
-        this.directionX = PROJECTION[2];
-        this.directionZ = PROJECTION[0];
+        this.directionZ = PROJECTION[2];
+        this.directionX = PROJECTION[0];
     }
 }

@@ -10,13 +10,13 @@ import org.openrs2.deob.annotation.Pc;
 public final class ParticleEmitterType {
 
     @OriginalMember(owner = "client!vaa", name = "w", descriptor = "I")
-    public int anInt9878;
+    public int startAlphaRange;
 
     @OriginalMember(owner = "client!vaa", name = "ub", descriptor = "I")
-    public int anInt9879;
+    public int maxStartBlue;
 
     @OriginalMember(owner = "client!vaa", name = "F", descriptor = "[I")
-    public int[] anIntArray774;
+    public int[] globalEffectorIndices;
 
     @OriginalMember(owner = "client!vaa", name = "G", descriptor = "I")
     public int maxStartColour;
@@ -34,19 +34,19 @@ public final class ParticleEmitterType {
     public int[] localEffectors;
 
     @OriginalMember(owner = "client!vaa", name = "Z", descriptor = "I")
-    public int anInt9887;
+    public int alphaFadeStep;
 
     @OriginalMember(owner = "client!vaa", name = "x", descriptor = "I")
     public int maxSpeed;
 
     @OriginalMember(owner = "client!vaa", name = "s", descriptor = "I")
-    public int anInt9889;
+    public int speedChangeStep;
 
     @OriginalMember(owner = "client!vaa", name = "f", descriptor = "S")
     public short maxAngleH;
 
     @OriginalMember(owner = "client!vaa", name = "S", descriptor = "I")
-    public int anInt9890;
+    public int maxStartAlpha;
 
     @OriginalMember(owner = "client!vaa", name = "mb", descriptor = "[I")
     public int[] generalEffectors;
@@ -61,49 +61,49 @@ public final class ParticleEmitterType {
     public short maxAngleV;
 
     @OriginalMember(owner = "client!vaa", name = "cb", descriptor = "I")
-    public int anInt9899;
+    public int minStartRed;
 
     @OriginalMember(owner = "client!vaa", name = "lb", descriptor = "I")
-    public int lb;
+    public int speedChangeDuration;
 
     @OriginalMember(owner = "client!vaa", name = "Y", descriptor = "S")
     public short minAngleV;
 
     @OriginalMember(owner = "client!vaa", name = "m", descriptor = "I")
-    public int anInt9901;
+    public int colourFadeDuration;
 
     @OriginalMember(owner = "client!vaa", name = "a", descriptor = "I")
     public int maxLifetime;
 
     @OriginalMember(owner = "client!vaa", name = "J", descriptor = "I")
-    public int anInt9903;
+    public int minStartBlue;
 
     @OriginalMember(owner = "client!vaa", name = "C", descriptor = "I")
-    public int anInt9906;
+    public int minStartAlpha;
 
     @OriginalMember(owner = "client!vaa", name = "db", descriptor = "I")
-    public int anInt9909;
+    public int sizeChangeDuration;
 
     @OriginalMember(owner = "client!vaa", name = "xb", descriptor = "I")
-    public int anInt9910;
+    public int sizeChangeStep;
 
     @OriginalMember(owner = "client!vaa", name = "tb", descriptor = "I")
-    public int anInt9911;
+    public int startGreenRange;
 
     @OriginalMember(owner = "client!vaa", name = "ob", descriptor = "I")
     public int minLifetime;
 
     @OriginalMember(owner = "client!vaa", name = "d", descriptor = "I")
-    public int anInt9913;
+    public int startBlueRange;
 
     @OriginalMember(owner = "client!vaa", name = "h", descriptor = "I")
-    public int anInt9914;
+    public int minStartGreen;
 
     @OriginalMember(owner = "client!vaa", name = "P", descriptor = "I")
     public int decelerationRate;
 
     @OriginalMember(owner = "client!vaa", name = "H", descriptor = "I")
-    public int anInt9916;
+    public int blueFadeStep;
 
     @OriginalMember(owner = "client!vaa", name = "rb", descriptor = "I")
     public int maxSize;
@@ -112,25 +112,25 @@ public final class ParticleEmitterType {
     public int fadeColour;
 
     @OriginalMember(owner = "client!vaa", name = "R", descriptor = "I")
-    public int anInt9920;
+    public int greenFadeStep;
 
     @OriginalMember(owner = "client!vaa", name = "o", descriptor = "[I")
     public int[] globalEffectors;
 
     @OriginalMember(owner = "client!vaa", name = "O", descriptor = "I")
-    public int anInt9924;
+    public int maxStartRed;
 
     @OriginalMember(owner = "client!vaa", name = "bb", descriptor = "I")
-    public int anInt9925;
+    public int alphaFadeDuration;
 
     @OriginalMember(owner = "client!vaa", name = "j", descriptor = "I")
-    public int anInt9927;
+    public int maxStartGreen;
 
     @OriginalMember(owner = "client!vaa", name = "ab", descriptor = "I")
-    public int anInt9929;
+    public int startRedRange;
 
     @OriginalMember(owner = "client!vaa", name = "fb", descriptor = "I")
-    public int anInt9931;
+    public int redFadeStep;
 
     @OriginalMember(owner = "client!vaa", name = "k", descriptor = "I")
     public int minParticleRate;
@@ -175,7 +175,7 @@ public final class ParticleEmitterType {
     public boolean uniformColourVariance = true;
 
     @OriginalMember(owner = "client!vaa", name = "u", descriptor = "Z")
-    public boolean aBoolean764 = false;
+    public boolean hasHeightLevelBounds = false;
 
     @OriginalMember(owner = "client!vaa", name = "kb", descriptor = "I")
     public int sizeChangePercentage = 100;
@@ -193,7 +193,7 @@ public final class ParticleEmitterType {
     public int endSpeed = -1;
 
     @OriginalMember(owner = "client!vaa", name = "V", descriptor = "Z")
-    public boolean aBoolean755 = false;
+    public boolean softwareTextured = false;
 
     @OriginalMember(owner = "client!vaa", name = "e", descriptor = "I")
     public int lifetime = -1;
@@ -293,7 +293,7 @@ public final class ParticleEmitterType {
         } else if (code == 29) {
             packet.g2s();
         } else if (code == 30) {
-            this.aBoolean755 = true;
+            this.softwareTextured = true;
         } else if (code == 31) {
             this.minSize = packet.g2() << 12 << 2;
             this.maxSize = packet.g2() << 12 << 2;
@@ -308,60 +308,60 @@ public final class ParticleEmitterType {
 
     @OriginalMember(owner = "client!vaa", name = "b", descriptor = "(I)V")
     public void postDecode() {
-        this.anInt9899 = this.minStartColour >> 16 & 0xFF;
+        this.minStartRed = this.minStartColour >> 16 & 0xFF;
 
         if (this.minHeightLevel > -2 || this.maxHeightLevel > -2) {
-            this.aBoolean764 = true;
+            this.hasHeightLevelBounds = true;
         }
 
-        this.anInt9924 = this.maxStartColour >> 16 & 0xFF;
-        this.anInt9929 = this.anInt9924 - this.anInt9899;
-        this.anInt9914 = this.minStartColour >> 8 & 0xFF;
-        this.anInt9927 = this.maxStartColour >> 8 & 0xFF;
-        this.anInt9879 = this.maxStartColour & 0xFF;
-        this.anInt9911 = this.anInt9927 - this.anInt9914;
-        this.anInt9903 = this.minStartColour & 0xFF;
-        this.anInt9890 = this.maxStartColour >> 24 & 0xFF;
-        this.anInt9906 = this.minStartColour >> 24 & 0xFF;
-        this.anInt9913 = this.anInt9879 - this.anInt9903;
-        this.anInt9878 = this.anInt9890 - this.anInt9906;
+        this.maxStartRed = this.maxStartColour >> 16 & 0xFF;
+        this.startRedRange = this.maxStartRed - this.minStartRed;
+        this.minStartGreen = this.minStartColour >> 8 & 0xFF;
+        this.maxStartGreen = this.maxStartColour >> 8 & 0xFF;
+        this.maxStartBlue = this.maxStartColour & 0xFF;
+        this.startGreenRange = this.maxStartGreen - this.minStartGreen;
+        this.minStartBlue = this.minStartColour & 0xFF;
+        this.maxStartAlpha = this.maxStartColour >> 24 & 0xFF;
+        this.minStartAlpha = this.minStartColour >> 24 & 0xFF;
+        this.startBlueRange = this.maxStartBlue - this.minStartBlue;
+        this.startAlphaRange = this.maxStartAlpha - this.minStartAlpha;
 
         if (this.endSize != -1) {
-            this.anInt9909 = this.sizeChangePercentage * this.maxLifetime / 100;
-            if (this.anInt9909 == 0) {
-                this.anInt9909 = 1;
+            this.sizeChangeDuration = this.sizeChangePercentage * this.maxLifetime / 100;
+            if (this.sizeChangeDuration == 0) {
+                this.sizeChangeDuration = 1;
             }
-            this.anInt9910 = (this.endSize - (this.maxSize - this.minSize) / 2 - this.minSize) / this.anInt9909;
+            this.sizeChangeStep = (this.endSize - (this.maxSize - this.minSize) / 2 - this.minSize) / this.sizeChangeDuration;
         }
 
         if (this.endSpeed != -1) {
-            this.lb = this.maxLifetime * this.speedChangePercentage / 100;
-            if (this.lb == 0) {
-                this.lb = 1;
+            this.speedChangeDuration = this.maxLifetime * this.speedChangePercentage / 100;
+            if (this.speedChangeDuration == 0) {
+                this.speedChangeDuration = 1;
             }
-            this.anInt9889 = (this.endSpeed - (this.maxSpeed - this.minSpeed) / 2 - this.minSpeed) / this.lb;
+            this.speedChangeStep = (this.endSpeed - (this.maxSpeed - this.minSpeed) / 2 - this.minSpeed) / this.speedChangeDuration;
         }
 
         if (this.fadeColour != 0) {
-            this.anInt9925 = this.alphaFadePercentage * this.maxLifetime / 100;
-            this.anInt9901 = this.maxLifetime * this.colourFadePercentage / 100;
+            this.alphaFadeDuration = this.alphaFadePercentage * this.maxLifetime / 100;
+            this.colourFadeDuration = this.maxLifetime * this.colourFadePercentage / 100;
 
-            if (this.anInt9901 == 0) {
-                this.anInt9901 = 1;
+            if (this.colourFadeDuration == 0) {
+                this.colourFadeDuration = 1;
             }
 
-            if (this.anInt9925 == 0) {
-                this.anInt9925 = 1;
+            if (this.alphaFadeDuration == 0) {
+                this.alphaFadeDuration = 1;
             }
 
-            this.anInt9931 = ((((this.fadeColour >> 16) & 0xFF) - (this.anInt9929 / 2) - this.anInt9899) << 8) / this.anInt9901;
-            this.anInt9920 = ((((this.fadeColour >> 8) & 0xFF) - this.anInt9914 - (this.anInt9911 / 2)) << 8) / this.anInt9901;
-            this.anInt9916 = (((this.fadeColour & 0xFF) - (this.anInt9913 / 2) - this.anInt9903) << 8) / this.anInt9901;
-            this.anInt9916 += (this.anInt9916 <= 0) ? 4 : -4;
-            this.anInt9887 = ((((this.fadeColour >> 24) & 0xFF) - (this.anInt9878 / 2) - this.anInt9906) << 8) / this.anInt9925;
-            this.anInt9931 += (this.anInt9931 <= 0) ? 4 : -4;
-            this.anInt9920 += (this.anInt9920 > 0) ? -4 : 4;
-            this.anInt9887 += (this.anInt9887 <= 0) ? 4 : -4;
+            this.redFadeStep = ((((this.fadeColour >> 16) & 0xFF) - (this.startRedRange / 2) - this.minStartRed) << 8) / this.colourFadeDuration;
+            this.greenFadeStep = ((((this.fadeColour >> 8) & 0xFF) - this.minStartGreen - (this.startGreenRange / 2)) << 8) / this.colourFadeDuration;
+            this.blueFadeStep = (((this.fadeColour & 0xFF) - (this.startBlueRange / 2) - this.minStartBlue) << 8) / this.colourFadeDuration;
+            this.blueFadeStep += (this.blueFadeStep <= 0) ? 4 : -4;
+            this.alphaFadeStep = ((((this.fadeColour >> 24) & 0xFF) - (this.startAlphaRange / 2) - this.minStartAlpha) << 8) / this.alphaFadeDuration;
+            this.redFadeStep += (this.redFadeStep <= 0) ? 4 : -4;
+            this.greenFadeStep += (this.greenFadeStep > 0) ? -4 : 4;
+            this.alphaFadeStep += (this.alphaFadeStep <= 0) ? 4 : -4;
         }
     }
 

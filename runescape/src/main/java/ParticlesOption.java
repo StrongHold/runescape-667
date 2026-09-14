@@ -6,14 +6,14 @@ import org.openrs2.deob.annotation.OriginalMember;
 public final class ParticlesOption extends Option {
 
     @OriginalMember(owner = "client!su", name = "<init>", descriptor = "(Lclient!kv;)V")
-    public ParticlesOption(@OriginalArg(0) ClientOptions arg0) {
-        super(arg0);
+    public ParticlesOption(@OriginalArg(0) ClientOptions options) {
+        super(options);
         ParticleManager.setOption(super.value);
     }
 
     @OriginalMember(owner = "client!su", name = "<init>", descriptor = "(ILclient!kv;)V")
-    public ParticlesOption(@OriginalArg(0) int arg0, @OriginalArg(1) ClientOptions arg1) {
-        super(arg0, arg1);
+    public ParticlesOption(@OriginalArg(0) int value, @OriginalArg(1) ClientOptions options) {
+        super(value, options);
         ParticleManager.setOption(super.value);
     }
 
