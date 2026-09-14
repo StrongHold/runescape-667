@@ -9,7 +9,7 @@ public final class Static725 {
     public static final Class121 aClass121_6 = new Class121();
 
     @OriginalMember(owner = "client!ww", name = "a", descriptor = "(Lclient!ha;IB)V")
-    public static void method9454(@OriginalArg(0) Toolkit arg0, @OriginalArg(1) int arg1) {
+    public static void method9454(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) int level) {
         if (!Static18.occlude || !Static29.aBoolean60) {
             Static469.activeOccluderCount = 0;
             return;
@@ -20,10 +20,10 @@ public final class Static725 {
         Static298.occludedGroundCount = 0;
         Static356.anInt5773 = 0;
         Static679.occludedWallCount = 0;
-        @Pc(32) int[] local32 = arg0.Y();
-        Static1.anInt10797 = (int) ((float) local32[2] / 3.0F);
-        Static412.anInt6357 = (int) ((float) local32[3] / 3.0F);
-        arg0.method7944(Static118.anIntArray198);
+        @Pc(32) int[] projection = toolkit.Y();
+        Static1.anInt10797 = (int) ((float) projection[2] / 3.0F);
+        Static412.anInt6357 = (int) ((float) projection[3] / 3.0F);
+        toolkit.method7944(Static118.anIntArray198);
         if (Static228.anInt3709 != (int) ((float) Static118.anIntArray198[0] / 3.0F) || (int) ((float) Static118.anIntArray198[1] / 3.0F) != Static624.anInt9461) {
             Static228.anInt3709 = (int) ((float) Static118.anIntArray198[0] / 3.0F);
             Static624.anInt9461 = (int) ((float) Static118.anIntArray198[1] / 3.0F);
@@ -31,40 +31,40 @@ public final class Static725 {
             Static460.anInt6970 = Static228.anInt3709 >> 1;
             Static485.anIntArray886 = new int[Static228.anInt3709 * Static624.anInt9461];
         }
-        Static107.aMatrix_3 = arg0.camera();
+        Static107.aMatrix_3 = toolkit.camera();
         Static469.activeOccluderCount = 0;
-        for (@Pc(117) int local117 = 0; local117 < Static317.anInt5046; local117++) {
-            Static494.method6601(arg1, Static384.aLocOccluderArray2[local117], arg0);
+        for (@Pc(117) int i = 0; i < Static317.anInt5046; i++) {
+            Static494.method6601(level, Static384.aLocOccluderArray2[i], toolkit);
         }
-        for (@Pc(149) int local149 = 0; local149 < Static444.anInt6751; local149++) {
-            Static494.method6601(arg1, Static607.aLocOccluderArray4[local149], arg0);
+        for (@Pc(149) int i = 0; i < Static444.anInt6751; i++) {
+            Static494.method6601(level, Static607.aLocOccluderArray4[i], toolkit);
         }
-        for (@Pc(170) int local170 = 0; local170 < Static150.anInt2634; local170++) {
-            Static494.method6601(arg1, Static285.aLocOccluderArray1[local170], arg0);
+        for (@Pc(170) int i = 0; i < Static150.anInt2634; i++) {
+            Static494.method6601(level, Static285.aLocOccluderArray1[i], toolkit);
         }
         Static432.occludedPixelCount = 0;
         if (Static469.activeOccluderCount > 0) {
-            @Pc(205) int local205 = Static485.anIntArray886.length;
-            @Pc(212) int local212 = local205 - local205 & 0x7;
-            @Pc(214) int local214 = 0;
-            while (local214 < local212) {
-                Static485.anIntArray886[local214++] = Integer.MAX_VALUE;
-                Static485.anIntArray886[local214++] = Integer.MAX_VALUE;
-                Static485.anIntArray886[local214++] = Integer.MAX_VALUE;
-                Static485.anIntArray886[local214++] = Integer.MAX_VALUE;
-                Static485.anIntArray886[local214++] = Integer.MAX_VALUE;
-                Static485.anIntArray886[local214++] = Integer.MAX_VALUE;
-                Static485.anIntArray886[local214++] = Integer.MAX_VALUE;
-                Static485.anIntArray886[local214++] = Integer.MAX_VALUE;
+            @Pc(205) int length = Static485.anIntArray886.length;
+            @Pc(212) int unrolledLength = length - length & 0x7;
+            @Pc(214) int index = 0;
+            while (index < unrolledLength) {
+                Static485.anIntArray886[index++] = Integer.MAX_VALUE;
+                Static485.anIntArray886[index++] = Integer.MAX_VALUE;
+                Static485.anIntArray886[index++] = Integer.MAX_VALUE;
+                Static485.anIntArray886[index++] = Integer.MAX_VALUE;
+                Static485.anIntArray886[index++] = Integer.MAX_VALUE;
+                Static485.anIntArray886[index++] = Integer.MAX_VALUE;
+                Static485.anIntArray886[index++] = Integer.MAX_VALUE;
+                Static485.anIntArray886[index++] = Integer.MAX_VALUE;
             }
-            while (local214 < local205) {
-                Static485.anIntArray886[local214++] = Integer.MAX_VALUE;
+            while (index < length) {
+                Static485.anIntArray886[index++] = Integer.MAX_VALUE;
             }
             Static254.anInt4115 = 1;
-            for (@Pc(289) int local289 = 0; local289 < Static469.activeOccluderCount; local289++) {
-                @Pc(295) LocOccluder local295 = Static560.aLocOccluderArray3[local289];
-                Static264.method9460(local295.aShortArray17[0], local295.aShortArray18[0], local295.aShortArray19[3], local295.aShortArray19[1], local295.aShortArray18[3], local295.aShortArray17[3], local295.aShortArray18[1], local295.aShortArray19[0], local295.aShortArray17[1]);
-                Static264.method9460(local295.aShortArray17[1], local295.aShortArray18[1], local295.aShortArray19[3], local295.aShortArray19[2], local295.aShortArray18[3], local295.aShortArray17[3], local295.aShortArray18[2], local295.aShortArray19[1], local295.aShortArray17[2]);
+            for (@Pc(289) int i = 0; i < Static469.activeOccluderCount; i++) {
+                @Pc(295) LocOccluder occluder = Static560.aLocOccluderArray3[i];
+                Static264.rasteriseTriangle(occluder.aShortArray17[0], occluder.aShortArray18[0], occluder.aShortArray19[3], occluder.aShortArray19[1], occluder.aShortArray18[3], occluder.aShortArray17[3], occluder.aShortArray18[1], occluder.aShortArray19[0], occluder.aShortArray17[1]);
+                Static264.rasteriseTriangle(occluder.aShortArray17[1], occluder.aShortArray18[1], occluder.aShortArray19[3], occluder.aShortArray19[2], occluder.aShortArray18[3], occluder.aShortArray17[3], occluder.aShortArray18[2], occluder.aShortArray19[1], occluder.aShortArray17[2]);
             }
             Static254.anInt4115 = 2;
         }
@@ -74,14 +74,14 @@ public final class Static725 {
     }
 
     @OriginalMember(owner = "client!ww", name = "a", descriptor = "(ZD)V")
-    public static void method9455(@OriginalArg(1) double arg0) {
-        if (Static385.aDouble18 == arg0) {
+    public static void method9455(@OriginalArg(1) double gamma) {
+        if (Static385.aDouble18 == gamma) {
             return;
         }
-        for (@Pc(18) int local18 = 0; local18 < 256; local18++) {
-            @Pc(32) int local32 = (int) (Math.pow((double) local18 / 255.0D, arg0) * 255.0D);
-            Static609.anIntArray716[local18] = local32 > 255 ? 255 : local32;
+        for (@Pc(18) int i = 0; i < 256; i++) {
+            @Pc(32) int value = (int) (Math.pow((double) i / 255.0D, gamma) * 255.0D);
+            Static609.anIntArray716[i] = value > 255 ? 255 : value;
         }
-        Static385.aDouble18 = arg0;
+        Static385.aDouble18 = gamma;
     }
 }

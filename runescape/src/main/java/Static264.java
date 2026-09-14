@@ -5,547 +5,553 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static264 {
 
     @OriginalMember(owner = "client!ie", name = "b", descriptor = "[[I")
-    public static final int[][] anIntArrayArray267 = new int[][]{{0, 1, 2, 3}, {1, 2, 3, 0}, {1, 2, -1, 0}, {2, 0, -1, 1}, {0, 1, -1, 2}, {1, 2, -1, 0}, {-1, 4, -1, 1}, {-1, 1, 3, -1}, {-1, 0, 2, -1}, {3, 5, 2, 0}, {0, 2, 5, 3}, {0, 2, 3, 5}, {0, 1, 2, 3}};
+    public static final int[][] SPLIT_EDGE_FACE = new int[][]{{0, 1, 2, 3}, {1, 2, 3, 0}, {1, 2, -1, 0}, {2, 0, -1, 1}, {0, 1, -1, 2}, {1, 2, -1, 0}, {-1, 4, -1, 1}, {-1, 1, 3, -1}, {-1, 0, 2, -1}, {3, 5, 2, 0}, {0, 2, 5, 3}, {0, 2, 3, 5}, {0, 1, 2, 3}};
 
     @OriginalMember(owner = "client!ie", name = "a", descriptor = "(IIIIIIII)V")
-    public static void method9459(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(4) int arg3, @OriginalArg(5) int arg4, @OriginalArg(6) int arg5, @OriginalArg(7) int arg6) {
-        if (Static180.anInt2995 <= arg5 && arg1 <= Static111.anInt2219 && Static724.anInt10930 <= arg3 && arg4 <= Static273.anInt4395) {
-            Static446.method6094(arg4, arg1, arg2, arg0, arg5, arg6, arg3);
+    public static void fillAndOutlineRect(@OriginalArg(0) int fillColour, @OriginalArg(1) int x1, @OriginalArg(2) int lineColour, @OriginalArg(4) int y0, @OriginalArg(5) int y1, @OriginalArg(6) int x0, @OriginalArg(7) int lineWidth) {
+        if (Static180.anInt2995 <= x0 && x1 <= Static111.anInt2219 && Static724.anInt10930 <= y0 && y1 <= Static273.anInt4395) {
+            Static446.method6094(y1, x1, lineColour, fillColour, x0, lineWidth, y0);
         } else {
-            Static547.method7252(arg4, arg5, arg2, arg3, arg1, arg6, arg0);
+            Static547.method7252(y1, x0, lineColour, y0, x1, lineWidth, fillColour);
         }
     }
 
+    /**
+     * Scan converts a screen space triangle against the software occlusion depth buffer held in
+     * {@link Static485#anIntArray886}. {@link Static254#anInt4115} selects the mode: 1 writes the
+     * triangle's depth into the buffer and always answers true, 2 leaves the buffer alone and answers
+     * whether every pixel of the triangle lies behind the depth already recorded there, so true means
+     * the triangle is entirely hidden by the occluders drawn in mode 1.
+     */
     @OriginalMember(owner = "client!ie", name = "a", descriptor = "(IIIBIIIIII)Z")
-    public static boolean method9460(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(4) int arg3, @OriginalArg(5) int arg4, @OriginalArg(6) int arg5, @OriginalArg(7) int arg6, @OriginalArg(8) int arg7, @OriginalArg(9) int arg8) {
-        if (arg1 > 2000 || arg6 > 2000 || arg4 > 2000 || arg0 > 2000 || arg8 > 2000 || arg5 > 2000) {
+    public static boolean rasteriseTriangle(@OriginalArg(0) int xA, @OriginalArg(1) int yA, @OriginalArg(2) int zC, @OriginalArg(4) int zB, @OriginalArg(5) int yC, @OriginalArg(6) int xC, @OriginalArg(7) int yB, @OriginalArg(8) int zA, @OriginalArg(9) int xB) {
+        if (yA > 2000 || yB > 2000 || yC > 2000 || xA > 2000 || xB > 2000 || xC > 2000) {
             return false;
-        } else if (arg1 >= -2000 && arg6 >= -2000 && arg4 >= -2000 && arg0 >= -2000 && arg8 >= -2000 && arg5 >= -2000) {
-            @Pc(88) int local88;
+        } else if (yA >= -2000 && yB >= -2000 && yC >= -2000 && xA >= -2000 && xB >= -2000 && xC >= -2000) {
             if (Static254.anInt4115 == 2) {
-                local88 = Static228.anInt3709 * arg1 + arg0;
-                if (local88 >= 0 && local88 < Static485.anIntArray886.length && Static485.anIntArray886[local88] > (arg7 << 8) - 38400) {
+                int index = Static228.anInt3709 * yA + xA;
+                if (index >= 0 && index < Static485.anIntArray886.length && Static485.anIntArray886[index] > (zA << 8) - 38400) {
                     return false;
                 }
-                local88 = Static228.anInt3709 * arg6 + arg8;
-                if (local88 >= 0 && Static485.anIntArray886.length > local88 && (arg3 << 8) - 38400 < Static485.anIntArray886[local88]) {
+                index = Static228.anInt3709 * yB + xB;
+                if (index >= 0 && Static485.anIntArray886.length > index && (zB << 8) - 38400 < Static485.anIntArray886[index]) {
                     return false;
                 }
-                local88 = arg4 * Static228.anInt3709 + arg5;
-                if (local88 >= 0 && Static485.anIntArray886.length > local88 && (arg2 << 8) - 38400 < Static485.anIntArray886[local88]) {
+                index = yC * Static228.anInt3709 + xC;
+                if (index >= 0 && Static485.anIntArray886.length > index && (zC << 8) - 38400 < Static485.anIntArray886[index]) {
                     return false;
                 }
             }
-            local88 = arg8 - arg0;
-            @Pc(191) int local191 = arg6 - arg1;
-            @Pc(196) int local196 = arg5 - arg0;
-            @Pc(201) int local201 = arg4 - arg1;
-            @Pc(206) int local206 = arg3 - arg7;
-            if (arg6 > arg1 && arg4 > arg4) {
-                if (arg6 <= arg4) {
-                    arg4++;
+            @Pc(88) int dxAB = xB - xA;
+            @Pc(191) int dyAB = yB - yA;
+            @Pc(196) int dxAC = xC - xA;
+            @Pc(201) int dyAC = yC - yA;
+            @Pc(206) int dzAB = zB - zA;
+            if (yB > yA && yC > yC) {
+                if (yB <= yC) {
+                    yC++;
                 } else {
-                    arg6++;
+                    yB++;
                 }
-                arg1--;
-            } else if (arg4 <= arg6) {
-                if (arg6 < arg1) {
-                    arg1++;
+                yA--;
+            } else if (yC <= yB) {
+                if (yB < yA) {
+                    yA++;
                 } else {
-                    arg6++;
+                    yB++;
                 }
-                arg4--;
+                yC--;
             } else {
-                if (arg1 <= arg4) {
-                    arg4++;
+                if (yA <= yC) {
+                    yC++;
                 } else {
-                    arg1++;
+                    yA++;
                 }
-                arg6--;
+                yB--;
             }
-            @Pc(272) int local272 = arg2 - arg7;
-            @Pc(274) int local274 = 0;
-            if (arg1 != arg6) {
-                local274 = (arg8 - arg0 << 12) / (arg6 - arg1);
+            @Pc(272) int dzAC = zC - zA;
+            @Pc(274) int gradientAB = 0;
+            if (yA != yB) {
+                gradientAB = (xB - xA << 12) / (yB - yA);
             }
-            @Pc(291) int local291 = 0;
-            if (arg4 != arg6) {
-                local291 = (arg5 - arg8 << 12) / (arg4 - arg6);
+            @Pc(291) int gradientBC = 0;
+            if (yC != yB) {
+                gradientBC = (xC - xB << 12) / (yC - yB);
             }
-            @Pc(312) int local312 = 0;
-            if (arg4 != arg1) {
-                local312 = (arg0 - arg5 << 12) / (arg1 - arg4);
+            @Pc(312) int gradientCA = 0;
+            if (yC != yA) {
+                gradientCA = (xA - xC << 12) / (yA - yC);
             }
-            @Pc(352) int local352 = local201 * local88 - local191 * local196;
-            if (local352 == 0) {
+            @Pc(352) int area = dyAC * dxAB - dyAB * dxAC;
+            if (area == 0) {
                 return false;
             }
-            @Pc(369) int local369 = (local201 * local206 - local272 * local191 << 8) / local352;
-            @Pc(381) int local381 = (local272 * local88 - local206 * local196 << 8) / local352;
-            if (arg1 <= arg6 && arg4 >= arg1) {
-                if (Static624.anInt9461 <= arg1) {
+            @Pc(369) int dzdx = (dyAC * dzAB - dzAC * dyAB << 8) / area;
+            @Pc(381) int dzdy = (dzAC * dxAB - dzAB * dxAC << 8) / area;
+            if (yA <= yB && yC >= yA) {
+                if (Static624.anInt9461 <= yA) {
                     return true;
                 }
-                if (arg4 > Static624.anInt9461) {
-                    arg4 = Static624.anInt9461;
+                if (yC > Static624.anInt9461) {
+                    yC = Static624.anInt9461;
                 }
-                arg7 = local369 + (arg7 << 8) - local369 * arg0;
-                if (Static624.anInt9461 < arg6) {
-                    arg6 = Static624.anInt9461;
+                zA = dzdx + (zA << 8) - dzdx * xA;
+                if (Static624.anInt9461 < yB) {
+                    yB = Static624.anInt9461;
                 }
-                if (arg4 > arg6) {
-                    arg5 = arg0 <<= 0xC;
-                    arg8 <<= 0xC;
-                    if (arg1 < 0) {
-                        arg7 -= arg1 * local381;
-                        arg0 -= local274 * arg1;
-                        arg5 -= arg1 * local312;
-                        arg1 = 0;
+                if (yC > yB) {
+                    xC = xA <<= 0xC;
+                    xB <<= 0xC;
+                    if (yA < 0) {
+                        zA -= yA * dzdy;
+                        xA -= gradientAB * yA;
+                        xC -= yA * gradientCA;
+                        yA = 0;
                     }
-                    if (arg6 < 0) {
-                        arg8 -= arg6 * local291;
-                        arg6 = 0;
+                    if (yB < 0) {
+                        xB -= yB * gradientBC;
+                        yB = 0;
                     }
-                    if ((arg1 == arg6 || local274 <= local312) && (arg1 != arg6 || local312 <= local291)) {
-                        arg4 -= arg6;
-                        arg6 -= arg1;
-                        arg1 *= Static228.anInt3709;
+                    if ((yA == yB || gradientAB <= gradientCA) && (yA != yB || gradientCA <= gradientBC)) {
+                        yC -= yB;
+                        yB -= yA;
+                        yA *= Static228.anInt3709;
                         while (true) {
-                            arg6--;
-                            if (arg6 < 0) {
+                            yB--;
+                            if (yB < 0) {
                                 while (true) {
-                                    arg4--;
-                                    if (arg4 < 0) {
+                                    yC--;
+                                    if (yC < 0) {
                                         return true;
                                     }
-                                    if (!Static34.method885((arg8 >> 12) - 1, (arg5 >> 12) + 1, arg7, Static485.anIntArray886, local369, arg1)) {
+                                    if (!Static34.method885((xB >> 12) - 1, (xC >> 12) + 1, zA, Static485.anIntArray886, dzdx, yA)) {
                                         return false;
                                     }
-                                    arg5 += local312;
-                                    arg7 += local381;
-                                    arg1 += Static228.anInt3709;
-                                    arg8 += local291;
+                                    xC += gradientCA;
+                                    zA += dzdy;
+                                    yA += Static228.anInt3709;
+                                    xB += gradientBC;
                                 }
                             }
-                            if (!Static34.method885((arg0 >> 12) - 1, (arg5 >> 12) + 1, arg7, Static485.anIntArray886, local369, arg1)) {
+                            if (!Static34.method885((xA >> 12) - 1, (xC >> 12) + 1, zA, Static485.anIntArray886, dzdx, yA)) {
                                 return false;
                             }
-                            arg7 += local381;
-                            arg1 += Static228.anInt3709;
-                            arg0 += local274;
-                            arg5 += local312;
+                            zA += dzdy;
+                            yA += Static228.anInt3709;
+                            xA += gradientAB;
+                            xC += gradientCA;
                         }
                     } else {
-                        arg4 -= arg6;
-                        arg6 -= arg1;
-                        arg1 = Static228.anInt3709 * arg1;
+                        yC -= yB;
+                        yB -= yA;
+                        yA = Static228.anInt3709 * yA;
                         while (true) {
-                            arg6--;
-                            if (arg6 < 0) {
+                            yB--;
+                            if (yB < 0) {
                                 while (true) {
-                                    arg4--;
-                                    if (arg4 < 0) {
+                                    yC--;
+                                    if (yC < 0) {
                                         return true;
                                     }
-                                    if (!Static34.method885((arg5 >> 12) - 1, (arg8 >> 12) + 1, arg7, Static485.anIntArray886, local369, arg1)) {
+                                    if (!Static34.method885((xC >> 12) - 1, (xB >> 12) + 1, zA, Static485.anIntArray886, dzdx, yA)) {
                                         return false;
                                     }
-                                    arg5 += local312;
-                                    arg8 += local291;
-                                    arg7 += local381;
-                                    arg1 += Static228.anInt3709;
+                                    xC += gradientCA;
+                                    xB += gradientBC;
+                                    zA += dzdy;
+                                    yA += Static228.anInt3709;
                                 }
                             }
-                            if (!Static34.method885((arg5 >> 12) - 1, (arg0 >> 12) + 1, arg7, Static485.anIntArray886, local369, arg1)) {
+                            if (!Static34.method885((xC >> 12) - 1, (xA >> 12) + 1, zA, Static485.anIntArray886, dzdx, yA)) {
                                 return false;
                             }
-                            arg0 += local274;
-                            arg7 += local381;
-                            arg1 += Static228.anInt3709;
-                            arg5 += local312;
+                            xA += gradientAB;
+                            zA += dzdy;
+                            yA += Static228.anInt3709;
+                            xC += gradientCA;
                         }
                     }
                 } else {
-                    arg8 = arg0 <<= 0xC;
-                    arg5 <<= 0xC;
-                    if (arg1 < 0) {
-                        arg7 -= arg1 * local381;
-                        arg0 -= arg1 * local274;
-                        arg8 -= local312 * arg1;
-                        arg1 = 0;
+                    xB = xA <<= 0xC;
+                    xC <<= 0xC;
+                    if (yA < 0) {
+                        zA -= yA * dzdy;
+                        xA -= yA * gradientAB;
+                        xB -= gradientCA * yA;
+                        yA = 0;
                     }
-                    if (arg4 < 0) {
-                        arg5 -= arg4 * local291;
-                        arg4 = 0;
+                    if (yC < 0) {
+                        xC -= yC * gradientBC;
+                        yC = 0;
                     }
-                    if (arg1 != arg4 && local312 < local274 || arg1 == arg4 && local291 > local274) {
-                        arg6 -= arg4;
-                        arg4 -= arg1;
-                        arg1 = Static228.anInt3709 * arg1;
+                    if (yA != yC && gradientCA < gradientAB || yA == yC && gradientBC > gradientAB) {
+                        yB -= yC;
+                        yC -= yA;
+                        yA = Static228.anInt3709 * yA;
                         while (true) {
-                            arg4--;
-                            if (arg4 < 0) {
+                            yC--;
+                            if (yC < 0) {
                                 while (true) {
-                                    arg6--;
-                                    if (arg6 < 0) {
+                                    yB--;
+                                    if (yB < 0) {
                                         return true;
                                     }
-                                    if (!Static34.method885((arg5 >> 12) - 1, (arg0 >> 12) + 1, arg7, Static485.anIntArray886, local369, arg1)) {
+                                    if (!Static34.method885((xC >> 12) - 1, (xA >> 12) + 1, zA, Static485.anIntArray886, dzdx, yA)) {
                                         return false;
                                     }
-                                    arg5 += local291;
-                                    arg0 += local274;
-                                    arg7 += local381;
-                                    arg1 += Static228.anInt3709;
+                                    xC += gradientBC;
+                                    xA += gradientAB;
+                                    zA += dzdy;
+                                    yA += Static228.anInt3709;
                                 }
                             }
-                            if (!Static34.method885((arg8 >> 12) - 1, (arg0 >> 12) + 1, arg7, Static485.anIntArray886, local369, arg1)) {
+                            if (!Static34.method885((xB >> 12) - 1, (xA >> 12) + 1, zA, Static485.anIntArray886, dzdx, yA)) {
                                 return false;
                             }
-                            arg0 += local274;
-                            arg7 += local381;
-                            arg8 += local312;
-                            arg1 += Static228.anInt3709;
+                            xA += gradientAB;
+                            zA += dzdy;
+                            xB += gradientCA;
+                            yA += Static228.anInt3709;
                         }
                     } else {
-                        arg6 -= arg4;
-                        arg4 -= arg1;
-                        arg1 = Static228.anInt3709 * arg1;
+                        yB -= yC;
+                        yC -= yA;
+                        yA = Static228.anInt3709 * yA;
                         while (true) {
-                            arg4--;
-                            if (arg4 < 0) {
+                            yC--;
+                            if (yC < 0) {
                                 while (true) {
-                                    arg6--;
-                                    if (arg6 < 0) {
+                                    yB--;
+                                    if (yB < 0) {
                                         return true;
                                     }
-                                    if (!Static34.method885((arg0 >> 12) - 1, (arg5 >> 12) + 1, arg7, Static485.anIntArray886, local369, arg1)) {
+                                    if (!Static34.method885((xA >> 12) - 1, (xC >> 12) + 1, zA, Static485.anIntArray886, dzdx, yA)) {
                                         return false;
                                     }
-                                    arg7 += local381;
-                                    arg0 += local274;
-                                    arg1 += Static228.anInt3709;
-                                    arg5 += local291;
+                                    zA += dzdy;
+                                    xA += gradientAB;
+                                    yA += Static228.anInt3709;
+                                    xC += gradientBC;
                                 }
                             }
-                            if (!Static34.method885((arg0 >> 12) - 1, (arg8 >> 12) - -1, arg7, Static485.anIntArray886, local369, arg1)) {
+                            if (!Static34.method885((xA >> 12) - 1, (xB >> 12) - -1, zA, Static485.anIntArray886, dzdx, yA)) {
                                 return false;
                             }
-                            arg0 += local274;
-                            arg1 += Static228.anInt3709;
-                            arg8 += local312;
-                            arg7 += local381;
+                            xA += gradientAB;
+                            yA += Static228.anInt3709;
+                            xB += gradientCA;
+                            zA += dzdy;
                         }
                     }
                 }
-            } else if (arg4 < arg6) {
-                if (Static624.anInt9461 <= arg4) {
+            } else if (yC < yB) {
+                if (Static624.anInt9461 <= yC) {
                     return true;
                 }
-                if (Static624.anInt9461 < arg1) {
-                    arg1 = Static624.anInt9461;
+                if (Static624.anInt9461 < yA) {
+                    yA = Static624.anInt9461;
                 }
-                if (arg6 > Static624.anInt9461) {
-                    arg6 = Static624.anInt9461;
+                if (yB > Static624.anInt9461) {
+                    yB = Static624.anInt9461;
                 }
-                arg2 = local369 + (arg2 << 8) - arg5 * local369;
-                if (arg6 > arg1) {
-                    arg8 = arg5 <<= 0xC;
-                    if (arg4 < 0) {
-                        arg5 -= local312 * arg4;
-                        arg8 -= arg4 * local291;
-                        arg2 -= arg4 * local381;
-                        arg4 = 0;
+                zC = dzdx + (zC << 8) - xC * dzdx;
+                if (yB > yA) {
+                    xB = xC <<= 0xC;
+                    if (yC < 0) {
+                        xC -= gradientCA * yC;
+                        xB -= yC * gradientBC;
+                        zC -= yC * dzdy;
+                        yC = 0;
                     }
-                    arg0 <<= 0xC;
-                    if (arg1 < 0) {
-                        arg0 -= arg1 * local274;
-                        arg1 = 0;
+                    xA <<= 0xC;
+                    if (yA < 0) {
+                        xA -= yA * gradientAB;
+                        yA = 0;
                     }
-                    if (local312 <= local291) {
-                        arg6 -= arg1;
-                        arg1 -= arg4;
-                        arg4 *= Static228.anInt3709;
+                    if (gradientCA <= gradientBC) {
+                        yB -= yA;
+                        yA -= yC;
+                        yC *= Static228.anInt3709;
                         while (true) {
-                            arg1--;
-                            if (arg1 < 0) {
+                            yA--;
+                            if (yA < 0) {
                                 while (true) {
-                                    arg6--;
-                                    if (arg6 < 0) {
+                                    yB--;
+                                    if (yB < 0) {
                                         return true;
                                     }
-                                    if (!Static34.method885((arg0 >> 12) - 1, (arg8 >> 12) + 1, arg2, Static485.anIntArray886, local369, arg4)) {
+                                    if (!Static34.method885((xA >> 12) - 1, (xB >> 12) + 1, zC, Static485.anIntArray886, dzdx, yC)) {
                                         return false;
                                     }
-                                    arg2 += local381;
-                                    arg8 += local291;
-                                    arg4 += Static228.anInt3709;
-                                    arg0 += local274;
+                                    zC += dzdy;
+                                    xB += gradientBC;
+                                    yC += Static228.anInt3709;
+                                    xA += gradientAB;
                                 }
                             }
-                            if (!Static34.method885((arg5 >> 12) - 1, (arg8 >> 12) + 1, arg2, Static485.anIntArray886, local369, arg4)) {
+                            if (!Static34.method885((xC >> 12) - 1, (xB >> 12) + 1, zC, Static485.anIntArray886, dzdx, yC)) {
                                 return false;
                             }
-                            arg4 += Static228.anInt3709;
-                            arg5 += local312;
-                            arg2 += local381;
-                            arg8 += local291;
+                            yC += Static228.anInt3709;
+                            xC += gradientCA;
+                            zC += dzdy;
+                            xB += gradientBC;
                         }
                     } else {
-                        arg6 -= arg1;
-                        arg1 -= arg4;
-                        arg4 *= Static228.anInt3709;
+                        yB -= yA;
+                        yA -= yC;
+                        yC *= Static228.anInt3709;
                         while (true) {
-                            arg1--;
-                            if (arg1 < 0) {
+                            yA--;
+                            if (yA < 0) {
                                 while (true) {
-                                    arg6--;
-                                    if (arg6 < 0) {
+                                    yB--;
+                                    if (yB < 0) {
                                         return true;
                                     }
-                                    if (!Static34.method885((arg8 >> 12) - 1, (arg0 >> 12) + 1, arg2, Static485.anIntArray886, local369, arg4)) {
+                                    if (!Static34.method885((xB >> 12) - 1, (xA >> 12) + 1, zC, Static485.anIntArray886, dzdx, yC)) {
                                         return false;
                                     }
-                                    arg2 += local381;
-                                    arg8 += local291;
-                                    arg0 += local274;
-                                    arg4 += Static228.anInt3709;
+                                    zC += dzdy;
+                                    xB += gradientBC;
+                                    xA += gradientAB;
+                                    yC += Static228.anInt3709;
                                 }
                             }
-                            if (!Static34.method885((arg8 >> 12) - 1, (arg5 >> 12) + 1, arg2, Static485.anIntArray886, local369, arg4)) {
+                            if (!Static34.method885((xB >> 12) - 1, (xC >> 12) + 1, zC, Static485.anIntArray886, dzdx, yC)) {
                                 return false;
                             }
-                            arg5 += local312;
-                            arg4 += Static228.anInt3709;
-                            arg2 += local381;
-                            arg8 += local291;
+                            xC += gradientCA;
+                            yC += Static228.anInt3709;
+                            zC += dzdy;
+                            xB += gradientBC;
                         }
                     }
                 } else {
-                    arg0 = arg5 <<= 0xC;
-                    if (arg4 < 0) {
-                        arg0 -= local291 * arg4;
-                        arg2 -= local381 * arg4;
-                        arg5 -= local312 * arg4;
-                        arg4 = 0;
+                    xA = xC <<= 0xC;
+                    if (yC < 0) {
+                        xA -= gradientBC * yC;
+                        zC -= dzdy * yC;
+                        xC -= gradientCA * yC;
+                        yC = 0;
                     }
-                    arg8 <<= 0xC;
-                    if (arg6 < 0) {
-                        arg8 -= local274 * arg6;
-                        arg6 = 0;
+                    xB <<= 0xC;
+                    if (yB < 0) {
+                        xB -= gradientAB * yB;
+                        yB = 0;
                     }
-                    if (local312 <= local291) {
-                        arg1 -= arg6;
-                        arg6 -= arg4;
-                        arg4 = Static228.anInt3709 * arg4;
+                    if (gradientCA <= gradientBC) {
+                        yA -= yB;
+                        yB -= yC;
+                        yC = Static228.anInt3709 * yC;
                         while (true) {
-                            arg6--;
-                            if (arg6 < 0) {
+                            yB--;
+                            if (yB < 0) {
                                 while (true) {
-                                    arg1--;
-                                    if (arg1 < 0) {
+                                    yA--;
+                                    if (yA < 0) {
                                         return true;
                                     }
-                                    if (!Static34.method885((arg5 >> 12) - 1, (arg8 >> 12) - -1, arg2, Static485.anIntArray886, local369, arg4)) {
+                                    if (!Static34.method885((xC >> 12) - 1, (xB >> 12) - -1, zC, Static485.anIntArray886, dzdx, yC)) {
                                         return false;
                                     }
-                                    arg8 += local274;
-                                    arg4 += Static228.anInt3709;
-                                    arg5 += local312;
-                                    arg2 += local381;
+                                    xB += gradientAB;
+                                    yC += Static228.anInt3709;
+                                    xC += gradientCA;
+                                    zC += dzdy;
                                 }
                             }
-                            if (!Static34.method885((arg5 >> 12) - 1, (arg0 >> 12) + 1, arg2, Static485.anIntArray886, local369, arg4)) {
+                            if (!Static34.method885((xC >> 12) - 1, (xA >> 12) + 1, zC, Static485.anIntArray886, dzdx, yC)) {
                                 return false;
                             }
-                            arg0 += local291;
-                            arg4 += Static228.anInt3709;
-                            arg2 += local381;
-                            arg5 += local312;
+                            xA += gradientBC;
+                            yC += Static228.anInt3709;
+                            zC += dzdy;
+                            xC += gradientCA;
                         }
                     } else {
-                        arg1 -= arg6;
-                        arg6 -= arg4;
-                        arg4 *= Static228.anInt3709;
+                        yA -= yB;
+                        yB -= yC;
+                        yC *= Static228.anInt3709;
                         while (true) {
-                            arg6--;
-                            if (arg6 < 0) {
+                            yB--;
+                            if (yB < 0) {
                                 while (true) {
-                                    arg1--;
-                                    if (arg1 < 0) {
+                                    yA--;
+                                    if (yA < 0) {
                                         return true;
                                     }
-                                    if (!Static34.method885((arg8 >> 12) - 1, (arg5 >> 12) + 1, arg2, Static485.anIntArray886, local369, arg4)) {
+                                    if (!Static34.method885((xB >> 12) - 1, (xC >> 12) + 1, zC, Static485.anIntArray886, dzdx, yC)) {
                                         return false;
                                     }
-                                    arg2 += local381;
-                                    arg4 += Static228.anInt3709;
-                                    arg5 += local312;
-                                    arg8 += local274;
+                                    zC += dzdy;
+                                    yC += Static228.anInt3709;
+                                    xC += gradientCA;
+                                    xB += gradientAB;
                                 }
                             }
-                            if (!Static34.method885((arg0 >> 12) - 1, (arg5 >> 12) + 1, arg2, Static485.anIntArray886, local369, arg4)) {
+                            if (!Static34.method885((xA >> 12) - 1, (xC >> 12) + 1, zC, Static485.anIntArray886, dzdx, yC)) {
                                 return false;
                             }
-                            arg2 += local381;
-                            arg0 += local291;
-                            arg5 += local312;
-                            arg4 += Static228.anInt3709;
+                            zC += dzdy;
+                            xA += gradientBC;
+                            xC += gradientCA;
+                            yC += Static228.anInt3709;
                         }
                     }
                 }
-            } else if (Static624.anInt9461 <= arg6) {
+            } else if (Static624.anInt9461 <= yB) {
                 return true;
             } else {
-                if (Static624.anInt9461 < arg4) {
-                    arg4 = Static624.anInt9461;
+                if (Static624.anInt9461 < yC) {
+                    yC = Static624.anInt9461;
                 }
-                if (arg1 > Static624.anInt9461) {
-                    arg1 = Static624.anInt9461;
+                if (yA > Static624.anInt9461) {
+                    yA = Static624.anInt9461;
                 }
-                arg3 = (arg3 << 8) - (arg8 * local369 - local369);
-                if (arg4 >= arg1) {
-                    arg5 = arg8 <<= 0xC;
-                    if (arg6 < 0) {
-                        arg8 -= arg6 * local291;
-                        arg3 -= local381 * arg6;
-                        arg5 -= local274 * arg6;
-                        arg6 = 0;
+                zB = (zB << 8) - (xB * dzdx - dzdx);
+                if (yC >= yA) {
+                    xC = xB <<= 0xC;
+                    if (yB < 0) {
+                        xB -= yB * gradientBC;
+                        zB -= dzdy * yB;
+                        xC -= gradientAB * yB;
+                        yB = 0;
                     }
-                    arg0 <<= 0xC;
-                    if (arg1 < 0) {
-                        arg0 -= arg1 * local312;
-                        arg1 = 0;
+                    xA <<= 0xC;
+                    if (yA < 0) {
+                        xA -= yA * gradientCA;
+                        yA = 0;
                     }
-                    if (local291 > local274) {
-                        arg4 -= arg1;
-                        arg1 -= arg6;
-                        arg6 = Static228.anInt3709 * arg6;
+                    if (gradientBC > gradientAB) {
+                        yC -= yA;
+                        yA -= yB;
+                        yB = Static228.anInt3709 * yB;
                         while (true) {
-                            arg1--;
-                            if (arg1 < 0) {
+                            yA--;
+                            if (yA < 0) {
                                 while (true) {
-                                    arg4--;
-                                    if (arg4 < 0) {
+                                    yC--;
+                                    if (yC < 0) {
                                         return true;
                                     }
-                                    if (!Static34.method885((arg0 >> 12) - 1, (arg8 >> 12) + 1, arg3, Static485.anIntArray886, local369, arg6)) {
+                                    if (!Static34.method885((xA >> 12) - 1, (xB >> 12) + 1, zB, Static485.anIntArray886, dzdx, yB)) {
                                         return false;
                                     }
-                                    arg8 += local291;
-                                    arg0 += local312;
-                                    arg3 += local381;
-                                    arg6 += Static228.anInt3709;
+                                    xB += gradientBC;
+                                    xA += gradientCA;
+                                    zB += dzdy;
+                                    yB += Static228.anInt3709;
                                 }
                             }
-                            if (!Static34.method885((arg5 >> 12) - 1, (arg8 >> 12) + 1, arg3, Static485.anIntArray886, local369, arg6)) {
+                            if (!Static34.method885((xC >> 12) - 1, (xB >> 12) + 1, zB, Static485.anIntArray886, dzdx, yB)) {
                                 return false;
                             }
-                            arg8 += local291;
-                            arg6 += Static228.anInt3709;
-                            arg3 += local381;
-                            arg5 += local274;
+                            xB += gradientBC;
+                            yB += Static228.anInt3709;
+                            zB += dzdy;
+                            xC += gradientAB;
                         }
                     } else {
-                        arg4 -= arg1;
-                        arg1 -= arg6;
-                        arg6 *= Static228.anInt3709;
+                        yC -= yA;
+                        yA -= yB;
+                        yB *= Static228.anInt3709;
                         while (true) {
-                            arg1--;
-                            if (arg1 < 0) {
+                            yA--;
+                            if (yA < 0) {
                                 while (true) {
-                                    arg4--;
-                                    if (arg4 < 0) {
+                                    yC--;
+                                    if (yC < 0) {
                                         return true;
                                     }
-                                    if (!Static34.method885((arg8 >> 12) - 1, (arg0 >> 12) + 1, arg3, Static485.anIntArray886, local369, arg6)) {
+                                    if (!Static34.method885((xB >> 12) - 1, (xA >> 12) + 1, zB, Static485.anIntArray886, dzdx, yB)) {
                                         return false;
                                     }
-                                    arg8 += local291;
-                                    arg0 += local312;
-                                    arg6 += Static228.anInt3709;
-                                    arg3 += local381;
+                                    xB += gradientBC;
+                                    xA += gradientCA;
+                                    yB += Static228.anInt3709;
+                                    zB += dzdy;
                                 }
                             }
-                            if (!Static34.method885((arg8 >> 12) - 1, (arg5 >> 12) + 1, arg3, Static485.anIntArray886, local369, arg6)) {
+                            if (!Static34.method885((xB >> 12) - 1, (xC >> 12) + 1, zB, Static485.anIntArray886, dzdx, yB)) {
                                 return false;
                             }
-                            arg6 += Static228.anInt3709;
-                            arg5 += local274;
-                            arg3 += local381;
-                            arg8 += local291;
+                            yB += Static228.anInt3709;
+                            xC += gradientAB;
+                            zB += dzdy;
+                            xB += gradientBC;
                         }
                     }
                 } else {
-                    arg0 = arg8 <<= 0xC;
-                    if (arg6 < 0) {
-                        arg3 -= local381 * arg6;
-                        arg8 -= arg6 * local291;
-                        arg0 -= arg6 * local274;
-                        arg6 = 0;
+                    xA = xB <<= 0xC;
+                    if (yB < 0) {
+                        zB -= dzdy * yB;
+                        xB -= yB * gradientBC;
+                        xA -= yB * gradientAB;
+                        yB = 0;
                     }
-                    arg5 <<= 0xC;
-                    if (arg4 < 0) {
-                        arg5 -= local312 * arg4;
-                        arg4 = 0;
+                    xC <<= 0xC;
+                    if (yC < 0) {
+                        xC -= gradientCA * yC;
+                        yC = 0;
                     }
-                    if (arg6 != arg4 && local291 > local274 || arg4 == arg6 && local312 < local274) {
-                        arg1 -= arg4;
-                        arg4 -= arg6;
-                        arg6 = Static228.anInt3709 * arg6;
+                    if (yB != yC && gradientBC > gradientAB || yC == yB && gradientCA < gradientAB) {
+                        yA -= yC;
+                        yC -= yB;
+                        yB = Static228.anInt3709 * yB;
                         while (true) {
-                            arg4--;
-                            if (arg4 < 0) {
+                            yC--;
+                            if (yC < 0) {
                                 while (true) {
-                                    arg1--;
-                                    if (arg1 < 0) {
+                                    yA--;
+                                    if (yA < 0) {
                                         return true;
                                     }
-                                    if (!Static34.method885((arg0 >> 12) - 1, (arg5 >> 12) + 1, arg3, Static485.anIntArray886, local369, arg6)) {
+                                    if (!Static34.method885((xA >> 12) - 1, (xC >> 12) + 1, zB, Static485.anIntArray886, dzdx, yB)) {
                                         return false;
                                     }
-                                    arg0 += local274;
-                                    arg3 += local381;
-                                    arg6 += Static228.anInt3709;
-                                    arg5 += local312;
+                                    xA += gradientAB;
+                                    zB += dzdy;
+                                    yB += Static228.anInt3709;
+                                    xC += gradientCA;
                                 }
                             }
-                            if (!Static34.method885((arg0 >> 12) - 1, (arg8 >> 12) + 1, arg3, Static485.anIntArray886, local369, arg6)) {
+                            if (!Static34.method885((xA >> 12) - 1, (xB >> 12) + 1, zB, Static485.anIntArray886, dzdx, yB)) {
                                 return false;
                             }
-                            arg0 += local274;
-                            arg3 += local381;
-                            arg6 += Static228.anInt3709;
-                            arg8 += local291;
+                            xA += gradientAB;
+                            zB += dzdy;
+                            yB += Static228.anInt3709;
+                            xB += gradientBC;
                         }
                     } else {
-                        arg1 -= arg4;
-                        arg4 -= arg6;
-                        arg6 *= Static228.anInt3709;
+                        yA -= yC;
+                        yC -= yB;
+                        yB *= Static228.anInt3709;
                         while (true) {
-                            arg4--;
-                            if (arg4 < 0) {
+                            yC--;
+                            if (yC < 0) {
                                 while (true) {
-                                    arg1--;
-                                    if (arg1 < 0) {
+                                    yA--;
+                                    if (yA < 0) {
                                         return true;
                                     }
-                                    if (!Static34.method885((arg5 >> 12) - 1, (arg0 >> 12) + 1, arg3, Static485.anIntArray886, local369, arg6)) {
+                                    if (!Static34.method885((xC >> 12) - 1, (xA >> 12) + 1, zB, Static485.anIntArray886, dzdx, yB)) {
                                         return false;
                                     }
-                                    arg3 += local381;
-                                    arg6 += Static228.anInt3709;
-                                    arg0 += local274;
-                                    arg5 += local312;
+                                    zB += dzdy;
+                                    yB += Static228.anInt3709;
+                                    xA += gradientAB;
+                                    xC += gradientCA;
                                 }
                             }
-                            if (!Static34.method885((arg8 >> 12) - 1, (arg0 >> 12) + 1, arg3, Static485.anIntArray886, local369, arg6)) {
+                            if (!Static34.method885((xB >> 12) - 1, (xA >> 12) + 1, zB, Static485.anIntArray886, dzdx, yB)) {
                                 return false;
                             }
-                            arg3 += local381;
-                            arg0 += local274;
-                            arg6 += Static228.anInt3709;
-                            arg8 += local291;
+                            zB += dzdy;
+                            xA += gradientAB;
+                            yB += Static228.anInt3709;
+                            xB += gradientBC;
                         }
                     }
                 }

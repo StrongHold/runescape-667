@@ -44,7 +44,7 @@ public final class TextureShapeRectangle extends TextureShape {
         @Pc(22) int x1 = width * this.right >> 12;
         @Pc(29) int y0 = height * this.top >> 12;
         @Pc(36) int y1 = height * this.bottom >> 12;
-        Static264.method9459(super.fillColour, x1, super.lineColour, y0, y1, x0, super.lineWidth);
+        Static264.fillAndOutlineRect(super.fillColour, x1, super.lineColour, y0, y1, x0, super.lineWidth);
     }
 
     @OriginalMember(owner = "client!hba", name = "b", descriptor = "(III)V")

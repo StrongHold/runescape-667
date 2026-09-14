@@ -81,7 +81,7 @@ public class Terrain {
     public static final int[][] SPLIT_FACE_C = new int[][]{{12, 12, 12, 12}, {12, 12, 12, 12}, {5, 5, 5}, {5, 5, 5}, {5, 5, 5}, {5, 5, 5}, {12, 12, 12, 12, 12, 12}, {1, 1, 1, 7}, {1, 1, 7, 1}, {8, 9, 9, 8, 8, 9}, {8, 8, 9, 8, 9, 9}, {10, 10, 11, 11, 11, 10}, {12, 12, 12, 12}};
 
     @OriginalMember(owner = "client!ww", name = "c", descriptor = "[I")
-    public static int[] OVERLAY_SIZES = new int[13];
+    public static final int[] OVERLAY_SIZES = new int[13];
 
     @OriginalMember(owner = "client!ska", name = "H", descriptor = "[I")
     public static int[] faceVertices = new int[6];
@@ -196,15 +196,15 @@ public class Terrain {
         @Pc(10) int featureFlags;
         if (!this.underwater) {
             for (level = 0; level < 4; level++) {
-                for (groundFlags = 0; groundFlags < this.width; groundFlags++) {
-                    for (featureFlags = 0; featureFlags < this.length; featureFlags++) {
-                        if ((Static280.tileFlags[level][groundFlags][featureFlags] & 0x1) != 0) {
+                for (int x = 0; x < this.width; x++) {
+                    for (int z = 0; z < this.length; z++) {
+                        if ((Static280.tileFlags[level][x][z] & 0x1) != 0) {
                             @Pc(26) int blockedLevel = level;
-                            if ((Static280.tileFlags[1][groundFlags][featureFlags] & 0x2) != 0) {
+                            if ((Static280.tileFlags[1][x][z] & 0x2) != 0) {
                                 blockedLevel = level - 1;
                             }
                             if (blockedLevel >= 0) {
-                                collisionMaps[blockedLevel].flagBlocked(featureFlags, groundFlags);
+                                collisionMaps[blockedLevel].flagBlocked(z, x);
                             }
                         }
                     }
@@ -1129,7 +1129,7 @@ public class Terrain {
                             faceC = SPLIT_FACE_C[shape];
                             overlayFaces = overlayType == null ? 0 : SPLIT_OVERLAY_FACE_COUNT[shape];
                             faceA = Static115.anIntArrayArray56[shape];
-                            edgeFaces = Static264.anIntArrayArray267[shape];
+                            edgeFaces = Static264.SPLIT_EDGE_FACE[shape];
                             faceB = Static206.anIntArrayArray84[shape];
                         }
 
@@ -1449,9 +1449,9 @@ public class Terrain {
                                                     blendedTextures[vertexIndex] = underlayTypeNW.texture;
                                                     blendedSizes[vertexIndex] = underlayTypeNW.size;
                                                 }
-                                                worldX = Static273.method3966(colours[nextX][z], rotatedX << 7 >> 9, colours[x][z]);
-                                                worldY = Static273.method3966(colours[nextX][nextZ], rotatedX << 7 >> 9, colours[x][nextZ]);
-                                                blendedColours[vertexIndex] = Static273.method3966(worldY, rotatedY << 7 >> 9, worldX);
+                                                int colourSouth = Static273.method3966(colours[nextX][z], rotatedX << 7 >> 9, colours[x][z]);
+                                                int colourNorth = Static273.method3966(colours[nextX][nextZ], rotatedX << 7 >> 9, colours[x][nextZ]);
+                                                blendedColours[vertexIndex] = Static273.method3966(colourNorth, rotatedY << 7 >> 9, colourSouth);
                                             }
 
                                             if (overlayBlendColours != null) {
