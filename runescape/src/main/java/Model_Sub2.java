@@ -71,7 +71,7 @@ public final class Model_Sub2 extends Model {
     public short[] aShortArray67;
 
     @OriginalMember(owner = "client!kla", name = "n", descriptor = "[Lclient!efa;")
-    public Class97[] aClass97Array1;
+    public GlBillboardFace[] billboardFaces;
 
     @OriginalMember(owner = "client!kla", name = "Yb", descriptor = "[S")
     public short[] aShortArray68;
@@ -107,7 +107,7 @@ public final class Model_Sub2 extends Model {
     public byte[] aByteArray54;
 
     @OriginalMember(owner = "client!kla", name = "Bc", descriptor = "I")
-    public int anInt5533;
+    public int billboardCount;
 
     @OriginalMember(owner = "client!kla", name = "bb", descriptor = "S")
     public short aShort67;
@@ -116,7 +116,7 @@ public final class Model_Sub2 extends Model {
     public short aShort68;
 
     @OriginalMember(owner = "client!kla", name = "dc", descriptor = "[Lclient!lfa;")
-    public Class223[] aClass223Array1;
+    public GlBillboardAttributes[] billboardAttributes;
 
     @OriginalMember(owner = "client!kla", name = "ec", descriptor = "S")
     public short aShort69;
@@ -331,10 +331,10 @@ public final class Model_Sub2 extends Model {
         @Pc(619) int local619;
         @Pc(674) int local674;
         if (arg1.billboards != null) {
-            this.anInt5533 = arg1.billboards.length;
-            this.aClass97Array1 = new Class97[this.anInt5533];
-            this.aClass223Array1 = new Class223[this.anInt5533];
-            for (local603 = 0; local603 < this.anInt5533; local603++) {
+            this.billboardCount = arg1.billboards.length;
+            this.billboardFaces = new GlBillboardFace[this.billboardCount];
+            this.billboardAttributes = new GlBillboardAttributes[this.billboardCount];
+            for (local603 = 0; local603 < this.billboardCount; local603++) {
                 @Pc(612) MeshBillboard local612 = arg1.billboards[local603];
                 @Pc(617) BillboardType local617 = BillboardTypeList.list(local612.id);
                 local619 = -1;
@@ -349,8 +349,8 @@ public final class Model_Sub2 extends Model {
                 }
                 local674 = ColourUtils.HSL_TO_RGB[arg1.faceColour[local612.face] & 0xFFFF] & 0xFFFFFF;
                 @Pc(692) int local692 = local674 | 255 - (arg1.faceAlpha == null ? 0 : arg1.faceAlpha[local612.face]) << 24;
-                this.aClass97Array1[local603] = new Class97(local619, arg1.faceA[local612.face], arg1.faceB[local612.face], arg1.faceC[local612.face], local617.width, local617.height, local617.texture, local617.anInt9697, local617.blendMode, local617.hideFace, local617.aBoolean748, local612.distance);
-                this.aClass223Array1[local603] = new Class223(local692);
+                this.billboardFaces[local603] = new GlBillboardFace(local619, arg1.faceA[local612.face], arg1.faceB[local612.face], arg1.faceC[local612.face], local617.width, local617.height, local617.texture, local617.anInt9697, local617.blendMode, local617.hideFace, local617.aBoolean748, local612.distance);
+                this.billboardAttributes[local603] = new GlBillboardAttributes(local692);
             }
         }
         local603 = this.anInt5560 * 3;
@@ -791,11 +791,11 @@ public final class Model_Sub2 extends Model {
         if (!(local61 != local39 | local41 != local63)) {
             return;
         }
-        if (this.aClass97Array1 != null) {
-            for (@Pc(118) int local118 = 0; local118 < this.anInt5533; local118++) {
-                @Pc(125) Class97 local125 = this.aClass97Array1[local118];
-                @Pc(130) Class223 local130 = this.aClass223Array1[local118];
-                local130.anInt5805 = local130.anInt5805 & 0xFF000000 | ColourUtils.HSL_TO_RGB[this.aShortArray74[local125.anInt2513] & 0xFFFF] & 0xFFFFFF;
+        if (this.billboardFaces != null) {
+            for (@Pc(118) int local118 = 0; local118 < this.billboardCount; local118++) {
+                @Pc(125) GlBillboardFace local125 = this.billboardFaces[local118];
+                @Pc(130) GlBillboardAttributes local130 = this.billboardAttributes[local118];
+                local130.colour = local130.colour & 0xFF000000 | ColourUtils.HSL_TO_RGB[this.aShortArray74[local125.face] & 0xFFFF] & 0xFFFFFF;
             }
         }
         if (this.aClass94_6 != null) {
@@ -1093,7 +1093,7 @@ public final class Model_Sub2 extends Model {
             return;
         }
         this.aBoolean422 = false;
-        if (this.aModelParticleEmitterArray4 == null && this.aModelParticleEffectorArray4 == null && this.aClass97Array1 == null && !Static298.method4387(this.anInt5529, this.anInt5520)) {
+        if (this.aModelParticleEmitterArray4 == null && this.aModelParticleEffectorArray4 == null && this.billboardFaces == null && !Static298.method4387(this.anInt5529, this.anInt5520)) {
             @Pc(37) boolean local37 = false;
             @Pc(39) boolean local39 = false;
             @Pc(41) boolean local41 = false;
@@ -1231,7 +1231,7 @@ public final class Model_Sub2 extends Model {
 
     @OriginalMember(owner = "client!kla", name = "a", descriptor = "(B)V")
     public void method4984() {
-        if (this.aClass97Array1 == null) {
+        if (this.billboardFaces == null) {
             return;
         }
         @Pc(16) Matrix_Sub3 local16 = this.aClass19_Sub3_24.aClass73_Sub3_2;
@@ -1239,23 +1239,23 @@ public final class Model_Sub2 extends Model {
         this.aClass19_Sub3_24.C(!this.aBoolean421);
         this.aClass19_Sub3_24.method7008(false);
         this.aClass19_Sub3_24.method7039(null, null, this.aClass19_Sub3_24.aClass94_15, this.aClass19_Sub3_24.aClass94_16);
-        for (@Pc(49) int local49 = 0; local49 < this.anInt5533; local49++) {
-            @Pc(58) Class97 local58 = this.aClass97Array1[local49];
-            @Pc(63) Class223 local63 = this.aClass223Array1[local49];
-            if (!local58.aBoolean211 || !this.aClass19_Sub3_24.bloom()) {
-                @Pc(94) float local94 = (float) (this.anIntArray410[local58.anInt2516] + this.anIntArray410[local58.anInt2511] + this.anIntArray410[local58.anInt2515]) * 0.3333333F;
-                @Pc(115) float local115 = (float) (this.anIntArray409[local58.anInt2511] + this.anIntArray409[local58.anInt2515] + this.anIntArray409[local58.anInt2516]) * 0.3333333F;
-                @Pc(138) float local138 = (float) (this.anIntArray412[local58.anInt2511] + this.anIntArray412[local58.anInt2515] + this.anIntArray412[local58.anInt2516]) * 0.3333333F;
+        for (@Pc(49) int local49 = 0; local49 < this.billboardCount; local49++) {
+            @Pc(58) GlBillboardFace local58 = this.billboardFaces[local49];
+            @Pc(63) GlBillboardAttributes local63 = this.billboardAttributes[local49];
+            if (!local58.hideWithBloom || !this.aClass19_Sub3_24.bloom()) {
+                @Pc(94) float local94 = (float) (this.anIntArray410[local58.vertexC] + this.anIntArray410[local58.vertexA] + this.anIntArray410[local58.vertexB]) * 0.3333333F;
+                @Pc(115) float local115 = (float) (this.anIntArray409[local58.vertexA] + this.anIntArray409[local58.vertexB] + this.anIntArray409[local58.vertexC]) * 0.3333333F;
+                @Pc(138) float local138 = (float) (this.anIntArray412[local58.vertexA] + this.anIntArray412[local58.vertexB] + this.anIntArray412[local58.vertexC]) * 0.3333333F;
                 @Pc(152) float local152 = Static9.aFloat1 + local138 * Static376.aFloat113 + Static393.aFloat117 * local94 + local115 * Static238.aFloat73;
                 @Pc(166) float local166 = Static209.aFloat70 + Static409.aFloat118 * local138 + Static91.aFloat208 * local115 + Static430.aFloat120 * local94;
                 @Pc(180) float local180 = local115 * Static188.aFloat65 + Static289.aFloat84 * local94 + Static190.aFloat66 * local138 + Static24.aFloat20;
-                @Pc(201) float local201 = (float) (1.0D / Math.sqrt(local180 * local180 + local152 * local152 + local166 * local166)) * (float) local58.anInt2514;
-                local16.method7144(local63.anInt5809 * local58.aShort30 >> 7, (float) local63.anInt5807 + local152 - local201 * local152, local63.anInt5803, local58.aShort32 * local63.anInt5802 >> 7, local201 * local180 - local180, local166 * local201 + ((float) local63.anInt5800 - local166));
+                @Pc(201) float local201 = (float) (1.0D / Math.sqrt(local180 * local180 + local152 * local152 + local166 * local166)) * (float) local58.distance;
+                local16.method7144(local63.scaleX * local58.width >> 7, (float) local63.offsetX + local152 - local201 * local152, local63.angle, local58.height * local63.scaleY >> 7, local201 * local180 - local180, local166 * local201 + ((float) local63.offsetY - local166));
                 this.aClass19_Sub3_24.method7012(local16);
-                @Pc(253) int local253 = local63.anInt5805;
+                @Pc(253) int local253 = local63.colour;
                 OpenGL.glColor4ub((byte) (local253 >> 16), (byte) (local253 >> 8), (byte) local253, (byte) (local253 >> 24));
-                this.aClass19_Sub3_24.method7046(local58.aShort31);
-                this.aClass19_Sub3_24.setBlendMode(local58.aByte48);
+                this.aClass19_Sub3_24.method7046(local58.texture);
+                this.aClass19_Sub3_24.setBlendMode(local58.blendMode);
                 this.aClass19_Sub3_24.method6998(4);
             }
         }
@@ -1617,7 +1617,7 @@ public final class Model_Sub2 extends Model {
         if (local328 / local93 >= this.aClass19_Sub3_24.aFloat133 || local339 / local93 <= this.aClass19_Sub3_24.aFloat141) {
             return;
         }
-        if (cylinder != null || this.aClass97Array1 != null) {
+        if (cylinder != null || this.billboardFaces != null) {
             Static376.aFloat113 = local17.aFloat160 * local20.aFloat154 + local17.aFloat157 * local20.aFloat150 + local17.aFloat153 * local20.aFloat160;
             Static430.aFloat120 = local17.aFloat161 * local20.aFloat153 + local17.aFloat156 * local20.aFloat161 + local17.aFloat150 * local20.aFloat155;
             Static393.aFloat117 = local17.aFloat157 * local20.aFloat161 + local17.aFloat153 * local20.aFloat153 + local17.aFloat160 * local20.aFloat155;
@@ -1977,7 +1977,7 @@ public final class Model_Sub2 extends Model {
         if (local326 / (float) arg2 >= this.aClass19_Sub3_24.aFloat133 || local337 / (float) arg2 <= this.aClass19_Sub3_24.aFloat141) {
             return;
         }
-        if (cylinder != null || this.aClass97Array1 != null) {
+        if (cylinder != null || this.billboardFaces != null) {
             Static409.aFloat118 = local17.aFloat160 * local14.aFloat161 + local17.aFloat150 * local14.aFloat156 + local17.aFloat154 * local14.aFloat150;
             Static289.aFloat84 = local14.aFloat151 * local17.aFloat161 + local14.aFloat155 * local17.aFloat153 + local17.aFloat155 * local14.aFloat154;
             Static376.aFloat113 = local17.aFloat154 * local14.aFloat160 + local17.aFloat160 * local14.aFloat153 + local14.aFloat157 * local17.aFloat150;
@@ -2097,8 +2097,8 @@ public final class Model_Sub2 extends Model {
                     this.anIntArray412[local14] += Static78.anInt1624;
                 }
             } else {
-                @Pc(557) Class97 local557;
-                @Pc(562) Class223 local562;
+                @Pc(557) GlBillboardFace local557;
+                @Pc(562) GlBillboardAttributes local562;
                 if (arg0 == 5) {
                     for (local14 = 0; local14 < this.anInt5560; local14++) {
                         local20 = (this.aByteArray54[local14] & 0xFF) + (arg1 * 8);
@@ -2112,11 +2112,11 @@ public final class Model_Sub2 extends Model {
                     if (this.aClass94_6 != null) {
                         this.aClass94_6.anInterface12_2 = null;
                     }
-                    if (this.aClass97Array1 != null) {
-                        for (local20 = 0; local20 < this.anInt5533; local20++) {
-                            local557 = this.aClass97Array1[local20];
-                            local562 = this.aClass223Array1[local20];
-                            local562.anInt5805 = local562.anInt5805 & 0xFFFFFF | 255 - (this.aByteArray54[local557.anInt2513] & 0xFF) << 24;
+                    if (this.billboardFaces != null) {
+                        for (local20 = 0; local20 < this.billboardCount; local20++) {
+                            local557 = this.billboardFaces[local20];
+                            local562 = this.billboardAttributes[local20];
+                            local562.colour = local562.colour & 0xFFFFFF | 255 - (this.aByteArray54[local557.face] & 0xFF) << 24;
                         }
                     }
                 } else if (arg0 == 7) {
@@ -2143,31 +2143,31 @@ public final class Model_Sub2 extends Model {
                     if (this.aClass94_6 != null) {
                         this.aClass94_6.anInterface12_2 = null;
                     }
-                    if (this.aClass97Array1 != null) {
-                        for (local20 = 0; local20 < this.anInt5533; local20++) {
-                            local557 = this.aClass97Array1[local20];
-                            local562 = this.aClass223Array1[local20];
-                            local562.anInt5805 = local562.anInt5805 & 0xFF000000 | ColourUtils.HSL_TO_RGB[this.aShortArray74[local557.anInt2513] & 0xFFFF] & 0xFFFFFF;
+                    if (this.billboardFaces != null) {
+                        for (local20 = 0; local20 < this.billboardCount; local20++) {
+                            local557 = this.billboardFaces[local20];
+                            local562 = this.billboardAttributes[local20];
+                            local562.colour = local562.colour & 0xFF000000 | ColourUtils.HSL_TO_RGB[this.aShortArray74[local557.face] & 0xFFFF] & 0xFFFFFF;
                         }
                     }
                 } else {
-                    @Pc(763) Class223 local763;
+                    @Pc(763) GlBillboardAttributes local763;
                     if (arg0 == 8) {
-                        for (local14 = 0; local14 < this.anInt5533; local14++) {
-                            local763 = this.aClass223Array1[local14];
-                            local763.anInt5807 += arg1;
-                            local763.anInt5800 += arg2;
+                        for (local14 = 0; local14 < this.billboardCount; local14++) {
+                            local763 = this.billboardAttributes[local14];
+                            local763.offsetX += arg1;
+                            local763.offsetY += arg2;
                         }
                     } else if (arg0 == 10) {
-                        for (local14 = 0; local14 < this.anInt5533; local14++) {
-                            local763 = this.aClass223Array1[local14];
-                            local763.anInt5809 = local763.anInt5809 * arg1 >> 7;
-                            local763.anInt5802 = arg2 * local763.anInt5802 >> 7;
+                        for (local14 = 0; local14 < this.billboardCount; local14++) {
+                            local763 = this.billboardAttributes[local14];
+                            local763.scaleX = local763.scaleX * arg1 >> 7;
+                            local763.scaleY = arg2 * local763.scaleY >> 7;
                         }
                     } else if (arg0 == 9) {
-                        for (local14 = 0; local14 < this.anInt5533; local14++) {
-                            local763 = this.aClass223Array1[local14];
-                            local763.anInt5803 = arg1 + local763.anInt5803 & 0x3FFF;
+                        for (local14 = 0; local14 < this.billboardCount; local14++) {
+                            local763 = this.billboardAttributes[local14];
+                            local763.angle = arg1 + local763.angle & 0x3FFF;
                         }
                     }
                 }
@@ -2492,8 +2492,8 @@ public final class Model_Sub2 extends Model {
                 }
             }
         } else if (arg0 != 3) {
-            @Pc(2692) Class97 local2692;
-            @Pc(2697) Class223 local2697;
+            @Pc(2692) GlBillboardFace local2692;
+            @Pc(2697) GlBillboardAttributes local2697;
             if (arg0 == 5) {
                 if (this.anIntArrayArray129 != null) {
                     for (local24 = 0; local24 < local8; local24++) {
@@ -2517,16 +2517,16 @@ public final class Model_Sub2 extends Model {
                             }
                         }
                     }
-                    if (this.aClass97Array1 != null) {
-                        for (local32 = 0; local32 < this.anInt5533; local32++) {
-                            local2692 = this.aClass97Array1[local32];
-                            local2697 = this.aClass223Array1[local32];
-                            local2697.anInt5805 = 255 - (this.aByteArray54[local2692.anInt2513] & 0xFF) << 24 | local2697.anInt5805 & 0xFFFFFF;
+                    if (this.billboardFaces != null) {
+                        for (local32 = 0; local32 < this.billboardCount; local32++) {
+                            local2692 = this.billboardFaces[local32];
+                            local2697 = this.billboardAttributes[local32];
+                            local2697.colour = 255 - (this.aByteArray54[local2692.face] & 0xFF) << 24 | local2697.colour & 0xFFFFFF;
                         }
                     }
                 }
             } else if (arg0 != 7) {
-                @Pc(2952) Class223 local2952;
+                @Pc(2952) GlBillboardAttributes local2952;
                 if (arg0 == 8) {
                     if (this.anIntArrayArray130 != null) {
                         for (local24 = 0; local24 < local8; local24++) {
@@ -2534,9 +2534,9 @@ public final class Model_Sub2 extends Model {
                             if (this.anIntArrayArray130.length > local32) {
                                 local273 = this.anIntArrayArray130[local32];
                                 for (local275 = 0; local275 < local273.length; local275++) {
-                                    local2952 = this.aClass223Array1[local273[local275]];
-                                    local2952.anInt5800 += arg3;
-                                    local2952.anInt5807 += arg2;
+                                    local2952 = this.billboardAttributes[local273[local275]];
+                                    local2952.offsetY += arg3;
+                                    local2952.offsetX += arg2;
                                 }
                             }
                         }
@@ -2548,9 +2548,9 @@ public final class Model_Sub2 extends Model {
                             if (local32 < this.anIntArrayArray130.length) {
                                 local273 = this.anIntArrayArray130[local32];
                                 for (local275 = 0; local275 < local273.length; local275++) {
-                                    local2952 = this.aClass223Array1[local273[local275]];
-                                    local2952.anInt5809 = arg2 * local2952.anInt5809 >> 7;
-                                    local2952.anInt5802 = arg3 * local2952.anInt5802 >> 7;
+                                    local2952 = this.billboardAttributes[local273[local275]];
+                                    local2952.scaleX = arg2 * local2952.scaleX >> 7;
+                                    local2952.scaleY = arg3 * local2952.scaleY >> 7;
                                 }
                             }
                         }
@@ -2561,8 +2561,8 @@ public final class Model_Sub2 extends Model {
                         if (local32 < this.anIntArrayArray130.length) {
                             local273 = this.anIntArrayArray130[local32];
                             for (local275 = 0; local275 < local273.length; local275++) {
-                                local2952 = this.aClass223Array1[local273[local275]];
-                                local2952.anInt5803 = local2952.anInt5803 + arg2 & 0x3FFF;
+                                local2952 = this.billboardAttributes[local273[local275]];
+                                local2952.angle = local2952.angle + arg2 & 0x3FFF;
                             }
                         }
                     }
@@ -2600,11 +2600,11 @@ public final class Model_Sub2 extends Model {
                         }
                     }
                 }
-                if (this.aClass97Array1 != null) {
-                    for (local32 = 0; local32 < this.anInt5533; local32++) {
-                        local2692 = this.aClass97Array1[local32];
-                        local2697 = this.aClass223Array1[local32];
-                        local2697.anInt5805 = local2697.anInt5805 & 0xFF000000 | ColourUtils.HSL_TO_RGB[this.aShortArray74[local2692.anInt2513] & 0xFFFF] & 0xFFFFFF;
+                if (this.billboardFaces != null) {
+                    for (local32 = 0; local32 < this.billboardCount; local32++) {
+                        local2692 = this.billboardFaces[local32];
+                        local2697 = this.billboardAttributes[local32];
+                        local2697.colour = local2697.colour & 0xFF000000 | ColourUtils.HSL_TO_RGB[this.aShortArray74[local2692.face] & 0xFFFF] & 0xFFFFFF;
                     }
                 }
             }
@@ -2766,11 +2766,11 @@ public final class Model_Sub2 extends Model {
             }
             this.aShortArray74[local7] = (short) (local24 << 10 | local30 << 7 | local49);
         }
-        if (this.aClass97Array1 != null) {
-            for (local18 = 0; local18 < this.anInt5533; local18++) {
-                @Pc(116) Class97 local116 = this.aClass97Array1[local18];
-                @Pc(121) Class223 local121 = this.aClass223Array1[local18];
-                local121.anInt5805 = local121.anInt5805 & 0xFF000000 | ColourUtils.HSL_TO_RGB[this.aShortArray74[local116.anInt2513] & 0xFFFF] & 0xFFFFFF;
+        if (this.billboardFaces != null) {
+            for (local18 = 0; local18 < this.billboardCount; local18++) {
+                @Pc(116) GlBillboardFace local116 = this.billboardFaces[local18];
+                @Pc(121) GlBillboardAttributes local121 = this.billboardAttributes[local18];
+                local121.colour = local121.colour & 0xFF000000 | ColourUtils.HSL_TO_RGB[this.aShortArray74[local116.face] & 0xFFFF] & 0xFFFFFF;
             }
         }
         if (this.aClass94_6 != null) {
@@ -3130,7 +3130,7 @@ public final class Model_Sub2 extends Model {
         arg4.anInt5529 = this.anInt5529;
         arg4.anInt5560 = this.anInt5560;
         arg4.aShort67 = this.aShort67;
-        arg4.anInt5533 = this.anInt5533;
+        arg4.billboardCount = this.billboardCount;
         arg4.anInt5543 = this.anInt5543;
         arg4.aByte89 = 0;
         arg4.anInt5523 = this.anInt5523;
@@ -3366,17 +3366,17 @@ public final class Model_Sub2 extends Model {
             arg4.aShortArray75 = this.aShortArray75;
         }
         if (!Static137.method2350(this.anInt5529, arg3)) {
-            arg4.aClass223Array1 = this.aClass223Array1;
-        } else if (arg0.aClass223Array1 == null || this.anInt5533 > arg0.aClass223Array1.length) {
-            local258 = this.anInt5533;
-            arg4.aClass223Array1 = arg0.aClass223Array1 = new Class223[local258];
-            for (local689 = 0; local689 < this.anInt5533; local689++) {
-                arg4.aClass223Array1[local689] = this.aClass223Array1[local689].method5227();
+            arg4.billboardAttributes = this.billboardAttributes;
+        } else if (arg0.billboardAttributes == null || this.billboardCount > arg0.billboardAttributes.length) {
+            local258 = this.billboardCount;
+            arg4.billboardAttributes = arg0.billboardAttributes = new GlBillboardAttributes[local258];
+            for (local689 = 0; local689 < this.billboardCount; local689++) {
+                arg4.billboardAttributes[local689] = this.billboardAttributes[local689].copy();
             }
         } else {
-            arg4.aClass223Array1 = arg0.aClass223Array1;
-            for (local258 = 0; local258 < this.anInt5533; local258++) {
-                arg4.aClass223Array1[local258].method5229(this.aClass223Array1[local258]);
+            arg4.billboardAttributes = arg0.billboardAttributes;
+            for (local258 = 0; local258 < this.billboardCount; local258++) {
+                arg4.billboardAttributes[local258].set(this.billboardAttributes[local258]);
             }
         }
         arg4.anIntArrayArray131 = this.anIntArrayArray131;
@@ -3401,7 +3401,7 @@ public final class Model_Sub2 extends Model {
         }
         arg4.aModelParticleEmitterArray4 = this.aModelParticleEmitterArray4;
         arg4.aShortArray66 = this.aShortArray66;
-        arg4.aClass97Array1 = this.aClass97Array1;
+        arg4.billboardFaces = this.billboardFaces;
         arg4.aShortArray70 = this.aShortArray70;
         return arg4;
     }
@@ -3414,11 +3414,11 @@ public final class Model_Sub2 extends Model {
                 this.aShortArray74[local3] = dest;
             }
         }
-        if (this.aClass97Array1 != null) {
-            for (@Pc(42) int local42 = 0; local42 < this.anInt5533; local42++) {
-                @Pc(49) Class97 local49 = this.aClass97Array1[local42];
-                @Pc(54) Class223 local54 = this.aClass223Array1[local42];
-                local54.anInt5805 = ColourUtils.HSL_TO_RGB[this.aShortArray74[local49.anInt2513] & 0xFFFF] & 0xFFFFFF | local54.anInt5805 & 0xFF000000;
+        if (this.billboardFaces != null) {
+            for (@Pc(42) int local42 = 0; local42 < this.billboardCount; local42++) {
+                @Pc(49) GlBillboardFace local49 = this.billboardFaces[local42];
+                @Pc(54) GlBillboardAttributes local54 = this.billboardAttributes[local42];
+                local54.colour = ColourUtils.HSL_TO_RGB[this.aShortArray74[local49.face] & 0xFFFF] & 0xFFFFFF | local54.colour & 0xFF000000;
             }
         }
         if (this.aClass94_6 != null) {
@@ -3633,8 +3633,8 @@ public final class Model_Sub2 extends Model {
                 }
             }
         } else {
-            @Pc(1268) Class97 local1268;
-            @Pc(1273) Class223 local1273;
+            @Pc(1268) GlBillboardFace local1268;
+            @Pc(1273) GlBillboardAttributes local1273;
             if (arg0 == 5) {
                 if (this.anIntArrayArray129 != null) {
                     for (local27 = 0; local27 < local8; local27++) {
@@ -3656,16 +3656,16 @@ public final class Model_Sub2 extends Model {
                             }
                         }
                     }
-                    if (this.aClass97Array1 != null) {
-                        for (local35 = 0; local35 < this.anInt5533; local35++) {
-                            local1268 = this.aClass97Array1[local35];
-                            local1273 = this.aClass223Array1[local35];
-                            local1273.anInt5805 = local1273.anInt5805 & 0xFFFFFF | 255 - (this.aByteArray54[local1268.anInt2513] & 0xFF) << 24;
+                    if (this.billboardFaces != null) {
+                        for (local35 = 0; local35 < this.billboardCount; local35++) {
+                            local1268 = this.billboardFaces[local35];
+                            local1273 = this.billboardAttributes[local35];
+                            local1273.colour = local1273.colour & 0xFFFFFF | 255 - (this.aByteArray54[local1268.face] & 0xFF) << 24;
                         }
                     }
                 }
             } else if (arg0 != 7) {
-                @Pc(1546) Class223 local1546;
+                @Pc(1546) GlBillboardAttributes local1546;
                 if (arg0 == 8) {
                     if (this.anIntArrayArray130 != null) {
                         for (local27 = 0; local27 < local8; local27++) {
@@ -3673,9 +3673,9 @@ public final class Model_Sub2 extends Model {
                             if (local35 < this.anIntArrayArray130.length) {
                                 local165 = this.anIntArrayArray130[local35];
                                 for (local167 = 0; local167 < local165.length; local167++) {
-                                    local1546 = this.aClass223Array1[local165[local167]];
-                                    local1546.anInt5800 += arg3;
-                                    local1546.anInt5807 += arg2;
+                                    local1546 = this.billboardAttributes[local165[local167]];
+                                    local1546.offsetY += arg3;
+                                    local1546.offsetX += arg2;
                                 }
                             }
                         }
@@ -3687,9 +3687,9 @@ public final class Model_Sub2 extends Model {
                             if (local35 < this.anIntArrayArray130.length) {
                                 local165 = this.anIntArrayArray130[local35];
                                 for (local167 = 0; local167 < local165.length; local167++) {
-                                    local1546 = this.aClass223Array1[local165[local167]];
-                                    local1546.anInt5802 = local1546.anInt5802 * arg3 >> 7;
-                                    local1546.anInt5809 = arg2 * local1546.anInt5809 >> 7;
+                                    local1546 = this.billboardAttributes[local165[local167]];
+                                    local1546.scaleY = local1546.scaleY * arg3 >> 7;
+                                    local1546.scaleX = arg2 * local1546.scaleX >> 7;
                                 }
                             }
                         }
@@ -3700,8 +3700,8 @@ public final class Model_Sub2 extends Model {
                         if (this.anIntArrayArray130.length > local35) {
                             local165 = this.anIntArrayArray130[local35];
                             for (local167 = 0; local167 < local165.length; local167++) {
-                                local1546 = this.aClass223Array1[local165[local167]];
-                                local1546.anInt5803 = local1546.anInt5803 + arg2 & 0x3FFF;
+                                local1546 = this.billboardAttributes[local165[local167]];
+                                local1546.angle = local1546.angle + arg2 & 0x3FFF;
                             }
                         }
                     }
@@ -3737,11 +3737,11 @@ public final class Model_Sub2 extends Model {
                         }
                     }
                 }
-                if (this.aClass97Array1 != null) {
-                    for (local35 = 0; local35 < this.anInt5533; local35++) {
-                        local1268 = this.aClass97Array1[local35];
-                        local1273 = this.aClass223Array1[local35];
-                        local1273.anInt5805 = local1273.anInt5805 & 0xFF000000 | ColourUtils.HSL_TO_RGB[this.aShortArray74[local1268.anInt2513] & 0xFFFF] & 0xFFFFFF;
+                if (this.billboardFaces != null) {
+                    for (local35 = 0; local35 < this.billboardCount; local35++) {
+                        local1268 = this.billboardFaces[local35];
+                        local1273 = this.billboardAttributes[local35];
+                        local1273.colour = local1273.colour & 0xFF000000 | ColourUtils.HSL_TO_RGB[this.aShortArray74[local1268.face] & 0xFFFF] & 0xFFFFFF;
                     }
                 }
             }

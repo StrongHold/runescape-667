@@ -127,13 +127,13 @@ public final class Model_Sub1 extends Model {
     public ModelParticleEmitter[] aModelParticleEmitterArray2;
 
     @OriginalMember(owner = "client!eu", name = "Cc", descriptor = "I")
-    public int anInt2713;
+    public int billboardCount;
 
     @OriginalMember(owner = "client!eu", name = "tb", descriptor = "[Lclient!ala;")
-    public Class18[] aClass18Array1;
+    public NativeBillboardAttributes[] billboardAttributes;
 
     @OriginalMember(owner = "client!eu", name = "N", descriptor = "[Lclient!pr;")
-    public Class298[] aClass298Array1;
+    public NativeBillboardFace[] billboardFaces;
 
     @OriginalMember(owner = "client!eu", name = "eb", descriptor = "[S")
     public short[] aShortArray47;
@@ -306,10 +306,10 @@ public final class Model_Sub1 extends Model {
         @Pc(510) int local510;
         @Pc(566) int local566;
         if (arg1.billboards != null) {
-            this.anInt2713 = arg1.billboards.length;
-            this.aClass18Array1 = new Class18[this.anInt2713];
-            this.aClass298Array1 = new Class298[this.anInt2713];
-            for (local494 = 0; local494 < this.anInt2713; local494++) {
+            this.billboardCount = arg1.billboards.length;
+            this.billboardAttributes = new NativeBillboardAttributes[this.billboardCount];
+            this.billboardFaces = new NativeBillboardFace[this.billboardCount];
+            for (local494 = 0; local494 < this.billboardCount; local494++) {
                 @Pc(503) MeshBillboard local503 = arg1.billboards[local494];
                 @Pc(508) BillboardType local508 = BillboardTypeList.list(local503.id);
                 local510 = -1;
@@ -324,8 +324,8 @@ public final class Model_Sub1 extends Model {
                 }
                 local566 = ColourUtils.HSL_TO_RGB[arg1.faceColour[local503.face] & 0xFFFF] & 0xFFFFFF;
                 @Pc(585) int local585 = local566 | 255 - (arg1.faceAlpha == null ? 0 : arg1.faceAlpha[local503.face]) << 24;
-                this.aClass298Array1[local494] = new Class298(local510, arg1.faceA[local503.face], arg1.faceB[local503.face], arg1.faceC[local503.face], local508.width, local508.height, local508.texture, local508.anInt9697, local508.blendMode, local508.hideFace, local508.aBoolean748, local503.distance);
-                this.aClass18Array1[local494] = new Class18(local585);
+                this.billboardFaces[local494] = new NativeBillboardFace(local510, arg1.faceA[local503.face], arg1.faceB[local503.face], arg1.faceC[local503.face], local508.width, local508.height, local508.texture, local508.anInt9697, local508.blendMode, local508.hideFace, local508.aBoolean748, local503.distance);
+                this.billboardAttributes[local494] = new NativeBillboardAttributes(local585);
             }
         }
         local494 = this.anInt2715 * 3;
@@ -1106,31 +1106,31 @@ public final class Model_Sub1 extends Model {
 
     @OriginalMember(owner = "client!eu", name = "g", descriptor = "(I)V")
     public void method2552() {
-        if (this.aClass298Array1 == null) {
+        if (this.billboardFaces == null) {
             return;
         }
         this.aClass19_Sub1_6.C(!this.aBoolean228);
         this.aClass19_Sub1_6.method8072(false);
         this.aClass19_Sub1_6.method8080(1, Static454.aClass168_5);
         this.aClass19_Sub1_6.method8142(Static454.aClass168_5, 1);
-        for (@Pc(48) int local48 = 0; local48 < this.anInt2713; local48++) {
-            @Pc(57) Class298 local57 = this.aClass298Array1[local48];
-            @Pc(62) Class18 local62 = this.aClass18Array1[local48];
-            if (!local57.aBoolean577 || !this.aClass19_Sub1_6.bloom()) {
-                @Pc(94) float local94 = (float) (this.anIntArray240[local57.anInt7573] + this.anIntArray240[local57.anInt7574] + this.anIntArray240[local57.anInt7577]) * 0.3333333F;
-                @Pc(116) float local116 = (float) (this.anIntArray242[local57.anInt7577] + this.anIntArray242[local57.anInt7573] + this.anIntArray242[local57.anInt7574]) * 0.3333333F;
-                @Pc(137) float local137 = (float) (this.anIntArray244[local57.anInt7573] + this.anIntArray244[local57.anInt7574] + this.anIntArray244[local57.anInt7577]) * 0.3333333F;
+        for (@Pc(48) int local48 = 0; local48 < this.billboardCount; local48++) {
+            @Pc(57) NativeBillboardFace local57 = this.billboardFaces[local48];
+            @Pc(62) NativeBillboardAttributes local62 = this.billboardAttributes[local48];
+            if (!local57.hideWithBloom || !this.aClass19_Sub1_6.bloom()) {
+                @Pc(94) float local94 = (float) (this.anIntArray240[local57.vertexA] + this.anIntArray240[local57.vertexB] + this.anIntArray240[local57.vertexC]) * 0.3333333F;
+                @Pc(116) float local116 = (float) (this.anIntArray242[local57.vertexC] + this.anIntArray242[local57.vertexA] + this.anIntArray242[local57.vertexB]) * 0.3333333F;
+                @Pc(137) float local137 = (float) (this.anIntArray244[local57.vertexA] + this.anIntArray244[local57.vertexB] + this.anIntArray244[local57.vertexC]) * 0.3333333F;
                 @Pc(151) float local151 = local137 * Static53.aFloat28 + local116 * Static18.aFloat2 + local94 * Static305.aFloat86 + Static279.aFloat82;
                 @Pc(165) float local165 = Static706.aFloat217 + Static654.aFloat209 * local137 + Static348.aFloat107 * local94 + local116 * Static580.aFloat176;
                 @Pc(179) float local179 = local137 * Static382.aFloat114 + Static624.aFloat198 * local116 + local94 * Static355.aFloat111 + Static115.aFloat50;
-                @Pc(200) float local200 = (float) (1.0D / Math.sqrt(local179 * local179 + local165 * local165 + local151 * local151)) * (float) local57.anInt7576;
+                @Pc(200) float local200 = (float) (1.0D / Math.sqrt(local179 * local179 + local165 * local165 + local151 * local151)) * (float) local57.distance;
                 @Pc(205) Matrix_Sub1 local205 = this.aClass19_Sub1_6.method8040();
-                local205.method1893(local179 - local179 * local200, local62.anInt266 * local57.aShort98 >> 7, local62.anInt268 * local57.aShort99 >> 7, (float) local62.anInt263 + local165 - local165 * local200, (float) local62.anInt262 + local151 - local151 * local200, local62.anInt267);
+                local205.method1893(local179 - local179 * local200, local62.scaleY * local57.height >> 7, local62.scaleX * local57.width >> 7, (float) local62.offsetY + local165 - local165 * local200, (float) local62.offsetX + local151 - local151 * local200, local62.angle);
                 local205.method1878(this.aClass19_Sub1_6.aClass73_Sub1_17);
                 this.aClass19_Sub1_6.method8042();
-                @Pc(260) int local260 = local62.anInt269;
-                this.aClass19_Sub1_6.method8108(false, local57.aShort100, false);
-                this.aClass19_Sub1_6.method8053(local57.aByte123);
+                @Pc(260) int local260 = local62.colour;
+                this.aClass19_Sub1_6.method8108(false, local57.texture, false);
+                this.aClass19_Sub1_6.method8053(local57.blendMode);
                 this.aClass19_Sub1_6.method8112(local260);
                 this.aClass19_Sub1_6.method8059();
             }
@@ -1265,8 +1265,8 @@ public final class Model_Sub1 extends Model {
                     this.anIntArray244[local16] += Static393.anInt6145;
                 }
             } else {
-                @Pc(538) Class298 local538;
-                @Pc(543) Class18 local543;
+                @Pc(538) NativeBillboardFace local538;
+                @Pc(543) NativeBillboardAttributes local543;
                 if (arg0 == 5) {
                     for (local16 = 0; local16 < this.anInt2715; local16++) {
                         local20 = arg1 * 8 + (this.aByteArray33[local16] & 0xFF);
@@ -1277,11 +1277,11 @@ public final class Model_Sub1 extends Model {
                         }
                         this.aByteArray33[local16] = (byte) local20;
                     }
-                    if (this.aClass298Array1 != null) {
-                        for (local20 = 0; local20 < this.anInt2713; local20++) {
-                            local538 = this.aClass298Array1[local20];
-                            local543 = this.aClass18Array1[local20];
-                            local543.anInt269 = 255 - (this.aByteArray33[local538.anInt7575] & 0xFF) << 24 | local543.anInt269 & 0xFFFFFF;
+                    if (this.billboardFaces != null) {
+                        for (local20 = 0; local20 < this.billboardCount; local20++) {
+                            local538 = this.billboardFaces[local20];
+                            local543 = this.billboardAttributes[local20];
+                            local543.colour = 255 - (this.aByteArray33[local538.face] & 0xFF) << 24 | local543.colour & 0xFFFFFF;
                         }
                     }
                     this.method2563();
@@ -1306,32 +1306,32 @@ public final class Model_Sub1 extends Model {
                         }
                         this.aShortArray40[local16] = (short) (local198 << 7 | local616 << 10 | local610);
                     }
-                    if (this.aClass298Array1 != null) {
-                        for (local20 = 0; local20 < this.anInt2713; local20++) {
-                            local538 = this.aClass298Array1[local20];
-                            local543 = this.aClass18Array1[local20];
-                            local543.anInt269 = ColourUtils.HSL_TO_RGB[this.aShortArray40[local538.anInt7575] & 0xFFFF] & 0xFFFFFF | local543.anInt269 & 0xFF000000;
+                    if (this.billboardFaces != null) {
+                        for (local20 = 0; local20 < this.billboardCount; local20++) {
+                            local538 = this.billboardFaces[local20];
+                            local543 = this.billboardAttributes[local20];
+                            local543.colour = ColourUtils.HSL_TO_RGB[this.aShortArray40[local538.face] & 0xFFFF] & 0xFFFFFF | local543.colour & 0xFF000000;
                         }
                     }
                     this.method2563();
                 } else {
-                    @Pc(728) Class18 local728;
+                    @Pc(728) NativeBillboardAttributes local728;
                     if (arg0 == 8) {
-                        for (local16 = 0; local16 < this.anInt2713; local16++) {
-                            local728 = this.aClass18Array1[local16];
-                            local728.anInt263 += arg2;
-                            local728.anInt262 += arg1;
+                        for (local16 = 0; local16 < this.billboardCount; local16++) {
+                            local728 = this.billboardAttributes[local16];
+                            local728.offsetY += arg2;
+                            local728.offsetX += arg1;
                         }
                     } else if (arg0 == 10) {
-                        for (local16 = 0; local16 < this.anInt2713; local16++) {
-                            local728 = this.aClass18Array1[local16];
-                            local728.anInt266 = local728.anInt266 * arg2 >> 7;
-                            local728.anInt268 = arg1 * local728.anInt268 >> 7;
+                        for (local16 = 0; local16 < this.billboardCount; local16++) {
+                            local728 = this.billboardAttributes[local16];
+                            local728.scaleY = local728.scaleY * arg2 >> 7;
+                            local728.scaleX = arg1 * local728.scaleX >> 7;
                         }
                     } else if (arg0 == 9) {
-                        for (local16 = 0; local16 < this.anInt2713; local16++) {
-                            local728 = this.aClass18Array1[local16];
-                            local728.anInt267 = local728.anInt267 + arg1 & 0x3FFF;
+                        for (local16 = 0; local16 < this.billboardCount; local16++) {
+                            local728 = this.billboardAttributes[local16];
+                            local728.angle = local728.angle + arg1 & 0x3FFF;
                         }
                     }
                 }
@@ -1787,9 +1787,9 @@ public final class Model_Sub1 extends Model {
                 }
             }
         } else {
-            @Pc(1265) Class18 local1265;
+            @Pc(1265) NativeBillboardAttributes local1265;
             @Pc(1145) boolean local1145;
-            @Pc(1260) Class298 local1260;
+            @Pc(1260) NativeBillboardFace local1260;
             if (arg0 == 5) {
                 if (this.anIntArrayArray68 != null) {
                     local1145 = false;
@@ -1811,11 +1811,11 @@ public final class Model_Sub1 extends Model {
                         }
                     }
                     if (local1145) {
-                        if (this.aClass298Array1 != null) {
-                            for (local40 = 0; local40 < this.anInt2713; local40++) {
-                                local1260 = this.aClass298Array1[local40];
-                                local1265 = this.aClass18Array1[local40];
-                                local1265.anInt269 = local1265.anInt269 & 0xFFFFFF | 255 - (this.aByteArray33[local1260.anInt7575] & 0xFF) << 24;
+                        if (this.billboardFaces != null) {
+                            for (local40 = 0; local40 < this.billboardCount; local40++) {
+                                local1260 = this.billboardFaces[local40];
+                                local1265 = this.billboardAttributes[local40];
+                                local1265.colour = local1265.colour & 0xFFFFFF | 255 - (this.aByteArray33[local1260.face] & 0xFF) << 24;
                             }
                         }
                         this.method2563();
@@ -1853,11 +1853,11 @@ public final class Model_Sub1 extends Model {
                         }
                     }
                     if (local1145) {
-                        if (this.aClass298Array1 != null) {
-                            for (local40 = 0; local40 < this.anInt2713; local40++) {
-                                local1260 = this.aClass298Array1[local40];
-                                local1265 = this.aClass18Array1[local40];
-                                local1265.anInt269 = ColourUtils.HSL_TO_RGB[this.aShortArray40[local1260.anInt7575] & 0xFFFF] & 0xFFFFFF | local1265.anInt269 & 0xFF000000;
+                        if (this.billboardFaces != null) {
+                            for (local40 = 0; local40 < this.billboardCount; local40++) {
+                                local1260 = this.billboardFaces[local40];
+                                local1265 = this.billboardAttributes[local40];
+                                local1265.colour = ColourUtils.HSL_TO_RGB[this.aShortArray40[local1260.face] & 0xFFFF] & 0xFFFFFF | local1265.colour & 0xFF000000;
                             }
                         }
                         this.method2563();
@@ -1870,9 +1870,9 @@ public final class Model_Sub1 extends Model {
                         if (local32 < this.anIntArrayArray67.length) {
                             local162 = this.anIntArrayArray67[local32];
                             for (local164 = 0; local164 < local162.length; local164++) {
-                                local1265 = this.aClass18Array1[local162[local164]];
-                                local1265.anInt262 += arg2;
-                                local1265.anInt263 += arg3;
+                                local1265 = this.billboardAttributes[local162[local164]];
+                                local1265.offsetX += arg2;
+                                local1265.offsetY += arg3;
                             }
                         }
                     }
@@ -1884,9 +1884,9 @@ public final class Model_Sub1 extends Model {
                         if (local32 < this.anIntArrayArray67.length) {
                             local162 = this.anIntArrayArray67[local32];
                             for (local164 = 0; local164 < local162.length; local164++) {
-                                local1265 = this.aClass18Array1[local162[local164]];
-                                local1265.anInt268 = arg2 * local1265.anInt268 >> 7;
-                                local1265.anInt266 = arg3 * local1265.anInt266 >> 7;
+                                local1265 = this.billboardAttributes[local162[local164]];
+                                local1265.scaleX = arg2 * local1265.scaleX >> 7;
+                                local1265.scaleY = arg3 * local1265.scaleY >> 7;
                             }
                         }
                     }
@@ -1897,8 +1897,8 @@ public final class Model_Sub1 extends Model {
                     if (this.anIntArrayArray67.length > local32) {
                         local162 = this.anIntArrayArray67[local32];
                         for (local164 = 0; local164 < local162.length; local164++) {
-                            local1265 = this.aClass18Array1[local162[local164]];
-                            local1265.anInt267 = local1265.anInt267 + arg2 & 0x3FFF;
+                            local1265 = this.billboardAttributes[local162[local164]];
+                            local1265.angle = local1265.angle + arg2 & 0x3FFF;
                         }
                     }
                 }
@@ -2213,9 +2213,9 @@ public final class Model_Sub1 extends Model {
                 }
             }
         } else if (arg0 != 3) {
-            @Pc(2686) Class18 local2686;
+            @Pc(2686) NativeBillboardAttributes local2686;
             @Pc(2555) boolean local2555;
-            @Pc(2681) Class298 local2681;
+            @Pc(2681) NativeBillboardFace local2681;
             if (arg0 == 5) {
                 if (this.anIntArrayArray68 != null) {
                     local2555 = false;
@@ -2239,11 +2239,11 @@ public final class Model_Sub1 extends Model {
                         }
                     }
                     if (local2555) {
-                        if (this.aClass298Array1 != null) {
-                            for (local40 = 0; local40 < this.anInt2713; local40++) {
-                                local2681 = this.aClass298Array1[local40];
-                                local2686 = this.aClass18Array1[local40];
-                                local2686.anInt269 = 255 - (this.aByteArray33[local2681.anInt7575] & 0xFF) << 24 | local2686.anInt269 & 0xFFFFFF;
+                        if (this.billboardFaces != null) {
+                            for (local40 = 0; local40 < this.billboardCount; local40++) {
+                                local2681 = this.billboardFaces[local40];
+                                local2686 = this.billboardAttributes[local40];
+                                local2686.colour = 255 - (this.aByteArray33[local2681.face] & 0xFF) << 24 | local2686.colour & 0xFFFFFF;
                             }
                         }
                         this.method2563();
@@ -2283,11 +2283,11 @@ public final class Model_Sub1 extends Model {
                         }
                     }
                     if (local2555) {
-                        if (this.aClass298Array1 != null) {
-                            for (local40 = 0; local40 < this.anInt2713; local40++) {
-                                local2681 = this.aClass298Array1[local40];
-                                local2686 = this.aClass18Array1[local40];
-                                local2686.anInt269 = local2686.anInt269 & 0xFF000000 | ColourUtils.HSL_TO_RGB[this.aShortArray40[local2681.anInt7575] & 0xFFFF] & 0xFFFFFF;
+                        if (this.billboardFaces != null) {
+                            for (local40 = 0; local40 < this.billboardCount; local40++) {
+                                local2681 = this.billboardFaces[local40];
+                                local2686 = this.billboardAttributes[local40];
+                                local2686.colour = local2686.colour & 0xFF000000 | ColourUtils.HSL_TO_RGB[this.aShortArray40[local2681.face] & 0xFFFF] & 0xFFFFFF;
                             }
                         }
                         this.method2563();
@@ -2300,9 +2300,9 @@ public final class Model_Sub1 extends Model {
                         if (this.anIntArrayArray67.length > local32) {
                             local256 = this.anIntArrayArray67[local32];
                             for (local258 = 0; local258 < local256.length; local258++) {
-                                local2686 = this.aClass18Array1[local256[local258]];
-                                local2686.anInt263 += arg3;
-                                local2686.anInt262 += arg2;
+                                local2686 = this.billboardAttributes[local256[local258]];
+                                local2686.offsetY += arg3;
+                                local2686.offsetX += arg2;
                             }
                         }
                     }
@@ -2314,9 +2314,9 @@ public final class Model_Sub1 extends Model {
                         if (local32 < this.anIntArrayArray67.length) {
                             local256 = this.anIntArrayArray67[local32];
                             for (local258 = 0; local258 < local256.length; local258++) {
-                                local2686 = this.aClass18Array1[local256[local258]];
-                                local2686.anInt268 = arg2 * local2686.anInt268 >> 7;
-                                local2686.anInt266 = arg3 * local2686.anInt266 >> 7;
+                                local2686 = this.billboardAttributes[local256[local258]];
+                                local2686.scaleX = arg2 * local2686.scaleX >> 7;
+                                local2686.scaleY = arg3 * local2686.scaleY >> 7;
                             }
                         }
                     }
@@ -2327,8 +2327,8 @@ public final class Model_Sub1 extends Model {
                     if (local32 < this.anIntArrayArray67.length) {
                         local256 = this.anIntArrayArray67[local32];
                         for (local258 = 0; local258 < local256.length; local258++) {
-                            local2686 = this.aClass18Array1[local256[local258]];
-                            local2686.anInt267 = arg2 + local2686.anInt267 & 0x3FFF;
+                            local2686 = this.billboardAttributes[local256[local258]];
+                            local2686.angle = arg2 + local2686.angle & 0x3FFF;
                         }
                     }
                 }
@@ -2501,7 +2501,7 @@ public final class Model_Sub1 extends Model {
         if (this.aClass19_Sub1_6.aFloat188 <= local338 / (float) arg2 || this.aClass19_Sub1_6.aFloat183 >= local326 / (float) arg2) {
             return;
         }
-        if (cylinder != null || this.aClass298Array1 != null) {
+        if (cylinder != null || this.billboardFaces != null) {
             Static348.aFloat107 = local25.aFloat39 * local14.aFloat44 + local14.aFloat42 * local25.aFloat44 + local14.aFloat41 * local25.aFloat45;
             Static355.aFloat111 = local14.aFloat45 * local25.aFloat39 + local25.aFloat44 * local14.aFloat36 + local25.aFloat45 * local14.aFloat47;
             Static654.aFloat209 = local25.aFloat38 * local14.aFloat44 + local25.aFloat41 * local14.aFloat42 + local25.aFloat47 * local14.aFloat41;
@@ -2750,7 +2750,7 @@ public final class Model_Sub1 extends Model {
         if (local323 / local96 >= this.aClass19_Sub1_6.aFloat188 || local334 / local96 <= this.aClass19_Sub1_6.aFloat183) {
             return;
         }
-        if (cylinder != null || this.aClass298Array1 != null) {
+        if (cylinder != null || this.billboardFaces != null) {
             Static654.aFloat209 = local14.aFloat41 * local25.aFloat47 + local25.aFloat38 * local14.aFloat44 + local14.aFloat42 * local25.aFloat41;
             Static382.aFloat114 = local14.aFloat45 * local25.aFloat38 + local25.aFloat41 * local14.aFloat36 + local14.aFloat47 * local25.aFloat47;
             Static348.aFloat107 = local14.aFloat41 * local25.aFloat45 + local14.aFloat44 * local25.aFloat39 + local14.aFloat42 * local25.aFloat44;
@@ -2822,7 +2822,7 @@ public final class Model_Sub1 extends Model {
     public Model method2557(@OriginalArg(0) int arg0, @OriginalArg(1) Model_Sub1 arg1, @OriginalArg(2) boolean arg2, @OriginalArg(3) boolean arg3, @OriginalArg(4) Model_Sub1 arg4) {
         arg4.anInt2765 = this.anInt2765;
         arg4.aShort36 = this.aShort36;
-        arg4.anInt2713 = this.anInt2713;
+        arg4.billboardCount = this.billboardCount;
         arg4.anInt2773 = this.anInt2773;
         arg4.aBoolean230 = this.aBoolean230;
         arg4.anInt2745 = this.anInt2745;
@@ -3054,17 +3054,17 @@ public final class Model_Sub1 extends Model {
             arg4.aShortArray46 = this.aShortArray46;
         }
         if (!Static246.method3521(arg0, this.anInt2765)) {
-            arg4.aClass18Array1 = this.aClass18Array1;
-        } else if (arg1.aClass18Array1 == null || this.anInt2713 > arg1.aClass18Array1.length) {
-            local226 = this.anInt2713;
-            arg4.aClass18Array1 = arg1.aClass18Array1 = new Class18[local226];
-            for (local711 = 0; local711 < this.anInt2713; local711++) {
-                arg4.aClass18Array1[local711] = this.aClass18Array1[local711].method270();
+            arg4.billboardAttributes = this.billboardAttributes;
+        } else if (arg1.billboardAttributes == null || this.billboardCount > arg1.billboardAttributes.length) {
+            local226 = this.billboardCount;
+            arg4.billboardAttributes = arg1.billboardAttributes = new NativeBillboardAttributes[local226];
+            for (local711 = 0; local711 < this.billboardCount; local711++) {
+                arg4.billboardAttributes[local711] = this.billboardAttributes[local711].copy();
             }
         } else {
-            arg4.aClass18Array1 = arg1.aClass18Array1;
-            for (local226 = 0; local226 < this.anInt2713; local226++) {
-                arg4.aClass18Array1[local226].method271(this.aClass18Array1[local226]);
+            arg4.billboardAttributes = arg1.billboardAttributes;
+            for (local226 = 0; local226 < this.billboardCount; local226++) {
+                arg4.billboardAttributes[local226].set(this.billboardAttributes[local226]);
             }
         }
         arg4.anIntArrayArray67 = this.anIntArrayArray67;
@@ -3083,7 +3083,7 @@ public final class Model_Sub1 extends Model {
         }
         arg4.anIntArrayArray68 = this.anIntArrayArray68;
         arg4.anIntArray243 = this.anIntArray243;
-        arg4.aClass298Array1 = this.aClass298Array1;
+        arg4.billboardFaces = this.billboardFaces;
         arg4.aShortArray50 = this.aShortArray50;
         arg4.aShortArray41 = this.aShortArray41;
         arg4.aShortArray45 = this.aShortArray45;
@@ -3104,7 +3104,7 @@ public final class Model_Sub1 extends Model {
             return;
         }
         this.aBoolean229 = false;
-        if (this.aModelParticleEmitterArray2 == null && this.aModelParticleEffectorArray2 == null && this.aClass298Array1 == null && !Static2.method66(this.anInt2765, this.anInt2756)) {
+        if (this.aModelParticleEmitterArray2 == null && this.aModelParticleEffectorArray2 == null && this.billboardFaces == null && !Static2.method66(this.anInt2765, this.anInt2756)) {
             @Pc(39) boolean local39 = false;
             @Pc(41) boolean local41 = false;
             if (this.anIntArray240 != null && !Static577.method7616(this.anInt2756, this.anInt2765)) {
@@ -3274,11 +3274,11 @@ public final class Model_Sub1 extends Model {
         if (!(local39 != local61 | local41 != local63)) {
             return;
         }
-        if (this.aClass298Array1 != null) {
-            for (@Pc(119) int local119 = 0; local119 < this.anInt2713; local119++) {
-                @Pc(126) Class298 local126 = this.aClass298Array1[local119];
-                @Pc(131) Class18 local131 = this.aClass18Array1[local119];
-                local131.anInt269 = ColourUtils.HSL_TO_RGB[this.aShortArray40[local126.anInt7575] & 0xFFFF] & 0xFFFFFF | local131.anInt269 & 0xFF000000;
+        if (this.billboardFaces != null) {
+            for (@Pc(119) int local119 = 0; local119 < this.billboardCount; local119++) {
+                @Pc(126) NativeBillboardFace local126 = this.billboardFaces[local119];
+                @Pc(131) NativeBillboardAttributes local131 = this.billboardAttributes[local119];
+                local131.colour = ColourUtils.HSL_TO_RGB[this.aShortArray40[local126.face] & 0xFFFF] & 0xFFFFFF | local131.colour & 0xFF000000;
             }
         }
         this.method2563();
@@ -3292,11 +3292,11 @@ public final class Model_Sub1 extends Model {
                 this.aShortArray40[local7] = dest;
             }
         }
-        if (this.aClass298Array1 != null) {
-            for (@Pc(42) int local42 = 0; local42 < this.anInt2713; local42++) {
-                @Pc(49) Class298 local49 = this.aClass298Array1[local42];
-                @Pc(54) Class18 local54 = this.aClass18Array1[local42];
-                local54.anInt269 = local54.anInt269 & 0xFF000000 | ColourUtils.HSL_TO_RGB[this.aShortArray40[local49.anInt7575] & 0xFFFF] & 0xFFFFFF;
+        if (this.billboardFaces != null) {
+            for (@Pc(42) int local42 = 0; local42 < this.billboardCount; local42++) {
+                @Pc(49) NativeBillboardFace local49 = this.billboardFaces[local42];
+                @Pc(54) NativeBillboardAttributes local54 = this.billboardAttributes[local42];
+                local54.colour = local54.colour & 0xFF000000 | ColourUtils.HSL_TO_RGB[this.aShortArray40[local49.face] & 0xFFFF] & 0xFFFFFF;
             }
         }
         this.method2563();
@@ -3620,11 +3620,11 @@ public final class Model_Sub1 extends Model {
             }
             this.aShortArray40[local7] = (short) (local28 << 7 | local22 << 10 | local32);
         }
-        if (this.aClass298Array1 != null) {
-            for (local16 = 0; local16 < this.anInt2713; local16++) {
-                @Pc(108) Class298 local108 = this.aClass298Array1[local16];
-                @Pc(113) Class18 local113 = this.aClass18Array1[local16];
-                local113.anInt269 = ColourUtils.HSL_TO_RGB[this.aShortArray40[local108.anInt7575] & 0xFFFF] & 0xFFFFFF | local113.anInt269 & 0xFF000000;
+        if (this.billboardFaces != null) {
+            for (local16 = 0; local16 < this.billboardCount; local16++) {
+                @Pc(108) NativeBillboardFace local108 = this.billboardFaces[local16];
+                @Pc(113) NativeBillboardAttributes local113 = this.billboardAttributes[local16];
+                local113.colour = ColourUtils.HSL_TO_RGB[this.aShortArray40[local108.face] & 0xFFFF] & 0xFFFFFF | local113.colour & 0xFF000000;
             }
         }
         this.method2563();
