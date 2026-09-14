@@ -7,7 +7,7 @@ public final class Static322 {
     public static short aShort135;
 
     @OriginalMember(owner = "client!kd", name = "a", descriptor = "(IIC)C")
-    public static char method9436(@OriginalArg(1) int language, @OriginalArg(2) char c) {
+    public static char stripAccent(@OriginalArg(1) int language, @OriginalArg(2) char c) {
         if (c >= 'À' && c <= 'ÿ') {
             if (c >= 'À' && c <= 'Æ') {
                 return 'A';

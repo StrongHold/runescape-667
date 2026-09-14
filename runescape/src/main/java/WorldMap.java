@@ -46,10 +46,10 @@ public final class WorldMap {
     public static final IterableHashTable areas = new IterableHashTable(16);
 
     @OriginalMember(owner = "client!baa", name = "J", descriptor = "[B")
-    public static final byte[] aByteArray55 = new byte[1];
+    public static final byte[] singleLocShapes = new byte[1];
 
     @OriginalMember(owner = "client!baa", name = "B", descriptor = "[S")
-    public static final short[] aShortArray77 = new short[1];
+    public static final short[] singleLocIds = new short[1];
 
     @OriginalMember(owner = "client!o", name = "jb", descriptor = "Lclient!jg;")
     public static final DequeIterator elementIterator = new DequeIterator();
@@ -166,55 +166,55 @@ public final class WorldMap {
     public static FloorUnderlayTypeList floorUnderlayTypeList;
 
     @OriginalMember(owner = "client!baa", name = "d", descriptor = "[S")
-    public static short[] aShortArray78;
+    public static short[] tileLocIds;
 
     @OriginalMember(owner = "client!baa", name = "z", descriptor = "[B")
-    public static byte[] aByteArray56;
+    public static byte[] underlayColoursHigh;
 
     @OriginalMember(owner = "client!baa", name = "p", descriptor = "[B")
-    public static byte[] aByteArray57;
+    public static byte[] underlays;
 
     @OriginalMember(owner = "client!baa", name = "v", descriptor = "I")
-    public static int anInt5645;
+    public static int viewZ2;
 
     @OriginalMember(owner = "client!baa", name = "h", descriptor = "[S")
-    public static short[] aShortArray79;
+    public static short[] underlayColoursLow;
 
     @OriginalMember(owner = "client!baa", name = "C", descriptor = "I")
-    public static int anInt5646;
+    public static int screenY2;
 
     @OriginalMember(owner = "client!baa", name = "E", descriptor = "[B")
-    public static byte[] aByteArray58;
+    public static byte[] tileLocShapes;
 
     @OriginalMember(owner = "client!baa", name = "s", descriptor = "I")
-    public static int anInt5647;
+    public static int viewX2;
 
     @OriginalMember(owner = "client!baa", name = "o", descriptor = "[I")
     public static int[] overlayColours;
 
     @OriginalMember(owner = "client!baa", name = "c", descriptor = "I")
-    public static int anInt5649;
+    public static int screenX1;
 
     @OriginalMember(owner = "client!baa", name = "i", descriptor = "[B")
-    public static byte[] aByteArray59;
+    public static byte[] overlayShapes;
 
     @OriginalMember(owner = "client!baa", name = "l", descriptor = "Lclient!av;")
-    public static IterableHashTable aIterableHashTable;
+    public static IterableHashTable multiLocs;
 
     @OriginalMember(owner = "client!baa", name = "r", descriptor = "I")
-    public static int anInt5651;
+    public static int screenX2;
 
     @OriginalMember(owner = "client!baa", name = "K", descriptor = "I")
-    public static int anInt5652;
+    public static int viewX1;
 
     @OriginalMember(owner = "client!baa", name = "a", descriptor = "I")
-    public static int anInt5653;
+    public static int screenY1;
 
     @OriginalMember(owner = "client!baa", name = "N", descriptor = "[B")
-    public static byte[] aByteArray60;
+    public static byte[] overlays;
 
     @OriginalMember(owner = "client!baa", name = "n", descriptor = "I")
-    public static int anInt5654;
+    public static int viewZ1;
 
     @OriginalMember(owner = "client!baa", name = "L", descriptor = "[[[Lclient!fla;")
     public static LinkedList[][][] tiles;
@@ -244,10 +244,10 @@ public final class WorldMap {
     public static int flashingElement = -1;
 
     @OriginalMember(owner = "client!kc", name = "f", descriptor = "I")
-    public static int anInt5084;
+    public static int flashCycles;
 
     @OriginalMember(owner = "client!gka", name = "m", descriptor = "I")
-    public static int anInt3467;
+    public static int flashTimer;
 
     @OriginalMember(owner = "client!dk", name = "v", descriptor = "I")
     public static int toolkitType = -1;
@@ -280,10 +280,10 @@ public final class WorldMap {
     public static Sprite overviewSprite;
 
     @OriginalMember(owner = "client!qaa", name = "c", descriptor = "I")
-    public static int anInt7639;
+    public static int viewportZ;
 
     @OriginalMember(owner = "client!qq", name = "c", descriptor = "I")
-    public static int anInt8111;
+    public static int viewportX;
 
     @OriginalMember(owner = "client!w", name = "i", descriptor = "Z")
     public static boolean mapOverride = false;
@@ -342,20 +342,20 @@ public final class WorldMap {
             width = (int) ((float) (childWidth * 2) / currentZoom);
             height = (int) ((float) (childHeight * 2) / currentZoom);
 
-            anInt7639 = displayZ - (int) ((float) childHeight / currentZoom);
-            anInt8111 = displayX - (int) ((float) childWidth / currentZoom);
+            viewportZ = displayZ - (int) ((float) childHeight / currentZoom);
+            viewportX = displayX - (int) ((float) childWidth / currentZoom);
 
-            method5062(x1 + areaX, y1 + areaZ, x2 + areaX, y2 + areaZ, childX, childY, childWidth + childX, childHeight + childY + 1);
-            method5060(toolkit);
+            setView(x1 + areaX, y1 + areaZ, x2 + areaX, y2 + areaZ, childX, childY, childWidth + childX, childHeight + childY + 1);
+            drawTiles(toolkit);
 
-            @Pc(203) Deque local203 = method5081(toolkit);
-            renderElements(local203, toolkit);
+            @Pc(203) Deque entries = positionElements(toolkit);
+            renderElements(entries, toolkit);
 
-            if (anInt5084 > 0) {
-                anInt3467--;
-                if (anInt3467 == 0) {
-                    anInt5084--;
-                    anInt3467 = 20;
+            if (flashCycles > 0) {
+                flashTimer--;
+                if (flashTimer == 0) {
+                    flashCycles--;
+                    flashTimer = 20;
                 }
             }
 
@@ -400,35 +400,35 @@ public final class WorldMap {
         @Pc(84) int newY = z + ((height - newHeight) / 2);
 
         if (overviewSprite == null || overviewSprite.getWidth() != width || overviewSprite.getHeight() != height) {
-            method5062(areaX, areaZ, areaWidth + areaX, areaZ + areaHeight, newX, newY, newX + newWidth, newY - -newHeight);
-            method5060(toolkit);
+            setView(areaX, areaZ, areaWidth + areaX, areaZ + areaHeight, newX, newY, newX + newWidth, newY - -newHeight);
+            drawTiles(toolkit);
             overviewSprite = toolkit.createSprite(newX, newY, newWidth, newHeight, false);
         }
 
         overviewSprite.render(newX, newY);
 
-        @Pc(138) int local138 = (newWidth * WorldMap.width) / areaWidth;
-        @Pc(144) int local144 = (newHeight * WorldMap.height) / areaHeight;
-        @Pc(152) int local152 = anInt8111 * newWidth / areaWidth + newX;
-        @Pc(166) int local166 = newHeight + newY - local144 - anInt7639 * newHeight / areaHeight;
+        @Pc(138) int rectWidth = (newWidth * WorldMap.width) / areaWidth;
+        @Pc(144) int rectHeight = (newHeight * WorldMap.height) / areaHeight;
+        @Pc(152) int rectX = viewportX * newWidth / areaWidth + newX;
+        @Pc(166) int rectY = newHeight + newY - rectHeight - viewportZ * newHeight / areaHeight;
 
         @Pc(168) int colour = 0x88FF0000;
         if (Client.modeGame == ModeGame.STELLAR_DAWN) {
             colour = 0x88FFFFFF;
         }
 
-        toolkit.aa(local152, local166, local138, local144, colour, 1);
-        toolkit.outlineRect(local152, local166, local138, local144, colour, 0);
+        toolkit.aa(rectX, rectY, rectWidth, rectHeight, colour, 1);
+        toolkit.outlineRect(rectX, rectY, rectWidth, rectHeight, colour, 0);
 
-        if (anInt5084 <= 0) {
+        if (flashCycles <= 0) {
             return;
         }
 
         @Pc(202) int alpha;
-        if (anInt3467 > 50) {
-            alpha = (100 - anInt3467) * 5;
+        if (flashTimer > 50) {
+            alpha = (100 - flashTimer) * 5;
         } else {
-            alpha = anInt3467 * 5;
+            alpha = flashTimer * 5;
         }
 
         for (@Pc(213) MapElementListEntry entry = (MapElementListEntry) elements.first(); entry != null; entry = (MapElementListEntry) elements.next()) {
@@ -560,10 +560,10 @@ public final class WorldMap {
             }
 
             tileSize = (int) currentZoom >> 1;
-            tileShapes = Static640.method8437(tileSize);
+            tileShapes = Static640.createTileShapeMasks(tileSize);
 
             checkJump();
-            method5069();
+            allocateBuffers();
 
             boundedEntries = new Deque();
 
@@ -584,7 +584,7 @@ public final class WorldMap {
                 mapDl = 16;
             }
 
-            method5067(textureSource, mapDh >> 2 << 10, mapDl >> 1);
+            initOverlayColours(textureSource, mapDh >> 2 << 10, mapDl >> 1);
             mapElementTypeList.setCaches(1024, 256);
             msiTypeList.setCache(256, 256);
             locTypeList.setRecentUse(4096);
@@ -592,7 +592,7 @@ public final class WorldMap {
             loadingPercent = 20;
         } else if (loadingPercent == 20) {
             Static314.noTimeout(true);
-            method5080(toolkit, mapDh, mapDl);
+            decodeArea(toolkit, mapDh, mapDl);
             loadingPercent = 60;
             Static314.noTimeout(true);
             Static199.doneslowupdate();
@@ -683,112 +683,101 @@ public final class WorldMap {
     }
 
     @OriginalMember(owner = "client!baa", name = "a", descriptor = "(Lclient!d;II)V")
-    public static void method5067(@OriginalArg(0) TextureSource textureSource, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
+    public static void initOverlayColours(@OriginalArg(0) TextureSource textureSource, @OriginalArg(1) int hueOffset, @OriginalArg(2) int lightnessOffset) {
         for (@Pc(1) int i = 0; i < floorOverlayTypeList.num; i++) {
-            overlayColours[i + 1] = overlayColour(textureSource, i, arg1, arg2);
+            overlayColours[i + 1] = overlayColour(textureSource, i, hueOffset, lightnessOffset);
         }
     }
 
     @OriginalMember(owner = "client!baa", name = "b", descriptor = "(I)Lclient!ip;")
-    public static WorldMapArea getArea(@OriginalArg(0) int arg0) {
-        return (WorldMapArea) areas.get(arg0);
+    public static WorldMapArea getArea(@OriginalArg(0) int id) {
+        return (WorldMapArea) areas.get(id);
     }
 
     @OriginalMember(owner = "client!baa", name = "a", descriptor = "(Lclient!ha;)V")
-    public static void method5060(@OriginalArg(0) Toolkit arg0) {
-        @Pc(3) int local3 = anInt5647 - anInt5652;
-        @Pc(7) int local7 = anInt5645 - anInt5654;
-        @Pc(15) int local15 = (anInt5651 - anInt5649 << 16) / local3;
-        @Pc(23) int local23 = (anInt5646 - anInt5653 << 16) / local7;
-        method5066(arg0, local15, local23);
+    public static void drawTiles(@OriginalArg(0) Toolkit toolkit) {
+        @Pc(3) int viewWidth = viewX2 - viewX1;
+        @Pc(7) int viewHeight = viewZ2 - viewZ1;
+        @Pc(15) int scaleX = (screenX2 - screenX1 << 16) / viewWidth;
+        @Pc(23) int scaleZ = (screenY2 - screenY1 << 16) / viewHeight;
+        drawTiles(toolkit, scaleX, scaleZ);
     }
 
     @OriginalMember(owner = "client!baa", name = "a", descriptor = "(Lclient!ha;IIIIIII[S[BZ)V")
-    public static void method5061(@OriginalArg(0) Toolkit arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) int arg6, @OriginalArg(7) int arg7, @OriginalArg(8) short[] arg8, @OriginalArg(9) byte[] arg9, @OriginalArg(10) boolean arg10) {
-        @Pc(20) int local20;
-        @Pc(32) int local32;
-        if (arg10 || arg5 != 0 || arg6 > 0) {
-            if (arg6 == 0) {
-                arg0.aa(arg1, arg2, arg3, arg4, arg5, 0);
+    public static void drawTile(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) int x, @OriginalArg(2) int y, @OriginalArg(3) int width, @OriginalArg(4) int height, @OriginalArg(5) int underlayColour, @OriginalArg(6) int overlay, @OriginalArg(7) int overlayShape, @OriginalArg(8) short[] locIds, @OriginalArg(9) byte[] locShapes, @OriginalArg(10) boolean opaque) {
+        if (opaque || underlayColour != 0 || overlay > 0) {
+            if (overlay == 0) {
+                toolkit.aa(x, y, width, height, underlayColour, 0);
             } else {
-                local20 = arg7 & 0x3F;
-                if (local20 == 0 || arg3 <= 1 || arg4 <= 1) {
-                    local32 = overlayColours[arg6];
-                    if (arg10 || local32 != 0) {
-                        arg0.aa(arg1, arg2, arg3, arg4, local32, 0);
+                int shape = overlayShape & 0x3F;
+                if (shape == 0 || width <= 1 || height <= 1) {
+                    int colour = overlayColours[overlay];
+                    if (opaque || colour != 0) {
+                        toolkit.aa(x, y, width, height, colour, 0);
                     }
                 } else {
-                    local32 = arg10 ? 0 : 1;
-                    Static339.method5007(arg4, tileShapes, overlayColours[arg6], arg3, tileSize, arg1, arg0, local32, arg7 >> 6 & 0x3, arg2, arg5, local20);
+                    Static339.method5007(height, tileShapes, overlayColours[overlay], width, tileSize, x, toolkit, opaque ? 0 : 1, overlayShape >> 6 & 0x3, y, underlayColour, shape);
                 }
             }
         }
-        if (arg8 == null) {
+        if (locIds == null) {
             return;
         }
-        if (arg3 == 1) {
-            local20 = arg1;
-        } else {
-            local20 = arg1 + arg3 - 1;
-        }
-        if (arg4 == 1) {
-            local32 = arg2;
-        } else {
-            local32 = arg2 + arg4 - 1;
-        }
-        for (@Pc(100) int local100 = 0; local100 < arg8.length; local100++) {
-            @Pc(107) int local107 = arg9[local100] & 0x3F;
-            if (local107 == 0 || local107 == 2 || local107 == 3 || local107 == 9) {
-                @Pc(127) LocType local127 = locTypeList.list(arg8[local100] & 0xFFFF);
-                if (local127.msi == -1) {
-                    @Pc(133) int local133 = -3355444;
-                    if (local127.active == LocInteractivity.INTERACTIVE) {
-                        local133 = -3407872;
+        @Pc(20) int right = width == 1 ? x : x + width - 1;
+        @Pc(32) int bottom = height == 1 ? y : y + height - 1;
+        for (@Pc(100) int i = 0; i < locIds.length; i++) {
+            @Pc(107) int shape = locShapes[i] & 0x3F;
+            if (shape == 0 || shape == 2 || shape == 3 || shape == 9) {
+                @Pc(127) LocType locType = locTypeList.list(locIds[i] & 0xFFFF);
+                if (locType.msi == -1) {
+                    @Pc(133) int wallColour = -3355444;
+                    if (locType.active == LocInteractivity.INTERACTIVE) {
+                        wallColour = -3407872;
                     }
-                    @Pc(147) int local147 = arg9[local100] >> 6 & 0x3;
-                    if (local107 == 0) {
-                        if (local147 == 0) {
-                            arg0.P(arg1, arg2, arg4, local133, 0);
-                        } else if (local147 == 1) {
-                            arg0.U(arg1, arg2, arg3, local133, 0);
-                        } else if (local147 == 2) {
-                            arg0.P(local20, arg2, arg4, local133, 0);
+                    @Pc(147) int rotation = locShapes[i] >> 6 & 0x3;
+                    if (shape == 0) {
+                        if (rotation == 0) {
+                            toolkit.P(x, y, height, wallColour, 0);
+                        } else if (rotation == 1) {
+                            toolkit.U(x, y, width, wallColour, 0);
+                        } else if (rotation == 2) {
+                            toolkit.P(right, y, height, wallColour, 0);
                         } else {
-                            arg0.U(arg1, local32, arg3, local133, 0);
+                            toolkit.U(x, bottom, width, wallColour, 0);
                         }
-                    } else if (local107 == 2) {
-                        if (local147 == 0) {
-                            arg0.P(arg1, arg2, arg4, -1, 0);
-                            arg0.U(arg1, arg2, arg3, local133, 0);
-                        } else if (local147 == 1) {
-                            arg0.P(local20, arg2, arg4, -1, 0);
-                            arg0.U(arg1, arg2, arg3, local133, 0);
-                        } else if (local147 == 2) {
-                            arg0.P(local20, arg2, arg4, -1, 0);
-                            arg0.U(arg1, local32, arg3, local133, 0);
+                    } else if (shape == 2) {
+                        if (rotation == 0) {
+                            toolkit.P(x, y, height, -1, 0);
+                            toolkit.U(x, y, width, wallColour, 0);
+                        } else if (rotation == 1) {
+                            toolkit.P(right, y, height, -1, 0);
+                            toolkit.U(x, y, width, wallColour, 0);
+                        } else if (rotation == 2) {
+                            toolkit.P(right, y, height, -1, 0);
+                            toolkit.U(x, bottom, width, wallColour, 0);
                         } else {
-                            arg0.P(arg1, arg2, arg4, -1, 0);
-                            arg0.U(arg1, local32, arg3, local133, 0);
+                            toolkit.P(x, y, height, -1, 0);
+                            toolkit.U(x, bottom, width, wallColour, 0);
                         }
-                    } else if (local107 == 3) {
-                        if (local147 == 0) {
-                            arg0.U(arg1, arg2, 1, local133, 0);
-                        } else if (local147 == 1) {
-                            arg0.U(local20, arg2, 1, local133, 0);
-                        } else if (local147 == 2) {
-                            arg0.U(local20, local32, 1, local133, 0);
+                    } else if (shape == 3) {
+                        if (rotation == 0) {
+                            toolkit.U(x, y, 1, wallColour, 0);
+                        } else if (rotation == 1) {
+                            toolkit.U(right, y, 1, wallColour, 0);
+                        } else if (rotation == 2) {
+                            toolkit.U(right, bottom, 1, wallColour, 0);
                         } else {
-                            arg0.U(arg1, local32, 1, local133, 0);
+                            toolkit.U(x, bottom, 1, wallColour, 0);
                         }
-                    } else if (local107 == 9) {
-                        @Pc(313) int local313;
-                        if (local147 == 0 || local147 == 2) {
-                            for (local313 = 0; local313 < arg4; local313++) {
-                                arg0.U(arg1 + local313, local32 - local313, 1, local133, 0);
+                    } else if (shape == 9) {
+                        @Pc(313) int step;
+                        if (rotation == 0 || rotation == 2) {
+                            for (step = 0; step < height; step++) {
+                                toolkit.U(x + step, bottom - step, 1, wallColour, 0);
                             }
                         } else {
-                            for (local313 = 0; local313 < arg4; local313++) {
-                                arg0.U(arg1 + local313, arg2 + local313, 1, local133, 0);
+                            for (step = 0; step < height; step++) {
+                                toolkit.U(x + step, y + step, 1, wallColour, 0);
                             }
                         }
                     }
@@ -798,98 +787,97 @@ public final class WorldMap {
     }
 
     @OriginalMember(owner = "client!baa", name = "a", descriptor = "(IIIIIIII)V")
-    public static void method5062(@OriginalArg(0) int x1, @OriginalArg(3) int z1, @OriginalArg(2) int x2, @OriginalArg(1) int z2, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) int arg6, @OriginalArg(7) int arg7) {
-        anInt5652 = x1 - areaX;
-        anInt5645 = z2 - areaZ;
-        anInt5647 = x2 - areaX;
-        anInt5654 = z1 - areaZ;
-        anInt5649 = arg4;
-        anInt5653 = arg5;
-        anInt5651 = arg6;
-        anInt5646 = arg7;
+    public static void setView(@OriginalArg(0) int x1, @OriginalArg(3) int z1, @OriginalArg(2) int x2, @OriginalArg(1) int z2, @OriginalArg(4) int left, @OriginalArg(5) int top, @OriginalArg(6) int right, @OriginalArg(7) int bottom) {
+        viewX1 = x1 - areaX;
+        viewZ2 = z2 - areaZ;
+        viewX2 = x2 - areaX;
+        viewZ1 = z1 - areaZ;
+        screenX1 = left;
+        screenY1 = top;
+        screenX2 = right;
+        screenY2 = bottom;
     }
 
     @OriginalMember(owner = "client!baa", name = "a", descriptor = "([B[B[SII)V")
-    public static void method5064(@OriginalArg(0) byte[] arg0, @OriginalArg(1) byte[] arg1, @OriginalArg(2) short[] arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4) {
-        @Pc(2) int[] local2 = new int[areaHeight];
-        @Pc(5) int[] local5 = new int[areaHeight];
-        @Pc(8) int[] local8 = new int[areaHeight];
-        @Pc(11) int[] local11 = new int[areaHeight];
-        @Pc(14) int[] local14 = new int[areaHeight];
-        for (@Pc(16) int local16 = -5; local16 < areaWidth; local16++) {
-            @Pc(21) int local21 = local16 + 5;
-            @Pc(25) int local25 = local16 - 5;
-            @Pc(41) int local41;
-            for (@Pc(27) int local27 = 0; local27 < areaHeight; local27++) {
-                @Pc(86) int local86;
+    public static void blendUnderlays(@OriginalArg(0) byte[] underlayIds, @OriginalArg(1) byte[] coloursHigh, @OriginalArg(2) short[] coloursLow, @OriginalArg(3) int hueOffset, @OriginalArg(4) int lightnessOffset) {
+        @Pc(2) int[] hueColumns = new int[areaHeight];
+        @Pc(5) int[] saturationColumns = new int[areaHeight];
+        @Pc(8) int[] lightnessColumns = new int[areaHeight];
+        @Pc(11) int[] weightColumns = new int[areaHeight];
+        @Pc(14) int[] countColumns = new int[areaHeight];
+        for (@Pc(16) int x = -5; x < areaWidth; x++) {
+            @Pc(21) int addX = x + 5;
+            @Pc(25) int removeX = x - 5;
+            @Pc(41) int hueSum;
+            for (@Pc(27) int z = 0; z < areaHeight; z++) {
+                @Pc(86) int previousCount;
 
-                if (local21 < areaWidth) {
-                    local41 = arg0[local21 + local27 * areaWidth] & 0xFF;
-                    if (local41 > 0) {
-                        @Pc(50) FloorUnderlayType local50 = floorUnderlayTypeList.list(local41 - 1);
-                        local2[local27] += local50.anInt6630;
-                        local5[local27] += local50.anInt6637;
-                        local8[local27] += local50.anInt6639;
-                        local11[local27] += local50.anInt6632;
-                        local86 = local14[local27]++;
+                if (addX < areaWidth) {
+                    int underlay = underlayIds[addX + z * areaWidth] & 0xFF;
+                    if (underlay > 0) {
+                        @Pc(50) FloorUnderlayType type = floorUnderlayTypeList.list(underlay - 1);
+                        hueColumns[z] += type.anInt6630;
+                        saturationColumns[z] += type.anInt6637;
+                        lightnessColumns[z] += type.anInt6639;
+                        weightColumns[z] += type.anInt6632;
+                        previousCount = countColumns[z]++;
                     }
                 }
 
-                if (local25 >= 0) {
-                    local41 = arg0[local25 + local27 * areaWidth] & 0xFF;
-                    if (local41 > 0) {
-                        @Pc(50) FloorUnderlayType local50 = floorUnderlayTypeList.list(local41 - 1);
-                        local2[local27] -= local50.anInt6630;
-                        local5[local27] -= local50.anInt6637;
-                        local8[local27] -= local50.anInt6639;
-                        local11[local27] -= local50.anInt6632;
-                        local86 = local14[local27]--;
+                if (removeX >= 0) {
+                    int underlay = underlayIds[removeX + z * areaWidth] & 0xFF;
+                    if (underlay > 0) {
+                        @Pc(50) FloorUnderlayType type = floorUnderlayTypeList.list(underlay - 1);
+                        hueColumns[z] -= type.anInt6630;
+                        saturationColumns[z] -= type.anInt6637;
+                        lightnessColumns[z] -= type.anInt6639;
+                        weightColumns[z] -= type.anInt6632;
+                        previousCount = countColumns[z]--;
                     }
                 }
             }
 
-            if (local16 >= 0) {
-                local41 = 0;
-                @Pc(159) int local159 = 0;
-                @Pc(161) int local161 = 0;
-                @Pc(163) int local163 = 0;
-                @Pc(165) int local165 = 0;
-                for (@Pc(167) int local167 = -5; local167 < areaHeight; local167++) {
-                    @Pc(172) int local172 = local167 + 5;
-                    if (local172 < areaHeight) {
-                        local41 += local2[local172];
-                        local159 += local5[local172];
-                        local161 += local8[local172];
-                        local163 += local11[local172];
-                        local165 += local14[local172];
+            if (x >= 0) {
+                hueSum = 0;
+                @Pc(159) int saturationSum = 0;
+                @Pc(161) int lightnessSum = 0;
+                @Pc(163) int weightSum = 0;
+                @Pc(165) int count = 0;
+                for (@Pc(167) int z = -5; z < areaHeight; z++) {
+                    @Pc(172) int addZ = z + 5;
+                    if (addZ < areaHeight) {
+                        hueSum += hueColumns[addZ];
+                        saturationSum += saturationColumns[addZ];
+                        lightnessSum += lightnessColumns[addZ];
+                        weightSum += weightColumns[addZ];
+                        count += countColumns[addZ];
                     }
-                    @Pc(209) int local209 = local167 - 5;
-                    if (local209 >= 0) {
-                        local41 -= local2[local209];
-                        local159 -= local5[local209];
-                        local161 -= local8[local209];
-                        local163 -= local11[local209];
-                        local165 -= local14[local209];
+                    @Pc(209) int removeZ = z - 5;
+                    if (removeZ >= 0) {
+                        hueSum -= hueColumns[removeZ];
+                        saturationSum -= saturationColumns[removeZ];
+                        lightnessSum -= lightnessColumns[removeZ];
+                        weightSum -= weightColumns[removeZ];
+                        count -= countColumns[removeZ];
                     }
-                    if (local167 >= 0 && local165 > 0) {
-                        @Pc(261) int local261;
-                        if ((arg0[local16 + local167 * areaWidth] & 0xFF) == 0) {
-                            local261 = local16 + local167 * areaWidth;
-                            arg1[local261] = 0;
-                            arg2[local261] = 0;
+                    if (z >= 0 && count > 0) {
+                        if ((underlayIds[x + z * areaWidth] & 0xFF) == 0) {
+                            int index = x + z * areaWidth;
+                            coloursHigh[index] = 0;
+                            coloursLow[index] = 0;
                         } else {
-                            local261 = local163 == 0 ? 0 : Static318.method8555(local161 / local165, local159 / local165, local41 * 256 / local163);
-                            @Pc(294) int local294 = (local261 & 0x7F) + arg4;
-                            if (local294 < 0) {
-                                local294 = 0;
-                            } else if (local294 > 127) {
-                                local294 = 127;
+                            @Pc(261) int hsl = weightSum == 0 ? 0 : Static318.method8555(lightnessSum / count, saturationSum / count, hueSum * 256 / weightSum);
+                            @Pc(294) int lightness = (hsl & 0x7F) + lightnessOffset;
+                            if (lightness < 0) {
+                                lightness = 0;
+                            } else if (lightness > 127) {
+                                lightness = 127;
                             }
-                            @Pc(316) int local316 = (local261 + arg3 & 0xFC00) + (local261 & 0x380) + local294;
-                            @Pc(322) int local322 = local16 + local167 * areaWidth;
-                            @Pc(333) int local333 = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(Static75.method6238(local316)) & 0xFFFF];
-                            arg1[local322] = (byte) (local333 >> 16 & 0xFF);
-                            arg2[local322] = (short) (local333 & 0xFFFF);
+                            @Pc(316) int blendedHsl = (hsl + hueOffset & 0xFC00) + (hsl & 0x380) + lightness;
+                            @Pc(322) int index = x + z * areaWidth;
+                            @Pc(333) int rgb = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(Static75.method6238(blendedHsl)) & 0xFFFF];
+                            coloursHigh[index] = (byte) (rgb >> 16 & 0xFF);
+                            coloursLow[index] = (short) (rgb & 0xFFFF);
                         }
                     }
                 }
@@ -898,14 +886,14 @@ public final class WorldMap {
     }
 
     @OriginalMember(owner = "client!baa", name = "a", descriptor = "(Lclient!ha;IIII)V")
-    public static void method5066(@OriginalArg(0) Toolkit arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
-        @Pc(3) int local3 = anInt5647 - anInt5652;
-        @Pc(7) int local7 = anInt5645 - anInt5654;
-        if (anInt5647 < areaWidth) {
-            local3++;
+    public static void drawTiles(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) int scaleX, @OriginalArg(2) int scaleZ) {
+        @Pc(3) int tileCountX = viewX2 - viewX1;
+        @Pc(7) int tileCountZ = viewZ2 - viewZ1;
+        if (viewX2 < areaWidth) {
+            tileCountX++;
         }
-        if (anInt5645 < areaHeight) {
-            local7++;
+        if (viewZ2 < areaHeight) {
+            tileCountZ++;
         }
         @Pc(28) int local28;
         @Pc(40) int local40;
@@ -920,35 +908,35 @@ public final class WorldMap {
         @Pc(175) int local175;
         @Pc(177) int local177;
         @Pc(179) int local179;
-        for (@Pc(17) int local17 = 0; local17 < local3; local17++) {
-            local28 = (arg1 * local17 >> 16) + anInt5649;
-            local40 = (arg1 * (local17 + 1) >> 16) + anInt5649;
+        for (@Pc(17) int column = 0; column < tileCountX; column++) {
+            local28 = (scaleX * column >> 16) + screenX1;
+            local40 = (scaleX * (column + 1) >> 16) + screenX1;
             local44 = local40 - local28;
             if (local44 > 0) {
-                local50 = anInt5652 + local17;
+                local50 = viewX1 + column;
                 if (local50 >= 0 && local50 < areaWidth) {
-                    for (local57 = 0; local57 < local7; local57++) {
-                        local70 = anInt5646 - (arg2 * (local57 + 1) >> 16);
-                        local80 = anInt5646 - (arg2 * local57 >> 16);
+                    for (local57 = 0; local57 < tileCountZ; local57++) {
+                        local70 = screenY2 - (scaleZ * (local57 + 1) >> 16);
+                        local80 = screenY2 - (scaleZ * local57 >> 16);
                         local84 = local80 - local70;
                         if (local84 > 0) {
-                            local93 = local57 + anInt5654;
+                            local93 = local57 + viewZ1;
                             local173 = local50 + local93 * areaWidth;
                             local175 = 0;
                             local177 = 0;
                             local179 = 0;
                             if (local93 >= 0 && local93 < areaHeight) {
-                                local175 = (aByteArray56[local173] & 0xFF) << 16 | aShortArray79[local173] & 0xFFFF;
+                                local175 = (underlayColoursHigh[local173] & 0xFF) << 16 | underlayColoursLow[local173] & 0xFFFF;
                                 if (local175 != 0) {
                                     local175 |= 0xFF000000;
                                 }
-                                local177 = aByteArray60[local173] & 0xFF;
-                                local179 = aShortArray78[local173] & 0xFFFF;
+                                local177 = overlays[local173] & 0xFF;
+                                local179 = tileLocIds[local173] & 0xFFFF;
                             }
                             if (local175 == 0 && local177 == 0 && local179 == 0) {
                                 if (area.anInt4561 != -1) {
                                     local175 = area.anInt4561 | 0xFF000000;
-                                } else if ((local17 + anInt5652 & 0x4) == (local57 + anInt5645 & 0x4)) {
+                                } else if ((column + viewX1 & 0x4) == (local57 + viewZ2 & 0x4)) {
                                     local175 = overlayColours[floorOverlayTypeList.dflt + 1];
                                 } else {
                                     local175 = 0xFF4B5368;
@@ -956,29 +944,29 @@ public final class WorldMap {
                                 if (local175 == 0) {
                                     local175 = 0xFF000000;
                                 }
-                                arg0.aa(local28, local70, local44, local84, local175, 0);
+                                toolkit.aa(local28, local70, local44, local84, local175, 0);
                             } else if (local179 <= 0) {
-                                method5061(arg0, local28, local70, local44, local84, local175, local177, aByteArray59[local173], null, null, true);
+                                drawTile(toolkit, local28, local70, local44, local84, local175, local177, overlayShapes[local173], null, null, true);
                             } else if (local179 == 65535) {
-                                @Pc(282) Node_Sub23 local282 = (Node_Sub23) aIterableHashTable.get(local50 << 16 | local93);
-                                if (local282 != null) {
-                                    method5061(arg0, local28, local70, local44, local84, local175, local177, aByteArray59[local173], local282.aShortArray59, local282.aByteArray38, true);
+                                @Pc(282) Node_Sub23 locList = (Node_Sub23) multiLocs.get(local50 << 16 | local93);
+                                if (locList != null) {
+                                    drawTile(toolkit, local28, local70, local44, local84, local175, local177, overlayShapes[local173], locList.aShortArray59, locList.aByteArray38, true);
                                 }
                             } else {
-                                aShortArray77[0] = (short) (local179 - 1);
-                                aByteArray55[0] = aByteArray58[local173];
-                                method5061(arg0, local28, local70, local44, local84, local175, local177, aByteArray59[local173], aShortArray77, aByteArray55, true);
+                                singleLocIds[0] = (short) (local179 - 1);
+                                singleLocShapes[0] = tileLocShapes[local173];
+                                drawTile(toolkit, local28, local70, local44, local84, local175, local177, overlayShapes[local173], singleLocIds, singleLocShapes, true);
                             }
                         }
                     }
                 } else {
-                    for (local57 = 0; local57 < local7; local57++) {
-                        local70 = anInt5646 - (arg2 * (local57 + 1) >> 16);
-                        local80 = anInt5646 - (arg2 * local57 >> 16);
+                    for (local57 = 0; local57 < tileCountZ; local57++) {
+                        local70 = screenY2 - (scaleZ * (local57 + 1) >> 16);
+                        local80 = screenY2 - (scaleZ * local57 >> 16);
                         local84 = local80 - local70;
                         if (area.anInt4561 != -1) {
                             local93 = area.anInt4561 | 0xFF000000;
-                        } else if ((local17 + anInt5652 & 0x4) == (local57 + anInt5645 & 0x4)) {
+                        } else if ((column + viewX1 & 0x4) == (local57 + viewZ2 & 0x4)) {
                             local93 = overlayColours[floorOverlayTypeList.dflt + 1];
                         } else {
                             local93 = -11840664;
@@ -986,37 +974,37 @@ public final class WorldMap {
                         if (local93 == 0) {
                             local93 = -16777216;
                         }
-                        arg0.aa(local28, local70, local44, local84, local93, 0);
+                        toolkit.aa(local28, local70, local44, local84, local93, 0);
                     }
                 }
             }
         }
-        for (local28 = -16; local28 < local3 + 16; local28++) {
-            local40 = (arg1 * local28 >> 16) + anInt5649;
-            local44 = (arg1 * (local28 + 1) >> 16) + anInt5649;
+        for (local28 = -16; local28 < tileCountX + 16; local28++) {
+            local40 = (scaleX * local28 >> 16) + screenX1;
+            local44 = (scaleX * (local28 + 1) >> 16) + screenX1;
             local50 = local44 - local40;
             if (local50 > 0) {
-                local57 = local28 + anInt5652;
+                local57 = local28 + viewX1;
                 if (local57 >= 0 && local57 < areaWidth) {
-                    for (local70 = -16; local70 < local7 + 16; local70++) {
-                        local80 = anInt5646 - (arg2 * (local70 + 1) >> 16);
-                        local84 = anInt5646 - (arg2 * local70 >> 16);
+                    for (local70 = -16; local70 < tileCountZ + 16; local70++) {
+                        local80 = screenY2 - (scaleZ * (local70 + 1) >> 16);
+                        local84 = screenY2 - (scaleZ * local70 >> 16);
                         local93 = local84 - local80;
                         if (local93 > 0) {
-                            local173 = local70 + anInt5654;
+                            local173 = local70 + viewZ1;
                             if (local173 >= 0 && local173 < areaHeight) {
-                                local175 = aShortArray78[local57 + local173 * areaWidth] & 0xFFFF;
+                                local175 = tileLocIds[local57 + local173 * areaWidth] & 0xFFFF;
                                 if (local175 <= 0) {
-                                    drawMsiMultiple(arg0, local40, local80, local50, local93, null, null);
+                                    drawMsiMultiple(toolkit, local40, local80, local50, local93, null, null);
                                 } else if (local175 == 65535) {
-                                    @Pc(459) Node_Sub23 local459 = (Node_Sub23) aIterableHashTable.get(local57 << 16 | local173);
-                                    if (local459 != null) {
-                                        drawMsiMultiple(arg0, local40, local80, local50, local93, local459.aShortArray59, local459.aByteArray38);
+                                    @Pc(459) Node_Sub23 locList = (Node_Sub23) multiLocs.get(local57 << 16 | local173);
+                                    if (locList != null) {
+                                        drawMsiMultiple(toolkit, local40, local80, local50, local93, locList.aShortArray59, locList.aByteArray38);
                                     }
                                 } else {
-                                    aShortArray77[0] = (short) (local175 - 1);
-                                    aByteArray55[0] = aByteArray58[local57 + local173 * areaWidth];
-                                    drawMsiMultiple(arg0, local40, local80, local50, local93, aShortArray77, aByteArray55);
+                                    singleLocIds[0] = (short) (local175 - 1);
+                                    singleLocShapes[0] = tileLocShapes[local57 + local173 * areaWidth];
+                                    drawMsiMultiple(toolkit, local40, local80, local50, local93, singleLocIds, singleLocShapes);
                                 }
                             }
                         }
@@ -1024,16 +1012,16 @@ public final class WorldMap {
                 }
             }
         }
-        local40 = anInt5652 >> 6;
-        local44 = anInt5654 >> 6;
+        local40 = viewX1 >> 6;
+        local44 = viewZ1 >> 6;
         if (local40 < 0) {
             local40 = 0;
         }
         if (local44 < 0) {
             local44 = 0;
         }
-        local50 = anInt5647 >> 6;
-        local57 = anInt5645 >> 6;
+        local50 = viewX2 >> 6;
+        local57 = viewZ2 >> 6;
         if (local50 >= tiles[0].length) {
             local50 = tiles[0].length - 1;
         }
@@ -1048,36 +1036,36 @@ public final class WorldMap {
             @Pc(631) int local631;
             for (local80 = local40; local80 <= local50; local80++) {
                 for (local84 = local44; local84 <= local57; local84++) {
-                    @Pc(589) LinkedList local589 = tiles[local70][local80][local84];
-                    if (local589 != null) {
+                    @Pc(589) LinkedList chunkTiles = tiles[local70][local80][local84];
+                    if (chunkTiles != null) {
                         local173 = (local80 + (areaX >> 6)) * 64;
                         local175 = (local84 + (areaZ >> 6)) * 64;
-                        for (@Pc(612) WorldMapTile local612 = (WorldMapTile) local589.first(); local612 != null; local612 = (WorldMapTile) local589.next()) {
-                            local179 = local173 + local612.aByte138 - areaX - anInt5652;
-                            local631 = local175 + local612.aByte139 - areaZ - anInt5654;
-                            local641 = (arg1 * local179 >> 16) + anInt5649;
-                            local653 = (arg1 * (local179 + 1) >> 16) + anInt5649;
-                            local665 = anInt5646 - (arg2 * (local631 + 1) >> 16);
-                            local675 = anInt5646 - (arg2 * local631 >> 16);
-                            method5061(arg0, local641, local665, local653 - local641, local675 - local665, local612.anInt9770, local612.aByte137 & 0xFF, local612.aByte136, local612.aShortArray133, local612.aByteArray104, false);
+                        for (@Pc(612) WorldMapTile tile = (WorldMapTile) chunkTiles.first(); tile != null; tile = (WorldMapTile) chunkTiles.next()) {
+                            local179 = local173 + tile.aByte138 - areaX - viewX1;
+                            local631 = local175 + tile.aByte139 - areaZ - viewZ1;
+                            local641 = (scaleX * local179 >> 16) + screenX1;
+                            local653 = (scaleX * (local179 + 1) >> 16) + screenX1;
+                            local665 = screenY2 - (scaleZ * (local631 + 1) >> 16);
+                            local675 = screenY2 - (scaleZ * local631 >> 16);
+                            drawTile(toolkit, local641, local665, local653 - local641, local675 - local665, tile.anInt9770, tile.aByte137 & 0xFF, tile.aByte136, tile.aShortArray133, tile.aByteArray104, false);
                         }
                     }
                 }
             }
             for (local84 = local40; local84 <= local50; local84++) {
                 for (local93 = local44; local93 <= local57; local93++) {
-                    @Pc(727) LinkedList local727 = tiles[local70][local84][local93];
-                    if (local727 != null) {
+                    @Pc(727) LinkedList chunkTiles = tiles[local70][local84][local93];
+                    if (chunkTiles != null) {
                         local175 = (local84 + (areaX >> 6)) * 64;
                         local177 = (local93 + (areaZ >> 6)) * 64;
-                        for (@Pc(750) WorldMapTile local750 = (WorldMapTile) local727.first(); local750 != null; local750 = (WorldMapTile) local727.next()) {
-                            local631 = local175 + local750.aByte138 - areaX - anInt5652;
-                            local641 = local177 + local750.aByte139 - areaZ - anInt5654;
-                            local653 = (arg1 * local631 >> 16) + anInt5649;
-                            local665 = (arg1 * (local631 + 1) >> 16) + anInt5649;
-                            local675 = anInt5646 - (arg2 * (local641 + 1) >> 16);
-                            @Pc(813) int local813 = anInt5646 - (arg2 * local641 >> 16);
-                            drawMsiMultiple(arg0, local653, local675, local665 - local653, local813 - local675, local750.aShortArray133, local750.aByteArray104);
+                        for (@Pc(750) WorldMapTile tile = (WorldMapTile) chunkTiles.first(); tile != null; tile = (WorldMapTile) chunkTiles.next()) {
+                            local631 = local175 + tile.aByte138 - areaX - viewX1;
+                            local641 = local177 + tile.aByte139 - areaZ - viewZ1;
+                            local653 = (scaleX * local631 >> 16) + screenX1;
+                            local665 = (scaleX * (local631 + 1) >> 16) + screenX1;
+                            local675 = screenY2 - (scaleZ * (local641 + 1) >> 16);
+                            @Pc(813) int bottom = screenY2 - (scaleZ * local641 >> 16);
+                            drawMsiMultiple(toolkit, local653, local675, local665 - local653, bottom - local675, tile.aShortArray133, tile.aByteArray104);
                         }
                     }
                 }
@@ -1086,7 +1074,7 @@ public final class WorldMap {
     }
 
     @OriginalMember(owner = "client!baa", name = "a", descriptor = "(Lclient!d;III)I")
-    public static int overlayColour(@OriginalArg(0) TextureSource textureSource, @OriginalArg(1) int id, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3) {
+    public static int overlayColour(@OriginalArg(0) TextureSource textureSource, @OriginalArg(1) int id, @OriginalArg(2) int hueOffset, @OriginalArg(3) int lightnessOffset) {
         @Pc(4) FloorOverlayType type = floorOverlayTypeList.list(id);
         if (type == null) {
             return 0;
@@ -1099,284 +1087,284 @@ public final class WorldMap {
 
         @Pc(68) int colour;
         if (type.blendColour >= 0) {
-            @Pc(27) int local27 = type.blendColour;
+            @Pc(27) int hsl = type.blendColour;
 
-            @Pc(33) int local33 = (local27 & 0x7F) + arg3;
-            if (local33 < 0) {
-                local33 = 0;
-            } else if (local33 > 127) {
-                local33 = 127;
+            @Pc(33) int lightness = (hsl & 0x7F) + lightnessOffset;
+            if (lightness < 0) {
+                lightness = 0;
+            } else if (lightness > 127) {
+                lightness = 127;
             }
 
-            @Pc(55) int local55 = (local27 + arg2 & 0xFC00) + (local27 & 0x380) + local33;
-            colour = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(ColourUtils.method3066(local55)) & 0xFFFF] | 0xFF000000;
+            @Pc(55) int blendedHsl = (hsl + hueOffset & 0xFC00) + (hsl & 0x380) + lightness;
+            colour = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(ColourUtils.method3066(blendedHsl)) & 0xFFFF] | 0xFF000000;
         } else if (texture >= 0) {
             colour = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(ColourUtils.method3066(textureSource.getMetrics(texture).aShort37)) & 0xFFFF] | 0xFF000000;
         } else if (type.colour == -1) {
             colour = 0;
         } else {
-            @Pc(27) int local27 = type.colour;
-            @Pc(33) int local33 = (local27 & 0x7F) + arg3;
-            if (local33 < 0) {
-                local33 = 0;
-            } else if (local33 > 127) {
-                local33 = 127;
+            @Pc(27) int hsl = type.colour;
+            @Pc(33) int lightness = (hsl & 0x7F) + lightnessOffset;
+            if (lightness < 0) {
+                lightness = 0;
+            } else if (lightness > 127) {
+                lightness = 127;
             }
-            @Pc(55) int local55 = (local27 + arg2 & 0xFC00) + (local27 & 0x380) + local33;
-            colour = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(ColourUtils.method3066(local55)) & 0xFFFF] | 0xFF000000;
+            @Pc(55) int blendedHsl = (hsl + hueOffset & 0xFC00) + (hsl & 0x380) + lightness;
+            colour = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(ColourUtils.method3066(blendedHsl)) & 0xFFFF] | 0xFF000000;
         }
 
         return colour;
     }
 
     @OriginalMember(owner = "client!baa", name = "c", descriptor = "()V")
-    public static void method5069() {
-        aByteArray57 = new byte[areaWidth * areaHeight];
-        aByteArray60 = new byte[areaWidth * areaHeight];
-        aByteArray59 = new byte[areaWidth * areaHeight];
-        aShortArray78 = new short[areaWidth * areaHeight];
-        aByteArray58 = new byte[areaWidth * areaHeight];
-        aIterableHashTable = new IterableHashTable(1024);
+    public static void allocateBuffers() {
+        underlays = new byte[areaWidth * areaHeight];
+        overlays = new byte[areaWidth * areaHeight];
+        overlayShapes = new byte[areaWidth * areaHeight];
+        tileLocIds = new short[areaWidth * areaHeight];
+        tileLocShapes = new byte[areaWidth * areaHeight];
+        multiLocs = new IterableHashTable(1024);
         tiles = new LinkedList[3][areaWidth >> 6][areaHeight >> 6];
         overlayColours = new int[floorOverlayTypeList.num + 1];
     }
 
     @OriginalMember(owner = "client!baa", name = "d", descriptor = "()V")
-    public static void method5070() {
-        aByteArray57 = null;
-        aByteArray56 = null;
-        aShortArray79 = null;
-        aByteArray60 = null;
-        aByteArray59 = null;
-        aShortArray78 = null;
-        aByteArray58 = null;
-        aIterableHashTable = null;
+    public static void freeBuffers() {
+        underlays = null;
+        underlayColoursHigh = null;
+        underlayColoursLow = null;
+        overlays = null;
+        overlayShapes = null;
+        tileLocIds = null;
+        tileLocShapes = null;
+        multiLocs = null;
         tiles = null;
         overlayColours = null;
     }
 
     @OriginalMember(owner = "client!baa", name = "a", descriptor = "(Lclient!ha;Lclient!fu;Lclient!el;)V")
-    public static void method5071(@OriginalArg(0) Toolkit arg0, @OriginalArg(1) MapElementListEntry arg1, @OriginalArg(2) MapElementType arg2) {
-        if (arg2.landmarkPolygons == null) {
+    public static void drawLandmark(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) MapElementListEntry entry, @OriginalArg(2) MapElementType type) {
+        if (type.landmarkPolygons == null) {
             return;
         }
-        @Pc(7) int[] local7 = new int[arg2.landmarkPolygons.length];
-        @Pc(20) int local20;
-        @Pc(32) int local32;
-        for (@Pc(9) int local9 = 0; local9 < local7.length / 2; local9++) {
-            local20 = arg2.landmarkPolygons[local9 * 2] + arg1.x;
-            local32 = arg2.landmarkPolygons[local9 * 2 + 1] + arg1.z;
-            local7[local9 * 2] = anInt5649 + (anInt5651 - anInt5649) * (local20 - anInt5652) / (anInt5647 - anInt5652);
-            local7[local9 * 2 + 1] = anInt5646 - (anInt5646 - anInt5653) * (local32 - anInt5654) / (anInt5645 - anInt5654);
+        @Pc(7) int[] points = new int[type.landmarkPolygons.length];
+        @Pc(20) int edge;
+        @Pc(32) int x1;
+        for (@Pc(9) int i = 0; i < points.length / 2; i++) {
+            int pointX = type.landmarkPolygons[i * 2] + entry.x;
+            int pointZ = type.landmarkPolygons[i * 2 + 1] + entry.z;
+            points[i * 2] = screenX1 + (screenX2 - screenX1) * (pointX - viewX1) / (viewX2 - viewX1);
+            points[i * 2 + 1] = screenY2 - (screenY2 - screenY1) * (pointZ - viewZ1) / (viewZ2 - viewZ1);
         }
-        Minimap.method2371(arg0, local7, arg2.landmarkBackground);
-        if (arg2.anInt2603 > 0) {
-            @Pc(102) int local102;
-            @Pc(110) int local110;
-            @Pc(120) int local120;
-            @Pc(125) int local125;
-            @Pc(127) int local127;
-            for (local20 = 0; local20 < local7.length / 2 - 1; local20++) {
-                local32 = local7[local20 * 2];
-                local102 = local7[local20 * 2 + 1];
-                local110 = local7[(local20 + 1) * 2];
-                local120 = local7[(local20 + 1) * 2 + 1];
-                if (local110 < local32) {
-                    local125 = local32;
-                    local127 = local102;
-                    local32 = local110;
-                    local102 = local120;
-                    local110 = local125;
-                    local120 = local127;
-                } else if (local110 == local32 && local120 < local102) {
-                    local125 = local102;
-                    local102 = local120;
-                    local120 = local125;
+        Minimap.method2371(toolkit, points, type.landmarkBackground);
+        if (type.anInt2603 > 0) {
+            @Pc(102) int y1;
+            @Pc(110) int x2;
+            @Pc(120) int y2;
+            @Pc(125) int tempX;
+            @Pc(127) int tempY;
+            for (edge = 0; edge < points.length / 2 - 1; edge++) {
+                x1 = points[edge * 2];
+                y1 = points[edge * 2 + 1];
+                x2 = points[(edge + 1) * 2];
+                y2 = points[(edge + 1) * 2 + 1];
+                if (x2 < x1) {
+                    tempX = x1;
+                    tempY = y1;
+                    x1 = x2;
+                    y1 = y2;
+                    x2 = tempX;
+                    y2 = tempY;
+                } else if (x2 == x1 && y2 < y1) {
+                    tempX = y1;
+                    y1 = y2;
+                    y2 = tempX;
                 }
-                arg0.method7995(local32, local102, local110, local120, arg2.landmarkPalette[arg2.landmarkColorIndices[local20] & 0xFF], arg2.anInt2603, arg2.anInt2587, arg2.anInt2607);
+                toolkit.method7995(x1, y1, x2, y2, type.landmarkPalette[type.landmarkColorIndices[edge] & 0xFF], type.anInt2603, type.anInt2587, type.anInt2607);
             }
-            local32 = local7[local7.length - 2];
-            local102 = local7[local7.length - 1];
-            local110 = local7[0];
-            local120 = local7[1];
-            if (local110 < local32) {
-                local125 = local32;
-                local127 = local102;
-                local32 = local110;
-                local102 = local120;
-                local110 = local125;
-                local120 = local127;
-            } else if (local110 == local32 && local120 < local102) {
-                local125 = local102;
-                local102 = local120;
-                local120 = local125;
+            x1 = points[points.length - 2];
+            y1 = points[points.length - 1];
+            x2 = points[0];
+            y2 = points[1];
+            if (x2 < x1) {
+                tempX = x1;
+                tempY = y1;
+                x1 = x2;
+                y1 = y2;
+                x2 = tempX;
+                y2 = tempY;
+            } else if (x2 == x1 && y2 < y1) {
+                tempX = y1;
+                y1 = y2;
+                y2 = tempX;
             }
-            arg0.method7995(local32, local102, local110, local120, arg2.landmarkPalette[arg2.landmarkColorIndices[arg2.landmarkColorIndices.length - 1] & 0xFF], arg2.anInt2603, arg2.anInt2587, arg2.anInt2607);
+            toolkit.method7995(x1, y1, x2, y2, type.landmarkPalette[type.landmarkColorIndices[type.landmarkColorIndices.length - 1] & 0xFF], type.anInt2603, type.anInt2587, type.anInt2607);
             return;
         }
-        for (local20 = 0; local20 < local7.length / 2 - 1; local20++) {
-            arg0.line(local7[(local20 + 1) * 2 + 1], local7[local20 * 2 + 1], local7[(local20 + 1) * 2], arg2.landmarkPalette[arg2.landmarkColorIndices[local20] & 0xFF], local7[local20 * 2]);
+        for (edge = 0; edge < points.length / 2 - 1; edge++) {
+            toolkit.line(points[(edge + 1) * 2 + 1], points[edge * 2 + 1], points[(edge + 1) * 2], type.landmarkPalette[type.landmarkColorIndices[edge] & 0xFF], points[edge * 2]);
         }
-        arg0.line(local7[1], local7[local7.length - 1], local7[0], arg2.landmarkPalette[arg2.landmarkColorIndices[arg2.landmarkColorIndices.length - 1] & 0xFF], local7[local7.length - 2]);
+        toolkit.line(points[1], points[points.length - 1], points[0], type.landmarkPalette[type.landmarkColorIndices[type.landmarkColorIndices.length - 1] & 0xFF], points[points.length - 2]);
     }
 
     @OriginalMember(owner = "client!baa", name = "a", descriptor = "(Lclient!ha;Lclient!fu;IIII)V")
-    public static void method5073(@OriginalArg(0) Toolkit arg0, @OriginalArg(1) MapElementListEntry arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3) {
-        arg1.spriteX = anInt5649 + (arg2 * (arg1.x - anInt5652) >> 16);
-        arg1.spriteY = anInt5646 - (arg3 * (arg1.z - anInt5654) >> 16);
+    public static void positionElement(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) MapElementListEntry entry, @OriginalArg(2) int scaleX, @OriginalArg(3) int scaleZ) {
+        entry.spriteX = screenX1 + (scaleX * (entry.x - viewX1) >> 16);
+        entry.spriteY = screenY2 - (scaleZ * (entry.z - viewZ1) >> 16);
     }
 
     @OriginalMember(owner = "client!baa", name = "a", descriptor = "(Lclient!ha;Lclient!ge;IIII[I[I)V")
-    public static void decodeTile(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) Packet packet, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) int[] arg6, @OriginalArg(7) int[] arg7) {
+    public static void decodeTile(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) Packet packet, @OriginalArg(2) int chunkX, @OriginalArg(3) int chunkZ, @OriginalArg(4) int x, @OriginalArg(5) int z, @OriginalArg(6) int[] underlayPalette, @OriginalArg(7) int[] overlayPalette) {
         @Pc(3) int data = packet.g1();
         if ((data & 0x1) == 0) {
-            @Pc(15) boolean local15 = (data & 0x2) == 0;
-            @Pc(21) int local21 = data >> 2 & 0x3F;
-            if (local21 != 62) {
-                if (local21 == 63) {
-                    local21 = packet.g1();
-                } else if (local15) {
-                    local21 = arg6[local21];
+            @Pc(15) boolean underlay = (data & 0x2) == 0;
+            @Pc(21) int id = data >> 2 & 0x3F;
+            if (id != 62) {
+                if (id == 63) {
+                    id = packet.g1();
+                } else if (underlay) {
+                    id = underlayPalette[id];
                 } else {
-                    local21 = arg7[local21];
+                    id = overlayPalette[id];
                 }
-                if (local15) {
-                    aByteArray57[arg4 + arg5 * areaWidth] = (byte) local21;
-                    aByteArray60[arg4 + arg5 * areaWidth] = 0;
+                if (underlay) {
+                    underlays[x + z * areaWidth] = (byte) id;
+                    overlays[x + z * areaWidth] = 0;
                 } else {
-                    aByteArray60[arg4 + arg5 * areaWidth] = (byte) local21;
-                    aByteArray59[arg4 + arg5 * areaWidth] = 0;
-                    aByteArray57[arg4 + arg5 * areaWidth] = packet.g1b();
+                    overlays[x + z * areaWidth] = (byte) id;
+                    overlayShapes[x + z * areaWidth] = 0;
+                    underlays[x + z * areaWidth] = packet.g1b();
                 }
             }
             return;
         }
 
-        @Pc(100) int local100 = (data >> 1 & 0x3) + 1;
-        @Pc(108) boolean local108 = (data & 0x8) != 0;
-        @Pc(116) boolean local116 = (data & 0x10) != 0;
-        for (@Pc(118) int local118 = 0; local118 < local100; local118++) {
-            @Pc(123) int local123 = packet.g1();
-            @Pc(125) int local125 = 0;
-            @Pc(127) int local127 = 0;
-            if (local108) {
-                local125 = packet.g1();
-                local127 = packet.g1();
+        @Pc(100) int levels = (data >> 1 & 0x3) + 1;
+        @Pc(108) boolean hasOverlay = (data & 0x8) != 0;
+        @Pc(116) boolean hasLocs = (data & 0x10) != 0;
+        for (@Pc(118) int level = 0; level < levels; level++) {
+            @Pc(123) int underlayId = packet.g1();
+            @Pc(125) int overlayId = 0;
+            @Pc(127) int shape = 0;
+            if (hasOverlay) {
+                overlayId = packet.g1();
+                shape = packet.g1();
             }
-            @Pc(139) int local139 = 0;
-            if (local116) {
-                local139 = packet.g1();
+            @Pc(139) int locCount = 0;
+            if (hasLocs) {
+                locCount = packet.g1();
             }
-            @Pc(215) short[] local215;
-            @Pc(218) byte[] local218;
-            @Pc(220) int local220;
-            if (local118 == 0) {
-                aByteArray57[arg4 + arg5 * areaWidth] = (byte) local123;
-                aByteArray60[arg4 + arg5 * areaWidth] = (byte) local125;
-                aByteArray59[arg4 + arg5 * areaWidth] = (byte) local127;
-                if (local139 == 1) {
-                    aShortArray78[arg4 + arg5 * areaWidth] = (short) (packet.g2() + 1);
-                    aByteArray58[arg4 + arg5 * areaWidth] = packet.g1b();
-                } else if (local139 > 1) {
-                    aShortArray78[arg4 + arg5 * areaWidth] = -1;
-                    local215 = new short[local139];
-                    local218 = new byte[local139];
-                    for (local220 = 0; local220 < local139; local220++) {
-                        local215[local220] = (short) packet.g2();
-                        local218[local220] = packet.g1b();
+            @Pc(215) short[] levelLocIds;
+            @Pc(218) byte[] levelLocShapes;
+            @Pc(220) int i;
+            if (level == 0) {
+                underlays[x + z * areaWidth] = (byte) underlayId;
+                overlays[x + z * areaWidth] = (byte) overlayId;
+                overlayShapes[x + z * areaWidth] = (byte) shape;
+                if (locCount == 1) {
+                    tileLocIds[x + z * areaWidth] = (short) (packet.g2() + 1);
+                    tileLocShapes[x + z * areaWidth] = packet.g1b();
+                } else if (locCount > 1) {
+                    tileLocIds[x + z * areaWidth] = -1;
+                    levelLocIds = new short[locCount];
+                    levelLocShapes = new byte[locCount];
+                    for (i = 0; i < locCount; i++) {
+                        levelLocIds[i] = (short) packet.g2();
+                        levelLocShapes[i] = packet.g1b();
                     }
-                    aIterableHashTable.put(arg4 << 16 | arg5, new Node_Sub23(local215, local218));
+                    multiLocs.put(x << 16 | z, new Node_Sub23(levelLocIds, levelLocShapes));
                 }
             } else {
-                local215 = null;
-                local218 = null;
-                if (local139 > 0) {
-                    local215 = new short[local139];
-                    local218 = new byte[local139];
-                    for (local220 = 0; local220 < local139; local220++) {
-                        local215[local220] = (short) packet.g2();
-                        local218[local220] = packet.g1b();
+                levelLocIds = null;
+                levelLocShapes = null;
+                if (locCount > 0) {
+                    levelLocIds = new short[locCount];
+                    levelLocShapes = new byte[locCount];
+                    for (i = 0; i < locCount; i++) {
+                        levelLocIds[i] = (short) packet.g2();
+                        levelLocShapes[i] = packet.g1b();
                     }
                 }
-                if (tiles[local118 - 1][arg2 - (areaX >> 6)][arg3 - (areaZ >> 6)] == null) {
-                    tiles[local118 - 1][arg2 - (areaX >> 6)][arg3 - (areaZ >> 6)] = new LinkedList();
+                if (tiles[level - 1][chunkX - (areaX >> 6)][chunkZ - (areaZ >> 6)] == null) {
+                    tiles[level - 1][chunkX - (areaX >> 6)][chunkZ - (areaZ >> 6)] = new LinkedList();
                 }
-                @Pc(338) WorldMapTile tile = new WorldMapTile(arg4 & 0x3F, arg5 & 0x3F, local123, local125, local127, local215, local218);
-                tiles[local118 - 1][arg2 - (areaX >> 6)][arg3 - (areaZ >> 6)].add(tile);
+                @Pc(338) WorldMapTile tile = new WorldMapTile(x & 0x3F, z & 0x3F, underlayId, overlayId, shape, levelLocIds, levelLocShapes);
+                tiles[level - 1][chunkX - (areaX >> 6)][chunkZ - (areaZ >> 6)].add(tile);
             }
         }
     }
 
     @OriginalMember(owner = "client!baa", name = "a", descriptor = "()V")
-    public static void method5075() {
-        @Pc(4) int local4;
-        @Pc(15) int local15;
-        @Pc(49) int local49;
-        for (@Pc(1) int local1 = 0; local1 < areaWidth; local1++) {
-            for (local4 = 0; local4 < areaHeight; local4++) {
-                local15 = aShortArray78[local1 + local4 * areaWidth] & 0xFFFF;
-                if (local15 != 0) {
-                    @Pc(35) int local35;
-                    if (local15 == 65535) {
-                        @Pc(31) Node_Sub23 local31 = (Node_Sub23) aIterableHashTable.get(local1 << 16 | local4);
-                        if (local31 != null) {
-                            for (local35 = 0; local35 < local31.aShortArray59.length; local35++) {
-                                @Pc(46) LocType local46 = locTypeList.list(local31.aShortArray59[local35] & 0xFFFF);
-                                local49 = local46.mapelement;
-                                if (local46.multiloc != null) {
-                                    local46 = local46.getMultiLoc(varDomain);
-                                    if (local46 != null) {
-                                        local49 = local46.mapelement;
+    public static void loadLocElements() {
+        @Pc(4) int z;
+        @Pc(15) int locId;
+        @Pc(49) int mapelement;
+        for (@Pc(1) int x = 0; x < areaWidth; x++) {
+            for (z = 0; z < areaHeight; z++) {
+                locId = tileLocIds[x + z * areaWidth] & 0xFFFF;
+                if (locId != 0) {
+                    @Pc(35) int locIndex;
+                    if (locId == 65535) {
+                        @Pc(31) Node_Sub23 locList = (Node_Sub23) multiLocs.get(x << 16 | z);
+                        if (locList != null) {
+                            for (locIndex = 0; locIndex < locList.aShortArray59.length; locIndex++) {
+                                @Pc(46) LocType locType = locTypeList.list(locList.aShortArray59[locIndex] & 0xFFFF);
+                                mapelement = locType.mapelement;
+                                if (locType.multiloc != null) {
+                                    locType = locType.getMultiLoc(varDomain);
+                                    if (locType != null) {
+                                        mapelement = locType.mapelement;
                                     }
                                 }
-                                if (local49 != -1) {
-                                    @Pc(70) MapElementListEntry local70 = new MapElementListEntry(local49);
-                                    local70.x = local1;
-                                    local70.z = local4;
-                                    elements.addLast(local70);
+                                if (mapelement != -1) {
+                                    @Pc(70) MapElementListEntry element = new MapElementListEntry(mapelement);
+                                    element.x = x;
+                                    element.z = z;
+                                    elements.addLast(element);
                                 }
                             }
                         }
                     } else {
-                        @Pc(94) LocType local94 = locTypeList.list(local15 - 1);
-                        local35 = local94.mapelement;
-                        if (local94.multiloc != null) {
-                            local94 = local94.getMultiLoc(varDomain);
-                            if (local94 != null) {
-                                local35 = local94.mapelement;
+                        @Pc(94) LocType locType = locTypeList.list(locId - 1);
+                        int elementId = locType.mapelement;
+                        if (locType.multiloc != null) {
+                            locType = locType.getMultiLoc(varDomain);
+                            if (locType != null) {
+                                elementId = locType.mapelement;
                             }
                         }
-                        if (local35 != -1) {
-                            @Pc(118) MapElementListEntry local118 = new MapElementListEntry(local35);
-                            local118.x = local1;
-                            local118.z = local4;
-                            elements.addLast(local118);
+                        if (elementId != -1) {
+                            @Pc(118) MapElementListEntry element = new MapElementListEntry(elementId);
+                            element.x = x;
+                            element.z = z;
+                            elements.addLast(element);
                         }
                     }
                 }
             }
         }
-        for (local4 = 0; local4 < 3; local4++) {
-            for (local15 = 0; local15 < tiles[0].length; local15++) {
-                for (@Pc(144) int local144 = 0; local144 < tiles[0][0].length; local144++) {
-                    @Pc(153) LinkedList local153 = tiles[local4][local15][local144];
-                    if (local153 != null) {
-                        for (@Pc(160) WorldMapTile local160 = (WorldMapTile) local153.first(); local160 != null; local160 = (WorldMapTile) local153.next()) {
-                            if (local160.aShortArray133 != null) {
-                                for (local49 = 0; local49 < local160.aShortArray133.length; local49++) {
-                                    @Pc(177) LocType local177 = locTypeList.list(local160.aShortArray133[local49] & 0xFFFF);
-                                    @Pc(180) int local180 = local177.mapelement;
-                                    if (local177.multiloc != null) {
-                                        local177 = local177.getMultiLoc(varDomain);
-                                        if (local177 != null) {
-                                            local180 = local177.mapelement;
+        for (int level = 0; level < 3; level++) {
+            for (int chunkX = 0; chunkX < tiles[0].length; chunkX++) {
+                for (@Pc(144) int chunkZ = 0; chunkZ < tiles[0][0].length; chunkZ++) {
+                    @Pc(153) LinkedList chunkTiles = tiles[level][chunkX][chunkZ];
+                    if (chunkTiles != null) {
+                        for (@Pc(160) WorldMapTile tile = (WorldMapTile) chunkTiles.first(); tile != null; tile = (WorldMapTile) chunkTiles.next()) {
+                            if (tile.aShortArray133 != null) {
+                                for (int locSlot = 0; locSlot < tile.aShortArray133.length; locSlot++) {
+                                    @Pc(177) LocType locType = locTypeList.list(tile.aShortArray133[locSlot] & 0xFFFF);
+                                    @Pc(180) int elementId = locType.mapelement;
+                                    if (locType.multiloc != null) {
+                                        locType = locType.getMultiLoc(varDomain);
+                                        if (locType != null) {
+                                            elementId = locType.mapelement;
                                         }
                                     }
-                                    if (local180 != -1) {
-                                        @Pc(201) MapElementListEntry local201 = new MapElementListEntry(local180);
-                                        local201.x = (local15 + (areaX >> 6)) * 64 + local160.aByte138 - areaX;
-                                        local201.z = (local144 + (areaZ >> 6)) * 64 + local160.aByte139 - areaZ;
-                                        elements.addLast(local201);
+                                    if (elementId != -1) {
+                                        @Pc(201) MapElementListEntry element = new MapElementListEntry(elementId);
+                                        element.x = (chunkX + (areaX >> 6)) * 64 + tile.aByte138 - areaX;
+                                        element.z = (chunkZ + (areaZ >> 6)) * 64 + tile.aByte139 - areaZ;
+                                        elements.addLast(element);
                                     }
                                 }
                             }
@@ -1425,101 +1413,98 @@ public final class WorldMap {
     }
 
     @OriginalMember(owner = "client!baa", name = "a", descriptor = "(Lclient!ha;II)V")
-    public static void method5080(@OriginalArg(0) Toolkit arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
-        @Pc(11) Packet local11 = new Packet(data.getfile(area.file, "area"));
-        @Pc(15) int local15 = local11.g1();
-        @Pc(18) int[] local18 = new int[local15];
-        for (@Pc(20) int local20 = 0; local20 < local15; local20++) {
-            local18[local20] = local11.g1();
+    public static void decodeArea(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) int hueOffset, @OriginalArg(2) int lightnessOffset) {
+        @Pc(11) Packet packet = new Packet(data.getfile(area.file, "area"));
+        @Pc(15) int underlayCount = packet.g1();
+        @Pc(18) int[] underlayPalette = new int[underlayCount];
+        for (@Pc(20) int i = 0; i < underlayCount; i++) {
+            underlayPalette[i] = packet.g1();
         }
-        @Pc(35) int local35 = local11.g1();
-        @Pc(38) int[] local38 = new int[local35];
-        for (@Pc(40) int local40 = 0; local40 < local35; local40++) {
-            local38[local40] = local11.g1();
+        @Pc(35) int overlayCount = packet.g1();
+        @Pc(38) int[] overlayPalette = new int[overlayCount];
+        for (@Pc(40) int i = 0; i < overlayCount; i++) {
+            overlayPalette[i] = packet.g1();
         }
-        while (true) {
-            @Pc(60) int local60;
-            @Pc(66) int local66;
-            @Pc(69) int local69;
-            @Pc(78) int local78;
-            @Pc(150) int local150;
-            while (local11.pos < local11.data.length) {
-                @Pc(64) int local64;
-                @Pc(86) int local86;
-                if (local11.g1() == 0) {
-                    local60 = local11.g1();
-                    local64 = local11.g1();
-                    for (local66 = 0; local66 < 64; local66++) {
-                        for (local69 = 0; local69 < 64; local69++) {
-                            local78 = local60 * 64 + local66 - areaX;
-                            local86 = local64 * 64 + local69 - areaZ;
-                            decodeTile(arg0, local11, local60, local64, local78, local86, local18, local38);
-                        }
+        @Pc(60) int chunkX;
+        @Pc(66) int offsetX;
+        @Pc(69) int offsetZ;
+        @Pc(78) int tileX;
+        @Pc(150) int subTileZ;
+        while (packet.pos < packet.data.length) {
+            @Pc(64) int chunkZ;
+            @Pc(86) int tileZ;
+            if (packet.g1() == 0) {
+                chunkX = packet.g1();
+                chunkZ = packet.g1();
+                for (offsetX = 0; offsetX < 64; offsetX++) {
+                    for (offsetZ = 0; offsetZ < 64; offsetZ++) {
+                        tileX = chunkX * 64 + offsetX - areaX;
+                        tileZ = chunkZ * 64 + offsetZ - areaZ;
+                        decodeTile(toolkit, packet, chunkX, chunkZ, tileX, tileZ, underlayPalette, overlayPalette);
                     }
-                } else {
-                    local60 = local11.g1();
-                    local64 = local11.g1();
-                    local66 = local11.g1();
-                    local69 = local11.g1();
-                    for (local78 = 0; local78 < 8; local78++) {
-                        for (local86 = 0; local86 < 8; local86++) {
-                            @Pc(138) int local138 = local60 * 64 + local66 * 8 + local78 - areaX;
-                            local150 = local64 * 64 + local69 * 8 + local86 - areaZ;
-                            decodeTile(arg0, local11, local60, local64, local138, local150, local18, local38);
+                }
+            } else {
+                chunkX = packet.g1();
+                chunkZ = packet.g1();
+                offsetX = packet.g1();
+                offsetZ = packet.g1();
+                for (int blockX = 0; blockX < 8; blockX++) {
+                    for (int blockZ = 0; blockZ < 8; blockZ++) {
+                        @Pc(138) int subTileX = chunkX * 64 + offsetX * 8 + blockX - areaX;
+                        subTileZ = chunkZ * 64 + offsetZ * 8 + blockZ - areaZ;
+                        decodeTile(toolkit, packet, chunkX, chunkZ, subTileX, subTileZ, underlayPalette, overlayPalette);
+                    }
+                }
+            }
+        }
+        underlayColoursHigh = new byte[areaWidth * areaHeight];
+        underlayColoursLow = new short[areaWidth * areaHeight];
+        for (int level = 0; level < 3; level++) {
+            @Pc(193) byte[] levelUnderlays = new byte[areaWidth * areaHeight];
+            for (int chunkIndexX = 0; chunkIndexX < tiles[level].length; chunkIndexX++) {
+                for (int chunkIndexZ = 0; chunkIndexZ < tiles[level][0].length; chunkIndexZ++) {
+                    @Pc(207) LinkedList chunkTiles = tiles[level][chunkIndexX][chunkIndexZ];
+                    if (chunkTiles != null) {
+                        for (@Pc(214) WorldMapTile tile = (WorldMapTile) chunkTiles.first(); tile != null; tile = (WorldMapTile) chunkTiles.next()) {
+                            levelUnderlays[chunkIndexX * 64 + tile.aByte138 + (chunkIndexZ * 64 + tile.aByte139) * areaWidth] = (byte) tile.anInt9770;
                         }
                     }
                 }
             }
-            aByteArray56 = new byte[areaWidth * areaHeight];
-            aShortArray79 = new short[areaWidth * areaHeight];
-            for (local60 = 0; local60 < 3; local60++) {
-                @Pc(193) byte[] local193 = new byte[areaWidth * areaHeight];
-                for (local66 = 0; local66 < tiles[local60].length; local66++) {
-                    for (local69 = 0; local69 < tiles[local60][0].length; local69++) {
-                        @Pc(207) LinkedList local207 = tiles[local60][local66][local69];
-                        if (local207 != null) {
-                            for (@Pc(214) WorldMapTile local214 = (WorldMapTile) local207.first(); local214 != null; local214 = (WorldMapTile) local207.next()) {
-                                local193[local66 * 64 + local214.aByte138 + (local69 * 64 + local214.aByte139) * areaWidth] = (byte) local214.anInt9770;
-                            }
-                        }
-                    }
-                }
-                method5064(local193, aByteArray56, aShortArray79, arg1, arg2);
-                for (local69 = 0; local69 < tiles[local60].length; local69++) {
-                    for (local78 = 0; local78 < tiles[local60][0].length; local78++) {
-                        @Pc(278) LinkedList local278 = tiles[local60][local69][local78];
-                        if (local278 != null) {
-                            for (@Pc(285) WorldMapTile local285 = (WorldMapTile) local278.first(); local285 != null; local285 = (WorldMapTile) local278.next()) {
-                                local150 = local69 * 64 + local285.aByte138 + (local78 * 64 + local285.aByte139) * areaWidth;
-                                local285.anInt9770 = (aByteArray56[local150] & 0xFF) << 16 | aShortArray79[local150] & 0xFFFF;
-                                if (local285.anInt9770 != 0) {
-                                    local285.anInt9770 |= 0xFF000000;
-                                }
+            blendUnderlays(levelUnderlays, underlayColoursHigh, underlayColoursLow, hueOffset, lightnessOffset);
+            for (int chunkIndexX = 0; chunkIndexX < tiles[level].length; chunkIndexX++) {
+                for (int chunkIndexZ = 0; chunkIndexZ < tiles[level][0].length; chunkIndexZ++) {
+                    @Pc(278) LinkedList chunkTiles = tiles[level][chunkIndexX][chunkIndexZ];
+                    if (chunkTiles != null) {
+                        for (@Pc(285) WorldMapTile tile = (WorldMapTile) chunkTiles.first(); tile != null; tile = (WorldMapTile) chunkTiles.next()) {
+                            int index = chunkIndexX * 64 + tile.aByte138 + (chunkIndexZ * 64 + tile.aByte139) * areaWidth;
+                            tile.anInt9770 = (underlayColoursHigh[index] & 0xFF) << 16 | underlayColoursLow[index] & 0xFFFF;
+                            if (tile.anInt9770 != 0) {
+                                tile.anInt9770 |= 0xFF000000;
                             }
                         }
                     }
                 }
             }
-            method5064(aByteArray57, aByteArray56, aShortArray79, arg1, arg2);
-            aByteArray57 = null;
-            method5075();
-            return;
         }
+        blendUnderlays(underlays, underlayColoursHigh, underlayColoursLow, hueOffset, lightnessOffset);
+        underlays = null;
+        loadLocElements();
     }
 
     @OriginalMember(owner = "client!baa", name = "b", descriptor = "(Lclient!ha;)Lclient!sia;")
-    public static Deque method5081(@OriginalArg(0) Toolkit arg0) {
-        @Pc(3) int local3 = anInt5647 - anInt5652;
-        @Pc(7) int local7 = anInt5645 - anInt5654;
-        @Pc(15) int local15 = (anInt5651 - anInt5649 << 16) / local3;
-        @Pc(23) int local23 = (anInt5646 - anInt5653 << 16) / local7;
-        return method5082(arg0, local15, local23);
+    public static Deque positionElements(@OriginalArg(0) Toolkit toolkit) {
+        @Pc(3) int viewWidth = viewX2 - viewX1;
+        @Pc(7) int viewHeight = viewZ2 - viewZ1;
+        @Pc(15) int scaleX = (screenX2 - screenX1 << 16) / viewWidth;
+        @Pc(23) int scaleZ = (screenY2 - screenY1 << 16) / viewHeight;
+        return positionElements(toolkit, scaleX, scaleZ);
     }
 
     @OriginalMember(owner = "client!baa", name = "b", descriptor = "(Lclient!ha;IIII)Lclient!sia;")
-    public static Deque method5082(@OriginalArg(0) Toolkit arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
+    public static Deque positionElements(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) int scaleX, @OriginalArg(2) int scaleZ) {
         for (@Pc(4) MapElementListEntry entry = (MapElementListEntry) elements.first(); entry != null; entry = (MapElementListEntry) elements.next()) {
-            method5073(arg0, entry, arg1, arg2);
+            positionElement(toolkit, entry, scaleX, scaleZ);
         }
         return elements;
     }
@@ -1587,7 +1572,7 @@ public final class WorldMap {
         component = null;
         area = null;
         loadingPercent = 0;
-        method5070();
+        freeBuffers();
         elements.clear();
         font30 = null;
         font12 = null;
@@ -1623,10 +1608,10 @@ public final class WorldMap {
     }
 
     @OriginalMember(owner = "client!vd", name = "a", descriptor = "(II)V")
-    public static void method8711(@OriginalArg(0) int arg0) {
+    public static void method8711(@OriginalArg(0) int x) {
         jumpX = -1;
         jumpZ = -1;
-        displayX = arg0;
+        displayX = x;
         checkJump();
     }
 
@@ -1673,16 +1658,16 @@ public final class WorldMap {
     @OriginalMember(owner = "client!vp", name = "a", descriptor = "(BI)V")
     public static void flashElement(@OriginalArg(1) int element) {
         flashingElement = element;
-        anInt5084 = 3;
+        flashCycles = 3;
         flashingElementCategory = -1;
-        anInt3467 = 100;
+        flashTimer = 100;
     }
 
     @OriginalMember(owner = "client!fea", name = "a", descriptor = "(II)V")
-    public static void flashElementCategory(@OriginalArg(0) int arg0) {
-        anInt3467 = 100;
-        flashingElementCategory = arg0;
-        anInt5084 = 3;
+    public static void flashElementCategory(@OriginalArg(0) int category) {
+        flashTimer = 100;
+        flashingElementCategory = category;
+        flashCycles = 3;
         flashingElement = -1;
     }
 
@@ -1763,10 +1748,10 @@ public final class WorldMap {
         @Pc(11) int minRectY = Integer.MAX_VALUE;
         @Pc(13) int maxRectY = Integer.MIN_VALUE;
         if (element.landmarkPolygons != null) {
-            maxRectY = anInt5646 - (entry.z + element.maxZ - anInt5654) * (anInt5646 - anInt5653) / (anInt5645 - anInt5654);
-            minRectY = anInt5646 - (entry.z + element.minZ - anInt5654) * (anInt5646 + -anInt5653) / (anInt5645 - anInt5654);
-            minRectX = anInt5649 + (anInt5651 - anInt5649) * (-anInt5652 + element.maxX - -entry.x) / (anInt5647 - anInt5652);
-            maxRectX = anInt5649 + (element.minX + entry.x - anInt5652) * (anInt5651 - anInt5649) / (anInt5647 - anInt5652);
+            maxRectY = screenY2 - (entry.z + element.maxZ - viewZ1) * (screenY2 - screenY1) / (viewZ2 - viewZ1);
+            minRectY = screenY2 - (entry.z + element.minZ - viewZ1) * (screenY2 + -screenY1) / (viewZ2 - viewZ1);
+            minRectX = screenX1 + (screenX2 - screenX1) * (-viewX1 + element.maxX - -entry.x) / (viewX2 - viewX1);
+            maxRectX = screenX1 + (element.minX + entry.x - viewX1) * (screenX2 - screenX1) / (viewX2 - viewX1);
         }
 
         @Pc(102) Sprite sprite = null;
@@ -1817,8 +1802,8 @@ public final class WorldMap {
 
             if (font != null) {
                 lineCount = Fonts.p11Metrics.splitLines(mapElementTextLines, null, null, element.text);
-                textY = entry.spriteY - element.anInt2617 * (anInt5646 - anInt5653) / (anInt5645 - anInt5654);
-                textX = element.anInt2600 * (anInt5651 - anInt5649) / (anInt5647 - anInt5652) + entry.spriteX;
+                textY = entry.spriteY - element.anInt2617 * (screenY2 - screenY1) / (viewZ2 - viewZ1);
+                textX = element.anInt2600 * (screenX2 - screenX1) / (viewX2 - viewX1) + entry.spriteX;
 
                 if (sprite != null) {
                     textY -= (sprite.scaleHeight() >> 1) + (font.getHeight() * lineCount);
@@ -1858,19 +1843,19 @@ public final class WorldMap {
             }
         }
 
-        if (anInt5649 <= maxRectX && anInt5651 >= minRectX && anInt5653 <= maxRectY && anInt5646 >= minRectY) {
-            method5071(toolkit, entry, element);
+        if (screenX1 <= maxRectX && screenX2 >= minRectX && screenY1 <= maxRectY && screenY2 >= minRectY) {
+            drawLandmark(toolkit, entry, element);
 
             if (sprite != null) {
-                if ((anInt5084 > 0) && ((flashingElement != -1 && entry.id == flashingElement) || (flashingElementCategory != -1 && element.category == flashingElementCategory))) {
-                    @Pc(312) int local312;
-                    if (anInt3467 > 50) {
-                        local312 = 200 - anInt3467 * 2;
+                if ((flashCycles > 0) && ((flashingElement != -1 && entry.id == flashingElement) || (flashingElementCategory != -1 && element.category == flashingElementCategory))) {
+                    @Pc(312) int alpha;
+                    if (flashTimer > 50) {
+                        alpha = 200 - flashTimer * 2;
                     } else {
-                        local312 = anInt3467 * 2;
+                        alpha = flashTimer * 2;
                     }
 
-                    @Pc(495) int colour = (local312 << 24) | 0xFFFF00;
+                    @Pc(495) int colour = (alpha << 24) | 0xFFFF00;
                     toolkit.fillCircle(entry.spriteX, entry.spriteY, sprite.getWidth() / 2 + 7, colour);
                     toolkit.fillCircle(entry.spriteX, entry.spriteY, sprite.getWidth() / 2 + 5, colour);
                     toolkit.fillCircle(entry.spriteX, entry.spriteY, sprite.getWidth() / 2 + 3, colour);
@@ -1920,7 +1905,7 @@ public final class WorldMap {
         @Pc(34) int textY1 = entry.spriteY;
         @Pc(36) int lineCount = 0;
         @Pc(38) int maxTotalWidth = 0;
-        @Pc(40) int local40 = 0;
+        @Pc(40) int textHeight = 0;
 
         if (element.text != null) {
             lineCount = Fonts.p11Metrics.splitLines(mapElementTextLines, null, null, element.text);
@@ -1937,25 +1922,25 @@ public final class WorldMap {
                 }
             }
 
-            local40 = font14.getHeight() * lineCount + font14.getWidth() / 2;
+            textHeight = font14.getHeight() * lineCount + font14.getWidth() / 2;
         }
 
         @Pc(56) int centerX = entry.spriteX + size / 2;
-        if (textX1 < anInt5649 + size) {
-            centerX = size / 2 + anInt5649 + maxTotalWidth / 2 + 15;
-            textX1 = anInt5649;
-        } else if (anInt5651 - size < textX1) {
-            textX1 = anInt5651 - size;
-            centerX = anInt5651 - size / 2 - maxTotalWidth / 2 - 10 - 5;
+        if (textX1 < screenX1 + size) {
+            centerX = size / 2 + screenX1 + maxTotalWidth / 2 + 15;
+            textX1 = screenX1;
+        } else if (screenX2 - size < textX1) {
+            textX1 = screenX2 - size;
+            centerX = screenX2 - size / 2 - maxTotalWidth / 2 - 10 - 5;
         }
 
         @Pc(163) int centerY = entry.spriteY;
-        if (size + anInt5653 > textY1) {
-            centerY = anInt5653 + size / 2 + 10;
-            textY1 = anInt5653;
-        } else if (anInt5646 - size < textY1) {
-            centerY = anInt5646 - size / 2 - local40 - 10;
-            textY1 = anInt5646 - size;
+        if (size + screenY1 > textY1) {
+            centerY = screenY1 + size / 2 + 10;
+            textY1 = screenY1;
+        } else if (screenY2 - size < textY1) {
+            centerY = screenY2 - size / 2 - textHeight - 10;
+            textY1 = screenY2 - size;
         }
 
         @Pc(78) int angle = (int) (Math.atan2(textX1 - entry.spriteX, textY1 - entry.spriteY) / 3.141592653589793D * 32767.0D) & 0xFFFF;
@@ -2015,7 +2000,7 @@ public final class WorldMap {
 
             checkJump();
             tileSize = (int) currentZoom >> 1;
-            tileShapes = Static640.method8437(tileSize);
+            tileShapes = Static640.createTileShapeMasks(tileSize);
         } else if (currentZoom > targetZoom) {
             currentZoom = (float) ((double) currentZoom - (double) currentZoom / 30.0D);
             if (currentZoom < targetZoom) {
@@ -2024,35 +2009,35 @@ public final class WorldMap {
 
             checkJump();
             tileSize = (int) currentZoom >> 1;
-            tileShapes = Static640.method8437(tileSize);
+            tileShapes = Static640.createTileShapeMasks(tileSize);
         }
 
         if (jumpX != -1 && jumpZ != -1) {
-            @Pc(101) int local101 = jumpX - displayX;
-            if (local101 < 2 || local101 > 2) {
-                local101 /= 8;
+            @Pc(101) int deltaX = jumpX - displayX;
+            if (deltaX < 2 || deltaX > 2) {
+                deltaX /= 8;
             }
 
-            @Pc(120) int local120 = jumpZ - displayZ;
-            displayX += local101;
-            if (local120 < 2 || local120 > 2) {
-                local120 /= 8;
+            @Pc(120) int deltaZ = jumpZ - displayZ;
+            displayX += deltaX;
+            if (deltaZ < 2 || deltaZ > 2) {
+                deltaZ /= 8;
             }
 
-            if (local101 == 0 && local120 == 0) {
+            if (deltaX == 0 && deltaZ == 0) {
                 jumpZ = -1;
                 jumpX = -1;
             }
 
-            displayZ -= -local120;
+            displayZ -= -deltaZ;
             checkJump();
         }
 
-        if (anInt5084 > 0) {
-            anInt3467--;
-            if (anInt3467 == 0) {
-                anInt5084--;
-                anInt3467 = 100;
+        if (flashCycles > 0) {
+            flashTimer--;
+            if (flashTimer == 0) {
+                flashCycles--;
+                flashTimer = 100;
             }
         } else {
             flashingElement = -1;
@@ -2171,14 +2156,14 @@ public final class WorldMap {
     }
 
     @OriginalMember(owner = "client!lka", name = "a", descriptor = "(ILclient!sia;ILclient!ha;I)V")
-    public static void renderElements(@OriginalArg(1) Deque arg0, @OriginalArg(3) Toolkit toolkit) {
+    public static void renderElements(@OriginalArg(1) Deque entries, @OriginalArg(3) Toolkit toolkit) {
         boundedEntries.clear();
 
         if (disableElements) {
             return;
         }
 
-        for (@Pc(27) MapElementListEntry entry = (MapElementListEntry) arg0.first(); entry != null; entry = (MapElementListEntry) arg0.next()) {
+        for (@Pc(27) MapElementListEntry entry = (MapElementListEntry) entries.first(); entry != null; entry = (MapElementListEntry) entries.next()) {
             @Pc(35) MapElementType type = mapElementTypeList.list(entry.id);
 
             if (isEnabled(type)) {

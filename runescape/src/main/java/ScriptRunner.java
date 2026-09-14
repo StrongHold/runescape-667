@@ -5867,16 +5867,16 @@ public final class ScriptRunner {
 
             if (opcode == WORLDMAP_FINDNEARESTELEMENT) {
                 intStackPointer -= 2;
-                @Pc(192) int local192 = intStack[intStackPointer];
+                @Pc(192) int element = intStack[intStackPointer];
                 @Pc(834) int coord = intStack[intStackPointer + 1];
                 @Pc(109) int x = coord >> 14 & 0x3FFF;
                 @Pc(115) int z = coord & 0x3FFF;
-                @Pc(375) int local375 = WorldMap.findNearestElement(local192, z, x);
-                if (local375 < 0) {
+                @Pc(375) int nearest = WorldMap.findNearestElement(element, z, x);
+                if (nearest < 0) {
                     intStack[intStackPointer++] = -1;
                     return;
                 }
-                intStack[intStackPointer++] = local375;
+                intStack[intStackPointer++] = nearest;
                 return;
             }
 

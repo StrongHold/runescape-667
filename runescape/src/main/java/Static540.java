@@ -9,69 +9,69 @@ public final class Static540 {
     public static int compare(@OriginalArg(0) String b, @OriginalArg(2) int language, @OriginalArg(3) String a) {
         @Pc(6) int lengthA = a.length();
         @Pc(9) int lengthB = b.length();
-        @Pc(11) int local11 = 0;
-        @Pc(13) int local13 = 0;
-        @Pc(22) char local22 = 0;
-        @Pc(24) char local24 = 0;
-        while (local11 - local22 < lengthA || lengthB > local13 - local24) {
-            if (local11 - local22 >= lengthA) {
+        @Pc(11) int indexA = 0;
+        @Pc(13) int indexB = 0;
+        @Pc(22) char pendingA = 0;
+        @Pc(24) char pendingB = 0;
+        while (indexA - pendingA < lengthA || lengthB > indexB - pendingB) {
+            if (indexA - pendingA >= lengthA) {
                 return -1;
             }
-            if (lengthB <= local13 - local24) {
+            if (lengthB <= indexB - pendingB) {
                 return 1;
             }
-            @Pc(62) char local62;
-            if (local22 == '\u0000') {
-                local62 = a.charAt(local11++);
+            @Pc(62) char charA;
+            if (pendingA == '\u0000') {
+                charA = a.charAt(indexA++);
             } else {
-                local62 = local22;
+                charA = pendingA;
             }
-            @Pc(77) char local77;
-            if (local24 == '\u0000') {
-                local77 = b.charAt(local13++);
+            @Pc(77) char charB;
+            if (pendingB == '\u0000') {
+                charB = b.charAt(indexB++);
             } else {
-                local77 = local24;
+                charB = pendingB;
             }
-            local22 = StringTools.transliteral(local62);
-            local24 = StringTools.transliteral(local77);
-            local62 = Static322.method9436(language, local62);
-            local77 = Static322.method9436(language, local77);
-            if (local62 != local77 && Character.toUpperCase(local62) != Character.toUpperCase(local77)) {
-                local62 = Character.toLowerCase(local62);
-                local77 = Character.toLowerCase(local77);
-                if (local77 != local62) {
-                    return StringTools.intHash(language, local62) - StringTools.intHash(language, local77);
+            pendingA = StringTools.transliteral(charA);
+            pendingB = StringTools.transliteral(charB);
+            charA = Static322.stripAccent(language, charA);
+            charB = Static322.stripAccent(language, charB);
+            if (charA != charB && Character.toUpperCase(charA) != Character.toUpperCase(charB)) {
+                charA = Character.toLowerCase(charA);
+                charB = Character.toLowerCase(charB);
+                if (charB != charA) {
+                    return StringTools.intHash(language, charA) - StringTools.intHash(language, charB);
                 }
             }
         }
-        @Pc(149) int local149 = Math.min(lengthA, lengthB);
-        for (@Pc(151) int local151 = 0; local151 < local149; local151++) {
+        @Pc(149) int shortestLength = Math.min(lengthA, lengthB);
+        for (@Pc(151) int i = 0; i < shortestLength; i++) {
             if (language == 2) {
-                local11 = lengthA - local151 - 1;
-                local13 = lengthB - local151 - 1;
+                indexA = lengthA - i - 1;
+                indexB = lengthB - i - 1;
             } else {
-                local13 = local151;
-                local11 = local151;
+                indexB = i;
+                indexA = i;
             }
-            @Pc(180) char local180 = a.charAt(local11);
-            @Pc(184) char local184 = b.charAt(local13);
-            if (local180 != local184 && Character.toUpperCase(local180) != Character.toUpperCase(local184)) {
-                local180 = Character.toLowerCase(local180);
-                local184 = Character.toLowerCase(local184);
-                if (local180 != local184) {
-                    return StringTools.intHash(language, local180) - StringTools.intHash(language, local184);
+            @Pc(180) char charA = a.charAt(indexA);
+            @Pc(184) char charB = b.charAt(indexB);
+            if (charA != charB && Character.toUpperCase(charA) != Character.toUpperCase(charB)) {
+                charA = Character.toLowerCase(charA);
+                charB = Character.toLowerCase(charB);
+                if (charA != charB) {
+                    return StringTools.intHash(language, charA) - StringTools.intHash(language, charB);
                 }
             }
         }
-        @Pc(239) int local239 = lengthA - lengthB;
-        if (local239 != 0) {
-            return local239;
+        @Pc(239) int lengthDifference = lengthA - lengthB;
+        if (lengthDifference != 0) {
+            return lengthDifference;
         }
-        for (@Pc(246) int local246 = 0; local246 < local149; local246++) {
-            @Pc(251) char local251 = a.charAt(local246);
-            @Pc(255) char local255 = b.charAt(local246);
-            if (local251 != local255) {
-                return StringTools.intHash(language, local251) - StringTools.intHash(language, local255);
+        for (@Pc(246) int i = 0; i < shortestLength; i++) {
+            @Pc(251) char charA = a.charAt(i);
+            @Pc(255) char charB = b.charAt(i);
+            if (charA != charB) {
+                return StringTools.intHash(language, charA) - StringTools.intHash(language, charB);
             }
         }
         return 0;
