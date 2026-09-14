@@ -29,32 +29,32 @@ public final class AnimBase extends Node {
     public final int[] anIntArray619;
 
     @OriginalMember(owner = "client!qda", name = "<init>", descriptor = "(I[B)V")
-    public AnimBase(@OriginalArg(0) int arg0, @OriginalArg(1) byte[] arg1) {
-        this.id = arg0;
-        @Pc(9) Packet local9 = new Packet(arg1);
-        this.anInt7690 = local9.g1();
+    public AnimBase(@OriginalArg(0) int id, @OriginalArg(1) byte[] data) {
+        this.id = id;
+        @Pc(9) Packet packet = new Packet(data);
+        this.anInt7690 = packet.g1();
         this.anIntArray618 = new int[this.anInt7690];
         this.aBooleanArray25 = new boolean[this.anInt7690];
         this.anIntArrayArray196 = new int[this.anInt7690][];
         this.anIntArray619 = new int[this.anInt7690];
-        for (@Pc(36) int local36 = 0; local36 < this.anInt7690; local36++) {
-            this.anIntArray619[local36] = local9.g1();
-            if (this.anIntArray619[local36] == 6) {
-                this.anIntArray619[local36] = 2;
+        for (@Pc(36) int group = 0; group < this.anInt7690; group++) {
+            this.anIntArray619[group] = packet.g1();
+            if (this.anIntArray619[group] == 6) {
+                this.anIntArray619[group] = 2;
             }
         }
-        for (@Pc(68) int local68 = 0; local68 < this.anInt7690; local68++) {
-            this.aBooleanArray25[local68] = local9.g1() == 1;
+        for (@Pc(68) int group = 0; group < this.anInt7690; group++) {
+            this.aBooleanArray25[group] = packet.g1() == 1;
         }
-        for (@Pc(89) int local89 = 0; local89 < this.anInt7690; local89++) {
-            this.anIntArray618[local89] = local9.g2();
+        for (@Pc(89) int group = 0; group < this.anInt7690; group++) {
+            this.anIntArray618[group] = packet.g2();
         }
-        for (@Pc(108) int local108 = 0; local108 < this.anInt7690; local108++) {
-            this.anIntArrayArray196[local108] = new int[local9.g1()];
+        for (@Pc(108) int group = 0; group < this.anInt7690; group++) {
+            this.anIntArrayArray196[group] = new int[packet.g1()];
         }
-        for (@Pc(128) int local128 = 0; local128 < this.anInt7690; local128++) {
-            for (@Pc(131) int local131 = 0; local131 < this.anIntArrayArray196[local128].length; local131++) {
-                this.anIntArrayArray196[local128][local131] = local9.g1();
+        for (@Pc(128) int group = 0; group < this.anInt7690; group++) {
+            for (@Pc(131) int label = 0; label < this.anIntArrayArray196[group].length; label++) {
+                this.anIntArrayArray196[group][label] = packet.g1();
             }
         }
     }

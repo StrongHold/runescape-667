@@ -25,10 +25,10 @@ public class Animator {
 
     @OriginalMember(owner = "client!op", name = "a", descriptor = "(Lclient!gu;Lclient!ka;Lclient!gu;B)V")
     public static void blend(@OriginalArg(0) Animator animator, @OriginalArg(1) Model model, @OriginalArg(2) Animator other) {
-        if (animator.method9111() && other.method9111()) {
+        if (animator.resolveSequences() && other.resolveSequences()) {
             @Pc(12) SeqType thisAnimation = animator.animation;
             @Pc(15) SeqType otherAnimation = other.animation;
-            model.method7477(other.frameOffset, animator.primarySequences.anInt6448, animator.primarySequences.aClass2_Sub2_Sub18_2, other.primarySequences.anInt6450, animator.primarySequences.anInt6450, other.primarySequences.aClass2_Sub2_Sub18_2, animator.primarySequences.aClass2_Sub2_Sub18_1, animator.frameOffset, thisAnimation.rotateNormals | otherAnimation.rotateNormals, otherAnimation.frameDurations[other.currentFrame], other.primarySequences.aClass2_Sub2_Sub18_1, thisAnimation.blendFlags, thisAnimation.frameDurations[animator.currentFrame], other.primarySequences.anInt6448);
+            model.method7477(other.frameOffset, animator.primarySequences.frame, animator.primarySequences.nextFrameset, other.primarySequences.nextFrame, animator.primarySequences.nextFrame, other.primarySequences.nextFrameset, animator.primarySequences.frameset, animator.frameOffset, thisAnimation.rotateNormals | otherAnimation.rotateNormals, otherAnimation.frameDurations[other.currentFrame], other.primarySequences.frameset, thisAnimation.blendFlags, thisAnimation.frameDurations[animator.currentFrame], other.primarySequences.frame);
         }
     }
 
@@ -78,7 +78,8 @@ public class Animator {
     }
 
     @OriginalMember(owner = "client!gu", name = "a", descriptor = "(ILclient!cka;B)V")
-    protected void newFrame(@OriginalArg(0) int arg0, @OriginalArg(1) SeqType arg1) {
+    protected void newFrame(@OriginalArg(0) int frame, @OriginalArg(1) SeqType animation) {
+        /* empty */
     }
 
     @OriginalMember(owner = "client!gu", name = "b", descriptor = "(I)I")
@@ -87,27 +88,27 @@ public class Animator {
     }
 
     @OriginalMember(owner = "client!gu", name = "a", descriptor = "(ILclient!ka;I)V")
-    public final void animate(@OriginalArg(1) Model model, @OriginalArg(2) int arg1) {
-        if (this.animation == null || !this.method9111()) {
+    public final void animate(@OriginalArg(1) Model model, @OriginalArg(2) int rotation) {
+        if (this.animation == null || !this.resolveSequences()) {
             return;
         }
 
-        model.method7487(this.primarySequences.aClass2_Sub2_Sub18_1, this.frameOffset, this.animation.frameDurations[this.currentFrame], this.primarySequences.aClass2_Sub2_Sub18_2, this.primarySequences.anInt6448, this.primarySequences.anInt6450, arg1, this.animation.rotateNormals);
+        model.method7487(this.primarySequences.frameset, this.frameOffset, this.animation.frameDurations[this.currentFrame], this.primarySequences.nextFrameset, this.primarySequences.frame, this.primarySequences.nextFrame, rotation, this.animation.rotateNormals);
 
-        if (this.runSecondary && this.animation.secondaryFrames != null && this.secondarySequences.aBoolean481) {
-            model.method7487(this.secondarySequences.aClass2_Sub2_Sub18_1, this.frameOffset, this.animation.frameDurations[this.currentFrame], this.secondarySequences.aClass2_Sub2_Sub18_2, this.secondarySequences.anInt6448, this.secondarySequences.anInt6450, arg1, this.animation.rotateNormals);
+        if (this.runSecondary && this.animation.secondaryFrames != null && this.secondarySequences.resolved) {
+            model.method7487(this.secondarySequences.frameset, this.frameOffset, this.animation.frameDurations[this.currentFrame], this.secondarySequences.nextFrameset, this.secondarySequences.frame, this.secondarySequences.nextFrame, rotation, this.animation.rotateNormals);
         }
     }
 
     @OriginalMember(owner = "client!gu", name = "a", descriptor = "(BI)Z")
     public final boolean method9090() {
-        @Pc(24) int local24;
-        return this.animation == null | (local24 = 1 - this.delay) <= 0 ? false : this.animation.tweened | this.frameOffset + local24 > this.animation.frameDurations[this.currentFrame];
+        @Pc(24) int remaining;
+        return this.animation == null | (remaining = 1 - this.delay) <= 0 ? false : this.animation.tweened | this.frameOffset + remaining > this.animation.frameDurations[this.currentFrame];
     }
 
     @OriginalMember(owner = "client!gu", name = "b", descriptor = "(II)V")
-    public final void setDelay(@OriginalArg(0) int arg0) {
-        this.delay = arg0;
+    public final void setDelay(@OriginalArg(0) int delay) {
+        this.delay = delay;
     }
 
     @OriginalMember(owner = "client!gu", name = "a", descriptor = "(IIBIZ)V")
@@ -192,15 +193,15 @@ public class Animator {
 
     @OriginalMember(owner = "client!gu", name = "d", descriptor = "(B)I")
     public final int functionMask() {
-        if (!this.method9111()) {
+        if (!this.resolveSequences()) {
             return 0;
         }
 
         @Pc(18) int mask = 0;
-        if (this.method9111()) {
-            mask = this.primarySequences.anInt6452 | 0x0;
+        if (this.resolveSequences()) {
+            mask = this.primarySequences.functionMask | 0x0;
             if (this.runSecondary && this.animation.secondaryFrames != null) {
-                mask |= this.secondarySequences.anInt6452;
+                mask |= this.secondarySequences.functionMask;
             }
         }
         return mask;
@@ -212,19 +213,19 @@ public class Animator {
     }
 
     @OriginalMember(owner = "client!gu", name = "a", descriptor = "(ZII)V")
-    public final void method9104(@OriginalArg(0) boolean arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
-        if (arg2 != 838828768) {
+    public final void method9104(@OriginalArg(0) boolean randomize, @OriginalArg(1) int animationId, @OriginalArg(2) int dummy) {
+        if (dummy != 838828768) {
             this.method9104(true, 51, 15);
         }
-        this.update(arg1, 0, 0, arg0);
+        this.update(animationId, 0, 0, randomize);
     }
 
     @OriginalMember(owner = "client!gu", name = "a", descriptor = "(Lclient!ka;I)V")
     public final void method9105(@OriginalArg(0) Model model) {
-        if (this.method9111()) {
-            model.method7493(this.primarySequences.anInt6448, this.primarySequences.aClass2_Sub2_Sub18_1);
-            if (this.runSecondary && this.animation.secondaryFrames != null && this.secondarySequences.aBoolean481) {
-                model.method7493(this.secondarySequences.anInt6448, this.secondarySequences.aClass2_Sub2_Sub18_1);
+        if (this.resolveSequences()) {
+            model.method7493(this.primarySequences.frame, this.primarySequences.frameset);
+            if (this.runSecondary && this.animation.secondaryFrames != null && this.secondarySequences.resolved) {
+                model.method7493(this.secondarySequences.frame, this.secondarySequences.frameset);
             }
         }
     }
@@ -253,25 +254,25 @@ public class Animator {
     }
 
     @OriginalMember(owner = "client!gu", name = "a", descriptor = "(IIZLclient!ka;)V")
-    public final void animatePartial(@OriginalArg(0) int arg0, @OriginalArg(3) Model arg1) {
-        if (this.method9111()) {
-            arg1.method7496(this.frameOffset, this.primarySequences.aClass2_Sub2_Sub18_1, this.primarySequences.aClass2_Sub2_Sub18_2, this.primarySequences.anInt6448, null, this.animation.frameDurations[this.currentFrame], this.animation.rotateNormals, this.primarySequences.anInt6450, arg0);
-            if (this.runSecondary && this.animation.secondaryFrames != null && this.secondarySequences.aBoolean481) {
-                arg1.method7496(this.frameOffset, this.secondarySequences.aClass2_Sub2_Sub18_1, this.secondarySequences.aClass2_Sub2_Sub18_2, this.secondarySequences.anInt6448, null, this.animation.frameDurations[this.currentFrame], this.animation.rotateNormals, this.secondarySequences.anInt6450, arg0);
+    public final void animatePartial(@OriginalArg(0) int groupMask, @OriginalArg(3) Model model) {
+        if (this.resolveSequences()) {
+            model.method7496(this.frameOffset, this.primarySequences.frameset, this.primarySequences.nextFrameset, this.primarySequences.frame, null, this.animation.frameDurations[this.currentFrame], this.animation.rotateNormals, this.primarySequences.nextFrame, groupMask);
+            if (this.runSecondary && this.animation.secondaryFrames != null && this.secondarySequences.resolved) {
+                model.method7496(this.frameOffset, this.secondarySequences.frameset, this.secondarySequences.nextFrameset, this.secondarySequences.frame, null, this.animation.frameDurations[this.currentFrame], this.animation.rotateNormals, this.secondarySequences.nextFrame, groupMask);
             }
         }
     }
 
     @OriginalMember(owner = "client!gu", name = "a", descriptor = "(I)Z")
-    public final boolean method9111() {
+    public final boolean resolveSequences() {
         if (this.animation == null) {
             return false;
         }
-        @Pc(30) boolean local30 = this.primarySequences.method5769(seqTL, this.animation, this.nextFrame, this.currentFrame, this.animation.frames);
-        if (local30 && this.runSecondary && this.animation.secondaryFrames != null) {
-            this.secondarySequences.method5769(seqTL, this.animation, this.nextFrame, this.currentFrame, this.animation.secondaryFrames);
+        @Pc(30) boolean resolved = this.primarySequences.resolve(seqTL, this.animation, this.nextFrame, this.currentFrame, this.animation.frames);
+        if (resolved && this.runSecondary && this.animation.secondaryFrames != null) {
+            this.secondarySequences.resolve(seqTL, this.animation, this.nextFrame, this.currentFrame, this.animation.secondaryFrames);
         }
-        return local30;
+        return resolved;
     }
 
     @OriginalMember(owner = "client!gu", name = "a", descriptor = "(II)Z")
@@ -295,16 +296,16 @@ public class Animator {
 
         @Pc(68) boolean tween = forceTweening | this.animation.tweened;
         if (time > 100 && this.animation.loopOffset > 0) {
-            @Pc(89) int local89 = this.animation.frames.length - this.animation.loopOffset;
+            @Pc(89) int loopStart = this.animation.frames.length - this.animation.loopOffset;
 
-            while (this.currentFrame < local89 && time > this.animation.frameDurations[this.currentFrame]) {
+            while (this.currentFrame < loopStart && time > this.animation.frameDurations[this.currentFrame]) {
                 time -= this.animation.frameDurations[this.currentFrame];
                 this.currentFrame++;
             }
 
-            if (local89 <= this.currentFrame) {
+            if (loopStart <= this.currentFrame) {
                 @Pc(134) int duration = 0;
-                for (@Pc(136) int i = local89; i < this.animation.frames.length; i++) {
+                for (@Pc(136) int i = loopStart; i < this.animation.frames.length; i++) {
                     duration += this.animation.frameDurations[i];
                 }
 

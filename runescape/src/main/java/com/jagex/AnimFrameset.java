@@ -45,7 +45,7 @@ public final class AnimFrameset extends Node2 {
         }
 
         if (this.frameData == null) {
-            @Pc(14) js5 local14 = anims;
+            @Pc(14) js5 animsLock = anims;
             synchronized (anims) {
                 if (!anims.requestgroupdownload(this.id)) {
                     return false;
@@ -65,7 +65,7 @@ public final class AnimFrameset extends Node2 {
             @Pc(82) Packet packet = new Packet(data);
             packet.pos = 1;
             @Pc(43) int id = packet.g2();
-            @Pc(91) js5 local91 = bases;
+            @Pc(91) js5 basesLock = bases;
             synchronized (bases) {
                 loaded &= bases.fileready(id);
             }
@@ -76,7 +76,7 @@ public final class AnimFrameset extends Node2 {
         }
 
         @Pc(123) Deque bases = new Deque();
-        @Pc(125) js5 local125 = anims;
+        @Pc(125) js5 animsLock = anims;
         @Pc(36) int[] fileIds;
         synchronized (anims) {
             @Pc(133) int count = anims.fileLimit(this.id);
@@ -99,7 +99,7 @@ public final class AnimFrameset extends Node2 {
             }
 
             if (base == null) {
-                @Pc(209) js5 local209 = AnimFrameset.bases;
+                @Pc(209) js5 basesLock = AnimFrameset.bases;
                 synchronized (AnimFrameset.bases) {
                     base = new AnimBase(baseId, AnimFrameset.bases.getfile(baseId));
                 }
@@ -114,17 +114,17 @@ public final class AnimFrameset extends Node2 {
     }
 
     @OriginalMember(owner = "client!rw", name = "a", descriptor = "(BI)Z")
-    public boolean method7568(@OriginalArg(1) int arg0) {
-        return this.frames[arg0].aBoolean470;
+    public boolean hasAlphaTransform(@OriginalArg(1) int frame) {
+        return this.frames[frame].hasAlphaTransform;
     }
 
     @OriginalMember(owner = "client!rw", name = "c", descriptor = "(II)Z")
-    public boolean method7569(@OriginalArg(1) int arg0) {
-        return this.frames[arg0].aBoolean471;
+    public boolean hasBillboardTransform(@OriginalArg(1) int frame) {
+        return this.frames[frame].hasBillboardTransform;
     }
 
     @OriginalMember(owner = "client!rw", name = "b", descriptor = "(II)Z")
-    public boolean method7570(@OriginalArg(0) int arg0) {
-        return this.frames[arg0].aBoolean469;
+    public boolean hasColourTransform(@OriginalArg(0) int frame) {
+        return this.frames[frame].hasColourTransform;
     }
 }
