@@ -14,17 +14,17 @@ public final class Static712 {
 
     @OriginalMember(owner = "client!wj", name = "a", descriptor = "()V")
     public static void method9323() {
-        for (@Pc(1) int local1 = 0; local1 < Static125.dynamicEntityCount; local1++) {
-            @Pc(6) PositionEntity local6 = Static679.aPositionEntity[local1];
-            Static549.method8293(local6, true);
-            Static679.aPositionEntity[local1] = null;
+        for (@Pc(1) int i = 0; i < Static125.dynamicEntityCount; i++) {
+            @Pc(6) PositionEntity entity = Static679.aPositionEntity[i];
+            Static549.method8293(entity, true);
+            Static679.aPositionEntity[i] = null;
         }
         Static125.dynamicEntityCount = 0;
     }
 
     @OriginalMember(owner = "client!wj", name = "k", descriptor = "(B)V")
     public static void method9329(@OriginalArg(0) byte arg0) {
-        @Pc(7) client local7 = client.aClient1;
+        @Pc(7) client lock = client.aClient1;
         synchronized (client.aClient1) {
             if (GameShell.fsframe != null) {
                 return;

@@ -27,15 +27,15 @@ public final class Static256 {
         }
 
         if (entity.actionAnimator.isAnimating() && !entity.actionAnimator.isDelayed()) {
-            @Pc(41) SeqType local41 = entity.actionAnimator.getAnimation();
-            if (entity.animationPathPointer > 0 && local41.animatingPrecedence == 0) {
+            @Pc(41) SeqType seq = entity.actionAnimator.getAnimation();
+            if (entity.animationPathPointer > 0 && seq.animatingPrecedence == 0) {
                 Static524.entityMoveFlags = 0;
                 Static521.entityMoveSpeed = MoveSpeed.STATIONARY;
                 entity.delayedWalkingTicks++;
                 return;
             }
 
-            if (entity.animationPathPointer <= 0 && local41.walkingPrecedence == 0) {
+            if (entity.animationPathPointer <= 0 && seq.walkingPrecedence == 0) {
                 Static521.entityMoveSpeed = MoveSpeed.STATIONARY;
                 entity.delayedWalkingTicks++;
                 Static524.entityMoveFlags = 0;
@@ -51,15 +51,15 @@ public final class Static256 {
             @Pc(117) SpotAnimationType type = SpotAnimationTypeList.instance.list(entity.spotAnims[i].id);
 
             if (type.loopSeq && type.seq != -1) {
-                @Pc(133) SeqType local133 = SeqTypeList.instance.list(type.seq);
-                if (entity.animationPathPointer > 0 && local133.animatingPrecedence == 0) {
+                @Pc(133) SeqType spotSeq = SeqTypeList.instance.list(type.seq);
+                if (entity.animationPathPointer > 0 && spotSeq.animatingPrecedence == 0) {
                     Static521.entityMoveSpeed = MoveSpeed.STATIONARY;
                     entity.delayedWalkingTicks++;
                     Static524.entityMoveFlags = 0;
                     return;
                 }
 
-                if (entity.animationPathPointer <= 0 && local133.walkingPrecedence == 0) {
+                if (entity.animationPathPointer <= 0 && spotSeq.walkingPrecedence == 0) {
                     Static521.entityMoveSpeed = MoveSpeed.STATIONARY;
                     entity.delayedWalkingTicks++;
                     Static524.entityMoveFlags = 0;
@@ -251,7 +251,7 @@ public final class Static256 {
     }
 
     @OriginalMember(owner = "client!hu", name = "a", descriptor = "(Lclient!da;Ljava/lang/String;Lclient!ve;IIIZLclient!hda;Lclient!aa;III)V")
-    public static void method3639(@OriginalArg(0) Font font, @OriginalArg(1) String text, @OriginalArg(2) FontMetrics metrics, @OriginalArg(3) int offsetX, @OriginalArg(4) int colour, @OriginalArg(5) int height, @OriginalArg(7) Component component, @OriginalArg(8) ClippingMask arg7, @OriginalArg(9) int arg8, @OriginalArg(10) int offsetY, @OriginalArg(11) int arg10) {
+    public static void drawMapElementText(@OriginalArg(0) Font font, @OriginalArg(1) String text, @OriginalArg(2) FontMetrics metrics, @OriginalArg(3) int offsetX, @OriginalArg(4) int colour, @OriginalArg(5) int height, @OriginalArg(7) Component component, @OriginalArg(8) ClippingMask mask, @OriginalArg(9) int drawY, @OriginalArg(10) int offsetY, @OriginalArg(11) int drawX) {
         @Pc(11) int yaw;
         if (Camera.mode == CameraMode.MODE_FOLLOWCOORD) {
             yaw = (int) Camera.playerCameraYaw & 0x3FFF;
@@ -259,26 +259,26 @@ public final class Static256 {
             yaw = (int) Camera.playerCameraYaw + Camera.yawOffset & 0x3FFF;
         }
 
-        @Pc(33) int local33 = Math.max(component.width / 2, component.height / 2) + 10;
-        @Pc(59) int local59 = (arg8 * arg8) + (arg10 * arg10);
-        if ((local33 * local33) < local59) {
+        @Pc(33) int radius = Math.max(component.width / 2, component.height / 2) + 10;
+        @Pc(59) int distanceSquared = (drawY * drawY) + (drawX * drawX);
+        if ((radius * radius) < distanceSquared) {
             return;
         }
 
-        @Pc(74) int local74 = Trig1.SIN[yaw];
-        @Pc(78) int local78 = Trig1.COS[yaw];
+        @Pc(74) int sin = Trig1.SIN[yaw];
+        @Pc(78) int cos = Trig1.COS[yaw];
         if (Camera.mode != CameraMode.MODE_FOLLOWCOORD) {
-            local74 = (local74 * 256) / (Camera.scaleOffset + 256);
-            local78 = (local78 * 256) / (Camera.scaleOffset + 256);
+            sin = (sin * 256) / (Camera.scaleOffset + 256);
+            cos = (cos * 256) / (Camera.scaleOffset + 256);
         }
 
-        @Pc(107) int local107 = ((local78 * arg10) + (arg8 * local74)) >> 14;
-        @Pc(118) int local118 = ((local78 * arg8) - (arg10 * local74)) >> 14;
+        @Pc(107) int rotatedX = ((cos * drawX) + (drawY * sin)) >> 14;
+        @Pc(118) int rotatedZ = ((cos * drawY) - (drawX * sin)) >> 14;
         @Pc(125) int paraWidth = metrics.paraWidth(null, text, 100);
-        @Pc(131) int centerX = local107 - paraWidth / 2;
+        @Pc(131) int textX = rotatedX - paraWidth / 2;
         @Pc(139) int textHeight = metrics.stringHeight(100, 0, text, null);
-        if (centerX >= -component.width && component.width >= centerX && local118 >= -component.height && component.height >= local118) {
-            font.renderLines(text, (component.width / 2) + centerX + offsetX, ((component.height / 2) + offsetY) - local118 - height - textHeight, offsetX, offsetY, paraWidth, 50, 1, 0, 0, colour, 0, arg7, null, null);
+        if (textX >= -component.width && component.width >= textX && rotatedZ >= -component.height && component.height >= rotatedZ) {
+            font.renderLines(text, (component.width / 2) + textX + offsetX, ((component.height / 2) + offsetY) - rotatedZ - height - textHeight, offsetX, offsetY, paraWidth, 50, 1, 0, 0, colour, 0, mask, null, null);
         }
     }
 }

@@ -469,8 +469,8 @@ public final class Minimap {
             }
 
             if (elementType.anInt2603 > 0) {
-                @Pc(250) int maxX;
-                @Pc(252) int maxY;
+                @Pc(250) int swapX;
+                @Pc(252) int swapY;
 
                 for (@Pc(62) int i = 0; i < polygon.length / 2 - 1; i++) {
                     @Pc(66) int x1 = polygon[i * 2];
@@ -480,16 +480,16 @@ public final class Minimap {
                     @Pc(241) int y2 = polygon[(i * 2) + 2 + 1];
 
                     if (x1 > x2) {
-                        maxX = x1;
-                        maxY = y1;
+                        swapX = x1;
+                        swapY = y1;
                         x1 = x2;
-                        x2 = maxX;
+                        x2 = swapX;
                         y1 = y2;
-                        y2 = maxY;
+                        y2 = swapY;
                     } else if (x1 == x2 && y1 > y2) {
-                        maxX = y1;
+                        swapY = y1;
                         y1 = y2;
-                        y2 = maxX;
+                        y2 = swapY;
                     }
 
                     toolkit.method7942(x1, y1, x2, y2, elementType.landmarkPalette[elementType.landmarkColorIndices[i] & 0xFF], 1, mask, screenX, screenY, elementType.anInt2603, elementType.anInt2587, elementType.anInt2607);
@@ -502,16 +502,16 @@ public final class Minimap {
                 @Pc(241) int y2 = polygon[1];
 
                 if (x2 < x1) {
-                    maxX = x1;
-                    maxY = y1;
+                    swapX = x1;
+                    swapY = y1;
                     x1 = x2;
-                    x2 = maxX;
+                    x2 = swapX;
                     y1 = y2;
-                    y2 = maxY;
+                    y2 = swapY;
                 } else if (x1 == x2 && y1 > y2) {
-                    maxX = y1;
+                    swapY = y1;
                     y1 = y2;
-                    y2 = maxX;
+                    y2 = swapY;
                 }
 
                 toolkit.method7942(x1, y1, x2, y2, elementType.landmarkPalette[elementType.landmarkColorIndices[elementType.landmarkColorIndices.length - 1] & 0xFF], 1, mask, screenX, screenY, elementType.anInt2603, elementType.anInt2587, elementType.anInt2607);
@@ -550,7 +550,7 @@ public final class Minimap {
                 font = Fonts.b12;
             }
 
-            Static256.method3639(font, elementType.text, metrics, screenX, elementType.textColour, height, component, mask, drawY, screenY, drawX);
+            Static256.drawMapElementText(font, elementType.text, metrics, screenX, elementType.textColour, height, component, mask, drawY, screenY, drawX);
         }
     }
 

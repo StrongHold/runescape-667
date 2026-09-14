@@ -88,10 +88,10 @@ public final class LoadingScreenRenderer implements Runnable {
         if (this.state == null) {
             return 0;
         }
-        @Pc(22) int local22 = this.state.getStep();
+        @Pc(22) int step = this.state.getStep();
         if (this.state.updatePercentage && this.state.endPercentage > this.percentage) {
             return this.percentage + 1;
-        } else if (local22 >= 0 && local22 < Loading.states.length - 1) {
+        } else if (step >= 0 && step < Loading.states.length - 1) {
             return this.percentage == this.state.startPercentage ? this.state.endPercentage : this.state.startPercentage;
         } else {
             return 100;
@@ -99,7 +99,7 @@ public final class LoadingScreenRenderer implements Runnable {
     }
 
     @OriginalMember(owner = "client!uaa", name = "a", descriptor = "(I)Z")
-    public synchronized boolean method8376() {
+    public synchronized boolean canChangeScreen() {
         return this.currentScreen.method8463(this.transitionStart);
     }
 
@@ -145,11 +145,11 @@ public final class LoadingScreenRenderer implements Runnable {
 
                             this.currentScreen.render(this.fullRepaint || Toolkit.active != null && Toolkit.active.method8001());
                         } else {
-                            @Pc(72) int colour = (int) ((now - this.transitionStart) * 255L / (long) this.lastScreen.getFadeDuration());
-                            @Pc(77) int prevColour = 255 - colour;
+                            @Pc(72) int alpha = (int) ((now - this.transitionStart) * 255L / (long) this.lastScreen.getFadeDuration());
+                            @Pc(77) int previousAlpha = 255 - alpha;
                             Static288.repaintMargins();
-                            @Pc(85) int prevColourOrWhite = (prevColour << 24) | 0xFFFFFF;
-                            @Pc(91) int colourOrWhite = (colour << 24) | 0xFFFFFF;
+                            @Pc(85) int previousTint = (previousAlpha << 24) | 0xFFFFFF;
+                            @Pc(91) int tint = (alpha << 24) | 0xFFFFFF;
                             Toolkit.active.GA(0x0);
 
                             @Pc(100) Sprite sprite = Toolkit.active.createSprite(GameShell.canvasWid, GameShell.canvasHei, true);
@@ -158,21 +158,21 @@ public final class LoadingScreenRenderer implements Runnable {
                             this.lastScreen.render(true);
 
                             Toolkit.active.restoreSurface();
-                            sprite.render(0, 0, 0, prevColourOrWhite, 1);
+                            sprite.render(0, 0, 0, previousTint, 1);
 
                             Toolkit.active.method8002(sprite);
                             Toolkit.active.GA(0x0);
                             this.currentScreen.render(true);
 
                             Toolkit.active.restoreSurface();
-                            sprite.render(0, 0, 0, colourOrWhite, 1);
+                            sprite.render(0, 0, 0, tint, 1);
                         }
                         try {
                             if (Toolkit.active != null && !(this.currentScreen instanceof AwtLoadingScreen)) {
                                 Toolkit.active.flip();
                             }
-                        } catch (@Pc(205) FlipException local205) {
-                            JagException.sendTrace(local205, local205.getMessage() + " (Recovered) " + client.aClient1.getErrorTrace());
+                        } catch (@Pc(205) FlipException ex) {
+                            JagException.sendTrace(ex, ex.getMessage() + " (Recovered) " + client.aClient1.getErrorTrace());
                             Static32.setToolkit(ToolkitType.JAVA, true);
                         }
                     }
@@ -198,7 +198,7 @@ public final class LoadingScreenRenderer implements Runnable {
                     if (Toolkit.active != null && !(this.currentScreen instanceof AwtLoadingScreen) && this.state.getStep() < LoadState.SHOW_LOGIN_WINDOW.getStep()) {
                         Static712.method9329((byte) 11);
                     }
-                } catch (@Pc(292) Exception local292) {
+                } catch (@Pc(292) Exception ignored) {
                     continue;
                 }
             }
