@@ -41,11 +41,11 @@ public final class Texture extends Node2 {
     public Texture() {
         this.spriteIds = new int[0];
         this.textureIds = new int[0];
-        this.hdrOp = new Node_Sub1_Sub17(0);
+        this.hdrOp = new TextureOpConstant(0);
         this.hdrOp.cacheSize = 1;
-        this.colourOp = new Node_Sub1_Sub17();
+        this.colourOp = new TextureOpConstant();
         this.colourOp.cacheSize = 1;
-        this.alphaOp = new Node_Sub1_Sub17();
+        this.alphaOp = new TextureOpConstant();
         this.alphaOp.cacheSize = 1;
         this.ops = new TextureOp[]{this.colourOp, this.alphaOp, this.hdrOp};
     }

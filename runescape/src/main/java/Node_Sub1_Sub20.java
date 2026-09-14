@@ -7,29 +7,33 @@ import org.openrs2.deob.annotation.OriginalClass;
 import org.openrs2.deob.annotation.OriginalMember;
 import org.openrs2.deob.annotation.Pc;
 
+/**
+ * Generates two crossing families of diagonal bands, each band pinched into a repeating chain of
+ * lens shapes by a cosine that varies its width along its length.
+ */
 @OriginalClass("client!nla")
 public final class Node_Sub1_Sub20 extends TextureOp {
 
     @OriginalMember(owner = "client!nla", name = "K", descriptor = "I")
-    public int anInt6570 = 4096;
+    public int thickness = 4096;
 
     @OriginalMember(owner = "client!nla", name = "R", descriptor = "I")
-    public int anInt6573 = 12288;
+    public int frequency = 12288;
 
     @OriginalMember(owner = "client!nla", name = "I", descriptor = "I")
-    public int anInt6566 = 8192;
+    public int widthScale = 8192;
 
     @OriginalMember(owner = "client!nla", name = "O", descriptor = "I")
-    public int anInt6574 = 0;
+    public int secondOffsetX = 0;
 
     @OriginalMember(owner = "client!nla", name = "S", descriptor = "I")
-    public int anInt6577 = 2048;
+    public int secondOffsetY = 2048;
 
     @OriginalMember(owner = "client!nla", name = "N", descriptor = "I")
-    public int anInt6578 = 2048;
+    public int firstOffsetX = 2048;
 
     @OriginalMember(owner = "client!nla", name = "W", descriptor = "I")
-    public int anInt6580 = 0;
+    public int firstOffsetY = 0;
 
     @OriginalMember(owner = "client!nla", name = "<init>", descriptor = "()V")
     public Node_Sub1_Sub20() {
@@ -43,19 +47,19 @@ public final class Node_Sub1_Sub20 extends TextureOp {
             OrthoMode.cachedViewportWidth = -73;
         }
         if (arg2 == 0) {
-            this.anInt6578 = arg1.g2();
+            this.firstOffsetX = arg1.g2();
         } else if (arg2 == 1) {
-            this.anInt6580 = arg1.g2();
+            this.firstOffsetY = arg1.g2();
         } else if (arg2 == 2) {
-            this.anInt6574 = arg1.g2();
+            this.secondOffsetX = arg1.g2();
         } else if (arg2 == 3) {
-            this.anInt6577 = arg1.g2();
+            this.secondOffsetY = arg1.g2();
         } else if (arg2 == 4) {
-            this.anInt6573 = arg1.g2();
+            this.frequency = arg1.g2();
         } else if (arg2 == 5) {
-            this.anInt6570 = arg1.g2();
+            this.thickness = arg1.g2();
         } else if (arg2 == 6) {
-            this.anInt6566 = arg1.g2();
+            this.widthScale = arg1.g2();
         }
     }
 
@@ -66,51 +70,51 @@ public final class Node_Sub1_Sub20 extends TextureOp {
     }
 
     @OriginalMember(owner = "client!nla", name = "c", descriptor = "(III)Z")
-    public boolean method5851(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) {
-        @Pc(13) int local13 = (arg0 - arg1) * this.anInt6573 >> 12;
-        @Pc(33) int local33 = Static24.anIntArray33[local13 * 255 >> 12 & 0xFF];
-        @Pc(40) int local40 = (local33 << 12) / this.anInt6573;
-        @Pc(47) int local47 = (local40 << 12) / this.anInt6566;
-        @Pc(54) int local54 = this.anInt6570 * local47 >> 12;
-        return arg0 + arg1 < local54 && -local54 < arg1 + arg0;
+    public boolean inFirstBand(@OriginalArg(0) int y, @OriginalArg(1) int x) {
+        @Pc(13) int phase = (y - x) * this.frequency >> 12;
+        @Pc(33) int wave = Static24.anIntArray33[phase * 255 >> 12 & 0xFF];
+        @Pc(40) int amplitude = (wave << 12) / this.frequency;
+        @Pc(47) int scaledAmplitude = (amplitude << 12) / this.widthScale;
+        @Pc(54) int halfWidth = this.thickness * scaledAmplitude >> 12;
+        return y + x < halfWidth && -halfWidth < x + y;
     }
 
     @OriginalMember(owner = "client!nla", name = "a", descriptor = "(II)[I")
     @Override
-    public int[] monochromeOutput(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) {
+    public int[] monochromeOutput(@OriginalArg(0) int arg0, @OriginalArg(1) int y) {
         if (arg0 < 107) {
             return null;
         }
-        @Pc(17) int[] local17 = super.monochromeCache.get(arg1);
+        @Pc(17) int[] output = super.monochromeCache.get(y);
         if (super.monochromeCache.dirty) {
-            @Pc(27) int local27 = MonochromeImageCache.anIntArray341[arg1] - 2048;
-            for (@Pc(29) int local29 = 0; local29 < EnvironmentLight.anInt9289; local29++) {
-                @Pc(37) int local37 = EnvironmentLight.anIntArray92[local29] - 2048;
-                @Pc(42) int local42 = this.anInt6578 + local37;
-                @Pc(52) int local52 = local42 < -2048 ? local42 + 4096 : local42;
-                @Pc(64) int local64 = local52 > 2048 ? local52 - 4096 : local52;
-                @Pc(69) int local69 = this.anInt6580 + local27;
-                @Pc(81) int local81 = local69 >= -2048 ? local69 : local69 + 4096;
-                @Pc(91) int local91 = local81 <= 2048 ? local81 : local81 - 4096;
-                @Pc(96) int local96 = this.anInt6574 + local37;
-                @Pc(108) int local108 = local96 < -2048 ? local96 + 4096 : local96;
-                @Pc(120) int local120 = local108 > 2048 ? local108 - 4096 : local108;
-                @Pc(126) int local126 = local27 + this.anInt6577;
-                @Pc(136) int local136 = local126 < -2048 ? local126 + 4096 : local126;
-                @Pc(146) int local146 = local136 <= 2048 ? local136 : local136 - 4096;
-                local17[local29] = this.method5851(local91, local64) || this.method5852(local120, local146) ? 4096 : 0;
+            @Pc(27) int centreOffsetY = MonochromeImageCache.anIntArray341[y] - 2048;
+            for (@Pc(29) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+                @Pc(37) int centreOffsetX = EnvironmentLight.anIntArray92[x] - 2048;
+                @Pc(42) int firstSumX = this.firstOffsetX + centreOffsetX;
+                @Pc(52) int firstWrapX = firstSumX < -2048 ? firstSumX + 4096 : firstSumX;
+                @Pc(64) int firstX = firstWrapX > 2048 ? firstWrapX - 4096 : firstWrapX;
+                @Pc(69) int firstSumY = this.firstOffsetY + centreOffsetY;
+                @Pc(81) int firstWrapY = firstSumY >= -2048 ? firstSumY : firstSumY + 4096;
+                @Pc(91) int firstY = firstWrapY <= 2048 ? firstWrapY : firstWrapY - 4096;
+                @Pc(96) int secondSumX = this.secondOffsetX + centreOffsetX;
+                @Pc(108) int secondWrapX = secondSumX < -2048 ? secondSumX + 4096 : secondSumX;
+                @Pc(120) int secondX = secondWrapX > 2048 ? secondWrapX - 4096 : secondWrapX;
+                @Pc(126) int secondSumY = centreOffsetY + this.secondOffsetY;
+                @Pc(136) int secondWrapY = secondSumY < -2048 ? secondSumY + 4096 : secondSumY;
+                @Pc(146) int secondY = secondWrapY <= 2048 ? secondWrapY : secondWrapY - 4096;
+                output[x] = this.inFirstBand(firstY, firstX) || this.inSecondBand(secondX, secondY) ? 4096 : 0;
             }
         }
-        return local17;
+        return output;
     }
 
     @OriginalMember(owner = "client!nla", name = "d", descriptor = "(III)Z")
-    public boolean method5852(@OriginalArg(1) int arg0, @OriginalArg(2) int arg1) {
-        @Pc(18) int local18 = this.anInt6573 * (arg0 + arg1) >> 12;
-        @Pc(28) int local28 = Static24.anIntArray33[local18 * 255 >> 12 & 0xFF];
-        @Pc(35) int local35 = (local28 << 12) / this.anInt6573;
-        @Pc(42) int local42 = (local35 << 12) / this.anInt6566;
-        @Pc(49) int local49 = local42 * this.anInt6570 >> 12;
-        return arg1 - arg0 < local49 && -local49 < arg1 - arg0;
+    public boolean inSecondBand(@OriginalArg(1) int x, @OriginalArg(2) int y) {
+        @Pc(18) int phase = this.frequency * (x + y) >> 12;
+        @Pc(28) int wave = Static24.anIntArray33[phase * 255 >> 12 & 0xFF];
+        @Pc(35) int amplitude = (wave << 12) / this.frequency;
+        @Pc(42) int scaledAmplitude = (amplitude << 12) / this.widthScale;
+        @Pc(49) int halfWidth = scaledAmplitude * this.thickness >> 12;
+        return y - x < halfWidth && -halfWidth < y - x;
     }
 }
