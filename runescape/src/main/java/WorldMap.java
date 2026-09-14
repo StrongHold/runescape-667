@@ -895,116 +895,104 @@ public final class WorldMap {
         if (viewZ2 < areaHeight) {
             tileCountZ++;
         }
-        @Pc(28) int local28;
-        @Pc(40) int local40;
-        @Pc(44) int local44;
-        @Pc(50) int local50;
-        @Pc(57) int local57;
-        @Pc(70) int local70;
-        @Pc(80) int local80;
-        @Pc(84) int local84;
-        @Pc(93) int local93;
-        @Pc(173) int local173;
-        @Pc(175) int local175;
-        @Pc(177) int local177;
-        @Pc(179) int local179;
         for (@Pc(17) int column = 0; column < tileCountX; column++) {
-            local28 = (scaleX * column >> 16) + screenX1;
-            local40 = (scaleX * (column + 1) >> 16) + screenX1;
-            local44 = local40 - local28;
-            if (local44 > 0) {
-                local50 = viewX1 + column;
-                if (local50 >= 0 && local50 < areaWidth) {
-                    for (local57 = 0; local57 < tileCountZ; local57++) {
-                        local70 = screenY2 - (scaleZ * (local57 + 1) >> 16);
-                        local80 = screenY2 - (scaleZ * local57 >> 16);
-                        local84 = local80 - local70;
-                        if (local84 > 0) {
-                            local93 = local57 + viewZ1;
-                            local173 = local50 + local93 * areaWidth;
-                            local175 = 0;
-                            local177 = 0;
-                            local179 = 0;
-                            if (local93 >= 0 && local93 < areaHeight) {
-                                local175 = (underlayColoursHigh[local173] & 0xFF) << 16 | underlayColoursLow[local173] & 0xFFFF;
-                                if (local175 != 0) {
-                                    local175 |= 0xFF000000;
+            @Pc(28) int left = (scaleX * column >> 16) + screenX1;
+            @Pc(40) int right = (scaleX * (column + 1) >> 16) + screenX1;
+            @Pc(44) int width = right - left;
+            if (width > 0) {
+                @Pc(50) int tileX = viewX1 + column;
+                if (tileX >= 0 && tileX < areaWidth) {
+                    for (@Pc(57) int row = 0; row < tileCountZ; row++) {
+                        @Pc(70) int top = screenY2 - (scaleZ * (row + 1) >> 16);
+                        @Pc(80) int bottom = screenY2 - (scaleZ * row >> 16);
+                        @Pc(84) int height = bottom - top;
+                        if (height > 0) {
+                            @Pc(93) int tileZ = row + viewZ1;
+                            @Pc(173) int tileIndex = tileX + tileZ * areaWidth;
+                            @Pc(175) int underlayColour = 0;
+                            @Pc(177) int overlay = 0;
+                            @Pc(179) int locId = 0;
+                            if (tileZ >= 0 && tileZ < areaHeight) {
+                                underlayColour = (underlayColoursHigh[tileIndex] & 0xFF) << 16 | underlayColoursLow[tileIndex] & 0xFFFF;
+                                if (underlayColour != 0) {
+                                    underlayColour |= 0xFF000000;
                                 }
-                                local177 = overlays[local173] & 0xFF;
-                                local179 = tileLocIds[local173] & 0xFFFF;
+                                overlay = overlays[tileIndex] & 0xFF;
+                                locId = tileLocIds[tileIndex] & 0xFFFF;
                             }
-                            if (local175 == 0 && local177 == 0 && local179 == 0) {
+                            if (underlayColour == 0 && overlay == 0 && locId == 0) {
                                 if (area.anInt4561 != -1) {
-                                    local175 = area.anInt4561 | 0xFF000000;
-                                } else if ((column + viewX1 & 0x4) == (local57 + viewZ2 & 0x4)) {
-                                    local175 = overlayColours[floorOverlayTypeList.dflt + 1];
+                                    underlayColour = area.anInt4561 | 0xFF000000;
+                                } else if ((column + viewX1 & 0x4) == (row + viewZ2 & 0x4)) {
+                                    underlayColour = overlayColours[floorOverlayTypeList.dflt + 1];
                                 } else {
-                                    local175 = 0xFF4B5368;
+                                    underlayColour = 0xFF4B5368;
                                 }
-                                if (local175 == 0) {
-                                    local175 = 0xFF000000;
+                                if (underlayColour == 0) {
+                                    underlayColour = 0xFF000000;
                                 }
-                                toolkit.aa(local28, local70, local44, local84, local175, 0);
-                            } else if (local179 <= 0) {
-                                drawTile(toolkit, local28, local70, local44, local84, local175, local177, overlayShapes[local173], null, null, true);
-                            } else if (local179 == 65535) {
-                                @Pc(282) Node_Sub23 locList = (Node_Sub23) multiLocs.get(local50 << 16 | local93);
+                                toolkit.aa(left, top, width, height, underlayColour, 0);
+                            } else if (locId <= 0) {
+                                drawTile(toolkit, left, top, width, height, underlayColour, overlay, overlayShapes[tileIndex], null, null, true);
+                            } else if (locId == 65535) {
+                                @Pc(282) Node_Sub23 locList = (Node_Sub23) multiLocs.get(tileX << 16 | tileZ);
                                 if (locList != null) {
-                                    drawTile(toolkit, local28, local70, local44, local84, local175, local177, overlayShapes[local173], locList.aShortArray59, locList.aByteArray38, true);
+                                    drawTile(toolkit, left, top, width, height, underlayColour, overlay, overlayShapes[tileIndex], locList.aShortArray59, locList.aByteArray38, true);
                                 }
                             } else {
-                                singleLocIds[0] = (short) (local179 - 1);
-                                singleLocShapes[0] = tileLocShapes[local173];
-                                drawTile(toolkit, local28, local70, local44, local84, local175, local177, overlayShapes[local173], singleLocIds, singleLocShapes, true);
+                                singleLocIds[0] = (short) (locId - 1);
+                                singleLocShapes[0] = tileLocShapes[tileIndex];
+                                drawTile(toolkit, left, top, width, height, underlayColour, overlay, overlayShapes[tileIndex], singleLocIds, singleLocShapes, true);
                             }
                         }
                     }
                 } else {
-                    for (local57 = 0; local57 < tileCountZ; local57++) {
-                        local70 = screenY2 - (scaleZ * (local57 + 1) >> 16);
-                        local80 = screenY2 - (scaleZ * local57 >> 16);
-                        local84 = local80 - local70;
+                    for (int row = 0; row < tileCountZ; row++) {
+                        int top = screenY2 - (scaleZ * (row + 1) >> 16);
+                        int bottom = screenY2 - (scaleZ * row >> 16);
+                        int height = bottom - top;
+                        int colour;
                         if (area.anInt4561 != -1) {
-                            local93 = area.anInt4561 | 0xFF000000;
-                        } else if ((column + viewX1 & 0x4) == (local57 + viewZ2 & 0x4)) {
-                            local93 = overlayColours[floorOverlayTypeList.dflt + 1];
+                            colour = area.anInt4561 | 0xFF000000;
+                        } else if ((column + viewX1 & 0x4) == (row + viewZ2 & 0x4)) {
+                            colour = overlayColours[floorOverlayTypeList.dflt + 1];
                         } else {
-                            local93 = -11840664;
+                            colour = -11840664;
                         }
-                        if (local93 == 0) {
-                            local93 = -16777216;
+                        if (colour == 0) {
+                            colour = -16777216;
                         }
-                        toolkit.aa(local28, local70, local44, local84, local93, 0);
+                        toolkit.aa(left, top, width, height, colour, 0);
                     }
                 }
             }
         }
-        for (local28 = -16; local28 < tileCountX + 16; local28++) {
-            local40 = (scaleX * local28 >> 16) + screenX1;
-            local44 = (scaleX * (local28 + 1) >> 16) + screenX1;
-            local50 = local44 - local40;
-            if (local50 > 0) {
-                local57 = local28 + viewX1;
-                if (local57 >= 0 && local57 < areaWidth) {
-                    for (local70 = -16; local70 < tileCountZ + 16; local70++) {
-                        local80 = screenY2 - (scaleZ * (local70 + 1) >> 16);
-                        local84 = screenY2 - (scaleZ * local70 >> 16);
-                        local93 = local84 - local80;
-                        if (local93 > 0) {
-                            local173 = local70 + viewZ1;
-                            if (local173 >= 0 && local173 < areaHeight) {
-                                local175 = tileLocIds[local57 + local173 * areaWidth] & 0xFFFF;
-                                if (local175 <= 0) {
-                                    drawMsiMultiple(toolkit, local40, local80, local50, local93, null, null);
-                                } else if (local175 == 65535) {
-                                    @Pc(459) Node_Sub23 locList = (Node_Sub23) multiLocs.get(local57 << 16 | local173);
+        for (int column = -16; column < tileCountX + 16; column++) {
+            int left = (scaleX * column >> 16) + screenX1;
+            int right = (scaleX * (column + 1) >> 16) + screenX1;
+            int width = right - left;
+            if (width > 0) {
+                int tileX = column + viewX1;
+                if (tileX >= 0 && tileX < areaWidth) {
+                    for (int row = -16; row < tileCountZ + 16; row++) {
+                        int top = screenY2 - (scaleZ * (row + 1) >> 16);
+                        int bottom = screenY2 - (scaleZ * row >> 16);
+                        int height = bottom - top;
+                        if (height > 0) {
+                            int tileZ = row + viewZ1;
+                            if (tileZ >= 0 && tileZ < areaHeight) {
+                                int locId = tileLocIds[tileX + tileZ * areaWidth] & 0xFFFF;
+                                if (locId <= 0) {
+                                    drawMsiMultiple(toolkit, left, top, width, height, null, null);
+                                } else if (locId == 65535) {
+                                    @Pc(459) Node_Sub23 locList = (Node_Sub23) multiLocs.get(tileX << 16 | tileZ);
                                     if (locList != null) {
-                                        drawMsiMultiple(toolkit, local40, local80, local50, local93, locList.aShortArray59, locList.aByteArray38);
+                                        drawMsiMultiple(toolkit, left, top, width, height, locList.aShortArray59, locList.aByteArray38);
                                     }
                                 } else {
-                                    singleLocIds[0] = (short) (local175 - 1);
-                                    singleLocShapes[0] = tileLocShapes[local57 + local173 * areaWidth];
-                                    drawMsiMultiple(toolkit, local40, local80, local50, local93, singleLocIds, singleLocShapes);
+                                    singleLocIds[0] = (short) (locId - 1);
+                                    singleLocShapes[0] = tileLocShapes[tileX + tileZ * areaWidth];
+                                    drawMsiMultiple(toolkit, left, top, width, height, singleLocIds, singleLocShapes);
                                 }
                             }
                         }
@@ -1012,60 +1000,55 @@ public final class WorldMap {
                 }
             }
         }
-        local40 = viewX1 >> 6;
-        local44 = viewZ1 >> 6;
-        if (local40 < 0) {
-            local40 = 0;
+        int chunkX1 = viewX1 >> 6;
+        int chunkZ1 = viewZ1 >> 6;
+        if (chunkX1 < 0) {
+            chunkX1 = 0;
         }
-        if (local44 < 0) {
-            local44 = 0;
+        if (chunkZ1 < 0) {
+            chunkZ1 = 0;
         }
-        local50 = viewX2 >> 6;
-        local57 = viewZ2 >> 6;
-        if (local50 >= tiles[0].length) {
-            local50 = tiles[0].length - 1;
+        int chunkX2 = viewX2 >> 6;
+        int chunkZ2 = viewZ2 >> 6;
+        if (chunkX2 >= tiles[0].length) {
+            chunkX2 = tiles[0].length - 1;
         }
-        if (local57 >= tiles[0][0].length) {
-            local57 = tiles[0][0].length - 1;
+        if (chunkZ2 >= tiles[0][0].length) {
+            chunkZ2 = tiles[0][0].length - 1;
         }
-        for (local70 = 0; local70 < 3; local70++) {
-            @Pc(641) int local641;
-            @Pc(653) int local653;
-            @Pc(665) int local665;
-            @Pc(675) int local675;
-            @Pc(631) int local631;
-            for (local80 = local40; local80 <= local50; local80++) {
-                for (local84 = local44; local84 <= local57; local84++) {
-                    @Pc(589) LinkedList chunkTiles = tiles[local70][local80][local84];
+        for (int level = 0; level < 3; level++) {
+            for (int chunkX = chunkX1; chunkX <= chunkX2; chunkX++) {
+                for (int chunkZ = chunkZ1; chunkZ <= chunkZ2; chunkZ++) {
+                    @Pc(589) LinkedList chunkTiles = tiles[level][chunkX][chunkZ];
                     if (chunkTiles != null) {
-                        local173 = (local80 + (areaX >> 6)) * 64;
-                        local175 = (local84 + (areaZ >> 6)) * 64;
+                        int baseX = (chunkX + (areaX >> 6)) * 64;
+                        int baseZ = (chunkZ + (areaZ >> 6)) * 64;
                         for (@Pc(612) WorldMapTile tile = (WorldMapTile) chunkTiles.first(); tile != null; tile = (WorldMapTile) chunkTiles.next()) {
-                            local179 = local173 + tile.aByte138 - areaX - viewX1;
-                            local631 = local175 + tile.aByte139 - areaZ - viewZ1;
-                            local641 = (scaleX * local179 >> 16) + screenX1;
-                            local653 = (scaleX * (local179 + 1) >> 16) + screenX1;
-                            local665 = screenY2 - (scaleZ * (local631 + 1) >> 16);
-                            local675 = screenY2 - (scaleZ * local631 >> 16);
-                            drawTile(toolkit, local641, local665, local653 - local641, local675 - local665, tile.anInt9770, tile.aByte137 & 0xFF, tile.aByte136, tile.aShortArray133, tile.aByteArray104, false);
+                            int viewX = baseX + tile.aByte138 - areaX - viewX1;
+                            @Pc(631) int viewZ = baseZ + tile.aByte139 - areaZ - viewZ1;
+                            @Pc(641) int left = (scaleX * viewX >> 16) + screenX1;
+                            @Pc(653) int right = (scaleX * (viewX + 1) >> 16) + screenX1;
+                            @Pc(665) int top = screenY2 - (scaleZ * (viewZ + 1) >> 16);
+                            @Pc(675) int bottom = screenY2 - (scaleZ * viewZ >> 16);
+                            drawTile(toolkit, left, top, right - left, bottom - top, tile.anInt9770, tile.aByte137 & 0xFF, tile.aByte136, tile.aShortArray133, tile.aByteArray104, false);
                         }
                     }
                 }
             }
-            for (local84 = local40; local84 <= local50; local84++) {
-                for (local93 = local44; local93 <= local57; local93++) {
-                    @Pc(727) LinkedList chunkTiles = tiles[local70][local84][local93];
+            for (int chunkX = chunkX1; chunkX <= chunkX2; chunkX++) {
+                for (int chunkZ = chunkZ1; chunkZ <= chunkZ2; chunkZ++) {
+                    @Pc(727) LinkedList chunkTiles = tiles[level][chunkX][chunkZ];
                     if (chunkTiles != null) {
-                        local175 = (local84 + (areaX >> 6)) * 64;
-                        local177 = (local93 + (areaZ >> 6)) * 64;
+                        int baseX = (chunkX + (areaX >> 6)) * 64;
+                        int baseZ = (chunkZ + (areaZ >> 6)) * 64;
                         for (@Pc(750) WorldMapTile tile = (WorldMapTile) chunkTiles.first(); tile != null; tile = (WorldMapTile) chunkTiles.next()) {
-                            local631 = local175 + tile.aByte138 - areaX - viewX1;
-                            local641 = local177 + tile.aByte139 - areaZ - viewZ1;
-                            local653 = (scaleX * local631 >> 16) + screenX1;
-                            local665 = (scaleX * (local631 + 1) >> 16) + screenX1;
-                            local675 = screenY2 - (scaleZ * (local641 + 1) >> 16);
-                            @Pc(813) int bottom = screenY2 - (scaleZ * local641 >> 16);
-                            drawMsiMultiple(toolkit, local653, local675, local665 - local653, bottom - local675, tile.aShortArray133, tile.aByteArray104);
+                            int viewX = baseX + tile.aByte138 - areaX - viewX1;
+                            int viewZ = baseZ + tile.aByte139 - areaZ - viewZ1;
+                            int left = (scaleX * viewX >> 16) + screenX1;
+                            int right = (scaleX * (viewX + 1) >> 16) + screenX1;
+                            int top = screenY2 - (scaleZ * (viewZ + 1) >> 16);
+                            @Pc(813) int bottom = screenY2 - (scaleZ * viewZ >> 16);
+                            drawMsiMultiple(toolkit, left, top, right - left, bottom - top, tile.aShortArray133, tile.aByteArray104);
                         }
                     }
                 }

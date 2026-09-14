@@ -19,7 +19,7 @@ public final class Static21 {
     public static Class stringClass;
 
     @OriginalMember(owner = "client!am", name = "a", descriptor = "(Lclient!ha;IIIIIIZZ)V")
-    public static void method8043(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) int threadCount, @OriginalArg(4) int mapWidth, @OriginalArg(5) int mapLength, @OriginalArg(6) int renderDistance, @OriginalArg(7) boolean water, @OriginalArg(8) boolean lighting) {
+    public static void initScene(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) int threadCount, @OriginalArg(4) int mapWidth, @OriginalArg(5) int mapLength, @OriginalArg(6) int renderDistance, @OriginalArg(7) boolean underwater, @OriginalArg(8) boolean lighting) {
         Static665.aToolkit_15 = toolkit;
         Static32.anInt772 = threadCount;
         Static661.aBoolean457 = Static32.anInt772 > 1 && Static665.aToolkit_15.method7979();
@@ -35,7 +35,7 @@ public final class Static21 {
         Static276.method3986();
         Static478.aTileArrayArrayArray3 = new Tile[4][Static619.tileMaxX][Static662.tileMaxZ];
         Static706.floor = new Ground[4];
-        if (water) {
+        if (underwater) {
             Static62.waterColour = new int[Static619.tileMaxX][Static662.tileMaxZ];
             Static421.waterBias = new byte[Static619.tileMaxX][Static662.tileMaxZ];
             Static272.waterDepth = new short[Static619.tileMaxX][Static662.tileMaxZ];
@@ -129,7 +129,8 @@ public final class Static21 {
             try {
                 JavaScript.call("showVideoAd", GameShell.loaderApplet);
                 return true;
-            } catch (@Pc(15) Throwable local15) {
+            } catch (@Pc(15) Throwable ex) {
+                /* empty */
             }
         }
         return false;

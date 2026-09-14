@@ -142,7 +142,7 @@ public final class MapBuilder {
             renderDistance++;
         }
 
-        Static21.method8043(Toolkit.active, Static455.anInt6915, Static720.mapWidth, Static501.mapLength, renderDistance, underwater, Toolkit.active.getMaxLights() > 0);
+        Static21.initScene(Toolkit.active, Static455.anInt6915, Static720.mapWidth, Static501.mapLength, renderDistance, underwater, Toolkit.active.getMaxLights() > 0);
         Static483.method6490(Static699.w2Debug);
         if (Static699.w2Debug != 0) {
             Fonts.setDebugFont(Fonts.p11);
@@ -240,12 +240,10 @@ public final class MapBuilder {
         } else {
             Static3.method87(0);
         }
-        @Pc(855) int local855;
-        @Pc(858) int local858;
-        for (@Pc(852) int local852 = 0; local852 < 4; local852++) {
-            for (local855 = 0; local855 < Static720.mapWidth; local855++) {
-                for (local858 = 0; local858 < Static501.mapLength; local858++) {
-                    Static468.updateObjCount(local852, local855, local858);
+        for (@Pc(852) int level = 0; level < 4; level++) {
+            for (@Pc(855) int x = 0; x < Static720.mapWidth; x++) {
+                for (@Pc(858) int z = 0; z < Static501.mapLength; z++) {
+                    Static468.updateObjCount(level, x, z);
                 }
             }
         }
@@ -262,15 +260,15 @@ public final class MapBuilder {
         }
 
         if (Static117.areaMode == AreaMode.STATIC_AREA) {
-            local855 = (Static62.areaCenterX - (Static720.mapWidth >> 4)) / 8;
-            local858 = (Static62.areaCenterX + (Static720.mapWidth >> 4)) / 8;
-            @Pc(961) int local961 = (Static525.areaCenterZ - (Static501.mapLength >> 4)) / 8;
-            @Pc(969) int local969 = ((Static501.mapLength >> 4) + Static525.areaCenterZ) / 8;
-            for (@Pc(973) int local973 = local855 - 1; local973 <= local858 + 1; local973++) {
-                for (@Pc(978) int local978 = local961 - 1; local978 <= local969 + 1; local978++) {
-                    if (local973 < local855 || local973 > local858 || local978 < local961 || local969 < local978) {
-                        js5.MAPS.requestGroup("m" + local973 + "_" + local978);
-                        js5.MAPS.requestGroup("l" + local973 + "_" + local978);
+            int chunkX1 = (Static62.areaCenterX - (Static720.mapWidth >> 4)) / 8;
+            int chunkX2 = (Static62.areaCenterX + (Static720.mapWidth >> 4)) / 8;
+            @Pc(961) int chunkZ1 = (Static525.areaCenterZ - (Static501.mapLength >> 4)) / 8;
+            @Pc(969) int chunkZ2 = ((Static501.mapLength >> 4) + Static525.areaCenterZ) / 8;
+            for (@Pc(973) int chunkX = chunkX1 - 1; chunkX <= chunkX2 + 1; chunkX++) {
+                for (@Pc(978) int chunkZ = chunkZ1 - 1; chunkZ <= chunkZ2 + 1; chunkZ++) {
+                    if (chunkX < chunkX1 || chunkX > chunkX2 || chunkZ < chunkZ1 || chunkZ2 < chunkZ) {
+                        js5.MAPS.requestGroup("m" + chunkX + "_" + chunkZ);
+                        js5.MAPS.requestGroup("l" + chunkX + "_" + chunkZ);
                     }
                 }
             }
