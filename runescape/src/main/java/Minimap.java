@@ -117,9 +117,9 @@ public final class Minimap {
             selfZ = PlayerEntity.self.z;
         }
 
-        @Pc(120) int x = ((selfX / 128) + 208 + 48) - (Static720.mapWidth * 2);
-        @Pc(137) int z = ((Static501.mapLength * 4) + 48) - (selfZ / 128) - ((Static501.mapLength - 104) * 2);
-        sprite.renderRotated((float) screenX + ((float) component.width / 2.0F), ((float) component.height / 2.0F) + (float) screenY, (float) x, (float) z, scale, yaw << 2, clippingMask, screenX, screenY);
+        @Pc(120) int centerX = ((selfX / 128) + 208 + 48) - (Static720.mapWidth * 2);
+        @Pc(137) int centerZ = ((Static501.mapLength * 4) + 48) - (selfZ / 128) - ((Static501.mapLength - 104) * 2);
+        sprite.renderRotated((float) screenX + ((float) component.width / 2.0F), ((float) component.height / 2.0F) + (float) screenY, (float) centerX, (float) centerZ, scale, yaw << 2, clippingMask, screenX, screenY);
 
         for (@Pc(171) IntNode node = (IntNode) elementCoords.first(); node != null; node = (IntNode) elementCoords.next()) {
             @Pc(178) int coord = node.value;
@@ -534,9 +534,9 @@ public final class Minimap {
         }
 
         if (elementType.text != null) {
-            @Pc(36) int height = 0;
+            @Pc(36) int spriteHeight = 0;
             if (sprite != null) {
-                height = sprite.getHeight();
+                spriteHeight = sprite.getHeight();
             }
 
             @Pc(553) Font font = Fonts.p11;
@@ -550,7 +550,7 @@ public final class Minimap {
                 font = Fonts.b12;
             }
 
-            Static256.drawMapElementText(font, elementType.text, metrics, screenX, elementType.textColour, height, component, mask, drawY, screenY, drawX);
+            Static256.drawMapElementText(font, elementType.text, metrics, screenX, elementType.textColour, spriteHeight, component, mask, drawY, screenY, drawX);
         }
     }
 
@@ -723,11 +723,9 @@ public final class Minimap {
 
                                 if (mapelement >= 0) {
                                     @Pc(832) boolean randomise = false;
-                                    if (mapelement >= 0) {
-                                        @Pc(842) MapElementType elementType = MapElementTypeList.instance.list(mapelement);
-                                        if (elementType != null && elementType.randomise) {
-                                            randomise = true;
-                                        }
+                                    @Pc(842) MapElementType elementType = MapElementTypeList.instance.list(mapelement);
+                                    if (elementType != null && elementType.randomise) {
+                                        randomise = true;
                                     }
 
                                     @Pc(278) int newX = x;
@@ -830,15 +828,15 @@ public final class Minimap {
     }
 
     @OriginalMember(owner = "client!dk", name = "a", descriptor = "(IIBJLclient!aa;IIILclient!hda;)V")
-    public static void drawHintMapedge(@OriginalArg(0) int arrowX, @OriginalArg(1) int offsetX, @OriginalArg(3) long maxDistance, @OriginalArg(4) ClippingMask mask, @OriginalArg(5) int sprite, @OriginalArg(6) int offsetY, @OriginalArg(7) int arrowY, @OriginalArg(8) Component component) {
-        @Pc(16) int distance = (arrowY * arrowY) + (arrowX * arrowX);
-        if ((long) distance > maxDistance) {
+    public static void drawHintMapedge(@OriginalArg(0) int arrowX, @OriginalArg(1) int offsetX, @OriginalArg(3) long maxDistanceSquared, @OriginalArg(4) ClippingMask mask, @OriginalArg(5) int spriteId, @OriginalArg(6) int offsetY, @OriginalArg(7) int arrowZ, @OriginalArg(8) Component component) {
+        @Pc(16) int distanceSquared = (arrowZ * arrowZ) + (arrowX * arrowX);
+        if ((long) distanceSquared > maxDistanceSquared) {
             return;
         }
 
         @Pc(37) int radius = Math.min(component.width / 2, component.height / 2);
-        if (distance <= (radius * radius)) {
-            drawDot(offsetY, mask, Sprites.hintMapmarkers[sprite], arrowY, arrowX, component, offsetX);
+        if (distanceSquared <= (radius * radius)) {
+            drawDot(offsetY, mask, Sprites.hintMapmarkers[spriteId], arrowZ, arrowX, component, offsetX);
             return;
         }
 
@@ -858,12 +856,12 @@ public final class Minimap {
             sin = sin * 256 / (Camera.scaleOffset + 256);
         }
 
-        @Pc(112) int rotatedX = ((arrowX * cos) + (arrowY * sin)) >> 14;
-        @Pc(123) int rotatedZ = ((arrowY * cos) - (arrowX * sin)) >> 14;
+        @Pc(112) int rotatedX = ((arrowX * cos) + (arrowZ * sin)) >> 14;
+        @Pc(123) int rotatedZ = ((arrowZ * cos) - (arrowX * sin)) >> 14;
         @Pc(129) double angle = Math.atan2(rotatedX, rotatedZ);
         @Pc(136) int edgeX = (int) ((double) radius * Math.sin(angle));
         @Pc(143) int edgeZ = (int) ((double) radius * Math.cos(angle));
-        Sprites.hintMapedge[sprite].renderRotated((float) edgeX + (float) component.width / 2.0F + (float) offsetX, (float) -edgeZ + (float) component.height / 2.0F + (float) offsetY, 4096, (int) ((-angle / 6.283185307179586D) * 65535.0D));
+        Sprites.hintMapedge[spriteId].renderRotated((float) edgeX + (float) component.width / 2.0F + (float) offsetX, (float) -edgeZ + (float) component.height / 2.0F + (float) offsetY, 4096, (int) ((-angle / 6.283185307179586D) * 65535.0D));
     }
 
     @OriginalMember(owner = "client!ns", name = "a", descriptor = "(B)V")

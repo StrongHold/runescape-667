@@ -34,34 +34,34 @@ public final class Static651 {
                 }
             }
         } else if (entity.target != -1 && (turnRemaining >= 10240 || turnRemaining <= 2048)) {
-            @Pc(172) int delta = EntityMoveFlag.FLAG_TO_YAW[moveFlags] - entity.yaw.value & 0x3FFF;
+            @Pc(172) int moveYawDelta = EntityMoveFlag.FLAG_TO_YAW[moveFlags] - entity.yaw.value & 0x3FFF;
 
             if (moveSpeed == MoveSpeed.RUN && basType.run != -1) {
-                if (delta > 2048 && delta <= 6144 && basType.runFollowTurnCw != -1) {
+                if (moveYawDelta > 2048 && moveYawDelta <= 6144 && basType.runFollowTurnCw != -1) {
                     animator.update(true, basType.runFollowTurnCw);
-                } else if (delta >= 10240 && delta < 14336 && basType.runFollowTurnCcw != -1) {
+                } else if (moveYawDelta >= 10240 && moveYawDelta < 14336 && basType.runFollowTurnCcw != -1) {
                     animator.update(true, basType.runFollowTurnCcw);
-                } else if (delta <= 6144 || delta >= 10240 || basType.runFollowTurn180 == -1) {
+                } else if (moveYawDelta <= 6144 || moveYawDelta >= 10240 || basType.runFollowTurn180 == -1) {
                     animator.update(true, basType.run);
                 } else {
                     animator.update(true, basType.runFollowTurn180);
                 }
             } else if (moveSpeed == MoveSpeed.CRAWL && basType.crawl != -1) {
-                if (delta > 2048 && delta <= 6144 && basType.crawlFollowTurnCw != -1) {
+                if (moveYawDelta > 2048 && moveYawDelta <= 6144 && basType.crawlFollowTurnCw != -1) {
                     animator.update(true, basType.crawlFollowTurnCw);
-                } else if (delta >= 10240 && delta < 14336 && basType.crawlFollowTurnCcw != -1) {
+                } else if (moveYawDelta >= 10240 && moveYawDelta < 14336 && basType.crawlFollowTurnCcw != -1) {
                     animator.update(true, basType.crawlFollowTurnCcw);
-                } else if (delta <= 6144 || delta >= 10240 || basType.crawlFollowTurn180 == -1) {
+                } else if (moveYawDelta <= 6144 || moveYawDelta >= 10240 || basType.crawlFollowTurn180 == -1) {
                     animator.update(true, basType.crawl);
                 } else {
                     animator.update(true, basType.crawlFollowTurn180);
                 }
             } else {
-                if (delta > 2048 && delta <= 6144 && basType.walkFollowTurnCw != -1) {
+                if (moveYawDelta > 2048 && moveYawDelta <= 6144 && basType.walkFollowTurnCw != -1) {
                     animator.update(true, basType.walkFollowTurnCw);
-                } else if (delta >= 10240 && delta < 14336 && basType.walkFollowTurnCcw != -1) {
+                } else if (moveYawDelta >= 10240 && moveYawDelta < 14336 && basType.walkFollowTurnCcw != -1) {
                     animator.update(true, basType.walkFollowTurnCcw);
-                } else if (delta <= 6144 || delta >= 10240 || basType.walkFollowTurn180 == -1) {
+                } else if (moveYawDelta <= 6144 || moveYawDelta >= 10240 || basType.walkFollowTurn180 == -1) {
                     animator.update(true, basType.walk);
                 } else {
                     animator.update(true, basType.walkFollowTurn180);

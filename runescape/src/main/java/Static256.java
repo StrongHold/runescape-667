@@ -153,14 +153,14 @@ public final class Static256 {
 
             if (entity.pathPointer == 1) {
                 @Pc(468) int accelerationSquared = entity.movementAcceleration * entity.movementAcceleration;
-                @Pc(642) int relativeX = (pathX >= entity.x ? pathX - entity.x : entity.x - pathX) << 9;
-                @Pc(661) int relativeZ = (pathZ >= entity.z ? pathZ - entity.z : entity.z - pathZ) << 9;
-                @Pc(673) int max = relativeX > relativeZ ? relativeX : relativeZ;
-                @Pc(680) int maxAcceleration = max * basType.movementAcceleration * 2;
+                @Pc(642) int distanceX = (pathX >= entity.x ? pathX - entity.x : entity.x - pathX) << 9;
+                @Pc(661) int distanceZ = (pathZ >= entity.z ? pathZ - entity.z : entity.z - pathZ) << 9;
+                @Pc(673) int distance = distanceX > distanceZ ? distanceX : distanceZ;
+                @Pc(680) int maxAccelerationSquared = distance * basType.movementAcceleration * 2;
 
-                if (accelerationSquared > maxAcceleration) {
+                if (accelerationSquared > maxAccelerationSquared) {
                     entity.movementAcceleration /= 2;
-                } else if ((accelerationSquared / 2) > max) {
+                } else if ((accelerationSquared / 2) > distance) {
                     entity.movementAcceleration -= basType.movementAcceleration;
 
                     if (entity.movementAcceleration < 0) {
@@ -246,12 +246,11 @@ public final class Static256 {
 
         if (entity.animationPathPointer > 0) {
             entity.animationPathPointer--;
-            return;
         }
     }
 
     @OriginalMember(owner = "client!hu", name = "a", descriptor = "(Lclient!da;Ljava/lang/String;Lclient!ve;IIIZLclient!hda;Lclient!aa;III)V")
-    public static void drawMapElementText(@OriginalArg(0) Font font, @OriginalArg(1) String text, @OriginalArg(2) FontMetrics metrics, @OriginalArg(3) int offsetX, @OriginalArg(4) int colour, @OriginalArg(5) int height, @OriginalArg(7) Component component, @OriginalArg(8) ClippingMask mask, @OriginalArg(9) int drawY, @OriginalArg(10) int offsetY, @OriginalArg(11) int drawX) {
+    public static void drawMapElementText(@OriginalArg(0) Font font, @OriginalArg(1) String text, @OriginalArg(2) FontMetrics metrics, @OriginalArg(3) int offsetX, @OriginalArg(4) int colour, @OriginalArg(5) int spriteHeight, @OriginalArg(7) Component component, @OriginalArg(8) ClippingMask mask, @OriginalArg(9) int drawY, @OriginalArg(10) int offsetY, @OriginalArg(11) int drawX) {
         @Pc(11) int yaw;
         if (Camera.mode == CameraMode.MODE_FOLLOWCOORD) {
             yaw = (int) Camera.playerCameraYaw & 0x3FFF;
@@ -278,7 +277,7 @@ public final class Static256 {
         @Pc(131) int textX = rotatedX - paraWidth / 2;
         @Pc(139) int textHeight = metrics.stringHeight(100, 0, text, null);
         if (textX >= -component.width && component.width >= textX && rotatedZ >= -component.height && component.height >= rotatedZ) {
-            font.renderLines(text, (component.width / 2) + textX + offsetX, ((component.height / 2) + offsetY) - rotatedZ - height - textHeight, offsetX, offsetY, paraWidth, 50, 1, 0, 0, colour, 0, mask, null, null);
+            font.renderLines(text, (component.width / 2) + textX + offsetX, ((component.height / 2) + offsetY) - rotatedZ - spriteHeight - textHeight, offsetX, offsetY, paraWidth, 50, 1, 0, 0, colour, 0, mask, null, null);
         }
     }
 }
