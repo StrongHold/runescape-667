@@ -14,7 +14,7 @@ public final class Static150 {
     @OriginalMember(owner = "client!en", name = "a", descriptor = "(B)V")
     public static void method2455() {
         Static173.method2690();
-        Static517.method6822(ClientOptions.instance.stereoSound.getValue() == 1);
+        Static517.configureAudio(ClientOptions.instance.stereoSound.getValue() == 1);
         Static719.aPcmPlayer_5 = Static638.method8394(GameShell.signLink, 0, 22050, GameShell.canvas);
         Static697.method9120(Static48.method1100(null));
         Static559.aPcmPlayer_3 = Static638.method8394(GameShell.signLink, 1, 2048, GameShell.canvas);

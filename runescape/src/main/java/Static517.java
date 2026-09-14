@@ -12,10 +12,10 @@ public final class Static517 {
     public static final Class77 aClass77_5 = new Class77();
 
     @OriginalMember(owner = "client!qea", name = "e", descriptor = "Lclient!hc;")
-    public static final CutsceneActionType A_CUTSCENE_ACTION_TYPE___36 = new CutsceneActionType(15);
+    public static final CutsceneActionType HIT = new CutsceneActionType(15);
 
     @OriginalMember(owner = "client!qea", name = "a", descriptor = "(ZIII)V")
-    public static void method6822(@OriginalArg(0) boolean stereo) {
+    public static void configureAudio(@OriginalArg(0) boolean stereo) {
         if (22050 > 48000) {
             throw new IllegalArgumentException();
         }
@@ -25,50 +25,50 @@ public final class Static517 {
     }
 
     @OriginalMember(owner = "client!qea", name = "a", descriptor = "(Z[[[BIBIIZ)V")
-    public static void method6823(@OriginalArg(0) boolean arg0, @OriginalArg(1) byte[][][] arg1, @OriginalArg(2) int arg2, @OriginalArg(3) byte arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) boolean arg6) {
-        @Pc(6) int local6 = arg0 ? 1 : 0;
+    public static void method6823(@OriginalArg(0) boolean underwater, @OriginalArg(1) byte[][][] roofStamps, @OriginalArg(2) int levels, @OriginalArg(3) byte roofStamp, @OriginalArg(4) int orthoZoom, @OriginalArg(5) int entitySkipFlags, @OriginalArg(6) boolean trackOrthoTiles) {
+        @Pc(6) int ground = underwater ? 1 : 0;
         Static546.onscreenOpaqueEntityCount = 0;
         Static645.onscreenTransparentEntityCount = 0;
         Static675.anInt10155++;
-        @Pc(22) Entity local22;
-        if ((arg5 & 0x2) == 0) {
-            for (local22 = Static576.opaqueStationaryEntities[local6]; local22 != null; local22 = local22.nextEntity) {
-                if (!Static208.method3107(local22, arg0, arg1, arg2, arg3)) {
-                    projectToScreen(local22);
-                    if (local22.anInt10697 != -1) {
-                        Static48.aEntityArray3[Static546.onscreenOpaqueEntityCount++] = local22;
+        @Pc(22) Entity entity;
+        if ((entitySkipFlags & 0x2) == 0) {
+            for (entity = Static576.opaqueStationaryEntities[ground]; entity != null; entity = entity.nextEntity) {
+                if (!Static208.method3107(entity, underwater, roofStamps, levels, roofStamp)) {
+                    projectToScreen(entity);
+                    if (entity.anInt10697 != -1) {
+                        Static48.aEntityArray3[Static546.onscreenOpaqueEntityCount++] = entity;
                     }
                 }
             }
         }
         @Pc(157) int local157;
-        if ((arg5 & 0x1) == 0) {
-            for (local22 = Static398.transparentStationaryEntities[local6]; local22 != null; local22 = local22.nextEntity) {
-                if (!Static208.method3107(local22, arg0, arg1, arg2, arg3)) {
-                    projectToScreen(local22);
-                    if (local22.anInt10697 != -1) {
-                        Static395.aEntityArray11[Static645.onscreenTransparentEntityCount++] = local22;
+        if ((entitySkipFlags & 0x1) == 0) {
+            for (entity = Static398.transparentStationaryEntities[ground]; entity != null; entity = entity.nextEntity) {
+                if (!Static208.method3107(entity, underwater, roofStamps, levels, roofStamp)) {
+                    projectToScreen(entity);
+                    if (entity.anInt10697 != -1) {
+                        Static395.aEntityArray11[Static645.onscreenTransparentEntityCount++] = entity;
                     }
                 }
             }
-            for (@Pc(98) Entity local98 = Static468.dynamicEntities[local6]; local98 != null; local98 = local98.nextEntity) {
-                if (!Static208.method3107(local98, arg0, arg1, arg2, arg3)) {
-                    if (local98.isTransparent(0)) {
-                        projectToScreen(local98);
-                        if (local98.anInt10697 != -1) {
-                            Static395.aEntityArray11[Static645.onscreenTransparentEntityCount++] = local98;
+            for (@Pc(98) Entity dynamic = Static468.dynamicEntities[ground]; dynamic != null; dynamic = dynamic.nextEntity) {
+                if (!Static208.method3107(dynamic, underwater, roofStamps, levels, roofStamp)) {
+                    if (dynamic.isTransparent(0)) {
+                        projectToScreen(dynamic);
+                        if (dynamic.anInt10697 != -1) {
+                            Static395.aEntityArray11[Static645.onscreenTransparentEntityCount++] = dynamic;
                         }
                     } else {
-                        projectToScreen(local98);
-                        if (local98.anInt10697 != -1) {
-                            Static48.aEntityArray3[Static546.onscreenOpaqueEntityCount++] = local98;
+                        projectToScreen(dynamic);
+                        if (dynamic.anInt10697 != -1) {
+                            Static48.aEntityArray3[Static546.onscreenOpaqueEntityCount++] = dynamic;
                         }
                     }
                 }
             }
-            if (!arg0) {
+            if (!underwater) {
                 for (local157 = 0; local157 < Static125.dynamicEntityCount; local157++) {
-                    if (!Static208.method3107(Static679.aPositionEntity[local157], arg0, arg1, arg2, arg3)) {
+                    if (!Static208.method3107(Static679.aPositionEntity[local157], underwater, roofStamps, levels, roofStamp)) {
                         projectToScreen(Static679.aPositionEntity[local157]);
                         if (Static679.aPositionEntity[local157].anInt10697 != -1) {
                             if (Static679.aPositionEntity[local157].isTransparent(0)) {
@@ -85,85 +85,85 @@ public final class Static517 {
         if (Static546.onscreenOpaqueEntityCount > 0) {
             Quicksort.quicksort(Static48.aEntityArray3, 0, Static546.onscreenOpaqueEntityCount - 1);
             for (local225 = 0; local225 < Static546.onscreenOpaqueEntityCount; local225++) {
-                Static632.method8368(Static48.aEntityArray3[local225], arg6);
+                Static632.method8368(Static48.aEntityArray3[local225], trackOrthoTiles);
             }
         }
         if (Static442.aBoolean500) {
             Static665.aToolkit_15.method8009(0, null);
         }
-        if ((arg5 & 0x2) == 0) {
+        if ((entitySkipFlags & 0x2) == 0) {
             for (local225 = Static296.tileMinLevel; local225 < Static299.tileMaxLevel; local225++) {
-                @Pc(304) boolean[][] local304;
+                @Pc(304) boolean[][] visibleTiles;
                 @Pc(316) int local316;
-                @Pc(323) int local323;
-                @Pc(325) int local325;
-                @Pc(263) int local263;
-                if (local225 < arg2 || arg1 == null) {
-                    local263 = Static258.aBooleanArrayArray3.length;
+                @Pc(323) int tileX;
+                @Pc(325) int offsetZ;
+                @Pc(263) int maxOffsetX;
+                if (local225 < levels || roofStamps == null) {
+                    maxOffsetX = Static258.aBooleanArrayArray3.length;
                     if (Static441.anInt6691 + Static258.aBooleanArrayArray3.length > Static619.tileMaxX) {
-                        local263 -= Static441.anInt6691 + Static258.aBooleanArrayArray3.length - Static619.tileMaxX;
+                        maxOffsetX -= Static441.anInt6691 + Static258.aBooleanArrayArray3.length - Static619.tileMaxX;
                     }
                     local157 = Static258.aBooleanArrayArray3[0].length;
                     if (Static220.anInt3562 + Static258.aBooleanArrayArray3[0].length > Static662.tileMaxZ) {
                         local157 -= Static220.anInt3562 + Static258.aBooleanArrayArray3[0].length - Static662.tileMaxZ;
                     }
-                    local304 = Static142.aBooleanArrayArray1;
+                    visibleTiles = Static142.aBooleanArrayArray1;
                     if (Static581.aBoolean657) {
                         if (Static661.aBoolean457) {
-                            local304 = Static433.aBooleanArrayArrayArray5[local225];
+                            visibleTiles = Static433.aBooleanArrayArrayArray5[local225];
                         }
-                        for (local316 = Static231.anInt3734; local316 < local263; local316++) {
-                            local323 = local316 + Static441.anInt6691 - Static231.anInt3734;
-                            for (local325 = Static13.anInt148; local325 < local157; local325++) {
-                                if (Static258.aBooleanArrayArray3[local316][local325] && !Static588.method7714(local325 + Static220.anInt3562 - Static13.anInt148, local225, local323)) {
-                                    local304[local316][local325] = true;
+                        for (local316 = Static231.anInt3734; local316 < maxOffsetX; local316++) {
+                            tileX = local316 + Static441.anInt6691 - Static231.anInt3734;
+                            for (offsetZ = Static13.anInt148; offsetZ < local157; offsetZ++) {
+                                if (Static258.aBooleanArrayArray3[local316][offsetZ] && !Static588.method7714(offsetZ + Static220.anInt3562 - Static13.anInt148, local225, tileX)) {
+                                    visibleTiles[local316][offsetZ] = true;
                                 } else {
-                                    local304[local316][local325] = false;
+                                    visibleTiles[local316][offsetZ] = false;
                                 }
                             }
                         }
                     }
                     if (Static661.aBoolean457) {
-                        if (arg4 >= 0) {
-                            Static246.ground[local225].renderTilesAtDepth(0, 0, 0, null, false, arg4, arg5);
+                        if (orthoZoom >= 0) {
+                            Static246.ground[local225].renderTilesAtDepth(0, 0, 0, null, false, orthoZoom, entitySkipFlags);
                         } else {
-                            Static246.ground[local225].renderTiles(0, 0, 0, null, false, arg5);
+                            Static246.ground[local225].renderTiles(0, 0, 0, null, false, entitySkipFlags);
                         }
                         for (local316 = 0; local316 < Static32.anInt772; local316++) {
                             Static684.aClass302Array1[local316].addGround(new GroundRenderTask(local225 + 1));
                         }
-                    } else if (arg4 >= 0) {
-                        Static246.ground[local225].renderTilesAtDepth(Static403.anInt6246, Static550.anInt8271, Static35.anInt813, Static142.aBooleanArrayArray1, true, arg4, arg5);
+                    } else if (orthoZoom >= 0) {
+                        Static246.ground[local225].renderTilesAtDepth(Static403.anInt6246, Static550.anInt8271, Static35.anInt813, Static142.aBooleanArrayArray1, true, orthoZoom, entitySkipFlags);
                     } else {
-                        Static246.ground[local225].renderTiles(Static403.anInt6246, Static550.anInt8271, Static35.anInt813, Static142.aBooleanArrayArray1, true, arg5);
+                        Static246.ground[local225].renderTiles(Static403.anInt6246, Static550.anInt8271, Static35.anInt813, Static142.aBooleanArrayArray1, true, entitySkipFlags);
                     }
                 } else {
-                    local263 = Static258.aBooleanArrayArray3.length;
+                    maxOffsetX = Static258.aBooleanArrayArray3.length;
                     if (Static441.anInt6691 + Static258.aBooleanArrayArray3.length > Static619.tileMaxX) {
-                        local263 -= Static441.anInt6691 + Static258.aBooleanArrayArray3.length - Static619.tileMaxX;
+                        maxOffsetX -= Static441.anInt6691 + Static258.aBooleanArrayArray3.length - Static619.tileMaxX;
                     }
                     local157 = Static258.aBooleanArrayArray3[0].length;
                     if (Static220.anInt3562 + Static258.aBooleanArrayArray3[0].length > Static662.tileMaxZ) {
                         local157 -= Static220.anInt3562 + Static258.aBooleanArrayArray3[0].length - Static662.tileMaxZ;
                     }
-                    local304 = Static142.aBooleanArrayArray1;
+                    visibleTiles = Static142.aBooleanArrayArray1;
                     if (Static581.aBoolean657) {
                         if (Static661.aBoolean457) {
-                            local304 = Static433.aBooleanArrayArrayArray5[local225];
+                            visibleTiles = Static433.aBooleanArrayArrayArray5[local225];
                         }
-                        for (local316 = Static231.anInt3734; local316 < local263; local316++) {
-                            local323 = local316 + Static441.anInt6691 - Static231.anInt3734;
-                            for (local325 = Static13.anInt148; local325 < local157; local325++) {
-                                local304[local316][local325] = false;
-                                if (Static258.aBooleanArrayArray3[local316][local325]) {
-                                    @Pc(344) int local344 = local325 + Static220.anInt3562 - Static13.anInt148;
-                                    for (@Pc(346) int local346 = local225; local346 >= 0; local346--) {
-                                        if (Static334.activeTiles[local346][local323][local344] != null && Static334.activeTiles[local346][local323][local344].level == local225) {
-                                            if ((local346 < arg2 || arg1[local346][local323][local344] != arg3) && !Static588.method7714(local344, local225, local323)) {
-                                                local304[local316][local325] = true;
+                        for (local316 = Static231.anInt3734; local316 < maxOffsetX; local316++) {
+                            tileX = local316 + Static441.anInt6691 - Static231.anInt3734;
+                            for (offsetZ = Static13.anInt148; offsetZ < local157; offsetZ++) {
+                                visibleTiles[local316][offsetZ] = false;
+                                if (Static258.aBooleanArrayArray3[local316][offsetZ]) {
+                                    @Pc(344) int tileZ = offsetZ + Static220.anInt3562 - Static13.anInt148;
+                                    for (@Pc(346) int searchLevel = local225; searchLevel >= 0; searchLevel--) {
+                                        if (Static334.activeTiles[searchLevel][tileX][tileZ] != null && Static334.activeTiles[searchLevel][tileX][tileZ].level == local225) {
+                                            if ((searchLevel < levels || roofStamps[searchLevel][tileX][tileZ] != roofStamp) && !Static588.method7714(tileZ, local225, tileX)) {
+                                                visibleTiles[local316][offsetZ] = true;
                                                 break;
                                             }
-                                            local304[local316][local325] = false;
+                                            visibleTiles[local316][offsetZ] = false;
                                             break;
                                         }
                                     }
@@ -172,18 +172,18 @@ public final class Static517 {
                         }
                     }
                     if (Static661.aBoolean457) {
-                        if (arg4 >= 0) {
-                            Static246.ground[local225].renderTilesAtDepth(0, 0, 0, null, false, arg4, arg5);
+                        if (orthoZoom >= 0) {
+                            Static246.ground[local225].renderTilesAtDepth(0, 0, 0, null, false, orthoZoom, entitySkipFlags);
                         } else {
-                            Static246.ground[local225].renderTiles(0, 0, 0, null, false, arg5);
+                            Static246.ground[local225].renderTiles(0, 0, 0, null, false, entitySkipFlags);
                         }
                         for (local316 = 0; local316 < Static32.anInt772; local316++) {
                             Static684.aClass302Array1[local316].addGround(new GroundRenderTask(local225 + 1));
                         }
-                    } else if (arg4 >= 0) {
-                        Static246.ground[local225].renderTilesAtDepth(Static403.anInt6246, Static550.anInt8271, Static35.anInt813, Static142.aBooleanArrayArray1, false, arg4, arg5);
+                    } else if (orthoZoom >= 0) {
+                        Static246.ground[local225].renderTilesAtDepth(Static403.anInt6246, Static550.anInt8271, Static35.anInt813, Static142.aBooleanArrayArray1, false, orthoZoom, entitySkipFlags);
                     } else {
-                        Static246.ground[local225].renderTiles(Static403.anInt6246, Static550.anInt8271, Static35.anInt813, Static142.aBooleanArrayArray1, false, arg5);
+                        Static246.ground[local225].renderTiles(Static403.anInt6246, Static550.anInt8271, Static35.anInt813, Static142.aBooleanArrayArray1, false, entitySkipFlags);
                     }
                 }
             }
@@ -191,7 +191,7 @@ public final class Static517 {
         if (Static645.onscreenTransparentEntityCount > 0) {
             Static498.method6650(Static395.aEntityArray11, 0, Static645.onscreenTransparentEntityCount - 1);
             for (local225 = 0; local225 < Static645.onscreenTransparentEntityCount; local225++) {
-                Static632.method8368(Static395.aEntityArray11[local225], arg6);
+                Static632.method8368(Static395.aEntityArray11[local225], trackOrthoTiles);
             }
         }
     }

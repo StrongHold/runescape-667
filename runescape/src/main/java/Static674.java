@@ -8,7 +8,7 @@ public final class Static674 {
 
     @OriginalMember(owner = "client!vfa", name = "b", descriptor = "(B)V")
     public static void method8806() {
-        Static517.method6822(ClientOptions.instance.stereoSound.getValue() == 1);
+        Static517.configureAudio(ClientOptions.instance.stereoSound.getValue() == 1);
         Static719.aPcmPlayer_5 = Static638.method8394(GameShell.signLink, 0, 22050, GameShell.canvas);
         Static697.method9120(Static48.method1100(null));
         Static559.aPcmPlayer_3 = Static638.method8394(GameShell.signLink, 1, 2048, GameShell.canvas);

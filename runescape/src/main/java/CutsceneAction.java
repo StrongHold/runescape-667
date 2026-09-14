@@ -47,7 +47,7 @@ public abstract class CutsceneAction {
             action = new CutsceneAction_Sub2(packet);
         } else if (type == Static384.A_CUTSCENE_ACTION_TYPE___26) {
             action = new CutsceneAction_Sub17(packet);
-        } else if (type == Static517.A_CUTSCENE_ACTION_TYPE___36) {
+        } else if (type == Static517.HIT) {
             action = new CutsceneAction_Sub10(packet);
         } else if (CutsceneActionType.A_CUTSCENE_ACTION_TYPE___17 == type) {
             action = new CutsceneAction_Sub12(packet);

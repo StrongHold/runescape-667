@@ -52,21 +52,21 @@ public final class Static220 {
                     sound.movementSpeed = movementSpeed;
                     sound.volume = npcType.soundVolume;
                 } else {
-                    @Pc(198) boolean local198 = false;
+                    @Pc(198) boolean restart = false;
 
                     if (sound.stream == null) {
-                        local198 = true;
+                        restart = true;
                     } else {
                         sound.volume -= 512;
 
                         if (sound.volume <= 0) {
                             SoundManager.activeStreams.remove(sound.stream);
-                            local198 = true;
+                            restart = true;
                             sound.stream = null;
                         }
                     }
 
-                    if (local198) {
+                    if (restart) {
                         sound.vorbisSound = null;
                         sound.packet = null;
                         sound.vorbis = npcType.vorbis;
@@ -105,21 +105,21 @@ public final class Static220 {
                     sound.movementSpeed = movementSpeed;
                     sound.volume = sound.player.soundVolume;
                 } else {
-                    @Pc(198) boolean local198 = false;
+                    @Pc(198) boolean restart = false;
 
                     if (sound.stream == null) {
-                        local198 = true;
+                        restart = true;
                     } else {
                         sound.volume -= 512;
 
                         if (sound.volume <= 0) {
                             SoundManager.activeStreams.remove(sound.stream);
                             sound.stream = null;
-                            local198 = true;
+                            restart = true;
                         }
                     }
 
-                    if (local198) {
+                    if (restart) {
                         sound.vorbis = sound.player.vorbis;
                         sound.id = currentSound;
                         sound.volume = sound.player.soundVolume;
@@ -140,15 +140,15 @@ public final class Static220 {
     }
 
     @OriginalMember(owner = "client!gq", name = "a", descriptor = "(Lclient!cd;Lclient!sb;Lclient!sb;Lclient!sb;ILclient!bd;)Z")
-    public static boolean method3201(@OriginalArg(0) PcmPlayer arg0, @OriginalArg(1) js5 vorbis, @OriginalArg(2) js5 synthSounds, @OriginalArg(3) js5 js5_15, @OriginalArg(5) MixBuss mixBuss) {
+    public static boolean method3201(@OriginalArg(0) PcmPlayer pcmPlayer, @OriginalArg(1) js5 vorbis, @OriginalArg(2) js5 synthSounds, @OriginalArg(3) js5 js5_15, @OriginalArg(5) MixBuss mixBuss) {
         Static581.mixBuss = mixBuss;
         Static296.vorbisJs5 = vorbis;
         Static91.synthSoundsJs5 = synthSounds;
         Static286.anIntArray358 = new int[16];
-        Static426.aPcmPlayer_2 = arg0;
+        Static426.aPcmPlayer_2 = pcmPlayer;
         Static86.js5_15 = js5_15;
-        for (@Pc(25) int local25 = 0; local25 < 16; local25++) {
-            Static286.anIntArray358[local25] = 255;
+        for (@Pc(25) int channel = 0; channel < 16; channel++) {
+            Static286.anIntArray358[channel] = 255;
         }
         return true;
     }
