@@ -7,6 +7,26 @@ import org.openrs2.deob.annotation.Pc;
 @OriginalClass("client!ae")
 public final class Class7 {
 
+    private static final int TEXTURE_WIDTH = 128;
+
+    private static final int TEXTURE_HEIGHT = 128;
+
+    private static final int FRAME_COUNT = 16;
+
+    private static final int BYTES_PER_TEXEL = 2;
+
+    private static final int FRAME_SIZE = TEXTURE_WIDTH * TEXTURE_HEIGHT * BYTES_PER_TEXEL;
+
+    private static final int HEIGHT_MASK = TEXTURE_HEIGHT - 1;
+
+    private static final int WIDTH_MASK = TEXTURE_WIDTH - 1;
+
+    /**
+     * The height field is sampled as if one unit of height spanned 128 texels, so the cross product that turns the
+     * two central differences into a normal has a fixed up component of 128 and a length of at least 128 squared.
+     */
+    private static final float HEIGHT_SCALE = 128.0F;
+
     @OriginalMember(owner = "client!ae", name = "g", descriptor = "Lclient!bga;")
     public Interface2 anInterface2_1 = null;
 
@@ -26,29 +46,29 @@ public final class Class7 {
     public boolean aBoolean7;
 
     @OriginalMember(owner = "client!ae", name = "<init>", descriptor = "(Lclient!am;)V")
-    public Class7(@OriginalArg(0) NativeToolkit arg0) {
-        this.aClass19_Sub1_1 = arg0;
+    public Class7(@OriginalArg(0) NativeToolkit toolkit) {
+        this.aClass19_Sub1_1 = toolkit;
         this.aBoolean7 = this.aClass19_Sub1_1.aBoolean696;
         if (this.aBoolean7 && !this.aClass19_Sub1_1.method8153(Static702.aClass397_16, Static482.aClass92_13)) {
             this.aBoolean7 = false;
         }
         if (this.aBoolean7 || this.aClass19_Sub1_1.method8071(Static482.aClass92_13, Static702.aClass397_16)) {
-            Static132.method2312();
+            NativeWaterNoise.ensureGenerated();
             if (this.aBoolean7) {
-                @Pc(60) byte[] local60 = ByteArrayWrapper.unwrap(false, Static177.anObject6);
-                this.anInterface2_2 = this.aClass19_Sub1_1.method8038(Static482.aClass92_13, local60);
-                @Pc(76) byte[] local76 = ByteArrayWrapper.unwrap(false, Static644.anObject18);
-                this.aClass19_Sub1_1.method8038(Static482.aClass92_13, local76);
+                @Pc(60) byte[] rippleTexels = ByteArrayWrapper.unwrap(false, Static177.anObject6);
+                this.anInterface2_2 = this.aClass19_Sub1_1.method8038(Static482.aClass92_13, rippleTexels);
+                @Pc(76) byte[] flowTexels = ByteArrayWrapper.unwrap(false, Static644.anObject18);
+                this.aClass19_Sub1_1.method8038(Static482.aClass92_13, flowTexels);
             } else {
-                this.anInterface18Array2 = new Interface18[16];
-                for (@Pc(93) int local93 = 0; local93 < 16; local93++) {
-                    @Pc(104) byte[] local104 = ByteArrayWrapper.unwrap(32768, Static177.anObject6, local93 * 16384 * 2);
-                    this.anInterface18Array2[local93] = this.aClass19_Sub1_1.method8028(128, local104, Static482.aClass92_13, 128, true);
+                this.anInterface18Array2 = new Interface18[FRAME_COUNT];
+                for (@Pc(93) int frame = 0; frame < FRAME_COUNT; frame++) {
+                    @Pc(104) byte[] rippleTexels = ByteArrayWrapper.unwrap(FRAME_SIZE, Static177.anObject6, frame * FRAME_SIZE);
+                    this.anInterface18Array2[frame] = this.aClass19_Sub1_1.method8028(TEXTURE_WIDTH, rippleTexels, Static482.aClass92_13, TEXTURE_HEIGHT, true);
                 }
-                this.anInterface18Array1 = new Interface18[16];
-                for (@Pc(129) int local129 = 0; local129 < 16; local129++) {
-                    @Pc(140) byte[] local140 = ByteArrayWrapper.unwrap(32768, Static644.anObject18, local129 * 128 * 256);
-                    this.anInterface18Array1[local129] = this.aClass19_Sub1_1.method8028(128, local140, Static482.aClass92_13, 128, true);
+                this.anInterface18Array1 = new Interface18[FRAME_COUNT];
+                for (@Pc(129) int frame = 0; frame < FRAME_COUNT; frame++) {
+                    @Pc(140) byte[] flowTexels = ByteArrayWrapper.unwrap(FRAME_SIZE, Static644.anObject18, frame * FRAME_SIZE);
+                    this.anInterface18Array1[frame] = this.aClass19_Sub1_1.method8028(TEXTURE_WIDTH, flowTexels, Static482.aClass92_13, TEXTURE_HEIGHT, true);
                 }
             }
         }
@@ -57,33 +77,33 @@ public final class Class7 {
     @OriginalMember(owner = "client!ae", name = "a", descriptor = "(I)Z")
     public boolean method115() {
         if (this.anInterface2_1 == null) {
-            @Pc(26) byte[] local26;
+            @Pc(26) byte[] heights;
             if (Static186.anObject7 == null) {
-                local26 = Static448.method6106(4.0F, 4.0F, 0.5F, 16.0F, 0.6F, new Class59_Sub1(419684));
-                Static186.anObject7 = ByteArrayWrapper.wrap(local26);
+                heights = Static448.method6106(4.0F, 4.0F, 0.5F, 16.0F, 0.6F, new Class59_Sub1(419684));
+                Static186.anObject7 = ByteArrayWrapper.wrap(heights);
             }
-            local26 = ByteArrayWrapper.unwrap(false, Static186.anObject7);
-            @Pc(42) byte[] local42 = new byte[local26.length * 4];
-            @Pc(44) int local44 = 0;
-            for (@Pc(46) int local46 = 0; local46 < 16; local46++) {
-                @Pc(54) int local54 = local46 * 128 * 128;
-                @Pc(56) int local56 = local54;
-                for (@Pc(58) int local58 = 0; local58 < 128; local58++) {
-                    @Pc(67) int local67 = local56 + local58 * 128;
-                    @Pc(78) int local78 = local56 + (local58 - 1 & 0x7F) * 128;
-                    @Pc(88) int local88 = (local58 + 1 & 0x7F) * 128 + local56;
-                    for (@Pc(90) int local90 = 0; local90 < 128; local90++) {
-                        @Pc(111) float local111 = (float) ((local26[local78 + local90] & 0xFF) - (local26[local90 + local88] & 0xFF));
-                        @Pc(138) float local138 = (float) ((local26[local67 + (local90 - 1 & 0x7F)] & 0xFF) - (local26[local67 + (local90 + 1 & 0x7F)] & 0xFF));
-                        @Pc(153) float local153 = (float) (128.0D / Math.sqrt(local111 * local111 + local138 * local138 + 16384.0F));
-                        local42[local44++] = (byte) (int) (local138 * local153 + 127.0F);
-                        local42[local44++] = (byte) (int) (local153 * 128.0F + 127.0F);
-                        local42[local44++] = (byte) (int) (local111 * local153 + 127.0F);
-                        local42[local44++] = local26[local54++];
+            heights = ByteArrayWrapper.unwrap(false, Static186.anObject7);
+            @Pc(42) byte[] normals = new byte[heights.length * 4];
+            @Pc(44) int normalIndex = 0;
+            for (@Pc(46) int frame = 0; frame < FRAME_COUNT; frame++) {
+                @Pc(54) int heightIndex = frame * TEXTURE_WIDTH * TEXTURE_HEIGHT;
+                @Pc(56) int frameStart = heightIndex;
+                for (@Pc(58) int y = 0; y < TEXTURE_HEIGHT; y++) {
+                    @Pc(67) int rowStart = frameStart + y * TEXTURE_WIDTH;
+                    @Pc(78) int aboveStart = frameStart + (y - 1 & HEIGHT_MASK) * TEXTURE_WIDTH;
+                    @Pc(88) int belowStart = (y + 1 & HEIGHT_MASK) * TEXTURE_WIDTH + frameStart;
+                    for (@Pc(90) int x = 0; x < TEXTURE_WIDTH; x++) {
+                        @Pc(111) float slopeY = (float) ((heights[aboveStart + x] & 0xFF) - (heights[x + belowStart] & 0xFF));
+                        @Pc(138) float slopeX = (float) ((heights[rowStart + (x - 1 & WIDTH_MASK)] & 0xFF) - (heights[rowStart + (x + 1 & WIDTH_MASK)] & 0xFF));
+                        @Pc(153) float scale = (float) (HEIGHT_SCALE / Math.sqrt(slopeY * slopeY + slopeX * slopeX + HEIGHT_SCALE * HEIGHT_SCALE));
+                        normals[normalIndex++] = (byte) (int) (slopeX * scale + 127.0F);
+                        normals[normalIndex++] = (byte) (int) (scale * HEIGHT_SCALE + 127.0F);
+                        normals[normalIndex++] = (byte) (int) (slopeY * scale + 127.0F);
+                        normals[normalIndex++] = heights[heightIndex++];
                     }
                 }
             }
-            this.anInterface2_1 = this.aClass19_Sub1_1.method8038(Static172.aClass92_8, local42);
+            this.anInterface2_1 = this.aClass19_Sub1_1.method8038(Static172.aClass92_8, normals);
         }
         return this.anInterface2_1 != null;
     }
