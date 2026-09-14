@@ -399,13 +399,13 @@ public final class D3DToolkit extends NativeToolkit {
 
     @OriginalMember(owner = "client!kea", name = "i", descriptor = "(II)Lclient!rea;")
     @Override
-    protected Class26 method8087(@OriginalArg(1) int arg0) {
+    protected RenderPass method8087(@OriginalArg(1) int arg0) {
         if (arg0 == 3) {
-            return new Class26_Sub8(this, this.aJs5_112);
+            return new D3DUnderwaterPass(this, this.aJs5_112);
         } else if (arg0 == 4) {
-            return new Class26_Sub9(this, this.aJs5_112, this.aClass7_8);
+            return new D3DTransparentWaterPass(this, this.aJs5_112, this.aClass7_8);
         } else if (arg0 == 8) {
-            return new Class26_Sub10(this, this.aJs5_112, this.aClass7_8);
+            return new D3DEnvironmentMappedWaterPass(this, this.aJs5_112, this.aClass7_8);
         } else {
             return super.method8087(arg0);
         }

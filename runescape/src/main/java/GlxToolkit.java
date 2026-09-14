@@ -305,7 +305,7 @@ public final class GlxToolkit extends NativeToolkit {
     @OriginalMember(owner = "client!tca", name = "a", descriptor = "(Lclient!eba;[BBIII)Lclient!bga;")
     @Override
     public Interface2 method8038(@OriginalArg(0) Class92 arg0, @OriginalArg(1) byte[] arg1) {
-        return new Class51_Sub1(this, arg0, 128, 128, 16, arg1);
+        return new GlTexture3D(this, arg0, 128, 128, 16, arg1);
     }
 
     @OriginalMember(owner = "client!tca", name = "c", descriptor = "(B)V")
@@ -367,13 +367,13 @@ public final class GlxToolkit extends NativeToolkit {
 
     @OriginalMember(owner = "client!tca", name = "i", descriptor = "(II)Lclient!rea;")
     @Override
-    protected Class26 method8087(@OriginalArg(1) int arg0) {
+    protected RenderPass method8087(@OriginalArg(1) int arg0) {
         if (arg0 == 3) {
-            return new Class26_Sub11(this, super.aJs5_112);
+            return new GlUnderwaterPass(this, super.aJs5_112);
         } else if (arg0 == 4) {
-            return new Class26_Sub1(this, super.aJs5_112, super.aClass7_8);
+            return new GlTransparentWaterPass(this, super.aJs5_112, super.aClass7_8);
         } else if (arg0 == 8) {
-            return new Class26_Sub3(this, super.aJs5_112, super.aClass7_8);
+            return new GlslEnvironmentMappedWaterPass(this, super.aJs5_112, super.aClass7_8);
         } else {
             return super.method8087(arg0);
         }
@@ -464,11 +464,11 @@ public final class GlxToolkit extends NativeToolkit {
     @Override
     public Interface18 method8143(@OriginalArg(1) int arg0, @OriginalArg(2) int[] arg1, @OriginalArg(3) int arg2, @OriginalArg(4) int arg3, @OriginalArg(5) boolean arg4, @OriginalArg(6) int arg5) {
         if (this.aBoolean706 || Node_Sub1_Sub27.method9150(arg0) && Node_Sub1_Sub27.method9150(arg5)) {
-            return new Class51_Sub4(this, arg0, arg5, arg4, arg1, 0, arg3);
+            return new GlTexture2D(this, arg0, arg5, arg4, arg1, 0, arg3);
         } else if (this.aBoolean705) {
-            return new Class51_Sub3(this, arg0, arg5, arg1, 0, arg3);
+            return new GlRectangleTexture(this, arg0, arg5, arg1, 0, arg3);
         } else {
-            @Pc(64) Class51_Sub4 local64 = new Class51_Sub4(this, Static172.aClass92_8, Static702.aClass397_16, IntMath.nextPow2(arg0), IntMath.nextPow2(arg5));
+            @Pc(64) GlTexture2D local64 = new GlTexture2D(this, Static172.aClass92_8, Static702.aClass397_16, IntMath.nextPow2(arg0), IntMath.nextPow2(arg5));
             local64.method9048(arg1, 0, 0, arg5, arg0, arg3);
             return local64;
         }
@@ -849,11 +849,11 @@ public final class GlxToolkit extends NativeToolkit {
     @Override
     protected Interface18 method8098(@OriginalArg(0) Class92 arg0, @OriginalArg(1) boolean arg1, @OriginalArg(2) int arg2, @OriginalArg(5) float[] arg3, @OriginalArg(7) int arg4) {
         if (this.aBoolean706 || Node_Sub1_Sub27.method9150(arg4) && Node_Sub1_Sub27.method9150(arg2)) {
-            return new Class51_Sub4(this, arg0, arg4, arg2, arg1, arg3, 0, 0);
+            return new GlTexture2D(this, arg0, arg4, arg2, arg1, arg3, 0, 0);
         } else if (this.aBoolean705) {
-            return new Class51_Sub3(this, arg0, arg4, arg2, arg3, 0, 0);
+            return new GlRectangleTexture(this, arg0, arg4, arg2, arg3, 0, 0);
         } else {
-            @Pc(58) Class51_Sub4 local58 = new Class51_Sub4(this, arg0, Static702.aClass397_20, IntMath.nextPow2(arg4), IntMath.nextPow2(arg2));
+            @Pc(58) GlTexture2D local58 = new GlTexture2D(this, arg0, Static702.aClass397_20, IntMath.nextPow2(arg4), IntMath.nextPow2(arg2));
             local58.method8651(arg0, arg2, arg3, arg4);
             return local58;
         }
@@ -931,11 +931,11 @@ public final class GlxToolkit extends NativeToolkit {
     @Override
     public Interface18 method8067(@OriginalArg(0) Class92 arg0, @OriginalArg(1) Class397 arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3) {
         if (this.aBoolean706 || Node_Sub1_Sub27.method9150(arg3) && Node_Sub1_Sub27.method9150(arg2)) {
-            return new Class51_Sub4(this, arg0, arg1, arg3, arg2);
+            return new GlTexture2D(this, arg0, arg1, arg3, arg2);
         } else if (this.aBoolean705) {
-            return new Class51_Sub3(this, arg0, arg1, arg3, arg2);
+            return new GlRectangleTexture(this, arg0, arg1, arg3, arg2);
         } else {
-            return new Class51_Sub4(this, arg0, arg1, IntMath.nextPow2(arg3), IntMath.nextPow2(arg2));
+            return new GlTexture2D(this, arg0, arg1, IntMath.nextPow2(arg3), IntMath.nextPow2(arg2));
         }
     }
 
@@ -943,11 +943,11 @@ public final class GlxToolkit extends NativeToolkit {
     @Override
     protected Interface18 method8103(@OriginalArg(0) Class92 arg0, @OriginalArg(1) int arg1, @OriginalArg(2) boolean arg2, @OriginalArg(5) int arg3, @OriginalArg(7) byte[] arg4) {
         if (this.aBoolean706 || Node_Sub1_Sub27.method9150(arg1) && Node_Sub1_Sub27.method9150(arg3)) {
-            return new Class51_Sub4(this, arg0, arg1, arg3, arg2, arg4, 0, 0);
+            return new GlTexture2D(this, arg0, arg1, arg3, arg2, arg4, 0, 0);
         } else if (this.aBoolean705) {
-            return new Class51_Sub3(this, arg0, arg1, arg3, arg4, 0, 0);
+            return new GlRectangleTexture(this, arg0, arg1, arg3, arg4, 0, 0);
         } else {
-            @Pc(58) Class51_Sub4 local58 = new Class51_Sub4(this, arg0, Static702.aClass397_16, IntMath.nextPow2(arg1), IntMath.nextPow2(arg3));
+            @Pc(58) GlTexture2D local58 = new GlTexture2D(this, arg0, Static702.aClass397_16, IntMath.nextPow2(arg1), IntMath.nextPow2(arg3));
             local58.method9051(0, arg3, arg4, arg0, arg1);
             return local58;
         }
@@ -1025,7 +1025,7 @@ public final class GlxToolkit extends NativeToolkit {
     @OriginalMember(owner = "client!tca", name = "a", descriptor = "(I[[IZI)Lclient!fv;")
     @Override
     public Interface8 method8063(@OriginalArg(0) int arg0, @OriginalArg(1) int[][] arg1, @OriginalArg(2) boolean arg2) {
-        return new Class51_Sub2(this, arg0, arg2, arg1);
+        return new GlCubeMapTexture(this, arg0, arg2, arg1);
     }
 
     @OriginalMember(owner = "client!tca", name = "a", descriptor = "(Ljava/lang/Object;Ljava/awt/Canvas;I)V")

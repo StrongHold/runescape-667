@@ -65,7 +65,7 @@ public abstract class NativeToolkit extends Toolkit {
     public float aFloat182;
 
     @OriginalMember(owner = "client!am", name = "Ce", descriptor = "Lclient!rea;")
-    public Class26 aClass26_3;
+    public RenderPass aClass26_3;
 
     @OriginalMember(owner = "client!am", name = "pc", descriptor = "F")
     public float aFloat183;
@@ -389,7 +389,7 @@ public abstract class NativeToolkit extends Toolkit {
     public boolean aBoolean682 = false;
 
     @OriginalMember(owner = "client!am", name = "pf", descriptor = "[Lclient!rea;")
-    public final Class26[] aClass26Array3 = new Class26[10];
+    public final RenderPass[] aClass26Array3 = new RenderPass[10];
 
     @OriginalMember(owner = "client!am", name = "Fc", descriptor = "F")
     public float aFloat194 = 1.0F;
@@ -817,7 +817,7 @@ public abstract class NativeToolkit extends Toolkit {
     public void method8033() {
         this.method8086();
         if (this.aClass26_3 != null) {
-            this.aClass26_3.method8296();
+            this.aClass26_3.onTextureMatrixChanged();
         }
     }
 
@@ -985,7 +985,7 @@ public abstract class NativeToolkit extends Toolkit {
     @OriginalMember(owner = "client!am", name = "z", descriptor = "()Z")
     @Override
     public final boolean method7990() {
-        return this.aClass26Array3[3].method8289();
+        return this.aClass26Array3[3].isSupported();
     }
 
     @OriginalMember(owner = "client!am", name = "a", descriptor = "(Ljava/awt/Canvas;Ljava/lang/Object;I)V")
@@ -1332,8 +1332,8 @@ public abstract class NativeToolkit extends Toolkit {
         this.anInt9160 = height;
         this.anInt9169 = bias;
         if (this.aBoolean694) {
-            this.aClass26Array3[3].method8295();
-            this.aClass26Array3[3].method8291();
+            this.aClass26Array3[3].onUnderwaterSettingsChanged();
+            this.aClass26Array3[3].onFogChanged();
         }
     }
 
@@ -1647,7 +1647,7 @@ public abstract class NativeToolkit extends Toolkit {
     public void method8081() {
         this.aBoolean682 = false;
         if (this.aClass26_3 != null) {
-            this.aClass26_3.method8288();
+            this.aClass26_3.onCameraChanged();
         }
         this.method8069();
     }
@@ -1725,17 +1725,17 @@ public abstract class NativeToolkit extends Toolkit {
     protected abstract void method8086();
 
     @OriginalMember(owner = "client!am", name = "i", descriptor = "(II)Lclient!rea;")
-    protected Class26 method8087(@OriginalArg(1) int arg0) {
+    protected RenderPass method8087(@OriginalArg(1) int arg0) {
         if (arg0 == 6) {
-            return new Class26_Sub5(this);
+            return new UnlitPass(this);
         } else if (arg0 == 1) {
-            return new Class26_Sub4(this);
+            return new FixedFunctionSpecularPass(this);
         } else if (arg0 == 2) {
-            return new Class26_Sub2(this, this.aClass7_8);
+            return new FixedFunctionWaterPass(this, this.aClass7_8);
         } else if (arg0 == 7) {
-            return new Class26_Sub7(this);
+            return new FixedFunctionEnvironmentMapPass(this);
         } else {
-            return new Class26_Sub6(this);
+            return new NoEffectPass(this);
         }
     }
 
@@ -1780,23 +1780,23 @@ public abstract class NativeToolkit extends Toolkit {
         }
         if (arg0 != this.anInt9174) {
             if (this.anInt9174 != 0) {
-                this.aClass26Array3[Integer.MAX_VALUE & this.anInt9174].method8286();
+                this.aClass26Array3[Integer.MAX_VALUE & this.anInt9174].disable();
             }
             if (arg0 == 0) {
                 this.aClass26_3 = null;
             } else {
                 this.aClass26_3 = this.aClass26Array3[arg0 & Integer.MAX_VALUE];
-                this.aClass26_3.method8297(arg4);
-                this.aClass26_3.method8292(arg4);
-                this.aClass26_3.method8290(arg2, arg3);
+                this.aClass26_3.enable(arg4);
+                this.aClass26_3.applyTextureCombine(arg4);
+                this.aClass26_3.setEffectParams(arg2, arg3);
             }
             this.anInt9172 = arg2;
             this.anInt9152 = arg3;
             this.anInt9174 = arg0;
         } else if (this.anInt9174 != 0) {
-            this.aClass26Array3[this.anInt9174 & Integer.MAX_VALUE].method8292(arg4);
+            this.aClass26Array3[this.anInt9174 & Integer.MAX_VALUE].applyTextureCombine(arg4);
             if (this.anInt9172 != arg2 || this.anInt9152 != arg3) {
-                this.aClass26Array3[Integer.MAX_VALUE & this.anInt9174].method8290(arg2, arg3);
+                this.aClass26Array3[Integer.MAX_VALUE & this.anInt9174].setEffectParams(arg2, arg3);
                 this.anInt9152 = arg3;
                 this.anInt9172 = arg2;
             }
@@ -1820,7 +1820,7 @@ public abstract class NativeToolkit extends Toolkit {
         this.aBoolean682 = false;
         this.method8136();
         if (this.aClass26_3 != null) {
-            this.aClass26_3.method8285();
+            this.aClass26_3.onModelMatrixChanged();
         }
     }
 
@@ -1851,7 +1851,7 @@ public abstract class NativeToolkit extends Toolkit {
     @OriginalMember(owner = "client!am", name = "y", descriptor = "(B)V")
     public void method8093() {
         if (this.aClass26_3 != null) {
-            this.aClass26_3.method8291();
+            this.aClass26_3.onFogChanged();
         }
         this.method8150();
     }
@@ -2128,7 +2128,7 @@ public abstract class NativeToolkit extends Toolkit {
                 this.method8088(local29);
                 this.method8054(local31);
             } else {
-                this.aClass26_3.method8294(local29, local31);
+                this.aClass26_3.bindTexture(local29, local31);
             }
             this.aBoolean694 = this.aBoolean681;
             this.anInt9179 = arg1;
@@ -2380,7 +2380,7 @@ public abstract class NativeToolkit extends Toolkit {
     public void method8126() {
         this.method8110();
         if (this.aClass26_3 != null) {
-            this.aClass26_3.method8287();
+            this.aClass26_3.onProjectionChanged();
         }
     }
 
@@ -2500,16 +2500,16 @@ public abstract class NativeToolkit extends Toolkit {
         this.aClass26Array3[3] = this.method8087(3);
         this.aClass26Array3[8] = this.method8087(8);
         this.aClass26Array3[9] = this.method8087(9);
-        if (!this.aClass26Array3[2].method8289()) {
+        if (!this.aClass26Array3[2].isSupported()) {
             this.aClass26Array3[2] = this.method8087(0);
         }
-        if (!this.aClass26Array3[4].method8289()) {
+        if (!this.aClass26Array3[4].isSupported()) {
             this.aClass26Array3[4] = this.aClass26Array3[2];
         }
-        if (!this.aClass26Array3[8].method8289()) {
+        if (!this.aClass26Array3[8].isSupported()) {
             this.aClass26Array3[8] = this.aClass26Array3[4];
         }
-        if (!this.aClass26Array3[9].method8289()) {
+        if (!this.aClass26Array3[9].isSupported()) {
             this.aClass26Array3[9] = this.aClass26Array3[8];
         }
         this.method8102();

@@ -3,45 +3,45 @@ import org.openrs2.deob.annotation.OriginalClass;
 import org.openrs2.deob.annotation.OriginalMember;
 
 @OriginalClass("client!jka")
-public final class Class26_Sub5 extends Class26 {
+public final class UnlitPass extends RenderPass {
 
     @OriginalMember(owner = "client!jka", name = "<init>", descriptor = "(Lclient!am;)V")
-    public Class26_Sub5(@OriginalArg(0) NativeToolkit arg0) {
-        super(arg0);
+    public UnlitPass(@OriginalArg(0) NativeToolkit toolkit) {
+        super(toolkit);
     }
 
     @OriginalMember(owner = "client!jka", name = "e", descriptor = "(I)V")
     @Override
-    public void method8286() {
-        super.aClass19_Sub1_21.method8132(false);
+    public void disable() {
+        super.toolkit.method8132(false);
     }
 
     @OriginalMember(owner = "client!jka", name = "a", descriptor = "(Lclient!mw;IB)V")
     @Override
-    public void method8294(@OriginalArg(0) Interface17 arg0, @OriginalArg(1) int arg1) {
-        super.aClass19_Sub1_21.method8088(arg0);
-        super.aClass19_Sub1_21.method8054(arg1);
+    public void bindTexture(@OriginalArg(0) Interface17 texture, @OriginalArg(1) int colourOp) {
+        super.toolkit.method8088(texture);
+        super.toolkit.method8054(colourOp);
     }
 
     @OriginalMember(owner = "client!jka", name = "a", descriptor = "(ZII)V")
     @Override
-    public void method8290(@OriginalArg(1) int arg0, @OriginalArg(2) int arg1) {
+    public void setEffectParams(@OriginalArg(1) int effectParam1, @OriginalArg(2) int effectParam2) {
     }
 
     @OriginalMember(owner = "client!jka", name = "b", descriptor = "(B)Z")
     @Override
-    public boolean method8289() {
+    public boolean isSupported() {
         return true;
     }
 
     @OriginalMember(owner = "client!jka", name = "a", descriptor = "(IZ)V")
     @Override
-    public void method8297(@OriginalArg(1) boolean arg0) {
-        super.aClass19_Sub1_21.method8132(true);
+    public void enable(@OriginalArg(1) boolean lit) {
+        super.toolkit.method8132(true);
     }
 
     @OriginalMember(owner = "client!jka", name = "a", descriptor = "(ZZ)V")
     @Override
-    public void method8292(@OriginalArg(0) boolean arg0) {
+    public void applyTextureCombine(@OriginalArg(0) boolean lit) {
     }
 }
