@@ -92,7 +92,7 @@ public final class AudioBussMixer extends AudioBuss {
 
     @OriginalMember(owner = "client!nn", name = "a", descriptor = "()Lclient!dea;")
     @Override
-    public AudioBuss method9135() {
+    public AudioBuss nextSubStream() {
         return (AudioBuss) this.busses.next();
     }
 
@@ -107,7 +107,7 @@ public final class AudioBussMixer extends AudioBuss {
 
     @OriginalMember(owner = "client!nn", name = "c", descriptor = "()Lclient!dea;")
     @Override
-    public AudioBuss method9133() {
+    public AudioBuss firstSubStream() {
         return (AudioBuss) this.busses.first();
     }
 

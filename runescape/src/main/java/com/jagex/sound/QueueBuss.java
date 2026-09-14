@@ -64,7 +64,7 @@ public final class QueueBuss extends AudioBuss {
 
     @OriginalMember(owner = "client!wc", name = "a", descriptor = "()Lclient!dea;")
     @Override
-    public AudioBuss method9135() {
+    public AudioBuss nextSubStream() {
         return null;
     }
 
@@ -147,7 +147,7 @@ public final class QueueBuss extends AudioBuss {
 
     @OriginalMember(owner = "client!wc", name = "c", descriptor = "()Lclient!dea;")
     @Override
-    public AudioBuss method9133() {
+    public AudioBuss firstSubStream() {
         return null;
     }
 

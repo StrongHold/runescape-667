@@ -19,8 +19,8 @@ public final class Static440 {
         if (arg0.aClass2_Sub49_6 != null) {
             arg0.aClass2_Sub49_6.anInt8817 = 0;
         }
-        arg0.aBoolean793 = false;
-        for (@Pc(25) AudioBuss local25 = arg0.method9133(); local25 != null; local25 = arg0.method9135()) {
+        arg0.active = false;
+        for (@Pc(25) AudioBuss local25 = arg0.firstSubStream(); local25 != null; local25 = arg0.nextSubStream()) {
             method5964(local25);
         }
     }

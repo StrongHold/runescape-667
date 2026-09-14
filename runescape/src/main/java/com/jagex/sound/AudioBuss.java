@@ -9,16 +9,16 @@ import org.openrs2.deob.annotation.OriginalMember;
 public abstract class AudioBuss extends Node {
 
     @OriginalMember(owner = "client!dea", name = "l", descriptor = "Lclient!dea;")
-    public AudioBuss aClass2_Sub6_9;
+    public AudioBuss nextInBucket;
 
     @OriginalMember(owner = "client!dea", name = "n", descriptor = "I")
-    public int anInt10517;
+    public int priority;
 
     @OriginalMember(owner = "client!dea", name = "k", descriptor = "Lclient!rm;")
     public SoundPacket aClass2_Sub49_6;
 
     @OriginalMember(owner = "client!dea", name = "m", descriptor = "Z")
-    public volatile boolean aBoolean793 = true;
+    public volatile boolean active = true;
 
     @OriginalMember(owner = "client!dea", name = "a", descriptor = "(I)V")
     public abstract void skip(@OriginalArg(0) int arg0);
@@ -30,11 +30,11 @@ public abstract class AudioBuss extends Node {
     public abstract int method9132();
 
     @OriginalMember(owner = "client!dea", name = "c", descriptor = "()Lclient!dea;")
-    public abstract AudioBuss method9133();
+    public abstract AudioBuss firstSubStream();
 
     @OriginalMember(owner = "client!dea", name = "a", descriptor = "([III)V")
     protected final void mix(@OriginalArg(0) int[] arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2) {
-        if (this.aBoolean793) {
+        if (this.active) {
             this.fill(arg0, arg1, arg2);
         } else {
             this.skip(arg2);
@@ -42,7 +42,7 @@ public abstract class AudioBuss extends Node {
     }
 
     @OriginalMember(owner = "client!dea", name = "a", descriptor = "()Lclient!dea;")
-    public abstract AudioBuss method9135();
+    public abstract AudioBuss nextSubStream();
 
     @OriginalMember(owner = "client!dea", name = "d", descriptor = "()I")
     public int method9136() {

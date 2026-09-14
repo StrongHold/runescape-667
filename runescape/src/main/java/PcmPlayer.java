@@ -133,10 +133,10 @@ public class PcmPlayer {
         if (local12 == null) {
             this.aClass2_Sub6Array6[local7] = arg1;
         } else {
-            local12.aClass2_Sub6_9 = arg1;
+            local12.nextInBucket = arg1;
         }
         this.aClass2_Sub6Array5[local7] = arg1;
-        arg1.anInt10517 = arg0;
+        arg1.priority = arg0;
     }
 
     @OriginalMember(owner = "client!cd", name = "a", descriptor = "(B)V")
@@ -276,7 +276,7 @@ public class PcmPlayer {
                                 }
                                 @Pc(101) SoundPacket local101 = local97.aClass2_Sub49_6;
                                 if (local101 == null || local101.anInt8817 <= local63) {
-                                    local97.aBoolean793 = true;
+                                    local97.active = true;
                                     @Pc(127) int local127 = local97.method9132();
                                     local47 += local127;
                                     if (local101 != null) {
@@ -285,27 +285,27 @@ public class PcmPlayer {
                                     if (local47 >= this.anInt4087) {
                                         break label103;
                                     }
-                                    @Pc(148) AudioBuss local148 = local97.method9133();
+                                    @Pc(148) AudioBuss local148 = local97.firstSubStream();
                                     if (local148 != null) {
-                                        if (debug && local101 != null && local97.method9133() != null) {
+                                        if (debug && local101 != null && local97.firstSubStream() != null) {
                                             System.out.println("Warning: a pcm_stream with substreams has set its \'w\' - this can cause");
                                             System.out.println("         parent duplicate demotion, and high-pri substreams will be lost!");
                                             System.out.println("         Guilty class name: " + local97.getClass().getName());
                                             debug = true;
                                         }
 
-                                        @Pc(153) int local153 = local97.anInt10517;
+                                        @Pc(153) int local153 = local97.priority;
                                         while (local148 != null) {
                                             this.method3591(local153 * local148.method9136() >> 8, local148);
-                                            local148 = local97.method9135();
+                                            local148 = local97.nextSubStream();
                                         }
                                     }
-                                    @Pc(172) AudioBuss local172 = local97.aClass2_Sub6_9;
-                                    local97.aClass2_Sub6_9 = null;
+                                    @Pc(172) AudioBuss local172 = local97.nextInBucket;
+                                    local97.nextInBucket = null;
                                     if (local92 == null) {
                                         this.aClass2_Sub6Array6[local58] = local172;
                                     } else {
-                                        local92.aClass2_Sub6_9 = local172;
+                                        local92.nextInBucket = local172;
                                     }
                                     if (local172 == null) {
                                         this.aClass2_Sub6Array5[local58] = local92;
@@ -314,7 +314,7 @@ public class PcmPlayer {
                                 } else {
                                     local49 |= 0x1 << local58;
                                     local92 = local97;
-                                    local97 = local97.aClass2_Sub6_9;
+                                    local97 = local97.nextInBucket;
                                 }
                             }
                         }
@@ -328,8 +328,8 @@ public class PcmPlayer {
                 @Pc(218) AudioBuss local218 = this.aClass2_Sub6Array6[local58];
                 this.aClass2_Sub6Array6[local58] = this.aClass2_Sub6Array5[local58] = null;
                 while (local218 != null) {
-                    @Pc(232) AudioBuss local232 = local218.aClass2_Sub6_9;
-                    local218.aClass2_Sub6_9 = null;
+                    @Pc(232) AudioBuss local232 = local218.nextInBucket;
+                    local218.nextInBucket = null;
                     local218 = local232;
                 }
             }

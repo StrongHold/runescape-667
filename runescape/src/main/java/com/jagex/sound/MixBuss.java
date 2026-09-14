@@ -198,7 +198,7 @@ public final class MixBuss extends AudioBuss {
 
     @OriginalMember(owner = "client!bd", name = "c", descriptor = "()Lclient!dea;")
     @Override
-    public synchronized AudioBuss method9133() {
+    public synchronized AudioBuss firstSubStream() {
         return this.voiceBuss;
     }
 
@@ -371,7 +371,7 @@ public final class MixBuss extends AudioBuss {
 
     @OriginalMember(owner = "client!bd", name = "a", descriptor = "()Lclient!dea;")
     @Override
-    public synchronized AudioBuss method9135() {
+    public synchronized AudioBuss nextSubStream() {
         return null;
     }
 

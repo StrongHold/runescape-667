@@ -74,7 +74,7 @@ public final class VoiceBuss extends AudioBuss {
 
     @OriginalMember(owner = "client!uka", name = "a", descriptor = "()Lclient!dea;")
     @Override
-    public AudioBuss method9135() {
+    public AudioBuss nextSubStream() {
         @Pc(11) MusicPatchNode local11;
         do {
             local11 = (MusicPatchNode) this.voices.next();
@@ -87,12 +87,12 @@ public final class VoiceBuss extends AudioBuss {
 
     @OriginalMember(owner = "client!uka", name = "c", descriptor = "()Lclient!dea;")
     @Override
-    public AudioBuss method9133() {
+    public AudioBuss firstSubStream() {
         @Pc(9) MusicPatchNode local9 = (MusicPatchNode) this.voices.first();
         if (local9 == null) {
             return null;
         } else if (local9.stream == null) {
-            return this.method9135();
+            return this.nextSubStream();
         } else {
             return local9.stream;
         }

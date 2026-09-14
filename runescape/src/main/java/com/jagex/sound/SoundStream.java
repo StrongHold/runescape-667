@@ -1121,7 +1121,7 @@ public final class SoundStream extends AudioBuss {
 
     @OriginalMember(owner = "client!haa", name = "c", descriptor = "()Lclient!dea;")
     @Override
-    public AudioBuss method9133() {
+    public AudioBuss firstSubStream() {
         return null;
     }
 
@@ -1371,7 +1371,7 @@ public final class SoundStream extends AudioBuss {
 
     @OriginalMember(owner = "client!haa", name = "a", descriptor = "()Lclient!dea;")
     @Override
-    public AudioBuss method9135() {
+    public AudioBuss nextSubStream() {
         return null;
     }
 
