@@ -50,7 +50,7 @@ val compileJawtShim by tasks.registering(Exec::class) {
 
 tasks.register("assembleNatives") {
     description = "Builds every native this module owns."
-    dependsOn(compileJawtShim)
+    dependsOn(compileJawtShim, compileOpenGlBinding, compileMemoryLibrary)
 }
 
 /**
@@ -439,12 +439,11 @@ val openGlLibrary = layout.buildDirectory.file("natives/libjaggl.dylib")
 /**
  * Builds the OpenGL binding.
  *
- * It is incomplete: the natives that marshal arrays or strings and the platform calls that own the
- * context are not written yet, so the client cannot use this. What it does show is that the
- * mechanical part maps onto the OpenGL this machine has, which is most of the binding.
+ * The mechanical half is generated from the client's JNI headers and the platform half, which
+ * owns the context and the layer that presents it, is written by hand beside it.
  */
 val compileOpenGlBinding by tasks.registering(Exec::class) {
-    description = "Builds the part of the OpenGL binding that is written."
+    description = "Builds the OpenGL binding."
     dependsOn(generateOpenGlBinding, ":unpackX64Jdk")
     inputs.file(openGlSource)
     outputs.file(openGlLibrary)
@@ -480,4 +479,53 @@ val compileOpenGlBinding by tasks.registering(Exec::class) {
     doFirst {
         outputDirectory.mkdirs()
     }
+}
+
+val memorySource = layout.projectDirectory.file("src/main/native/jaclib.c")
+val memoryLibrary = layout.buildDirectory.file("natives/libjaclib.dylib")
+
+/**
+ * Builds the native memory library.
+ *
+ * The client's own JNI headers are on the include path and the source includes them, so a
+ * signature that does not match the Java declaration fails the compile rather than the client.
+ */
+val compileMemoryLibrary by tasks.registering(Exec::class) {
+    description = "Builds the native memory library the hardware toolkits allocate from."
+    dependsOn(":unpackX64Jdk", ":runescape:compileJava")
+
+    val headers = project(":runescape").layout.buildDirectory.dir("generated/jni")
+    val target = memoryLibrary.get().asFile
+
+    inputs.file(memorySource)
+    inputs.dir(headers)
+    outputs.file(memoryLibrary)
+
+    executable = "clang"
+    args(
+        "-arch", "arm64",
+        "-arch", "x86_64",
+        "-dynamiclib",
+        "-Wall",
+        "-Werror",
+        "-I", jdkHome.dir("include").asFile.absolutePath,
+        "-I", jdkHome.dir("include/darwin").asFile.absolutePath,
+        "-I", headers.get().asFile.absolutePath,
+        "-install_name", "@loader_path/libjaclib.dylib",
+        "-o", target.absolutePath,
+        memorySource.asFile.absolutePath,
+    )
+
+    doFirst {
+        target.parentFile.mkdirs()
+    }
+}
+
+val verifyMemoryLibrary by tasks.registering(JavaExec::class) {
+    description = "Allocates from the native memory library and forces it to compact."
+    dependsOn(compileMemoryLibrary)
+    mainClass = "MemoryHeap"
+    classpath = sourceSets["main"].runtimeClasspath
+    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+    args(memoryLibrary.get().asFile.absolutePath)
 }
