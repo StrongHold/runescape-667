@@ -570,9 +570,12 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_glDeleteProgramARB(JNIEnv *env, jclass 
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_glBufferDataARBub(JNIEnv *env, jclass owner, jint target,
                                                             jint size, jbyteArray data, jint offset,
                                                             jint usage) {
-    jbyte *bytes = (*env)->GetPrimitiveArrayCritical(env, data, NULL);
-    glBufferDataARB((GLenum) target, (GLsizeiptrARB) size, bytes + offset, (GLenum) usage);
-    (*env)->ReleasePrimitiveArrayCritical(env, data, bytes, JNI_ABORT);
+    jbyte *bytes = data == NULL ? NULL : (*env)->GetPrimitiveArrayCritical(env, data, NULL);
+    glBufferDataARB((GLenum) target, (GLsizeiptrARB) size,
+                    bytes == NULL ? NULL : bytes + offset, (GLenum) usage);
+    if (bytes != NULL) {
+        (*env)->ReleasePrimitiveArrayCritical(env, data, bytes, JNI_ABORT);
+    }
 }
 
 /* Two arrays, one for the length written and one for the text. */
@@ -580,10 +583,15 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_glGetInfoLogARB(JNIEnv *env, jclass own
                                                           jint limit, jintArray written,
                                                           jint writtenOffset, jbyteArray log,
                                                           jint logOffset) {
-    jint *counts = (*env)->GetPrimitiveArrayCritical(env, written, NULL);
-    jbyte *text = (*env)->GetPrimitiveArrayCritical(env, log, NULL);
-    glGetInfoLogARB((GLhandleARB) object, (GLsizei) limit, (GLsizei *) (counts + writtenOffset),
-                    (GLcharARB *) (text + logOffset));
-    (*env)->ReleasePrimitiveArrayCritical(env, log, text, 0);
-    (*env)->ReleasePrimitiveArrayCritical(env, written, counts, 0);
+    jint *counts = written == NULL ? NULL : (*env)->GetPrimitiveArrayCritical(env, written, NULL);
+    jbyte *text = log == NULL ? NULL : (*env)->GetPrimitiveArrayCritical(env, log, NULL);
+    glGetInfoLogARB((GLhandleARB) object, (GLsizei) limit,
+                    counts == NULL ? NULL : (GLsizei *) (counts + writtenOffset),
+                    text == NULL ? NULL : (GLcharARB *) (text + logOffset));
+    if (text != NULL) {
+        (*env)->ReleasePrimitiveArrayCritical(env, log, text, 0);
+    }
+    if (counts != NULL) {
+        (*env)->ReleasePrimitiveArrayCritical(env, written, counts, 0);
+    }
 }
