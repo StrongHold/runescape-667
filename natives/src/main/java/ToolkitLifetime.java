@@ -23,6 +23,7 @@ public final class ToolkitLifetime {
 
     public static void main(String[] args) {
         try {
+            Watchdog.arm("The toolkit lifetime check", 120);
             run(args[0]);
             System.out.println("built and discarded " + ROUNDS + " toolkits");
             System.exit(0);

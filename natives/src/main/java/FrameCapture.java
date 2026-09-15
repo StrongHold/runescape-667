@@ -34,6 +34,7 @@ public final class FrameCapture {
      */
     public static void main(String[] args) {
         try {
+            Watchdog.arm("The frame capture", 120);
             capture(args[0]);
             System.out.println("captured " + FRAMES + " frames");
             System.exit(0);

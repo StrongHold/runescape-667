@@ -27,7 +27,7 @@ public final class MacSoftwareToolkitLifetime {
      * Holds a toolkit for the life of the client, if this platform needs it held.
      */
     public static void hold(Object toolkit) {
-        if (toolkit != null && MacSoftwareToolkitLibrary.isSupplyingSurface()) {
+        if (toolkit != null && MacToolkitLibrary.isSupplyingSurface()) {
             keep(toolkit);
         }
     }
@@ -41,7 +41,7 @@ public final class MacSoftwareToolkitLifetime {
      * on its way out anyway.
      */
     public static boolean holdRatherThanRelease(Object object) {
-        if (object == null || !MacSoftwareToolkitLibrary.isSupplyingSurface()) {
+        if (object == null || !MacToolkitLibrary.isSupplyingSurface()) {
             return false;
         }
 

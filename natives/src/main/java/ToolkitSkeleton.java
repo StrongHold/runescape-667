@@ -21,6 +21,7 @@ public final class ToolkitSkeleton {
 
     public static void main(String[] args) {
         try {
+            Watchdog.arm("The skeleton check", 120);
             build(args[0]);
             System.out.println("the toolkit built against the skeleton on " + System.getProperty("os.arch"));
             System.exit(0);

@@ -6,14 +6,15 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.List;
 
 /**
- * Supplies the software toolkit with a drawing surface on macOS.
+ * Supplies the toolkit libraries with a drawing surface on macOS.
  *
- * The toolkit asks JavaVM.framework for a surface of a version that framework no longer serves, so
- * on macOS it can never obtain one and the client falls back to the Java toolkit. The toolkit takes
- * only one symbol from that framework, so a copy of it that resolves the symbol against a library
- * shipped with the client works instead.
+ * Both the software and the hardware toolkit ask JavaVM.framework for a surface, and that
+ * framework no longer serves the versions they ask for, so on macOS neither can obtain one and the
+ * client falls back to the Java toolkit. Each takes only one symbol from that framework, so a copy
+ * that resolves the symbol against a library shipped with the client works instead.
  *
  * The library shipped with the client is named by the {@value #SURFACE_PROPERTY} system property.
  * Without that property nothing happens here and the toolkit loads exactly as it always did. The
@@ -21,19 +22,18 @@ import java.nio.file.Files;
  *
  * The file downloaded for the toolkit is never modified.
  */
-public final class MacSoftwareToolkitLibrary {
+public final class MacToolkitLibrary {
 
     /**
-     * The name the toolkit registers its library under.
+     * The libraries that ask JavaVM.framework for a drawing surface, by the name each is
+     * registered under.
      */
-    private static final String LIBRARY = "sw3d";
+    private static final List<String> LIBRARIES = List.of("sw3d", "jaggl");
 
     /**
      * Names the library that provides the drawing surface.
      */
-    private static final String SURFACE_PROPERTY = "sw3d.surface.library";
-
-    private static final String COPY_NAME = "libsw3d-surface.dylib";
+    private static final String SURFACE_PROPERTY = "toolkit.surface.library";
 
     private static final byte[] JAVA_VM = path("/System/Library/Frameworks/JavaVM.framework/Versions/A/JavaVM");
 
@@ -43,12 +43,12 @@ public final class MacSoftwareToolkitLibrary {
      */
     public static void substitute(String name) {
         File surface = surfaceLibrary();
-        if (LIBRARY.equals(name) && surface != null) {
-            File shipped = (File) LibraryManager.libraries.get(LIBRARY);
+        if (LIBRARIES.contains(name) && surface != null) {
+            File shipped = (File) LibraryManager.libraries.get(name);
             if (shipped != null) {
-                File copy = new File(surface.getParentFile(), COPY_NAME);
+                File copy = new File(surface.getParentFile(), "lib" + name + "-surface.dylib");
                 if (writeCopy(shipped, copy, surface.getName())) {
-                    LibraryManager.putLibrary(copy, LIBRARY);
+                    LibraryManager.putLibrary(copy, name);
                 }
             }
         }
@@ -130,7 +130,7 @@ public final class MacSoftwareToolkitLibrary {
         return value.getBytes(StandardCharsets.US_ASCII);
     }
 
-    private MacSoftwareToolkitLibrary() {
+    private MacToolkitLibrary() {
         /* empty */
     }
 }
