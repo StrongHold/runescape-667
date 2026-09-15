@@ -21,5 +21,6 @@ rootProject.name = "runescape-667"
 include(
     "client",
     "loader",
+    "natives",
     "runescape",
 )
