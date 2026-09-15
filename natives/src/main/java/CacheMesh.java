@@ -42,18 +42,35 @@ public final class CacheMesh {
     }
 
     /**
-     * The first model in the cache with at least this many faces, which keeps the scene away from
-     * the many tiny models the cache begins with.
+     * The first model in the cache with at least this many faces and none of them textured.
+     *
+     * A textured face sends the toolkit to its texture cache, which answers nothing while the
+     * scenes hand it a texture source that holds nothing, and it reads the answer without
+     * checking it. An untextured model keeps that out of the way until textures are written.
      */
-    public Optional<Mesh> firstWithFaces(int faces) {
+    public Optional<Mesh> firstUntexturedWithFaces(int faces) {
         for (var group = 0; group < GROUP_LIMIT; group++) {
             var mesh = read(group);
-            if (mesh.isPresent() && mesh.get().faceCount >= faces) {
+            if (mesh.isPresent() && mesh.get().faceCount >= faces && untextured(mesh.get())) {
                 return mesh;
             }
         }
 
         return Optional.empty();
+    }
+
+    private static boolean untextured(Mesh mesh) {
+        if (mesh.faceTexture == null) {
+            return true;
+        }
+
+        for (var face = 0; face < mesh.faceCount; face++) {
+            if (mesh.faceTexture[face] != -1) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private Optional<Mesh> read(int group) {

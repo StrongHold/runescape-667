@@ -246,6 +246,9 @@ JNIEXPORT void JNICALL Java_ja_a(JNIEnv *env, jobject self, jlong handle, jint x
     matrix->row[3][2] += (float) z;
 }
 
+/**
+ * Replaces the matrix with a single turn. The client uses these to start a transform.
+ */
 JNIEXPORT void JNICALL Java_ja_VA(JNIEnv *env, jobject self, jlong handle, jint angle) {
     (void) env;
     (void) self;
@@ -266,13 +269,19 @@ JNIEXPORT void JNICALL Java_ja_NA(JNIEnv *env, jobject self, jlong handle, jint 
     }
 }
 
+/**
+ * Turns whatever the matrix already held, so that turns can be chained. The turn goes after what
+ * is already there rather than before it.
+ */
 JNIEXPORT void JNICALL Java_ja_J(JNIEnv *env, jobject self, jlong handle, jint angle) {
     (void) env;
     (void) self;
 
     Matrix *matrix = matrixOf(handle);
     if (matrix != NULL) {
-        rotationX(matrix, angle);
+        Matrix rotation;
+        rotationX(&rotation, angle);
+        compose(matrix, &rotation);
     }
 }
 
@@ -282,7 +291,9 @@ JNIEXPORT void JNICALL Java_ja_m(JNIEnv *env, jobject self, jlong handle, jint a
 
     Matrix *matrix = matrixOf(handle);
     if (matrix != NULL) {
-        rotationY(matrix, angle);
+        Matrix rotation;
+        rotationY(&rotation, angle);
+        compose(matrix, &rotation);
     }
 }
 
@@ -292,14 +303,16 @@ JNIEXPORT void JNICALL Java_ja_za(JNIEnv *env, jobject self, jlong handle, jint 
 
     Matrix *matrix = matrixOf(handle);
     if (matrix != NULL) {
-        rotationZ(matrix, angle);
+        Matrix rotation;
+        rotationZ(&rotation, angle);
+        compose(matrix, &rotation);
     }
 }
 
 /**
  * Turns about the upright axis, which is what the client means when it asks a matrix to rotate
- * without saying about what. Like every other turn here it replaces the matrix rather than
- * turning what it already held.
+ * without saying about what. This one replaces the matrix, where turning about a named axis
+ * chains onto it.
  */
 JNIEXPORT void JNICALL Java_ja_t(JNIEnv *env, jobject self, jlong handle, jint angle) {
     (void) env;

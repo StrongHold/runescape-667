@@ -49,6 +49,7 @@ public final class MatrixProbe {
             var lines = new ArrayList<String>();
 
             identity(toolkit, lines);
+            chains(toolkit, lines);
             projectionVariants(toolkit, lines);
             sineTable(toolkit, lines);
             rotations(toolkit, lines);
@@ -110,6 +111,37 @@ public final class MatrixProbe {
                 forRelative.projectRelative(point[0], point[1], point[2], destination);
                 lines.add("alone " + angle + " | projectRelative " + describe(point) + " -> " + describe(destination));
             }
+        }
+    }
+
+    /**
+     * Turns applied one after another, which is how the client builds a model's transform.
+     *
+     * A turn applied to an identity matrix cannot say whether it replaced the matrix or combined
+     * with it, because both give the same answer. Only a chain can, and the client uses chains.
+     */
+    private static void chains(com.jagex.graphics.Toolkit toolkit, List<String> lines) {
+        for (var angle = TURN / 16; angle < TURN; angle += TURN / 8) {
+            var chained = toolkit.createMatrix();
+            chained.makeRotationZ(angle);
+            chained.rotateAxisY(angle / 2);
+            record(lines, "chain zy " + angle, chained);
+
+            chained.makeRotationZ(angle);
+            chained.rotateAxisY(angle / 2);
+            chained.translate(10, 20, 30);
+            chained.rotateAxisX(angle / 4);
+            record(lines, "chain zyx " + angle, chained);
+
+            var moved = toolkit.createMatrix();
+            moved.applyTranslation(50, 60, 70);
+            moved.rotateAxisY(angle);
+            record(lines, "chain move then turn " + angle, moved);
+
+            var turned = toolkit.createMatrix();
+            turned.makeRotationX(angle);
+            turned.rotate(angle / 2);
+            record(lines, "chain x then rotate " + angle, turned);
         }
     }
 

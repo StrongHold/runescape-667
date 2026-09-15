@@ -21,6 +21,15 @@ public sealed interface Scene {
     int HEIGHT = 384;
     int CLEAR_COLOUR = 0x202080;
 
+    /** The toolkit turns through this many steps of a circle. */
+    int TURN = 16384;
+
+    /** How close to the camera a model may come before it is cut away. */
+    int NEAR = 50;
+
+    /** How far in front of the camera the model in the geometry scene sits. */
+    int DEPTH = 900;
+
     List<Scene> ALL = List.of(
         new Sprites(),
         new AlphaSweep(),
@@ -40,6 +49,18 @@ public sealed interface Scene {
     }
 
     void draw(Toolkit toolkit, Props props);
+
+    /**
+     * Whether our toolkit is expected to draw this scene yet.
+     *
+     * A scene for a native that is not written is still worth drawing, because the shipped
+     * toolkit's frame is the thing the implementation will be written against. It is reported as
+     * outstanding rather than as a failure, so that it cannot hide a real difference in a scene
+     * that is finished.
+     */
+    default boolean written() {
+        return true;
+    }
 
     /**
      * What a difference in this scene is reported against.
@@ -158,12 +179,20 @@ public sealed interface Scene {
     record Geometry() implements Scene {
 
         @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
         public void draw(Toolkit toolkit, Props props) {
             toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
 
-            for (var depth : new int[] {200, 600, 1800, 5400, 16200}) {
-                props.matrix().applyTranslation(0, 0, depth);
-                props.model().render(props.matrix(), null, 0);
+            for (var step = 0; step < 4; step++) {
+                props.matrix().makeRotationZ(0);
+                props.matrix().rotateAxisY(step * TURN / 4);
+                props.matrix().translate(0, 0, DEPTH);
+                props.model().render(props.matrix(), null, 1);
             }
         }
     }
