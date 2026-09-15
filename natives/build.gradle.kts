@@ -735,10 +735,29 @@ val captureOwnFrames by tasks.registering(JavaExec::class) {
     args(toolkitLibrary.get().asFile.absolutePath)
     environment("SW3D_DUMP", directory.absolutePath)
     environment("SW3D_VERBOSE", providers.environmentVariable("SW3D_VERBOSE").getOrElse(""))
+    inputs.file(toolkitLibrary)
     outputs.dir(ownFrames)
 
     doFirst {
         directory.deleteRecursively()
         directory.mkdirs()
     }
+}
+
+/**
+ * Fails unless our toolkit rasterised the fixed scene exactly as the shipped one did.
+ *
+ * This is the oracle the rest of the toolkit is written against. Both sides render the same scene
+ * through the same harness and dump their frames the same way, so a difference is a difference in
+ * the rasteriser and nothing else.
+ */
+val verifyOwnFrames by tasks.registering(JavaExec::class) {
+    description = "Compares our toolkit's frames against the shipped toolkit's, pixel for pixel."
+    dependsOn(captureFrames, captureOwnFrames)
+    mainClass = "FrameDiff"
+    classpath = sourceSets["main"].runtimeClasspath
+    args(
+        layout.buildDirectory.dir("frames").get().asFile.absolutePath,
+        ownFrames.get().asFile.absolutePath,
+    )
 }
