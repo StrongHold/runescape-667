@@ -13,6 +13,7 @@ val x64JdkUrl = "https://cdn.azul.com/zulu/bin/zulu21.52.203-ca-jdk21.0.12.1-mac
 val x64JdkSha256 = "6edaf4b72ec6c23d86a46d8b88d0cfed2aaf81645fee13fd852d37af23c4b9fb"
 val x64JdkDir = layout.projectDirectory.dir(".gradle/jdk-x64")
 val x64Java = x64JdkDir.file("unpacked/Home/bin/java")
+val surfaceLibrary = layout.projectDirectory.file("natives/build/natives/libjawtshim.dylib")
 
 val onMacOs = providers.systemProperty("os.name").map { it.startsWith("Mac") }.getOrElse(false)
 
@@ -83,8 +84,9 @@ subprojects {
     if (onMacOs) {
         plugins.withType<ApplicationPlugin> {
             tasks.named<JavaExec>("run") {
-                dependsOn(unpackX64Jdk)
+                dependsOn(unpackX64Jdk, ":natives:compileJawtShim")
                 setExecutable(x64Java.asFile.absolutePath)
+                systemProperty("sw3d.surface.library", surfaceLibrary.asFile.absolutePath)
             }
         }
     }
