@@ -28,6 +28,8 @@ val compileJawtShim by tasks.registering(Exec::class) {
         "-fobjc-arc",
         "-Wall",
         "-Werror",
+        // The toolkits are from 2011 and the surfaces they ask for are deprecated by design.
+        "-Wno-deprecated-declarations",
         "-I", jdkHome.dir("include").asFile.absolutePath,
         "-I", jdkHome.dir("include/darwin").asFile.absolutePath,
         "-framework", "Cocoa",
