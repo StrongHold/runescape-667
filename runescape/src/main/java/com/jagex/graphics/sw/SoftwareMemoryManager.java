@@ -25,6 +25,9 @@ public final class SoftwareMemoryManager {
         }
 
         if (instances <= 0) {
+            if (MacSoftwareToolkitLifetime.holdRatherThanRelease(object)) {
+                return;
+            }
             object.w(false);
         } else {
             @Pc(15) SoftwareObjectNode node = new SoftwareObjectNode();

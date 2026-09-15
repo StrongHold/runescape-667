@@ -1,7 +1,5 @@
 package com.jagex.graphics.sw;
 
-import com.jagex.graphics.Toolkit;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,16 +21,37 @@ import java.util.List;
  */
 public final class MacSoftwareToolkitLifetime {
 
-    private static final List<Toolkit> held = new ArrayList<>();
+    private static final List<Object> held = new ArrayList<>();
 
     /**
      * Holds a toolkit for the life of the client, if this platform needs it held.
      */
-    public static void hold(Toolkit toolkit) {
+    public static void hold(Object toolkit) {
         if (toolkit != null && MacSoftwareToolkitLibrary.isSupplyingSurface()) {
-            synchronized (held) {
-                held.add(toolkit);
-            }
+            keep(toolkit);
+        }
+    }
+
+    /**
+     * Whether an object should be kept rather than released where it stands.
+     *
+     * An object released this way is released on whichever thread the collector happens to be
+     * running, and a canvas released there drains a pool belonging to another thread. Keeping the
+     * object instead costs its memory and nothing else, because everything released this way is
+     * on its way out anyway.
+     */
+    public static boolean holdRatherThanRelease(Object object) {
+        if (object == null || !MacSoftwareToolkitLibrary.isSupplyingSurface()) {
+            return false;
+        }
+
+        keep(object);
+        return true;
+    }
+
+    private static void keep(Object object) {
+        synchronized (held) {
+            held.add(object);
         }
     }
 
