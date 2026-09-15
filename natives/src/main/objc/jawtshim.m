@@ -303,6 +303,45 @@ static BOOL verbose(void) {
 @end
 
 /*
+ * The hardware toolkit attaches its context from the thread it draws on. AppKit requires the main
+ * thread for that and stops the process when it is called from anywhere else, so the call is
+ * passed to the main thread on the toolkit's behalf.
+ *
+ * This replaces a method on a system class, which is worth doing only because the alternative is
+ * changing which thread the client builds its toolkit on. It is put in place when the hardware
+ * toolkit asks for a surface and not before, and it changes where the call runs rather than what it
+ * does.
+ */
+static IMP attachContextToView;
+
+static void mainThreadSetView(id context, SEL selector, id view) {
+    void (*attach)(id, SEL, id) = (void (*)(id, SEL, id)) attachContextToView;
+
+    if ([NSThread isMainThread]) {
+        attach(context, selector, view);
+    } else {
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            attach(context, selector, view);
+        });
+    }
+}
+
+static void passSetViewToTheMainThread(void) {
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        Method setView = class_getInstanceMethod(NSClassFromString(@"NSOpenGLContext"), @selector(setView:));
+        if (setView == NULL) {
+            SHIMLOG("no setView: to pass to the main thread");
+            return;
+        }
+
+        attachContextToView = method_getImplementation(setView);
+        method_setImplementation(setView, (IMP) mainThreadSetView);
+        SHIMLOG("setView: will run on the main thread");
+    });
+}
+
+/*
  * The hardware toolkit wants a real NSView, because it hands whatever it finds to
  * [NSOpenGLContext setView:]. A Canvas has no view of its own, so one is made and placed in the
  * window's own view.
@@ -500,6 +539,8 @@ static JAWT_DrawingSurface *JNICALL softwareSurface(JNIEnv *env, jobject target)
  * The hardware toolkit attaches an OpenGL context to what it is handed, so it gets a real view.
  */
 static JAWT_DrawingSurface *JNICALL hardwareSurface(JNIEnv *env, jobject target) {
+    passSetViewToTheMainThread();
+
     NSView *view = glView(env, target);
     if (view == nil) {
         SHIMLOG("no view for the hardware toolkit");
