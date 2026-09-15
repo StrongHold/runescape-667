@@ -26,9 +26,34 @@ typedef struct {
     uint32_t *pixels;
     int width;
     int height;
+
+    /** What may be drawn on, as a half open rectangle. Resetting it opens the whole buffer. */
+    int clipLeft;
+    int clipTop;
+    int clipRight;
+    int clipBottom;
 } Raster;
 
 extern Raster raster;
+
+/**
+ * Points the renderer at a buffer, or at nothing, and opens the clip over all of it.
+ */
+void rasterUse(uint32_t *pixels, int width, int height);
+
+void rasterResetClip(void);
+
+/**
+ * How the client asks for a colour to be put down. It passes the alpha the blending mode uses in
+ * the top byte of the colour itself.
+ */
+enum {
+    BLEND_OPAQUE = 0,
+    BLEND_ALPHA = 1,
+    BLEND_ADD = 2
+};
+
+uint32_t blend(uint32_t destination, uint32_t colour, int mode);
 
 Surface *surfaceCreate(JNIEnv *env, jobject canvas, int width, int height);
 void surfaceResize(Surface *surface, int width, int height);

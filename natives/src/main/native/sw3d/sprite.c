@@ -109,10 +109,10 @@ JNIEXPORT void JNICALL Java_j_W(JNIEnv *env, jobject self, jlong handle, jint x,
         return;
     }
 
-    int firstRow = y < 0 ? -y : 0;
-    int firstColumn = x < 0 ? -x : 0;
-    int lastRow = y + sprite->height > raster.height ? raster.height - y : sprite->height;
-    int lastColumn = x + sprite->width > raster.width ? raster.width - x : sprite->width;
+    int firstRow = y < raster.clipTop ? raster.clipTop - y : 0;
+    int firstColumn = x < raster.clipLeft ? raster.clipLeft - x : 0;
+    int lastRow = y + sprite->height > raster.clipBottom ? raster.clipBottom - y : sprite->height;
+    int lastColumn = x + sprite->width > raster.clipRight ? raster.clipRight - x : sprite->width;
 
     uint32_t tint = (uint32_t) colour & 0xFFFFFF;
 

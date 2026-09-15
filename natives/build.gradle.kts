@@ -674,47 +674,56 @@ val generateToolkitStubs by tasks.registering {
 
 val toolkitLibrary = layout.buildDirectory.file("natives/libsw3d.dylib")
 
+/**
+ * Builds the software toolkit.
+ *
+ * The sources are listed when the task runs rather than when it is configured, so that adding a
+ * file to the directory rebuilds rather than being silently left out of the link.
+ */
 val compileSoftwareToolkit by tasks.registering(Exec::class) {
     description = "Builds the software toolkit."
     dependsOn(generateToolkitStubs, ":unpackX64Jdk")
 
     val target = toolkitLibrary.get().asFile
-    val written = toolkitDirectory.asFile.walkTopDown()
-        .filter { it.isFile && (it.extension == "c" || it.extension == "m") }
-        .map { it.absolutePath }
-        .sorted()
-        .toList()
+    val written = fileTree(toolkitDirectory) { include("**/*.c", "**/*.m") }
+    val stubs = toolkitStubs.get().asFile
+    val includes = listOf(
+        jdkHome.dir("include").asFile.absolutePath,
+        jdkHome.dir("include/darwin").asFile.absolutePath,
+        toolkitDirectory.asFile.absolutePath,
+    )
 
-    inputs.dir(toolkitDirectory)
+    inputs.files(written)
     inputs.file(toolkitStubs)
     outputs.file(toolkitLibrary)
 
     executable = "clang"
-    args(
-        listOf(
-            "-arch", "arm64",
-            "-arch", "x86_64",
-            "-dynamiclib",
-            "-fobjc-arc",
-            "-Wall",
-            "-Werror",
-            // The surfaces a 2011 toolkit needs are deprecated by design.
-            "-Wno-deprecated-declarations",
-            "-O2",
-            "-I", jdkHome.dir("include").asFile.absolutePath,
-            "-I", jdkHome.dir("include/darwin").asFile.absolutePath,
-            "-I", toolkitDirectory.asFile.absolutePath,
-            "-framework", "Cocoa",
-            "-framework", "QuartzCore",
-            "-framework", "ImageIO",
-            "-install_name", "@loader_path/libsw3d.dylib",
-            "-o", target.absolutePath,
-            toolkitStubs.get().asFile.absolutePath,
-        ) + written
-    )
 
     doFirst {
         target.parentFile.mkdirs()
+        setArgs(
+            listOf(
+                "-arch", "arm64",
+                "-arch", "x86_64",
+                "-dynamiclib",
+                "-fobjc-arc",
+                "-Wall",
+                "-Werror",
+                // The surfaces a 2011 toolkit needs are deprecated by design.
+                "-Wno-deprecated-declarations",
+                "-O2",
+            )
+                + includes.flatMap { listOf("-I", it) }
+                + listOf(
+                    "-framework", "Cocoa",
+                    "-framework", "QuartzCore",
+                    "-framework", "ImageIO",
+                    "-install_name", "@loader_path/libsw3d.dylib",
+                    "-o", target.absolutePath,
+                    stubs.absolutePath,
+                )
+                + written.files.map { it.absolutePath }.sorted()
+        )
     }
 }
 

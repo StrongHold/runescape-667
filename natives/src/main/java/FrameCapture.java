@@ -35,6 +35,11 @@ public final class FrameCapture {
     private static final int GRADIENT_X = 10;
     private static final int GRADIENT_Y = 10;
 
+    private static final int MATRIX_Y = 272;
+    private static final int MATRIX_BANDS = 7;
+    private static final int MATRIX_BAND_HEIGHT = 16;
+    private static final int[] ALPHAS = {1, 64, 128, 129, 192, 254, 255};
+
     /**
      * The window keeps the virtual machine alive after this method returns, so every path out of
      * here ends in an explicit exit. Without that a failed check hangs instead of reporting.
@@ -74,6 +79,7 @@ public final class FrameCapture {
             toolkit.ya();
             sprite.render(GRADIENT_X, GRADIENT_Y, 0, 0xFFFFFF, 0);
             sprite.render(GRADIENT_X, 200, 3, 0xFFFFFF, 0);
+            drawFlatShapes(toolkit);
             toolkit.flip(0, 0);
             Thread.sleep(200);
         }
@@ -136,6 +142,92 @@ public final class FrameCapture {
                 "Row " + row + " holds the clear colour, so the gradient is not where it was drawn "
                     + "and its " + edge + " cannot be read.");
         }
+    }
+
+    /**
+     * The shapes the client's interfaces are made of, drawn where they cannot land on the sprites.
+     *
+     * Each is drawn twice, once inside a clip that cuts it in half, so a clip that is ignored or
+     * applied to the wrong edge shows as a difference rather than as nothing.
+     */
+    private static void drawFlatShapes(Toolkit toolkit) {
+        alphaSweep(toolkit);
+        modes(toolkit);
+        clipped(toolkit);
+        blendMatrix(toolkit);
+    }
+
+    /**
+     * Every source value blended over a spread of destination values, at one alpha per band.
+     *
+     * A blend can be wrong in a way that only shows at particular values, and two formulas that
+     * agree on most inputs disagree on a handful. This leaves nowhere for that to hide: each
+     * column is one source value and each band is one destination and alpha, so the frame carries
+     * the whole function rather than a few samples of it.
+     */
+    private static void blendMatrix(Toolkit toolkit) {
+        for (int band = 0; band < MATRIX_BANDS; band++) {
+            int y = MATRIX_Y + band * MATRIX_BAND_HEIGHT;
+            int destination = band * 36;
+            int alpha = ALPHAS[band % ALPHAS.length];
+
+            toolkit.aa(0, y, 256, MATRIX_BAND_HEIGHT, 0xFF000000 | grey(destination), 0);
+
+            for (int source = 0; source < 256; source++) {
+                toolkit.aa(source, y, 1, MATRIX_BAND_HEIGHT, (alpha << 24) | grey(source), 1);
+            }
+        }
+    }
+
+    private static int grey(int value) {
+        return (value << 16) | (value << 8) | value;
+    }
+
+    /**
+     * The same fill at every alpha the client can ask for, so the blend is pinned across its whole
+     * range rather than at one or two points where more than one formula would fit.
+     */
+    private static void alphaSweep(Toolkit toolkit) {
+        for (int step = 0; step <= 16; step++) {
+            int alpha = step == 16 ? 0xFF : step * 16;
+            toolkit.aa(130 + step * 22, 20, 20, 24, (alpha << 24) | 0xCC3311, 1);
+        }
+    }
+
+    /**
+     * Each way of putting a colour down, over a background and over an already drawn shape, so
+     * that a blend which only looks right against the clear colour still fails.
+     */
+    private static void modes(Toolkit toolkit) {
+        toolkit.aa(130, 60, 340, 24, 0xFF806040, 0);
+
+        toolkit.aa(140, 66, 60, 12, 0xFFCC3311, 0);
+        toolkit.aa(210, 66, 60, 12, 0x80CC3311, 1);
+        toolkit.aa(280, 66, 60, 12, 0xFFCC3311, 2);
+        toolkit.aa(350, 66, 60, 12, 0xFFF0F0F0, 2);
+
+        toolkit.outlineRect(130, 100, 80, 30, 0xFF33CC11, 0);
+        toolkit.outlineRect(220, 100, 80, 30, 0x8033CC11, 1);
+        toolkit.outlineRect(310, 100, 80, 30, 0xFF33CC11, 2);
+
+        toolkit.line(130, 150, 470, 170, 0xFF11CCCC, 0);
+        toolkit.line(470, 155, 130, 175, 0x8011CCCC, 1);
+        toolkit.line(130, 180, 140, 250, 0xFF11CCCC, 0);
+        toolkit.line(160, 250, 150, 180, 0xFFCCCC11, 0);
+
+
+    }
+
+    /**
+     * The same shapes again inside a clip that cuts each of them, so a clip applied to the wrong
+     * edge or ignored altogether shows up rather than passing unnoticed.
+     */
+    private static void clipped(Toolkit toolkit) {
+        toolkit.KA(330, 200, 450, 250);
+        toolkit.aa(300, 190, 180, 70, 0xFF5D5447, 0);
+        toolkit.outlineRect(320, 195, 150, 60, 0xFFCC11CC, 0);
+        toolkit.line(300, 190, 480, 260, 0xFFFFFFFF, 0);
+        toolkit.la();
     }
 
     /**
