@@ -161,11 +161,30 @@ public final class MatrixProbe {
         }
     }
 
+    /**
+     * Cameras, with one axis turned at a time before any combination of them.
+     *
+     * A camera turns about three axes and the order they are applied in cannot be read off a case
+     * where all three are turned together, because several orders fit. One axis at a time pins
+     * each turn, and the combinations then pin the order.
+     */
     private static void cameras(com.jagex.graphics.Toolkit toolkit, List<String> lines) {
         for (var angle = 0; angle < TURN; angle += TURN / 8) {
-            var camera = toolkit.createMatrix();
-            camera.createCamera(100, -200, 300, angle, angle / 2, angle / 4);
-            record(lines, "createCamera " + angle, camera);
+            var aboutX = toolkit.createMatrix();
+            aboutX.createCamera(100, -200, 300, angle, 0, 0);
+            record(lines, "cameraX " + angle, aboutX);
+
+            var aboutY = toolkit.createMatrix();
+            aboutY.createCamera(100, -200, 300, 0, angle, 0);
+            record(lines, "cameraY " + angle, aboutY);
+
+            var aboutZ = toolkit.createMatrix();
+            aboutZ.createCamera(100, -200, 300, 0, 0, angle);
+            record(lines, "cameraZ " + angle, aboutZ);
+
+            var together = toolkit.createMatrix();
+            together.createCamera(100, -200, 300, angle, angle / 2, angle / 4);
+            record(lines, "camera " + angle, together);
         }
     }
 
