@@ -719,6 +719,7 @@ val captureOwnFrames by tasks.registering(JavaExec::class) {
     environment("SW3D_DUMP", directory.absolutePath)
     environment("SW3D_VERBOSE", providers.environmentVariable("SW3D_VERBOSE").getOrElse(""))
     inputs.file(toolkitLibrary)
+    inputs.files(sourceSets["main"].runtimeClasspath)
     outputs.dir(ownFrames)
 
     doFirst {

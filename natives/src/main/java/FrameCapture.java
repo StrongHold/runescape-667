@@ -93,7 +93,7 @@ public final class FrameCapture {
         for (var scene : Scene.ALL) {
             for (var repeat = 0; repeat < REPEATS; repeat++) {
                 drawOnce(toolkit, scene, props);
-                manifest.add(scene.title());
+                manifest.add(scene.written() ? scene.title() : scene.title() + " (outstanding)");
             }
         }
 
@@ -134,12 +134,14 @@ public final class FrameCapture {
             return FlatMesh.INSTANCE.build();
         }
 
-        /*
-         * A model out of the cache makes the shipped toolkit crash inside its own upload, so the
-         * mesh built here is used until that is understood. The reader stays because the mesh is
-         * the thing that has to stop being a variable once models are written.
-         */
-        return FlatMesh.INSTANCE.build();
+        var found = CacheMesh.at(cache).firstUntexturedWithFaces(MODEL_FACES);
+        if (found.isEmpty()) {
+            return FlatMesh.INSTANCE.build();
+        }
+
+        System.out.println("model from the cache: " + found.get().faceCount + " faces, "
+            + found.get().vertexCount + " vertices");
+        return found.get();
     }
 
     static String dumpDirectory() {
