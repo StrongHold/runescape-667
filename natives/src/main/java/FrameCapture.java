@@ -32,8 +32,8 @@ public final class FrameCapture {
     private static final int FUNCTIONS = 2048;
     private static final int FEATURES = 64;
     private static final int MODEL_FACES = 200;
-    private static final int VISIBLE_FACES = 4;
-    private static final int AMBIENT = 64;
+    private static final int VISIBLE_FACES = 2;
+    private static final int AMBIENT = number("SW3D_AMBIENT", 64);
     private static final int CONTRAST = 768;
 
     /**
@@ -81,7 +81,8 @@ public final class FrameCapture {
         var camera = toolkit.createMatrix();
         camera.makeIdentity();
         toolkit.setCamera(camera);
-        toolkit.ZA(0xFFFFFF, 0.5F, 0.5F, 20.0F, -50.0F, 30.0F);
+        var sun = (float) number("SW3D_SUN_TENTHS", 5) / 10.0F;
+        toolkit.ZA(0xFFFFFF, sun, sun, 20.0F, -50.0F, 30.0F);
 
         toolkit.method7938(toolkit.createHeap(POOL_SIZE));
         var props = new Scene.Props(
@@ -155,7 +156,28 @@ public final class FrameCapture {
     private static com.jagex.graphics.Mesh fewFaces() throws Exception {
         var mesh = mesh();
         mesh.faceCount = Math.min(mesh.faceCount, VISIBLE_FACES);
+
+        /*
+         * The colour of every visible face can be forced from outside, so that the colour table
+         * can be read out of either toolkit one value at a time.
+         */
+        var forced = System.getenv("SW3D_FACE_COLOUR");
+        if (forced != null && !forced.isEmpty()) {
+            for (var face = 0; face < mesh.faceCount; face++) {
+                mesh.faceColour[face] = (short) Integer.parseInt(forced);
+            }
+        }
+
         return mesh;
+    }
+
+    /**
+     * A number the environment may override, so that the scenes can be driven to a particular
+     * corner without changing what they normally draw.
+     */
+    private static int number(String name, int fallback) {
+        var held = System.getenv(name);
+        return held == null || held.isEmpty() ? fallback : Integer.parseInt(held);
     }
 
     static String dumpDirectory() {
