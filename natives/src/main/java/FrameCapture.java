@@ -23,9 +23,16 @@ public final class FrameCapture {
 
     private static final int WIDTH = 512;
     private static final int HEIGHT = 384;
-    private static final int SPRITE_SIZE = 128;
+    /**
+     * The sprite is not square and not symmetrical, so a frame says which of its dimensions the
+     * toolkit read as which, and which way round it drew both axes. A square sprite cannot.
+     */
+    private static final int SPRITE_WIDTH = 96;
+    private static final int SPRITE_HEIGHT = 64;
+
     private static final int CLEAR_COLOUR = 0x202080;
     private static final int FRAMES = 3;
+    private static final int GRADIENT_X = 10;
     private static final int GRADIENT_Y = 10;
 
     /**
@@ -56,7 +63,7 @@ public final class FrameCapture {
         Thread.sleep(1000);
 
         Toolkit toolkit = oa.create(canvas, new StubTextureSource(), WIDTH, HEIGHT);
-        Sprite sprite = toolkit.createSprite(SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE, gradient());
+        Sprite sprite = toolkit.createSprite(SPRITE_WIDTH, SPRITE_WIDTH, SPRITE_HEIGHT, gradient());
 
         toolkit.la();
         toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
@@ -65,8 +72,8 @@ public final class FrameCapture {
         for (int i = 0; i < FRAMES; i++) {
             toolkit.GA(CLEAR_COLOUR);
             toolkit.ya();
-            sprite.render(10, GRADIENT_Y, 0, 0xFFFFFF, 0);
-            sprite.render(10, 200, 3, 0xFFFFFF, 0);
+            sprite.render(GRADIENT_X, GRADIENT_Y, 0, 0xFFFFFF, 0);
+            sprite.render(GRADIENT_X, 200, 3, 0xFFFFFF, 0);
             toolkit.flip(0, 0);
             Thread.sleep(200);
         }
@@ -81,26 +88,41 @@ public final class FrameCapture {
      * a transform the surface failed to reset, which is invisible in a symmetrical test image.
      */
     private static void checkOrientation() throws IOException {
-        String directory = System.getenv("JAWTSHIM_DUMP");
+        String directory = dumpDirectory();
         if (directory == null) {
             return;
         }
 
         BufferedImage frame = ImageIO.read(new File(directory, "frame-0000.png"));
-        int column = 10 + SPRITE_SIZE / 2;
 
+        int column = GRADIENT_X + SPRITE_WIDTH / 2;
         int top = frame.getRGB(column, GRADIENT_Y + 4) & 0xFFFFFF;
-        int bottom = frame.getRGB(column, GRADIENT_Y + SPRITE_SIZE - 4) & 0xFFFFFF;
-
+        int bottom = frame.getRGB(column, GRADIENT_Y + SPRITE_HEIGHT - 4) & 0xFFFFFF;
         requireGradient("top", top, GRADIENT_Y + 4);
-        requireGradient("bottom", bottom, GRADIENT_Y + SPRITE_SIZE - 4);
+        requireGradient("bottom", bottom, GRADIENT_Y + SPRITE_HEIGHT - 4);
+        requireRise("Green rises down the source sprite", (top >> 8) & 0xFF, (bottom >> 8) & 0xFF);
 
-        int topGreen = (top >> 8) & 0xFF;
-        int bottomGreen = (bottom >> 8) & 0xFF;
-        if (topGreen >= bottomGreen) {
+        int row = GRADIENT_Y + SPRITE_HEIGHT / 2;
+        int left = frame.getRGB(GRADIENT_X + 4, row) & 0xFFFFFF;
+        int right = frame.getRGB(GRADIENT_X + SPRITE_WIDTH - 4, row) & 0xFFFFFF;
+        requireGradient("left", left, row);
+        requireGradient("right", right, row);
+        requireRise("Red rises to the right of the source sprite", (left >> 16) & 0xFF, (right >> 16) & 0xFF);
+    }
+
+    /**
+     * Where presented frames are written. The shipped toolkit is driven through the shim and ours
+     * writes them itself, so either may name the directory.
+     */
+    private static String dumpDirectory() {
+        String shim = System.getenv("JAWTSHIM_DUMP");
+        return shim == null ? System.getenv("SW3D_DUMP") : shim;
+    }
+
+    private static void requireRise(String what, int first, int last) {
+        if (first >= last) {
             throw new IllegalStateException(
-                "The gradient is upside down. Green rises down the source sprite but read "
-                    + topGreen + " at the top and " + bottomGreen + " at the bottom.");
+                what + ", but the frame reads " + first + " then " + last + ".");
         }
     }
 
@@ -116,12 +138,16 @@ public final class FrameCapture {
         }
     }
 
+    /**
+     * Red rises to the right and green rises downwards, so either axis drawn the wrong way round
+     * shows up as a fall rather than a rise.
+     */
     private static int[] gradient() {
-        int[] pixels = new int[SPRITE_SIZE * SPRITE_SIZE];
+        int[] pixels = new int[SPRITE_WIDTH * SPRITE_HEIGHT];
         for (int i = 0; i < pixels.length; i++) {
-            int x = i % SPRITE_SIZE;
-            int y = i / SPRITE_SIZE;
-            pixels[i] = 0xFF000000 | (x * 2 << 16) | (y * 2 << 8) | 0x80;
+            int x = i % SPRITE_WIDTH;
+            int y = i / SPRITE_WIDTH;
+            pixels[i] = 0xFF000000 | (x * 2 << 16) | (y * 3 << 8) | 0x80;
         }
         return pixels;
     }

@@ -222,7 +222,7 @@ static void dumpFrame(CGImageRef frame) {
 
     static int counter;
     char path[PATH_MAX];
-    snprintf(path, sizeof(path), "%s/frame-%03d.png", directory, counter++);
+    snprintf(path, sizeof(path), "%s/frame-%04d.png", directory, counter++);
 
     NSURL *url = [NSURL fileURLWithPath:@(path)];
     CGImageDestinationRef destination =
