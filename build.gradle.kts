@@ -61,9 +61,7 @@ val unpackX64Jdk by tasks.registering(Exec::class) {
     inputs.file(archive)
     outputs.dir(into)
     executable = "tar"
-    argumentProviders.add(CommandLineArgumentProvider {
-        listOf("-xzf", archive.get().asFile.absolutePath, "-C", into.asFile.absolutePath, "--strip-components=2")
-    })
+    args("-xzf", archive.get().asFile.absolutePath, "-C", into.asFile.absolutePath, "--strip-components=2")
     doFirst {
         into.asFile.mkdirs()
     }
