@@ -302,14 +302,36 @@ val generateOpenGlBinding by tasks.registering {
      */
     val renamed = mapOf(
         "glBufferDataARBa" to "glBufferDataARB",
+        "glBufferDataARBub" to "glBufferDataARB",
         "glBufferSubDataARBa" to "glBufferSubDataARB",
+        "glBufferSubDataARBub" to "glBufferSubDataARB",
+        "glDrawPixelsi" to "glDrawPixels",
+        "glDrawPixelsub" to "glDrawPixels",
+        "glGetTexImagei" to "glGetTexImage",
+        "glGetTexImageub" to "glGetTexImage",
+        "glReadPixelsi" to "glReadPixels",
+        "glReadPixelsub" to "glReadPixels",
+        "glTexImage1Dub" to "glTexImage1D",
+        "glTexImage2Df" to "glTexImage2D",
+        "glTexImage2Di" to "glTexImage2D",
+        "glTexImage2Dub" to "glTexImage2D",
+        "glTexImage3Dub" to "glTexImage3D",
+        "glTexSubImage2Df" to "glTexSubImage2D",
+        "glTexSubImage2Di" to "glTexSubImage2D",
+        "glTexSubImage2Dub" to "glTexSubImage2D",
     )
 
     /**
-     * Named in the singular by the client but taking a count and an address in OpenGL, so each
-     * needs a local of its own rather than a pass-through.
+     * Natives with no OpenGL entry point of their own. Two are named in the singular by the client
+     * and take a count and an address in OpenGL, and two take raw bytes where OpenGL takes a list of
+     * strings. Each needs a body rather than a pass-through.
      */
-    val plural = setOf("glDeleteProgramARB", "glGenProgramARB")
+    val plural = setOf(
+        "glDeleteProgramARB",
+        "glGenProgramARB",
+        "glProgramRawARB",
+        "glShaderSourceRawARB",
+    )
 
     doLast {
         val declaration = Regex("""JNIEXPORT\s+(\S+)\s+JNICALL\s+(\w+)\s*\(([^)]*)\)\s*;""")
@@ -324,12 +346,45 @@ val generateOpenGlBinding by tasks.registering {
             val name = symbol.removePrefix("Java_jaggl_OpenGL_")
             val types = parameters.split(",").map(String::trim).filter(String::isNotEmpty).drop(2)
 
+            /*
+             * Every native that takes an array takes it as the last pair of arguments, an array
+             * and an offset into it, and OpenGL takes one address in their place.
+             */
+            val arrayed = types.size >= 2 &&
+                types[types.size - 2].endsWith("Array") &&
+                types.last() == "jint" &&
+                types.dropLast(2).none { it.endsWith("Array") || it == "jstring" }
+
             val needsHands = name in glue || name in plural ||
-                types.any { it.contains("Array") || it == "jstring" } ||
-                returns == "jstring"
+                returns == "jstring" ||
+                types.any { it == "jstring" } ||
+                (types.any { it.contains("Array") } && !arrayed)
 
             if (needsHands) {
                 outstanding.add("$returns $name(${types.joinToString(", ")})")
+            } else if (arrayed) {
+                val leading = types.dropLast(2)
+                val element = types[types.size - 2].removeSuffix("Array")
+                val named = leading.mapIndexed { index, type -> ", $type a$index" }.joinToString("") +
+                    ", ${types[types.size - 2]} elements, jint offset"
+                val arguments = leading.mapIndexed { index, type ->
+                    if (type == "jlong") "(GLhandleARB) a$index" else "a$index"
+                } + "(void *) (address + offset)"
+
+                body.append("\nJNIEXPORT $returns JNICALL $symbol(JNIEnv *env, jclass owner$named) {\n")
+                body.append("    $element *address = (*env)->GetPrimitiveArrayCritical(env, elements, NULL);\n")
+                if (returns != "void") {
+                    body.append("    $returns result = ")
+                } else {
+                    body.append("    ")
+                }
+                body.append("${renamed[name] ?: name}(${arguments.joinToString(", ")});\n")
+                body.append("    (*env)->ReleasePrimitiveArrayCritical(env, elements, address, 0);\n")
+                if (returns != "void") {
+                    body.append("    return result;\n")
+                }
+                body.append("}\n")
+                written++
             } else {
                 val named = types.mapIndexed { index, type -> "$type a$index" }
                 val arguments = types.mapIndexed { index, type ->
