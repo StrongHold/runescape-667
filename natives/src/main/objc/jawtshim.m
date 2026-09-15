@@ -1,15 +1,19 @@
 /*
- * A drawing surface for the software toolkit on modern macOS.
+ * A drawing surface for the toolkits on modern macOS.
  *
- * The toolkit asks JavaVM.framework for a JAWT_VERSION_1_3 drawing surface. That framework now
- * serves only JAWT_VERSION_1_7, so the request fails and the toolkit can never obtain a surface.
- * This library answers that request instead. The toolkit imports JAWT_GetAWT and nothing else from
+ * Both toolkits ask JavaVM.framework for a drawing surface, the software one at
+ * JAWT_VERSION_1_3 and the hardware one at JAWT_VERSION_1_4. That framework now serves only
+ * JAWT_VERSION_1_7, so neither request succeeds and neither toolkit can obtain a surface. This
+ * library answers those requests instead. Each toolkit imports JAWT_GetAWT and nothing else from
  * the framework, so repointing that one import is enough to reach this code.
  *
- * The toolkit uses very little of the surface. It reads the view out of the platform info, sends it
- * lockFocusIfCanDraw, draws through the current NSGraphicsContext, and sends unlockFocus. Nothing
- * here needs to be a real NSView, so the surface hands back an object that answers those two
- * messages over a bitmap context this library owns.
+ * The two want different things from a surface. The software toolkit reads a view out of the
+ * platform info, sends it lockFocusIfCanDraw, draws through the current NSGraphicsContext, and
+ * sends unlockFocus, so it is handed an object that answers those two messages over a bitmap this
+ * library owns. The hardware toolkit hands what it finds to NSOpenGLContext, so it is handed a real
+ * view placed in the window.
+ *
+ * The version asked for chooses between them, so the two share no state.
  */
 
 #import <Cocoa/Cocoa.h>
