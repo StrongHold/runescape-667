@@ -5,6 +5,7 @@
  * builds several toolkits is driving the same renderer through each of them.
  */
 
+#include <math.h>
 #include <string.h>
 
 #include "sw3d.h"
@@ -42,6 +43,37 @@ const Projection *projection(void) {
 
 const void *cameraMatrix(void) {
     return (const void *) (intptr_t) camera;
+}
+
+static Sun light;
+
+const Sun *sun(void) {
+    return &light;
+}
+
+/**
+ * Sets the light everything is shaded by.
+ *
+ * The direction is stored with a length of one so that shading is a plain dot product later, and
+ * the colour is split into its three bytes because that is how it is used.
+ */
+JNIEXPORT void JNICALL Java_oa_ZA(JNIEnv *env, jobject self, jint colour, jfloat intensity,
+                                   jfloat reverseIntensity, jfloat x, jfloat y, jfloat z) {
+    (void) env;
+    (void) self;
+
+    light.red = (unsigned char) (colour >> 16);
+    light.green = (unsigned char) (colour >> 8);
+    light.blue = (unsigned char) colour;
+
+    float length = sqrtf(x * x + y * y + z * z);
+    float scale = 1.0f / length;
+
+    light.x = x * scale;
+    light.y = y * scale;
+    light.z = z * scale;
+    light.intensity = intensity;
+    light.reverseIntensity = reverseIntensity;
 }
 
 JNIEXPORT void JNICALL Java_oa_MA(JNIEnv *env, jobject self, jobject textures,

@@ -84,6 +84,24 @@ typedef struct {
 const Projection *projection(void);
 
 /**
+ * The light everything is shaded by. The direction is kept with a length of one, as the toolkit
+ * keeps it, and the two strengths say how much light a face gets when it faces the sun and when
+ * it faces away.
+ */
+typedef struct {
+    float x;
+    float y;
+    float z;
+    float intensity;
+    float reverseIntensity;
+    unsigned char red;
+    unsigned char green;
+    unsigned char blue;
+} Sun;
+
+const Sun *sun(void);
+
+/**
  * The matrix the world is seen through, or null before the client has given one.
  */
 const void *cameraMatrix(void);
