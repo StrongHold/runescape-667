@@ -348,7 +348,9 @@ val generateOpenGlBinding by tasks.registering {
 
             /*
              * Every native that takes an array takes it as the last pair of arguments, an array
-             * and an offset into it, and OpenGL takes one address in their place.
+             * and an offset into it, and OpenGL takes one address in their place. The array may be
+             * absent, which is how the client asks OpenGL to set storage aside without filling it,
+             * so the address it is given is absent too rather than taken from nothing.
              */
             val arrayed = types.size >= 2 &&
                 types[types.size - 2].endsWith("Array") &&
@@ -369,17 +371,19 @@ val generateOpenGlBinding by tasks.registering {
                     ", ${types[types.size - 2]} elements, jint offset"
                 val arguments = leading.mapIndexed { index, type ->
                     if (type == "jlong") "(GLhandleARB) a$index" else "a$index"
-                } + "(void *) (address + offset)"
+                } + "address == NULL ? NULL : (void *) (address + offset)"
 
                 body.append("\nJNIEXPORT $returns JNICALL $symbol(JNIEnv *env, jclass owner$named) {\n")
-                body.append("    $element *address = (*env)->GetPrimitiveArrayCritical(env, elements, NULL);\n")
+                body.append("    $element *address = elements == NULL ? NULL : (*env)->GetPrimitiveArrayCritical(env, elements, NULL);\n")
                 if (returns != "void") {
                     body.append("    $returns result = ")
                 } else {
                     body.append("    ")
                 }
                 body.append("${renamed[name] ?: name}(${arguments.joinToString(", ")});\n")
-                body.append("    (*env)->ReleasePrimitiveArrayCritical(env, elements, address, 0);\n")
+                body.append("    if (address != NULL) {\n")
+                body.append("        (*env)->ReleasePrimitiveArrayCritical(env, elements, address, 0);\n")
+                body.append("    }\n")
                 if (returns != "void") {
                     body.append("    return result;\n")
                 }
