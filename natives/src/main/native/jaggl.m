@@ -66,10 +66,13 @@
 /*
  * One per canvas the client draws on. The client holds these as opaque longs and hands them back to
  * say which one it means.
+ *
+ * The layer is held as a plain pointer with its retain taken by hand, because this record is
+ * allocated by malloc and ARC cannot manage an object reference in memory it did not allocate.
  */
 typedef struct {
     jobject canvas;
-    JagGLLayer *layer;
+    void *layer;
     GLint width;
     GLint height;
 } Surface;
@@ -278,7 +281,7 @@ static BOOL attach(JNIEnv *env, jobject canvas, Surface *surface) {
         JAWT_DrawingSurfaceInfo *info = drawing->GetDrawingSurfaceInfo(drawing);
         if (info != NULL) {
             id<JAWT_SurfaceLayers> layers = (__bridge id<JAWT_SurfaceLayers>) info->platformInfo;
-            JagGLLayer *layer = surface->layer;
+            JagGLLayer *layer = (__bridge JagGLLayer *) surface->layer;
             CGRect frame = CGRectMake(info->bounds.x, 0, info->bounds.width, info->bounds.height);
 
             surface->width = info->bounds.width;
@@ -288,7 +291,7 @@ static BOOL attach(JNIEnv *env, jobject canvas, Surface *surface) {
                 CGFloat top = layers.windowLayer.bounds.size.height;
                 layer.frame = CGRectMake(frame.origin.x, top - info->bounds.y - frame.size.height,
                                          frame.size.width, frame.size.height);
-                if (surface->layer.superlayer == nil) {
+                if (layer.superlayer == nil) {
                     layers.layer = layer;
                 }
                 attached = YES;
@@ -364,6 +367,7 @@ JNIEXPORT jlong JNICALL Java_jaggl_OpenGL_init(JNIEnv *env, jclass owner, jobjec
                                                       styleMask:NSWindowStyleMaskBorderless
                                                         backing:NSBackingStoreBuffered
                                                           defer:NO];
+        offscreenWindow.releasedWhenClosed = NO;
         offscreenView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 16, 16)];
         offscreenView.wantsBestResolutionOpenGLSurface = NO;
         offscreenWindow.contentView = offscreenView;
@@ -384,10 +388,11 @@ JNIEXPORT jlong JNICALL Java_jaggl_OpenGL_prepareSurface(JNIEnv *env, jclass own
     dispatch_sync(dispatch_get_main_queue(), ^{
         layer = [[JagGLLayer alloc] init];
     });
-    surface->layer = layer;
+    surface->layer = (__bridge_retained void *) layer;
 
     if (!attach(env, canvas, surface)) {
         (*env)->DeleteGlobalRef(env, surface->canvas);
+        CFBridgingRelease(surface->layer);
         free(surface);
         return 0;
     }
@@ -428,19 +433,19 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_releaseSurface(JNIEnv *env, jclass owne
         currentSurface = NULL;
     }
 
-    JagGLLayer *layer = surface->layer;
+    JagGLLayer *layer = (__bridge JagGLLayer *) surface->layer;
     dispatch_sync(dispatch_get_main_queue(), ^{
         [layer removeFromSuperlayer];
     });
 
     (*env)->DeleteGlobalRef(env, surface->canvas);
-    surface->layer = nil;
+    CFBridgingRelease(surface->layer);
     free(surface);
 }
 
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_swapBuffers(JNIEnv *env, jclass owner) {
-    if (currentSurface != nil) {
-        [currentSurface->layer blit];
+    if (currentSurface != NULL) {
+        [(__bridge JagGLLayer *) currentSurface->layer blit];
     }
 }
 
@@ -476,7 +481,7 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_release(JNIEnv *env, jclass owner) {
     dispatch_sync(dispatch_get_main_queue(), ^{
         offscreenContext = nil;
         offscreenView = nil;
-        [offscreenWindow close];
+        [offscreenWindow orderOut:nil];
         offscreenWindow = nil;
     });
 }
