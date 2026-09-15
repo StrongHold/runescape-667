@@ -40,9 +40,29 @@ typedef struct {
     int clipTop;
     int clipRight;
     int clipBottom;
+
+    /**
+     * How far away each pixel drawn so far is, so that a nearer face covers one behind it wherever
+     * they overlap rather than only when it happens to be drawn later.
+     *
+     * Sorting whole faces cannot answer this. Two faces that pass through each other, or three
+     * that overlap in a ring, have no order that is right everywhere, and a model made of flat
+     * faces has plenty of both. The buffer belongs to the picture rather than to one model, so
+     * everything drawn between two clears is measured against everything else.
+     *
+     * This holds the distance from the eye rather than the distance the toolkit holds, which runs
+     * from nothing at the near plane to one at the far plane. The two put the same pixel in front
+     * of the same pixel, so what is drawn is the same, but anything that reads a distance back out
+     * and does arithmetic on it, such as fog, needs the toolkit's.
+     */
+    float *depths;
+    int depthRoom;
 } Raster;
 
 extern Raster raster;
+
+/** The distance an untouched pixel is, which is further than anything can be drawn. */
+#define FURTHEST 3.4e38f
 
 /**
  * Points the renderer at a buffer, or at nothing, and opens the clip over all of it.
@@ -50,6 +70,13 @@ extern Raster raster;
 void rasterUse(uint32_t *pixels, int width, int height);
 
 void rasterResetClip(void);
+
+/**
+ * Sets every distance in a rectangle, clipped, to one value.
+ */
+void depthClear(int left, int top, int width, int height, float value);
+
+float *depthRow(int y);
 
 /**
  * How the client asks for a colour to be put down. It passes the alpha the blending mode uses in
@@ -77,11 +104,30 @@ typedef struct {
     float centreY;
     float scaleX;
     float scaleY;
-    int near;
-    int far;
+
+    /**
+     * The client hands these over as whole numbers and the toolkit keeps them as floats, so a far
+     * plane the client set to the largest whole number there is comes back as the smallest. That
+     * is kept.
+     */
+    float near;
+    float far;
 } Projection;
 
 const Projection *projection(void);
+
+/**
+ * The colour the distance fades everything towards, and how far away the fade is complete.
+ */
+typedef struct {
+    uint32_t colour;
+    float range;
+} Fog;
+
+const Fog *distanceFog(void);
+
+/** The pool a model's geometry is taken from, or null before the client has given one. */
+Pool *modelPoolInUse(void);
 
 /**
  * The light everything is shaded by. The direction is kept with a length of one, as the toolkit
@@ -158,6 +204,15 @@ const uint32_t *modelShade(const void *handle);
 int modelFaceIsFlat(const void *handle, int face);
 int modelAmbient(const void *handle);
 int modelContrast(const void *handle);
+
+/** How much memory the toolkit is holding, which the client watches and reports. */
+size_t allocatedSize(void);
+void allocatedGrew(size_t bytes);
+void allocatedShrank(size_t bytes);
+
+/** How many models have been built since the client last asked. */
+int modelsBuiltSinceAsked(void);
+void modelWasBuilt(void);
 
 Surface *surfaceCreate(JNIEnv *env, jobject canvas, int width, int height);
 void surfaceResize(Surface *surface, int width, int height);

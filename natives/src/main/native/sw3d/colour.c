@@ -106,11 +106,29 @@ uint32_t unlitColour(int hsl, int ambient) {
 }
 
 /**
+ * The ends of the range a lit channel is held between. A lit surface is never quite black and
+ * never quite white, whichever way it is turned and whatever light reaches it.
+ */
+enum {
+    DARKEST = 4,
+    BRIGHTEST = 0xFC
+};
+
+static int held(int value) {
+    if (value < DARKEST) {
+        return DARKEST;
+    } else if (value > BRIGHTEST) {
+        return BRIGHTEST;
+    } else {
+        return value;
+    }
+}
+
+/**
  * The colour a surface facing this way takes.
  *
  * The light is the ambient plus the sun, and how much sun depends on whether the surface faces it
- * at all. Each channel is tinted by the sun's own colour before it is scaled, and none of them
- * reaches the top of the range: the toolkit stops at 252.
+ * at all. Each channel is tinted by the sun's own colour before it is scaled.
  */
 uint32_t sunlitColour(uint32_t unlit, const Normal *normal, float strength) {
     const Sun *light = sun();
@@ -124,15 +142,5 @@ uint32_t sunlitColour(uint32_t unlit, const Normal *normal, float strength) {
     int green = (scale * (int) ((((unlit >> 8) & 0xFF) * light->green) >> 8)) >> 8;
     int blue = (scale * (int) (((unlit & 0xFF) * light->blue) >> 8)) >> 8;
 
-    if (red > 0xFC) {
-        red = 0xFC;
-    }
-    if (green > 0xFC) {
-        green = 0xFC;
-    }
-    if (blue > 0xFC) {
-        blue = 0xFC;
-    }
-
-    return ((uint32_t) red << 16) | ((uint32_t) green << 8) | (uint32_t) blue;
+    return ((uint32_t) held(red) << 16) | ((uint32_t) held(green) << 8) | (uint32_t) held(blue);
 }

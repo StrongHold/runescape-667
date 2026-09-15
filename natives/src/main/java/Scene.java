@@ -41,7 +41,9 @@ public sealed interface Scene {
         new OutlineAndLine(),
         new Clip(),
         new Geometry(),
-        new FewFaces()
+        new FewFaces(),
+        new DepthOrder(),
+        new SubClip()
     );
 
     /**
@@ -214,6 +216,68 @@ public sealed interface Scene {
 
             props.matrix().applyTranslation(0, 0, DEPTH);
             props.simple().render(props.matrix(), null, 1);
+        }
+    }
+
+    /**
+     * Two models overlapping, drawn near first and then far, so that what covers what is decided
+     * by how far away a pixel is rather than by which model was drawn last. Forgetting how far
+     * away everything is between the two lets the far one cover the near one.
+     *
+     * The last model is drawn with the recording of distance turned off. The toolkit ignores that
+     * and records it anyway, which is worth drawing so that answering the client here would show
+     * up as a difference.
+     */
+    record DepthOrder() implements Scene {
+
+        /** How much nearer the front model stands than the one behind it. */
+        private static final int CLOSER = 300;
+
+        /** How far the models are nudged apart, so that only part of each is covered. */
+        private static final int NUDGE = 90;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            place(props, -NUDGE, DEPTH - CLOSER);
+            place(props, NUDGE, DEPTH);
+
+            toolkit.ya();
+            place(props, 0, DEPTH + CLOSER);
+
+            toolkit.C(false);
+            place(props, NUDGE * 2, DEPTH - CLOSER);
+            toolkit.C(true);
+        }
+
+        private static void place(Props props, int across, int away) {
+            props.matrix().makeRotationZ(0);
+            props.matrix().translate(across, 0, away);
+            props.model().render(props.matrix(), null, 1);
+        }
+    }
+
+    /**
+     * A model inside a clip narrowed twice, which only ever narrows, and then drawn again once the
+     * clip has been opened. A second call that asks for a wider rectangle has to leave the first
+     * one alone.
+     */
+    record SubClip() implements Scene {
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+
+            props.matrix().makeRotationZ(0);
+            props.matrix().translate(0, 0, DEPTH);
+            props.model().render(props.matrix(), null, 1);
+
+            toolkit.la();
+            toolkit.aa(0, 366, WIDTH, 14, 0xFF00FF00, 0);
         }
     }
 

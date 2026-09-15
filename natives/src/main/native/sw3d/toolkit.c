@@ -6,6 +6,7 @@
  */
 
 #include <math.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "sw3d.h"
@@ -24,6 +25,82 @@ void rasterUse(uint32_t *pixels, int width, int height) {
     raster.width = width;
     raster.height = height;
     rasterResetClip();
+
+    int wanted = width * height;
+    if (raster.depthRoom < wanted) {
+        float *grown = realloc(raster.depths, (size_t) wanted * sizeof(float));
+        if (grown != NULL) {
+            allocatedGrew((size_t) (wanted - raster.depthRoom) * sizeof(float));
+            raster.depths = grown;
+            raster.depthRoom = wanted;
+        }
+    }
+
+    depthClear(0, 0, width, height, FURTHEST);
+}
+
+float *depthRow(int y) {
+    return raster.depths + (size_t) y * (size_t) raster.width;
+}
+
+void depthClear(int left, int top, int width, int height, float value) {
+    if (raster.depths == NULL) {
+        return;
+    }
+
+    if (left < raster.clipLeft) {
+        width -= raster.clipLeft - left;
+        left = raster.clipLeft;
+    }
+    if (top < raster.clipTop) {
+        height -= raster.clipTop - top;
+        top = raster.clipTop;
+    }
+    if (left + width > raster.clipRight) {
+        width = raster.clipRight - left;
+    }
+    if (top + height > raster.clipBottom) {
+        height = raster.clipBottom - top;
+    }
+
+    for (int y = top; y < top + height; y++) {
+        float *row = depthRow(y);
+        for (int x = left; x < left + width; x++) {
+            row[x] = value;
+        }
+    }
+}
+
+/**
+ * How much memory the toolkit is holding.
+ *
+ * The client watches this and drops what it can when it grows too large, so it is a count of what
+ * the toolkit asked the system for rather than of what any one thing needs.
+ */
+static size_t allocated;
+
+size_t allocatedSize(void) {
+    return allocated;
+}
+
+void allocatedGrew(size_t bytes) {
+    allocated += bytes;
+}
+
+void allocatedShrank(size_t bytes) {
+    allocated = bytes > allocated ? 0 : allocated - bytes;
+}
+
+static int modelsBuilt;
+
+void modelWasBuilt(void) {
+    modelsBuilt++;
+}
+
+int modelsBuiltSinceAsked(void) {
+    int count = modelsBuilt;
+    modelsBuilt = 0;
+    return count;
 }
 
 /**
@@ -44,6 +121,16 @@ const Projection *projection(void) {
 const void *cameraMatrix(void) {
     return (const void *) (intptr_t) camera;
 }
+
+/** Where a shadow's detail was last set to. Nothing reads it, because nothing draws a shadow. */
+static int shadowResolution;
+
+/** What the client last asked for the recording of distance. Nothing reads it either. */
+static int depthWriteAsked;
+
+static Fog fog;
+
+static Pool *modelPool;
 
 static Sun light;
 
@@ -142,8 +229,199 @@ JNIEXPORT void JNICALL Java_oa_f(JNIEnv *env, jobject self, jint near, jint far)
     (void) env;
     (void) self;
 
-    view.near = near;
-    view.far = far;
+    view.near = (float) near;
+    view.far = (float) far;
+}
+
+/** How close a thing may come before it is cut away, back as the whole number it started as. */
+JNIEXPORT jint JNICALL Java_oa_i(JNIEnv *env, jobject self) {
+    (void) env;
+    (void) self;
+
+    return (jint) view.near;
+}
+
+JNIEXPORT jint JNICALL Java_oa_XA(JNIEnv *env, jobject self) {
+    (void) env;
+    (void) self;
+
+    return (jint) view.far;
+}
+
+JNIEXPORT jint JNICALL Java_oa_E(JNIEnv *env, jobject self) {
+    (void) env;
+    (void) self;
+
+    return (jint) allocatedSize();
+}
+
+JNIEXPORT jint JNICALL Java_oa_M(JNIEnv *env, jobject self) {
+    (void) env;
+    (void) self;
+
+    return modelsBuiltSinceAsked();
+}
+
+/**
+ * Whether the toolkit can draw a shadow, which this one cannot.
+ */
+JNIEXPORT jint JNICALL Java_oa_I(JNIEnv *env, jobject self) {
+    (void) env;
+    (void) self;
+
+    return 0;
+}
+
+/**
+ * Narrows what may be drawn on. It only ever narrows: a rectangle wider than the one already set
+ * leaves that one alone. Opening it again is what resetting the clip is for.
+ */
+JNIEXPORT void JNICALL Java_oa_T(JNIEnv *env, jobject self, jint left, jint top,
+                                  jint right, jint bottom) {
+    (void) env;
+    (void) self;
+
+    if (raster.clipLeft < left) {
+        raster.clipLeft = left;
+    }
+    if (raster.clipTop < top) {
+        raster.clipTop = top;
+    }
+    if (raster.clipRight > right) {
+        raster.clipRight = right;
+    }
+    if (raster.clipBottom > bottom) {
+        raster.clipBottom = bottom;
+    }
+}
+
+/**
+ * Whether a face that is drawn records how far away it is.
+ *
+ * The client asks for this and the software renderer does not answer: it records the distance of
+ * everything it draws, whichever way the flag is set. The flag is kept because the client can ask
+ * for it back, and for no other reason.
+ */
+JNIEXPORT void JNICALL Java_oa_C(JNIEnv *env, jobject self, jboolean write) {
+    (void) env;
+    (void) self;
+
+    depthWriteAsked = write == JNI_TRUE;
+}
+
+/**
+ * Forgets how far away everything is, over the whole buffer.
+ */
+JNIEXPORT void JNICALL Java_oa_ya(JNIEnv *env, jobject self) {
+    (void) env;
+    (void) self;
+
+    depthClear(0, 0, raster.width, raster.height, FURTHEST);
+}
+
+/**
+ * The colour the distance fades everything towards, and how far away the fade is complete. The
+ * client offers a third number that the toolkit has never read.
+ */
+JNIEXPORT void JNICALL Java_oa_L(JNIEnv *env, jobject self, jint colour, jint range, jint offset) {
+    (void) env;
+    (void) self;
+    (void) offset;
+
+    fog.colour = (uint32_t) colour;
+    fog.range = range < 0 ? 0.0f : (float) range;
+}
+
+const Fog *distanceFog(void) {
+    return &fog;
+}
+
+/**
+ * How finely a shadow is drawn. This toolkit draws none, so the number is only remembered.
+ */
+JNIEXPORT void JNICALL Java_oa_X(JNIEnv *env, jobject self, jint resolution) {
+    (void) env;
+    (void) self;
+
+    shadowResolution = resolution;
+}
+
+/**
+ * Lets the toolkit do whatever it keeps for quiet moments. There is nothing it keeps.
+ */
+JNIEXPORT void JNICALL Java_oa_d(JNIEnv *env, jobject self, jint budget) {
+    (void) env;
+    (void) self;
+    (void) budget;
+}
+
+/**
+ * Stops drawing everything as though it were seen through water. Nothing here ever started.
+ */
+JNIEXPORT void JNICALL Java_oa_pa(JNIEnv *env, jobject self) {
+    (void) env;
+    (void) self;
+}
+
+/**
+ * Draws a piece of ground. The toolkit this replaces does nothing here, and the client draws its
+ * ground through the ground natives instead.
+ */
+JNIEXPORT void JNICALL Java_oa_Q(JNIEnv *env, jobject self, jint x, jint y, jint width,
+                                  jint height, jint overlay, jint underlay, jbyteArray shape,
+                                  jint size, jint mode) {
+    (void) env;
+    (void) self;
+    (void) x;
+    (void) y;
+    (void) width;
+    (void) height;
+    (void) overlay;
+    (void) underlay;
+    (void) shape;
+    (void) size;
+    (void) mode;
+}
+
+/**
+ * The pool a model's geometry is taken from.
+ */
+JNIEXPORT void JNICALL Java_oa_va(JNIEnv *env, jobject self, jobject pool) {
+    (void) self;
+
+    modelPool = (Pool *) (intptr_t) nativeIdOf(env, pool);
+}
+
+Pool *modelPoolInUse(void) {
+    return modelPool;
+}
+
+/**
+ * Lets go of everything the toolkit holds. The client calls this when it is shutting down and
+ * when it is changing which toolkit it draws through.
+ */
+static void releaseEverything(void) {
+    free(raster.depths);
+    raster.depths = NULL;
+    raster.depthRoom = 0;
+    rasterUse(NULL, 0, 0);
+    camera = 0;
+    modelPool = NULL;
+}
+
+JNIEXPORT void JNICALL Java_oa_FA(JNIEnv *env, jobject self) {
+    (void) env;
+    (void) self;
+
+    releaseEverything();
+}
+
+JNIEXPORT void JNICALL Java_oa_w(JNIEnv *env, jobject self, jboolean unused) {
+    (void) env;
+    (void) self;
+    (void) unused;
+
+    releaseEverything();
 }
 
 JNIEXPORT void JNICALL Java_oa_xa(JNIEnv *env, jobject self, jfloat globalAmbient) {

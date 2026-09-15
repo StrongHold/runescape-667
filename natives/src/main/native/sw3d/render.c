@@ -70,40 +70,6 @@ static uint16_t hold(float value) {
     }
 }
 
-/**
- * How far away each pixel drawn so far is, so that a nearer face covers one behind it wherever
- * they overlap rather than only when it happens to be drawn later.
- *
- * Sorting whole faces cannot answer this. Two faces that pass through each other, or three that
- * overlap in a ring, have no order that is right everywhere, and a model made of flat faces has
- * plenty of both.
- */
-static float *depths;
-static int depthRoom;
-static int depthWidth;
-
-static float *depthRow(int y) {
-    return depths + (size_t) y * (size_t) depthWidth;
-}
-
-static void clearDepths(void) {
-    int wanted = raster.width * raster.height;
-
-    if (depthRoom < wanted) {
-        float *grown = realloc(depths, (size_t) wanted * sizeof(float));
-        if (grown == NULL) {
-            return;
-        }
-        depths = grown;
-        depthRoom = wanted;
-    }
-
-    depthWidth = raster.width;
-    for (int i = 0; i < wanted; i++) {
-        depths[i] = 3.4e38f;
-    }
-}
-
 /** A vertex after it has been projected. Behind the eye it has no place on the buffer. */
 typedef struct {
     float x;
@@ -112,16 +78,8 @@ typedef struct {
     int visible;
 } Projected;
 
-typedef struct {
-    int face;
-    int depth;
-} Ordered;
-
 static Projected *projected;
 static int projectedRoom;
-
-static Ordered *order;
-static int orderRoom;
 
 static int room(void **held, int *have, int want, size_t size) {
     if (*have >= want) {
@@ -136,10 +94,6 @@ static int room(void **held, int *have, int want, size_t size) {
     *held = grown;
     *have = want;
     return 1;
-}
-
-static int compareDepth(const void *left, const void *right) {
-    return ((const Ordered *) right)->depth - ((const Ordered *) left)->depth;
 }
 
 /**
@@ -395,8 +349,7 @@ static void renderModel(const void *model, const void *matrix) {
         return;
     }
 
-    if (!room((void **) &projected, &projectedRoom, vertices, sizeof(Projected))
-        || !room((void **) &order, &orderRoom, faces, sizeof(Ordered))) {
+    if (!room((void **) &projected, &projectedRoom, vertices, sizeof(Projected))) {
         return;
     }
 
@@ -440,7 +393,19 @@ static void renderModel(const void *model, const void *matrix) {
     const short *faceC = modelFaceC(model);
     const short *faceColour = modelFaceColour(model);
 
-    int drawn = 0;
+    if (raster.depths == NULL) {
+        return;
+    }
+
+    const uint32_t *shade = modelShade(model);
+
+    /*
+     * The faces are drawn in the order the model lists them. Nothing sorts them: what covers what
+     * is settled a pixel at a time by how far away each one is, and two faces that meet exactly
+     * are settled by which of them the model lists second. Sorting them first would change that
+     * answer wherever they meet, which on a model whose faces line up with an axis is a great
+     * many pixels.
+     */
     for (int face = 0; face < faces; face++) {
         const Projected *a = &projected[faceA[face]];
         const Projected *b = &projected[faceB[face]];
@@ -460,30 +425,14 @@ static void renderModel(const void *model, const void *matrix) {
             continue;
         }
 
-        order[drawn].face = face;
-        order[drawn].depth = a->depth + b->depth + c->depth;
-        drawn++;
-    }
-
-    clearDepths();
-    if (depths == NULL) {
-        return;
-    }
-
-    qsort(order, (size_t) drawn, sizeof(Ordered), compareDepth);
-
-    const uint32_t *shade = modelShade(model);
-
-    for (int i = 0; i < drawn; i++) {
-        int face = order[i].face;
         uint32_t unlit = shade == NULL
             ? unlitColour(faceColour == NULL ? 0 : faceColour[face] & 0xFFFF, modelAmbient(model))
             : 0;
 
         fillTriangle(
-            cornerAt(&projected[faceA[face]], shade == NULL ? unlit : shade[face * 3]),
-            cornerAt(&projected[faceB[face]], shade == NULL ? unlit : shade[face * 3 + 1]),
-            cornerAt(&projected[faceC[face]], shade == NULL ? unlit : shade[face * 3 + 2]));
+            cornerAt(a, shade == NULL ? unlit : shade[face * 3]),
+            cornerAt(b, shade == NULL ? unlit : shade[face * 3 + 1]),
+            cornerAt(c, shade == NULL ? unlit : shade[face * 3 + 2]));
     }
 }
 

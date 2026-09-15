@@ -31,7 +31,7 @@ public final class FrameCheck {
     private static final int MARK = 0xFFFF0000;
 
     /** What an undrawn pixel is, which is what the harness clears a frame to. */
-    private static final int BLANK = 0;
+    private static final int BLANK = Scene.CLEAR_COLOUR;
 
     private record Frames(String label, Path directory, List<String> scenes) {
 
@@ -131,6 +131,10 @@ public final class FrameCheck {
      * the second is a face in the right place with the wrong light on it.
      */
     private static List<String> measureOutstanding(Frames shipped, Frames ours) throws IOException {
+        /*
+         * A scene that is checked reports its distance through its failure instead, so measuring
+         * it again here would say the same thing twice.
+         */
         var report = new ArrayList<String>();
         var seen = new ArrayList<String>();
 
@@ -154,6 +158,8 @@ public final class FrameCheck {
         var coverage = 0;
         var shade = 0;
         var worst = 0;
+        var worstX = -1;
+        var worstY = -1;
 
         for (var y = 0; y < left.getHeight(); y++) {
             for (var x = 0; x < left.getWidth(); x++) {
@@ -169,14 +175,18 @@ public final class FrameCheck {
                         coverage++;
                     } else {
                         shade++;
-                        worst = Math.max(worst, apart(wanted, got));
+                        if (apart(wanted, got) > worst) {
+                            worst = apart(wanted, got);
+                            worstX = x;
+                            worstY = y;
+                        }
                     }
                 }
             }
         }
 
-        return "%d drawn, %d only one side drew, %d shaded differently, worst part off by %d"
-            .formatted(drawn, coverage, shade, worst);
+        return "%d drawn, %d only one side drew, %d shaded differently, worst part off by %d at %d,%d"
+            .formatted(drawn, coverage, shade, worst, worstX, worstY);
     }
 
     /** How far apart two colours are, measured by the part of them that differs most. */
@@ -240,8 +250,9 @@ public final class FrameCheck {
 
         ImageIO.write(marked, "png", marks.resolve(what.replace(' ', '-') + ".png").toFile());
 
-        return Optional.of("%s: %d of %d pixels differ, within %d,%d to %d,%d.%n    %s".formatted(
+        return Optional.of("%s: %d of %d pixels differ, within %d,%d to %d,%d.%n    %s%n    %s".formatted(
             what, count, left.getWidth() * left.getHeight(), minX, minY, maxX, maxY,
+            distance(expected, actual),
             String.join(System.lineSeparator() + "    ", samples)));
     }
 
