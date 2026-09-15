@@ -441,25 +441,32 @@ val compileOpenGlBinding by tasks.registering(Exec::class) {
     inputs.file(openGlSource)
     outputs.file(openGlLibrary)
 
-    val source = openGlSource.get().asFile
+    val generated = openGlSource.get().asFile
+    val platform = layout.projectDirectory.file("src/main/native/jaggl.m").asFile
     val target = openGlLibrary.get().asFile
     val outputDirectory = target.parentFile
+
+    inputs.file(platform)
 
     executable = "clang"
     args(
         "-arch", "arm64",
         "-arch", "x86_64",
         "-dynamiclib",
+        "-fobjc-arc",
         "-Wall",
         "-Werror",
         // The binding is from 2011 and every surface it asks for is deprecated by design.
         "-Wno-deprecated-declarations",
         "-I", jdkHome.dir("include").asFile.absolutePath,
         "-I", jdkHome.dir("include/darwin").asFile.absolutePath,
+        "-framework", "Cocoa",
+        "-framework", "QuartzCore",
         "-framework", "OpenGL",
         "-install_name", "@loader_path/libjaggl.dylib",
         "-o", target.absolutePath,
-        source.absolutePath,
+        generated.absolutePath,
+        platform.absolutePath,
     )
 
     doFirst {
