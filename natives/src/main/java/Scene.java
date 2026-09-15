@@ -43,7 +43,9 @@ public sealed interface Scene {
         new Geometry(),
         new FewFaces(),
         new DepthOrder(),
-        new SubClip()
+        new SubClip(),
+        new ReadBack(),
+        new SpriteMatrix()
     );
 
     /**
@@ -256,6 +258,65 @@ public sealed interface Scene {
             props.matrix().makeRotationZ(0);
             props.matrix().translate(across, 0, away);
             props.model().render(props.matrix(), null, 1);
+        }
+    }
+
+    /**
+     * Every way of putting a sprite down, against every way of combining it with the colour it is
+     * given, over backgrounds that are not flat.
+     *
+     * Five ways of combining and three ways of laying down make fifteen, and several of them agree
+     * with each other whenever the colour is white or the background is empty. Each row here is
+     * one way of combining and each column one colour, and every one of them is drawn over a band
+     * that is already painted, so nothing can pass by agreeing only where it does not matter.
+     */
+    record SpriteMatrix() implements Scene {
+
+        private static final int[] COLOURS = {
+            0xFFFFFFFF, 0xFF00FF00, 0x80CC3311, 0x40FFFFFF, 0xC0336699, 0x00FFAA22
+        };
+
+        private static final int STEP = 84;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            for (var mode = 0; mode < 3; mode++) {
+                var y = mode * 128;
+                toolkit.aa(0, y, WIDTH, 120, 0xFF404060, 0);
+                toolkit.aa(0, y + 40, WIDTH, 40, 0xFF906030, 0);
+
+                for (var op = 0; op < 5; op++) {
+                    for (var colour = 0; colour < COLOURS.length; colour++) {
+                        props.gradient().render(
+                            colour * STEP + op * 14, y + op * 6, op, COLOURS[colour], mode);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Shapes drawn, read back off the buffer, and drawn again beside themselves.
+     *
+     * Reading a rectangle back answers nothing a picture can check on its own. Making a sprite of
+     * what came back and drawing it gives the same picture twice, so a read that takes the wrong
+     * rows, or the wrong corner, or stops one short, shows as a copy that does not match what it
+     * was copied from.
+     */
+    record ReadBack() implements Scene {
+
+        private static final int PATCH = 120;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.aa(20, 20, PATCH, PATCH, 0xFF806040, 0);
+            toolkit.outlineRect(30, 30, 60, 40, 0xFF33CC11, 0);
+            toolkit.line(20, 140, 140, 20, 0xFF11CCCC, 0);
+            props.gradient().render(60, 60, 0, 0xFFFFFF, 0);
+
+            var read = toolkit.na(20, 20, PATCH, PATCH);
+            toolkit.createSprite(PATCH, PATCH, PATCH, read).render(200, 20, 0, 0xFFFFFF, 0);
+            toolkit.createSprite(PATCH, PATCH, PATCH, read).render(200, 180, 3, 0xFF00FF, 0);
         }
     }
 

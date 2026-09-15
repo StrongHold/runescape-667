@@ -765,46 +765,57 @@ val verifyToolkit by tasks.registering(JavaExec::class) {
     )
 }
 
-val shippedMatrices = layout.buildDirectory.file("matrices/shipped.txt")
-val ownMatrices = layout.buildDirectory.file("matrices/ours.txt")
-
 /**
- * Runs the matrix script through the shipped toolkit, on the JVM that can load it.
+ * Registers a probe that asks both toolkits the same questions and compares the answers.
+ *
+ * Not everything a toolkit does ends up on the screen, and what does not cannot be checked by
+ * comparing pictures. A probe drives one named class through each toolkit, writes every answer as
+ * a line of text, and the check reads the two files back. Adding one is three tasks, so they are
+ * written once here rather than three more times for each new family of natives.
+ *
+ * The shipped side runs on the x86_64 virtual machine it needs, and ours runs there too, so both
+ * sides are asked on the same instruction set.
  */
-val captureMatrices by tasks.registering(JavaExec::class) {
-    description = "Records what the shipped toolkit's matrices answer."
-    dependsOn(patchToolkit)
-    mainClass = "MatrixProbe"
-    classpath = sourceSets["main"].runtimeClasspath
-    setExecutable(rootProject.layout.projectDirectory.file(".gradle/jdk-x64/unpacked/Home/bin/java").asFile.absolutePath)
-    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
-    args(patchedToolkit.get().asFile.absolutePath, shippedMatrices.get().asFile.absolutePath)
+fun registerProbe(name: String, probe: String, what: String): TaskProvider<JavaExec> {
+    val shippedAnswers = layout.buildDirectory.file("answers/$name-shipped.txt")
+    val ownAnswers = layout.buildDirectory.file("answers/$name-ours.txt")
+    val x64Java = rootProject.layout.projectDirectory
+        .file(".gradle/jdk-x64/unpacked/Home/bin/java").asFile.absolutePath
 
-    val target = shippedMatrices.get().asFile
-    doFirst {
-        target.parentFile.mkdirs()
+    val captureShipped = tasks.register<JavaExec>("capture${name.replaceFirstChar(Char::uppercase)}") {
+        description = "Records what the shipped toolkit answers for $what."
+        dependsOn(patchToolkit)
+        mainClass = probe
+        classpath = sourceSets["main"].runtimeClasspath
+        setExecutable(x64Java)
+        jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+        args(patchedToolkit.get().asFile.absolutePath, shippedAnswers.get().asFile.absolutePath)
+        outputs.file(shippedAnswers)
+        doFirst { shippedAnswers.get().asFile.parentFile.mkdirs() }
+    }
+
+    val captureOurs = tasks.register<JavaExec>("captureOwn${name.replaceFirstChar(Char::uppercase)}") {
+        description = "Records what our toolkit answers for $what."
+        dependsOn(compileSoftwareToolkit, ":unpackX64Jdk")
+        mainClass = probe
+        classpath = sourceSets["main"].runtimeClasspath
+        setExecutable(x64Java)
+        jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+        args(toolkitLibrary.get().asFile.absolutePath, ownAnswers.get().asFile.absolutePath)
+        inputs.file(toolkitLibrary)
+        inputs.files(sourceSets["main"].runtimeClasspath)
+        outputs.file(ownAnswers)
+        doFirst { ownAnswers.get().asFile.parentFile.mkdirs() }
+    }
+
+    return tasks.register<JavaExec>("verify${name.replaceFirstChar(Char::uppercase)}") {
+        description = "Checks our $what against the shipped toolkit's, answer for answer."
+        dependsOn(captureShipped, captureOurs)
+        mainClass = "AnswerCheck"
+        classpath = sourceSets["main"].runtimeClasspath
+        args(shippedAnswers.get().asFile.absolutePath, ownAnswers.get().asFile.absolutePath, what)
     }
 }
 
-val captureOwnMatrices by tasks.registering(JavaExec::class) {
-    description = "Records what our toolkit's matrices answer."
-    dependsOn(compileSoftwareToolkit)
-    mainClass = "MatrixProbe"
-    classpath = sourceSets["main"].runtimeClasspath
-    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
-    args(toolkitLibrary.get().asFile.absolutePath, ownMatrices.get().asFile.absolutePath)
-    inputs.file(toolkitLibrary)
-
-    val target = ownMatrices.get().asFile
-    doFirst {
-        target.parentFile.mkdirs()
-    }
-}
-
-val verifyMatrices by tasks.registering(JavaExec::class) {
-    description = "Checks our matrices against the shipped toolkit's, answer for answer."
-    dependsOn(captureMatrices, captureOwnMatrices)
-    mainClass = "MatrixCheck"
-    classpath = sourceSets["main"].runtimeClasspath
-    args(shippedMatrices.get().asFile.absolutePath, ownMatrices.get().asFile.absolutePath)
-}
+val verifyMatrices = registerProbe("matrices", "MatrixProbe", "matrix answers")
+val verifyPoints = registerProbe("points", "PointProbe", "projection answers")

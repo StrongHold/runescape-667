@@ -25,27 +25,149 @@ static void spriteFree(Sprite *sprite) {
 
 /**
  * How the client wants a sprite's own pixels combined with the colour it passes.
+ *
+ * Every one of these works a byte at a time on all four bytes of a pixel, the top one included, so
+ * the colour's own alpha is combined with the sprite's alpha exactly as the other three are.
  */
 enum {
-    /** Multiply the two, which leaves the sprite almost as it is when the colour is white. */
-    OP_MODULATE = 0,
-    /** Ignore the sprite's colours and paint its shape in the colour. */
-    OP_FLAT = 3
+    /** Multiply the two, which leaves the sprite as it is when the colour is white. */
+    OP_MULTIPLY = 0,
+    /** Take the sprite as it stands and ignore the colour. */
+    OP_KEEP = 1,
+    /** Run between the sprite and the colour, by how much alpha the colour carries. */
+    OP_MIX = 2,
+    /** Add the colour, holding at white. */
+    OP_ADD = 3,
+    /** Take the colour away, holding at black. */
+    OP_SUBTRACT = 4
 };
 
-/**
- * Multiplies a pixel by a colour.
- *
- * The shift is by eight rather than a divide by 255, so a channel comes back one lower than it
- * went in even when the colour is white. That is what the toolkit this replaces does, and the
- * client's artwork was drawn against it, so it is kept.
- */
-static uint32_t modulate(uint32_t pixel, uint32_t colour) {
-    uint32_t red = (((pixel >> 16) & 0xFF) * ((colour >> 16) & 0xFF)) >> 8;
-    uint32_t green = (((pixel >> 8) & 0xFF) * ((colour >> 8) & 0xFF)) >> 8;
-    uint32_t blue = ((pixel & 0xFF) * (colour & 0xFF)) >> 8;
+/** The four bytes of a pixel: blue, green, red and alpha, in the order they sit in it. */
+enum { PARTS = 4 };
 
-    return (red << 16) | (green << 8) | blue;
+static int partOf(uint32_t pixel, int part) {
+    return (int) (pixel >> (part * 8)) & 0xFF;
+}
+
+static uint32_t fromParts(const int *parts) {
+    uint32_t pixel = 0;
+    for (int part = 0; part < PARTS; part++) {
+        pixel |= (uint32_t) (parts[part] & 0xFF) << (part * 8);
+    }
+    return pixel;
+}
+
+static int holdToWhite(int value) {
+    return value > 0xFF ? 0xFF : value;
+}
+
+/**
+ * The top sixteen bits of the product of two sixteen bit numbers, read as unsigned.
+ *
+ * This is one multiply of the toolkit's, and it has to be done in numbers wide enough to hold the
+ * product: a colour asking for more than half alpha spreads a multiplier of nearly sixteen bits,
+ * and the product of that with a part carried up eight places does not fit in a signed word.
+ */
+static int highProduct(int left, int right) {
+    return (int) (((uint32_t) left & 0xFFFFu) * ((uint32_t) right & 0xFFFFu) >> 16);
+}
+
+/**
+ * Narrows a sixteen bit number back down to one part of a pixel.
+ *
+ * The number is read as a **signed** one, so anything from half of sixteen bits upwards comes out
+ * as nothing rather than as white. Nothing reaches that from an ordinary colour, but a colour
+ * asking for more than half alpha does, and the part of the picture that should have come out
+ * brightest comes out black instead. That is what the toolkit does.
+ */
+static int narrowToPart(int value) {
+    int16_t signed16 = (int16_t) value;
+
+    if (signed16 < 0) {
+        return 0;
+    } else if (signed16 > 0xFF) {
+        return 0xFF;
+    } else {
+        return signed16;
+    }
+}
+
+/**
+ * How much of the sprite a mix keeps, and how much of the colour, held the way the toolkit holds
+ * them.
+ *
+ * The toolkit takes the colour's top byte with a **signed** shift and packs two copies of it into
+ * one pair of numbers. A colour asking for more than half alpha therefore spreads a number far
+ * larger than a byte, every part of the answer runs past white, and the two halves of the pair
+ * stop agreeing with each other. That is what it does, so it is what happens here. Which half of
+ * the pair a part of a pixel uses depends on whether the part is an even one or an odd one.
+ */
+typedef struct {
+    int keep[2];
+    int lose[2];
+} Mixture;
+
+static Mixture mixtureOf(uint32_t colour) {
+    int alpha = (int) colour >> 24;
+    uint32_t packed = ((uint32_t) alpha << 16) | (uint32_t) alpha;
+    uint32_t inverse = (packed ^ 0xFF00FFu) << 8;
+
+    Mixture mixture;
+    mixture.keep[0] = (int) (packed & 0xFFFF);
+    mixture.keep[1] = (int) (packed >> 16);
+    mixture.lose[0] = (int) (inverse & 0xFFFF);
+    mixture.lose[1] = (int) (inverse >> 16);
+    return mixture;
+}
+
+/**
+ * One part of a pixel, once the sprite and the colour have been put together.
+ *
+ * The answer is sixteen bits wide. Everything but the mix leaves a part that already fits in a
+ * byte, and the mix does not: when the answer is run into the buffer by its own alpha the whole
+ * sixteen bits are what is run, and everywhere else the two halves of the mix are narrowed to
+ * bytes first and then added with no room to carry.
+ *
+ * Each of these carries the sprite's part up eight places before it multiplies, which is why a
+ * sprite multiplied by white comes back as it went in rather than one lower.
+ */
+static int combine(int op, int sprite, int colour, const Mixture *mixture, int part, int wide) {
+    int half = part & 1;
+
+    switch (op) {
+        case OP_MULTIPLY:
+            return highProduct(sprite << 8, colour);
+        case OP_KEEP:
+            return sprite;
+        case OP_MIX: {
+            int kept = highProduct(sprite << 8, mixture->keep[half]);
+            int lost = highProduct(colour, mixture->lose[half]);
+            return wide
+                ? (kept + lost) & 0xFFFF
+                : (narrowToPart(kept) + narrowToPart(lost)) & 0xFF;
+        }
+        case OP_ADD:
+            return holdToWhite(sprite + colour);
+        case OP_SUBTRACT:
+            return sprite - colour < 0 ? 0 : sprite - colour;
+        default:
+            return sprite;
+    }
+}
+
+/**
+ * One part of a pixel, once the result has met what the buffer already held.
+ */
+static int lay(int mode, int put, int held, int alpha) {
+    switch (mode) {
+        case BLEND_ALPHA:
+            return narrowToPart((highProduct((alpha << 8) & 0xFFFF, put)
+                + highProduct(held << 8, alpha ^ 0xFF)) & 0xFFFF);
+        case BLEND_ADD:
+            return holdToWhite(held + put);
+        default:
+            return put;
+    }
 }
 
 /**
@@ -102,10 +224,13 @@ JNIEXPORT void JNICALL Java_j_W(JNIEnv *env, jobject self, jlong handle, jint x,
                                  jint op, jint colour, jint mode) {
     (void) env;
     (void) self;
-    (void) mode;
 
     Sprite *sprite = (Sprite *) (intptr_t) handle;
     if (sprite == NULL || raster.pixels == NULL) {
+        return;
+    }
+
+    if (op < OP_MULTIPLY || op > OP_SUBTRACT || mode < BLEND_OPAQUE || mode > BLEND_ADD) {
         return;
     }
 
@@ -114,14 +239,29 @@ JNIEXPORT void JNICALL Java_j_W(JNIEnv *env, jobject self, jlong handle, jint x,
     int lastRow = y + sprite->height > raster.clipBottom ? raster.clipBottom - y : sprite->height;
     int lastColumn = x + sprite->width > raster.clipRight ? raster.clipRight - x : sprite->width;
 
-    uint32_t tint = (uint32_t) colour & 0xFFFFFF;
+    Mixture mixture = mixtureOf((uint32_t) colour);
 
     for (int row = firstRow; row < lastRow; row++) {
         const uint32_t *from = sprite->pixels + (size_t) row * (size_t) sprite->width;
         uint32_t *to = raster.pixels + (size_t) (y + row) * (size_t) raster.width + x;
 
         for (int column = firstColumn; column < lastColumn; column++) {
-            to[column] = op == OP_FLAT ? tint : modulate(from[column] & 0xFFFFFF, tint);
+            int put[PARTS];
+
+            for (int part = 0; part < PARTS; part++) {
+                put[part] = combine(op, partOf(from[column], part),
+                                    partOf((uint32_t) colour, part), &mixture, part,
+                                    mode == BLEND_ALPHA);
+            }
+
+            int alpha = put[PARTS - 1];
+            int laid[PARTS];
+
+            for (int part = 0; part < PARTS; part++) {
+                laid[part] = lay(mode, put[part], partOf(to[column], part), alpha);
+            }
+
+            to[column] = fromParts(laid);
         }
     }
 }
