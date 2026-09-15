@@ -743,3 +743,47 @@ val verifyToolkit by tasks.registering(JavaExec::class) {
         layout.buildDirectory.dir("frame-differences").get().asFile.absolutePath,
     )
 }
+
+val shippedMatrices = layout.buildDirectory.file("matrices/shipped.txt")
+val ownMatrices = layout.buildDirectory.file("matrices/ours.txt")
+
+/**
+ * Runs the matrix script through the shipped toolkit, on the JVM that can load it.
+ */
+val captureMatrices by tasks.registering(JavaExec::class) {
+    description = "Records what the shipped toolkit's matrices answer."
+    dependsOn(patchToolkit)
+    mainClass = "MatrixProbe"
+    classpath = sourceSets["main"].runtimeClasspath
+    setExecutable(rootProject.layout.projectDirectory.file(".gradle/jdk-x64/unpacked/Home/bin/java").asFile.absolutePath)
+    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+    args(patchedToolkit.get().asFile.absolutePath, shippedMatrices.get().asFile.absolutePath)
+
+    val target = shippedMatrices.get().asFile
+    doFirst {
+        target.parentFile.mkdirs()
+    }
+}
+
+val captureOwnMatrices by tasks.registering(JavaExec::class) {
+    description = "Records what our toolkit's matrices answer."
+    dependsOn(compileSoftwareToolkit)
+    mainClass = "MatrixProbe"
+    classpath = sourceSets["main"].runtimeClasspath
+    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+    args(toolkitLibrary.get().asFile.absolutePath, ownMatrices.get().asFile.absolutePath)
+    inputs.file(toolkitLibrary)
+
+    val target = ownMatrices.get().asFile
+    doFirst {
+        target.parentFile.mkdirs()
+    }
+}
+
+val verifyMatrices by tasks.registering(JavaExec::class) {
+    description = "Checks our matrices against the shipped toolkit's, answer for answer."
+    dependsOn(captureMatrices, captureOwnMatrices)
+    mainClass = "MatrixCheck"
+    classpath = sourceSets["main"].runtimeClasspath
+    args(shippedMatrices.get().asFile.absolutePath, ownMatrices.get().asFile.absolutePath)
+}
