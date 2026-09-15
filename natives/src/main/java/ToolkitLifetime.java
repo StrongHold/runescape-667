@@ -44,7 +44,7 @@ public final class ToolkitLifetime {
         Thread.sleep(600);
 
         for (int round = 0; round < ROUNDS; round++) {
-            discardToolkit(canvas);
+            discardToolkit(canvas, round % 2 == 0);
             System.gc();
             System.runFinalization();
             Thread.sleep(150);
@@ -53,12 +53,21 @@ public final class ToolkitLifetime {
 
     /**
      * Leaves nothing referring to the toolkit, so that collection can reach it.
+     *
+     * Releasing the toolkit is the harder case and is what switching to another one does. It
+     * empties the toolkit of its surfaces and drops the count of live toolkits to zero in one
+     * step, so the surfaces are left for the collector at exactly the moment releasing them where
+     * they stand becomes unsafe.
      */
-    private static void discardToolkit(Canvas canvas) throws FlipException {
+    private static void discardToolkit(Canvas canvas, boolean release) throws FlipException {
         Toolkit toolkit = Static226.create(ToolkitType.SSE, null, canvas, new StubTextureSource(), WIDTH, HEIGHT, 0);
         toolkit.GA(0);
         toolkit.ya();
         toolkit.flip(0, 0);
+
+        if (release) {
+            toolkit.free();
+        }
     }
 
     private ToolkitLifetime() {
