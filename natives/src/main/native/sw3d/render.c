@@ -74,7 +74,7 @@ static uint16_t hold(float value) {
 typedef struct {
     float x;
     float y;
-    int depth;
+    float depth;
     int visible;
 } Projected;
 
@@ -121,7 +121,7 @@ static Corner cornerAt(const Projected *point, uint32_t colour) {
     Corner corner;
     corner.x = point->x;
     corner.y = point->y;
-    corner.depth = (float) point->depth;
+    corner.depth = point->depth;
 
     for (int part = 0; part < CHANNELS; part++) {
         corner.colour[part] = (uint16_t) ((colour >> (part * 8) & 0xFF) << 8);
@@ -194,15 +194,16 @@ static void fillSpan(int y, const Side *left, const Side *right) {
     int from = (int) lrintf(left->x);
     int to = (int) lrintf(right->x);
     float over = reciprocal((float) (to - from));
+    int width = raster.clipRight - raster.clipLeft;
 
-    if (to > raster.clipRight) {
-        to = raster.clipRight;
+    if (to > width) {
+        to = width;
     }
 
     int skipped = 0;
-    if (from < raster.clipLeft) {
-        skipped = raster.clipLeft - from;
-        from = raster.clipLeft;
+    if (from < 0) {
+        skipped = -from;
+        from = 0;
     }
 
     if (to <= from) {
@@ -222,8 +223,10 @@ static void fillSpan(int y, const Side *left, const Side *right) {
         colourStep[part] = narrow(each);
     }
 
-    uint32_t *row = raster.pixels + (size_t) y * (size_t) raster.width;
-    float *held = depthRow(y);
+    size_t start = (size_t) (y + raster.clipTop) * (size_t) raster.width
+        + (size_t) raster.clipLeft;
+    uint32_t *row = raster.pixels + start;
+    float *held = raster.depths + start;
 
     for (int x = from; x < to; x++) {
         if (depth <= held[x]) {
@@ -288,12 +291,13 @@ static void fillTriangle(Corner a, Corner b, Corner c) {
     Side toBottom = sideBetween(top, bottom, bottomRow - topRow);
     Side acrossBottom = sideBetween(middle, bottom, bottomRow - middleRow);
 
-    int row = topRow < raster.clipTop ? raster.clipTop : topRow;
+    int height = raster.clipBottom - raster.clipTop;
+    int row = topRow < 0 ? 0 : topRow;
     int skipped = row - topRow;
     int rows = middleRow - topRow - skipped;
 
-    if (raster.clipBottom - row < rows) {
-        rows = raster.clipBottom - row;
+    if (height - row < rows) {
+        rows = height - row;
     }
 
     Side leftStep = toMiddle.x > toBottom.x ? toBottom : toMiddle;
@@ -316,8 +320,8 @@ static void fillTriangle(Corner a, Corner b, Corner c) {
         rows = bottomRow - middleRow + rows;
     }
 
-    if (raster.clipBottom - row < rows) {
-        rows = raster.clipBottom - row;
+    if (height - row < rows) {
+        rows = height - row;
     }
 
     if (rows > 0) {
@@ -335,11 +339,75 @@ static void fillTriangle(Corner a, Corner b, Corner c) {
     }
 }
 
+enum { ROWS = 4 };
+
+typedef struct {
+    float row[ROWS][ROWS];
+} Transform;
+
+/**
+ * The matrix a model is put through once the camera has had it.
+ *
+ * It opens the picture out to the field the client asked for and leaves the distance from the eye
+ * in the fourth place, so that dividing a point by that place is what makes a thing further away
+ * smaller. The third place is left running from nothing at the near plane to one at the far
+ * plane, which is the range distances are kept in.
+ *
+ * Folding the field into the matrix is not the same as opening the picture out afterwards. The
+ * field then multiplies each term of the sum rather than the sum, and the two answers differ by
+ * enough to move the edge of a face onto the next pixel.
+ */
+static Transform projectionMatrix(void) {
+    const Projection *view = projection();
+    float range = view->far - view->near;
+
+    Transform matrix;
+    memset(&matrix, 0, sizeof matrix);
+    matrix.row[0][0] = view->scaleX;
+    matrix.row[1][1] = view->scaleY;
+    matrix.row[2][2] = view->far / range;
+    matrix.row[2][3] = 1.0f;
+    matrix.row[3][2] = -view->near * view->far / range;
+    return matrix;
+}
+
+/**
+ * Puts one matrix after another, adding the four terms of a row in pairs.
+ *
+ * Four numbers added in a different order are a different number as soon as they stop fitting
+ * exactly, and this answer decides which pixel the edge of a face lands on, so the pairs are kept.
+ */
+static Transform after(const float *first, const Transform *second) {
+    Transform result;
+
+    for (int row = 0; row < ROWS; row++) {
+        const float *terms = first + row * ROWS;
+
+        for (int lane = 0; lane < ROWS; lane++) {
+            float even = terms[0] * second->row[0][lane] + terms[2] * second->row[2][lane];
+            float odd = terms[1] * second->row[1][lane] + terms[3] * second->row[3][lane];
+            result.row[row][lane] = even + odd;
+        }
+    }
+
+    return result;
+}
+
+/**
+ * Keeps the sign a distance had before it was divided.
+ *
+ * Dividing by a distance behind the eye turns the sign of the answer round. The toolkit puts the
+ * sign back rather than letting a point behind the eye come out in front of one in front of it.
+ */
+static float signedAs(float value, float before) {
+    return before < 0.0f ? -fabsf(value) : value;
+}
+
 /**
  * Draws one model through one matrix.
  */
 static void renderModel(const void *model, const void *matrix) {
-    if (model == NULL || matrix == NULL || raster.pixels == NULL) {
+    if (model == NULL || matrix == NULL || raster.pixels == NULL || raster.depths == NULL) {
         return;
     }
 
@@ -367,35 +435,46 @@ static void renderModel(const void *model, const void *matrix) {
         matrixCompose(matrix, camera, combined);
     }
 
+    Transform projector = projectionMatrix();
+    Transform onto = after(matrixRows(combined), &projector);
+    free(combined);
+
+    /* Where the middle of the picture sits, counted from the corner that may be drawn on. */
+    float acrossFromClip = view->centreX - (float) raster.clipLeft;
+    float downFromClip = view->centreY - (float) raster.clipTop;
+
     const int *vertexX = modelVertexX(model);
     const int *vertexY = modelVertexY(model);
     const int *vertexZ = modelVertexZ(model);
 
     for (int vertex = 0; vertex < vertices; vertex++) {
-        float point[4];
-        matrixTransform(combined, (float) vertexX[vertex], (float) vertexY[vertex],
-                        (float) vertexZ[vertex], point);
+        float x = (float) vertexX[vertex];
+        float y = (float) vertexY[vertex];
+        float z = (float) vertexZ[vertex];
+
+        float point[ROWS];
+        for (int lane = 0; lane < ROWS; lane++) {
+            point[lane] = x * onto.row[0][lane] + y * onto.row[1][lane]
+                + z * onto.row[2][lane] + onto.row[3][lane];
+        }
+
+        /* The fourth place is how far from the eye the point ended up. */
+        float away = point[3];
 
         Projected *landed = &projected[vertex];
-        landed->depth = (int) point[2];
-        landed->visible = point[2] >= (float) view->near && point[2] <= (float) view->far;
+        landed->depth = signedAs(point[2] / away, point[2]);
+        landed->visible = away >= view->near && away <= view->far;
 
         if (landed->visible) {
-            landed->x = view->centreX + point[0] * view->scaleX / point[2];
-            landed->y = view->centreY + point[1] * view->scaleY / point[2];
+            landed->x = point[0] / away + acrossFromClip;
+            landed->y = point[1] / away + downFromClip;
         }
     }
-
-    free(combined);
 
     const short *faceA = modelFaceA(model);
     const short *faceB = modelFaceB(model);
     const short *faceC = modelFaceC(model);
     const short *faceColour = modelFaceColour(model);
-
-    if (raster.depths == NULL) {
-        return;
-    }
 
     const uint32_t *shade = modelShade(model);
 

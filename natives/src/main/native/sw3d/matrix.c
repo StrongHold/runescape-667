@@ -197,6 +197,10 @@ size_t matrixSize(void) {
     return sizeof(Matrix);
 }
 
+const float *matrixRows(const void *handle) {
+    return &((const Matrix *) handle)->row[0][0];
+}
+
 JNIEXPORT void JNICALL Java_ja_la(JNIEnv *env, jobject self) {
     Matrix *matrix = calloc(1, sizeof(Matrix));
     if (matrix != NULL) {

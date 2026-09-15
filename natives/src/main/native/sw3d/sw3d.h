@@ -188,6 +188,9 @@ void matrixCompose(const void *first, const void *second, void *into);
 
 size_t matrixSize(void);
 
+/** The sixteen floats a matrix holds, a row at a time. */
+const float *matrixRows(const void *handle);
+
 /** What a model holds, read without knowing how it is laid out. */
 int modelVertexCount(const void *handle);
 int modelFaceCount(const void *handle);
