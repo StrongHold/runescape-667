@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Keeps software toolkits alive on macOS.
+ * Keeps software toolkits alive where releasing one would end the process.
  *
  * The software toolkit's canvas takes an autorelease pool when it creates its back buffer and
  * drains that pool when it is destroyed. A pool belongs to the thread that created it, and the
@@ -17,17 +17,30 @@ import java.util.List;
  * buffer until the client exits, which is a few megabytes each and only for the handful of
  * toolkits a session builds.
  *
- * This applies only where the drawing surface has been supplied, so no other platform is affected.
+ * Nothing is held until the host application asks for it, so a platform that does not need this
+ * releases its toolkits as it always did.
+ *
+ * This class is not part of the original client.
  */
-public final class MacSoftwareToolkitLifetime {
+public final class SoftwareToolkitLifetime {
 
     private static final List<Object> held = new ArrayList<>();
 
+    private static volatile boolean retaining = false;
+
     /**
-     * Holds a toolkit for the life of the client, if this platform needs it held.
+     * Holds every software toolkit and every object released outside an instance count for the
+     * life of the client.
+     */
+    public static void retainAll() {
+        retaining = true;
+    }
+
+    /**
+     * Holds a toolkit for the life of the client, where this platform needs it held.
      */
     public static void hold(Object toolkit) {
-        if (toolkit != null && MacToolkitLibrary.isSupplyingSurface()) {
+        if (toolkit != null && retaining) {
             keep(toolkit);
         }
     }
@@ -41,7 +54,7 @@ public final class MacSoftwareToolkitLifetime {
      * on its way out anyway.
      */
     public static boolean holdRatherThanRelease(Object object) {
-        if (object == null || !MacToolkitLibrary.isSupplyingSurface()) {
+        if (object == null || !retaining) {
             return false;
         }
 
@@ -55,7 +68,7 @@ public final class MacSoftwareToolkitLifetime {
         }
     }
 
-    private MacSoftwareToolkitLifetime() {
+    private SoftwareToolkitLifetime() {
         /* empty */
     }
 }

@@ -3,7 +3,7 @@ import com.jagex.core.datastruct.key.Deque;
 import com.jagex.graphics.TextureSource;
 import com.jagex.graphics.Toolkit;
 import com.jagex.graphics.ToolkitType;
-import com.jagex.graphics.sw.MacSoftwareToolkitLifetime;
+import com.jagex.graphics.sw.SoftwareToolkitLifetime;
 import com.jagex.js5.js5;
 import org.openrs2.deob.annotation.OriginalArg;
 import org.openrs2.deob.annotation.OriginalMember;
@@ -27,7 +27,7 @@ public final class Static226 {
             return JavaToolkit.create(canvas, textureSource, width, height);
         } else if (type == ToolkitType.SSE) {
             Toolkit software = oa.create(canvas, textureSource, width, height);
-            MacSoftwareToolkitLifetime.hold(software);
+            SoftwareToolkitLifetime.hold(software); // Not part of the original client.
             return software;
         } else if (type == ToolkitType.GL) {
             return GlToolkit.create(canvas, textureSource, antialiasing);

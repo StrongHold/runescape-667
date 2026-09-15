@@ -1,34 +1,36 @@
-package com.jagex.graphics.sw;
+package com.jagex;
 
+import com.jagex.graphics.sw.SoftwareToolkitLifetime;
 import rs2.client.loading.library.LibraryManager;
+import rs2.client.loading.library.LibraryOverride;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Supplies the toolkit libraries with a drawing surface on macOS.
+ * Loads libraries written for this client in place of the ones downloaded for it.
  *
- * Both the software and the hardware toolkit ask JavaVM.framework for a surface, and that
- * framework no longer serves the versions they ask for, so on macOS neither can obtain one and the
- * client falls back to the Java toolkit. Each takes only one symbol from that framework, so a copy
- * that resolves the symbol against a library shipped with the client works instead.
+ * Two kinds of replacement are offered. A library written for this client is named by the
+ * {@code toolkit.<name>.library} system property and is loaded as it stands. A library that has no
+ * replacement yet but that asks JavaVM.framework for a drawing surface is copied and the copy is
+ * pointed at a surface shipped with this client, because that framework no longer serves the
+ * versions those libraries ask for and macOS therefore denies them a surface.
  *
- * The library shipped with the client is named by the {@value #SURFACE_PROPERTY} system property.
- * Without that property nothing happens here and the toolkit loads exactly as it always did. The
- * copy is written beside that library because it refers to it relative to its own location.
- *
- * The file downloaded for the toolkit is never modified.
+ * Neither path modifies a downloaded library. The copy is written beside the surface library,
+ * because it refers to that library relative to its own location.
  */
-public final class MacToolkitLibrary {
+public final class NativeLibraries {
 
     /**
      * The libraries that ask JavaVM.framework for a drawing surface, by the name each is
      * registered under.
      */
-    private static final List<String> LIBRARIES = List.of("sw3d", "jaggl");
+    private static final List<String> SURFACE_DEPENDENTS = List.of("sw3d", "jaggl");
 
     /**
      * Names the library that provides the drawing surface.
@@ -42,38 +44,59 @@ public final class MacToolkitLibrary {
 
     private static final byte[] JAVA_VM = path("/System/Library/Frameworks/JavaVM.framework/Versions/A/JavaVM");
 
-    /**
-     * Registers whichever library the client should load for this name.
-     *
-     * A library written for this client is preferred, where one is supplied. Failing that, and
-     * where the drawing surface is supplied, the downloaded library is copied and the copy is
-     * pointed at that surface. Failing both, the client loads what it downloaded.
-     */
-    public static void substitute(String name) {
-        File replacement = fileNamed(String.format(REPLACEMENT_PROPERTY, name));
-        if (replacement != null) {
-            LibraryManager.putLibrary(replacement, name);
-            return;
-        }
+    private static final Map<String, File> supplied = new ConcurrentHashMap<>();
 
-        File surface = surfaceLibrary();
-        if (LIBRARIES.contains(name) && surface != null) {
-            File shipped = (File) LibraryManager.libraries.get(name);
-            if (shipped != null) {
-                File copy = new File(surface.getParentFile(), "lib" + name + "-surface.dylib");
-                if (writeCopy(shipped, copy, surface.getName())) {
-                    LibraryManager.putLibrary(copy, name);
-                }
-            }
+    /**
+     * Takes over the loading of any library this client replaces.
+     *
+     * Supplying the drawing surface is the one switch that turns on everything macOS needs from
+     * the software toolkit, so the toolkits are held for the life of the client only then.
+     */
+    public static void install() {
+        LibraryOverride.supply(NativeLibraries::libraryFor);
+
+        if (surfaceLibrary() != null) {
+            SoftwareToolkitLifetime.retainAll();
         }
     }
 
     /**
-     * Whether this client is supplying the toolkit's drawing surface, which is the one switch that
-     * turns on everything macOS needs from the software toolkit.
+     * Answers whichever library this client should load for this name, or null to load the one
+     * that was downloaded.
+     *
+     * A library written for this client is preferred. Failing that, and where the drawing surface
+     * is supplied, the downloaded library is copied and the copy is pointed at that surface. The
+     * copy is made once, because the download is registered before the first library is loaded and
+     * does not change afterwards.
      */
-    public static boolean isSupplyingSurface() {
-        return surfaceLibrary() != null;
+    private static File libraryFor(String name) {
+        File replacement = fileNamed(String.format(REPLACEMENT_PROPERTY, name));
+        if (replacement != null) {
+            return replacement;
+        }
+
+        File already = supplied.get(name);
+        if (already != null) {
+            return already;
+        }
+
+        File surface = surfaceLibrary();
+        if (!SURFACE_DEPENDENTS.contains(name) || surface == null) {
+            return null;
+        }
+
+        File shipped = (File) LibraryManager.libraries.get(name);
+        if (shipped == null) {
+            return null;
+        }
+
+        File copy = new File(surface.getParentFile(), "lib" + name + "-surface.dylib");
+        if (!writeCopy(shipped, copy, surface.getName())) {
+            return null;
+        }
+
+        supplied.put(name, copy);
+        return copy;
     }
 
     private static File surfaceLibrary() {
@@ -148,7 +171,7 @@ public final class MacToolkitLibrary {
         return value.getBytes(StandardCharsets.US_ASCII);
     }
 
-    private MacToolkitLibrary() {
+    private NativeLibraries() {
         /* empty */
     }
 }
