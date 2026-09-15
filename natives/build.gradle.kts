@@ -582,3 +582,163 @@ val traceToolkit by tasks.registering(JavaExec::class) {
         logger.lifecycle("${order.size} natives reached, ${calls.size} calls, written to ${report.name}")
     }
 }
+
+val toolkitDirectory = layout.projectDirectory.dir("src/main/native/sw3d")
+val toolkitStubs = layout.buildDirectory.file("generated/sw3d-stubs.c")
+val toolkitOutstanding = layout.buildDirectory.file("generated/sw3d-outstanding.txt")
+
+/**
+ * Writes a do-nothing implementation of every native the toolkit declares and this module does
+ * not yet answer, so the library always exports the whole surface while it is being filled in.
+ *
+ * Which natives are written is read from the sources rather than listed here, so the two cannot
+ * drift apart.
+ */
+val generateToolkitStubs by tasks.registering {
+    description = "Stubs every toolkit native that is not written yet, and lists what is left."
+    dependsOn(":runescape:compileJava")
+
+    val headerDirectory = project(":runescape").layout.buildDirectory.dir("generated/jni")
+    val sources = toolkitDirectory
+    val classes = toolkitClasses
+    val stubs = toolkitStubs
+    val outstanding = toolkitOutstanding
+
+    inputs.dir(headerDirectory)
+    inputs.dir(sources)
+    outputs.file(stubs)
+    outputs.file(outstanding)
+
+    doLast {
+        val symbol = Regex("""JNIEXPORT\s+\S+\s+JNICALL\s+(Java_\w+)\s*\(""")
+        val written = sources.asFile.walkTopDown()
+            .filter { it.isFile && (it.extension == "c" || it.extension == "m") }
+            .flatMap { file -> symbol.findAll(file.readText()).map { it.groupValues[1] } }
+            .toSet()
+
+        val declaration = Regex("""JNIEXPORT\s+(\S+)\s+JNICALL\s+(\w+)\s*\(([^)]*)\)\s*;""")
+        val body = StringBuilder()
+        val left = mutableListOf<String>()
+
+        classes.sorted().forEach { name ->
+            val header = headerDirectory.get().file("$name.h").asFile
+            require(header.isFile) { "No JNI header for $name. Did the class stop declaring natives?" }
+
+            declaration.findAll(header.readText().replace(Regex("""\s+"""), " ")).forEach { match ->
+                val (returns, entry, parameters) = match.destructured
+                if (entry !in written) {
+                    val named = parameters.split(",").map(String::trim).filter(String::isNotEmpty)
+                        .mapIndexed { index, type ->
+                            when (index) {
+                                0 -> "JNIEnv *env"
+                                1 -> "$type self"
+                                else -> "$type a$index"
+                            }
+                        }
+                    body.append("\nJNIEXPORT $returns JNICALL $entry(${named.joinToString(", ")}) {\n")
+                    body.append("    unimplemented(\"$entry\");\n")
+                    if (returns != "void") {
+                        body.append("    return 0;\n")
+                    }
+                    body.append("}\n")
+                    left += entry
+                }
+            }
+        }
+
+        stubs.get().asFile.also { it.parentFile.mkdirs() }.writeText(
+            """
+            /*
+             * Every native the software toolkit declares that is not written yet.
+             *
+             * This file is generated from the JNI headers the client build emits and from which
+             * entry points the sources beside it define, so the library exports the whole surface
+             * however much of it is real.
+             */
+            #include <stdio.h>
+            #include <stdlib.h>
+            #include <jni.h>
+
+            static void unimplemented(const char *name) {
+                if (getenv("SW3D_VERBOSE") != NULL) {
+                    fprintf(stderr, "[sw3d] %s\n", name);
+                }
+            }
+            """.trimIndent() + "\n" + body
+        )
+
+        outstanding.get().asFile.writeText(left.sorted().joinToString("\n") + "\n")
+        logger.lifecycle("${written.size} natives written, ${left.size} left")
+    }
+}
+
+val toolkitLibrary = layout.buildDirectory.file("natives/libsw3d.dylib")
+
+val compileSoftwareToolkit by tasks.registering(Exec::class) {
+    description = "Builds the software toolkit."
+    dependsOn(generateToolkitStubs, ":unpackX64Jdk")
+
+    val target = toolkitLibrary.get().asFile
+    val written = toolkitDirectory.asFile.walkTopDown()
+        .filter { it.isFile && (it.extension == "c" || it.extension == "m") }
+        .map { it.absolutePath }
+        .sorted()
+        .toList()
+
+    inputs.dir(toolkitDirectory)
+    inputs.file(toolkitStubs)
+    outputs.file(toolkitLibrary)
+
+    executable = "clang"
+    args(
+        listOf(
+            "-arch", "arm64",
+            "-arch", "x86_64",
+            "-dynamiclib",
+            "-fobjc-arc",
+            "-Wall",
+            "-Werror",
+            // The surfaces a 2011 toolkit needs are deprecated by design.
+            "-Wno-deprecated-declarations",
+            "-O2",
+            "-I", jdkHome.dir("include").asFile.absolutePath,
+            "-I", jdkHome.dir("include/darwin").asFile.absolutePath,
+            "-I", toolkitDirectory.asFile.absolutePath,
+            "-framework", "Cocoa",
+            "-framework", "QuartzCore",
+            "-framework", "ImageIO",
+            "-install_name", "@loader_path/libsw3d.dylib",
+            "-o", target.absolutePath,
+            toolkitStubs.get().asFile.absolutePath,
+        ) + written
+    )
+
+    doFirst {
+        target.parentFile.mkdirs()
+    }
+}
+
+val ownFrames = layout.buildDirectory.dir("own-frames")
+
+/**
+ * Renders the fixed scene through our own toolkit and leaves the frames beside the ones the
+ * shipped toolkit produced, so the two can be compared.
+ */
+val captureOwnFrames by tasks.registering(JavaExec::class) {
+    description = "Renders the fixed scene through our own software toolkit."
+    dependsOn(compileSoftwareToolkit)
+    mainClass = "FrameCapture"
+    classpath = sourceSets["main"].runtimeClasspath
+    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+    val directory = ownFrames.get().asFile
+
+    args(toolkitLibrary.get().asFile.absolutePath)
+    environment("SW3D_DUMP", directory.absolutePath)
+    environment("SW3D_VERBOSE", providers.environmentVariable("SW3D_VERBOSE").getOrElse(""))
+    outputs.dir(ownFrames)
+
+    doFirst {
+        directory.deleteRecursively()
+        directory.mkdirs()
+    }
+}
