@@ -32,6 +32,7 @@ public final class FrameCapture {
     private static final int FUNCTIONS = 2048;
     private static final int FEATURES = 64;
     private static final int MODEL_FACES = 200;
+    private static final int VISIBLE_FACES = 2;
     private static final int AMBIENT = 64;
     private static final int CONTRAST = 768;
 
@@ -86,6 +87,7 @@ public final class FrameCapture {
         var props = new Scene.Props(
             gradient,
             toolkit.createModel(mesh(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
+            toolkit.createModel(fewFaces(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
             toolkit.createMatrix());
 
         var manifest = new ArrayList<String>();
@@ -142,6 +144,18 @@ public final class FrameCapture {
         System.out.println("model from the cache: " + found.get().faceCount + " faces, "
             + found.get().vertexCount + " vertices");
         return found.get();
+    }
+
+    /**
+     * The same model from the cache with all but a couple of its faces cut off.
+     *
+     * A model the toolkit accepts is the only kind worth checking against, and three hundred
+     * faces say only that something is wrong. Two faces can be worked out by hand.
+     */
+    private static com.jagex.graphics.Mesh fewFaces() throws Exception {
+        var mesh = mesh();
+        mesh.faceCount = Math.min(mesh.faceCount, VISIBLE_FACES);
+        return mesh;
     }
 
     static String dumpDirectory() {
