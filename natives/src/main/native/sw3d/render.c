@@ -326,32 +326,18 @@ static void renderModel(const void *model, const void *matrix) {
 
     qsort(order, (size_t) drawn, sizeof(Ordered), compareDepth);
 
-    const Normal *normals = modelNormals(model);
-    int ambient = modelAmbient(model);
-    float strength = modelContrast(model) == 0 ? 1.0f : 768.0f / (float) modelContrast(model);
+    const uint32_t *shade = modelShade(model);
 
     for (int i = 0; i < drawn; i++) {
         int face = order[i].face;
-        int hsl = faceColour == NULL ? 0 : faceColour[face] & 0xFFFF;
-        uint32_t unlit = unlitColour(hsl, ambient);
-        uint32_t shaded;
-        uint32_t shadedB;
-        uint32_t shadedC;
+        uint32_t unlit = shade == NULL
+            ? unlitColour(faceColour == NULL ? 0 : faceColour[face] & 0xFFFF, modelAmbient(model))
+            : 0;
 
-        if (normals == NULL) {
-            shaded = shadedB = shadedC = unlit;
-        } else if (modelFaceIsFlat(model, face)) {
-            shaded = shadedB = shadedC =
-                sunlitColour(unlit, &modelFaceNormals(model)[face], strength);
-        } else {
-            shaded = sunlitColour(unlit, &normals[faceA[face]], strength);
-            shadedB = sunlitColour(unlit, &normals[faceB[face]], strength);
-            shadedC = sunlitColour(unlit, &normals[faceC[face]], strength);
-        }
-
-        fillTriangle(cornerAt(&projected[faceA[face]], shaded),
-                     cornerAt(&projected[faceB[face]], shadedB),
-                     cornerAt(&projected[faceC[face]], shadedC));
+        fillTriangle(
+            cornerAt(&projected[faceA[face]], shade == NULL ? unlit : shade[face * 3]),
+            cornerAt(&projected[faceB[face]], shade == NULL ? unlit : shade[face * 3 + 1]),
+            cornerAt(&projected[faceC[face]], shade == NULL ? unlit : shade[face * 3 + 2]));
     }
 }
 

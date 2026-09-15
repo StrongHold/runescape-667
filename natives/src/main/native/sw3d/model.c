@@ -42,6 +42,9 @@ typedef struct {
 
     Normal *normals;
     Normal *faceNormals;
+
+    /** The colour each corner of each face takes, worked out once when the model is built. */
+    uint32_t *shade;
 } Model;
 
 static Model *modelOf(JNIEnv *env, jobject self) {
@@ -202,6 +205,43 @@ static void calculateNormals(Model *model) {
     }
 }
 
+/**
+ * Works out what colour each corner of each face takes.
+ *
+ * This happens when the model is built rather than when it is drawn, which is what the toolkit
+ * does. A model carries the light that was on it when it was made, so moving the sun afterwards
+ * does not change a model that already exists.
+ */
+static void lightModel(Model *model) {
+    if (model->faceColour == NULL || model->normals == NULL) {
+        return;
+    }
+
+    model->shade = calloc((size_t) model->faceCount * 3, sizeof(uint32_t));
+    if (model->shade == NULL) {
+        return;
+    }
+
+    float strength = model->contrast == 0 ? 1.0f : 768.0f / (float) model->contrast;
+
+    for (int face = 0; face < model->faceCount; face++) {
+        uint32_t unlit = unlitColour(model->faceColour[face] & 0xFFFF, model->ambient);
+        const short *corners[3] = {model->faceA, model->faceB, model->faceC};
+
+        int flat = model->shadingType != NULL && model->shadingType[face] != 0;
+
+        for (int corner = 0; corner < 3; corner++) {
+            const Normal *normal = flat
+                ? &model->faceNormals[face]
+                : &model->normals[corners[corner][face]];
+
+            model->shade[face * 3 + corner] = normal->magnitude == 0.0f
+                ? unlit
+                : sunlitColour(unlit, normal, strength);
+        }
+    }
+}
+
 JNIEXPORT void JNICALL Java_i_oa(JNIEnv *env, jobject self, jobject toolkit) {
     (void) toolkit;
 
@@ -292,6 +332,7 @@ JNIEXPORT void JNICALL Java_i_R(JNIEnv *env, jobject self, jobject toolkit, jobj
 
         if (model->faceA != NULL && model->faceB != NULL && model->faceC != NULL) {
             calculateNormals(model);
+            lightModel(model);
         }
     }
 
@@ -317,6 +358,7 @@ JNIEXPORT void JNICALL Java_i_w(JNIEnv *env, jobject self, jboolean immediate) {
     free(model->shadingType);
     free(model->normals);
     free(model->faceNormals);
+    free(model->shade);
     free(model);
 
     setNativeId(env, self, 0);
@@ -401,6 +443,10 @@ const Normal *modelNormals(const void *handle) {
 
 const Normal *modelFaceNormals(const void *handle) {
     return ((const Model *) handle)->faceNormals;
+}
+
+const uint32_t *modelShade(const void *handle) {
+    return ((const Model *) handle)->shade;
 }
 
 /**
