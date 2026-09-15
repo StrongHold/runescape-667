@@ -44,6 +44,21 @@ static float reciprocal(float value) {
 #endif
 }
 
+/**
+ * The same reciprocal, taken four at a time.
+ *
+ * The toolkit divides a whole side at once and a row one value at a time, and the two ways of
+ * asking the processor for an approximate reciprocal need not answer alike, so each is asked the
+ * way the toolkit asks it.
+ */
+static float reciprocalOfFour(float value) {
+#if defined(__SSE__) || defined(_M_X64)
+    return _mm_cvtss_f32(_mm_rcp_ps(_mm_set1_ps(value)));
+#else
+    return 1.0f / value;
+#endif
+}
+
 /** Brings a whole number into the range a light step is held in, holding at the ends. */
 static int16_t narrow(float value) {
     int whole = (int) value;
@@ -138,7 +153,7 @@ static Corner cornerAt(const Projected *point, uint32_t colour) {
  * part per row does not climb at all.
  */
 static Side sideBetween(const Corner *from, const Corner *to, int rows) {
-    float over = reciprocal(fmaxf((float) rows, LEAST));
+    float over = reciprocalOfFour(fmaxf((float) rows, LEAST));
 
     Side side;
     side.x = (to->x - from->x) * over;
@@ -244,13 +259,19 @@ static void fillSpan(int y, const Side *left, const Side *right) {
     }
 }
 
-/** Fills the rows between two sides, which is half a triangle. */
-static void fillHalf(int row, int rows, Side left, Side right, const Side *leftStep,
+/**
+ * Fills the rows between two sides, which is half a triangle.
+ *
+ * The sides are left where the walk ended rather than being put back, because the second half of
+ * a triangle carries on down one of them. Where it ended is not where multiplying the step by the
+ * number of rows would put it, and the second half starts from where the walk ended.
+ */
+static void fillHalf(int row, int rows, Side *left, Side *right, const Side *leftStep,
                      const Side *rightStep) {
     for (int done = 0; done < rows; done++) {
-        fillSpan(row + done, &left, &right);
-        advance(&left, leftStep);
-        advance(&right, rightStep);
+        fillSpan(row + done, left, right);
+        advance(left, leftStep);
+        advance(right, rightStep);
     }
 }
 
@@ -309,9 +330,7 @@ static void fillTriangle(Corner a, Corner b, Corner c) {
     carry(&right, &rightStep, skipped);
 
     if (rows > 0) {
-        fillHalf(row, rows, left, right, &leftStep, &rightStep);
-        carry(&left, &leftStep, rows);
-        carry(&right, &rightStep, rows);
+        fillHalf(row, rows, &left, &right, &leftStep, &rightStep);
         row += rows;
         skipped = 0;
         rows = bottomRow - middleRow;
@@ -335,7 +354,7 @@ static void fillTriangle(Corner a, Corner b, Corner c) {
             carry(&left, &leftStep, skipped);
         }
 
-        fillHalf(row, rows, left, right, &leftStep, &rightStep);
+        fillHalf(row, rows, &left, &right, &leftStep, &rightStep);
     }
 }
 
