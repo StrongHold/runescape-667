@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,10 +26,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class NativeLibraries {
 
     /**
-     * The libraries that ask JavaVM.framework for a drawing surface, by the name each is
-     * registered under.
+     * The library that asks JavaVM.framework for a drawing surface, by the name it is registered
+     * under. Only the software toolkit is left: everything else that wanted one is ours now and
+     * takes its surface from Cocoa directly.
      */
-    private static final List<String> SURFACE_DEPENDENTS = List.of("sw3d", "jaggl");
+    private static final String SURFACE_DEPENDENT = "sw3d";
 
     /**
      * Names the library that provides the drawing surface.
@@ -81,7 +81,7 @@ public final class NativeLibraries {
         }
 
         File surface = surfaceLibrary();
-        if (!SURFACE_DEPENDENTS.contains(name) || surface == null) {
+        if (!SURFACE_DEPENDENT.equals(name) || surface == null) {
             return null;
         }
 
