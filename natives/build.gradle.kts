@@ -117,35 +117,6 @@ val verifyToolkitLifetime by tasks.registering(JavaExec::class) {
     args(patchedToolkit.get().asFile.absolutePath)
 }
 
-val verifyFrames by tasks.registering {
-    description = "Checks that every captured frame of the fixed scene is identical."
-    dependsOn(captureFrames)
-
-    val frames = layout.buildDirectory.dir("frames")
-    inputs.dir(frames)
-
-    doLast {
-        val captured = frames.get().asFile.listFiles { file -> file.extension == "png" }
-            ?.sortedBy { it.name }
-            ?: emptyList()
-
-        require(captured.size >= 2) { "Expected at least two frames, found ${captured.size}" }
-
-        val digests = captured.associate { it.name to it.readBytes().toList().hashCode() }
-        val distinct = digests.values.distinct()
-        require(distinct.size == 1) {
-            "The fixed scene rendered differently between frames, so some drawing state is not " +
-                "being reset: $digests"
-        }
-
-        logger.lifecycle("${captured.size} frames identical")
-    }
-}
-
-/**
- * The classes the software toolkit binds to. Their native declarations are the whole contract an
- * implementation has to meet.
- */
 val toolkitClasses = listOf("a", "ba", "h", "i", "j", "ja", "n", "na", "oa", "p", "t", "wa", "xa", "ya")
 
 val skeletonSource = layout.buildDirectory.file("generated/sw3d-skeleton.c")
@@ -754,19 +725,21 @@ val captureOwnFrames by tasks.registering(JavaExec::class) {
 }
 
 /**
- * Fails unless our toolkit rasterised the fixed scene exactly as the shipped one did.
+ * Checks both toolkits against the scenes and against each other.
  *
- * This is the oracle the rest of the toolkit is written against. Both sides render the same scene
- * through the same harness and dump their frames the same way, so a difference is a difference in
+ * This is the oracle the rest of the toolkit is written against. Both sides draw the same scenes
+ * through the same harness and dump their frames the same way, so a scene that disagrees with
+ * itself is state left behind, and a scene that disagrees with the other side is a difference in
  * the rasteriser and nothing else.
  */
-val verifyOwnFrames by tasks.registering(JavaExec::class) {
-    description = "Compares our toolkit's frames against the shipped toolkit's, pixel for pixel."
+val verifyToolkit by tasks.registering(JavaExec::class) {
+    description = "Checks our toolkit against the shipped one, scene by scene and pixel by pixel."
     dependsOn(captureFrames, captureOwnFrames)
-    mainClass = "FrameDiff"
+    mainClass = "FrameCheck"
     classpath = sourceSets["main"].runtimeClasspath
     args(
         layout.buildDirectory.dir("frames").get().asFile.absolutePath,
         ownFrames.get().asFile.absolutePath,
+        layout.buildDirectory.dir("frame-differences").get().asFile.absolutePath,
     )
 }

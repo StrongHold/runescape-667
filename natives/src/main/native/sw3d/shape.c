@@ -5,7 +5,14 @@
  * loops, clipped to the rectangle the client last set.
  */
 
+#include <stdint.h>
+
 #include "sw3d.h"
+
+enum {
+    FRACTION = 16,
+    HALF = 1 << (FRACTION - 1)
+};
 
 static void horizontal(int x, int y, int length, uint32_t colour, int mode) {
     if (raster.pixels == NULL || y < raster.clipTop || y >= raster.clipBottom) {
@@ -79,41 +86,42 @@ JNIEXPORT void JNICALL Java_oa_P(JNIEnv *env, jobject self, jint x, jint y, jint
 }
 
 /**
- * Walks the longer axis a pixel at a time and carries the error on the shorter one, which is the
- * ordinary way to draw a line and the one the client's own diagonal edges were drawn with.
+ * Walks the longer axis a pixel at a time and carries the other one as a fraction.
+ *
+ * The fraction starts half a pixel in, so a point that falls exactly between two pixels is put on
+ * the further one. Without that bias a steep line lands a pixel to one side of where the toolkit
+ * this replaces puts it, which is invisible on a short line and obvious on a long one.
  */
 JNIEXPORT void JNICALL Java_oa_wa(JNIEnv *env, jobject self, jint x1, jint y1, jint x2, jint y2,
                                    jint colour, jint mode) {
     (void) env;
     (void) self;
+
     if (raster.pixels == NULL) {
         return;
     }
 
     uint32_t value = (uint32_t) colour;
 
-    int dx = x2 > x1 ? x2 - x1 : x1 - x2;
-    int dy = y2 > y1 ? y2 - y1 : y1 - y2;
-    int stepX = x1 < x2 ? 1 : -1;
-    int stepY = y1 < y2 ? 1 : -1;
-    int error = dx - dy;
+    int dx = x2 - x1;
+    int dy = y2 - y1;
+    int alongX = dx < 0 ? -dx : dx;
+    int alongY = dy < 0 ? -dy : dy;
 
-    int x = x1;
-    int y = y1;
-
-    while (x != x2 || y != y2) {
-        plot(x, y, value, mode);
-
-        int doubled = error * 2;
-        if (doubled > -dy) {
-            error -= dy;
-            x += stepX;
-        }
-        if (doubled < dx) {
-            error += dx;
-            y += stepY;
-        }
+    if (alongX == 0 && alongY == 0) {
+        plot(x1, y1, value, mode);
+        return;
     }
 
-    plot(x2, y2, value, mode);
+    int steps = alongX > alongY ? alongX : alongY;
+    int64_t x = ((int64_t) x1 << FRACTION) + HALF;
+    int64_t y = ((int64_t) y1 << FRACTION) + HALF;
+    int64_t stepX = ((int64_t) dx << FRACTION) / steps;
+    int64_t stepY = ((int64_t) dy << FRACTION) / steps;
+
+    for (int i = 0; i <= steps; i++) {
+        plot((int) (x >> FRACTION), (int) (y >> FRACTION), value, mode);
+        x += stepX;
+        y += stepY;
+    }
 }
