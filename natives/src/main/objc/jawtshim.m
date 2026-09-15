@@ -449,6 +449,16 @@ static NSView *glView(JNIEnv *env, jobject target) {
     dispatch_sync(dispatch_get_main_queue(), ^{
         liveGlView = [[NSView alloc] initWithFrame:host.bounds];
         liveGlView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+
+        /*
+         * The toolkit draws at the size it was given in points and knows nothing of the backing
+         * store, so the surface is asked for one pixel per point. Left to itself the surface is
+         * sized in backing store pixels, and on a display with more than one pixel per point the
+         * picture comes out at a fraction of the size in the bottom left corner, because that is
+         * where the OpenGL origin is.
+         */
+        liveGlView.wantsBestResolutionOpenGLSurface = NO;
+
         [host addSubview:liveGlView];
     });
 
