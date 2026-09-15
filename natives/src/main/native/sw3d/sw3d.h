@@ -13,9 +13,17 @@
 #define SW3D_H
 
 #include <jni.h>
+#include <stddef.h>
 #include <stdint.h>
 
 typedef struct Surface Surface;
+typedef struct Pool Pool;
+
+/**
+ * The memory a model's geometry is kept in. Everything taken from a pool is given back at once.
+ */
+void *poolTake(Pool *pool, size_t size);
+void poolRelease(Pool *pool);
 
 /**
  * The back buffer being drawn into, which is the current surface's. Every drawing native writes

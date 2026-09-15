@@ -1,3 +1,5 @@
+import com.jagex.graphics.Matrix;
+import com.jagex.graphics.Model;
 import com.jagex.graphics.Sprite;
 import com.jagex.graphics.Toolkit;
 
@@ -25,10 +27,19 @@ public sealed interface Scene {
         new BlendMatrix(),
         new BlendMode(),
         new OutlineAndLine(),
-        new Clip()
+        new Clip(),
+        new Geometry()
     );
 
-    void draw(Toolkit toolkit, Sprite gradient);
+    /**
+     * What every scene is given. A scene uses what it needs and ignores the rest, which keeps one
+     * scene from having to know what another one wanted.
+     */
+    record Props(Sprite gradient, Model model, Matrix matrix) {
+        /* empty */
+    }
+
+    void draw(Toolkit toolkit, Props props);
 
     /**
      * What a difference in this scene is reported against.
@@ -47,11 +58,11 @@ public sealed interface Scene {
     record Sprites() implements Scene {
 
         @Override
-        public void draw(Toolkit toolkit, Sprite gradient) {
-            gradient.render(10, 10, 0, 0xFFFFFF, 0);
-            gradient.render(10, 120, 3, 0xFFFFFF, 0);
-            gradient.render(-20, 240, 0, 0xFFFFFF, 0);
-            gradient.render(WIDTH - 40, 300, 0, 0xFFFFFF, 0);
+        public void draw(Toolkit toolkit, Props props) {
+            props.gradient().render(10, 10, 0, 0xFFFFFF, 0);
+            props.gradient().render(10, 120, 3, 0xFFFFFF, 0);
+            props.gradient().render(-20, 240, 0, 0xFFFFFF, 0);
+            props.gradient().render(WIDTH - 40, 300, 0, 0xFFFFFF, 0);
         }
     }
 
@@ -61,7 +72,7 @@ public sealed interface Scene {
     record AlphaSweep() implements Scene {
 
         @Override
-        public void draw(Toolkit toolkit, Sprite gradient) {
+        public void draw(Toolkit toolkit, Props props) {
             toolkit.aa(0, 100, WIDTH, 80, 0xFF806040, 0);
 
             for (var step = 0; step <= 16; step++) {
@@ -84,7 +95,7 @@ public sealed interface Scene {
         private static final int[] ALPHAS = {1, 63, 64, 65, 127, 128, 129, 191, 192, 253, 254, 255};
 
         @Override
-        public void draw(Toolkit toolkit, Sprite gradient) {
+        public void draw(Toolkit toolkit, Props props) {
             for (var band = 0; band < ALPHAS.length; band++) {
                 var y = band * 32;
 
@@ -104,7 +115,7 @@ public sealed interface Scene {
     record BlendMode() implements Scene {
 
         @Override
-        public void draw(Toolkit toolkit, Sprite gradient) {
+        public void draw(Toolkit toolkit, Props props) {
             toolkit.aa(20, 20, 470, 60, 0xFF806040, 0);
 
             toolkit.aa(40, 40, 80, 20, 0xFFCC3311, 0);
@@ -124,7 +135,7 @@ public sealed interface Scene {
     record OutlineAndLine() implements Scene {
 
         @Override
-        public void draw(Toolkit toolkit, Sprite gradient) {
+        public void draw(Toolkit toolkit, Props props) {
             toolkit.outlineRect(20, 20, 120, 60, 0xFF33CC11, 0);
             toolkit.outlineRect(160, 20, 120, 60, 0x8033CC11, 1);
             toolkit.outlineRect(300, 20, 120, 60, 0xFF33CC11, 2);
@@ -141,6 +152,23 @@ public sealed interface Scene {
     }
 
     /**
+     * A model turned to several angles, which is the first thing to need vertices projected and
+     * faces filled rather than rectangles.
+     */
+    record Geometry() implements Scene {
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+
+            for (var depth : new int[] {200, 600, 1800, 5400, 16200}) {
+                props.matrix().applyTranslation(0, 0, depth);
+                props.model().render(props.matrix(), null, 0);
+            }
+        }
+    }
+
+    /**
      * The same shapes inside a clip that cuts each of them, so a clip applied to the wrong edge,
      * or not at all, shows up rather than passing unnoticed. The last fill is drawn after the
      * clip is opened again, so a clip left closed shows up too.
@@ -148,14 +176,14 @@ public sealed interface Scene {
     record Clip() implements Scene {
 
         @Override
-        public void draw(Toolkit toolkit, Sprite gradient) {
+        public void draw(Toolkit toolkit, Props props) {
             toolkit.KA(120, 100, 380, 280);
 
             toolkit.aa(20, 20, 470, 340, 0xFF5D5447, 0);
             toolkit.outlineRect(60, 60, 390, 260, 0xFFCC11CC, 0);
             toolkit.line(20, 20, 490, 360, 0xFFFFFFFF, 0);
-            gradient.render(90, 80, 0, 0xFFFFFF, 0);
-            gradient.render(340, 240, 0, 0xFFFFFF, 0);
+            props.gradient().render(90, 80, 0, 0xFFFFFF, 0);
+            props.gradient().render(340, 240, 0, 0xFFFFFF, 0);
 
             toolkit.la();
             toolkit.aa(0, 370, WIDTH, 10, 0xFF00FF00, 0);
