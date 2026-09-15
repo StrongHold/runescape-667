@@ -23,6 +23,8 @@ val compileJawtShim by tasks.registering(Exec::class) {
         "-I", jdkHome.dir("include").asFile.absolutePath,
         "-I", jdkHome.dir("include/darwin").asFile.absolutePath,
         "-framework", "Cocoa",
+        "-framework", "QuartzCore",
+        "-framework", "ImageIO",
         "-install_name", "@loader_path/libjawtshim.dylib",
         "-o", shimLibrary.get().asFile.absolutePath,
         shimSource.asFile.absolutePath,
