@@ -83,6 +83,15 @@ static BOOL verbose(void) {
 #define SHIMLOG(...) do { if (verbose()) { fprintf(stderr, "[jawtshim] " __VA_ARGS__); fputc('\n', stderr); } } while (0)
 
 /*
+ * The layer the software toolkit's frames are shown through. It belongs to the component rather
+ * than to any one bitmap, so it is attached once and kept. A resize makes a new bitmap, and
+ * attaching a layer per bitmap would mean waiting on the main thread during a resize, which
+ * deadlocks.
+ */
+static CALayer *presentationLayer;
+static BOOL presentationAttempted;
+
+/*
  * The object the toolkit treats as its view. It answers the two messages the toolkit sends and
  * makes its own bitmap the current drawing destination in between.
  */
@@ -92,8 +101,6 @@ static BOOL verbose(void) {
 @property (nonatomic, assign) int width;
 @property (nonatomic, assign) int height;
 @property (nonatomic, assign) unsigned long signatureBeforeDraw;
-@property (nonatomic, strong) CALayer *presentationLayer;
-@property (nonatomic, assign) BOOL presentationUnavailable;
 @property (nonatomic, assign) int framesPresented;
 @property (nonatomic, strong) NSGraphicsContext *drawingContext;
 
@@ -182,10 +189,10 @@ static BOOL verbose(void) {
  * to the main thread, while the surface info that produced it is still alive.
  */
 - (void)attachLayer:(JNIEnv *)env target:(jobject)target {
-    if (self.presentationLayer != nil || self.presentationUnavailable) {
+    if (presentationLayer != nil || presentationAttempted) {
         return;
     }
-    self.presentationUnavailable = YES;
+    presentationAttempted = YES;
 
     JawtGetAwt getAwt = jdkJawtGetAwt(env);
     if (getAwt == NULL) {
@@ -228,8 +235,7 @@ static BOOL verbose(void) {
                 layers.layer = layer;
             });
 
-            self.presentationLayer = layer;
-            self.presentationUnavailable = NO;
+            presentationLayer = layer;
             SHIMLOG("attached layer %p", layer);
             surface->FreeDrawingSurfaceInfo(info);
         }
@@ -290,7 +296,7 @@ static BOOL verbose(void) {
     }
 
     [self dumpFrame:frame];
-    CALayer *layer = self.presentationLayer;
+    CALayer *layer = presentationLayer;
     if (layer == nil) {
         CGImageRelease(frame);
         self.framesPresented++;
@@ -300,9 +306,13 @@ static BOOL verbose(void) {
     self.framesPresented++;
 
     id contents = (__bridge_transfer id) frame;
+    CGRect bounds = CGRectMake(0, 0, self.width, self.height);
     dispatch_async(dispatch_get_main_queue(), ^{
         [CATransaction begin];
         [CATransaction setDisableActions:YES];
+        if (!CGRectEqualToRect(layer.frame, bounds)) {
+            layer.frame = bounds;
+        }
         layer.contents = contents;
         [CATransaction commit];
     });
@@ -324,11 +334,19 @@ static IMP contextSetView;
 static IMP contextUpdate;
 static IMP contextClearDrawable;
 
+/*
+ * Runs the work on the main thread without ever waiting for it.
+ *
+ * Waiting deadlocks on a resize. The toolkit is called with the AWT tree lock held, and the main
+ * thread needs that same lock to finish the resize, so a thread that holds it and then waits on
+ * the main thread stops the client for good. Arriving a moment late costs at most one frame drawn
+ * against the previous size.
+ */
 static void onMainThread(void (^work)(void)) {
     if ([NSThread isMainThread]) {
         work();
     } else {
-        dispatch_sync(dispatch_get_main_queue(), work);
+        dispatch_async(dispatch_get_main_queue(), work);
     }
 }
 
