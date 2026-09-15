@@ -38,6 +38,8 @@ typedef struct {
 
     int ambient;
     int contrast;
+
+    Normal *normals;
 } Model;
 
 static Model *modelOf(JNIEnv *env, jobject self) {
@@ -135,6 +137,54 @@ static void measure(Model *model) {
     model->radiusSphere = (int) ceil(sqrt(solid));
 }
 
+/**
+ * The direction each vertex faces, taken as the sum of the unit normals of the faces meeting
+ * there. The count is kept alongside, because the sum is divided by it rather than normalised
+ * again.
+ */
+static void calculateNormals(Model *model) {
+    model->normals = calloc((size_t) model->vertexCount, sizeof(Normal));
+    if (model->normals == NULL) {
+        return;
+    }
+
+    for (int face = 0; face < model->faceCount; face++) {
+        int a = model->faceA[face];
+        int b = model->faceB[face];
+        int c = model->faceC[face];
+
+        float abx = (float) (model->vertexX[b] - model->vertexX[a]);
+        float aby = (float) (model->vertexY[b] - model->vertexY[a]);
+        float abz = (float) (model->vertexZ[b] - model->vertexZ[a]);
+        float acx = (float) (model->vertexX[c] - model->vertexX[a]);
+        float acy = (float) (model->vertexY[c] - model->vertexY[a]);
+        float acz = (float) (model->vertexZ[c] - model->vertexZ[a]);
+
+        float nx = aby * acz - abz * acy;
+        float ny = abz * acx - abx * acz;
+        float nz = abx * acy - aby * acx;
+
+        float length = sqrtf(nx * nx + ny * ny + nz * nz);
+        if (length == 0.0f) {
+            continue;
+        }
+
+        float scale = 1.0f / length;
+        nx *= scale;
+        ny *= scale;
+        nz *= scale;
+
+        int corners[3] = {a, b, c};
+        for (int corner = 0; corner < 3; corner++) {
+            Normal *normal = &model->normals[corners[corner]];
+            normal->x += nx;
+            normal->y += ny;
+            normal->z += nz;
+            normal->magnitude += 1.0f;
+        }
+    }
+}
+
 JNIEXPORT void JNICALL Java_i_oa(JNIEnv *env, jobject self, jobject toolkit) {
     (void) toolkit;
 
@@ -222,6 +272,10 @@ JNIEXPORT void JNICALL Java_i_R(JNIEnv *env, jobject self, jobject toolkit, jobj
 
     if (model->vertexX != NULL && model->vertexY != NULL && model->vertexZ != NULL) {
         measure(model);
+
+        if (model->faceA != NULL && model->faceB != NULL && model->faceC != NULL) {
+            calculateNormals(model);
+        }
     }
 
     setNativeId(env, self, (jlong) (intptr_t) model);
@@ -243,6 +297,7 @@ JNIEXPORT void JNICALL Java_i_w(JNIEnv *env, jobject self, jboolean immediate) {
     free(model->faceC);
     free(model->faceColour);
     free(model->faceAlpha);
+    free(model->normals);
     free(model);
 
     setNativeId(env, self, 0);
@@ -319,4 +374,16 @@ const short *modelFaceC(const void *handle) {
 
 const short *modelFaceColour(const void *handle) {
     return ((const Model *) handle)->faceColour;
+}
+
+const Normal *modelNormals(const void *handle) {
+    return ((const Model *) handle)->normals;
+}
+
+int modelAmbient(const void *handle) {
+    return ((const Model *) handle)->ambient;
+}
+
+int modelContrast(const void *handle) {
+    return ((const Model *) handle)->contrast;
 }

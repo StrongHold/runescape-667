@@ -52,65 +52,94 @@ static int compareDepth(const void *left, const void *right) {
     return ((const Ordered *) right)->depth - ((const Ordered *) left)->depth;
 }
 
-/**
- * Fills the triangle between three points, one row at a time, by walking each edge down.
- */
-static void fillTriangle(const Projected *a, const Projected *b, const Projected *c,
-                         uint32_t colour) {
-    const Projected *top = a;
-    const Projected *middle = b;
-    const Projected *bottom = c;
-    const Projected *swap;
+/** A corner of a triangle, with the colour the light gave it. */
+typedef struct {
+    int x;
+    int y;
+    float red;
+    float green;
+    float blue;
+} Corner;
 
-    if (top->y > middle->y) {
+static Corner cornerAt(const Projected *point, uint32_t colour) {
+    Corner corner;
+    corner.x = point->x;
+    corner.y = point->y;
+    corner.red = (float) ((colour >> 16) & 0xFF);
+    corner.green = (float) ((colour >> 8) & 0xFF);
+    corner.blue = (float) (colour & 0xFF);
+    return corner;
+}
+
+static Corner between(const Corner *from, const Corner *to, float howfar) {
+    Corner corner;
+    corner.x = (int) ((float) from->x + ((float) to->x - (float) from->x) * howfar);
+    corner.y = 0;
+    corner.red = from->red + (to->red - from->red) * howfar;
+    corner.green = from->green + (to->green - from->green) * howfar;
+    corner.blue = from->blue + (to->blue - from->blue) * howfar;
+    return corner;
+}
+
+/**
+ * Fills the triangle between three corners, one row at a time, running the colour from each
+ * corner into the next so that a curved surface made of flat faces does not look flat.
+ */
+static void fillTriangle(Corner top, Corner middle, Corner bottom) {
+    Corner swap;
+
+    if (top.y > middle.y) {
         swap = top; top = middle; middle = swap;
     }
-    if (middle->y > bottom->y) {
+    if (middle.y > bottom.y) {
         swap = middle; middle = bottom; bottom = swap;
     }
-    if (top->y > middle->y) {
+    if (top.y > middle.y) {
         swap = top; top = middle; middle = swap;
     }
 
-    if (top->y == bottom->y) {
+    if (top.y == bottom.y) {
         return;
     }
 
-    int first = top->y < raster.clipTop ? raster.clipTop : top->y;
-    int last = bottom->y > raster.clipBottom ? raster.clipBottom : bottom->y;
+    int first = top.y < raster.clipTop ? raster.clipTop : top.y;
+    int last = bottom.y > raster.clipBottom ? raster.clipBottom : bottom.y;
 
     for (int y = first; y < last; y++) {
-        float longSide = (float) (y - top->y) / (float) (bottom->y - top->y);
-        float left = (float) top->x + ((float) bottom->x - (float) top->x) * longSide;
-        float right;
+        Corner left = between(&top, &bottom, (float) (y - top.y) / (float) (bottom.y - top.y));
+        Corner right;
 
-        if (y < middle->y) {
-            if (middle->y == top->y) {
+        if (y < middle.y) {
+            if (middle.y == top.y) {
                 continue;
             }
-            float shortSide = (float) (y - top->y) / (float) (middle->y - top->y);
-            right = (float) top->x + ((float) middle->x - (float) top->x) * shortSide;
+            right = between(&top, &middle, (float) (y - top.y) / (float) (middle.y - top.y));
         } else {
-            if (bottom->y == middle->y) {
+            if (bottom.y == middle.y) {
                 continue;
             }
-            float shortSide = (float) (y - middle->y) / (float) (bottom->y - middle->y);
-            right = (float) middle->x + ((float) bottom->x - (float) middle->x) * shortSide;
+            right = between(&middle, &bottom, (float) (y - middle.y) / (float) (bottom.y - middle.y));
         }
 
-        int from = (int) (left < right ? left : right);
-        int to = (int) (left < right ? right : left);
+        if (left.x > right.x) {
+            swap = left; left = right; right = swap;
+        }
 
-        if (from < raster.clipLeft) {
-            from = raster.clipLeft;
+        int span = right.x - left.x;
+        if (span <= 0) {
+            continue;
         }
-        if (to > raster.clipRight) {
-            to = raster.clipRight;
-        }
+
+        int from = left.x < raster.clipLeft ? raster.clipLeft : left.x;
+        int to = right.x > raster.clipRight ? raster.clipRight : right.x;
 
         uint32_t *row = raster.pixels + (size_t) y * (size_t) raster.width;
         for (int x = from; x < to; x++) {
-            row[x] = colour;
+            float across = (float) (x - left.x) / (float) span;
+            int red = (int) (left.red + (right.red - left.red) * across);
+            int green = (int) (left.green + (right.green - left.green) * across);
+            int blue = (int) (left.blue + (right.blue - left.blue) * across);
+            row[x] = ((uint32_t) red << 16) | ((uint32_t) green << 8) | (uint32_t) blue;
         }
     }
 }
@@ -189,10 +218,28 @@ static void renderModel(const void *model, const void *matrix) {
 
     qsort(order, (size_t) drawn, sizeof(Ordered), compareDepth);
 
+    const Normal *normals = modelNormals(model);
+    int ambient = modelAmbient(model);
+    float strength = modelContrast(model) == 0 ? 1.0f : 768.0f / (float) modelContrast(model);
+
     for (int i = 0; i < drawn; i++) {
         int face = order[i].face;
-        fillTriangle(&projected[faceA[face]], &projected[faceB[face]], &projected[faceC[face]],
-                     colourOf(faceColour == NULL ? 0 : faceColour[face]));
+        int hsl = faceColour == NULL ? 0 : faceColour[face] & 0xFFFF;
+        uint32_t unlit = unlitColour(hsl, ambient);
+        uint32_t shaded = normals == NULL
+            ? unlit
+            : sunlitColour(unlit, &normals[faceA[face]], strength);
+
+        uint32_t shadedB = normals == NULL
+            ? unlit
+            : sunlitColour(unlit, &normals[faceB[face]], strength);
+        uint32_t shadedC = normals == NULL
+            ? unlit
+            : sunlitColour(unlit, &normals[faceC[face]], strength);
+
+        fillTriangle(cornerAt(&projected[faceA[face]], shaded),
+                     cornerAt(&projected[faceB[face]], shadedB),
+                     cornerAt(&projected[faceC[face]], shadedC));
     }
 }
 

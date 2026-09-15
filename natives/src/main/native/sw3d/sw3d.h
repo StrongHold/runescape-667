@@ -102,6 +102,30 @@ typedef struct {
 const Sun *sun(void);
 
 /**
+ * How much light everything gets before the sun is taken into account.
+ */
+float globalAmbient(void);
+
+/** A vertex normal, kept as the sum of the unit normals of the faces meeting there. */
+typedef struct {
+    float x;
+    float y;
+    float z;
+    float magnitude;
+} Normal;
+
+/**
+ * The colour a face is before any light reaches it: its lightness scaled by the model's own
+ * ambient and held away from both ends of the range.
+ */
+uint32_t unlitColour(int hsl, int ambient);
+
+/**
+ * The colour a surface facing this way takes, given what it looks like unlit.
+ */
+uint32_t sunlitColour(uint32_t unlit, const Normal *normal, float strength);
+
+/**
  * The matrix the world is seen through, or null before the client has given one.
  */
 const void *cameraMatrix(void);
@@ -128,6 +152,9 @@ const short *modelFaceA(const void *handle);
 const short *modelFaceB(const void *handle);
 const short *modelFaceC(const void *handle);
 const short *modelFaceColour(const void *handle);
+const Normal *modelNormals(const void *handle);
+int modelAmbient(const void *handle);
+int modelContrast(const void *handle);
 
 Surface *surfaceCreate(JNIEnv *env, jobject canvas, int width, int height);
 void surfaceResize(Surface *surface, int width, int height);
