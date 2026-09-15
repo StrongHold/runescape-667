@@ -13,7 +13,7 @@ dependencies {
  * has no arm64 slice.
  */
 val jdkHome = rootProject.layout.projectDirectory.dir(".gradle/jdk-x64/unpacked/Home")
-val shimSource = layout.projectDirectory.file("src/main/native/jawtshim.m")
+val shimSource = layout.projectDirectory.file("src/main/native/jawtshim/jawtshim.m")
 val shimLibrary = layout.buildDirectory.file("natives/libjawtshim.dylib")
 
 val compileJawtShim by tasks.registering(Exec::class) {
@@ -449,7 +449,7 @@ val compileOpenGlBinding by tasks.registering(Exec::class) {
     outputs.file(openGlLibrary)
 
     val generated = openGlSource.get().asFile
-    val platform = layout.projectDirectory.file("src/main/native/jaggl.m").asFile
+    val platform = layout.projectDirectory.file("src/main/native/jaggl/jaggl.m").asFile
     val target = openGlLibrary.get().asFile
     val outputDirectory = target.parentFile
 
@@ -481,7 +481,7 @@ val compileOpenGlBinding by tasks.registering(Exec::class) {
     }
 }
 
-val memorySource = layout.projectDirectory.file("src/main/native/jaclib.c")
+val memorySource = layout.projectDirectory.file("src/main/native/jaclib/jaclib.c")
 val memoryLibrary = layout.buildDirectory.file("natives/libjaclib.dylib")
 
 /**
