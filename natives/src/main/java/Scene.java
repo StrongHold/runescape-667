@@ -37,14 +37,15 @@ public sealed interface Scene {
         new BlendMode(),
         new OutlineAndLine(),
         new Clip(),
-        new Geometry()
+        new Geometry(),
+        new FewFaces()
     );
 
     /**
      * What every scene is given. A scene uses what it needs and ignores the rest, which keeps one
      * scene from having to know what another one wanted.
      */
-    record Props(Sprite gradient, Model model, Matrix matrix) {
+    record Props(Sprite gradient, Model model, Model simple, Matrix matrix) {
         /* empty */
     }
 
@@ -194,6 +195,27 @@ public sealed interface Scene {
                 props.matrix().translate(0, 0, DEPTH);
                 props.model().render(props.matrix(), null, 1);
             }
+        }
+    }
+
+    /**
+     * The same model with all but a couple of its faces cut off, so that a difference can be
+     * worked out by hand. Three hundred faces say only that something is wrong.
+     */
+    record FewFaces() implements Scene {
+
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            props.matrix().applyTranslation(0, 0, DEPTH);
+            props.simple().render(props.matrix(), null, 1);
         }
     }
 

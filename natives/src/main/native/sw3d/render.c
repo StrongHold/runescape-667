@@ -9,6 +9,7 @@
  * replaces sorts them more carefully than this, and this is where that difference will show.
  */
 
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -50,8 +51,9 @@ static void clearDepths(void) {
 
 /** A vertex after it has been projected. Behind the eye it has no place on the buffer. */
 typedef struct {
-    int x;
-    int y;
+    float x;
+    float y;
+    int row;
     int depth;
     int visible;
 } Projected;
@@ -87,35 +89,53 @@ static int compareDepth(const void *left, const void *right) {
 }
 
 /** A corner of a triangle, with the colour the light gave it. */
+/** A corner of a triangle, with everything that is run between corners kept together. */
+enum {
+    LANE_X = 0,
+    LANE_DEPTH,
+    LANE_RED,
+    LANE_GREEN,
+    LANE_BLUE,
+    LANES
+};
+
 typedef struct {
-    int x;
-    int y;
-    float depth;
-    float red;
-    float green;
-    float blue;
+    int row;
+    float lane[LANES];
 } Corner;
 
 static Corner cornerAt(const Projected *point, uint32_t colour) {
     Corner corner;
-    corner.x = point->x;
-    corner.y = point->y;
-    corner.depth = (float) point->depth;
-    corner.red = (float) ((colour >> 16) & 0xFF);
-    corner.green = (float) ((colour >> 8) & 0xFF);
-    corner.blue = (float) (colour & 0xFF);
+    corner.row = point->row;
+    corner.lane[LANE_X] = point->x;
+    corner.lane[LANE_DEPTH] = (float) point->depth;
+    corner.lane[LANE_RED] = (float) ((colour >> 16) & 0xFF);
+    corner.lane[LANE_GREEN] = (float) ((colour >> 8) & 0xFF);
+    corner.lane[LANE_BLUE] = (float) (colour & 0xFF);
     return corner;
 }
 
-static Corner between(const Corner *from, const Corner *to, float howfar) {
-    Corner corner;
-    corner.x = (int) ((float) from->x + ((float) to->x - (float) from->x) * howfar);
-    corner.y = 0;
-    corner.depth = from->depth + (to->depth - from->depth) * howfar;
-    corner.red = from->red + (to->red - from->red) * howfar;
-    corner.green = from->green + (to->green - from->green) * howfar;
-    corner.blue = from->blue + (to->blue - from->blue) * howfar;
-    return corner;
+/**
+ * How much each lane moves per row between two corners.
+ *
+ * The number of rows is counted between the rows the corners landed on, never less than one, and
+ * the walk down the edge then adds this once per row rather than working out where it is from
+ * scratch each time. Recomputing gives a different answer at the rows where a value falls exactly
+ * between two pixels.
+ */
+static void stepBetween(const Corner *from, const Corner *to, float *step) {
+    int rows = to->row - from->row;
+    float over = (float) (rows < 1 ? 1 : rows);
+
+    for (int lane = 0; lane < LANES; lane++) {
+        step[lane] = (to->lane[lane] - from->lane[lane]) / over;
+    }
+}
+
+static void advance(float *held, const float *step) {
+    for (int lane = 0; lane < LANES; lane++) {
+        held[lane] += step[lane];
+    }
 }
 
 /**
@@ -125,68 +145,84 @@ static Corner between(const Corner *from, const Corner *to, float howfar) {
 static void fillTriangle(Corner top, Corner middle, Corner bottom) {
     Corner swap;
 
-    if (top.y > middle.y) {
+    if (top.row > middle.row) {
         swap = top; top = middle; middle = swap;
     }
-    if (middle.y > bottom.y) {
+    if (middle.row > bottom.row) {
         swap = middle; middle = bottom; bottom = swap;
     }
-    if (top.y > middle.y) {
+    if (top.row > middle.row) {
         swap = top; top = middle; middle = swap;
     }
 
-    if (top.y == bottom.y) {
+    if (top.row == bottom.row) {
         return;
     }
 
-    int first = top.y < raster.clipTop ? raster.clipTop : top.y;
-    int last = bottom.y > raster.clipBottom ? raster.clipBottom : bottom.y;
+    float longStep[LANES];
+    float shortStep[LANES];
+    float longSide[LANES];
+    float shortSide[LANES];
 
-    for (int y = first; y < last; y++) {
-        Corner left = between(&top, &bottom, (float) (y - top.y) / (float) (bottom.y - top.y));
-        Corner right;
+    stepBetween(&top, &bottom, longStep);
+    stepBetween(&top, &middle, shortStep);
 
-        if (y < middle.y) {
-            if (middle.y == top.y) {
-                continue;
+    for (int lane = 0; lane < LANES; lane++) {
+        longSide[lane] = top.lane[lane];
+        shortSide[lane] = top.lane[lane];
+    }
+
+    for (int y = top.row; y < bottom.row; y++) {
+        if (y == middle.row) {
+            stepBetween(&middle, &bottom, shortStep);
+            for (int lane = 0; lane < LANES; lane++) {
+                shortSide[lane] = middle.lane[lane];
             }
-            right = between(&top, &middle, (float) (y - top.y) / (float) (middle.y - top.y));
-        } else {
-            if (bottom.y == middle.y) {
-                continue;
-            }
-            right = between(&middle, &bottom, (float) (y - middle.y) / (float) (bottom.y - middle.y));
         }
 
-        if (left.x > right.x) {
-            swap = left; left = right; right = swap;
-        }
+        if (y >= raster.clipTop && y < raster.clipBottom) {
+            const float *left = longSide;
+            const float *right = shortSide;
 
-        int span = right.x - left.x;
-        if (span <= 0) {
-            continue;
-        }
-
-        int from = left.x < raster.clipLeft ? raster.clipLeft : left.x;
-        int to = right.x > raster.clipRight ? raster.clipRight : right.x;
-
-        uint32_t *row = raster.pixels + (size_t) y * (size_t) raster.width;
-        float *depths = depthRow(y);
-
-        for (int x = from; x < to; x++) {
-            float across = (float) (x - left.x) / (float) span;
-            float depth = left.depth + (right.depth - left.depth) * across;
-
-            if (depth >= depths[x]) {
-                continue;
+            if (left[LANE_X] > right[LANE_X]) {
+                left = shortSide;
+                right = longSide;
             }
 
-            depths[x] = depth;
-            int red = (int) (left.red + (right.red - left.red) * across);
-            int green = (int) (left.green + (right.green - left.green) * across);
-            int blue = (int) (left.blue + (right.blue - left.blue) * across);
-            row[x] = ((uint32_t) red << 16) | ((uint32_t) green << 8) | (uint32_t) blue;
+            int from = (int) lrintf(left[LANE_X]);
+            int to = (int) lrintf(right[LANE_X]);
+            float span = right[LANE_X] - left[LANE_X];
+
+            if (span > 0.0f) {
+                if (from < raster.clipLeft) {
+                    from = raster.clipLeft;
+                }
+                if (to > raster.clipRight) {
+                    to = raster.clipRight;
+                }
+
+                uint32_t *row = raster.pixels + (size_t) y * (size_t) raster.width;
+                float *depths = depthRow(y);
+
+                for (int x = from; x < to; x++) {
+                    float across = ((float) x - left[LANE_X]) / span;
+                    float depth = left[LANE_DEPTH] + (right[LANE_DEPTH] - left[LANE_DEPTH]) * across;
+
+                    if (depth >= depths[x]) {
+                        continue;
+                    }
+
+                    depths[x] = depth;
+                    int red = (int) (left[LANE_RED] + (right[LANE_RED] - left[LANE_RED]) * across);
+                    int green = (int) (left[LANE_GREEN] + (right[LANE_GREEN] - left[LANE_GREEN]) * across);
+                    int blue = (int) (left[LANE_BLUE] + (right[LANE_BLUE] - left[LANE_BLUE]) * across);
+                    row[x] = ((uint32_t) red << 16) | ((uint32_t) green << 8) | (uint32_t) blue;
+                }
+            }
         }
+
+        advance(longSide, longStep);
+        advance(shortSide, shortStep);
     }
 }
 
@@ -237,8 +273,9 @@ static void renderModel(const void *model, const void *matrix) {
         landed->visible = point[2] >= (float) view->near && point[2] <= (float) view->far;
 
         if (landed->visible) {
-            landed->x = (int) (view->centreX + point[0] * view->scaleX / point[2]);
-            landed->y = (int) (view->centreY + point[1] * view->scaleY / point[2]);
+            landed->x = view->centreX + point[0] * view->scaleX / point[2];
+            landed->y = view->centreY + point[1] * view->scaleY / point[2];
+            landed->row = (int) landed->y;
         }
     }
 
@@ -255,11 +292,23 @@ static void renderModel(const void *model, const void *matrix) {
         const Projected *b = &projected[faceB[face]];
         const Projected *c = &projected[faceC[face]];
 
-        if (a->visible && b->visible && c->visible) {
-            order[drawn].face = face;
-            order[drawn].depth = a->depth + b->depth + c->depth;
-            drawn++;
+        if (!a->visible || !b->visible || !c->visible) {
+            continue;
         }
+
+        /*
+         * A face turned away from the eye is inside the model and is not drawn. Which way round
+         * that is comes from the order its corners were given in, so the test is the sign of the
+         * area the three landed points enclose.
+         */
+        float area = (b->x - a->x) * (c->y - a->y) - (c->x - a->x) * (b->y - a->y);
+        if (area >= 0.0f) {
+            continue;
+        }
+
+        order[drawn].face = face;
+        order[drawn].depth = a->depth + b->depth + c->depth;
+        drawn++;
     }
 
     clearDepths();
