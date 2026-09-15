@@ -331,6 +331,10 @@ val generateOpenGlBinding by tasks.registering {
         "glGenProgramARB",
         "glProgramRawARB",
         "glShaderSourceRawARB",
+        // The client's default framebuffer is one of ours, so these are answered, not passed on.
+        "glBindFramebufferEXT",
+        "glDrawBuffer",
+        "glReadBuffer",
     )
 
     doLast {
