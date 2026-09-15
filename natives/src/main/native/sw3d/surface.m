@@ -311,9 +311,7 @@ JNIEXPORT void JNICALL Java_p_oa(JNIEnv *env, jobject self, jobject canvas, jint
         surfaceResize(surface, width, height);
 
         if (raster.pixels != NULL) {
-            raster.pixels = surface->pixels;
-            raster.width = surface->width;
-            raster.height = surface->height;
+            rasterUse(surface->pixels, surface->width, surface->height);
         }
     }
 }
@@ -339,9 +337,7 @@ JNIEXPORT void JNICALL Java_p_w(JNIEnv *env, jobject self, jboolean immediate) {
     Surface *surface = (Surface *) (intptr_t) nativeIdOf(env, self);
     if (surface != NULL) {
         if (raster.pixels == surface->pixels) {
-            raster.pixels = NULL;
-            raster.width = 0;
-            raster.height = 0;
+            rasterUse(NULL, 0, 0);
         }
 
         surfaceFree(surface);

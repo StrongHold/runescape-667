@@ -11,6 +11,20 @@
 
 Raster raster;
 
+void rasterResetClip(void) {
+    raster.clipLeft = 0;
+    raster.clipTop = 0;
+    raster.clipRight = raster.width;
+    raster.clipBottom = raster.height;
+}
+
+void rasterUse(uint32_t *pixels, int width, int height) {
+    raster.pixels = pixels;
+    raster.width = width;
+    raster.height = height;
+    rasterResetClip();
+}
+
 /**
  * Where the client wants the middle of the picture, and how wide a field it wants through it.
  * Nothing reads these yet; they are kept because every projection the toolkit does is relative
@@ -33,9 +47,7 @@ JNIEXPORT void JNICALL Java_oa_MA(JNIEnv *env, jobject self, jobject textures,
     (void) a2;
     (void) a3;
 
-    raster.pixels = NULL;
-    raster.width = 0;
-    raster.height = 0;
+    rasterUse(NULL, 0, 0);
 }
 
 JNIEXPORT void JNICALL Java_oa_ma(JNIEnv *env, jobject self, jlong matrix) {
@@ -54,19 +66,20 @@ JNIEXPORT void JNICALL Java_oa_t(JNIEnv *env, jobject self, jobject canvas) {
 
     Surface *surface = (Surface *) (intptr_t) nativeIdOf(env, canvas);
     if (surface == NULL) {
-        raster.pixels = NULL;
-        raster.width = 0;
-        raster.height = 0;
+        rasterUse(NULL, 0, 0);
     } else {
-        raster.pixels = surfacePixels(surface);
-        raster.width = surfaceWidth(surface);
-        raster.height = surfaceHeight(surface);
+        rasterUse(surfacePixels(surface), surfaceWidth(surface), surfaceHeight(surface));
     }
 }
 
+/**
+ * Opens the clip over the whole buffer again.
+ */
 JNIEXPORT void JNICALL Java_oa_la(JNIEnv *env, jobject self) {
     (void) env;
     (void) self;
+
+    rasterResetClip();
 }
 
 JNIEXPORT void JNICALL Java_oa_DA(JNIEnv *env, jobject self, jint x, jint y,
