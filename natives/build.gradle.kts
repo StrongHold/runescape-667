@@ -683,6 +683,9 @@ val compileSoftwareToolkit by tasks.registering(Exec::class) {
                 // The surfaces a 2011 toolkit needs are deprecated by design.
                 "-Wno-deprecated-declarations",
                 "-O2",
+                // The toolkit's arithmetic is done a multiply and an add at a time. Letting the
+                // compiler fuse the pair rounds once instead of twice and moves the answer.
+                "-ffp-contract=off",
             )
                 + includes.flatMap { listOf("-I", it) }
                 + listOf(
