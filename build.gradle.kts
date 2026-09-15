@@ -3,9 +3,14 @@ import java.security.DigestInputStream
 import java.security.MessageDigest
 
 /**
- * The software toolkit binaries shipped for macOS carry only i386 and x86_64 slices, so the client
- * has to run on an x86_64 JVM to load them. The build fetches that JVM itself rather than depending
- * on whichever JDKs a given machine happens to have installed.
+ * The software toolkit shipped for macOS carries only i386 and x86_64 slices, so anything that
+ * loads it has to run on an x86_64 JVM. The build fetches that JVM itself rather than depending on
+ * whichever JDKs a given machine happens to have installed.
+ *
+ * The client no longer needs it. Every library the client loads on macOS is now built here and
+ * carries both slices, so the client runs on whatever JVM the toolchain provides. What still needs
+ * it is the checking: the shipped toolkit is what our toolkit is measured against, and both sides
+ * are driven on the same instruction set so that the comparison is not measuring the processor.
  *
  * The download lives outside the build directory so that `clean` does not discard 200 MB.
  */
@@ -16,6 +21,7 @@ val x64Java = x64JdkDir.file("unpacked/Home/bin/java")
 val surfaceLibrary = layout.projectDirectory.file("natives/build/natives/libjawtshim.dylib")
 val openGlLibrary = layout.projectDirectory.file("natives/build/natives/libjaggl.dylib")
 val memoryLibrary = layout.projectDirectory.file("natives/build/natives/libjaclib.dylib")
+val softwareToolkit = layout.projectDirectory.file("natives/build/natives/libsw3d.dylib")
 
 val onMacOs = providers.systemProperty("os.name").map { it.startsWith("Mac") }.getOrElse(false)
 
@@ -87,15 +93,15 @@ subprojects {
         plugins.withType<ApplicationPlugin> {
             tasks.named<JavaExec>("run") {
                 dependsOn(
-                    unpackX64Jdk,
                     ":natives:compileJawtShim",
                     ":natives:compileOpenGlBinding",
                     ":natives:compileMemoryLibrary",
+                    ":natives:compileSoftwareToolkit",
                 )
-                setExecutable(x64Java.asFile.absolutePath)
                 systemProperty("toolkit.surface.library", surfaceLibrary.asFile.absolutePath)
                 systemProperty("toolkit.jaggl.library", openGlLibrary.asFile.absolutePath)
                 systemProperty("toolkit.jaclib.library", memoryLibrary.asFile.absolutePath)
+                systemProperty("toolkit.sw3d.library", softwareToolkit.asFile.absolutePath)
             }
         }
     }
