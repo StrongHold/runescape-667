@@ -13,7 +13,7 @@ dependencies {
  * has no arm64 slice.
  */
 val jdkHome = rootProject.layout.projectDirectory.dir(".gradle/jdk-x64/unpacked/Home")
-val shimSource = layout.projectDirectory.file("src/main/objc/jawtshim.m")
+val shimSource = layout.projectDirectory.file("src/main/native/jawtshim.m")
 val shimLibrary = layout.buildDirectory.file("natives/libjawtshim.dylib")
 
 val compileJawtShim by tasks.registering(Exec::class) {
@@ -23,6 +23,9 @@ val compileJawtShim by tasks.registering(Exec::class) {
     outputs.file(shimLibrary)
     executable = "clang"
     args(
+        // Universal, so each library can be replaced on its own rather than in lockstep with
+        // every other native on the same path.
+        "-arch", "arm64",
         "-arch", "x86_64",
         "-dynamiclib",
         "-fobjc-arc",
@@ -237,6 +240,7 @@ val compileToolkitSkeleton by tasks.registering(Exec::class) {
     executable = "clang"
     args(
         "-arch", "arm64",
+        "-arch", "x86_64",
         "-dynamiclib",
         "-Wall",
         "-Werror",
@@ -367,10 +371,10 @@ val generateOpenGlBinding by tasks.registering {
     }
 }
 
-val openGlLibrary = layout.buildDirectory.file("natives/libjaggl-arm64.dylib")
+val openGlLibrary = layout.buildDirectory.file("natives/libjaggl.dylib")
 
 /**
- * Builds the OpenGL binding for arm64, the architecture the shipped one does not have.
+ * Builds the OpenGL binding.
  *
  * It is incomplete: the natives that marshal arrays or strings and the platform calls that own the
  * context are not written yet, so the client cannot use this. What it does show is that the
@@ -389,6 +393,7 @@ val compileOpenGlBinding by tasks.registering(Exec::class) {
     executable = "clang"
     args(
         "-arch", "arm64",
+        "-arch", "x86_64",
         "-dynamiclib",
         "-Wall",
         "-Werror",
@@ -397,7 +402,7 @@ val compileOpenGlBinding by tasks.registering(Exec::class) {
         "-I", jdkHome.dir("include").asFile.absolutePath,
         "-I", jdkHome.dir("include/darwin").asFile.absolutePath,
         "-framework", "OpenGL",
-        "-install_name", "@loader_path/libjaggl-arm64.dylib",
+        "-install_name", "@loader_path/libjaggl.dylib",
         "-o", target.absolutePath,
         source.absolutePath,
     )
