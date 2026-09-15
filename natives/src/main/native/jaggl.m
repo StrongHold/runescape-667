@@ -153,6 +153,16 @@ static BOOL verbose(void) {
 /*
  * Asks for the finished frame to be shown. The frame itself is already where the layer reads it,
  * because the client draws into a framebuffer both contexts share, so there is nothing to copy.
+ *
+ * Nothing stops the client drawing the next frame into that framebuffer while Core Animation is
+ * reading it for the last one. If frames ever tear or flicker, this is why, and the fix is a
+ * second framebuffer: on each swap, copy the finished frame into it under a lock, and have the
+ * layer read the copy instead. openrs2-natives does exactly that, and keeps the copy the size of
+ * the layer so the resize is handled in the same step.
+ *
+ * It is not done here because nothing torn has been seen, and one framebuffer with one blit is
+ * both quicker and easier to follow than two with a lock between them. Add the copy when there is
+ * a reason to, not before.
  */
 - (void)present {
     glFlush();
@@ -180,6 +190,7 @@ static BOOL verbose(void) {
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    /* Read straight from what the client drew. See -present for what that risks. */
     if (defaultFramebuffer != 0) {
         CGSize size = self.bounds.size;
         glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, defaultFramebuffer);
