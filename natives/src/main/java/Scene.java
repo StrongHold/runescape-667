@@ -183,11 +183,6 @@ public sealed interface Scene {
     record Geometry() implements Scene {
 
         @Override
-        public boolean written() {
-            return false;
-        }
-
-        @Override
         public void draw(Toolkit toolkit, Props props) {
             toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
             toolkit.f(NEAR, Integer.MAX_VALUE);
@@ -211,11 +206,6 @@ public sealed interface Scene {
      * worked out by hand. Three hundred faces say only that something is wrong.
      */
     record FewFaces() implements Scene {
-
-        @Override
-        public boolean written() {
-            return false;
-        }
 
         @Override
         public void draw(Toolkit toolkit, Props props) {

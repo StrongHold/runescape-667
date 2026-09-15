@@ -30,6 +30,9 @@ public final class FrameCheck {
 
     private static final int MARK = 0xFFFF0000;
 
+    /** What an undrawn pixel is, which is what the harness clears a frame to. */
+    private static final int BLANK = 0;
+
     private record Frames(String label, Path directory, List<String> scenes) {
 
         static Frames at(String label, Path directory) throws IOException {
@@ -57,10 +60,7 @@ public final class FrameCheck {
             report.addAll(checkRepeatsAgree(ours, marks));
             report.addAll(checkImplementationsAgree(shipped, ours, marks));
 
-            var outstanding = shipped.scenes().stream().filter(FrameCheck::outstanding).distinct().toList();
-            if (!outstanding.isEmpty()) {
-                System.out.println("outstanding, drawn but not checked: " + String.join(", ", outstanding));
-            }
+            measureOutstanding(shipped, ours).forEach(System.out::println);
 
             if (report.isEmpty()) {
                 System.out.println(shipped.scenes().size() + " frames identical to the shipped toolkit");
@@ -119,6 +119,73 @@ public final class FrameCheck {
         }
 
         return report;
+    }
+
+    /**
+     * Says how close a scene that is still being worked on has got.
+     *
+     * A scene belonging to an unfinished native cannot pass or fail, but the distance between the
+     * two pictures is the only measure of progress there is, so it is reported rather than
+     * skipped. Pixels that only one side drew are counted apart from pixels both drew in different
+     * shades, because the two mean different things: the first is a face in the wrong place and
+     * the second is a face in the right place with the wrong light on it.
+     */
+    private static List<String> measureOutstanding(Frames shipped, Frames ours) throws IOException {
+        var report = new ArrayList<String>();
+        var seen = new ArrayList<String>();
+
+        for (var index = 0; index < shipped.scenes().size(); index++) {
+            var scene = shipped.scenes().get(index);
+            if (!outstanding(scene) || seen.contains(scene) || !Files.isRegularFile(ours.frame(index))) {
+                continue;
+            }
+            seen.add(scene);
+            report.add(scene + ": " + distance(shipped.frame(index), ours.frame(index)));
+        }
+
+        return report;
+    }
+
+    private static String distance(Path expected, Path actual) throws IOException {
+        var left = ImageIO.read(expected.toFile());
+        var right = ImageIO.read(actual.toFile());
+
+        var drawn = 0;
+        var coverage = 0;
+        var shade = 0;
+        var worst = 0;
+
+        for (var y = 0; y < left.getHeight(); y++) {
+            for (var x = 0; x < left.getWidth(); x++) {
+                var wanted = left.getRGB(x, y) & CHANNELS;
+                var got = right.getRGB(x, y) & CHANNELS;
+
+                if (wanted != BLANK || got != BLANK) {
+                    drawn++;
+                }
+
+                if (wanted != got) {
+                    if (wanted == BLANK || got == BLANK) {
+                        coverage++;
+                    } else {
+                        shade++;
+                        worst = Math.max(worst, apart(wanted, got));
+                    }
+                }
+            }
+        }
+
+        return "%d drawn, %d only one side drew, %d shaded differently, worst part off by %d"
+            .formatted(drawn, coverage, shade, worst);
+    }
+
+    /** How far apart two colours are, measured by the part of them that differs most. */
+    private static int apart(int left, int right) {
+        var most = 0;
+        for (var shift = 0; shift < 24; shift += 8) {
+            most = Math.max(most, Math.abs((left >> shift & 0xFF) - (right >> shift & 0xFF)));
+        }
+        return most;
     }
 
     private static Optional<String> compare(Path expected, Path actual, Path marks, String what,

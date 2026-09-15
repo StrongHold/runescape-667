@@ -98,8 +98,10 @@ val captureFrames by tasks.registering(JavaExec::class) {
     environment("SW3D_AMBIENT", providers.environmentVariable("SW3D_AMBIENT").getOrElse("64"))
     environment("SW3D_SUN_TENTHS", providers.environmentVariable("SW3D_SUN_TENTHS").getOrElse("5"))
     args(patchedToolkit.get().asFile.absolutePath)
+    outputs.dir(frames)
 
     doFirst {
+        frames.deleteRecursively()
         frames.mkdirs()
     }
 }
@@ -709,12 +711,18 @@ val ownFrames = layout.buildDirectory.dir("own-frames")
 /**
  * Renders the fixed scene through our own toolkit and leaves the frames beside the ones the
  * shipped toolkit produced, so the two can be compared.
+ *
+ * This runs on the same x86_64 virtual machine the shipped toolkit needs, so that both sides are
+ * compared running the same instructions. The rasteriser divides by the processor's approximate
+ * reciprocal rather than by a true division, and how close that approximation is belongs to the
+ * instruction set, so a comparison across two of them would be measuring the processor.
  */
 val captureOwnFrames by tasks.registering(JavaExec::class) {
     description = "Renders the fixed scene through our own software toolkit."
-    dependsOn(compileSoftwareToolkit)
+    dependsOn(compileSoftwareToolkit, ":unpackX64Jdk")
     mainClass = "FrameCapture"
     classpath = sourceSets["main"].runtimeClasspath
+    setExecutable(rootProject.layout.projectDirectory.file(".gradle/jdk-x64/unpacked/Home/bin/java").asFile.absolutePath)
     jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
     val directory = ownFrames.get().asFile
 
