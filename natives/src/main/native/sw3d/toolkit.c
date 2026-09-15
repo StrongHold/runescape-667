@@ -47,6 +47,10 @@ const void *cameraMatrix(void) {
 
 static Sun light;
 
+float globalAmbient(void) {
+    return ambient;
+}
+
 const Sun *sun(void) {
     return &light;
 }

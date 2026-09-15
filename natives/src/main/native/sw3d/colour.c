@@ -86,3 +86,53 @@ uint32_t colourOf(int packed) {
     build();
     return table[packed & (COLOURS - 1)];
 }
+
+/**
+ * The colour a face is before any light reaches it.
+ *
+ * The model's own ambient scales the lightness, and the result is held away from both ends of the
+ * range: a face is never quite black and never quite white, whatever it asked for.
+ */
+uint32_t unlitColour(int hsl, int ambient) {
+    int lightness = ((hsl & 0x7F) * ambient) >> 7;
+
+    if (lightness <= 1) {
+        lightness = 2;
+    } else if (lightness > 0x7E) {
+        lightness = 0x7E;
+    }
+
+    return colourOf((hsl & 0xFF80) | lightness);
+}
+
+/**
+ * The colour a surface facing this way takes.
+ *
+ * The light is the ambient plus the sun, and how much sun depends on whether the surface faces it
+ * at all. Each channel is tinted by the sun's own colour before it is scaled, and none of them
+ * reaches the top of the range: the toolkit stops at 252.
+ */
+uint32_t sunlitColour(uint32_t unlit, const Normal *normal, float strength) {
+    const Sun *light = sun();
+
+    float towards = (light->x * normal->x + light->y * normal->y + light->z * normal->z)
+        / normal->magnitude;
+    float reach = towards > 0.0f ? light->intensity : light->reverseIntensity;
+    int scale = (int) ((globalAmbient() + reach * towards * strength) * 256.0f);
+
+    int red = (scale * (int) ((((unlit >> 16) & 0xFF) * light->red) >> 8)) >> 8;
+    int green = (scale * (int) ((((unlit >> 8) & 0xFF) * light->green) >> 8)) >> 8;
+    int blue = (scale * (int) (((unlit & 0xFF) * light->blue) >> 8)) >> 8;
+
+    if (red > 0xFC) {
+        red = 0xFC;
+    }
+    if (green > 0xFC) {
+        green = 0xFC;
+    }
+    if (blue > 0xFC) {
+        blue = 0xFC;
+    }
+
+    return ((uint32_t) red << 16) | ((uint32_t) green << 8) | (uint32_t) blue;
+}
