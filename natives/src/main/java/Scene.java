@@ -30,6 +30,9 @@ public sealed interface Scene {
     /** How far in front of the camera the model in the geometry scene sits. */
     int DEPTH = 900;
 
+    /** How far apart the copies in the geometry scene stand. */
+    int SPREAD = 420;
+
     List<Scene> ALL = List.of(
         new Sprites(),
         new AlphaSweep(),
@@ -189,10 +192,15 @@ public sealed interface Scene {
             toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
             toolkit.f(NEAR, Integer.MAX_VALUE);
 
+            /*
+             * Four copies side by side rather than on top of one another. Stacking them put four
+             * near identical surfaces at almost the same distance and made the scene a test of
+             * how ties are broken rather than of how a model is drawn.
+             */
             for (var step = 0; step < 4; step++) {
                 props.matrix().makeRotationZ(0);
                 props.matrix().rotateAxisY(step * TURN / 4);
-                props.matrix().translate(0, 0, DEPTH);
+                props.matrix().translate((step - 2) * SPREAD, 0, DEPTH);
                 props.model().render(props.matrix(), null, 1);
             }
         }

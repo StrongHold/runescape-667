@@ -201,22 +201,30 @@ static void fillTriangle(Corner top, Corner middle, Corner bottom) {
                     to = raster.clipRight;
                 }
 
+                /*
+                 * The colour and the distance are stepped along the row the same way they are
+                 * stepped down the edges, rather than worked out again at every pixel.
+                 */
+                float held[LANES];
+                float step[LANES];
+
+                for (int lane = 0; lane < LANES; lane++) {
+                    held[lane] = left[lane];
+                    step[lane] = (right[lane] - left[lane]) / span;
+                }
+
                 uint32_t *row = raster.pixels + (size_t) y * (size_t) raster.width;
                 float *depths = depthRow(y);
 
                 for (int x = from; x < to; x++) {
-                    float across = ((float) x - left[LANE_X]) / span;
-                    float depth = left[LANE_DEPTH] + (right[LANE_DEPTH] - left[LANE_DEPTH]) * across;
-
-                    if (depth >= depths[x]) {
-                        continue;
+                    if (held[LANE_DEPTH] < depths[x]) {
+                        depths[x] = held[LANE_DEPTH];
+                        row[x] = ((uint32_t) (int) held[LANE_RED] << 16)
+                            | ((uint32_t) (int) held[LANE_GREEN] << 8)
+                            | (uint32_t) (int) held[LANE_BLUE];
                     }
 
-                    depths[x] = depth;
-                    int red = (int) (left[LANE_RED] + (right[LANE_RED] - left[LANE_RED]) * across);
-                    int green = (int) (left[LANE_GREEN] + (right[LANE_GREEN] - left[LANE_GREEN]) * across);
-                    int blue = (int) (left[LANE_BLUE] + (right[LANE_BLUE] - left[LANE_BLUE]) * across);
-                    row[x] = ((uint32_t) red << 16) | ((uint32_t) green << 8) | (uint32_t) blue;
+                    advance(held, step);
                 }
             }
         }
