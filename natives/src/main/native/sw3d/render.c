@@ -14,6 +14,40 @@
 
 #include "sw3d.h"
 
+/**
+ * How far away each pixel drawn so far is, so that a nearer face covers one behind it wherever
+ * they overlap rather than only when it happens to be drawn later.
+ *
+ * Sorting whole faces cannot answer this. Two faces that pass through each other, or three that
+ * overlap in a ring, have no order that is right everywhere, and a model made of flat faces has
+ * plenty of both.
+ */
+static float *depths;
+static int depthRoom;
+static int depthWidth;
+
+static float *depthRow(int y) {
+    return depths + (size_t) y * (size_t) depthWidth;
+}
+
+static void clearDepths(void) {
+    int wanted = raster.width * raster.height;
+
+    if (depthRoom < wanted) {
+        float *grown = realloc(depths, (size_t) wanted * sizeof(float));
+        if (grown == NULL) {
+            return;
+        }
+        depths = grown;
+        depthRoom = wanted;
+    }
+
+    depthWidth = raster.width;
+    for (int i = 0; i < wanted; i++) {
+        depths[i] = 3.4e38f;
+    }
+}
+
 /** A vertex after it has been projected. Behind the eye it has no place on the buffer. */
 typedef struct {
     int x;
@@ -56,6 +90,7 @@ static int compareDepth(const void *left, const void *right) {
 typedef struct {
     int x;
     int y;
+    float depth;
     float red;
     float green;
     float blue;
@@ -65,6 +100,7 @@ static Corner cornerAt(const Projected *point, uint32_t colour) {
     Corner corner;
     corner.x = point->x;
     corner.y = point->y;
+    corner.depth = (float) point->depth;
     corner.red = (float) ((colour >> 16) & 0xFF);
     corner.green = (float) ((colour >> 8) & 0xFF);
     corner.blue = (float) (colour & 0xFF);
@@ -75,6 +111,7 @@ static Corner between(const Corner *from, const Corner *to, float howfar) {
     Corner corner;
     corner.x = (int) ((float) from->x + ((float) to->x - (float) from->x) * howfar);
     corner.y = 0;
+    corner.depth = from->depth + (to->depth - from->depth) * howfar;
     corner.red = from->red + (to->red - from->red) * howfar;
     corner.green = from->green + (to->green - from->green) * howfar;
     corner.blue = from->blue + (to->blue - from->blue) * howfar;
@@ -134,8 +171,17 @@ static void fillTriangle(Corner top, Corner middle, Corner bottom) {
         int to = right.x > raster.clipRight ? raster.clipRight : right.x;
 
         uint32_t *row = raster.pixels + (size_t) y * (size_t) raster.width;
+        float *depths = depthRow(y);
+
         for (int x = from; x < to; x++) {
             float across = (float) (x - left.x) / (float) span;
+            float depth = left.depth + (right.depth - left.depth) * across;
+
+            if (depth >= depths[x]) {
+                continue;
+            }
+
+            depths[x] = depth;
             int red = (int) (left.red + (right.red - left.red) * across);
             int green = (int) (left.green + (right.green - left.green) * across);
             int blue = (int) (left.blue + (right.blue - left.blue) * across);
@@ -214,6 +260,11 @@ static void renderModel(const void *model, const void *matrix) {
             order[drawn].depth = a->depth + b->depth + c->depth;
             drawn++;
         }
+    }
+
+    clearDepths();
+    if (depths == NULL) {
+        return;
     }
 
     qsort(order, (size_t) drawn, sizeof(Ordered), compareDepth);
