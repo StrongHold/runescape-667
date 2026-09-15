@@ -104,6 +104,16 @@ static BOOL verbose(void) {
         _bitmap = CGBitmapContextCreate(NULL, width, height, 8, (size_t) width * BYTES_PER_PIXEL, space,
                                         kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrder32Host);
         CGColorSpaceRelease(space);
+
+        /*
+         * The toolkit draws top down and concatenates a vertical flip to suit a context whose
+         * origin is at the bottom. The bitmap is read back as an image whose first row is its top,
+         * so the context starts flipped and the toolkit's own flip cancels it. Without this the
+         * picture is upside down.
+         */
+        CGContextTranslateCTM(_bitmap, 0, height);
+        CGContextScaleCTM(_bitmap, 1, -1);
+
         SHIMLOG("surface %dx%d bitmap=%p", width, height, _bitmap);
     }
     return self;
