@@ -529,3 +529,13 @@ val verifyMemoryLibrary by tasks.registering(JavaExec::class) {
     jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
     args(memoryLibrary.get().asFile.absolutePath)
 }
+
+val cacheDirectory = providers.gradleProperty("cache")
+    .orElse(providers.systemProperty("user.home").map { "$it/.jagex_cache_32/runescape" })
+
+val listCacheLibraries by tasks.registering(JavaExec::class) {
+    description = "Lists the native libraries the cache holds, for every platform."
+    mainClass = "CacheLibraries"
+    classpath = sourceSets["main"].runtimeClasspath
+    args(cacheDirectory.get())
+}
