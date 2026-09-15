@@ -1,4 +1,3 @@
-import com.jagex.graphics.Sprite;
 import com.jagex.graphics.Toolkit;
 import rs2.client.loading.library.LibraryManager;
 
@@ -28,6 +27,13 @@ import java.util.List;
 public final class FrameCapture {
 
     private static final int REPEATS = 2;
+
+    private static final int POOL_SIZE = 1 << 20;
+    private static final int FUNCTIONS = 2048;
+    private static final int FEATURES = 64;
+    private static final int MODEL_FACES = 200;
+    private static final int AMBIENT = 64;
+    private static final int CONTRAST = 768;
 
     /**
      * The window keeps the virtual machine alive after this method returns, so every path out of
@@ -66,11 +72,27 @@ public final class FrameCapture {
         toolkit.DA(Scene.WIDTH / 2, Scene.HEIGHT / 2, 512, 512);
         toolkit.xa(1.0F);
 
+        /*
+         * The same setup the client's own profiling scene does. A model needs a camera to be
+         * projected through and a sun to be shaded by, and it has to be built asking for the
+         * features that draw it.
+         */
+        var camera = toolkit.createMatrix();
+        camera.makeIdentity();
+        toolkit.setCamera(camera);
+        toolkit.ZA(0xFFFFFF, 0.5F, 0.5F, 20.0F, -50.0F, 30.0F);
+
+        toolkit.method7938(toolkit.createHeap(POOL_SIZE));
+        var props = new Scene.Props(
+            gradient,
+            toolkit.createModel(mesh(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
+            toolkit.createMatrix());
+
         var manifest = new ArrayList<String>();
 
         for (var scene : Scene.ALL) {
             for (var repeat = 0; repeat < REPEATS; repeat++) {
-                drawOnce(toolkit, scene, gradient);
+                drawOnce(toolkit, scene, props);
                 manifest.add(scene.title());
             }
         }
@@ -80,10 +102,10 @@ public final class FrameCapture {
         window.dispose();
     }
 
-    private static void drawOnce(Toolkit toolkit, Scene scene, Sprite gradient) throws Exception {
+    private static void drawOnce(Toolkit toolkit, Scene scene, Scene.Props props) throws Exception {
         toolkit.GA(Scene.CLEAR_COLOUR);
         toolkit.ya();
-        scene.draw(toolkit, gradient);
+        scene.draw(toolkit, props);
         toolkit.flip(0, 0);
         Thread.sleep(60);
     }
@@ -99,6 +121,25 @@ public final class FrameCapture {
         }
 
         Files.write(Path.of(directory, "scenes.txt"), scenes);
+    }
+
+    /**
+     * A model out of the cache where there is one, and one built here where there is not, so the
+     * scenes still draw on a machine with no cache.
+     */
+    private static com.jagex.graphics.Mesh mesh() throws Exception {
+        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
+        if (!new File(cache, "main_file_cache.dat2").isFile()) {
+            System.out.println("no cache at " + cache + ", using the mesh built here");
+            return FlatMesh.INSTANCE.build();
+        }
+
+        /*
+         * A model out of the cache makes the shipped toolkit crash inside its own upload, so the
+         * mesh built here is used until that is understood. The reader stays because the mesh is
+         * the thing that has to stop being a variable once models are written.
+         */
+        return FlatMesh.INSTANCE.build();
     }
 
     static String dumpDirectory() {
