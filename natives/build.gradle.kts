@@ -95,3 +95,33 @@ val captureFrames by tasks.registering(JavaExec::class) {
         frames.mkdirs()
     }
 }
+
+/**
+ * A static scene must produce the same bytes every frame. The toolkit concatenates its transforms
+ * onto whatever context it is handed, so anything the surface fails to reset accumulates and shows
+ * up as the picture changing between frames of an unchanging scene.
+ */
+val verifyFrames by tasks.registering {
+    description = "Checks that every captured frame of the fixed scene is identical."
+    dependsOn(captureFrames)
+
+    val frames = layout.buildDirectory.dir("frames")
+    inputs.dir(frames)
+
+    doLast {
+        val captured = frames.get().asFile.listFiles { file -> file.extension == "png" }
+            ?.sortedBy { it.name }
+            ?: emptyList()
+
+        require(captured.size >= 2) { "Expected at least two frames, found ${captured.size}" }
+
+        val digests = captured.associate { it.name to it.readBytes().toList().hashCode() }
+        val distinct = digests.values.distinct()
+        require(distinct.size == 1) {
+            "The fixed scene rendered differently between frames, so some drawing state is not " +
+                "being reset: $digests"
+        }
+
+        logger.lifecycle("${captured.size} frames identical")
+    }
+}

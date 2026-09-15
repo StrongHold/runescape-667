@@ -134,6 +134,13 @@ static BOOL verbose(void) {
         self.drawingContext = [NSGraphicsContext graphicsContextWithCGContext:self.bitmap flipped:NO];
     }
 
+    /*
+     * The toolkit concatenates a vertical flip onto the transform of whatever context it is given,
+     * so the bitmap has to start every frame in the state it started the last one in. Without this
+     * the flips accumulate and the picture turns over on alternate frames.
+     */
+    CGContextSaveGState(self.bitmap);
+
     [NSGraphicsContext saveGraphicsState];
     [NSGraphicsContext setCurrentContext:self.drawingContext];
     self.signatureBeforeDraw = [self bitmapSignature];
@@ -144,6 +151,7 @@ static BOOL verbose(void) {
 - (void)unlockFocus {
     CGContextFlush(self.bitmap);
     [NSGraphicsContext restoreGraphicsState];
+    CGContextRestoreGState(self.bitmap);
 
     unsigned long after = [self bitmapSignature];
     SHIMLOG("unlockFocus, pixels %s", after == self.signatureBeforeDraw ? "UNCHANGED" : "WRITTEN");
