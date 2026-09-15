@@ -101,6 +101,17 @@ val captureFrames by tasks.registering(JavaExec::class) {
  * onto whatever context it is handed, so anything the surface fails to reset accumulates and shows
  * up as the picture changing between frames of an unchanging scene.
  */
+val verifyToolkitLifetime by tasks.registering(JavaExec::class) {
+    description = "Builds and discards software toolkits to prove none is torn down by the collector."
+    dependsOn(patchToolkit)
+    mainClass = "ToolkitLifetime"
+    classpath = sourceSets["main"].runtimeClasspath
+    setExecutable(rootProject.layout.projectDirectory.file(".gradle/jdk-x64/unpacked/Home/bin/java").asFile.absolutePath)
+    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+    systemProperty("sw3d.surface.library", shimLibrary.get().asFile.absolutePath)
+    args(patchedToolkit.get().asFile.absolutePath)
+}
+
 val verifyFrames by tasks.registering {
     description = "Checks that every captured frame of the fixed scene is identical."
     dependsOn(captureFrames)

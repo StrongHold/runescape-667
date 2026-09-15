@@ -54,6 +54,14 @@ public final class MacSoftwareToolkitLibrary {
         }
     }
 
+    /**
+     * Whether this client is supplying the toolkit's drawing surface, which is the one switch that
+     * turns on everything macOS needs from the software toolkit.
+     */
+    public static boolean isSupplyingSurface() {
+        return surfaceLibrary() != null;
+    }
+
     private static File surfaceLibrary() {
         String configured = System.getProperty(SURFACE_PROPERTY);
         File surface = configured == null ? null : new File(configured);
