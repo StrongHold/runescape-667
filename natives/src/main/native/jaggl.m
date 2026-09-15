@@ -49,17 +49,9 @@
 #include <jawt_md.h>
 
 /* The client renders here, off screen, and the layer shows what lands in it. */
-@interface JagGLLayer : CAOpenGLLayer {
-    @private
-    GLuint framebuffer;
-    GLuint colour;
-    GLuint depth;
-    GLint width;
-    GLint height;
-    NSLock *lock;
-}
+@interface JagGLLayer : CAOpenGLLayer
 
-- (void)blit;
+- (void)present;
 
 @end
 
@@ -84,17 +76,24 @@ static CGLContextObj layerContext;
 static CGLContextObj clientContext;
 
 /*
- * Somewhere for the client's own drawing to land. The client draws to the default framebuffer, so
- * the context it draws with needs a drawable of its own, and that drawable is never shown.
+ * Somewhere for the client's own drawing to land.
  *
- * It is a pixel buffer rather than a hidden window because a window would have to be made and
- * resized on the main thread. The client calls this from the thread it draws on, holding the AWT
- * tree lock, and the main thread needs that lock, so waiting on it stalls the client until it
- * gives up on the toolkit.
+ * The context has no drawable at all. A window would have to be made and resized on the main
+ * thread, and the client calls this from the thread it draws on while holding the AWT tree lock
+ * that the main thread needs, so waiting on it stalls the client until it gives up. A pixel buffer
+ * would avoid that, but this machine's OpenGL refuses to make one.
+ *
+ * So the client's default framebuffer is a framebuffer object of ours. Where the client asks for
+ * framebuffer zero it is given this one, and where it names the front or back buffer it is given
+ * this one's colour attachment. Everything else about its drawing is unchanged, and the layer
+ * shows whatever lands here.
  */
-static CGLPBufferObj offscreen;
+static GLuint defaultFramebuffer;
+static GLuint defaultColour;
+static GLuint defaultDepth;
 static GLint offscreenWidth;
 static GLint offscreenHeight;
+static BOOL defaultBound;
 
 static Surface *currentSurface;
 
@@ -147,61 +146,16 @@ static BOOL verbose(void) {
         self.asynchronous = NO;
         self.opaque = YES;
         self.needsDisplayOnBoundsChange = YES;
-        lock = [[NSLock alloc] init];
     }
     return self;
 }
 
 /*
- * Copies the frame the client has just finished into the framebuffer the layer draws from.
- *
- * This runs on the client's thread with the client's context current, which is why the framebuffer
- * is shared between the two contexts rather than handed over as a drawable.
+ * Asks for the finished frame to be shown. The frame itself is already where the layer reads it,
+ * because the client draws into a framebuffer both contexts share, so there is nothing to copy.
  */
-- (void)blit {
-    CGSize size = self.bounds.size;
-    GLint wanted = (GLint) size.width;
-    GLint tall = (GLint) size.height;
-    if (wanted <= 0 || tall <= 0) {
-        return;
-    }
-
-    [lock lock];
-
-    if (framebuffer == 0 || wanted != width || tall != height) {
-        if (framebuffer != 0) {
-            glDeleteRenderbuffersEXT(1, &depth);
-            glDeleteRenderbuffersEXT(1, &colour);
-            glDeleteFramebuffersEXT(1, &framebuffer);
-        }
-
-        glGenFramebuffersEXT(1, &framebuffer);
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, framebuffer);
-
-        glGenRenderbuffersEXT(1, &colour);
-        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, colour);
-        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_RGB, wanted, tall);
-        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, colour);
-
-        glGenRenderbuffersEXT(1, &depth);
-        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depth);
-        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, wanted, tall);
-        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, depth);
-
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-
-        width = wanted;
-        height = tall;
-        JAGGLLOG("framebuffer %dx%d", width, height);
-    }
-
-    glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, 0);
-    glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, framebuffer);
-    glBlitFramebufferEXT(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+- (void)present {
     glFlush();
-
-    [lock unlock];
 
     dispatch_async(dispatch_get_main_queue(), ^{
         [self setNeedsDisplay];
@@ -212,7 +166,7 @@ static BOOL verbose(void) {
                 pixelFormat:(CGLPixelFormatObj)format
                forLayerTime:(CFTimeInterval)layerTime
                 displayTime:(const CVTimeStamp *)displayTime {
-    return framebuffer != 0;
+    return defaultFramebuffer != 0;
 }
 
 - (void)drawInCGLContext:(CGLContextObj)context
@@ -226,13 +180,14 @@ static BOOL verbose(void) {
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    [lock lock];
-    if (framebuffer != 0) {
-        glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, framebuffer);
-        glBlitFramebufferEXT(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    if (defaultFramebuffer != 0) {
+        CGSize size = self.bounds.size;
+        glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, defaultFramebuffer);
+        glBlitFramebufferEXT(0, 0, offscreenWidth, offscreenHeight,
+                             0, 0, (GLint) size.width, (GLint) size.height,
+                             GL_COLOR_BUFFER_BIT, GL_NEAREST);
         glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, 0);
     }
-    [lock unlock];
 
     [super drawInCGLContext:context pixelFormat:format forLayerTime:layerTime displayTime:displayTime];
 }
@@ -322,29 +277,40 @@ static BOOL resizeOffscreen(GLint width, GLint height) {
         return NO;
     }
 
-    if (offscreen != NULL && width == offscreenWidth && height == offscreenHeight) {
+    if (defaultFramebuffer != 0 && width == offscreenWidth && height == offscreenHeight) {
         return YES;
     }
 
-    CGLPBufferObj replacement = NULL;
-    if (CGLCreatePBuffer(width, height, GL_TEXTURE_RECTANGLE_EXT, GL_RGBA, 0, &replacement) != kCGLNoError) {
-        JAGGLLOG("no pixel buffer at %dx%d", width, height);
+    if (defaultFramebuffer != 0) {
+        glDeleteRenderbuffersEXT(1, &defaultDepth);
+        glDeleteRenderbuffersEXT(1, &defaultColour);
+        glDeleteFramebuffersEXT(1, &defaultFramebuffer);
+    }
+
+    glGenFramebuffersEXT(1, &defaultFramebuffer);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, defaultFramebuffer);
+
+    glGenRenderbuffersEXT(1, &defaultColour);
+    glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, defaultColour);
+    glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_RGBA8, width, height);
+    glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, defaultColour);
+
+    glGenRenderbuffersEXT(1, &defaultDepth);
+    glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, defaultDepth);
+    glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH24_STENCIL8_EXT, width, height);
+    glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, defaultDepth);
+    glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, defaultDepth);
+
+    GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+    if (status != GL_FRAMEBUFFER_COMPLETE_EXT) {
+        JAGGLLOG("the default framebuffer is not complete at %dx%d, status 0x%x", width, height, status);
         return NO;
     }
 
-    GLint screen = 0;
-    CGLGetVirtualScreen(clientContext, &screen);
-    if (CGLSetPBuffer(clientContext, replacement, 0, 0, screen) != kCGLNoError) {
-        CGLReleasePBuffer(replacement);
-        JAGGLLOG("the context refused the pixel buffer");
-        return NO;
-    }
+    glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+    glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
 
-    if (offscreen != NULL) {
-        CGLReleasePBuffer(offscreen);
-    }
-
-    offscreen = replacement;
+    defaultBound = YES;
     offscreenWidth = width;
     offscreenHeight = height;
     JAGGLLOG("drawable %dx%d", width, height);
@@ -472,7 +438,7 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_releaseSurface(JNIEnv *env, jclass owne
 
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_swapBuffers(JNIEnv *env, jclass owner) {
     if (currentSurface != NULL) {
-        [(__bridge JagGLLayer *) currentSurface->layer blit];
+        [(__bridge JagGLLayer *) currentSurface->layer present];
     }
 }
 
@@ -505,12 +471,11 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_release(JNIEnv *env, jclass owner) {
         pixelFormat = NULL;
     }
 
-    if (offscreen != NULL) {
-        CGLReleasePBuffer(offscreen);
-        offscreen = NULL;
-        offscreenWidth = 0;
-        offscreenHeight = 0;
-    }
+    defaultFramebuffer = 0;
+    defaultColour = 0;
+    defaultDepth = 0;
+    offscreenWidth = 0;
+    offscreenHeight = 0;
 }
 
 /*
@@ -626,4 +591,33 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_glGetInfoLogARB(JNIEnv *env, jclass own
     if (counts != NULL) {
         (*env)->ReleasePrimitiveArrayCritical(env, written, counts, 0);
     }
+}
+
+/*
+ * The client's default framebuffer is one of ours, so the three natives that name it are answered
+ * rather than passed through.
+ */
+JNIEXPORT void JNICALL Java_jaggl_OpenGL_glBindFramebufferEXT(JNIEnv *env, jclass owner,
+                                                              jint target, jint framebuffer) {
+    GLuint wanted = framebuffer == 0 ? defaultFramebuffer : (GLuint) framebuffer;
+    glBindFramebufferEXT((GLenum) target, wanted);
+
+    if (target == GL_FRAMEBUFFER_EXT || target == GL_DRAW_FRAMEBUFFER_EXT) {
+        defaultBound = framebuffer == 0;
+    }
+}
+
+static GLenum attachmentFor(jint buffer) {
+    if (buffer == GL_BACK || buffer == GL_FRONT || buffer == GL_FRONT_AND_BACK || buffer == GL_NONE) {
+        return GL_COLOR_ATTACHMENT0_EXT;
+    }
+    return (GLenum) buffer;
+}
+
+JNIEXPORT void JNICALL Java_jaggl_OpenGL_glDrawBuffer(JNIEnv *env, jclass owner, jint buffer) {
+    glDrawBuffer(defaultBound ? attachmentFor(buffer) : (GLenum) buffer);
+}
+
+JNIEXPORT void JNICALL Java_jaggl_OpenGL_glReadBuffer(JNIEnv *env, jclass owner, jint buffer) {
+    glReadBuffer(defaultBound ? attachmentFor(buffer) : (GLenum) buffer);
 }
