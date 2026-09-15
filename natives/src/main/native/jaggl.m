@@ -85,11 +85,16 @@ static CGLContextObj clientContext;
 
 /*
  * Somewhere for the client's own drawing to land. The client draws to the default framebuffer, so
- * the context it draws with needs a real drawable of its own, and that drawable is never shown.
+ * the context it draws with needs a drawable of its own, and that drawable is never shown.
+ *
+ * It is a pixel buffer rather than a hidden window because a window would have to be made and
+ * resized on the main thread. The client calls this from the thread it draws on, holding the AWT
+ * tree lock, and the main thread needs that lock, so waiting on it stalls the client until it
+ * gives up on the toolkit.
  */
-static NSWindow *offscreenWindow;
-static NSView *offscreenView;
-static NSOpenGLContext *offscreenContext;
+static CGLPBufferObj offscreen;
+static GLint offscreenWidth;
+static GLint offscreenHeight;
 
 static Surface *currentSurface;
 
@@ -286,15 +291,16 @@ static BOOL attach(JNIEnv *env, jobject canvas, Surface *surface) {
 
             surface->width = info->bounds.width;
             surface->height = info->bounds.height;
+            jint top = info->bounds.y;
+            attached = YES;
 
-            dispatch_sync(dispatch_get_main_queue(), ^{
-                CGFloat top = layers.windowLayer.bounds.size.height;
-                layer.frame = CGRectMake(frame.origin.x, top - info->bounds.y - frame.size.height,
+            dispatch_async(dispatch_get_main_queue(), ^{
+                CGFloat window = layers.windowLayer.bounds.size.height;
+                layer.frame = CGRectMake(frame.origin.x, window - top - frame.size.height,
                                          frame.size.width, frame.size.height);
                 if (layer.superlayer == nil) {
                     layers.layer = layer;
                 }
-                attached = YES;
             });
 
             drawing->FreeDrawingSurfaceInfo(info);
@@ -308,19 +314,45 @@ static BOOL attach(JNIEnv *env, jobject canvas, Surface *surface) {
 }
 
 /*
- * Sizes the drawable the client draws into. It is never shown, so its only job is to be at least as
- * large as the surface being drawn for.
+ * Sizes the drawable the client draws into. It is never shown, so its only job is to be as large as
+ * the surface being drawn for.
  */
-static void resizeOffscreen(GLint width, GLint height) {
-    dispatch_sync(dispatch_get_main_queue(), ^{
-        NSRect frame = NSMakeRect(0, 0, width, height);
-        offscreenView.frame = frame;
-        [offscreenWindow setFrame:[offscreenWindow frameRectForContentRect:frame] display:NO];
-        [offscreenContext update];
-    });
+static BOOL resizeOffscreen(GLint width, GLint height) {
+    if (width <= 0 || height <= 0) {
+        return NO;
+    }
+
+    if (offscreen != NULL && width == offscreenWidth && height == offscreenHeight) {
+        return YES;
+    }
+
+    CGLPBufferObj replacement = NULL;
+    if (CGLCreatePBuffer(width, height, GL_TEXTURE_RECTANGLE_EXT, GL_RGBA, 0, &replacement) != kCGLNoError) {
+        JAGGLLOG("no pixel buffer at %dx%d", width, height);
+        return NO;
+    }
+
+    GLint screen = 0;
+    CGLGetVirtualScreen(clientContext, &screen);
+    if (CGLSetPBuffer(clientContext, replacement, 0, 0, screen) != kCGLNoError) {
+        CGLReleasePBuffer(replacement);
+        JAGGLLOG("the context refused the pixel buffer");
+        return NO;
+    }
+
+    if (offscreen != NULL) {
+        CGLReleasePBuffer(offscreen);
+    }
+
+    offscreen = replacement;
+    offscreenWidth = width;
+    offscreenHeight = height;
+    JAGGLLOG("drawable %dx%d", width, height);
+    return YES;
 }
 
 JNIEXPORT jlong JNICALL Java_jaggl_OpenGL_prepareSurface(JNIEnv *env, jclass owner, jobject canvas);
+JNIEXPORT jboolean JNICALL Java_jaggl_OpenGL_setSurface(JNIEnv *env, jclass owner, jlong handle);
 
 JNIEXPORT jlong JNICALL Java_jaggl_OpenGL_init(JNIEnv *env, jclass owner, jobject canvas,
                                                jint red, jint green, jint blue, jint depth,
@@ -362,33 +394,25 @@ JNIEXPORT jlong JNICALL Java_jaggl_OpenGL_init(JNIEnv *env, jclass owner, jobjec
         return 0;
     }
 
-    dispatch_sync(dispatch_get_main_queue(), ^{
-        offscreenWindow = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 16, 16)
-                                                      styleMask:NSWindowStyleMaskBorderless
-                                                        backing:NSBackingStoreBuffered
-                                                          defer:NO];
-        offscreenWindow.releasedWhenClosed = NO;
-        offscreenView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 16, 16)];
-        offscreenView.wantsBestResolutionOpenGLSurface = NO;
-        offscreenWindow.contentView = offscreenView;
-
-        offscreenContext = [[NSOpenGLContext alloc] initWithCGLContextObj:clientContext];
-        offscreenContext.view = offscreenView;
-    });
-
     JAGGLLOG("context ready");
-    return Java_jaggl_OpenGL_prepareSurface(env, owner, canvas);
+
+    jlong handle = Java_jaggl_OpenGL_prepareSurface(env, owner, canvas);
+    if (handle == 0) {
+        return 0;
+    }
+
+    if (!Java_jaggl_OpenGL_setSurface(env, owner, handle)) {
+        return 0;
+    }
+
+    return handle;
 }
 
 JNIEXPORT jlong JNICALL Java_jaggl_OpenGL_prepareSurface(JNIEnv *env, jclass owner, jobject canvas) {
     Surface *surface = calloc(1, sizeof(Surface));
     surface->canvas = (*env)->NewGlobalRef(env, canvas);
 
-    __block JagGLLayer *layer = nil;
-    dispatch_sync(dispatch_get_main_queue(), ^{
-        layer = [[JagGLLayer alloc] init];
-    });
-    surface->layer = (__bridge_retained void *) layer;
+    surface->layer = (__bridge_retained void *) [[JagGLLayer alloc] init];
 
     if (!attach(env, canvas, surface)) {
         (*env)->DeleteGlobalRef(env, surface->canvas);
@@ -406,9 +430,12 @@ JNIEXPORT jboolean JNICALL Java_jaggl_OpenGL_setSurface(JNIEnv *env, jclass owne
         return JNI_FALSE;
     }
 
+    if (CGLSetCurrentContext(clientContext) != kCGLNoError) {
+        return JNI_FALSE;
+    }
+
     currentSurface = surface;
-    resizeOffscreen(surface->width, surface->height);
-    return CGLSetCurrentContext(clientContext) == kCGLNoError;
+    return resizeOffscreen(surface->width, surface->height) ? JNI_TRUE : JNI_FALSE;
 }
 
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_surfaceResized(JNIEnv *env, jclass owner, jlong handle) {
@@ -434,7 +461,7 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_releaseSurface(JNIEnv *env, jclass owne
     }
 
     JagGLLayer *layer = (__bridge JagGLLayer *) surface->layer;
-    dispatch_sync(dispatch_get_main_queue(), ^{
+    dispatch_async(dispatch_get_main_queue(), ^{
         [layer removeFromSuperlayer];
     });
 
@@ -478,12 +505,12 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_release(JNIEnv *env, jclass owner) {
         pixelFormat = NULL;
     }
 
-    dispatch_sync(dispatch_get_main_queue(), ^{
-        offscreenContext = nil;
-        offscreenView = nil;
-        [offscreenWindow orderOut:nil];
-        offscreenWindow = nil;
-    });
+    if (offscreen != NULL) {
+        CGLReleasePBuffer(offscreen);
+        offscreen = NULL;
+        offscreenWidth = 0;
+        offscreenHeight = 0;
+    }
 }
 
 /*
