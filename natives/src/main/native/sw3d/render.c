@@ -277,16 +277,20 @@ static void renderModel(const void *model, const void *matrix) {
         int face = order[i].face;
         int hsl = faceColour == NULL ? 0 : faceColour[face] & 0xFFFF;
         uint32_t unlit = unlitColour(hsl, ambient);
-        uint32_t shaded = normals == NULL
-            ? unlit
-            : sunlitColour(unlit, &normals[faceA[face]], strength);
+        uint32_t shaded;
+        uint32_t shadedB;
+        uint32_t shadedC;
 
-        uint32_t shadedB = normals == NULL
-            ? unlit
-            : sunlitColour(unlit, &normals[faceB[face]], strength);
-        uint32_t shadedC = normals == NULL
-            ? unlit
-            : sunlitColour(unlit, &normals[faceC[face]], strength);
+        if (normals == NULL) {
+            shaded = shadedB = shadedC = unlit;
+        } else if (modelFaceIsFlat(model, face)) {
+            shaded = shadedB = shadedC =
+                sunlitColour(unlit, &modelFaceNormals(model)[face], strength);
+        } else {
+            shaded = sunlitColour(unlit, &normals[faceA[face]], strength);
+            shadedB = sunlitColour(unlit, &normals[faceB[face]], strength);
+            shadedC = sunlitColour(unlit, &normals[faceC[face]], strength);
+        }
 
         fillTriangle(cornerAt(&projected[faceA[face]], shaded),
                      cornerAt(&projected[faceB[face]], shadedB),

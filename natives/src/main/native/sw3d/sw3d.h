@@ -153,6 +153,8 @@ const short *modelFaceB(const void *handle);
 const short *modelFaceC(const void *handle);
 const short *modelFaceColour(const void *handle);
 const Normal *modelNormals(const void *handle);
+const Normal *modelFaceNormals(const void *handle);
+int modelFaceIsFlat(const void *handle, int face);
 int modelAmbient(const void *handle);
 int modelContrast(const void *handle);
 

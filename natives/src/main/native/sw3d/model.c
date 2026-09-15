@@ -26,6 +26,7 @@ typedef struct {
     short *faceC;
     short *faceColour;
     signed char *faceAlpha;
+    signed char *shadingType;
 
     int minX;
     int maxX;
@@ -40,6 +41,7 @@ typedef struct {
     int contrast;
 
     Normal *normals;
+    Normal *faceNormals;
 } Model;
 
 static Model *modelOf(JNIEnv *env, jobject self) {
@@ -144,7 +146,8 @@ static void measure(Model *model) {
  */
 static void calculateNormals(Model *model) {
     model->normals = calloc((size_t) model->vertexCount, sizeof(Normal));
-    if (model->normals == NULL) {
+    model->faceNormals = calloc((size_t) model->faceCount, sizeof(Normal));
+    if (model->normals == NULL || model->faceNormals == NULL) {
         return;
     }
 
@@ -173,6 +176,20 @@ static void calculateNormals(Model *model) {
         nx *= scale;
         ny *= scale;
         nz *= scale;
+
+        /*
+         * A face that asked to be flat keeps its own direction. Only the faces that asked to be
+         * smoothed hand their direction to the corners they meet at, and a face given a corner's
+         * averaged direction where it wanted its own comes out with almost no shading at all.
+         */
+        if (model->shadingType != NULL && model->shadingType[face] != 0) {
+            Normal *normal = &model->faceNormals[face];
+            normal->x = nx;
+            normal->y = ny;
+            normal->z = nz;
+            normal->magnitude = 1.0f;
+            continue;
+        }
 
         int corners[3] = {a, b, c};
         for (int corner = 0; corner < 3; corner++) {
@@ -223,7 +240,6 @@ JNIEXPORT void JNICALL Java_i_R(JNIEnv *env, jobject self, jobject toolkit, jobj
     (void) maxVertex;
     (void) vertexLabel;
     (void) originModels;
-    (void) shadingType;
     (void) facePriority;
     (void) faceTexSpace;
     (void) faceTexture;
@@ -269,6 +285,7 @@ JNIEXPORT void JNICALL Java_i_R(JNIEnv *env, jobject self, jobject toolkit, jobj
     model->faceC = copyShorts(env, faceC, faceCount);
     model->faceColour = copyShorts(env, faceColour, faceCount);
     model->faceAlpha = copyBytes(env, faceAlpha, faceCount);
+    model->shadingType = copyBytes(env, shadingType, faceCount);
 
     if (model->vertexX != NULL && model->vertexY != NULL && model->vertexZ != NULL) {
         measure(model);
@@ -297,7 +314,9 @@ JNIEXPORT void JNICALL Java_i_w(JNIEnv *env, jobject self, jboolean immediate) {
     free(model->faceC);
     free(model->faceColour);
     free(model->faceAlpha);
+    free(model->shadingType);
     free(model->normals);
+    free(model->faceNormals);
     free(model);
 
     setNativeId(env, self, 0);
@@ -378,6 +397,18 @@ const short *modelFaceColour(const void *handle) {
 
 const Normal *modelNormals(const void *handle) {
     return ((const Model *) handle)->normals;
+}
+
+const Normal *modelFaceNormals(const void *handle) {
+    return ((const Model *) handle)->faceNormals;
+}
+
+/**
+ * Whether this face wanted its own direction rather than the averaged one at its corners.
+ */
+int modelFaceIsFlat(const void *handle, int face) {
+    const Model *model = handle;
+    return model->shadingType != NULL && model->shadingType[face] != 0;
 }
 
 int modelAmbient(const void *handle) {
