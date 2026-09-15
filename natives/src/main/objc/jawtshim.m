@@ -86,6 +86,7 @@ static BOOL verbose(void) {
 @property (nonatomic, strong) CALayer *presentationLayer;
 @property (nonatomic, assign) BOOL presentationUnavailable;
 @property (nonatomic, assign) int framesPresented;
+@property (nonatomic, strong) NSGraphicsContext *drawingContext;
 
 - (void)attachLayer:(JNIEnv *)env target:(jobject)target;
 
@@ -129,9 +130,12 @@ static BOOL verbose(void) {
         return NO;
     }
 
+    if (self.drawingContext == nil) {
+        self.drawingContext = [NSGraphicsContext graphicsContextWithCGContext:self.bitmap flipped:NO];
+    }
+
     [NSGraphicsContext saveGraphicsState];
-    NSGraphicsContext *context = [NSGraphicsContext graphicsContextWithCGContext:self.bitmap flipped:NO];
-    [NSGraphicsContext setCurrentContext:context];
+    [NSGraphicsContext setCurrentContext:self.drawingContext];
     self.signatureBeforeDraw = [self bitmapSignature];
     SHIMLOG("lockFocusIfCanDraw");
     return YES;
@@ -246,6 +250,12 @@ static BOOL verbose(void) {
 }
 
 - (void)present {
+    @autoreleasepool {
+        [self presentInPool];
+    }
+}
+
+- (void)presentInPool {
     [self drawTestPattern];
     CGImageRef frame = CGBitmapContextCreateImage(self.bitmap);
     if (frame == NULL) {
@@ -286,9 +296,17 @@ typedef struct {
     ShimPlatformInfo platform;
 } ShimDrawingSurfaceInfo;
 
+/*
+ * The surface is owned by liveSurface, so this holds an unowned pointer. ARC cannot manage an
+ * object reference inside memory it did not allocate.
+ *
+ * The JavaVM is kept rather than the JNIEnv. A JNIEnv belongs to one thread, and the toolkit
+ * destroys its canvas from the finalizer thread, not the thread that created it.
+ */
 typedef struct {
     JAWT_DrawingSurface surface;
-    ShimSurface *shim;
+    void *shim;
+    JavaVM *vm;
 } ShimDrawingSurface;
 
 static jint JNICALL shimLock(JAWT_DrawingSurface *surface) {
@@ -301,19 +319,20 @@ static void JNICALL shimUnlock(JAWT_DrawingSurface *surface) {
 
 static JAWT_DrawingSurfaceInfo *JNICALL shimGetDrawingSurfaceInfo(JAWT_DrawingSurface *surface) {
     ShimDrawingSurface *owner = (ShimDrawingSurface *) surface;
+    ShimSurface *shim = (__bridge ShimSurface *) owner->shim;
     ShimDrawingSurfaceInfo *info = calloc(1, sizeof(ShimDrawingSurfaceInfo));
 
-    info->platform.view = (__bridge void *) owner->shim;
+    info->platform.view = owner->shim;
     info->info.platformInfo = &info->platform;
     info->info.ds = surface;
     info->info.bounds.x = 0;
     info->info.bounds.y = 0;
-    info->info.bounds.width = owner->shim.width;
-    info->info.bounds.height = owner->shim.height;
+    info->info.bounds.width = shim.width;
+    info->info.bounds.height = shim.height;
     info->info.clipSize = 1;
     info->info.clip = &info->info.bounds;
 
-    SHIMLOG("getDrawingSurfaceInfo %dx%d", owner->shim.width, owner->shim.height);
+    SHIMLOG("getDrawingSurfaceInfo %dx%d", shim.width, shim.height);
     return &info->info;
 }
 
@@ -351,7 +370,8 @@ static JAWT_DrawingSurface *JNICALL shimGetDrawingSurface(JNIEnv *env, jobject t
     [liveSurface attachLayer:env target:target];
 
     ShimDrawingSurface *surface = calloc(1, sizeof(ShimDrawingSurface));
-    surface->shim = liveSurface;
+    surface->shim = (__bridge void *) liveSurface;
+    (*env)->GetJavaVM(env, &surface->vm);
     surface->surface.env = env;
     surface->surface.target = (*env)->NewGlobalRef(env, target);
     surface->surface.Lock = shimLock;
@@ -363,10 +383,22 @@ static JAWT_DrawingSurface *JNICALL shimGetDrawingSurface(JNIEnv *env, jobject t
     return &surface->surface;
 }
 
+/*
+ * The toolkit destroys its canvas from the finalizer thread, so the JNIEnv captured when the
+ * surface was created belongs to a different thread and must not be used. The reference is dropped
+ * only if this thread has an environment of its own, and leaked otherwise, because one stale
+ * reference costs far less than using the wrong environment.
+ */
 static void JNICALL shimFreeDrawingSurface(JAWT_DrawingSurface *surface) {
     ShimDrawingSurface *owner = (ShimDrawingSurface *) surface;
-    (*owner->surface.env)->DeleteGlobalRef(owner->surface.env, owner->surface.target);
-    owner->shim = nil;
+    JNIEnv *env = NULL;
+
+    if (owner->vm != NULL && (*owner->vm)->GetEnv(owner->vm, (void **) &env, JNI_VERSION_1_6) == JNI_OK) {
+        (*env)->DeleteGlobalRef(env, owner->surface.target);
+    } else {
+        SHIMLOG("freeDrawingSurface on a thread with no environment, reference kept");
+    }
+
     free(owner);
 }
 
