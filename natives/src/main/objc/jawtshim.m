@@ -303,41 +303,69 @@ static BOOL verbose(void) {
 @end
 
 /*
- * The hardware toolkit attaches its context from the thread it draws on. AppKit requires the main
- * thread for that and stops the process when it is called from anywhere else, so the call is
- * passed to the main thread on the toolkit's behalf.
+ * The hardware toolkit works its OpenGL context from the thread it draws on. AppKit requires the
+ * main thread for the calls that touch the context's drawable and stops the process when they come
+ * from anywhere else, so those are passed to the main thread on the toolkit's behalf.
  *
  * This replaces a method on a system class, which is worth doing only because the alternative is
  * changing which thread the client builds its toolkit on. It is put in place when the hardware
  * toolkit asks for a surface and not before, and it changes where the call runs rather than what it
  * does.
  */
-static IMP attachContextToView;
+static IMP contextSetView;
+static IMP contextUpdate;
+static IMP contextClearDrawable;
 
-static void mainThreadSetView(id context, SEL selector, id view) {
-    void (*attach)(id, SEL, id) = (void (*)(id, SEL, id)) attachContextToView;
-
+static void onMainThread(void (^work)(void)) {
     if ([NSThread isMainThread]) {
-        attach(context, selector, view);
+        work();
     } else {
-        dispatch_sync(dispatch_get_main_queue(), ^{
-            attach(context, selector, view);
-        });
+        dispatch_sync(dispatch_get_main_queue(), work);
     }
 }
 
-static void passSetViewToTheMainThread(void) {
+static void mainThreadSetView(id context, SEL selector, id view) {
+    onMainThread(^{
+        ((void (*)(id, SEL, id)) contextSetView)(context, selector, view);
+    });
+}
+
+static void mainThreadUpdate(id context, SEL selector) {
+    onMainThread(^{
+        ((void (*)(id, SEL)) contextUpdate)(context, selector);
+    });
+}
+
+static void mainThreadClearDrawable(id context, SEL selector) {
+    onMainThread(^{
+        ((void (*)(id, SEL)) contextClearDrawable)(context, selector);
+    });
+}
+
+static BOOL replace(Class owner, SEL selector, IMP replacement, IMP *original) {
+    Method method = class_getInstanceMethod(owner, selector);
+    if (method == NULL) {
+        return NO;
+    }
+
+    *original = method_getImplementation(method);
+    method_setImplementation(method, replacement);
+    return YES;
+}
+
+/*
+ * Only the calls that touch the drawable are moved. makeCurrentContext and flushBuffer are left
+ * where they are on purpose: they act on the thread that calls them, so running them on the main
+ * thread would make the context current on the wrong one.
+ */
+static void passDrawableCallsToTheMainThread(void) {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        Method setView = class_getInstanceMethod(NSClassFromString(@"NSOpenGLContext"), @selector(setView:));
-        if (setView == NULL) {
-            SHIMLOG("no setView: to pass to the main thread");
-            return;
-        }
-
-        attachContextToView = method_getImplementation(setView);
-        method_setImplementation(setView, (IMP) mainThreadSetView);
-        SHIMLOG("setView: will run on the main thread");
+        Class context = NSClassFromString(@"NSOpenGLContext");
+        SHIMLOG("setView: %d, update %d, clearDrawable %d moved to the main thread",
+                replace(context, @selector(setView:), (IMP) mainThreadSetView, &contextSetView),
+                replace(context, @selector(update), (IMP) mainThreadUpdate, &contextUpdate),
+                replace(context, @selector(clearDrawable), (IMP) mainThreadClearDrawable, &contextClearDrawable));
     });
 }
 
@@ -539,7 +567,7 @@ static JAWT_DrawingSurface *JNICALL softwareSurface(JNIEnv *env, jobject target)
  * The hardware toolkit attaches an OpenGL context to what it is handed, so it gets a real view.
  */
 static JAWT_DrawingSurface *JNICALL hardwareSurface(JNIEnv *env, jobject target) {
-    passSetViewToTheMainThread();
+    passDrawableCallsToTheMainThread();
 
     NSView *view = glView(env, target);
     if (view == nil) {
