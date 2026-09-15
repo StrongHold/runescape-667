@@ -63,6 +63,54 @@ enum {
 
 uint32_t blend(uint32_t destination, uint32_t colour, int mode);
 
+/**
+ * The colour a packed hue, saturation and lightness stands for.
+ */
+uint32_t colourOf(int packed);
+
+/**
+ * Where the client wants the middle of the picture, how wide a field it wants through it, and
+ * how close and how far a thing may be before it is cut away.
+ */
+typedef struct {
+    float centreX;
+    float centreY;
+    float scaleX;
+    float scaleY;
+    int near;
+    int far;
+} Projection;
+
+const Projection *projection(void);
+
+/**
+ * The matrix the world is seen through, or null before the client has given one.
+ */
+const void *cameraMatrix(void);
+
+/**
+ * Puts a point through a matrix, answering the four floats before they are rounded.
+ */
+void matrixTransform(const void *matrix, float x, float y, float z, float *into);
+
+/**
+ * Puts one matrix after another, into a third.
+ */
+void matrixCompose(const void *first, const void *second, void *into);
+
+size_t matrixSize(void);
+
+/** What a model holds, read without knowing how it is laid out. */
+int modelVertexCount(const void *handle);
+int modelFaceCount(const void *handle);
+const int *modelVertexX(const void *handle);
+const int *modelVertexY(const void *handle);
+const int *modelVertexZ(const void *handle);
+const short *modelFaceA(const void *handle);
+const short *modelFaceB(const void *handle);
+const short *modelFaceC(const void *handle);
+const short *modelFaceColour(const void *handle);
+
 Surface *surfaceCreate(JNIEnv *env, jobject canvas, int width, int height);
 void surfaceResize(Surface *surface, int width, int height);
 void surfacePresent(Surface *surface, int x, int y);
