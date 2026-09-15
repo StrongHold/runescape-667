@@ -32,7 +32,7 @@ public final class FrameCapture {
     private static final int FUNCTIONS = 2048;
     private static final int FEATURES = 64;
     private static final int MODEL_FACES = 200;
-    private static final int VISIBLE_FACES = 2;
+    private static final int VISIBLE_FACES = 4;
     private static final int AMBIENT = 64;
     private static final int CONTRAST = 768;
 
