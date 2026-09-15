@@ -462,14 +462,12 @@ static void renderModel(const void *model, const void *matrix) {
     float acrossFromClip = view->centreX - (float) raster.clipLeft;
     float downFromClip = view->centreY - (float) raster.clipTop;
 
-    const int *vertexX = modelVertexX(model);
-    const int *vertexY = modelVertexY(model);
-    const int *vertexZ = modelVertexZ(model);
+    const float *held = modelVertices(model);
 
     for (int vertex = 0; vertex < vertices; vertex++) {
-        float x = (float) vertexX[vertex];
-        float y = (float) vertexY[vertex];
-        float z = (float) vertexZ[vertex];
+        float x = held[(size_t) vertex * MODEL_VERTEX_STRIDE];
+        float y = held[(size_t) vertex * MODEL_VERTEX_STRIDE + 1];
+        float z = held[(size_t) vertex * MODEL_VERTEX_STRIDE + 2];
 
         float point[ROWS];
         for (int lane = 0; lane < ROWS; lane++) {

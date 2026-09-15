@@ -194,9 +194,9 @@ const float *matrixRows(const void *handle);
 /** What a model holds, read without knowing how it is laid out. */
 int modelVertexCount(const void *handle);
 int modelFaceCount(const void *handle);
-const int *modelVertexX(const void *handle);
-const int *modelVertexY(const void *handle);
-const int *modelVertexZ(const void *handle);
+/** Where every vertex is, four floats apart, the fourth of them unused. */
+const float *modelVertices(const void *handle);
+enum { MODEL_VERTEX_STRIDE = 4 };
 const short *modelFaceA(const void *handle);
 const short *modelFaceB(const void *handle);
 const short *modelFaceC(const void *handle);

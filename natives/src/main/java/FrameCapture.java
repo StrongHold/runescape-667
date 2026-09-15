@@ -87,7 +87,7 @@ public final class FrameCapture {
         toolkit.method7938(toolkit.createHeap(POOL_SIZE));
         var props = new Scene.Props(
             gradient,
-            toolkit.createModel(mesh(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
+            toolkit.createModel(CacheMesh.anyUntextured(MODEL_FACES), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
             toolkit.createModel(fewFaces(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
             toolkit.createMatrix());
 
@@ -127,34 +127,13 @@ public final class FrameCapture {
     }
 
     /**
-     * A model out of the cache where there is one, and one built here where there is not, so the
-     * scenes still draw on a machine with no cache.
-     */
-    private static com.jagex.graphics.Mesh mesh() throws Exception {
-        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
-        if (!new File(cache, "main_file_cache.dat2").isFile()) {
-            System.out.println("no cache at " + cache + ", using the mesh built here");
-            return FlatMesh.INSTANCE.build();
-        }
-
-        var found = CacheMesh.at(cache).firstUntexturedWithFaces(MODEL_FACES);
-        if (found.isEmpty()) {
-            return FlatMesh.INSTANCE.build();
-        }
-
-        System.out.println("model from the cache: " + found.get().faceCount + " faces, "
-            + found.get().vertexCount + " vertices");
-        return found.get();
-    }
-
-    /**
      * The same model from the cache with all but a couple of its faces cut off.
      *
      * A model the toolkit accepts is the only kind worth checking against, and three hundred
      * faces say only that something is wrong. Two faces can be worked out by hand.
      */
     private static com.jagex.graphics.Mesh fewFaces() throws Exception {
-        var mesh = mesh();
+        var mesh = CacheMesh.anyUntextured(MODEL_FACES);
         mesh.faceCount = Math.min(mesh.faceCount, VISIBLE_FACES);
 
         /*

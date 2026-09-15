@@ -13,13 +13,47 @@
 
 #include "sw3d.h"
 
+/**
+ * What is added to a radius before it is cut to a whole number, which takes it to the next whole
+ * number for all but the hundredth of values that land just above one.
+ */
+static const float ROUNDING = 0.99f;
+
+/** What the client passes to leave an axis the size it already is. */
+enum { FULL = 128 };
+
+/**
+ * What a model has to have been built to allow before the client may ask for it.
+ *
+ * A model is built with room for only the things the client says it will do to it, so asking for
+ * anything else is a mistake in the client rather than something to be quietly allowed. The
+ * toolkit throws, and so does this.
+ */
+enum {
+    MAY_CHANGE_X = 0x1,
+    MAY_CHANGE_Y = 0x2,
+    MAY_CHANGE_Z = 0x4,
+    MAY_MIRROR = 0x10,
+    MAY_RECOLOUR = 0x4000
+};
+
+static const float OVER_FULL = 1.0f / (float) FULL;
+
+/** How many floats a vertex takes, which is one more than it needs so that four fit a register. */
+enum { VERTEX_STRIDE = 4 };
+
 typedef struct {
     int vertexCount;
     int faceCount;
 
-    int *vertexX;
-    int *vertexY;
-    int *vertexZ;
+    /**
+     * Where every vertex is, four floats apart.
+     *
+     * The client hands them over as whole numbers and they are kept as floats, because everything
+     * the client does to a model afterwards, moving it, resizing it, turning it, is done in floats
+     * and leaves them somewhere between two whole numbers.
+     */
+    float *vertices;
 
     short *faceA;
     short *faceB;
@@ -40,6 +74,18 @@ typedef struct {
     int ambient;
     int contrast;
 
+    /**
+     * What the client said it would do to the model, as the bits it passed when it built one.
+     *
+     * A model is built with room only for what this asks for, so anything else is refused. This is
+     * not the same as the features the client asks for, which say how a model is drawn rather than
+     * what may be done to it.
+     */
+    int functions;
+
+    /** Whether the box and the two radii still describe where the vertices are. */
+    int measured;
+
     Normal *normals;
     Normal *faceNormals;
 
@@ -51,16 +97,52 @@ static Model *modelOf(JNIEnv *env, jobject self) {
     return (Model *) (intptr_t) nativeIdOf(env, self);
 }
 
-static int *copyInts(JNIEnv *env, jintArray source, int count) {
-    if (source == NULL || count <= 0) {
+/**
+ * Takes the three arrays the client hands over and lays them out a vertex at a time, as floats.
+ */
+static float *copyVertices(JNIEnv *env, jintArray x, jintArray y, jintArray z, int count) {
+    if (x == NULL || y == NULL || z == NULL || count <= 0) {
         return NULL;
     }
 
-    int *copy = calloc((size_t) count, sizeof(int));
-    if (copy != NULL) {
-        (*env)->GetIntArrayRegion(env, source, 0, count, (jint *) copy);
+    int *held = calloc((size_t) count, sizeof(int));
+    float *laid = calloc((size_t) count * VERTEX_STRIDE, sizeof(float));
+
+    if (held == NULL || laid == NULL) {
+        free(held);
+        free(laid);
+        return NULL;
     }
-    return copy;
+
+    jintArray sources[3] = {x, y, z};
+    for (int lane = 0; lane < 3; lane++) {
+        (*env)->GetIntArrayRegion(env, sources[lane], 0, count, (jint *) held);
+        for (int vertex = 0; vertex < count; vertex++) {
+            laid[(size_t) vertex * VERTEX_STRIDE + lane] = (float) held[vertex];
+        }
+    }
+
+    free(held);
+    return laid;
+}
+
+/**
+ * Whether the model was built to allow this, throwing back into the client when it was not.
+ */
+static int allowed(JNIEnv *env, const Model *model, int feature) {
+    if ((model->functions & feature) != 0) {
+        return 1;
+    }
+
+    jclass complaint = (*env)->FindClass(env, "java/lang/IllegalStateException");
+    if (complaint != NULL) {
+        (*env)->ThrowNew(env, complaint, NULL);
+    }
+    return 0;
+}
+
+static float *vertexAt(Model *model, int vertex) {
+    return model->vertices + (size_t) vertex * VERTEX_STRIDE;
 }
 
 static short *copyShorts(JNIEnv *env, jshortArray source, int count) {
@@ -89,57 +171,60 @@ static signed char *copyBytes(JNIEnv *env, jbyteArray source, int count) {
 
 /**
  * The smallest box the model sits in, and the two radii the renderer uses to decide whether it is
- * worth looking at. The cylinder ignores height, because the client turns models about the
- * upright axis and a radius that ignores height does not change when it does.
+ * worth looking at.
+ *
+ * The cylinder ignores height, because the client turns models about the upright axis and a radius
+ * that ignores height does not change when it does.
+ *
+ * The box starts at the ends of what a short can hold rather than at nothing, so a model that sits
+ * entirely to one side of the middle is measured where it is rather than being stretched back to
+ * include the middle. Every one of these is kept as a short, and a model larger than a short can
+ * hold comes back wrapped.
  */
 static void measure(Model *model) {
-    model->minX = model->minY = model->minZ = 0;
-    model->maxX = model->maxY = model->maxZ = 0;
+    float leastX = 32767.0f;
+    float mostX = -32768.0f;
+    float leastY = 32767.0f;
+    float mostY = -32768.0f;
+    float leastZ = 32767.0f;
+    float mostZ = -32768.0f;
+    float widest = 0.0f;
+    float furthest = 0.0f;
 
     for (int vertex = 0; vertex < model->vertexCount; vertex++) {
-        int x = model->vertexX[vertex];
-        int y = model->vertexY[vertex];
-        int z = model->vertexZ[vertex];
+        const float *at = vertexAt(model, vertex);
+        float x = at[0];
+        float y = at[1];
+        float z = at[2];
 
-        if (x < model->minX) {
-            model->minX = x;
-        }
-        if (x > model->maxX) {
-            model->maxX = x;
-        }
-        if (y < model->minY) {
-            model->minY = y;
-        }
-        if (y > model->maxY) {
-            model->maxY = y;
-        }
-        if (z < model->minZ) {
-            model->minZ = z;
-        }
-        if (z > model->maxZ) {
-            model->maxZ = z;
-        }
+        leastX = fminf(x, leastX);
+        mostX = fmaxf(x, mostX);
+        leastY = fminf(y, leastY);
+        mostY = fmaxf(y, mostY);
+        leastZ = fminf(z, leastZ);
+        mostZ = fmaxf(z, mostZ);
+
+        float across = x * x + z * z;
+        widest = fmaxf(across, widest);
+        furthest = fmaxf(y * y + across, furthest);
     }
 
-    double flat = 0.0;
-    double solid = 0.0;
+    model->minX = (short) (int) leastX;
+    model->maxX = (short) (int) mostX;
+    model->minY = (short) (int) leastY;
+    model->maxY = (short) (int) mostY;
+    model->minZ = (short) (int) leastZ;
+    model->maxZ = (short) (int) mostZ;
+    model->radiusCylinder = (short) (int) (sqrtf(widest) + ROUNDING);
+    model->radiusSphere = (short) (int) (sqrtf(furthest) + ROUNDING);
+    model->measured = 1;
+}
 
-    for (int vertex = 0; vertex < model->vertexCount; vertex++) {
-        double x = model->vertexX[vertex];
-        double y = model->vertexY[vertex];
-        double z = model->vertexZ[vertex];
-
-        double across = x * x + z * z;
-        if (across > flat) {
-            flat = across;
-        }
-        if (across + y * y > solid) {
-            solid = across + y * y;
-        }
+/** Measures the model again if anything has moved since it last was. */
+static void measureIfNeeded(Model *model) {
+    if (!model->measured) {
+        measure(model);
     }
-
-    model->radiusCylinder = (int) ceil(sqrt(flat));
-    model->radiusSphere = (int) ceil(sqrt(solid));
 }
 
 /**
@@ -159,12 +244,16 @@ static void calculateNormals(Model *model) {
         int b = model->faceB[face];
         int c = model->faceC[face];
 
-        float abx = (float) (model->vertexX[b] - model->vertexX[a]);
-        float aby = (float) (model->vertexY[b] - model->vertexY[a]);
-        float abz = (float) (model->vertexZ[b] - model->vertexZ[a]);
-        float acx = (float) (model->vertexX[c] - model->vertexX[a]);
-        float acy = (float) (model->vertexY[c] - model->vertexY[a]);
-        float acz = (float) (model->vertexZ[c] - model->vertexZ[a]);
+        const float *from = vertexAt(model, a);
+        const float *toB = vertexAt(model, b);
+        const float *toC = vertexAt(model, c);
+
+        float abx = toB[0] - from[0];
+        float aby = toB[1] - from[1];
+        float abz = toB[2] - from[2];
+        float acx = toC[0] - from[0];
+        float acy = toC[1] - from[1];
+        float acz = toC[2] - from[2];
 
         float nx = aby * acz - abz * acy;
         float ny = abz * acx - abx * acz;
@@ -302,7 +391,6 @@ JNIEXPORT void JNICALL Java_i_R(JNIEnv *env, jobject self, jobject toolkit, jobj
     (void) particles;
     (void) emitterCount;
     (void) effectorCount;
-    (void) functions;
     (void) features;
     (void) billboards;
 
@@ -315,10 +403,9 @@ JNIEXPORT void JNICALL Java_i_R(JNIEnv *env, jobject self, jobject toolkit, jobj
     model->faceCount = faceCount;
     model->ambient = ambient;
     model->contrast = contrast;
+    model->functions = functions;
 
-    model->vertexX = copyInts(env, vertexX, vertexCount);
-    model->vertexY = copyInts(env, vertexY, vertexCount);
-    model->vertexZ = copyInts(env, vertexZ, vertexCount);
+    model->vertices = copyVertices(env, vertexX, vertexY, vertexZ, vertexCount);
 
     model->faceA = copyShorts(env, faceA, faceCount);
     model->faceB = copyShorts(env, faceB, faceCount);
@@ -327,7 +414,7 @@ JNIEXPORT void JNICALL Java_i_R(JNIEnv *env, jobject self, jobject toolkit, jobj
     model->faceAlpha = copyBytes(env, faceAlpha, faceCount);
     model->shadingType = copyBytes(env, shadingType, faceCount);
 
-    if (model->vertexX != NULL && model->vertexY != NULL && model->vertexZ != NULL) {
+    if (model->vertices != NULL) {
         measure(model);
 
         if (model->faceA != NULL && model->faceB != NULL && model->faceC != NULL) {
@@ -347,9 +434,7 @@ JNIEXPORT void JNICALL Java_i_w(JNIEnv *env, jobject self, jboolean immediate) {
         return;
     }
 
-    free(model->vertexX);
-    free(model->vertexY);
-    free(model->vertexZ);
+    free(model->vertices);
     free(model->faceA);
     free(model->faceB);
     free(model->faceC);
@@ -366,37 +451,203 @@ JNIEXPORT void JNICALL Java_i_w(JNIEnv *env, jobject self, jboolean immediate) {
 
 JNIEXPORT jint JNICALL Java_i_V(JNIEnv *env, jobject self) {
     Model *model = modelOf(env, self);
-    return model == NULL ? 0 : model->minX;
+    if (model == NULL) {
+        return 0;
+    }
+
+    measureIfNeeded(model);
+    return model->minX;
 }
 
 JNIEXPORT jint JNICALL Java_i_RA(JNIEnv *env, jobject self) {
     Model *model = modelOf(env, self);
-    return model == NULL ? 0 : model->maxX;
+    if (model == NULL) {
+        return 0;
+    }
+
+    measureIfNeeded(model);
+    return model->maxX;
 }
 
 JNIEXPORT jint JNICALL Java_i_fa(JNIEnv *env, jobject self) {
     Model *model = modelOf(env, self);
-    return model == NULL ? 0 : model->minY;
+    if (model == NULL) {
+        return 0;
+    }
+
+    measureIfNeeded(model);
+    return model->minY;
 }
 
 JNIEXPORT jint JNICALL Java_i_HA(JNIEnv *env, jobject self) {
     Model *model = modelOf(env, self);
-    return model == NULL ? 0 : model->minZ;
+    if (model == NULL) {
+        return 0;
+    }
+
+    measureIfNeeded(model);
+    return model->minZ;
 }
 
 JNIEXPORT jint JNICALL Java_i_G(JNIEnv *env, jobject self) {
     Model *model = modelOf(env, self);
-    return model == NULL ? 0 : model->maxZ;
+    if (model == NULL) {
+        return 0;
+    }
+
+    measureIfNeeded(model);
+    return model->maxZ;
 }
 
 JNIEXPORT jint JNICALL Java_i_na(JNIEnv *env, jobject self) {
     Model *model = modelOf(env, self);
-    return model == NULL ? 0 : model->radiusCylinder;
+    if (model == NULL) {
+        return 0;
+    }
+
+    measureIfNeeded(model);
+    return model->radiusCylinder;
 }
 
 JNIEXPORT jint JNICALL Java_i_da(JNIEnv *env, jobject self) {
     Model *model = modelOf(env, self);
     return model == NULL ? 0 : model->contrast;
+}
+
+JNIEXPORT jint JNICALL Java_i_WA(JNIEnv *env, jobject self) {
+    Model *model = modelOf(env, self);
+    return model == NULL ? 0 : model->ambient;
+}
+
+/** What the client said it would do to the model when it built one. */
+JNIEXPORT jint JNICALL Java_i_ua(JNIEnv *env, jobject self) {
+    Model *model = modelOf(env, self);
+    return model == NULL ? 0 : model->functions;
+}
+
+JNIEXPORT jint JNICALL Java_i_EA(JNIEnv *env, jobject self) {
+    Model *model = modelOf(env, self);
+    if (model == NULL) {
+        return 0;
+    }
+
+    measureIfNeeded(model);
+    return model->maxY;
+}
+
+JNIEXPORT jint JNICALL Java_i_ma(JNIEnv *env, jobject self) {
+    Model *model = modelOf(env, self);
+    if (model == NULL) {
+        return 0;
+    }
+
+    measureIfNeeded(model);
+    return model->radiusSphere;
+}
+
+/**
+ * How much light the model has before the sun reaches it. Changing it does not relight the model:
+ * the client sets this before it builds one.
+ */
+JNIEXPORT void JNICALL Java_i_C(JNIEnv *env, jobject self, jint ambient) {
+    Model *model = modelOf(env, self);
+    if (model != NULL) {
+        model->ambient = ambient;
+    }
+}
+
+JNIEXPORT void JNICALL Java_i_LA(JNIEnv *env, jobject self, jint contrast) {
+    Model *model = modelOf(env, self);
+    if (model != NULL) {
+        model->contrast = contrast;
+    }
+}
+
+/**
+ * Moves every vertex.
+ *
+ * The box the model sits in is left alone, so a model that has been moved still answers where it
+ * was before the move until something else makes it measure itself again. That is what the toolkit
+ * does, and it is kept.
+ */
+JNIEXPORT void JNICALL Java_i_H(JNIEnv *env, jobject self, jint x, jint y, jint z) {
+    Model *model = modelOf(env, self);
+    if (model == NULL || model->vertices == NULL) {
+        return;
+    }
+
+    if ((x != 0 && !allowed(env, model, MAY_CHANGE_X))
+        || (y != 0 && !allowed(env, model, MAY_CHANGE_Y))
+        || (z != 0 && !allowed(env, model, MAY_CHANGE_Z))) {
+        return;
+    }
+
+    for (int vertex = 0; vertex < model->vertexCount; vertex++) {
+        float *at = vertexAt(model, vertex);
+        at[0] += (float) x;
+        at[1] += (float) y;
+        at[2] += (float) z;
+    }
+}
+
+/**
+ * Stretches every vertex, where a hundred and twenty eight leaves an axis as it is.
+ *
+ * Each axis is taken down to the whole number below, so a model stretched and then stretched back
+ * does not come out where it started.
+ */
+JNIEXPORT void JNICALL Java_i_O(JNIEnv *env, jobject self, jint x, jint y, jint z) {
+    Model *model = modelOf(env, self);
+    if (model == NULL || model->vertices == NULL) {
+        return;
+    }
+
+    if ((x != FULL && !allowed(env, model, MAY_CHANGE_X))
+        || (y != FULL && !allowed(env, model, MAY_CHANGE_Y))
+        || (z != FULL && !allowed(env, model, MAY_CHANGE_Z))) {
+        return;
+    }
+
+    float scale[3] = {
+        (float) x * OVER_FULL,
+        (float) y * OVER_FULL,
+        (float) z * OVER_FULL
+    };
+    int wanted[3] = {x, y, z};
+
+    for (int lane = 0; lane < 3; lane++) {
+        if (wanted[lane] == FULL) {
+            continue;
+        }
+
+        for (int vertex = 0; vertex < model->vertexCount; vertex++) {
+            float *at = vertexAt(model, vertex);
+            at[lane] = floorf(at[lane] * scale[lane]);
+        }
+    }
+
+    model->measured = 0;
+}
+
+/**
+ * Gives every face wearing one colour another one, and forgets the light that was worked out for
+ * the model so that it is worked out again with the new colours.
+ */
+JNIEXPORT void JNICALL Java_i_ia(JNIEnv *env, jobject self, jshort from, jshort to) {
+    Model *model = modelOf(env, self);
+    if (model == NULL || model->faceColour == NULL || !allowed(env, model, MAY_RECOLOUR)) {
+        return;
+    }
+
+    for (int face = 0; face < model->faceCount; face++) {
+        if (model->faceColour[face] == from) {
+            model->faceColour[face] = to;
+        }
+    }
+
+    free(model->shade);
+    model->shade = NULL;
+    lightModel(model);
 }
 
 int modelVertexCount(const void *handle) {
@@ -409,16 +660,8 @@ int modelFaceCount(const void *handle) {
     return model == NULL ? 0 : model->faceCount;
 }
 
-const int *modelVertexX(const void *handle) {
-    return ((const Model *) handle)->vertexX;
-}
-
-const int *modelVertexY(const void *handle) {
-    return ((const Model *) handle)->vertexY;
-}
-
-const int *modelVertexZ(const void *handle) {
-    return ((const Model *) handle)->vertexZ;
+const float *modelVertices(const void *handle) {
+    return ((const Model *) handle)->vertices;
 }
 
 const short *modelFaceA(const void *handle) {

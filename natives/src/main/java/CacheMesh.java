@@ -28,6 +28,31 @@ public final class CacheMesh {
         this.store = store;
     }
 
+    /**
+     * A model out of the cache where there is one, and one built here where there is not, so a
+     * check still runs on a machine with no cache.
+     *
+     * Both sides of every check are given the same mesh, so which one it is does not decide
+     * whether they agree. It decides only how much of the toolkit the check reaches, and a model
+     * the client itself drew reaches far more of it than one built by hand.
+     */
+    public static Mesh anyUntextured(int faces) throws Exception {
+        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
+        if (!new File(cache, "main_file_cache.dat2").isFile()) {
+            System.out.println("no cache at " + cache + ", using the mesh built here");
+            return FlatMesh.INSTANCE.build();
+        }
+
+        var found = at(cache).firstUntexturedWithFaces(faces);
+        if (found.isEmpty()) {
+            return FlatMesh.INSTANCE.build();
+        }
+
+        System.out.println("model from the cache: " + found.get().faceCount + " faces, "
+            + found.get().vertexCount + " vertices");
+        return found.get();
+    }
+
     public static CacheMesh at(File cache) throws Exception {
         var data = new FileOnDisk(new File(cache, "main_file_cache.dat2"), "r", Long.MAX_VALUE);
         var index = new FileOnDisk(

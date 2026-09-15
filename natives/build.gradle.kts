@@ -819,3 +819,4 @@ fun registerProbe(name: String, probe: String, what: String): TaskProvider<JavaE
 
 val verifyMatrices = registerProbe("matrices", "MatrixProbe", "matrix answers")
 val verifyPoints = registerProbe("points", "PointProbe", "projection answers")
+val verifyModels = registerProbe("models", "ModelProbe", "model answers")
