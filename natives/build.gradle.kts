@@ -539,3 +539,46 @@ val listCacheLibraries by tasks.registering(JavaExec::class) {
     classpath = sourceSets["main"].runtimeClasspath
     args(cacheDirectory.get())
 }
+
+val toolkitTrace = layout.buildDirectory.file("generated/sw3d-trace.txt")
+
+/**
+ * Records which natives the toolkit reaches, and in what order, while a frame is drawn.
+ *
+ * The skeleton answers every call with nothing, so no frame comes out and the run is expected to
+ * fail. What it leaves behind is the order the client asks for things in, which is the order they
+ * are worth implementing in.
+ */
+val traceToolkit by tasks.registering(JavaExec::class) {
+    description = "Records the natives a frame reaches, in the order the client asks for them."
+    dependsOn(compileToolkitSkeleton)
+    mainClass = "FrameCapture"
+    classpath = sourceSets["main"].runtimeClasspath
+    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+    args(skeletonLibrary.get().asFile.absolutePath)
+    environment("SW3D_SKELETON_VERBOSE", "1")
+    environment("JAWTSHIM_DUMP", layout.buildDirectory.dir("trace-frames").get().asFile.absolutePath)
+    isIgnoreExitValue = true
+
+    val report = toolkitTrace.get().asFile
+    outputs.file(report)
+
+    doFirst {
+        report.parentFile.mkdirs()
+        errorOutput = report.outputStream()
+    }
+
+    doLast {
+        val calls = report.readLines()
+            .filter { it.startsWith("[sw3d-skeleton] ") }
+            .map { it.removePrefix("[sw3d-skeleton] ") }
+
+        val order = LinkedHashMap<String, Int>()
+        calls.forEach { order[it] = (order[it] ?: 0) + 1 }
+
+        report.writeText(
+            order.entries.joinToString("\n") { (symbol, count) -> "%-40s %d".format(symbol, count) } + "\n"
+        )
+        logger.lifecycle("${order.size} natives reached, ${calls.size} calls, written to ${report.name}")
+    }
+}
