@@ -30,14 +30,19 @@ void rasterUse(uint32_t *pixels, int width, int height) {
  * Nothing reads these yet; they are kept because every projection the toolkit does is relative
  * to them.
  */
-static int centreX;
-static int centreY;
-static int fieldWidth;
-static int fieldHeight;
+static Projection view;
 
 static float ambient;
 
 static jlong camera;
+
+const Projection *projection(void) {
+    return &view;
+}
+
+const void *cameraMatrix(void) {
+    return (const void *) (intptr_t) camera;
+}
 
 JNIEXPORT void JNICALL Java_oa_MA(JNIEnv *env, jobject self, jobject textures,
                                    jint a2, jint a3) {
@@ -87,10 +92,22 @@ JNIEXPORT void JNICALL Java_oa_DA(JNIEnv *env, jobject self, jint x, jint y,
     (void) env;
     (void) self;
 
-    centreX = x;
-    centreY = y;
-    fieldWidth = width;
-    fieldHeight = height;
+    view.centreX = (float) x;
+    view.centreY = (float) y;
+    view.scaleX = (float) width;
+    view.scaleY = (float) height;
+}
+
+/**
+ * How close and how far a thing may be before it is cut away. Nothing is drawn until the client
+ * has said, and it does not complain when it has not.
+ */
+JNIEXPORT void JNICALL Java_oa_f(JNIEnv *env, jobject self, jint near, jint far) {
+    (void) env;
+    (void) self;
+
+    view.near = near;
+    view.far = far;
 }
 
 JNIEXPORT void JNICALL Java_oa_xa(JNIEnv *env, jobject self, jfloat globalAmbient) {

@@ -183,6 +183,20 @@ static void transform(const Matrix *matrix, float x, float y, float z, float *in
     }
 }
 
+void matrixTransform(const void *handle, float x, float y, float z, float *into) {
+    transform((const Matrix *) handle, x, y, z, into);
+}
+
+void matrixCompose(const void *first, const void *second, void *into) {
+    Matrix result = *(const Matrix *) first;
+    compose(&result, (const Matrix *) second);
+    *(Matrix *) into = result;
+}
+
+size_t matrixSize(void) {
+    return sizeof(Matrix);
+}
+
 JNIEXPORT void JNICALL Java_ja_la(JNIEnv *env, jobject self) {
     Matrix *matrix = calloc(1, sizeof(Matrix));
     if (matrix != NULL) {
