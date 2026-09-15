@@ -72,6 +72,10 @@ static BOOL verbose(void) {
     return cached;
 }
 
+/*
+ * Reports what the surface is doing. Arguments must be free of side effects, because they are only
+ * evaluated when reporting is switched on.
+ */
 #define SHIMLOG(...) do { if (verbose()) { fprintf(stderr, "[jawtshim] " __VA_ARGS__); fputc('\n', stderr); } } while (0)
 
 /*
@@ -362,10 +366,10 @@ static void passDrawableCallsToTheMainThread(void) {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         Class context = NSClassFromString(@"NSOpenGLContext");
-        SHIMLOG("setView: %d, update %d, clearDrawable %d moved to the main thread",
-                replace(context, @selector(setView:), (IMP) mainThreadSetView, &contextSetView),
-                replace(context, @selector(update), (IMP) mainThreadUpdate, &contextUpdate),
-                replace(context, @selector(clearDrawable), (IMP) mainThreadClearDrawable, &contextClearDrawable));
+        BOOL view = replace(context, @selector(setView:), (IMP) mainThreadSetView, &contextSetView);
+        BOOL update = replace(context, @selector(update), (IMP) mainThreadUpdate, &contextUpdate);
+        BOOL clear = replace(context, @selector(clearDrawable), (IMP) mainThreadClearDrawable, &contextClearDrawable);
+        SHIMLOG("moved to the main thread: setView: %d, update %d, clearDrawable %d", view, update, clear);
     });
 }
 
