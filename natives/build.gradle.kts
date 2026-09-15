@@ -108,7 +108,7 @@ val verifyToolkitLifetime by tasks.registering(JavaExec::class) {
     classpath = sourceSets["main"].runtimeClasspath
     setExecutable(rootProject.layout.projectDirectory.file(".gradle/jdk-x64/unpacked/Home/bin/java").asFile.absolutePath)
     jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
-    systemProperty("sw3d.surface.library", shimLibrary.get().asFile.absolutePath)
+    systemProperty("toolkit.surface.library", shimLibrary.get().asFile.absolutePath)
     args(patchedToolkit.get().asFile.absolutePath)
 }
 

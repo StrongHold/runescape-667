@@ -15,6 +15,7 @@
 #import <Cocoa/Cocoa.h>
 #import <ImageIO/ImageIO.h>
 #import <QuartzCore/QuartzCore.h>
+#import <objc/runtime.h>
 
 #include <dlfcn.h>
 #include <limits.h>
@@ -302,6 +303,85 @@ static BOOL verbose(void) {
 @end
 
 /*
+ * The hardware toolkit wants a real NSView, because it hands whatever it finds to
+ * [NSOpenGLContext setView:]. A Canvas has no view of its own, so one is made and placed in the
+ * window's own view.
+ *
+ * The window is found by identity rather than by name or order: the layer the JDK reports as the
+ * surface's window layer is the same layer as the content view's, so the window whose content view
+ * carries that layer is the right one even when the client has several.
+ */
+static NSView *hostView(JNIEnv *env, jobject target) {
+    JawtGetAwt getAwt = jdkJawtGetAwt(env);
+    if (getAwt == NULL) {
+        return nil;
+    }
+
+    JAWT awt;
+    awt.version = JAWT_VERSION_1_4 | JAWT_MACOSX_USE_CALAYER;
+    if (!getAwt(env, &awt)) {
+        SHIMLOG("JDK JAWT refused a layer surface for the hardware toolkit");
+        return nil;
+    }
+
+    __block NSView *found = nil;
+    JAWT_DrawingSurface *surface = awt.GetDrawingSurface(env, target);
+    if (surface == NULL) {
+        return nil;
+    }
+
+    if ((surface->Lock(surface) & JAWT_LOCK_ERROR) == 0) {
+        JAWT_DrawingSurfaceInfo *info = surface->GetDrawingSurfaceInfo(surface);
+        if (info != NULL) {
+            id<JAWT_SurfaceLayers> layers = (__bridge id<JAWT_SurfaceLayers>) info->platformInfo;
+            CALayer *windowLayer = layers.windowLayer;
+
+            dispatch_sync(dispatch_get_main_queue(), ^{
+                for (NSWindow *window in [NSApp windows]) {
+                    NSView *content = [window contentView];
+                    if (found == nil && content != nil && content.layer == windowLayer) {
+                        found = content;
+                    }
+                }
+            });
+
+            surface->FreeDrawingSurfaceInfo(info);
+        }
+        surface->Unlock(surface);
+    }
+    awt.FreeDrawingSurface(surface);
+
+    SHIMLOG("host view = %s", found == nil ? "(not found)" : class_getName([found class]));
+    return found;
+}
+
+/*
+ * The view handed to the hardware toolkit. It is kept for as long as the client runs, because the
+ * toolkit holds the context that draws into it.
+ */
+static NSView *liveGlView;
+
+static NSView *glView(JNIEnv *env, jobject target) {
+    if (liveGlView != nil) {
+        return liveGlView;
+    }
+
+    NSView *host = hostView(env, target);
+    if (host == nil) {
+        return nil;
+    }
+
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        liveGlView = [[NSView alloc] initWithFrame:host.bounds];
+        liveGlView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+        [host addSubview:liveGlView];
+    });
+
+    SHIMLOG("made a %.0fx%.0f view for the hardware toolkit", host.bounds.size.width, host.bounds.size.height);
+    return liveGlView;
+}
+
+/*
  * JAWT_MacOSXDrawingSurfaceInfo as the toolkit expects it: the view is the first field, and the
  * toolkit reads it through two levels of indirection from the drawing surface info.
  */
@@ -323,6 +403,7 @@ typedef struct {
  */
 typedef struct {
     JAWT_DrawingSurface surface;
+    void *view;
     void *shim;
     JavaVM *vm;
 } ShimDrawingSurface;
@@ -340,17 +421,21 @@ static JAWT_DrawingSurfaceInfo *JNICALL shimGetDrawingSurfaceInfo(JAWT_DrawingSu
     ShimSurface *shim = (__bridge ShimSurface *) owner->shim;
     ShimDrawingSurfaceInfo *info = calloc(1, sizeof(ShimDrawingSurfaceInfo));
 
-    info->platform.view = owner->shim;
+    NSSize size = shim != nil
+        ? NSMakeSize(shim.width, shim.height)
+        : ((__bridge NSView *) owner->view).bounds.size;
+
+    info->platform.view = owner->view;
     info->info.platformInfo = &info->platform;
     info->info.ds = surface;
     info->info.bounds.x = 0;
     info->info.bounds.y = 0;
-    info->info.bounds.width = shim.width;
-    info->info.bounds.height = shim.height;
+    info->info.bounds.width = (jint) size.width;
+    info->info.bounds.height = (jint) size.height;
     info->info.clipSize = 1;
     info->info.clip = &info->info.bounds;
 
-    SHIMLOG("getDrawingSurfaceInfo %dx%d", shim.width, shim.height);
+    SHIMLOG("getDrawingSurfaceInfo %.0fx%.0f", size.width, size.height);
     return &info->info;
 }
 
@@ -372,7 +457,23 @@ static void componentSize(JNIEnv *env, jobject target, int *width, int *height) 
  */
 static ShimSurface *liveSurface;
 
-static JAWT_DrawingSurface *JNICALL shimGetDrawingSurface(JNIEnv *env, jobject target) {
+static ShimDrawingSurface *newSurface(JNIEnv *env, jobject target) {
+    ShimDrawingSurface *surface = calloc(1, sizeof(ShimDrawingSurface));
+    (*env)->GetJavaVM(env, &surface->vm);
+    surface->surface.env = env;
+    surface->surface.target = (*env)->NewGlobalRef(env, target);
+    surface->surface.Lock = shimLock;
+    surface->surface.Unlock = shimUnlock;
+    surface->surface.GetDrawingSurfaceInfo = shimGetDrawingSurfaceInfo;
+    surface->surface.FreeDrawingSurfaceInfo = shimFreeDrawingSurfaceInfo;
+    return surface;
+}
+
+/*
+ * The software toolkit draws into a bitmap this library owns, so what it is handed only has to
+ * answer the two messages it sends.
+ */
+static JAWT_DrawingSurface *JNICALL softwareSurface(JNIEnv *env, jobject target) {
     int width = 0;
     int height = 0;
     componentSize(env, target, &width, &height);
@@ -387,17 +488,28 @@ static JAWT_DrawingSurface *JNICALL shimGetDrawingSurface(JNIEnv *env, jobject t
     }
     [liveSurface attachLayer:env target:target];
 
-    ShimDrawingSurface *surface = calloc(1, sizeof(ShimDrawingSurface));
+    ShimDrawingSurface *surface = newSurface(env, target);
     surface->shim = (__bridge void *) liveSurface;
-    (*env)->GetJavaVM(env, &surface->vm);
-    surface->surface.env = env;
-    surface->surface.target = (*env)->NewGlobalRef(env, target);
-    surface->surface.Lock = shimLock;
-    surface->surface.Unlock = shimUnlock;
-    surface->surface.GetDrawingSurfaceInfo = shimGetDrawingSurfaceInfo;
-    surface->surface.FreeDrawingSurfaceInfo = shimFreeDrawingSurfaceInfo;
+    surface->view = surface->shim;
 
-    SHIMLOG("getDrawingSurface %dx%d", width, height);
+    SHIMLOG("software surface %dx%d", width, height);
+    return &surface->surface;
+}
+
+/*
+ * The hardware toolkit attaches an OpenGL context to what it is handed, so it gets a real view.
+ */
+static JAWT_DrawingSurface *JNICALL hardwareSurface(JNIEnv *env, jobject target) {
+    NSView *view = glView(env, target);
+    if (view == nil) {
+        SHIMLOG("no view for the hardware toolkit");
+        return NULL;
+    }
+
+    ShimDrawingSurface *surface = newSurface(env, target);
+    surface->view = (__bridge void *) view;
+
+    SHIMLOG("hardware surface");
     return &surface->surface;
 }
 
@@ -425,14 +537,29 @@ static void JNICALL shimFreeDrawingSurface(JAWT_DrawingSurface *surface) {
  * defines may be written. The software toolkit puts a JAWT_VERSION_1_3 structure on its stack, and
  * writing the fields added by later versions would overwrite its locals.
  */
+static void JNICALL shimAwtLock(JNIEnv *env) {
+    /* empty */
+}
+
+static void JNICALL shimAwtUnlock(JNIEnv *env) {
+    /* empty */
+}
+
 JNIEXPORT jboolean JNICALL JAWT_GetAWT(JNIEnv *env, JAWT *awt) {
-    if (awt->version != JAWT_VERSION_1_3) {
+    if (awt->version == JAWT_VERSION_1_3) {
+        awt->GetDrawingSurface = softwareSurface;
+        awt->FreeDrawingSurface = shimFreeDrawingSurface;
+    } else if (awt->version == JAWT_VERSION_1_4) {
+        awt->GetDrawingSurface = hardwareSurface;
+        awt->FreeDrawingSurface = shimFreeDrawingSurface;
+        awt->Lock = shimAwtLock;
+        awt->Unlock = shimAwtUnlock;
+        awt->GetComponent = NULL;
+    } else {
         SHIMLOG("refusing JAWT version 0x%08x", (unsigned) awt->version);
         return JNI_FALSE;
     }
 
-    awt->GetDrawingSurface = shimGetDrawingSurface;
-    awt->FreeDrawingSurface = shimFreeDrawingSurface;
     SHIMLOG("JAWT_GetAWT 0x%08x", (unsigned) awt->version);
     return JNI_TRUE;
 }

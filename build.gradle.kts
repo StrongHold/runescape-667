@@ -86,7 +86,7 @@ subprojects {
             tasks.named<JavaExec>("run") {
                 dependsOn(unpackX64Jdk, ":natives:compileJawtShim")
                 setExecutable(x64Java.asFile.absolutePath)
-                systemProperty("sw3d.surface.library", surfaceLibrary.asFile.absolutePath)
+                systemProperty("toolkit.surface.library", surfaceLibrary.asFile.absolutePath)
             }
         }
     }
