@@ -4,6 +4,7 @@ import com.jagex.AppletParameters;
 import com.jagex.Jawt;
 import com.jagex.KeyRing;
 import com.jagex.KeyRingReader;
+import com.jagex.NativeLibraries;
 import com.jagex.awt.GameApplet;
 import com.jagex.awt.GameFrame;
 import com.jagex.awt.ImageLoader;
@@ -80,6 +81,7 @@ public final class Application implements AppletStub {
 
     private void start() {
         installKeys();
+        NativeLibraries.install();
         Jawt.tryLoad();
 
         var applet = GameApplet.create(this);

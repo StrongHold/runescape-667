@@ -1,6 +1,7 @@
 import com.jagex.graphics.FlipException;
 import com.jagex.graphics.Toolkit;
 import com.jagex.graphics.ToolkitType;
+import com.jagex.graphics.sw.SoftwareToolkitLifetime;
 import rs2.client.loading.library.LibraryManager;
 
 import java.awt.Canvas;
@@ -14,6 +15,8 @@ import java.io.File;
  * The toolkit's canvas drains an autorelease pool it took on another thread when it is destroyed,
  * so a toolkit torn down through finalization ends the process. Nothing can be asserted here: the
  * failure is a dead virtual machine, so finishing at all is the result.
+ *
+ * The toolkits are retained here for the same reason the client retains them.
  */
 public final class ToolkitLifetime {
 
@@ -34,6 +37,7 @@ public final class ToolkitLifetime {
     }
 
     private static void run(String library) throws Exception {
+        SoftwareToolkitLifetime.retainAll();
         LibraryManager.putLibrary(new File(library), "sw3d");
 
         Frame frame = new Frame("toolkit lifetime");

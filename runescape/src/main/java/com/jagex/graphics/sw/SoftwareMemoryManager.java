@@ -25,7 +25,8 @@ public final class SoftwareMemoryManager {
         }
 
         if (instances <= 0) {
-            if (MacSoftwareToolkitLifetime.holdRatherThanRelease(object)) {
+            // Not part of the original client.
+            if (SoftwareToolkitLifetime.holdRatherThanRelease(object)) {
                 return;
             }
             object.w(false);
