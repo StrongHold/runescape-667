@@ -14,6 +14,7 @@ val x64JdkSha256 = "6edaf4b72ec6c23d86a46d8b88d0cfed2aaf81645fee13fd852d37af23c4
 val x64JdkDir = layout.projectDirectory.dir(".gradle/jdk-x64")
 val x64Java = x64JdkDir.file("unpacked/Home/bin/java")
 val surfaceLibrary = layout.projectDirectory.file("natives/build/natives/libjawtshim.dylib")
+val openGlLibrary = layout.projectDirectory.file("natives/build/natives/libjaggl.dylib")
 
 val onMacOs = providers.systemProperty("os.name").map { it.startsWith("Mac") }.getOrElse(false)
 
@@ -84,9 +85,10 @@ subprojects {
     if (onMacOs) {
         plugins.withType<ApplicationPlugin> {
             tasks.named<JavaExec>("run") {
-                dependsOn(unpackX64Jdk, ":natives:compileJawtShim")
+                dependsOn(unpackX64Jdk, ":natives:compileJawtShim", ":natives:compileOpenGlBinding")
                 setExecutable(x64Java.asFile.absolutePath)
                 systemProperty("toolkit.surface.library", surfaceLibrary.asFile.absolutePath)
+                systemProperty("toolkit.jaggl.library", openGlLibrary.asFile.absolutePath)
             }
         }
     }

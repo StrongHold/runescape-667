@@ -35,13 +35,27 @@ public final class MacToolkitLibrary {
      */
     private static final String SURFACE_PROPERTY = "toolkit.surface.library";
 
+    /**
+     * Names a library written for this client, to be loaded in place of the one downloaded for it.
+     */
+    private static final String REPLACEMENT_PROPERTY = "toolkit.%s.library";
+
     private static final byte[] JAVA_VM = path("/System/Library/Frameworks/JavaVM.framework/Versions/A/JavaVM");
 
     /**
-     * Registers a copy of the toolkit that draws through the surface library, if this platform
-     * needs one and one was supplied.
+     * Registers whichever library the client should load for this name.
+     *
+     * A library written for this client is preferred, where one is supplied. Failing that, and
+     * where the drawing surface is supplied, the downloaded library is copied and the copy is
+     * pointed at that surface. Failing both, the client loads what it downloaded.
      */
     public static void substitute(String name) {
+        File replacement = fileNamed(String.format(REPLACEMENT_PROPERTY, name));
+        if (replacement != null) {
+            LibraryManager.putLibrary(replacement, name);
+            return;
+        }
+
         File surface = surfaceLibrary();
         if (LIBRARIES.contains(name) && surface != null) {
             File shipped = (File) LibraryManager.libraries.get(name);
@@ -63,10 +77,14 @@ public final class MacToolkitLibrary {
     }
 
     private static File surfaceLibrary() {
-        String configured = System.getProperty(SURFACE_PROPERTY);
-        File surface = configured == null ? null : new File(configured);
-        if (surface != null && surface.isFile()) {
-            return surface;
+        return fileNamed(SURFACE_PROPERTY);
+    }
+
+    private static File fileNamed(String property) {
+        String configured = System.getProperty(property);
+        File file = configured == null ? null : new File(configured);
+        if (file != null && file.isFile()) {
+            return file;
         } else {
             return null;
         }
