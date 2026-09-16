@@ -99,7 +99,8 @@ public final class FrameCapture {
             toolkit.createMatrix(),
             toolkit.createFont(HandFont.metrics(), HandFont.letters(), true),
             toolkit.createFont(HandFont.metrics(), HandFont.letters(), false),
-            HandGround.build(toolkit));
+            HandGround.build(toolkit),
+            CacheMesh.anyUntextured(MODEL_FACES));
 
         var manifest = new ArrayList<String>();
 

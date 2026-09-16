@@ -425,7 +425,7 @@ static float signedAs(float value, float before) {
 /**
  * Draws one model through one matrix.
  */
-static void renderModel(const void *model, const void *matrix) {
+static void renderModel(void *model, const void *matrix) {
     if (model == NULL || matrix == NULL || raster.pixels == NULL || raster.depths == NULL) {
         return;
     }
@@ -612,7 +612,7 @@ JNIEXPORT void JNICALL Java_a_UA(JNIEnv *env, jobject self, jlong worker, jlong 
     (void) cylinder;
     (void) flags;
 
-    renderModel((const void *) (intptr_t) model, (const void *) (intptr_t) matrix);
+    renderModel((void *) (intptr_t) model, (const void *) (intptr_t) matrix);
 }
 
 /**

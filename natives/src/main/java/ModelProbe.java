@@ -42,6 +42,13 @@ public final class ModelProbe {
         {128, 128, 128}, {256, 128, 128}, {128, 64, 128}, {64, 64, 64}, {1, 1, 1}, {1000, 1, 300}
     };
 
+    /**
+     * Angles to turn through, in the sixteen thousand three hundred and eighty four steps of a
+     * circle the client counts in. The three whole quarters are taken the short way round by the
+     * toolkit and the rest through a table, so both paths are covered.
+     */
+    private static final int[] ANGLES = {0, 1, 0x1000, 0x2000, 0x3000, 0x0400, 0x2ABC, 0x3FFF};
+
     public static void main(String[] args) {
         try {
             Watchdog.arm("The model probe", 120);
@@ -56,6 +63,10 @@ public final class ModelProbe {
             refusals(toolkit, lines);
             moves(toolkit, lines);
             sizes(toolkit, lines);
+            turns(toolkit, lines);
+            mirrors(toolkit, lines);
+            masks(toolkit, lines);
+            animations(toolkit, lines);
             lights(toolkit, lines);
 
             Files.write(Path.of(args[1]), lines);
@@ -77,6 +88,12 @@ public final class ModelProbe {
         lines.add("refused move " + refused(() -> model.H(1, 0, 0)));
         lines.add("refused size " + refused(() -> model.O(64, 128, 128)));
         lines.add("refused recolour " + refused(() -> model.ia((short) 1, (short) 2)));
+        lines.add("refused turn " + refused(() -> model.a(0x1000)));
+        lines.add("refused turn with normals " + refused(() -> model.k(0x1000)));
+        lines.add("refused tip " + refused(() -> model.FA(0x1000)));
+        lines.add("refused roll " + refused(() -> model.VA(0x1000)));
+        lines.add("refused mirror " + refused(model::v));
+        lines.add("refused retexture " + refused(() -> model.aa((short) 1, (short) 2)));
         lines.add("allowed nothing " + measure(model));
     }
 
@@ -108,6 +125,77 @@ public final class ModelProbe {
             model.O(size[0], size[1], size[2]);
             lines.add("again " + measure(model));
         }
+    }
+
+    /**
+     * Turning a model, both the way that leaves the directions it is shaded by to be worked out
+     * again and the way that carries them round with it.
+     */
+    private static void turns(Toolkit toolkit, List<String> lines) throws Exception {
+        for (var angle : ANGLES) {
+            var turned = build(toolkit);
+            turned.a(angle);
+            lines.add("turned " + angle + " " + measure(turned));
+            turned.a(angle);
+            lines.add("turned twice " + angle + " " + measure(turned));
+
+            var carried = build(toolkit);
+            carried.k(angle);
+            lines.add("carried " + angle + " " + measure(carried));
+
+            var tipped = build(toolkit);
+            tipped.FA(angle);
+            lines.add("tipped " + angle + " " + measure(tipped));
+
+            var rolled = build(toolkit);
+            rolled.VA(angle);
+            lines.add("rolled " + angle + " " + measure(rolled));
+        }
+    }
+
+    /**
+     * Turning a model back to front, which also turns every face the other way round.
+     */
+    private static void mirrors(Toolkit toolkit, List<String> lines) throws Exception {
+        var model = build(toolkit);
+        model.v();
+        lines.add("mirrored " + measure(model));
+        model.v();
+        lines.add("mirrored back " + measure(model));
+    }
+
+    /**
+     * Narrowing what may be done to a model.
+     *
+     * Asking for something back that was given up is not probed. The toolkit this is checked
+     * against throws that out of the native call without catching it, which ends the process
+     * rather than reaching the client, so there is no answer to compare against.
+     */
+    private static void masks(Toolkit toolkit, List<String> lines) throws Exception {
+        var model = build(toolkit);
+        lines.add("mask " + model.ua());
+
+        model.s(0x00FF);
+        lines.add("narrowed " + model.ua());
+
+        model.s(0x000F);
+        lines.add("narrowed again " + model.ua());
+        lines.add("refused after narrowing " + refused(() -> model.ia((short) 1, (short) 2)));
+    }
+
+    /**
+     * Opening and closing an animation, and what the model says about itself between them.
+     */
+    private static void animations(Toolkit toolkit, List<String> lines) throws Exception {
+        var model = (i) build(toolkit);
+        lines.add("see through " + model.F() + " moving textures " + model.r());
+
+        lines.add("opened " + model.NA());
+        model.wa();
+        lines.add("closed " + measure(model));
+
+        model.aa((short) 0, (short) 1);
+        lines.add("retextured " + measure(model) + " moving textures " + model.r());
     }
 
     /**

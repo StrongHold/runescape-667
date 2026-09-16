@@ -213,6 +213,14 @@ void matrixCompose(const void *first, const void *second, void *into);
 
 size_t matrixSize(void);
 
+/**
+ * The sine and cosine of an angle measured in sixteen thousand three hundred and eighty four
+ * steps of a circle, read from the same single precision table every angle in the toolkit is
+ * taken from.
+ */
+float sineOf(int angle);
+float cosineOf(int angle);
+
 /** The sixteen floats a matrix holds, a row at a time. */
 const float *matrixRows(const void *handle);
 
@@ -228,7 +236,7 @@ const short *modelFaceC(const void *handle);
 const short *modelFaceColour(const void *handle);
 const Normal *modelNormals(const void *handle);
 const Normal *modelFaceNormals(const void *handle);
-const uint32_t *modelShade(const void *handle);
+const uint32_t *modelShade(void *handle);
 int modelFaceIsFlat(const void *handle, int face);
 int modelAmbient(const void *handle);
 int modelContrast(const void *handle);

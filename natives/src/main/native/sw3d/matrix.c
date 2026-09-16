@@ -57,12 +57,12 @@ static void buildTables(void) {
     tablesBuilt = 1;
 }
 
-static float sineOf(int angle) {
+float sineOf(int angle) {
     buildTables();
     return sineTable[(unsigned int) angle & (TURN - 1)];
 }
 
-static float cosineOf(int angle) {
+float cosineOf(int angle) {
     buildTables();
     return cosineTable[(unsigned int) angle & (TURN - 1)];
 }

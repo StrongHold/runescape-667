@@ -1,6 +1,7 @@
 import com.jagex.graphics.Font;
 import com.jagex.graphics.Ground;
 import com.jagex.graphics.Matrix;
+import com.jagex.graphics.Mesh;
 import com.jagex.graphics.Model;
 import com.jagex.graphics.Sprite;
 import com.jagex.graphics.Toolkit;
@@ -52,6 +53,7 @@ public sealed interface Scene {
         new Text(),
         new StretchedAndTiled(),
         new Masked(),
+        new Turned(),
         new Terrain()
     );
 
@@ -60,7 +62,7 @@ public sealed interface Scene {
      * scene from having to know what another one wanted.
      */
     record Props(Sprite gradient, Model model, Model simple, Matrix matrix,
-                 Font mono, Font proportional, Ground ground) {
+                 Font mono, Font proportional, Ground ground, Mesh mesh) {
         /* empty */
     }
 
@@ -185,6 +187,67 @@ public sealed interface Scene {
             toolkit.line(100, 300, 100, 300, 0xFFFFFFFF, 0);
             toolkit.line(-50, 250, 560, 260, 0xFFFF00FF, 0);
             toolkit.line(200, -50, 260, 430, 0xFF00FFFF, 0);
+        }
+    }
+
+    /**
+     * A model turned by the model rather than by the matrix it is drawn through.
+     *
+     * Turning a model moves its vertices, so the same picture could be had from a matrix and this
+     * would say nothing. What it covers is the rest of what a turn does: the direction each face
+     * is shaded by, which either moves with the vertices or is worked out again, and the order a
+     * face's corners are listed in, which a mirror reverses.
+     *
+     * Each copy is built from the mesh here rather than taken from the props, because turning a
+     * model is a change to the model and a model shared with another scene would arrive at it
+     * already turned.
+     */
+    record Turned() implements Scene {
+
+        /** Everything a model may be asked to do, so that every turn here is allowed. */
+        private static final int FUNCTIONS = 0xFFFF;
+
+        private static final int FEATURES = 64;
+        private static final int AMBIENT = 64;
+        private static final int CONTRAST = 768;
+
+        /** An angle that is not a whole quarter, so the turn goes through the table. */
+        private static final int ODD_ANGLE = 2748;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            var upright = build(toolkit, props);
+            upright.a(ODD_ANGLE);
+            place(props, -2, upright);
+
+            var carried = build(toolkit, props);
+            carried.k(TURN / 4);
+            place(props, -1, carried);
+
+            var tipped = build(toolkit, props);
+            tipped.FA(ODD_ANGLE);
+            place(props, 0, tipped);
+
+            var rolled = build(toolkit, props);
+            rolled.VA(TURN / 2);
+            place(props, 1, rolled);
+
+            var mirrored = build(toolkit, props);
+            mirrored.v();
+            place(props, 2, mirrored);
+        }
+
+        private static Model build(Toolkit toolkit, Props props) {
+            return toolkit.createModel(props.mesh(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
+        }
+
+        private static void place(Props props, int step, Model model) {
+            props.matrix().makeRotationZ(0);
+            props.matrix().translate(step * SPREAD, 0, DEPTH);
+            model.render(props.matrix(), null, 1);
         }
     }
 
