@@ -272,6 +272,68 @@ uint32_t pointLitColour(uint32_t colour, const float *place, const Normal *norma
     const float places[][4]);
 
 /**
+ * What the client knows about a texture, apart from its pixels.
+ *
+ * The client hands these over whole, and the toolkit keeps them under the names the client gave
+ * them. Three have a settled meaning: `alphaBlendMode` of one says the texture has no alpha, so
+ * an empty texel of it stays empty rather than being gathered into its neighbours; and the two
+ * repeat flags say which way round a texture carries on past its own edge.
+ */
+typedef struct {
+    unsigned short size;
+    int alphaBlendMode;
+    unsigned char effectType;
+    unsigned char effectParam1;
+    int effectParam2;
+    int small;
+    unsigned char alpha;
+    unsigned char aByte57;
+
+    /** How far the texture slides each way every hundredth of a second, or nought for still. */
+    signed char speedU;
+    signed char speedV;
+
+    int disableable;
+    int aBoolean234;
+    int aBoolean239;
+    int repeatsU;
+    int repeatsV;
+    unsigned char aByte53;
+    int aBoolean237;
+    int aBoolean238;
+    int colourOp;
+} TextureMetrics;
+
+typedef struct Texture Texture;
+
+/**
+ * The texture the client gave this number, asking the client for it if the toolkit has never
+ * been given it, or null when the client has none to give.
+ */
+const Texture *textureFor(int texture);
+
+/**
+ * What the client knows about a texture, whether or not its pixels have ever been handed over.
+ */
+const TextureMetrics *textureMetricsFor(int texture);
+
+const uint32_t *texturePixels(const Texture *texture);
+const TextureMetrics *textureMetrics(const Texture *texture);
+/** How far a texture that slides has slid by now, which the renderer reads it through. */
+void textureOffsets(const Texture *texture, float *u, float *v);
+/** How many pixels apart two rows of one texture are, which is not how wide a texture is. */
+enum { TEXTURE_STRIDE = 256 };
+
+/**
+ * Makes room for every texture the client may hand over, and remembers the object to ask when it
+ * has handed over none.
+ */
+void textureCacheReady(JNIEnv *env, jobject client);
+
+/** Moves every texture that slides on to where it stands at this moment. */
+void textureCacheService(int time);
+
+/**
  * The matrix the world is seen through, or null before the client has given one.
  */
 const void *cameraMatrix(void);

@@ -33,6 +33,19 @@ public final class CacheMesh {
     }
 
     /**
+     * A model out of the cache that wears at least one texture, or nothing when the cache holds
+     * none, because a mesh built here carries no texture space for a texture to sit in.
+     */
+    public static Optional<Mesh> anyTextured(int faces) throws Exception {
+        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
+        if (!new File(cache, "main_file_cache.dat2").isFile()) {
+            return Optional.empty();
+        }
+
+        return at(cache).firstTexturedWithFaces(faces);
+    }
+
+    /**
      * A model out of the cache where there is one, and one built here where there is not, so a
      * check still runs on a machine with no cache.
      *
@@ -118,12 +131,27 @@ public final class CacheMesh {
      *
      * A textured face sends the toolkit to its texture cache, which answers nothing while the
      * scenes hand it a texture source that holds nothing, and it reads the answer without
-     * checking it. An untextured model keeps that out of the way until textures are written.
+     * checking it. An untextured model keeps that out of the way.
      */
     public Optional<Mesh> firstUntexturedWithFaces(int faces) {
         for (var group = 0; group < GROUP_LIMIT; group++) {
             var mesh = read(group);
             if (mesh.isPresent() && mesh.get().faceCount >= faces && untextured(mesh.get())) {
+                return mesh;
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * The first model in the cache with at least this many faces and one of them textured.
+     */
+    public Optional<Mesh> firstTexturedWithFaces(int faces) {
+        for (var group = 0; group < GROUP_LIMIT; group++) {
+            var mesh = read(group);
+            if (mesh.isPresent() && mesh.get().faceCount >= faces && !untextured(mesh.get())
+                && plain(mesh.get())) {
                 return mesh;
             }
         }

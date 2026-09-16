@@ -80,7 +80,7 @@ public final class ModelProbe {
             window.setVisible(true);
             Thread.sleep(1000);
 
-            var toolkit = oa.create(canvas, new StubTextureSource(), Scene.WIDTH, Scene.HEIGHT);
+            var toolkit = oa.create(canvas, new HandTextureSource(), Scene.WIDTH, Scene.HEIGHT);
             toolkit.xa(1.0F);
             toolkit.ZA(0xFFFFFF, 0.5F, 0.5F, 20.0F, -50.0F, 30.0F);
             toolkit.method7938(toolkit.createHeap(POOL_SIZE));
@@ -105,6 +105,7 @@ public final class ModelProbe {
             pieces(toolkit, lines);
             cylinders(toolkit, lines);
             animations(toolkit, lines);
+            textures(toolkit, lines);
             lights(toolkit, lines);
             particles(toolkit, lines);
             spareVertices(toolkit, lines);
@@ -378,6 +379,59 @@ public final class ModelProbe {
 
         model.aa((short) 0, (short) 1);
         lines.add("retextured " + measure(model) + " moving textures " + model.r());
+    }
+
+    /**
+     * Handing textures to the toolkit, and what a model swapped onto one says about itself.
+     *
+     * A model is the only thing that reads a texture back out at present, and the only two
+     * questions it answers about one are whether the texture slides and whether its light had to
+     * be thrown away. Nothing here looks at a single pixel of a texture, so a texture handed over
+     * with its pixels is checked no further than the numbers that came with it.
+     *
+     * The model has to come out of the cache. A mesh built here carries no texture space for a
+     * texture to sit in, and a model built from one is not carried onto a new texture at all.
+     */
+    private static void textures(Toolkit toolkit, List<String> lines) throws Exception {
+        var held = (oa) toolkit;
+
+        for (var id = 0; id < 5; id++) {
+            lines.add("metrics " + id + " taken " + held.c((short) id));
+        }
+
+        for (var id = 0; id < 5; id++) {
+            lines.add("texture " + id + " taken " + held.WA((short) id));
+        }
+
+        lines.add("metrics beyond the source " + held.c((short) HandTextureSource.COUNT));
+        lines.add("texture beyond the source " + held.WA((short) HandTextureSource.COUNT));
+
+        var mesh = CacheMesh.anyTextured(MODEL_FACES);
+        if (mesh.isEmpty()) {
+            lines.add("no textured model in the cache");
+            return;
+        }
+
+        for (var id = 0; id < 5; id++) {
+            var model = (i) toolkit.createModel(
+                mesh.get(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
+            model.aa((short) 0, (short) id);
+            lines.add("swapped onto " + id + " moving textures " + model.r()
+                + " " + measure(model));
+        }
+
+        /*
+         * More textures than there is room for, so that the ones handed over first are thrown out.
+         * The toolkit asks the source for a texture it has thrown out rather than answering that
+         * it has none, so what this checks is that both toolkits throw out the same one.
+         */
+        for (var id = 0; id < HandTextureSource.COUNT; id++) {
+            held.WA((short) id);
+        }
+
+        var model = (i) toolkit.createModel(mesh.get(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
+        model.aa((short) 0, (short) 1);
+        lines.add("swapped onto one after a flood " + model.r() + " " + measure(model));
     }
 
     /**

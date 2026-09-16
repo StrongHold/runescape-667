@@ -1238,9 +1238,11 @@ JNIEXPORT jboolean JNICALL Java_i_r(JNIEnv *env, jobject self) {
 /**
  * Gives every face wearing one texture another one.
  *
- * The toolkit this replaces also asks the texture cache how large each of the two is and throws
- * the light away when they differ, because the colour a textured face is lit to depends on it.
- * Nothing here has a texture cache yet, so the light is thrown away either way.
+ * The toolkit this replaces goes on to compare what it knows about the two textures, keeping the
+ * light the model already has when they are shaded through alike and marking the model as wearing
+ * a texture that slides when the new one does. None of that is reached by a model built the way
+ * these are, because it sits behind a face texture array the toolkit allocated for itself rather
+ * than the one the mesh arrived with, and nothing here builds one.
  */
 JNIEXPORT void JNICALL Java_i_aa(JNIEnv *env, jobject self, jshort from, jshort to) {
     Model *model = modelOf(env, self);

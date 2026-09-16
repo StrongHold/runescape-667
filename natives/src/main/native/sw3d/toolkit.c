@@ -178,12 +178,11 @@ JNIEXPORT void JNICALL Java_oa_ZA(JNIEnv *env, jobject self, jint colour, jfloat
 
 JNIEXPORT void JNICALL Java_oa_MA(JNIEnv *env, jobject self, jobject textures,
                                    jint a2, jint a3) {
-    (void) env;
-    (void) self;
     (void) textures;
     (void) a2;
     (void) a3;
 
+    textureCacheReady(env, self);
     rasterUse(NULL, 0, 0);
 }
 
@@ -446,12 +445,13 @@ JNIEXPORT void JNICALL Java_oa_X(JNIEnv *env, jobject self, jint resolution) {
 }
 
 /**
- * Lets the toolkit do whatever it keeps for quiet moments. There is nothing it keeps.
+ * Lets the toolkit catch up on what it puts off, which is moving every texture that slides.
  */
-JNIEXPORT void JNICALL Java_oa_d(JNIEnv *env, jobject self, jint budget) {
+JNIEXPORT void JNICALL Java_oa_d(JNIEnv *env, jobject self, jint time) {
     (void) env;
     (void) self;
-    (void) budget;
+
+    textureCacheService(time);
 }
 
 /**
