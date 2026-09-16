@@ -36,9 +36,25 @@ enum {
     MAY_TURN_NORMALS = 0x8,
     MAY_MIRROR = 0x10,
     MAY_RECOLOUR = 0x4000,
+    MAY_CHANGE_ALPHA = 0x100,
+    MAY_TURN_NORMALS_WHILE_ANIMATING = 0x200,
     MAY_RETEXTURE = 0x8000,
     MAY_ANIMATE = 0x10000
 };
+
+/**
+ * The functions that let a copy change something the light depends on.
+ *
+ * A copy given any of them starts without the light its original was wearing, because the first
+ * thing the client does with such a copy is the very thing that would have thrown it away.
+ */
+enum { MAY_CHANGE_THE_LIGHT = 0x17218 };
+
+/**
+ * The functions that move the direction a vertex or a face is shaded by, rather than working it
+ * out again. A copy given any of them needs directions of its own.
+ */
+enum { MAY_CHANGE_THE_DIRECTIONS = MAY_TURN_NORMALS | MAY_MIRROR | MAY_TURN_NORMALS_WHILE_ANIMATING };
 
 /**
  * A face that asked to be shaded only while the model is being animated. Once the client gives up
@@ -94,9 +110,6 @@ static const float OVER_STRETCH = 1.0f / 128.0f;
  * low bit of the number the client passes alongside the three angles.
  */
 enum { TURN_ACROSS_FIRST = 0x1 };
-
-/** What a model has to have been built to allow before an animation turns its directions too. */
-enum { MAY_TURN_NORMALS_WHILE_ANIMATING = 0x200 };
 
 /** Where in the group list a label's vertices sit. */
 typedef struct {
@@ -763,14 +776,10 @@ JNIEXPORT void JNICALL Java_i_R(JNIEnv *env, jobject self, jobject toolkit, jobj
     setNativeId(env, self, (jlong) (intptr_t) model);
 }
 
-JNIEXPORT void JNICALL Java_i_w(JNIEnv *env, jobject self, jboolean immediate) {
-    (void) immediate;
-
-    Model *model = modelOf(env, self);
-    if (model == NULL) {
-        return;
-    }
-
+/**
+ * Lets go of everything the model holds, leaving it empty rather than freeing it.
+ */
+static void emptyModel(Model *model) {
     free(model->vertices);
     free(model->faceA);
     free(model->faceB);
@@ -785,6 +794,19 @@ JNIEXPORT void JNICALL Java_i_w(JNIEnv *env, jobject self, jboolean immediate) {
     free(model->normals);
     free(model->faceNormals);
     free(model->shade);
+
+    memset(model, 0, sizeof *model);
+}
+
+JNIEXPORT void JNICALL Java_i_w(JNIEnv *env, jobject self, jboolean immediate) {
+    (void) immediate;
+
+    Model *model = modelOf(env, self);
+    if (model == NULL) {
+        return;
+    }
+
+    emptyModel(model);
     free(model);
 
     setNativeId(env, self, 0);
@@ -1407,6 +1429,135 @@ JNIEXPORT void JNICALL Java_i_l(JNIEnv *env, jobject self, jlong handle, jint st
     }
 
     free(labels);
+}
+
+/**
+ * A copy of an array of whatever size, or nothing when there was nothing to copy.
+ */
+static void *duplicate(const void *source, size_t bytes) {
+    if (source == NULL || bytes == 0) {
+        return NULL;
+    }
+
+    void *copy = malloc(bytes);
+    if (copy != NULL) {
+        memcpy(copy, source, bytes);
+    }
+    return copy;
+}
+
+/**
+ * Makes one model into a copy of another, keeping only the right to do what the mask allows.
+ *
+ * The toolkit this replaces shares an array between the two models wherever the mask says the
+ * copy will never change it, and takes a copy only of the rest. Here every array is copied. The
+ * two behave the same, because the arrays that would have been shared are the ones nothing is
+ * allowed to touch; the difference is that this asks the system for more memory.
+ *
+ * The client hands over a second model to take the copies from, so that a copy made every frame
+ * reuses the same memory. That is the same saving by another route and is not taken here either.
+ */
+JNIEXPORT void JNICALL Java_i_ZA(JNIEnv *env, jobject self, jobject into, jobject scratch,
+                                  jint functions, jboolean reused, jboolean deep) {
+    (void) scratch;
+    (void) reused;
+
+    Model *source = modelOf(env, self);
+    Model *copy = modelOf(env, into);
+    if (source == NULL || copy == NULL) {
+        return;
+    }
+
+    if ((functions & source->functions) != functions) {
+        jclass complaint = (*env)->FindClass(env, "java/lang/IllegalArgumentException");
+        if (complaint != NULL) {
+            (*env)->ThrowNew(env, complaint,
+                "Can't re-enable previously disabled functions");
+        }
+        return;
+    }
+
+    /*
+     * A copy that will keep the light works the model it came from out first, and wears the
+     * answer. That matters because the client turns such a copy immediately afterwards, and a
+     * turn does not throw the light away: the copy is meant to be lit as the model it came from
+     * stood, not as it ends up.
+     */
+    if (deep == JNI_TRUE && (functions & MAY_CHANGE_THE_LIGHT) == 0 && source->shade == NULL) {
+        lightModel(source);
+    }
+
+    if (deep == JNI_TRUE && (functions & MAY_CHANGE_THE_DIRECTIONS) == 0
+        && source->normals == NULL) {
+        calculateNormals(source);
+    }
+
+    emptyModel(copy);
+
+    size_t vertices = (size_t) source->vertexCount;
+    size_t faces = (size_t) source->faceCount;
+    size_t shaded = (size_t) (source->maxVertex > source->vertexCount
+        ? source->maxVertex : source->vertexCount);
+
+    copy->vertexCount = source->vertexCount;
+    copy->maxVertex = source->maxVertex;
+    copy->faceCount = source->faceCount;
+    copy->ambient = source->ambient;
+    copy->contrast = source->contrast;
+    copy->features = source->features;
+    copy->functions = functions;
+    copy->transparent = source->transparent;
+    copy->movingTextures = source->movingTextures;
+
+    copy->measured = source->measured;
+    if (source->measured) {
+        copy->minX = source->minX;
+        copy->maxX = source->maxX;
+        copy->minY = source->minY;
+        copy->maxY = source->maxY;
+        copy->minZ = source->minZ;
+        copy->maxZ = source->maxZ;
+        copy->radiusCylinder = source->radiusCylinder;
+        copy->radiusSphere = source->radiusSphere;
+    }
+
+    copy->vertices = duplicate(source->vertices, vertices * VERTEX_STRIDE * sizeof(float));
+    copy->faceA = duplicate(source->faceA, faces * sizeof(short));
+    copy->faceB = duplicate(source->faceB, faces * sizeof(short));
+    copy->faceC = duplicate(source->faceC, faces * sizeof(short));
+    copy->faceColour = duplicate(source->faceColour, faces * sizeof(short));
+    copy->faceTexture = duplicate(source->faceTexture, faces * sizeof(short));
+    copy->faceAlpha = duplicate(source->faceAlpha, faces * sizeof(signed char));
+    copy->shadingType = duplicate(source->shadingType, faces * sizeof(signed char));
+    copy->vertexPiece = duplicate(source->vertexPiece, vertices * sizeof(short));
+    copy->normals = duplicate(source->normals, shaded * sizeof(Normal));
+    copy->faceNormals = duplicate(source->faceNormals, faces * sizeof(Normal));
+
+    if ((functions & MAY_CHANGE_THE_LIGHT) == 0) {
+        copy->shade = duplicate(source->shade, faces * 3 * sizeof(uint32_t));
+    }
+
+    /*
+     * A copy allowed to change how see-through a face is gets somewhere to keep that, whether or
+     * not the model it came from had one. That is why such a copy answers that it can be seen
+     * through when the original says it cannot.
+     */
+    if ((functions & MAY_CHANGE_ALPHA) != 0 && copy->faceAlpha == NULL && faces > 0) {
+        copy->faceAlpha = calloc(faces, sizeof(signed char));
+    }
+
+    if (source->labelTable != NULL) {
+        int held = 0;
+        for (int group = 0; group < source->labelGroups; group++) {
+            held += source->labelTable[group].count;
+        }
+
+        copy->labelGroups = source->labelGroups;
+        copy->labelTable = duplicate(source->labelTable,
+            (size_t) source->labelGroups * sizeof(LabelGroup));
+        copy->labelVertices = duplicate(source->labelVertices,
+            (size_t) (held == 0 ? 1 : held) * sizeof(unsigned short));
+    }
 }
 
 /**

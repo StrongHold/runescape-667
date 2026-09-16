@@ -58,6 +58,8 @@ public final class ModelProbe {
             toolkit.xa(1.0F);
             toolkit.ZA(0xFFFFFF, 0.5F, 0.5F, 20.0F, -50.0F, 30.0F);
             toolkit.method7938(toolkit.createHeap(POOL_SIZE));
+            toolkit.allocateThreads(1);
+            toolkit.linkThreads(0);
 
             var lines = new ArrayList<String>();
             refusals(toolkit, lines);
@@ -66,6 +68,7 @@ public final class ModelProbe {
             turns(toolkit, lines);
             mirrors(toolkit, lines);
             masks(toolkit, lines);
+            copies(toolkit, lines);
             animations(toolkit, lines);
             lights(toolkit, lines);
 
@@ -181,6 +184,41 @@ public final class ModelProbe {
         model.s(0x000F);
         lines.add("narrowed again " + model.ua());
         lines.add("refused after narrowing " + refused(() -> model.ia((short) 1, (short) 2)));
+    }
+
+    /**
+     * Copying a model, which hands the copy only the right to do what the mask allows.
+     *
+     * A copy is measured before anything is done to it, because the measurement is carried over
+     * rather than taken again, and then changed in a way the mask allows so that the copy is
+     * known to have its own arrays rather than the original's.
+     */
+    private static void copies(Toolkit toolkit, List<String> lines) throws Exception {
+        int[] masks = {0, 0x1, 0xF, 0x4000, 0x801F, 0xFFFF};
+
+        for (var mask : masks) {
+            var model = build(toolkit);
+            lines.add("original " + measure(model));
+
+            var copy = model.copy((byte) 0, mask, true);
+            lines.add("copied " + mask + " " + copy.ua() + " " + measure(copy)
+                + " " + copy.WA() + " " + copy.da() + " " + copy.F());
+
+            if ((mask & 0x1) != 0) {
+                copy.H(300, 0, 0);
+                lines.add("copy moved " + measure(copy) + " original " + measure(model));
+            }
+
+            if ((mask & 0x5) == 0x5) {
+                copy.a(0x1000);
+                lines.add("copy turned " + measure(copy) + " original " + measure(model));
+            }
+
+            if ((mask & 0x4000) != 0) {
+                copy.ia((short) 0, (short) 40);
+                lines.add("copy recoloured " + measure(copy) + " original " + measure(model));
+            }
+        }
     }
 
     /**

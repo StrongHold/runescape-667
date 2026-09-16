@@ -54,6 +54,7 @@ public sealed interface Scene {
         new StretchedAndTiled(),
         new Masked(),
         new Turned(),
+        new Copied(),
         new Animated(),
         new Terrain()
     );
@@ -188,6 +189,54 @@ public sealed interface Scene {
             toolkit.line(100, 300, 100, 300, 0xFFFFFFFF, 0);
             toolkit.line(-50, 250, 560, 260, 0xFFFF00FF, 0);
             toolkit.line(200, -50, 260, 430, 0xFF00FFFF, 0);
+        }
+    }
+
+    /**
+     * A model drawn beside copies of itself.
+     *
+     * A copy is handed only the right to do what its mask allows, and the light it was wearing is
+     * taken off it whenever the mask lets it change something the light depends on. Drawing the
+     * original after the copies have been changed also shows whether a copy shares an array with
+     * the model it came from, which it must not.
+     */
+    record Copied() implements Scene {
+
+        private static final int FUNCTIONS = 0xFFFF;
+        private static final int FEATURES = 64;
+        private static final int AMBIENT = 64;
+        private static final int CONTRAST = 768;
+
+        /** Enough to turn a model, enough to recolour one, and everything. */
+        private static final int[] MASKS = {0x5, 0x4000, 0xFFFF};
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            var model = toolkit.createModel(props.mesh(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
+
+            for (var step = 0; step < MASKS.length; step++) {
+                var copy = model.copy((byte) 0, MASKS[step], true);
+
+                if ((MASKS[step] & 0x5) == 0x5) {
+                    copy.a(TURN / 4);
+                }
+                if ((MASKS[step] & 0x4000) != 0) {
+                    copy.ia((short) 0, (short) 40);
+                }
+
+                place(props, step - 1, copy);
+            }
+
+            place(props, 2, model);
+        }
+
+        private static void place(Props props, int step, Model model) {
+            props.matrix().makeRotationZ(0);
+            props.matrix().translate(step * SPREAD, 0, DEPTH);
+            model.render(props.matrix(), null, 1);
         }
     }
 
