@@ -50,10 +50,10 @@ typedef struct {
      * faces has plenty of both. The buffer belongs to the picture rather than to one model, so
      * everything drawn between two clears is measured against everything else.
      *
-     * This holds the distance from the eye rather than the distance the toolkit holds, which runs
-     * from nothing at the near plane to one at the far plane. The two put the same pixel in front
-     * of the same pixel, so what is drawn is the same, but anything that reads a distance back out
-     * and does arithmetic on it, such as fog, needs the toolkit's.
+     * A distance here runs from nothing at the near plane to one at the far plane, which is what
+     * comes out of the picture the model was put through. That matters to anything that reads one
+     * back out and does arithmetic on it rather than only comparing it, such as moving everything
+     * in a rectangle further away.
      */
     float *depths;
 

@@ -331,6 +331,26 @@ JNIEXPORT void JNICALL Java_p_H(JNIEnv *env, jobject self, jint x, jint y,
     }
 }
 
+/**
+ * Shows one rectangle of the canvas that has changed since the last frame.
+ *
+ * Nothing of the sort happens here. The toolkit takes the drawing surface, takes what it is told
+ * about it, gives both back, and looks at none of the six numbers. Only the whole-canvas flip
+ * puts anything on the screen on this platform, so the client's rectangle by rectangle painting
+ * shows up at the next one of those rather than when it is asked for.
+ */
+JNIEXPORT void JNICALL Java_p_K(JNIEnv *env, jobject self, jint x, jint y, jint width,
+                                 jint height, jint canvasWidth, jint canvasHeight) {
+    (void) env;
+    (void) self;
+    (void) x;
+    (void) y;
+    (void) width;
+    (void) height;
+    (void) canvasWidth;
+    (void) canvasHeight;
+}
+
 JNIEXPORT void JNICALL Java_p_w(JNIEnv *env, jobject self, jboolean immediate) {
     (void) immediate;
 

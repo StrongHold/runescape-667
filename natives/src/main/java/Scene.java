@@ -65,6 +65,7 @@ public sealed interface Scene {
         new Flattened(),
         new Offscreen(),
         new SharedLight(),
+        new DepthShifted(),
         new Terrain()
     );
 
@@ -778,6 +779,54 @@ public sealed interface Scene {
                 props.matrix().translate((step - 1) * APART - APART / 2, 0, DEPTHS[step]);
                 props.model().renderOrtho(props.matrix(), null, SIZES[step], 0);
             }
+        }
+    }
+
+    /**
+     * Moving what has already been drawn further away without drawing it again.
+     *
+     * The client draws the world from above by scrolling what it drew last frame and filling in
+     * only the strip that came into view. A camera that rose or fell leaves everything it kept
+     * recorded at the wrong distance, so the client names a rectangle and says how far the
+     * camera moved, and every distance in it moves with it.
+     *
+     * A model is drawn, three rectangles are moved by different amounts, and a second model is
+     * drawn behind the first. It wins wherever the first was pushed back past it. The third
+     * rectangle is narrower than the buffer, which is where the walk goes wrong, and it is drawn
+     * to show what the client would get if it ever asked for one.
+     */
+    record DepthShifted() implements Scene {
+
+        /** A near enough far plane that a few hundred moved is a few hundred seen. */
+        private static final int FAR = DEPTH * 4;
+
+        /** How far behind the first model the second one stands. */
+        private static final int BEHIND = 120;
+
+        /** Each row is a rectangle and how far the camera is said to have moved over it. */
+        private static final int[][] MOVED = {
+            {0, 40, WIDTH, 60, 600},
+            {0, 160, WIDTH, 60, -600},
+            {30, 120, 100, 40, 900}
+        };
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, FAR);
+
+            props.matrix().makeRotationZ(0);
+            props.matrix().applyTranslation(0, 0, DEPTH);
+            props.model().render(props.matrix(), null, 1);
+
+            for (var rectangle : MOVED) {
+                toolkit.b(rectangle[0], rectangle[1], rectangle[2], rectangle[3], rectangle[4]);
+            }
+
+            props.matrix().makeRotationZ(0);
+            props.matrix().rotateAxisY(TURN / 4);
+            props.matrix().applyTranslation(0, 0, DEPTH + BEHIND);
+            props.model().render(props.matrix(), null, 1);
         }
     }
 

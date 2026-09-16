@@ -384,6 +384,41 @@ JNIEXPORT void JNICALL Java_oa_ya(JNIEnv *env, jobject self) {
 }
 
 /**
+ * Moves everything already drawn in a rectangle further away, by a distance the client gives.
+ *
+ * The client draws the world from above by scrolling what it drew last frame and filling in only
+ * the strip that came into view. When the camera rises or falls, everything it kept was recorded
+ * against a camera at the old height, so rather than draw it all again the client says how far
+ * the camera moved and every distance in the rectangle moves with it.
+ *
+ * The rectangle is walked with its own width taken as the width of the buffer, so the first
+ * distance touched is not the one at the corner the client named unless the rectangle is the full
+ * width. The client only ever asks for the full width. This is kept on purpose, do not correct
+ * it.
+ */
+JNIEXPORT void JNICALL Java_oa_b(JNIEnv *env, jobject self, jint x, jint y, jint width,
+                                  jint height, jdouble away) {
+    (void) env;
+    (void) self;
+
+    if (raster.depths == NULL) {
+        return;
+    }
+
+    const Projection *view = projection();
+    float step = (float) away / (view->far - view->near);
+
+    float *at = raster.depths + (size_t) (y * width + x);
+
+    for (int row = 0; row < height; row++) {
+        for (int column = 0; column < width; column++) {
+            at[column] += step;
+        }
+        at += raster.width;
+    }
+}
+
+/**
  * The colour the distance fades everything towards, and how far away the fade is complete. The
  * client offers a third number that the toolkit has never read.
  */
