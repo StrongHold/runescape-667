@@ -622,7 +622,17 @@ val generateToolkitStubs by tasks.registering {
             }
         }
 
-        stubs.get().asFile.also { it.parentFile.mkdirs() }.writeText(
+        val preamble = if (left.isEmpty()) {
+            """
+            /*
+             * Every native the software toolkit declares that is not written yet.
+             *
+             * There are none left, so this file stands empty. It is still compiled and linked, so
+             * that a native taken back out of the sources shows up here rather than as a missing
+             * symbol at run time.
+             */
+            """.trimIndent() + "\n"
+        } else {
             """
             /*
              * Every native the software toolkit declares that is not written yet.
@@ -640,8 +650,10 @@ val generateToolkitStubs by tasks.registering {
                     fprintf(stderr, "[sw3d] %s\n", name);
                 }
             }
-            """.trimIndent() + "\n" + body
-        )
+            """.trimIndent() + "\n"
+        }
+
+        stubs.get().asFile.also { it.parentFile.mkdirs() }.writeText(preamble + body)
 
         outstanding.get().asFile.writeText(left.sorted().joinToString("\n") + "\n")
         logger.lifecycle("${written.size} natives written, ${left.size} left")

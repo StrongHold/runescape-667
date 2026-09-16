@@ -165,7 +165,13 @@ static int slotFor(Ordering *ordering, int texture) {
 }
 
 /**
- * The five weights a blurred texel is gathered with, a normal curve one texel wide.
+ * The five weights a blurred texel is gathered with, which is the normal curve read at nought,
+ * one and two texels out from the middle: exp(-n squared over two) over the square root of two
+ * pi, rounded to a float.
+ *
+ * They are written out rather than worked out. The toolkit this stands in for holds them as
+ * these exact floats, and a texel gathered with a weight one place different in the last bit
+ * comes out a shade different, so they have to be these and not merely near them.
  *
  * They do not add up to one. What a texel is divided by is worked out as it is gathered, because
  * a texel the blur was told to leave out takes its weight out of the sum with it.
@@ -257,7 +263,7 @@ static void layDown(const uint32_t *from, uint32_t *into, int repeatsU, int repe
     }
 }
 
-static TextureMetrics metricsFrom(jshort size, jint alphaBlendMode, jbyte effectType,
+static TextureMetrics metricsFrom(jshort averageColour, jint alphaBlendMode, jbyte effectType,
                                   jbyte effectParam1, jint effectParam2, jboolean small,
                                   jbyte alpha, jbyte aByte57, jbyte speedU, jbyte speedV,
                                   jboolean disableable, jboolean aBoolean234, jboolean aBoolean239,
@@ -265,7 +271,7 @@ static TextureMetrics metricsFrom(jshort size, jint alphaBlendMode, jbyte effect
                                   jboolean aBoolean237, jboolean aBoolean238, jint colourOp) {
     TextureMetrics metrics;
 
-    metrics.size = (unsigned short) size;
+    metrics.averageColour = (unsigned short) averageColour;
     metrics.alphaBlendMode = alphaBlendMode;
     metrics.effectType = (unsigned char) effectType;
     metrics.effectParam1 = (unsigned char) effectParam1;
@@ -457,7 +463,8 @@ void textureCacheService(int time) {
 /**
  * Takes what the client knows about a texture without taking any of its pixels.
  */
-JNIEXPORT void JNICALL Java_oa_AA(JNIEnv *env, jobject self, jshort texture, jshort size,
+JNIEXPORT void JNICALL Java_oa_AA(JNIEnv *env, jobject self, jshort texture,
+                                   jshort averageColour,
                                    jint alphaBlendMode, jbyte effectType, jbyte effectParam1,
                                    jint effectParam2, jboolean small, jbyte alpha, jbyte aByte57,
                                    jbyte speedU, jbyte speedV, jboolean disableable,
@@ -472,7 +479,7 @@ JNIEXPORT void JNICALL Java_oa_AA(JNIEnv *env, jobject self, jshort texture, jsh
     }
 
     int slot = slotFor(&cache.metricsOrder, (unsigned short) texture);
-    cache.withoutPixels[slot] = metricsFrom(size, alphaBlendMode, effectType, effectParam1,
+    cache.withoutPixels[slot] = metricsFrom(averageColour, alphaBlendMode, effectType, effectParam1,
         effectParam2, small, alpha, aByte57, speedU, speedV, disableable, aBoolean234,
         aBoolean239, repeatsU, repeatsV, aByte53, aBoolean237, aBoolean238, colourOp);
 }
@@ -481,7 +488,7 @@ JNIEXPORT void JNICALL Java_oa_AA(JNIEnv *env, jobject self, jshort texture, jsh
  * Takes a texture's pixels along with everything the client knows about it.
  */
 JNIEXPORT void JNICALL Java_oa_CA(JNIEnv *env, jobject self, jshort texture, jintArray given,
-                                   jshort size, jint alphaBlendMode, jbyte effectType,
+                                   jshort averageColour, jint alphaBlendMode, jbyte effectType,
                                    jbyte effectParam1, jint effectParam2, jboolean small,
                                    jbyte alpha, jbyte aByte57, jbyte speedU, jbyte speedV,
                                    jboolean disableable, jboolean aBoolean234,
@@ -497,7 +504,7 @@ JNIEXPORT void JNICALL Java_oa_CA(JNIEnv *env, jobject self, jshort texture, jin
     int slot = slotFor(&cache.pixelOrder, (unsigned short) texture);
     Texture *held = &cache.withPixels[slot];
 
-    held->metrics = metricsFrom(size, alphaBlendMode, effectType, effectParam1, effectParam2,
+    held->metrics = metricsFrom(averageColour, alphaBlendMode, effectType, effectParam1, effectParam2,
         small, alpha, aByte57, speedU, speedV, disableable, aBoolean234, aBoolean239, repeatsU,
         repeatsV, aByte53, aBoolean237, aBoolean238, colourOp);
     held->offsetU = 0.0f;

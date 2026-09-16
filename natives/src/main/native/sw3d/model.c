@@ -806,8 +806,8 @@ static const float SHIFT_WHOLE = 256.0f;
 /** Where the middle of a texture falls, as a part of the whole of it. */
 static const float TEXTURE_MIDDLE = 0.5f;
 
-/** A whole turn, which is what an angle round an axis is taken as a part of. */
-static const float WHOLE_TURN = 6.2831855f;
+/** A whole turn in radians, which is what an angle round an axis is taken as a part of. */
+static const float WHOLE_TURN = (float) (2.0 * M_PI);
 
 /** What a space's three numbers are held out of when they scale a row of its turn. */
 static const float SCALE_WHOLE = 1024.0f;
@@ -962,24 +962,33 @@ typedef struct {
 } SpaceBox;
 
 /**
+ * How many texture spaces of one model are read. A model in the cache names far fewer than this,
+ * and the working room a space needs is held on the stack, so the rest are left.
+ */
+enum { SPACE_LIMIT = 64 };
+
+/** Further out than any place a model reaches, which a box is measured in from. */
+static const float BEYOND_EVERY_PLACE = 2.0e9f;
+
+/**
  * The box each space's faces stand in, so that a texture laid along an axis is measured from the
  * middle of what wears it rather than from where the model happens to sit in the world.
  */
 static void boxesOfSpaces(const Model *model, const signed char *faceSpace, int spaces,
                           SpaceBox *boxes) {
     const short *corners[CORNERS] = {model->faceA, model->faceB, model->faceC};
-    float least[64][3];
-    float most[64][3];
+    float least[SPACE_LIMIT][3];
+    float most[SPACE_LIMIT][3];
 
-    if (spaces > 64) {
-        spaces = 64;
+    if (spaces > SPACE_LIMIT) {
+        spaces = SPACE_LIMIT;
     }
 
     for (int space = 0; space < spaces; space++) {
         boxes[space].held = 0;
         for (int axis = 0; axis < 3; axis++) {
-            least[space][axis] = 2.0e9f;
-            most[space][axis] = -2.0e9f;
+            least[space][axis] = BEYOND_EVERY_PLACE;
+            most[space][axis] = -BEYOND_EVERY_PLACE;
         }
     }
 
@@ -1181,7 +1190,6 @@ static void placeOnTexture(Model *model, const signed char *faceSpace, const sig
 
     const short *corners[CORNERS] = {model->faceA, model->faceB, model->faceC};
 
-    enum { SPACE_LIMIT = 64 };
     if (spaces > SPACE_LIMIT) {
         spaces = SPACE_LIMIT;
     }
@@ -2710,4 +2718,544 @@ int modelAmbient(const void *handle) {
 
 int modelContrast(const void *handle) {
     return ((const Model *) handle)->contrast;
+}
+
+/**
+ * The right to be asked for a shadow, which a model is only built with when the client says it
+ * stands somewhere a shadow will be wanted.
+ */
+enum { MAY_CAST_A_SHADOW = 0x40000 };
+
+/**
+ * How far the shadow of the model reaches, in shadow places.
+ *
+ * A shadow is the model dropped straight down and slid by however far the sun leans over the
+ * height it is dropped through. Which end of the model's height slides furthest depends on which
+ * way the sun leans, and the pair chosen here is the one that opens the shadow out rather than
+ * closing it, so that every face of the model lands inside.
+ */
+static int shadowEdge(int edge, int height, int lean, int shift) {
+    return (edge - ((height * lean) >> SUN_LEAN_SHIFT)) >> shift;
+}
+
+/**
+ * Marks every place the model stands over, which is its shadow.
+ *
+ * A face that is fully clear, or that the client marked as one that lets light through, casts no
+ * shadow. A face turned away from the ground casts none either, which is what the signed area of
+ * the flattened face says.
+ */
+static void castShadow(Model *model, Shadow *shadow) {
+    if (model->vertexCount <= 0 || model->faceCount <= 0) {
+        return;
+    }
+
+    short *across = calloc((size_t) model->vertexCount, sizeof(short));
+    short *down = calloc((size_t) model->vertexCount, sizeof(short));
+    if (across == NULL || down == NULL) {
+        free(across);
+        free(down);
+        return;
+    }
+
+    int leanAcross = sunLeanAcross();
+    int leanAlong = sunLeanAlong();
+    int shift = shadowShift();
+    int left = shadowLeft(shadow);
+    int top = shadowTop(shadow);
+
+    for (int vertex = 0; vertex < model->vertexCount; vertex++) {
+        const float *at = vertexAt(model, vertex);
+        int height = (int) at[UPRIGHT];
+
+        across[vertex] = (short) (shadowEdge((int) at[ACROSS], height, leanAcross, shift) - left);
+        down[vertex] = (short) (shadowEdge((int) at[AWAY], height, leanAlong, shift) - top);
+    }
+
+    for (int face = 0; face < model->faceCount; face++) {
+        if (model->faceAlpha != NULL && (unsigned char) model->faceAlpha[face] == 0xff) {
+            continue;
+        }
+
+        if (model->shadingType != NULL && model->shadingType[face] == SHADED_WHEN_ANIMATED) {
+            continue;
+        }
+
+        int a = (unsigned short) model->faceA[face];
+        int b = (unsigned short) model->faceB[face];
+        int c = (unsigned short) model->faceC[face];
+
+        int turned = (down[b] - down[c]) * (across[a] - across[b])
+            - (across[c] - across[b]) * (down[b] - down[a]);
+
+        if (turned > 0) {
+            shadowMarkTriangle(shadow, down[a], down[b], down[c],
+                across[a], across[b], across[c]);
+        }
+    }
+
+    free(across);
+    free(down);
+}
+
+Shadow *shadowOfModel(void *handle, Shadow *reuse) {
+    Model *model = handle;
+    if (model->faceCount == 0) {
+        return NULL;
+    }
+
+    measureIfNeeded(model);
+
+    int leanAcross = sunLeanAcross();
+    int leanAlong = sunLeanAlong();
+    int shift = shadowShift();
+
+    int nearHeight = leanAcross > 0 ? model->maxY : model->minY;
+    int farHeight = leanAcross > 0 ? model->minY : model->maxY;
+    int left = shadowEdge(model->minX, nearHeight, leanAcross, shift);
+    int right = shadowEdge(model->maxX, farHeight, leanAcross, shift);
+
+    nearHeight = leanAlong > 0 ? model->maxY : model->minY;
+    farHeight = leanAlong > 0 ? model->minY : model->maxY;
+    int top = shadowEdge(model->minZ, nearHeight, leanAlong, shift);
+    int bottom = shadowEdge(model->maxZ, farHeight, leanAlong, shift);
+
+    int width = right - left + 1;
+    int height = bottom - top + 1;
+
+    Shadow *shadow;
+    if (shadowCanHold(reuse, width, height)) {
+        shadowClear(reuse);
+        shadow = reuse;
+    } else {
+        shadow = shadowNew(width, height);
+        if (shadow == NULL) {
+            return NULL;
+        }
+    }
+
+    shadowSetBounds(shadow, left, top, right, bottom);
+    castShadow(model, shadow);
+    return shadow;
+}
+
+/**
+ * The shadow the model casts, using the one the client offers where it is large enough.
+ *
+ * The client keeps hold of the shadow it was given last time so that the same run of places is
+ * used again rather than being taken and given back every frame. When that one cannot be reused
+ * a new one goes back in its place.
+ */
+JNIEXPORT jobject JNICALL Java_i_ba(JNIEnv *env, jobject self, jobject held) {
+    Model *model = modelOf(env, self);
+    if (model == NULL || !allowed(env, model, MAY_CAST_A_SHADOW)) {
+        return NULL;
+    }
+
+    Shadow *reuse = held == NULL ? NULL : (Shadow *) (intptr_t) nativeIdOf(env, held);
+    Shadow *shadow = shadowOfModel(model, reuse);
+
+    if (shadow == NULL) {
+        return NULL;
+    }
+
+    if (shadow == reuse) {
+        return held;
+    }
+
+    jobject fresh = toolkitShadowObject(env);
+    if (fresh != NULL) {
+        setNativeId(env, fresh, (jlong) (intptr_t) shadow);
+    }
+
+    return fresh;
+}
+
+/**
+ * One step of an animation applied to the whole model rather than to the groups a label names.
+ *
+ * The client drives a model with no skeleton this way, and it is also what moves a model into
+ * place before its shadow is asked for. The steps that fade a face or move a particle are not
+ * here, for the same reason they are not among the steps that name a label.
+ */
+JNIEXPORT void JNICALL Java_i_P(JNIEnv *env, jobject self, jint step, jint x, jint y, jint z) {
+    Model *model = modelOf(env, self);
+    if (model == NULL || model->vertices == NULL) {
+        return;
+    }
+
+    if (step == PIVOT_AT) {
+        float gathered[3] = {0.0f, 0.0f, 0.0f};
+
+        for (int vertex = 0; vertex < model->vertexCount; vertex++) {
+            const float *at = vertexAt(model, vertex);
+            for (int lane = 0; lane < 3; lane++) {
+                gathered[lane] += at[lane];
+            }
+        }
+
+        int places[3] = {x, y, z};
+        for (int lane = 0; lane < 3; lane++) {
+            model->pivot[lane] = model->vertexCount <= 0
+                ? (float) places[lane]
+                : gathered[lane] / (float) model->vertexCount + (float) places[lane];
+        }
+    } else if (step == MOVE_BY) {
+        for (int vertex = 0; vertex < model->vertexCount; vertex++) {
+            float *at = vertexAt(model, vertex);
+            at[ACROSS] += (float) x;
+            at[UPRIGHT] += (float) y;
+            at[AWAY] += (float) z;
+        }
+    } else if (step == TURN_BY) {
+        for (int vertex = 0; vertex < model->vertexCount; vertex++) {
+            float *at = vertexAt(model, vertex);
+
+            for (int lane = 0; lane < 3; lane++) {
+                at[lane] -= model->pivot[lane];
+            }
+
+            turnAboutPivot(at, x, y, z, 0);
+
+            for (int lane = 0; lane < 3; lane++) {
+                at[lane] += model->pivot[lane];
+            }
+        }
+    } else if (step == STRETCH_BY) {
+        float scale[3] = {(float) x, (float) y, (float) z};
+
+        for (int vertex = 0; vertex < model->vertexCount; vertex++) {
+            float *at = vertexAt(model, vertex);
+
+            for (int lane = 0; lane < 3; lane++) {
+                at[lane] = (at[lane] - model->pivot[lane]) * scale[lane] * OVER_STRETCH
+                    + model->pivot[lane];
+            }
+        }
+    }
+}
+
+/**
+ * How a model is made to sit on the ground under it.
+ *
+ * A model is built standing on a flat floor. The world is not flat, so the client names one of
+ * these and the model is bent to fit before it is drawn.
+ */
+enum {
+    STANDS_ON_THE_FLOOR = 1,
+    LEANS_TOWARDS_THE_FLOOR = 2,
+    TILTS_WITH_THE_FLOOR = 3,
+    HANGS_FROM_THE_CEILING = 4,
+    REACHES_FLOOR_TO_CEILING = 5
+};
+
+/**
+ * What the model has to have been built to allow before it can be made to fit the ground: to be
+ * moved up and down for most ways of fitting, and to be turned about as well for the one that
+ * tilts the whole model.
+ */
+enum { MAY_BE_RAISED = MAY_CHANGE_Y };
+enum { MAY_BE_TILTED = MAY_CHANGE_X | MAY_CHANGE_Y | MAY_CHANGE_Z };
+
+/**
+ * How many of the client's angles make a whole turn, and how many make a half of one.
+ */
+enum { ANGLES_PER_TURN = 0x4000, ANGLES_PER_HALF_TURN = ANGLES_PER_TURN / 2 };
+
+/**
+ * How the client packs the four numbers that go with tilting a model to the ground into one.
+ *
+ * The patch it reads the slope over is given in quarter units each way, and the two angles it
+ * will allow are given as a part of a whole turn in two hundred and fifty sixths.
+ */
+enum { PATCH_STEP = 4, ANGLE_STEP = ANGLES_PER_TURN / 256 };
+
+/**
+ * What the part of the way up the model is held out of when the client says how far up the
+ * bending towards the ground reaches.
+ */
+enum { REACH_WHOLE = 1 << 16 };
+
+/**
+ * What the part of the way up the model is held out of while it is stretched to reach a ceiling.
+ *
+ * The part is taken back out by a shift rather than a divide, because a vertex below the middle
+ * of the model counts as a negative part and the two round such a number different ways.
+ */
+enum { STRETCH_SHIFT = 8, STRETCH_WHOLE = 1 << STRETCH_SHIFT };
+
+/**
+ * Turns an angle in radians into the client's own measure, where a whole turn is sixteen
+ * thousand three hundred and eighty four.
+ */
+static const double ANGLES_PER_RADIAN = (double) ANGLES_PER_TURN / (2.0 * M_PI);
+
+/**
+ * Whether the vertex is one the faces are built from, which are the ones that are fitted to the
+ * ground without first being checked for standing over it.
+ *
+ * The vertices past that point carry billboards and particles, which the client puts wherever it
+ * likes, so those are only fitted where they do stand over the ground.
+ */
+static int onTheGround(const void *ground, int x, int z) {
+    int tileX = x >> groundTileShift(ground);
+    int tileZ = z >> groundTileShift(ground);
+
+    return tileX >= 0 && tileX < groundSizeX(ground) - 1
+        && tileZ >= 0 && tileZ < groundSizeZ(ground) - 1;
+}
+
+/**
+ * Raises every vertex by however far the ground under it stands above the height the model was
+ * put down at, so that a model built flat follows the slope it stands on.
+ */
+static void followGround(Model *model, const void *ground, int x, int y, int z, int lift) {
+    for (int vertex = 0; vertex < model->vertexCount; vertex++) {
+        float *at = vertexAt(model, vertex);
+        int across = (int) at[ACROSS] + x;
+        int along = (int) at[AWAY] + z;
+
+        if (vertex >= model->maxVertex && !onTheGround(ground, across, along)) {
+            continue;
+        }
+
+        at[UPRIGHT] += (float) (groundHeightBetween(ground, across, along) + lift - y);
+    }
+}
+
+/**
+ * Raises the lower part of the model towards the ground and leaves the rest of it where it is,
+ * so that the foot of a thing follows the slope and its top stays upright.
+ *
+ * How far up the model the bending reaches is the number the client passes, counted against the
+ * height of the model in sixty five thousand five hundred and thirty sixths.
+ */
+static void leanTowardsGround(Model *model, const void *ground, int reach,
+                              int x, int y, int z) {
+    for (int vertex = 0; vertex < model->vertexCount; vertex++) {
+        float *at = vertexAt(model, vertex);
+        int up = model->minY == 0
+            ? 0
+            : ((int) at[UPRIGHT] * REACH_WHOLE) / model->minY;
+
+        if (up >= reach) {
+            continue;
+        }
+
+        int across = (int) at[ACROSS] + x;
+        int along = (int) at[AWAY] + z;
+
+        if (vertex >= model->maxVertex && !onTheGround(ground, across, along)) {
+            continue;
+        }
+
+        int rise = groundHeightBetween(ground, across, along) - y;
+        at[UPRIGHT] += (float) (rise * (reach - up) / reach);
+    }
+}
+
+/**
+ * Stretches the model to reach from the floor to the ceiling above it.
+ */
+static void reachCeiling(Model *model, const void *floor, const void *ceiling, int gap,
+                         int height, int x, int y, int z) {
+    for (int vertex = 0; vertex < model->vertexCount; vertex++) {
+        float *at = vertexAt(model, vertex);
+        int across = (int) at[ACROSS] + x;
+        int along = (int) at[AWAY] + z;
+
+        if (vertex >= model->maxVertex
+            && (!onTheGround(floor, across, along) || !onTheGround(ceiling, across, along))) {
+            continue;
+        }
+
+        int under = groundHeightBetween(floor, across, along);
+        int over = groundHeightBetween(ceiling, across, along);
+        int room = under - over - gap;
+
+        int part = ((int) at[UPRIGHT] * STRETCH_WHOLE) / height;
+        at[UPRIGHT] = (float) (((part * room) >> STRETCH_SHIFT) - (y - under));
+    }
+}
+
+/**
+ * Tilts the whole model to lie along the slope it stands on, rather than bending it.
+ *
+ * The slope is read from the ground at the four corners of a patch the size the client names, and
+ * the model is turned about both level axes by as much of that slope as the client allows and
+ * then raised onto it.
+ */
+static void tiltWithGround(Model *model, const void *ground, int y, int mostAcross,
+                           int x, int width, int z, int depth, int mostAlong) {
+    int nearLeft = groundHeightBetween(ground, x - width / 2, z - depth / 2);
+    int nearRight = groundHeightBetween(ground, x + width / 2, z - depth / 2);
+    int farLeft = groundHeightBetween(ground, x - width / 2, z + depth / 2);
+    int farRight = groundHeightBetween(ground, x + width / 2, z + depth / 2);
+
+    int alongHigh = nearRight > nearLeft ? nearLeft : nearRight;
+    int alongLow = farRight <= farLeft ? farRight : farLeft;
+    int acrossLow = nearRight >= farRight ? farRight : nearRight;
+    int acrossHigh = farLeft > nearLeft ? nearLeft : farLeft;
+
+    if (depth != 0) {
+        int angle = (int) (atan2((double) (alongHigh - alongLow), (double) depth)
+            * ANGLES_PER_RADIAN) & (ANGLES_PER_TURN - 1);
+
+        if (angle != 0) {
+            if (mostAcross != 0) {
+                if (angle > ANGLES_PER_HALF_TURN) {
+                    int least = ANGLES_PER_TURN - mostAcross;
+                    if (angle < least) {
+                        angle = least;
+                    }
+                } else if (mostAcross < angle) {
+                    angle = mostAcross;
+                }
+            }
+
+            turn(model, angle, AWAY, UPRIGHT);
+            geometryChanged(model);
+        }
+    }
+
+    int rise = nearLeft + farRight;
+
+    if (width != 0) {
+        int angle = (int) (atan2((double) (acrossHigh - acrossLow), (double) width)
+            * ANGLES_PER_RADIAN) & (ANGLES_PER_TURN - 1);
+
+        if (angle != 0) {
+            if (mostAlong != 0) {
+                if (angle > ANGLES_PER_HALF_TURN) {
+                    int least = ANGLES_PER_TURN - mostAlong;
+                    if (least > angle) {
+                        angle = least;
+                    }
+                } else if (angle > mostAlong) {
+                    angle = mostAlong;
+                }
+            }
+
+            turn(model, angle, ACROSS, UPRIGHT);
+            geometryChanged(model);
+        }
+    }
+
+    if (rise > nearRight + farLeft) {
+        rise = farLeft + nearRight;
+    }
+
+    rise = (rise >> 1) - y;
+    if (rise != 0) {
+        for (int vertex = 0; vertex < model->vertexCount; vertex++) {
+            vertexAt(model, vertex)[UPRIGHT] += (float) rise;
+        }
+    }
+}
+
+/**
+ * Whether the whole model stands over ground that is there, which everything but hanging from a
+ * ceiling asks before it fits the model to anything.
+ */
+static int boxIsOverGround(const Model *model, const void *ground, int x, int z) {
+    int size = groundTileSize(ground);
+    int shift = groundTileShift(ground);
+
+    return x + model->minX >= 0
+        && ((x + model->maxX + size) >> shift) < groundSizeX(ground)
+        && z + model->minZ >= 0
+        && ((z + model->maxZ + size) >> shift) < groundSizeZ(ground);
+}
+
+/**
+ * Whether the ground under the model is flat at the height it was put down at, in which case
+ * there is nothing to fit it to.
+ */
+static int groundIsAlreadyFlat(const Model *model, const void *ground, int x, int y, int z) {
+    int size = groundTileSize(ground);
+    int shift = groundTileShift(ground);
+
+    int left = (x + model->minX) >> shift;
+    int right = (x + model->maxX + size - 1) >> shift;
+    int near = (z + model->minZ) >> shift;
+    int far = (z + model->maxZ + size - 1) >> shift;
+
+    return groundHeightAt(ground, left, near) == y
+        && groundHeightAt(ground, right, near) == y
+        && groundHeightAt(ground, left, far) == y
+        && groundHeightAt(ground, right, far) == y;
+}
+
+/**
+ * Fits the model to the ground it has been put down on.
+ *
+ * The client names one of several ways of fitting and a number that goes with it, and hands over
+ * the ground below and, where there is one, the ground above.
+ */
+JNIEXPORT void JNICALL Java_i_p(JNIEnv *env, jobject self, jint way, jint amount,
+                                 jobject below, jobject above, jint x, jint y, jint z) {
+    Model *model = modelOf(env, self);
+    if (model == NULL || model->vertices == NULL) {
+        return;
+    }
+
+    int wanted = way == TILTS_WITH_THE_FLOOR ? MAY_BE_TILTED : MAY_BE_RAISED;
+    if (!allowed(env, model, wanted)) {
+        return;
+    }
+
+    const void *floor = (const void *) (intptr_t) nativeIdOf(env, below);
+    const void *ceiling = above == NULL
+        ? NULL
+        : (const void *) (intptr_t) nativeIdOf(env, above);
+
+    if (floor == NULL) {
+        return;
+    }
+
+    measureIfNeeded(model);
+
+    int hanging = way == HANGS_FROM_THE_CEILING || way == REACHES_FLOOR_TO_CEILING;
+
+    if (!hanging && !boxIsOverGround(model, floor, x, z)) {
+        return;
+    }
+
+    if (hanging) {
+        if (ceiling == NULL || !boxIsOverGround(model, ceiling, x, z)) {
+            return;
+        }
+    } else if (groundIsAlreadyFlat(model, floor, x, y, z)) {
+        return;
+    }
+
+    if (way == STANDS_ON_THE_FLOOR) {
+        followGround(model, floor, x, y, z, 0);
+    } else if (way == LEANS_TOWARDS_THE_FLOOR) {
+        leanTowardsGround(model, floor, amount, x, y, z);
+    } else if (way == TILTS_WITH_THE_FLOOR) {
+        int width = (amount & 0xff) * PATCH_STEP;
+        int depth = ((amount >> 8) & 0xff) * PATCH_STEP;
+        int mostAcross = ((amount >> 16) & 0xff) * ANGLE_STEP;
+        int mostAlong = ((amount >> 24) & 0xff) * ANGLE_STEP;
+
+        int size = groundTileSize(floor);
+        int shift = groundTileShift(floor);
+
+        if (x - (width >> 1) < 0 || x + (width >> 1) + size >= groundSizeX(floor) << shift
+            || z - (depth >> 1) < 0 || z + (depth >> 1) + size >= groundSizeZ(floor) << shift) {
+            return;
+        }
+
+        tiltWithGround(model, floor, y, mostAcross, x, width, z, depth, mostAlong);
+    } else if (way == HANGS_FROM_THE_CEILING) {
+        followGround(model, ceiling, x, y, z, model->maxY - model->minY);
+    } else if (way == REACHES_FLOOR_TO_CEILING) {
+        int height = model->maxY - model->minY;
+        if (height != 0) {
+            reachCeiling(model, floor, ceiling, amount, height, x, y, z);
+        }
+    }
+
+    geometryChanged(model);
 }

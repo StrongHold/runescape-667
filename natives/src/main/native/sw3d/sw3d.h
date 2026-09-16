@@ -159,6 +159,32 @@ typedef struct {
 const Fog *distanceFog(void);
 
 /**
+ * How everything is drawn while the eye is under water.
+ *
+ * Water fades what is under it towards one colour, and the further below the surface a thing is
+ * the more of that colour it takes. Past the depth given nothing shows at all, so a face with a
+ * corner that deep is dropped rather than drawn.
+ *
+ * The fade is worked out per corner of a face and carried across it, which is why the depth is
+ * kept as its reciprocal: a corner costs a multiply rather than a divide.
+ */
+typedef struct {
+    /** Whether the eye is under water at all. */
+    int under;
+
+    /** Where the surface of the water is, as the client counts height. */
+    float surface;
+
+    /** Minus one over the depth, which turns a height below the surface into a fade. */
+    float perDepth;
+
+    /** What the water fades everything towards, one channel per lane, each times 256. */
+    float towards[4];
+} Underwater;
+
+const Underwater *underwater(void);
+
+/**
  * Fills a circle, keeping whatever is already nearer than the distance given.
  */
 void fillCircle(int x, int y, float depth, int radius, uint32_t colour, int mode);
@@ -192,6 +218,27 @@ int groundTileSize(const void *held);
 /** Draws one tile of the ground, or one depth of it. */
 void renderGroundTile(const void *ground, int x, int z);
 
+int groundTileSize(const void *ground);
+int groundTileShift(const void *ground);
+int groundSizeX(const void *ground);
+int groundSizeZ(const void *ground);
+
+/** How high the ground is at one corner of the grid. */
+int groundHeightAt(const void *ground, int x, int z);
+
+/** How high the ground is at a place between its corners. */
+int groundHeightBetween(const void *ground, int x, int z);
+
+/** How many faces one tile of the ground is drawn as. */
+int groundTileFaces(const void *tile);
+
+/** Which texture a face of the tile wears, or nothing where it wears none. */
+int groundTileFaceTexture(const void *tile, int face);
+
+/** Where one corner of the tile sits in its own square, and what colour it is. */
+void groundTilePlanCorner(const void *tile, int corner, int *across, int *along,
+                          uint32_t *colour);
+
 /** The pool a model's geometry is taken from, or null before the client has given one. */
 Pool *modelPoolInUse(void);
 
@@ -212,6 +259,80 @@ typedef struct {
 } Sun;
 
 const Sun *sun(void);
+
+/**
+ * How far the sun leans over one unit of height, in two hundred and fifty sixths.
+ *
+ * A shadow is the model flattened straight down and then slid by however far the sun leans, so
+ * these two numbers are all the shadow work needs of the sun's direction.
+ */
+int sunLeanAcross(void);
+int sunLeanAlong(void);
+
+/**
+ * What the sun's lean is held out of, which is how far it leans over one unit of height.
+ *
+ * A lean is taken back out by a shift rather than a divide. A model below the height its shadow
+ * is cast from counts as a negative height, and the two round such a number different ways.
+ */
+enum { SUN_LEAN_SHIFT = 8, SUN_LEAN_WHOLE = 1 << SUN_LEAN_SHIFT };
+
+/**
+ * How coarsely a shadow is drawn, as the number of places a world distance is shifted down by.
+ *
+ * The client asks for a resolution and the toolkit keeps the shift that reaches it, so that
+ * turning a world distance into a shadow distance is a shift rather than a divide.
+ */
+int shadowShift(void);
+
+/**
+ * A shadow the client hands between a model and the ground.
+ *
+ * A shadow is the model seen from straight above: one byte per place, holding how many of the
+ * model's faces stand over it. The client asks a model for one, adds it to the ground under the
+ * model, and takes it away again when the model moves.
+ */
+typedef struct Shadow Shadow;
+
+/**
+ * A shadow of the model, using the one given where it is large enough and building one where it
+ * is not. The one given is returned when it was reused.
+ */
+Shadow *shadowOfModel(void *model, Shadow *reuse);
+
+/** Releases a shadow. */
+void shadowRelease(Shadow *shadow);
+
+/** Where the shadow sits, in shadow places, relative to the model's own middle. */
+int shadowLeft(const Shadow *shadow);
+int shadowTop(const Shadow *shadow);
+
+/** How far the shadow reaches, which is one short of how many places it holds. */
+int shadowAcross(const Shadow *shadow);
+int shadowDown(const Shadow *shadow);
+
+const unsigned char *shadowPlaces(const Shadow *shadow);
+
+/** How many places the shadow has room for, which reuse is judged against. */
+int shadowRoom(const Shadow *shadow);
+
+/**
+ * Remembers the toolkit object the client is driving, so that a native can ask it to build an
+ * object the client owns the class of.
+ */
+void toolkitReady(JNIEnv *env, jobject self);
+
+/** An empty shadow object for a native to fill in and hand back to the client. */
+jobject toolkitShadowObject(JNIEnv *env);
+
+Shadow *shadowNew(int width, int height);
+int shadowCanHold(const Shadow *shadow, int width, int height);
+void shadowClear(Shadow *shadow);
+void shadowSetBounds(Shadow *shadow, int left, int top, int right, int bottom);
+
+/** Marks the places one triangle of the flattened model stands over. */
+void shadowMarkTriangle(Shadow *shadow, int downA, int downB, int downC,
+                        int acrossA, int acrossB, int acrossC);
 
 /**
  * How much light everything gets before the sun is taken into account.
@@ -286,7 +407,12 @@ uint32_t pointLitColour(uint32_t colour, const float *place, const Normal *norma
  * repeat flags say which way round a texture carries on past its own edge.
  */
 typedef struct {
-    unsigned short size;
+    /**
+     * The one colour that stands for the whole texture, packed the way the client packs a colour.
+     * It is what a textured face is painted in where the texture itself is not drawn, which is
+     * what the plan view of the ground does.
+     */
+    unsigned short averageColour;
     int alphaBlendMode;
     unsigned char effectType;
     unsigned char effectParam1;

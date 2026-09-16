@@ -35,6 +35,9 @@ typedef struct {
 
     /** How deep the water over the corner is, or nothing where the tile is not underwater. */
     int16_t *depth;
+
+    /** Whether the tile was handed over as one that casts a shadow of its own. */
+    int shadowed;
 } Tile;
 
 /** A light the client has put in the world, which brightens the tiles around it. */
@@ -64,6 +67,21 @@ typedef struct {
     Light *lights;
     int lightCount;
     int lightRoom;
+
+    /**
+     * How much of the sun each place on the ground is kept out of, one byte per place, counting
+     * how many models stand over it.
+     *
+     * The client adds a model's shadow to this when the model is put down and takes it away again
+     * when the model moves, so the ground carries the shadows of everything standing on it and
+     * never has to look at the models themselves.
+     */
+    unsigned char *shade;
+    int shadeAcross;
+    int shadeDown;
+
+    /** Which tiles have had a shadow move over them since their picture was last worked out. */
+    unsigned char *reshade;
 } Ground;
 
 static Ground *groundOf(JNIEnv *env, jobject self) {
@@ -131,6 +149,8 @@ static void groundFree(Ground *ground) {
 
     free(ground->heights);
     free(ground->lights);
+    free(ground->shade);
+    free(ground->reshade);
     free(ground);
 }
 
@@ -177,6 +197,36 @@ static int shiftOf(int size) {
     return shift;
 }
 
+/**
+ * The feature that says the ground takes the shadows of what stands on it, and the one that says
+ * it does not after all. The client passes both for ground it means to draw without shadows, and
+ * the second wins.
+ */
+enum { TAKES_SHADOWS = 0x10, TAKES_NO_SHADOWS = 0x20 };
+
+/**
+ * How far apart two places of the shadow map sit, which is the tile size brought down to the
+ * detail a shadow is drawn at. The map reaches a place beyond the ground each way, so that a
+ * shadow that hangs over the edge still has somewhere to land.
+ */
+enum { SHADE_MARGIN = 2 };
+
+static void takeShadows(Ground *ground) {
+    if ((ground->featureFlags & TAKES_NO_SHADOWS) != 0
+        || (ground->featureFlags & TAKES_SHADOWS) == 0) {
+        return;
+    }
+
+    int shift = shadowShift();
+    ground->shadeAcross = ((ground->tileSize * ground->sizeX) >> shift) + SHADE_MARGIN;
+    ground->shadeDown = ((ground->tileSize * ground->sizeZ) >> shift) + SHADE_MARGIN;
+
+    ground->shade = calloc((size_t) ground->shadeAcross * (size_t) ground->shadeDown,
+                           sizeof(unsigned char));
+    ground->reshade = calloc((size_t) ground->sizeX * (size_t) ground->sizeZ,
+                             sizeof(unsigned char));
+}
+
 JNIEXPORT void JNICALL Java_t_ga(JNIEnv *env, jobject self, jobject toolkit, jobject pool,
                                   jint sizeX, jint sizeZ, jobjectArray heights,
                                   jobjectArray levels, jint tileSize,
@@ -212,6 +262,7 @@ JNIEXPORT void JNICALL Java_t_ga(JNIEnv *env, jobject self, jobject toolkit, job
     }
 
     allocatedGrew((size_t) (sizeX + 1) * (size_t) (sizeZ + 1) * sizeof(int));
+    takeShadows(ground);
     setNativeId(env, self, (jlong) (intptr_t) ground);
 }
 
@@ -336,7 +387,6 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
     (void) waterColour;
     (void) waterDepth;
     (void) waterBias;
-    (void) shadowed;
 
     Ground *ground = groundOf(env, self);
     if (ground == NULL || across == NULL || x < 0 || z < 0
@@ -356,6 +406,7 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
 
     tile->corners = corners;
     tile->faces = corners / 3;
+    tile->shadowed = shadowed == JNI_TRUE;
     tile->across = shortsFrom(env, across, corners);
     tile->along = shortsFrom(env, along, corners);
     tile->texture = shortsFrom(env, texture, corners);
@@ -429,4 +480,278 @@ void groundTileCorner(const void *held, const void *at, int corner, int tileSize
 
 int groundTileSize(const void *held) {
     return ((const Ground *) held)->tileSize;
+}
+
+/**
+ * Marks the places one tile stands over, which is the tile flattened straight down.
+ *
+ * A tile is already given in its own square, so nothing has to be taken off before its corners
+ * are brought down to the detail a shadow is drawn at.
+ */
+static void castTileShadow(const Tile *tile, Shadow *shadow) {
+    int shift = shadowShift();
+
+    for (int face = 0; face < tile->faces; face++) {
+        int first = face * 3;
+
+        int across[3];
+        int down[3];
+        for (int corner = 0; corner < 3; corner++) {
+            across[corner] = tile->across[first + corner] >> shift;
+            down[corner] = tile->along[first + corner] >> shift;
+        }
+
+        int turned = (down[1] - down[2]) * (across[0] - across[1])
+            - (across[2] - across[1]) * (down[1] - down[0]);
+
+        if (turned > 0) {
+            shadowMarkTriangle(shadow, down[0], down[1], down[2],
+                across[0], across[1], across[2]);
+        }
+    }
+}
+
+/**
+ * Where a shadow lands, in shadow places, for a model standing this high above the ground.
+ *
+ * The sun leans, so a model standing above the ground throws its shadow to one side by however
+ * far the sun leans over the height it stands at.
+ */
+static int shadowLands(int place, int height, int lean) {
+    return (place - ((height * lean) >> SUN_LEAN_SHIFT)) >> shadowShift();
+}
+
+/**
+ * Notes that the picture of these tiles has to be worked out again, because a shadow moved over
+ * them. Nothing draws a shadow yet, so nothing reads this back.
+ */
+static void reshadeTiles(Ground *ground, int left, int top, int right, int bottom) {
+    for (int x = left; x <= right; x++) {
+        for (int z = top; z <= bottom; z++) {
+            if (x >= 0 && z >= 0 && x < ground->sizeX && z < ground->sizeZ) {
+                ground->reshade[(size_t) x * (size_t) ground->sizeZ + (size_t) z] = 1;
+            }
+        }
+    }
+}
+
+/**
+ * How many places of the shadow map fall on one tile, which turns the places a shadow moved over
+ * back into the tiles whose picture has to be worked out again.
+ */
+enum { PLACES_PER_TILE_SHIFT = 4 };
+
+/**
+ * Adds a shadow to the ground beneath it, or takes it away again.
+ *
+ * The shadow is a run of places counting how much of the sun each one is kept out of, and the
+ * ground carries the sum over everything standing on it, so putting one down adds its places and
+ * taking it away subtracts them. The run is brought inside the map first, because a model at the
+ * edge of the world throws its shadow past it.
+ */
+static void moveShadow(Ground *ground, const Shadow *shadow, int x, int height, int z, int adding) {
+    if (ground == NULL || ground->shade == NULL || shadow == NULL) {
+        return;
+    }
+
+    int left = shadowLeft(shadow) + 1 + shadowLands(x, height, sunLeanAcross());
+    int top = shadowTop(shadow) + 1 + shadowLands(z, height, sunLeanAlong());
+    int across = shadowAcross(shadow);
+    int down = shadowDown(shadow);
+
+    int from = 0;
+    int skipped = 0;
+
+    if (top <= 0) {
+        int above = 1 - top;
+        down -= above;
+        from += across * above;
+        top = 1;
+    }
+
+    if (top + down >= ground->shadeDown) {
+        down -= top + down - ground->shadeDown + 1;
+    }
+
+    if (left <= 0) {
+        int beside = 1 - left;
+        across -= beside;
+        from += beside;
+        skipped = beside;
+        left = 1;
+    }
+
+    if (left + across >= ground->shadeAcross) {
+        int beyond = left + across - ground->shadeAcross + 1;
+        across -= beyond;
+        skipped += beyond;
+    }
+
+    if (across <= 0 || down <= 0) {
+        return;
+    }
+
+    const unsigned char *places = shadowPlaces(shadow);
+    int room = shadowRoom(shadow);
+    int at = top * ground->shadeAcross + left;
+
+    for (int row = 0; row < down; row++) {
+        for (int column = 0; column < across; column++) {
+            if (from >= 0 && from < room) {
+                if (adding) {
+                    ground->shade[at] = (unsigned char) (ground->shade[at] + places[from]);
+                } else {
+                    ground->shade[at] = (unsigned char) (ground->shade[at] - places[from]);
+                }
+            }
+            at++;
+            from++;
+        }
+        at += ground->shadeAcross - across;
+        from += skipped;
+    }
+
+    reshadeTiles(ground,
+        (left - 1) >> PLACES_PER_TILE_SHIFT,
+        (top - 1) >> PLACES_PER_TILE_SHIFT,
+        (left + across - 2) >> PLACES_PER_TILE_SHIFT,
+        (top + down - 2) >> PLACES_PER_TILE_SHIFT);
+}
+
+/**
+ * Puts a model's shadow on the ground under it.
+ */
+JNIEXPORT void JNICALL Java_t_CA(JNIEnv *env, jobject self, jobject shadow, jint x, jint height,
+                                  jint z, jint unused, jboolean immediate) {
+    (void) unused;
+    (void) immediate;
+
+    moveShadow(groundOf(env, self), (const Shadow *) (intptr_t) nativeIdOf(env, shadow),
+        x, height, z, 1);
+}
+
+/**
+ * Takes a model's shadow off the ground under it, which the client does before the model moves.
+ */
+JNIEXPORT void JNICALL Java_t_wa(JNIEnv *env, jobject self, jobject shadow, jint x, jint height,
+                                  jint z, jint unused, jboolean immediate) {
+    (void) unused;
+    (void) immediate;
+
+    moveShadow(groundOf(env, self), (const Shadow *) (intptr_t) nativeIdOf(env, shadow),
+        x, height, z, 0);
+}
+
+/**
+ * The shadow one tile casts, which is the tile flattened the same way a model is.
+ *
+ * A tile only casts a shadow when it was handed over as one that does, and this client hands
+ * every tile over as one that does not, so nothing comes back.
+ */
+JNIEXPORT jobject JNICALL Java_t_fa(JNIEnv *env, jobject self, jint x, jint z, jobject held) {
+    Ground *ground = groundOf(env, self);
+    if (ground == NULL || x < 0 || z < 0 || x >= ground->sizeX || z >= ground->sizeZ) {
+        return NULL;
+    }
+
+    Tile *tile = *tileAt(ground, x, z);
+    if (tile == NULL || !tile->shadowed) {
+        return NULL;
+    }
+
+    int side = ground->tileSize >> shadowShift();
+
+    Shadow *reuse = held == NULL ? NULL : (Shadow *) (intptr_t) nativeIdOf(env, held);
+    Shadow *shadow;
+
+    if (shadowCanHold(reuse, side, side)) {
+        shadowClear(reuse);
+        shadow = reuse;
+    } else {
+        shadow = shadowNew(side, side);
+        if (shadow == NULL) {
+            return NULL;
+        }
+    }
+
+    shadowSetBounds(shadow, 0, 0, side, side);
+    castTileShadow(tile, shadow);
+
+    if (shadow == reuse) {
+        return held;
+    }
+
+    jobject fresh = toolkitShadowObject(env);
+    if (fresh != NULL) {
+        setNativeId(env, fresh, (jlong) (intptr_t) shadow);
+    }
+
+    return fresh;
+}
+
+int groundTileShift(const void *handle) {
+    return ((const Ground *) handle)->tileShift;
+}
+
+int groundSizeX(const void *handle) {
+    return ((const Ground *) handle)->sizeX;
+}
+
+int groundSizeZ(const void *handle) {
+    return ((const Ground *) handle)->sizeZ;
+}
+
+int groundHeightAt(const void *handle, int x, int z) {
+    return heightAt((const Ground *) handle, x, z);
+}
+
+/**
+ * How high the ground is at a place between its corners, which is the four corners of the tile it
+ * falls in weighed by how near it is to each.
+ */
+int groundHeightBetween(const void *handle, int x, int z) {
+    const Ground *ground = handle;
+    int tileX = x >> ground->tileShift;
+    int tileZ = z >> ground->tileShift;
+
+    if (tileX < 0 || tileZ < 0 || tileX > ground->sizeX - 1 || tileZ > ground->sizeZ - 1) {
+        return 0;
+    }
+
+    int acrossTile = (ground->tileSize - 1) & x;
+    int alongTile = (ground->tileSize - 1) & z;
+
+    int nearer = (acrossTile * heightAt(ground, tileX + 1, tileZ)
+        + (ground->tileSize - acrossTile) * heightAt(ground, tileX, tileZ)) >> ground->tileShift;
+    int further = (heightAt(ground, tileX, tileZ + 1) * (ground->tileSize - acrossTile)
+        + acrossTile * heightAt(ground, tileX + 1, tileZ + 1)) >> ground->tileShift;
+
+    return ((ground->tileSize - alongTile) * nearer + alongTile * further) >> ground->tileShift;
+}
+
+/**
+ * Which texture a face of the tile wears, or nothing where it wears none. The client gives one
+ * texture per face and it is kept beside each of the face's three corners.
+ */
+int groundTileFaceTexture(const void *at, int face) {
+    const Tile *tile = at;
+    if (tile->texture == NULL || face * 3 >= tile->corners) {
+        return -1;
+    }
+
+    return tile->texture[face * 3];
+}
+
+int groundTileFaces(const void *at) {
+    return ((const Tile *) at)->faces;
+}
+
+/**
+ * Where one corner of the tile sits in its own square, and what colour it is.
+ */
+void groundTilePlanCorner(const void *at, int corner, int *across, int *along, uint32_t *colour) {
+    const Tile *tile = at;
+    *across = tile->across[corner];
+    *along = tile->along[corner];
+    *colour = tile->colour[corner];
 }

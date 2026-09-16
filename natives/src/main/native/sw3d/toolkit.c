@@ -131,13 +131,24 @@ const void *cameraMatrix(void) {
     return (const void *) (intptr_t) camera;
 }
 
-/** Where a shadow's detail was last set to. Nothing reads it, because nothing draws a shadow. */
-static int shadowResolution;
+/**
+ * How far the sun leans over one unit of height, and how coarsely a shadow is drawn.
+ */
+static int leanAcross;
+static int leanAlong;
+static int shadowDownShift;
 
 /** What the client last asked for the recording of distance. Nothing reads it either. */
 static int depthWriteAsked;
 
 static Fog fog;
+
+static Underwater water;
+
+/**
+ * The fog colour from before the water went in, which going back up puts back.
+ */
+static uint32_t fogColourAbove;
 
 static Pool *modelPool;
 
@@ -174,6 +185,21 @@ JNIEXPORT void JNICALL Java_oa_ZA(JNIEnv *env, jobject self, jint colour, jfloat
     light.z = z * scale;
     light.intensity = intensity;
     light.reverseIntensity = reverseIntensity;
+
+    /*
+     * How far the sun leans over one unit of height. A shadow is the model dropped straight down
+     * and slid by this much for every unit it stood above the ground.
+     */
+    leanAcross = (int) (light.x * (float) SUN_LEAN_WHOLE / light.y);
+    leanAlong = (int) (light.z * (float) SUN_LEAN_WHOLE / light.y);
+}
+
+int sunLeanAcross(void) {
+    return leanAcross;
+}
+
+int sunLeanAlong(void) {
+    return leanAlong;
 }
 
 JNIEXPORT void JNICALL Java_oa_MA(JNIEnv *env, jobject self, jobject textures,
@@ -183,7 +209,40 @@ JNIEXPORT void JNICALL Java_oa_MA(JNIEnv *env, jobject self, jobject textures,
     (void) a3;
 
     textureCacheReady(env, self);
+    toolkitReady(env, self);
     rasterUse(NULL, 0, 0);
+}
+
+/**
+ * The toolkit object the client is driving, kept so that a native which has to hand a new object
+ * back can ask the client to build one.
+ */
+static jobject client;
+static jmethodID buildShadow;
+
+void toolkitReady(JNIEnv *env, jobject self) {
+    if (client != NULL) {
+        (*env)->DeleteGlobalRef(env, client);
+    }
+    client = (*env)->NewGlobalRef(env, self);
+
+    jclass owner = (*env)->GetObjectClass(env, self);
+    buildShadow = (*env)->GetMethodID(env, owner, "OA", "()Ljava/lang/Object;");
+    (*env)->DeleteLocalRef(env, owner);
+}
+
+/**
+ * An empty shadow object for a native to fill in and hand back.
+ *
+ * Only the client knows which class a shadow is, so it builds one rather than this reaching for
+ * the class by name.
+ */
+jobject toolkitShadowObject(JNIEnv *env) {
+    if (client == NULL || buildShadow == NULL) {
+        return NULL;
+    }
+
+    return (*env)->CallObjectMethod(env, client, buildShadow);
 }
 
 JNIEXPORT void JNICALL Java_oa_ma(JNIEnv *env, jobject self, jlong matrix) {
@@ -435,13 +494,21 @@ const Fog *distanceFog(void) {
 }
 
 /**
- * How finely a shadow is drawn. This toolkit draws none, so the number is only remembered.
+ * How finely a shadow is drawn, as the number of places a world distance is shifted down by to
+ * reach the resolution asked for.
  */
 JNIEXPORT void JNICALL Java_oa_X(JNIEnv *env, jobject self, jint resolution) {
     (void) env;
     (void) self;
 
-    shadowResolution = resolution;
+    shadowDownShift = 0;
+    for (int left = resolution; left > 1; left >>= 1) {
+        shadowDownShift++;
+    }
+}
+
+int shadowShift(void) {
+    return shadowDownShift;
 }
 
 /**
@@ -455,11 +522,68 @@ JNIEXPORT void JNICALL Java_oa_d(JNIEnv *env, jobject self, jint time) {
 }
 
 /**
- * Stops drawing everything as though it were seen through water. Nothing here ever started.
+ * Splits a colour into one channel per lane, each held at 256 times its value.
+ *
+ * The water fades towards this colour, and the fade is worked out in the same scale the rest of
+ * the shading is, so the channels are lifted here once rather than at every pixel.
+ */
+static void towardsColour(uint32_t colour, float *into) {
+    for (int channel = 0; channel < 4; channel++) {
+        into[channel] = (float) (((colour >> (channel * 8)) & 0xff) << 8);
+    }
+}
+
+/**
+ * Starts drawing everything as though it were seen through water.
+ *
+ * The fog colour the water wants goes in over the one above it, which coming back up puts back.
+ * The rasteriser is not told about the new colour here, so the distance fade keeps the colour it
+ * had until something else sets one. That is how this behaves and it is kept.
+ */
+JNIEXPORT void JNICALL Java_oa_ra(JNIEnv *env, jobject self, jint surface, jint colour, jint depth,
+                                   jint bias) {
+    (void) env;
+    (void) self;
+    (void) bias;
+
+    fogColourAbove = fog.colour;
+    fog.colour = (uint32_t) colour;
+
+    water.under = 1;
+    water.surface = (float) surface;
+    water.perDepth = -1.0F / (float) depth;
+    towardsColour((uint32_t) colour, water.towards);
+}
+
+/**
+ * Moves the water the eye is already under, which the client does as the eye rises and falls.
+ */
+JNIEXPORT void JNICALL Java_oa_EA(JNIEnv *env, jobject self, jint surface, jint colour, jint depth,
+                                   jint bias) {
+    (void) env;
+    (void) self;
+    (void) bias;
+
+    fog.colour = (uint32_t) colour;
+
+    water.surface = (float) surface;
+    water.perDepth = -1.0F / (float) depth;
+    towardsColour((uint32_t) colour, water.towards);
+}
+
+/**
+ * Stops drawing everything as though it were seen through water.
  */
 JNIEXPORT void JNICALL Java_oa_pa(JNIEnv *env, jobject self) {
     (void) env;
     (void) self;
+
+    fog.colour = fogColourAbove;
+    water.under = 0;
+}
+
+const Underwater *underwater(void) {
+    return &water;
 }
 
 /**

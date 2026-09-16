@@ -200,9 +200,12 @@ static Corner onTexture(Corner corner, float u, float v) {
  * mesh carries texture spaces places its textures by those instead, and nothing here reads one
  * yet, so such a model is textured as though it carried none.
  */
+/** The last texel of a texture each way, and the mask that wraps a coordinate back onto it. */
+enum { TEXTURE_EDGE = 127 };
+
 static const float FACE_CORNERS[3][2] = {
-    { 0.0f, 127.0f },
-    { 127.0f, 127.0f },
+    { 0.0f, (float) TEXTURE_EDGE },
+    { (float) TEXTURE_EDGE, (float) TEXTURE_EDGE },
     { 0.0f, 0.0f }
 };
 
@@ -295,9 +298,6 @@ static int distanceDecides = 1;
  */
 static const uint32_t *texels;
 static int texelsRepeat;
-
-/** How wide a texture is, and the mask that wraps a coordinate back onto it. */
-enum { TEXTURE_EDGE = 127 };
 
 /**
  * Where on its texture one pixel of a span reads from.
@@ -1777,4 +1777,141 @@ JNIEXPORT void JNICALL Java_a_O(JNIEnv *env, jobject self, jlong worker, jobject
     free(colours);
     free(sizes);
     free(textures);
+}
+
+/**
+ * What the size of a tile on the plan is held out of.
+ *
+ * The client asks for the plan at a size it gives in two hundred and fifty sixths of a pixel, so
+ * that a map can be drawn at less than one pixel to the tile without the size being nothing.
+ */
+enum { PLAN_SHIFT = 8, PLAN_WHOLE = 1 << PLAN_SHIFT };
+
+/**
+ * Stands for a face whose corners each keep the colour the client gave them, which is every face
+ * that wears no texture.
+ */
+static const uint32_t NO_PAINT = 0xffffffffu;
+
+/**
+ * What one corner of a tile looks like from straight above.
+ */
+static Corner planCorner(const void *tile, int corner, float across, float down, float width,
+                         int size, uint32_t paint) {
+    int alongX;
+    int alongZ;
+    uint32_t colour;
+    groundTilePlanCorner(tile, corner, &alongX, &alongZ, &colour);
+
+    if (paint != NO_PAINT) {
+        colour = paint;
+    }
+
+    float x = across + (float) alongX * width / (float) size;
+    float y = down - (float) alongZ * width / (float) size;
+
+    return flatCorner((int) x - raster.clipLeft, (int) y - raster.clipTop, colour);
+}
+
+/**
+ * The colour a whole face is painted in the plan, or nothing where each corner keeps its own.
+ *
+ * A textured face shows as the one colour that stands for its texture rather than as the texture
+ * itself, because a tile on the plan is a handful of pixels across and a texture drawn that small
+ * says nothing.
+ */
+static uint32_t planPaint(const void *tile, int face) {
+    int texture = groundTileFaceTexture(tile, face);
+    if (texture == -1) {
+        return NO_PAINT;
+    }
+
+    const TextureMetrics *metrics = textureMetricsFor(texture);
+    if (metrics == NULL || metrics->disableable) {
+        return NO_PAINT;
+    }
+
+    return colourOf(metrics->averageColour);
+}
+
+/**
+ * Draws one tile of the ground as it looks from straight above.
+ */
+static void renderTilePlan(const void *ground, const void *tile, float across, float down,
+                           float width) {
+    int size = groundTileSize(ground);
+
+    for (int face = 0; face < groundTileFaces(tile); face++) {
+        uint32_t paint = planPaint(tile, face);
+
+        fillTriangle(
+            planCorner(tile, face * 3, across, down, width, size, paint),
+            planCorner(tile, face * 3 + 1, across, down, width, size, paint),
+            planCorner(tile, face * 3 + 2, across, down, width, size, paint));
+    }
+}
+
+/**
+ * Draws a patch of the ground as it looks from straight above, which is the map.
+ *
+ * The ground runs left to right across the picture and bottom to top up it, so the first row is
+ * drawn at the bottom and each one after it a tile higher. The client says which tiles are worth
+ * drawing, one row of flags per row of tiles, because most of the world is behind something.
+ *
+ * Nothing here reads or writes how far away a pixel is. A tile drawn later covers one drawn
+ * earlier, which is what putting the rows in this order is for.
+ */
+JNIEXPORT void JNICALL Java_a_ta(JNIEnv *env, jobject self, jlong worker, jlong ground,
+                                  jint originAcross, jint originDown, jint size,
+                                  jint fromX, jint fromZ, jint toX, jint toZ,
+                                  jobjectArray visible) {
+    (void) self;
+    (void) worker;
+
+    const void *held = (const void *) (intptr_t) ground;
+    if (held == NULL || raster.pixels == NULL) {
+        return;
+    }
+
+    float width = (float) (size / PLAN_WHOLE);
+
+    /*
+     * Where the bottom row of the plan sits, which is as far below the top as the rows reach.
+     * It is rounded towards nothing rather than downwards, so a patch drawn back to front sits
+     * where the same patch drawn the right way round does.
+     */
+    float bottom = (float) originDown + (float) ((toZ - fromZ) * size / PLAN_WHOLE);
+
+    distanceDecides = 0;
+
+    for (int x = fromX; x < toX; x++) {
+        float across = (float) originAcross + width * (float) (x - fromX);
+
+        jbooleanArray row = visible == NULL
+            ? NULL
+            : (jbooleanArray) (*env)->GetObjectArrayElement(env, visible, x - fromX);
+
+        if (row != NULL) {
+            jboolean *flags = (*env)->GetBooleanArrayElements(env, row, NULL);
+            float down = bottom;
+
+            for (int z = fromZ; z < toZ; z++) {
+                int corners;
+                const void *tile = groundTile(held, x, z, &corners);
+
+                if (flags != NULL && flags[z - fromZ] && tile != NULL) {
+                    renderTilePlan(held, tile, across, down, width);
+                }
+
+                down -= width;
+            }
+
+            if (flags != NULL) {
+                (*env)->ReleaseBooleanArrayElements(env, row, flags, JNI_ABORT);
+            }
+            (*env)->DeleteLocalRef(env, row);
+        }
+    }
+
+    distanceDecides = 1;
 }
