@@ -213,6 +213,40 @@ uint32_t unlitColour(int hsl, int ambient);
 uint32_t sunlitColour(uint32_t unlit, const Normal *normal, float strength);
 
 /**
+ * How many lights the toolkit may be given a place for. Asking for more keeps the first four.
+ */
+enum { POINT_LIGHTS = 4 };
+
+/**
+ * A light with a place in the world, as opposed to the sun, which only has a direction.
+ *
+ * The place is kept as four floats so that it can be read a whole register at a time, and the
+ * fourth is never looked at. The reach is the range squared, scaled, which is the only form the
+ * light is ever used in.
+ */
+typedef struct {
+    float place[4];
+    float reach;
+    uint32_t colour;
+} PointLight;
+
+/**
+ * How many lights the client has given places for, between none and four.
+ */
+int pointLightCount(void);
+
+const PointLight *pointLight(int which);
+
+/**
+ * The colour a corner takes once the lights near it are added to the colour it already has.
+ *
+ * The places are the lights brought into the model's own frame, one per light, because a model
+ * is drawn with its vertices where the model keeps them rather than where they end up.
+ */
+uint32_t pointLitColour(uint32_t colour, const float *place, const Normal *normal,
+    const float places[][4]);
+
+/**
  * The matrix the world is seen through, or null before the client has given one.
  */
 const void *cameraMatrix(void);
@@ -250,6 +284,14 @@ const short *modelFaceA(const void *handle);
 const short *modelFaceB(const void *handle);
 const short *modelFaceC(const void *handle);
 const short *modelFaceColour(const void *handle);
+/**
+ * Whether the client built this model to be drawn with the directions its vertices face.
+ *
+ * A model built without that is never reached by a light with a place, however many places the
+ * client has given the toolkit.
+ */
+int modelNeedsNormals(const void *handle);
+
 const Normal *modelNormals(const void *handle);
 const Normal *modelFaceNormals(const void *handle);
 const uint32_t *modelShade(void *handle);

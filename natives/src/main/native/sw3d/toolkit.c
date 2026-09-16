@@ -495,3 +495,66 @@ JNIEXPORT void JNICALL Java_oa_GA(JNIEnv *env, jobject self, jint colour) {
         raster.pixels[i] = value;
     }
 }
+
+static PointLight lights[POINT_LIGHTS];
+static int litCount;
+
+int pointLightCount(void) {
+    return litCount;
+}
+
+const PointLight *pointLight(int which) {
+    return &lights[which];
+}
+
+/**
+ * Gives the toolkit the lights that have a place in the world.
+ *
+ * Five whole numbers describe each light: where it is, how far it reaches, and what colour it
+ * is. The strengths come separately as floats, one per light, and a strength above one is taken
+ * as one.
+ *
+ * Only the first four are kept. A count above four is cut to four, and the strength array is
+ * read for as many lights as are kept.
+ */
+JNIEXPORT void JNICALL Java_oa_N(JNIEnv *env, jobject self, jint count, jintArray described,
+        jfloatArray strengths) {
+    (void) self;
+
+    int kept = count < POINT_LIGHTS ? count : POINT_LIGHTS;
+    litCount = kept;
+
+    if (kept <= 0 || described == NULL || strengths == NULL) {
+        return;
+    }
+
+    jint *places = (*env)->GetIntArrayElements(env, described, NULL);
+    jfloat *strong = (*env)->GetFloatArrayElements(env, strengths, NULL);
+
+    if (places != NULL && strong != NULL) {
+        for (int light = 0; light < kept; light++) {
+            const jint *described5 = &places[(size_t) light * 5];
+            PointLight *into = &lights[light];
+
+            into->place[0] = (float) described5[0];
+            into->place[1] = (float) described5[1];
+            into->place[2] = (float) described5[2];
+            into->place[3] = 0.0f;
+
+            /* One is the most a strength counts for, and a strength that is not a number is kept. */
+            float held = 1.0f < strong[light] ? 1.0f : strong[light];
+            uint32_t range = (uint32_t) described5[3];
+
+            into->reach = (float) (int32_t) (range * range) * held * 256.0f;
+            into->colour = (uint32_t) described5[4];
+        }
+    }
+
+    if (places != NULL) {
+        (*env)->ReleaseIntArrayElements(env, described, places, JNI_ABORT);
+    }
+
+    if (strong != NULL) {
+        (*env)->ReleaseFloatArrayElements(env, strengths, strong, JNI_ABORT);
+    }
+}

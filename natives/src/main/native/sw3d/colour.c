@@ -11,6 +11,10 @@
 
 #include <math.h>
 
+#if defined(__SSE__) || defined(_M_X64)
+#include <xmmintrin.h>
+#endif
+
 #include "sw3d.h"
 
 enum {
@@ -143,4 +147,116 @@ uint32_t sunlitColour(uint32_t unlit, const Normal *normal, float strength) {
     int blue = (scale * (int) (((unlit & 0xFF) * light->blue) >> 8)) >> 8;
 
     return ((uint32_t) held(red) << 16) | ((uint32_t) held(green) << 8) | (uint32_t) held(blue);
+}
+
+/**
+ * The processor's approximate reciprocal square root.
+ *
+ * A light falls off by the cube of the distance, and the toolkit reaches that by asking for both
+ * approximations and multiplying them rather than by taking a root. Both approximations carry
+ * about twelve bits, so the answer differs from a true one often enough to decide a colour.
+ */
+static float reciprocalRoot(float value) {
+#if defined(__SSE__) || defined(_M_X64)
+    return _mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(value)));
+#else
+    return 1.0f / sqrtf(value);
+#endif
+}
+
+static float approximateReciprocal(float value) {
+#if defined(__SSE__) || defined(_M_X64)
+    return _mm_cvtss_f32(_mm_rcp_ss(_mm_set_ss(value)));
+#else
+    return 1.0f / value;
+#endif
+}
+
+/** The four bytes of a colour, in the order they sit in a pixel. */
+static void spread(uint32_t colour, float *into) {
+    for (int channel = 0; channel < 4; channel++) {
+        into[channel] = (float) ((colour >> (channel * 8)) & 0xFF);
+    }
+}
+
+/**
+ * A light brought back into a byte.
+ *
+ * The toolkit gets there in three steps and each one is visible in the answer: the light is
+ * rounded to a whole number, held to a signed short, and then held to an unsigned byte. A light
+ * too large for a whole number rounds to the smallest one there is, which the two holds then
+ * turn into black rather than white.
+ */
+static uint32_t squeeze(float value) {
+    int whole;
+    if (value >= -2147483648.0f && value < 2147483648.0f) {
+        whole = (int) nearbyintf(value);
+    } else {
+        whole = -2147483647 - 1;
+    }
+
+    if (whole < -32768) {
+        whole = -32768;
+    } else if (whole > 32767) {
+        whole = 32767;
+    }
+
+    if (whole < 0) {
+        whole = 0;
+    } else if (whole > 255) {
+        whole = 255;
+    }
+
+    return (uint32_t) whole;
+}
+
+uint32_t pointLitColour(uint32_t colour, const float *place, const Normal *normal,
+        const float places[][4]) {
+    int lights = pointLightCount();
+    if (lights == 0) {
+        return colour;
+    }
+
+    float lit[4];
+    spread(colour, lit);
+
+    /*
+     * The colour of a light is a fraction of the colour already there rather than an addition to
+     * it, so the two are multiplied and brought back down by the largest a pair of bytes can be.
+     */
+    float share[4];
+    for (int channel = 0; channel < 4; channel++) {
+        share[channel] = lit[channel] * (1.0f / 65535.0f);
+    }
+
+    for (int light = 0; light < lights; light++) {
+        /*
+         * How much of the light reaches the surface depends only on which way the surface faces,
+         * so the direction is taken as a unit one. A vertex facing nowhere has no length to
+         * divide by, and the division leaves something that is not a number, which the hold at
+         * nothing below turns into no light at all.
+         */
+        float towardsX = places[light][0] - place[0];
+        float towardsY = places[light][1] - place[1];
+        float towardsZ = places[light][2] - place[2];
+
+        float away = towardsX * towardsX + towardsY * towardsY + towardsZ * towardsZ;
+        float facing = (towardsX * normal->x + towardsY * normal->y + towardsZ * normal->z)
+            / normal->magnitude;
+
+        facing = facing > 0.0f ? facing : 0.0f;
+
+        float falls = approximateReciprocal(away) * reciprocalRoot(away);
+        float reach = facing * pointLight(light)->reach * falls;
+
+        float tint[4];
+        spread(pointLight(light)->colour, tint);
+
+        for (int channel = 0; channel < 4; channel++) {
+            lit[channel] += tint[channel] * share[channel] * reach;
+        }
+    }
+
+    return (squeeze(lit[3]) << 24) | (squeeze(lit[2]) << 16)
+        | (squeeze(lit[1]) << 8) | squeeze(lit[0]);
 }

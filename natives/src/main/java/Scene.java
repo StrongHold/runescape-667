@@ -60,6 +60,7 @@ public sealed interface Scene {
         new Turned(),
         new Copied(),
         new Animated(),
+        new PointLit(),
         new Terrain()
     );
 
@@ -666,6 +667,70 @@ public sealed interface Scene {
 
             props.ground().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
                 HandGround.TILES, visible, false, 0);
+        }
+    }
+
+    /**
+     * Models standing among lights that have a place in the world rather than only a direction.
+     *
+     * The client never asks for these, so the only way they are ever drawn is to ask for them
+     * here. Five are handed over and only four may be kept, one strength is above the one that
+     * counts as full, and one light sits behind the models so that the side facing away from it
+     * takes nothing from it.
+     */
+    record PointLit() implements Scene {
+
+        /** Where the models stand, and how far apart. */
+        private static final int APART = 260;
+
+        private static final int[] LIGHTS = {
+            -140, -80, DEPTH - 150, 90, 0xFF4040,
+            160, 60, DEPTH - 120, 110, 0x40FF60,
+            0, -200, DEPTH, 140, 0x8080FF,
+            -60, 120, DEPTH + 260, 120, 0xFFC020,
+            400, 400, DEPTH, 200, 0xFFFFFF
+        };
+
+        private static final float[] STRENGTHS = {1.0F, 0.45F, 2.5F, 0.8F, 1.0F};
+
+        /**
+         * A model only meets these lights if it was built asking for the directions its vertices
+         * face, which is a feature the scenes drawn by a lit model do not otherwise need.
+         */
+        private static final int FACING = 0x10;
+
+        private static final int FUNCTIONS = 2048;
+
+        private static final int FEATURES = 64;
+
+        private static final int AMBIENT = 64;
+
+        private static final int CONTRAST = 768;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            var facing = toolkit.createModel(props.mesh(), FUNCTIONS, FEATURES | FACING,
+                AMBIENT, CONTRAST);
+
+            var software = (oa) toolkit;
+            software.N(LIGHTS.length / 5, LIGHTS, STRENGTHS);
+
+            for (var step = 0; step < 3; step++) {
+                props.matrix().makeRotationZ(0);
+                props.matrix().rotateAxisY(step * TURN / 3);
+                props.matrix().translate((step - 1) * APART, 0, DEPTH);
+                facing.render(props.matrix(), null, 1);
+            }
+
+            /* The model that did not ask to face anywhere takes nothing from the lights. */
+            props.matrix().makeRotationZ(0);
+            props.matrix().applyTranslation(0, -190, DEPTH);
+            props.simple().render(props.matrix(), null, 1);
+
+            software.N(0, LIGHTS, STRENGTHS);
         }
     }
 

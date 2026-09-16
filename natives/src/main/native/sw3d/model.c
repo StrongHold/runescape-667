@@ -1832,6 +1832,10 @@ int modelFaceIsFlat(const void *handle, int face) {
     return model->shadingType != NULL && model->shadingType[face] != 0;
 }
 
+int modelNeedsNormals(const void *handle) {
+    return (((const Model *) handle)->features & NEEDS_NORMALS) != 0;
+}
+
 int modelAmbient(const void *handle) {
     return ((const Model *) handle)->ambient;
 }

@@ -531,6 +531,52 @@ static void pickingCylinder(void *model, const float *seen, int zoom, jint *into
 /**
  * Draws one model through one matrix.
  */
+/**
+ * Where each light sits in the model's own frame.
+ *
+ * A model is drawn from the vertices it keeps rather than from where they end up, so the lights
+ * come to the model instead. The matrix is turned about by reading it down its columns, which is
+ * the undoing of it for as long as the client only ever turns and moves a model.
+ */
+static void bringLightsIn(const float *rows, int lights, float nearby[][4]) {
+    for (int light = 0; light < lights; light++) {
+        const PointLight *lit = pointLight(light);
+
+        float acrossFrom = lit->place[0] - rows[12];
+        float downFrom = lit->place[1] - rows[13];
+        float awayFrom = lit->place[2] - rows[14];
+
+        for (int lane = 0; lane < 4; lane++) {
+            nearby[light][lane] = acrossFrom * rows[lane * 4]
+                + downFrom * rows[lane * 4 + 1]
+                + awayFrom * rows[lane * 4 + 2];
+        }
+    }
+}
+
+/**
+ * One corner's colour once the lights near it are added.
+ *
+ * A face the model said to shade flat faces the way the face does, and every other corner faces
+ * the way its vertex does, which is the same choice the sun is worked out with.
+ */
+static uint32_t litByNearby(void *model, int face, int vertex, uint32_t colour,
+        const float nearby[][4]) {
+    const Normal *normals = modelFaceIsFlat(model, face)
+        ? modelFaceNormals(model)
+        : modelNormals(model);
+
+    if (normals == NULL) {
+        return colour;
+    }
+
+    const float *held = modelVertices(model);
+    const float *place = &held[(size_t) vertex * MODEL_VERTEX_STRIDE];
+    const Normal *normal = modelFaceIsFlat(model, face) ? &normals[face] : &normals[vertex];
+
+    return pointLitColour(colour, place, normal, nearby);
+}
+
 static void renderModel(void *model, const void *matrix, jint *cylinder) {
     if (model == NULL || matrix == NULL || raster.pixels == NULL || raster.depths == NULL) {
         return;
@@ -564,6 +610,10 @@ static void renderModel(void *model, const void *matrix, jint *cylinder) {
     }
 
     free(combined);
+
+    float nearby[POINT_LIGHTS][4];
+    int lights = modelNeedsNormals(model) ? pointLightCount() : 0;
+    bringLightsIn(matrixRows(matrix), lights, nearby);
 
     if (raster.pixels == NULL || raster.depths == NULL) {
         return;
@@ -640,10 +690,24 @@ static void renderModel(void *model, const void *matrix, jint *cylinder) {
             ? unlitColour(faceColour == NULL ? 0 : faceColour[face] & 0xFFFF, modelAmbient(model))
             : 0;
 
+        uint32_t colours[3];
+        for (int corner = 0; corner < 3; corner++) {
+            colours[corner] = shade == NULL ? unlit : shade[face * 3 + corner];
+        }
+
+        if (lights > 0) {
+            const short *corners[3] = {faceA, faceB, faceC};
+
+            for (int corner = 0; corner < 3; corner++) {
+                colours[corner] = litByNearby(model, face, corners[corner][face],
+                    colours[corner], nearby);
+            }
+        }
+
         fillTriangle(
-            cornerAt(a, shade == NULL ? unlit : shade[face * 3]),
-            cornerAt(b, shade == NULL ? unlit : shade[face * 3 + 1]),
-            cornerAt(c, shade == NULL ? unlit : shade[face * 3 + 2]));
+            cornerAt(a, colours[0]),
+            cornerAt(b, colours[1]),
+            cornerAt(c, colours[2]));
     }
 }
 
