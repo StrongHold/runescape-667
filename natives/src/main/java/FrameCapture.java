@@ -89,7 +89,9 @@ public final class FrameCapture {
             gradient,
             toolkit.createModel(CacheMesh.anyUntextured(MODEL_FACES), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
             toolkit.createModel(fewFaces(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
-            toolkit.createMatrix());
+            toolkit.createMatrix(),
+            toolkit.createFont(HandFont.metrics(), HandFont.letters(), true),
+            toolkit.createFont(HandFont.metrics(), HandFont.letters(), false));
 
         var manifest = new ArrayList<String>();
 

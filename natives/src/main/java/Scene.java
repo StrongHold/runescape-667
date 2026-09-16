@@ -1,3 +1,4 @@
+import com.jagex.graphics.Font;
 import com.jagex.graphics.Matrix;
 import com.jagex.graphics.Model;
 import com.jagex.graphics.Sprite;
@@ -46,14 +47,16 @@ public sealed interface Scene {
         new SubClip(),
         new ReadBack(),
         new SpriteMatrix(),
-        new IndexedSprites()
+        new IndexedSprites(),
+        new Text()
     );
 
     /**
      * What every scene is given. A scene uses what it needs and ignores the rest, which keeps one
      * scene from having to know what another one wanted.
      */
-    record Props(Sprite gradient, Model model, Model simple, Matrix matrix) {
+    record Props(Sprite gradient, Model model, Model simple, Matrix matrix,
+                 Font mono, Font proportional) {
         /* empty */
     }
 
@@ -259,6 +262,42 @@ public sealed interface Scene {
             props.matrix().makeRotationZ(0);
             props.matrix().translate(across, 0, away);
             props.model().render(props.matrix(), null, 1);
+        }
+    }
+
+    /**
+     * Text, in both kinds of font, in several colours, with and without a shadow behind it.
+     *
+     * A monospaced font is drawn in the colour the client gives and a proportional one in the
+     * colours the font came with, so a colour that reaches the wrong one of those shows here. The
+     * last line of each runs off the right edge and the first sits above the top, because a letter
+     * is clipped a letter at a time and the edges are where that goes wrong.
+     */
+    record Text() implements Scene {
+
+        private static final String LINE = "Wg,ij AZ 019 {}[]|/\\ mmm iii";
+
+        private static final int[] COLOURS = {0xFFFFFF, 0xFF3311, 0x33CC11, 0x000000, 0x8040FF};
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.aa(0, 0, WIDTH, HEIGHT, 0xFF303048, 0);
+            toolkit.aa(0, 90, WIDTH, 60, 0xFF906030, 0);
+
+            for (var line = 0; line < COLOURS.length; line++) {
+                var y = line * 26 - 4;
+                props.mono().render(LINE, 10, y, COLOURS[line], -1);
+                props.mono().render(LINE, 300, y + 12, COLOURS[line], 0x000000);
+            }
+
+            for (var line = 0; line < COLOURS.length; line++) {
+                var y = 150 + line * 26;
+                props.proportional().render(LINE, 10, y, COLOURS[line], -1);
+                props.proportional().render(LINE, 300, y + 12, COLOURS[line], 0x000000);
+            }
+
+            props.mono().render(LINE, WIDTH - 40, HEIGHT - 20, 0xFFFFFF, 0x000000);
+            props.proportional().render(LINE, -60, HEIGHT - 8, 0xFFFFFF, -1);
         }
     }
 
