@@ -59,7 +59,7 @@ public final class oa extends Toolkit implements SoftwareObject {
     public int anInt6770;
 
     @OriginalMember(owner = "client!oa", name = "nativeid", descriptor = "J")
-    public final long nativeid = 0L;
+    public long nativeid = 0L;
 
     @OriginalMember(owner = "client!oa", name = "F", descriptor = "Z")
     public boolean aBoolean509 = false;

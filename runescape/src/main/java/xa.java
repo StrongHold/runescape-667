@@ -9,7 +9,7 @@ import org.openrs2.deob.annotation.OriginalMember;
 public final class xa implements DepthBuffer, SoftwareObject {
 
     @OriginalMember(owner = "client!xa", name = "nativeid", descriptor = "J")
-    public final long nativeid = 0L;
+    public long nativeid = 0L;
 
     @OriginalMember(owner = "client!xa", name = "<init>", descriptor = "(II)V")
     public xa(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) {

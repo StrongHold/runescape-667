@@ -1078,3 +1078,15 @@ JNIEXPORT void JNICALL Java_j_ma(JNIEnv *env, jobject self, jobject toolkit, jin
 
     setNativeId(env, self, (jlong) (intptr_t) sprite);
 }
+
+int spriteWidthOf(const void *handle) {
+    return ((const Sprite *) handle)->width;
+}
+
+int spriteHeightOf(const void *handle) {
+    return ((const Sprite *) handle)->height;
+}
+
+uint32_t *spritePixelsOf(void *handle) {
+    return ((Sprite *) handle)->pixels;
+}

@@ -63,6 +63,7 @@ public sealed interface Scene {
         new Animated(),
         new PointLit(),
         new Flattened(),
+        new Offscreen(),
         new Terrain()
     );
 
@@ -776,6 +777,56 @@ public sealed interface Scene {
                 props.matrix().translate((step - 1) * APART - APART / 2, 0, DEPTHS[step]);
                 props.model().renderOrtho(props.matrix(), null, SIZES[step], 0);
             }
+        }
+    }
+
+    /**
+     * Drawing somewhere other than the window, and bringing the result back.
+     *
+     * The client pairs a sprite with a buffer of distances and hands the pair over as a surface.
+     * Everything drawn afterwards lands on the sprite instead, with the middle of the picture
+     * moved to the middle of it, until the canvas is named again.
+     *
+     * A rectangle is copied out of the window first and back again afterwards, colours and
+     * distances together, so a surface that carried the distances across covers what it covered
+     * before rather than only what was drawn over it.
+     */
+    record Offscreen() implements Scene {
+
+        private static final int SIDE = 192;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, DEPTH * 8);
+
+            var sprite = toolkit.createSprite(SIDE, SIDE, false);
+            var surface = toolkit.createOffscreenSurface(sprite,
+                toolkit.method7986(SIDE, SIDE));
+
+            toolkit.swapSurface(surface);
+
+            /* The buffer of distances comes as it was found, so it is cleared before use. */
+            toolkit.ya();
+            toolkit.fillRect(0, 0, SIDE, SIDE, 0xFF203060);
+            toolkit.fillRect(10, 10, 80, 60, 0xFF44CC44);
+
+            props.matrix().makeRotationZ(0);
+            props.matrix().rotateAxisY(TURN / 8);
+            props.matrix().applyTranslation(0, 40, DEPTH);
+            props.model().render(props.matrix(), null, 1);
+
+            toolkit.restoreSurface();
+
+            /*
+             * The window is painted again from here, because what a surface swap leaves behind
+             * in it is not settled.
+             */
+            toolkit.fillRect(0, 0, WIDTH, HEIGHT, CLEAR_COLOUR | 0xFF000000);
+            toolkit.fillRect(20, 20, 300, 120, 0xFF2266AA);
+
+            surface.method9040(0, 0, SIDE, SIDE, 280, 150);
+            sprite.render(20, 250);
         }
     }
 

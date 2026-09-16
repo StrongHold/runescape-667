@@ -142,6 +142,13 @@ static Corner cornerAt(const Projected *point, uint32_t colour) {
         corner.colour[part] = (uint16_t) ((colour >> (part * 8) & 0xFF) << 8);
     }
 
+    /*
+     * A face is laid down solid. The colour a model is shaded with carries nothing in its top
+     * byte, and the window pays no attention to that byte, but a surface the client later draws
+     * as a sprite does, so what is written there has to say solid rather than say nothing.
+     */
+    corner.colour[3] = 0xFF00;
+
     return corner;
 }
 

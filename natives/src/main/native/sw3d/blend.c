@@ -9,7 +9,7 @@
 
 uint32_t blend(uint32_t destination, uint32_t colour, int mode) {
     if (mode == BLEND_OPAQUE) {
-        return colour & 0xFFFFFF;
+        return colour;
     }
 
     if (mode == BLEND_ADD) {
@@ -29,7 +29,7 @@ uint32_t blend(uint32_t destination, uint32_t colour, int mode) {
      * one short of the colour asked for.
      */
     if (alpha == 255) {
-        return colour & 0xFFFFFF;
+        return colour;
     }
 
     /*

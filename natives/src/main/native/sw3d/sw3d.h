@@ -56,6 +56,14 @@ typedef struct {
      * and does arithmetic on it, such as fog, needs the toolkit's.
      */
     float *depths;
+
+    /**
+     * The buffer of distances the toolkit keeps for the window, which is the one it may grow.
+     *
+     * Drawing into a surface of the client's own borrows that client's buffer instead, and the
+     * borrowed one must not be grown or given back, so the two are kept apart.
+     */
+    float *ownDepths;
     int depthRoom;
 } Raster;
 
@@ -68,6 +76,12 @@ extern Raster raster;
  * Points the renderer at a buffer, or at nothing, and opens the clip over all of it.
  */
 void rasterUse(uint32_t *pixels, int width, int height);
+
+/**
+ * Points the renderer at a surface of the client's own, along with the client's own buffer of
+ * distances. Neither is grown and neither is given back here.
+ */
+void rasterBorrow(uint32_t *pixels, float *depths, int width, int height);
 
 void rasterResetClip(void);
 
@@ -127,6 +141,12 @@ typedef struct {
 } Projection;
 
 const Projection *projection(void);
+
+/**
+ * Puts the middle of the picture at the middle of a surface this size, and works out where its
+ * four edges are. The scale is left as it is.
+ */
+void projectionMiddled(int width, int height);
 
 /**
  * The colour the distance fades everything towards, and how far away the fade is complete.
@@ -330,6 +350,18 @@ int surfaceHeight(Surface *surface);
 /**
  * The handle an object of the toolkit carries, which every class in it names `nativeid`.
  */
+/**
+ * A buffer of how far away each pixel is, belonging to a surface the client draws into rather
+ * than to the window.
+ */
+int spriteWidthOf(const void *handle);
+int spriteHeightOf(const void *handle);
+uint32_t *spritePixelsOf(void *handle);
+
+int distanceBufferWidth(const void *handle);
+int distanceBufferHeight(const void *handle);
+float *distanceBufferRows(void *handle);
+
 jlong nativeIdOf(JNIEnv *env, jobject owner);
 void setNativeId(JNIEnv *env, jobject owner, jlong value);
 

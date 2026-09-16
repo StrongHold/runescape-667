@@ -28,15 +28,24 @@ void rasterUse(uint32_t *pixels, int width, int height) {
 
     int wanted = width * height;
     if (raster.depthRoom < wanted) {
-        float *grown = realloc(raster.depths, (size_t) wanted * sizeof(float));
+        float *grown = realloc(raster.ownDepths, (size_t) wanted * sizeof(float));
         if (grown != NULL) {
             allocatedGrew((size_t) (wanted - raster.depthRoom) * sizeof(float));
-            raster.depths = grown;
+            raster.ownDepths = grown;
             raster.depthRoom = wanted;
         }
     }
 
+    raster.depths = raster.ownDepths;
     depthClear(0, 0, width, height, FURTHEST);
+}
+
+void rasterBorrow(uint32_t *pixels, float *depths, int width, int height) {
+    raster.pixels = pixels;
+    raster.depths = depths;
+    raster.width = width;
+    raster.height = height;
+    rasterResetClip();
 }
 
 float *depthRow(int y) {
@@ -230,6 +239,16 @@ JNIEXPORT void JNICALL Java_oa_DA(JNIEnv *env, jobject self, jint x, jint y,
  * How close and how far a thing may be before it is cut away. Nothing is drawn until the client
  * has said, and it does not complain when it has not.
  */
+void projectionMiddled(int width, int height) {
+    view.centreX = (float) width * 0.5f;
+    view.centreY = (float) height * 0.5f;
+
+    view.leftEdge = 0.0f - view.centreX;
+    view.rightEdge = (float) width - view.centreX;
+    view.topEdge = 0.0f - view.centreY;
+    view.bottomEdge = (float) height - view.centreY;
+}
+
 JNIEXPORT void JNICALL Java_oa_f(JNIEnv *env, jobject self, jint near, jint far) {
     (void) env;
     (void) self;
@@ -446,7 +465,8 @@ Pool *modelPoolInUse(void) {
  * when it is changing which toolkit it draws through.
  */
 static void releaseEverything(void) {
-    free(raster.depths);
+    free(raster.ownDepths);
+    raster.ownDepths = NULL;
     raster.depths = NULL;
     raster.depthRoom = 0;
     rasterUse(NULL, 0, 0);
