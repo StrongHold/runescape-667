@@ -261,6 +261,88 @@ JNIEXPORT void JNICALL Java_n_fa(JNIEnv *env, jobject self, jchar which, jint x,
     }
 }
 
+/**
+ * Puts a letter down only where a mask lets it through.
+ *
+ * Both kinds of font narrow a row to what the mask allows the same way, so which colours the ink
+ * takes is the only thing that still differs between them.
+ */
+static void plotMasked(JNIEnv *env, jobject self, int which, int x, int y, int colour,
+                       int flat, jobject held, int across, int down) {
+    Font *font = fontOf(env, self);
+    const Letter *letter = letterOf(font, which);
+    const void *mask = (const void *) (intptr_t) nativeIdOf(env, held);
+    Placed placed;
+
+    if (letter == NULL || mask == NULL || raster.pixels == NULL || !place(letter, x, y, &placed)) {
+        return;
+    }
+
+    /*
+     * A colour asking for no alpha at all is not turned away here, the way it is when no mask is
+     * given. It goes through the blend, which takes all of the colour away and leaves the buffer
+     * scaled by two hundred and fifty five, one part lower than it was.
+     */
+    int alpha = (int) ((uint32_t) colour >> 24);
+    uint32_t ink = alpha == 0xFF ? (uint32_t) colour : scaled((uint32_t) colour, alpha);
+    int rest = 0xFF - alpha;
+
+    for (int row = 0; row < placed.height; row++) {
+        int at = placed.top + row;
+        int from = 0;
+        int count = 0;
+
+        if (!maskRun(mask, at, across, down, &from, &count)) {
+            continue;
+        }
+
+        int left = from > placed.left ? from : placed.left;
+        int right = from + count;
+        if (right > placed.left + placed.width) {
+            right = placed.left + placed.width;
+        }
+
+        const unsigned char *ledger = letter->ink
+            + (size_t) (placed.fromTop + row) * (size_t) letter->width
+            + (size_t) placed.fromLeft;
+        uint32_t *into = raster.pixels + (size_t) at * (size_t) raster.width;
+
+        for (int column = left; column < right; column++) {
+            int shade = ledger[column - placed.left];
+            if (shade == 0) {
+                continue;
+            }
+
+            if (flat) {
+                into[column] = alpha == 0xFF ? ink : scaled(into[column], rest) + ink;
+            } else if (font->palette != NULL && shade < font->paletteSize) {
+                into[column] = font->palette[shade];
+            }
+        }
+    }
+}
+
+/**
+ * A letter of a mono font, where a mask lets it through. A mono letter is always drawn in the
+ * colour the client gives, so the flag saying whether this is a shadow is not read here either.
+ */
+JNIEXPORT void JNICALL Java_h_NA(JNIEnv *env, jobject self, jchar which, jint x, jint y,
+                                  jint colour, jboolean shadow, jobject mask,
+                                  jint across, jint down) {
+    (void) shadow;
+
+    plotMasked(env, self, which, x, y, colour, 1, mask, across, down);
+}
+
+/**
+ * A letter of a paletted font, where a mask lets it through.
+ */
+JNIEXPORT void JNICALL Java_n_PA(JNIEnv *env, jobject self, jchar which, jint x, jint y,
+                                  jint colour, jboolean shadow, jobject mask,
+                                  jint across, jint down) {
+    plotMasked(env, self, which, x, y, colour, shadow == JNI_TRUE, mask, across, down);
+}
+
 JNIEXPORT void JNICALL Java_h_JA(JNIEnv *env, jobject self, jobject toolkit, jobject pool,
                                   jobjectArray ink, jintArray width, jintArray height,
                                   jintArray across, jintArray down) {

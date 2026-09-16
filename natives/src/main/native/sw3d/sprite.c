@@ -410,12 +410,72 @@ static void drawStretched(const Sprite *sprite, int x, int y, int wantedWidth, i
     }
 }
 
+/**
+ * Draws a sprite, but only where a mask lets it through.
+ *
+ * Each row of the sprite is narrowed to the run the mask allows on that row of the buffer, which
+ * is how the client rounds the corners off an interface.
+ */
+static void drawMasked(const Sprite *sprite, int x, int y, int op, int colour, int mode,
+                       const void *mask, int across, int down) {
+    if (sprite == NULL || raster.pixels == NULL || mask == NULL) {
+        return;
+    }
+
+    if (op < OP_MULTIPLY || op > OP_SUBTRACT || mode < BLEND_OPAQUE || mode > BLEND_ADD) {
+        return;
+    }
+
+    x += sprite->fromLeft;
+    y += sprite->fromTop;
+
+    Mixture mixture = mixtureOf((uint32_t) colour);
+
+    for (int row = 0; row < sprite->height; row++) {
+        int at = y + row;
+        if (at < raster.clipTop || at >= raster.clipBottom) {
+            continue;
+        }
+
+        int from = 0;
+        int count = 0;
+        if (!maskRun(mask, at, across, down, &from, &count)) {
+            continue;
+        }
+
+        int left = from > x ? from : x;
+        int right = from + count;
+        if (right > x + sprite->width) {
+            right = x + sprite->width;
+        }
+
+        const uint32_t *ink = sprite->pixels + (size_t) row * (size_t) sprite->width;
+        uint32_t *into = raster.pixels + (size_t) at * (size_t) raster.width;
+
+        for (int column = left; column < right; column++) {
+            into[column] = putPixel(op, mode, ink[column - x], into[column], colour, &mixture);
+        }
+    }
+}
+
 JNIEXPORT void JNICALL Java_j_W(JNIEnv *env, jobject self, jlong handle, jint x, jint y,
                                  jint op, jint colour, jint mode) {
     (void) env;
     (void) self;
 
     drawSprite((const Sprite *) (intptr_t) handle, x, y, op, colour, mode);
+}
+
+/**
+ * Draws a sprite as it is, where a mask lets it through.
+ */
+JNIEXPORT void JNICALL Java_j_V(JNIEnv *env, jobject self, jlong handle, jint x, jint y,
+                                 jlong mask, jint across, jint down) {
+    (void) env;
+    (void) self;
+
+    drawMasked((const Sprite *) (intptr_t) handle, x, y, OP_KEEP, 0, BLEND_ALPHA,
+               (const void *) (intptr_t) mask, across, down);
 }
 
 /**

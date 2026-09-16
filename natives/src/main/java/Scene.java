@@ -49,7 +49,8 @@ public sealed interface Scene {
         new SpriteMatrix(),
         new IndexedSprites(),
         new Text(),
-        new StretchedAndTiled()
+        new StretchedAndTiled(),
+        new Masked()
     );
 
     /**
@@ -263,6 +264,63 @@ public sealed interface Scene {
             props.matrix().makeRotationZ(0);
             props.matrix().translate(across, 0, away);
             props.model().render(props.matrix(), null, 1);
+        }
+    }
+
+    /**
+     * A shape drawn through, which is how the client rounds the corners off an interface.
+     *
+     * A mask is one run of pixels per row, and it is placed on the buffer when it is used rather
+     * than when it is made. So the same mask is drawn through several times here at several
+     * places, including places where part of it falls outside what may be drawn on.
+     */
+    record Masked() implements Scene {
+
+        private static final int SIZE = 120;
+
+        /** How far in the corners are rounded, which is what the client uses a mask for. */
+        private static final int CORNER = 30;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.aa(0, 0, WIDTH, HEIGHT, 0xFF303048, 0);
+            toolkit.aa(0, 150, WIDTH, 80, 0xFF906030, 0);
+
+            var starts = new int[SIZE];
+            var lengths = new int[SIZE];
+            for (var row = 0; row < SIZE; row++) {
+                var inset = inset(row);
+                starts[row] = inset;
+                lengths[row] = SIZE - inset * 2;
+            }
+
+            var mask = toolkit.createMask(SIZE, SIZE, starts, lengths);
+            var picture = toolkit.createSprite(IndexedGlyph.solid(), true);
+
+            toolkit.A(0xFF33CC11, mask, 20, 20);
+            toolkit.A(0xFF3311CC, mask, 160, 130);
+            toolkit.A(0xFFCC1133, mask, WIDTH - 60, 240);
+            toolkit.A(0xFFCCCC11, mask, -60, 240);
+
+            for (var step = 0; step < 6; step++) {
+                picture.render(24 + step * 16, 26 + step * 14, mask, 20, 20);
+            }
+
+            props.mono().setTextColours(0xFFFFFF, 0x000000);
+            props.mono().render("Masked", 170, 170, 160, 130, mask, null, null);
+            props.proportional().setTextColours(0xFFFFFF, -1);
+            props.proportional().render("Masked", 170, 200, 160, 130, mask, null, null);
+        }
+
+        /** How far into the row the shape starts, which rounds the corners and waists the middle. */
+        private static int inset(int row) {
+            if (row < CORNER) {
+                return CORNER - row;
+            } else if (row >= SIZE - CORNER) {
+                return CORNER - (SIZE - 1 - row);
+            } else {
+                return row % 7;
+            }
         }
     }
 

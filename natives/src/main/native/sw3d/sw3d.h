@@ -126,6 +126,17 @@ typedef struct {
 
 const Fog *distanceFog(void);
 
+/**
+ * A shape the client draws through, kept as one run of pixels per row.
+ *
+ * Nothing outside the mask file knows how a mask is laid out. A caller asks what a mask lets
+ * through on one row of the buffer and is told where that run starts and how long it is, already
+ * brought inside the clip.
+ */
+int maskRun(const void *held, int row, int across, int down, int *from, int *count);
+
+void maskFree(void *held);
+
 /** The pool a model's geometry is taken from, or null before the client has given one. */
 Pool *modelPoolInUse(void);
 
