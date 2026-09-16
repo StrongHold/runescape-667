@@ -56,6 +56,7 @@ public sealed interface Scene {
         new Rotated(),
         new LiftedOut(),
         new Scrolled(),
+        new Circles(),
         new Turned(),
         new Copied(),
         new Animated(),
@@ -192,6 +193,51 @@ public sealed interface Scene {
             toolkit.line(100, 300, 100, 300, 0xFFFFFFFF, 0);
             toolkit.line(-50, 250, 560, 260, 0xFFFF00FF, 0);
             toolkit.line(200, -50, 260, 430, 0xFF00FFFF, 0);
+        }
+    }
+
+    /**
+     * Filled circles, which the client draws the world map's markers out of.
+     *
+     * The two halves of a circle do not agree about their edges in the toolkit, so radii are
+     * drawn both small and large and against every edge of what may be drawn on, where the
+     * disagreement shows as a row that is one pixel wider on one side than the other.
+     *
+     * The client only ever asks for the blending mode. The other two are asked for here through
+     * the toolkit itself, because nothing else can reach them.
+     */
+    record Circles() implements Scene {
+
+        private static final int[] RADII = {0, 1, 2, 3, 7, 20, 41};
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            var at = (oa) toolkit;
+
+            var x = 30;
+            for (var radius : RADII) {
+                at.za(x, 60, radius, 0xFF20C080, 1);
+                at.za(x, 150, radius, 0x80C02040, 1);
+                at.za(x, 240, radius, 0xFF3060C0, 0);
+                at.za(x, 330, radius, 0x40808080, 2);
+                x += 70;
+            }
+
+            at.za(0, 0, 30, 0xFFFFCC00, 1);
+            at.za(WIDTH, 0, 30, 0xFFFFCC00, 1);
+            at.za(0, HEIGHT, 30, 0xFFCC00FF, 1);
+            at.za(WIDTH, HEIGHT, 30, 0xFFCC00FF, 1);
+            at.za(WIDTH / 2, -10, 40, 0xFF00CCCC, 1);
+
+            /*
+             * Circles whose middle sits outside what may be drawn on. The lower half of a circle
+             * starts at the middle rather than at the first row that may be drawn on, so one
+             * centred above the clip is drawn above it. That is what the toolkit does.
+             */
+            toolkit.T(140, 300, 400, 384);
+            at.za(200, 270, 45, 0xFFFFFFFF, 1);
+            at.za(340, 500, 45, 0xFF884400, 1);
+            toolkit.la();
         }
     }
 

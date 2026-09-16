@@ -125,3 +125,118 @@ JNIEXPORT void JNICALL Java_oa_wa(JNIEnv *env, jobject self, jint x1, jint y1, j
         y += stepY;
     }
 }
+
+/*
+ * A filled circle.
+ *
+ * Each row is a run, and how long the run is comes from an addition rather than from a square
+ * root: the two halves of the circle walk outwards and inwards a step at a time, and every step
+ * adds a number that itself grows by two. Doing it by the root instead lands on a different
+ * pixel wherever the answer sits close to a whole number.
+ *
+ * The two halves do not agree about their edges. The upper one runs from one past the left of
+ * the run up to but not including the right of it; the lower one runs from the left up to and
+ * including the right, and stops one short of what may be drawn on. That is what the toolkit
+ * does.
+ */
+
+/** How far away a pixel already is before this one is allowed over it. */
+static int nearerThan(int x, int y, float depth) {
+    if (raster.depths == NULL) {
+        return 1;
+    }
+
+    return raster.depths[(size_t) y * (size_t) raster.width + x] > depth;
+}
+
+static void runOfCircle(int y, int from, int to, uint32_t colour, int mode, float depth) {
+    uint32_t *row = raster.pixels + (size_t) y * (size_t) raster.width;
+
+    for (int column = from; column < to; column++) {
+        if (nearerThan(column, y, depth)) {
+            row[column] = blend(row[column], colour, mode);
+        }
+    }
+}
+
+static void fillCircle(int x, int y, float depth, int radius, uint32_t colour, int mode) {
+    if (raster.pixels == NULL) {
+        return;
+    }
+
+    int reach = radius < 0 ? -radius : radius;
+    int firstRow = y - reach < raster.clipTop ? raster.clipTop : y - reach;
+    int lastRow = y + reach + 1 > raster.clipBottom ? raster.clipBottom : y + reach + 1;
+    int middleRow = lastRow < y ? lastRow : y;
+    int square = reach * reach;
+
+    int down = y - firstRow;
+    int outer = down * down;
+    int inner = outer - down;
+    int step = -(down + down);
+    int across = 0;
+
+    for (int row = firstRow; row < middleRow; row++) {
+        while (square >= inner || square >= outer) {
+            outer += across + across;
+            inner += across + across;
+            across++;
+        }
+
+        int from = x + 1 - across < raster.clipLeft ? raster.clipLeft : x + 1 - across;
+        int to = x + across > raster.clipRight ? raster.clipRight : x + across;
+        runOfCircle(row, from, to, colour, mode, depth);
+
+        step += 2;
+        outer += step - 2;
+        inner += step;
+    }
+
+    /*
+     * The lower half starts where the upper one left off, or at the first row that may be drawn
+     * on when the middle of the circle sits above that. Without the second of those a circle
+     * centred above what may be drawn on is drawn above it.
+     */
+    int start = middleRow < firstRow ? firstRow : middleRow;
+    int below = start - y;
+    int reached = below * below + square;
+    int lowOuter = reached - below;
+    int lowInner = reached - reach;
+    int lowStep = below + below;
+    int lowAcross = reach;
+
+    for (int row = start; row < lastRow; row++) {
+        while (square < lowOuter && square < lowInner) {
+            lowOuter -= lowAcross + lowAcross;
+            lowAcross--;
+            lowInner -= lowAcross + lowAcross;
+        }
+
+        int from = x - lowAcross < raster.clipLeft ? raster.clipLeft : x - lowAcross;
+        int to = x + lowAcross > raster.clipRight - 1 ? raster.clipRight - 1 : x + lowAcross;
+        runOfCircle(row, from, to + 1, colour, mode, depth);
+
+        lowOuter += lowStep;
+        lowInner += lowStep;
+        lowStep += 2;
+    }
+}
+
+/**
+ * Fills a circle. The client only ever asks for the blending mode, and a mode the toolkit does
+ * not know is a mistake in the client rather than something to be quietly ignored.
+ */
+JNIEXPORT void JNICALL Java_oa_za(JNIEnv *env, jobject self, jint x, jint y, jint radius,
+                                   jint colour, jint mode) {
+    (void) self;
+
+    if (mode < BLEND_OPAQUE || mode > BLEND_ADD) {
+        jclass complaint = (*env)->FindClass(env, "java/lang/IllegalArgumentException");
+        if (complaint != NULL) {
+            (*env)->ThrowNew(env, complaint, NULL);
+        }
+        return;
+    }
+
+    fillCircle(x, y, 0.0f, radius, (uint32_t) colour, mode);
+}
