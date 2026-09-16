@@ -220,11 +220,17 @@ static int shiftOf(int size) {
 static void measureCorners(Ground *ground);
 
 /**
- * The feature that says the ground takes the shadows of what stands on it, and the one that says
- * it does not after all. The client passes both for ground it means to draw without shadows, and
- * the second wins.
+ * The feature that says the ground takes the shadows of what stands on it.
  */
-enum { TAKES_SHADOWS = 0x10, TAKES_NO_SHADOWS = 0x20 };
+enum { TAKES_SHADOWS = 0x10 };
+
+/**
+ * The feature the client asks for when the player has turned textures off.
+ *
+ * A tile then loses any texture the artwork says may be turned off. Ground asked for this way
+ * takes no shadows either: the client passes both features and this one puts the other out.
+ */
+enum { TEXTURES_TURNED_OFF = 0x20 };
 
 /**
  * How many places wider than the ground the shadow map is: one spare at each end, so that a
@@ -233,7 +239,7 @@ enum { TAKES_SHADOWS = 0x10, TAKES_NO_SHADOWS = 0x20 };
 enum { SHADE_MARGIN = 2 };
 
 static void takeShadows(Ground *ground) {
-    if ((ground->featureFlags & TAKES_NO_SHADOWS) != 0
+    if ((ground->featureFlags & TEXTURES_TURNED_OFF) != 0
         || (ground->featureFlags & TAKES_SHADOWS) == 0) {
         return;
     }
@@ -476,6 +482,22 @@ static uint32_t litCorner(const Ground *ground, int packed, int shade, int x, in
 }
 
 /**
+ * Whether the player has turned this texture off.
+ *
+ * A player who turns textures off keeps the ones the artwork says may not be turned off, and the
+ * ground is told which way round it is through a feature of its own rather than through the one
+ * a model is built with.
+ */
+static int wearsNothing(const Ground *ground, int texture) {
+    if (texture == -1 || (ground->featureFlags & TEXTURES_TURNED_OFF) == 0) {
+        return 0;
+    }
+
+    const TextureMetrics *metrics = textureMetricsFor(texture);
+    return metrics != NULL && metrics->disableable;
+}
+
+/**
  * Builds one tile out of the corners the client hands over.
  *
  * Every corner arrives three to a face, already spread out of the indexed list the client keeps,
@@ -540,6 +562,10 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
         for (int corner = 0; corner < corners; corner++) {
             int worldX = (x << ground->tileShift) + tile->across[corner];
             int worldZ = (z << ground->tileShift) + tile->along[corner];
+
+            if (wearsNothing(ground, tile->texture == NULL ? -1 : tile->texture[corner])) {
+                tile->texture[corner] = -1;
+            }
 
             tile->up[corner] = (int16_t) (averageHeight(ground, worldX, worldZ) + levels[corner]);
             tile->light[corner] = (unsigned char) groundCornerShade(ground,

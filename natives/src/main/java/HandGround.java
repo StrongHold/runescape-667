@@ -54,16 +54,27 @@ public final class HandGround {
      * wearing the same texture at another size, and a tile wearing none.
      */
     public static Ground buildTextured(Toolkit toolkit) {
-        return build(toolkit, TEXTURED_WITH, TILE);
+        return build(toolkit, TEXTURED_WITH, TILE, FEATURE_FLAGS | TEXTURES_TURNED_OFF);
     }
 
-    /** The texture a textured patch wears, which is one the player is not allowed to turn off. */
+    /**
+     * The texture a textured patch wears on its near half, which the player is not allowed to
+     * turn off, and the one it wears on its far half, which they are.
+     */
     private static final int TEXTURED_WITH = 6;
+    private static final int TEXTURED_WITH_ONE_THAT_MAY_GO = 7;
+
+    /** What the client asks the ground for when the player has turned textures off. */
+    private static final int TEXTURES_TURNED_OFF = 0x20;
 
     private static Ground build(Toolkit toolkit, int texture, int size) {
+        return build(toolkit, texture, size, FEATURE_FLAGS);
+    }
+
+    private static Ground build(Toolkit toolkit, int texture, int size, int features) {
         var heights = heights();
         var ground = toolkit.createGround(TILES, TILES, heights, heights,
-            GROUND_FLAGS, FEATURE_FLAGS);
+            GROUND_FLAGS, features);
 
         for (var x = 0; x < TILES; x++) {
             for (var z = 0; z < TILES; z++) {
@@ -87,8 +98,9 @@ public final class HandGround {
     }
 
     private static void addTile(Ground ground, int x, int z, int texture, int size) {
-        var wears = x == TILES / 2 ? -1 : texture;
-        var across = z < TILES / 2 ? size : size * 2;
+        var wears = texture == -1 || x == TILES / 2 ? -1
+            : z < TILES / 2 ? texture : TEXTURED_WITH_ONE_THAT_MAY_GO;
+        var across = size;
 
         var offsetX = new int[] {0, TILE, TILE, 0};
         var offsetY = new int[] {0, 0, TILE, TILE};
