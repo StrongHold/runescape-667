@@ -936,6 +936,52 @@ JNIEXPORT jint JNICALL Java_j_JA(JNIEnv *env, jobject self, jlong handle) {
 /**
  * An empty sprite of a given size, for the client to draw into.
  */
+/**
+ * A sprite made from a rectangle of what has already been drawn.
+ *
+ * The world map draws the whole map into the buffer once and then keeps it as a sprite, and
+ * asks the sprite how wide it is to decide whether it has to do that again. A sprite that comes
+ * back empty answers nothing, so the map is drawn again every frame.
+ *
+ * The client asks for the sprite to be solid or not. A solid one makes every pixel that was
+ * drawn on opaque and leaves the rest clear; the other keeps the buffer as it stands, alpha
+ * included.
+ */
+JNIEXPORT void JNICALL Java_j_h(JNIEnv *env, jobject self, jobject toolkit, jint x, jint y,
+                                 jint width, jint height, jboolean solid) {
+    (void) toolkit;
+
+    spriteFree((Sprite *) (intptr_t) nativeIdOf(env, self));
+    setNativeId(env, self, 0);
+
+    if (width <= 0 || height <= 0 || raster.pixels == NULL) {
+        return;
+    }
+
+    Sprite *sprite = calloc(1, sizeof(Sprite));
+    if (sprite == NULL) {
+        return;
+    }
+
+    if (!spriteRoom(sprite, width, height)) {
+        free(sprite);
+        return;
+    }
+
+    for (int row = 0; row < height; row++) {
+        const uint32_t *from = raster.pixels
+            + (size_t) (y + row) * (size_t) raster.width + (size_t) x;
+        uint32_t *into = sprite->pixels + (size_t) row * (size_t) width;
+
+        for (int column = 0; column < width; column++) {
+            into[column] = solid != JNI_TRUE ? from[column]
+                : (from[column] == 0 ? 0 : from[column] | 0xFF000000u);
+        }
+    }
+
+    setNativeId(env, self, (jlong) (intptr_t) sprite);
+}
+
 JNIEXPORT void JNICALL Java_j_EA(JNIEnv *env, jobject self, jobject toolkit,
                                   jint width, jint height) {
     (void) toolkit;

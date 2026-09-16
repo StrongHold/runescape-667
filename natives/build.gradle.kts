@@ -817,6 +817,21 @@ fun registerProbe(name: String, probe: String, what: String): TaskProvider<JavaE
     }
 }
 
+/**
+ * The one native the shipped toolkit exports under a C++ name, which no virtual machine can
+ * find, so it cannot be driven and there is no answer to compare against. What can be checked
+ * is that it agrees with the two written natives that do the same thing in two steps.
+ */
+val verifySpriteLift by tasks.registering(JavaExec::class) {
+    description = "Checks a sprite lifted straight out of the buffer against the same in two steps."
+    dependsOn(compileSoftwareToolkit, ":unpackX64Jdk")
+    mainClass = "SpriteLiftCheck"
+    classpath = sourceSets["main"].runtimeClasspath
+    setExecutable(rootProject.layout.projectDirectory.file(".gradle/jdk-x64/unpacked/Home/bin/java").asFile.absolutePath)
+    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+    args(toolkitLibrary.get().asFile.absolutePath)
+}
+
 val verifyMatrices = registerProbe("matrices", "MatrixProbe", "matrix answers")
 val verifyPoints = registerProbe("points", "PointProbe", "projection answers")
 val verifyModels = registerProbe("models", "ModelProbe", "model answers")
