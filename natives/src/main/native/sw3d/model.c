@@ -133,6 +133,13 @@ typedef struct {
     short *faceC;
     short *faceColour;
     short *faceTexture;
+
+    /**
+     * Which of the pieces the client built the model from each vertex came from, one bit per
+     * piece. A player is one model built from a head, a torso and so on, and each piece is moved
+     * into place on its own.
+     */
+    short *vertexPiece;
     signed char *faceAlpha;
     signed char *shadingType;
 
@@ -696,7 +703,7 @@ JNIEXPORT void JNICALL Java_i_R(JNIEnv *env, jobject self, jobject toolkit, jobj
                                  jintArray billboards) {
     (void) toolkit;
     (void) pool;
-    (void) originModels;
+
     (void) facePriority;
     (void) faceTexSpace;
     (void) faceLabel;
@@ -740,6 +747,7 @@ JNIEXPORT void JNICALL Java_i_R(JNIEnv *env, jobject self, jobject toolkit, jobj
     model->faceC = copyShorts(env, faceC, faceCount);
     model->faceColour = copyShorts(env, faceColour, faceCount);
     model->faceTexture = copyShorts(env, faceTexture, faceCount);
+    model->vertexPiece = copyShorts(env, originModels, vertexCount);
     model->faceAlpha = copyBytes(env, faceAlpha, faceCount);
     model->shadingType = copyBytes(env, shadingType, faceCount);
     gatherLabels(env, model, vertexLabel);
@@ -769,6 +777,7 @@ JNIEXPORT void JNICALL Java_i_w(JNIEnv *env, jobject self, jboolean immediate) {
     free(model->faceC);
     free(model->faceColour);
     free(model->faceTexture);
+    free(model->vertexPiece);
     free(model->faceAlpha);
     free(model->shadingType);
     free(model->labelTable);
@@ -1398,6 +1407,63 @@ JNIEXPORT void JNICALL Java_i_l(JNIEnv *env, jobject self, jlong handle, jint st
     }
 
     free(labels);
+}
+
+/**
+ * Puts the vertices of some of the pieces the model was built from through a matrix.
+ *
+ * The pieces are named by a bit each, and a vertex belongs to the pieces its own word names. A
+ * player is one model built from a head, a torso, a pair of legs and so on, and each of them is
+ * carried to where its bone is on its own.
+ *
+ * Undoing a matrix takes the translation off first and then puts the point through the matrix the
+ * other way round, which is its inverse as long as the rest of it only turns. Applying one is the
+ * ordinary way round.
+ *
+ * Nothing here says the model has moved. The client puts a piece into place and takes it out
+ * again either side of an animation, and measuring it in between would measure it where no frame
+ * ever sees it.
+ */
+JNIEXPORT void JNICALL Java_i_J(JNIEnv *env, jobject self, jlong matrix, jint pieces,
+                                 jboolean undo) {
+    Model *model = modelOf(env, self);
+    if (model == NULL || model->vertices == NULL || model->vertexPiece == NULL) {
+        return;
+    }
+
+    const float *rows = matrixRows((const void *) (intptr_t) matrix);
+    if (rows == NULL) {
+        return;
+    }
+
+    for (int vertex = 0; vertex < model->maxVertex; vertex++) {
+        if ((model->vertexPiece[vertex] & pieces) == 0) {
+            continue;
+        }
+
+        float *at = vertexAt(model, vertex);
+        float was[VERTEX_STRIDE];
+        memcpy(was, at, sizeof was);
+
+        if (undo == JNI_TRUE) {
+            for (int lane = 0; lane < VERTEX_STRIDE; lane++) {
+                was[lane] -= rows[12 + lane];
+            }
+
+            for (int lane = 0; lane < VERTEX_STRIDE; lane++) {
+                at[lane] = was[0] * rows[lane * 4]
+                    + was[1] * rows[lane * 4 + 1]
+                    + was[2] * rows[lane * 4 + 2];
+            }
+        } else {
+            for (int lane = 0; lane < VERTEX_STRIDE; lane++) {
+                at[lane] = was[0] * rows[lane]
+                    + was[1] * rows[4 + lane]
+                    + was[2] * rows[8 + lane]
+                    + rows[12 + lane];
+            }
+        }
+    }
 }
 
 /**
