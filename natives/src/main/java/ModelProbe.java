@@ -9,6 +9,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -36,6 +37,9 @@ public final class ModelProbe {
     private static final int AMBIENT = 64;
     private static final int CONTRAST = 768;
     private static final int MODEL_FACES = 200;
+
+    /** Two emitters of three vertices each, and three effectors of one. */
+    private static final int PARTICLE_PLACES = 2 * 3 + 3;
 
     /** How far in front of the camera the model stands when it is asked whether it was picked. */
     private static final int DEPTH = 900;
@@ -99,6 +103,7 @@ public final class ModelProbe {
             cylinders(toolkit, lines);
             animations(toolkit, lines);
             lights(toolkit, lines);
+            particles(toolkit, lines);
 
             Files.write(Path.of(args[1]), lines);
             System.out.println("recorded " + lines.size() + " model answers");
@@ -439,6 +444,42 @@ public final class ModelProbe {
         return "%d %d %d %d %d %d %d %d".formatted(
             model.V(), model.RA(), model.fa(), model.EA(),
             model.HA(), model.G(), model.na(), model.ma());
+    }
+
+    /**
+     * Where the vertices the client hangs particles off end up.
+     *
+     * Three whole numbers come back for each one, the three corners of every emitter first and
+     * then the single vertex of every effector, so reading the run in the wrong order shows up
+     * as well as putting a vertex in the wrong place. The model is asked again after it has been
+     * turned and moved, because the answer is worked out from where its vertices are now.
+     */
+    private static void particles(Toolkit toolkit, List<String> lines) throws Exception {
+        var model = (i) toolkit.createModel(CacheMesh.withParticles(
+            CacheMesh.anyUntextured(MODEL_FACES)), FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
+
+        var matrix = toolkit.createMatrix();
+        var places = new int[PARTICLE_PLACES * 3];
+
+        matrix.makeIdentity();
+        model.method3688(places, matrix);
+        lines.add("particles flat " + Arrays.toString(places));
+
+        matrix.makeRotationZ(0x1400);
+        matrix.rotateAxisY(0x0900);
+        matrix.translate(-40, 700, 250);
+        model.method3688(places, matrix);
+        lines.add("particles turned " + Arrays.toString(places));
+
+        model.a(0x0800);
+        model.H(13, -21, 34);
+        model.method3688(places, matrix);
+        lines.add("particles after the model moved " + Arrays.toString(places));
+
+        var plain = (i) build(toolkit);
+        Arrays.fill(places, -1);
+        plain.method3688(places, matrix);
+        lines.add("particles on a model with none " + Arrays.toString(places));
     }
 
     private static Model build(Toolkit toolkit) throws Exception {

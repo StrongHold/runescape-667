@@ -290,6 +290,13 @@ const short *modelFaceColour(const void *handle);
  * A model built without that is never reached by a light with a place, however many places the
  * client has given the toolkit.
  */
+/**
+ * The vertices the client hangs particles off, three for every emitter and then one for every
+ * effector, in one flat run.
+ */
+int modelParticleCount(const void *handle);
+const int *modelParticleVertices(const void *handle);
+
 int modelNeedsNormals(const void *handle);
 
 const Normal *modelNormals(const void *handle);

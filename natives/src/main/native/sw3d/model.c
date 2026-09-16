@@ -167,6 +167,14 @@ typedef struct {
     int labelGroups;
     unsigned short *labelVertices;
 
+    /**
+     * The vertices the client hangs particles off: three for every emitter, then one for every
+     * effector, in one flat run.
+     */
+    int *particleVertices;
+    int emitters;
+    int effectors;
+
     int minX;
     int maxX;
     int minY;
@@ -277,6 +285,18 @@ static int allowed(JNIEnv *env, const Model *model, int functions) {
 
 static float *vertexAt(Model *model, int vertex) {
     return model->vertices + (size_t) vertex * VERTEX_STRIDE;
+}
+
+static int *copyInts(JNIEnv *env, jintArray source, int count) {
+    if (source == NULL || count <= 0) {
+        return NULL;
+    }
+
+    int *copy = calloc((size_t) count, sizeof(int));
+    if (copy != NULL) {
+        (*env)->GetIntArrayRegion(env, source, 0, count, (jint *) copy);
+    }
+    return copy;
 }
 
 static short *copyShorts(JNIEnv *env, jshortArray source, int count) {
@@ -735,9 +755,6 @@ JNIEXPORT void JNICALL Java_i_R(JNIEnv *env, jobject self, jobject toolkit, jobj
     (void) texOffsetX;
     (void) texOffsetY;
     (void) texOffsetZ;
-    (void) particles;
-    (void) emitterCount;
-    (void) effectorCount;
     (void) billboards;
 
     Model *model = calloc(1, sizeof(Model));
@@ -761,6 +778,9 @@ JNIEXPORT void JNICALL Java_i_R(JNIEnv *env, jobject self, jobject toolkit, jobj
     model->faceColour = copyShorts(env, faceColour, faceCount);
     model->faceTexture = copyShorts(env, faceTexture, faceCount);
     model->vertexPiece = copyShorts(env, originModels, vertexCount);
+    model->emitters = emitterCount;
+    model->effectors = effectorCount;
+    model->particleVertices = copyInts(env, particles, emitterCount * 3 + effectorCount);
     model->faceAlpha = copyBytes(env, faceAlpha, faceCount);
     model->shadingType = copyBytes(env, shadingType, faceCount);
     gatherLabels(env, model, vertexLabel);
@@ -787,6 +807,7 @@ static void emptyModel(Model *model) {
     free(model->faceColour);
     free(model->faceTexture);
     free(model->vertexPiece);
+    free(model->particleVertices);
     free(model->faceAlpha);
     free(model->shadingType);
     free(model->labelTable);
@@ -1830,6 +1851,19 @@ const uint32_t *modelShade(void *handle) {
 int modelFaceIsFlat(const void *handle, int face) {
     const Model *model = handle;
     return model->shadingType != NULL && model->shadingType[face] != 0;
+}
+
+/**
+ * How many vertices the client has hung particles off: three for every emitter and one for every
+ * effector.
+ */
+int modelParticleCount(const void *handle) {
+    const Model *model = handle;
+    return model->emitters * 3 + model->effectors;
+}
+
+const int *modelParticleVertices(const void *handle) {
+    return ((const Model *) handle)->particleVertices;
 }
 
 int modelNeedsNormals(const void *handle) {

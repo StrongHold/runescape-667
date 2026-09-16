@@ -1399,3 +1399,48 @@ JNIEXPORT void JNICALL Java_a_na(JNIEnv *env, jobject self, jlong worker, jobjec
     fillTriangle(start, ahead, end);
     distanceDecides = 1;
 }
+
+/**
+ * Answers where every vertex the client hangs a particle off has ended up.
+ *
+ * Three whole numbers come back for each one, in the order the model keeps them: the three
+ * corners of every emitter first and then the single vertex of every effector. Each goes through
+ * the matrix as it stands and is cut to a whole number rather than rounded, so a particle sits
+ * where its vertex sits and not half a unit past it.
+ *
+ * The client gives an array it has already made. Nothing here checks that it is long enough.
+ */
+JNIEXPORT void JNICALL Java_a_e(JNIEnv *env, jobject self, jlong worker, jlong model,
+                                 jintArray into, jlong matrix) {
+    (void) self;
+    (void) worker;
+
+    void *held = (void *) (intptr_t) model;
+    const void *rows = matrix == 0 ? NULL : matrixRows((const void *) (intptr_t) matrix);
+    if (held == NULL || rows == NULL || into == NULL) {
+        return;
+    }
+
+    int wanted = modelParticleCount(held);
+    const int *vertices = modelParticleVertices(held);
+    if (wanted <= 0 || vertices == NULL) {
+        return;
+    }
+
+    const float *places = modelVertices(held);
+    const float *rowsOf = rows;
+
+    for (int which = 0; which < wanted; which++) {
+        const float *at = &places[(size_t) vertices[which] * MODEL_VERTEX_STRIDE];
+
+        jint landed[3];
+        for (int lane = 0; lane < 3; lane++) {
+            landed[lane] = (jint) (at[0] * rowsOf[lane]
+                + at[1] * rowsOf[4 + lane]
+                + at[2] * rowsOf[8 + lane]
+                + rowsOf[12 + lane]);
+        }
+
+        (*env)->SetIntArrayRegion(env, into, which * 3, 3, landed);
+    }
+}

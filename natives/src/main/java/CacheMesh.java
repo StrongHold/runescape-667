@@ -1,6 +1,8 @@
 import com.jagex.core.io.BufferedFile;
 import com.jagex.core.io.FileOnDisk;
 import com.jagex.graphics.Mesh;
+import com.jagex.graphics.particles.ModelParticleEffector;
+import com.jagex.graphics.particles.ModelParticleEmitter;
 import com.jagex.js5.FileSystem_Client;
 import com.jagex.js5.Js5Archive;
 import com.jagex.js5.js5;
@@ -53,6 +55,28 @@ public final class CacheMesh {
         System.out.println("model from the cache: " + found.get().faceCount + " faces, "
             + found.get().vertexCount + " vertices");
         return found.get();
+    }
+
+    /**
+     * Hangs particles off a mesh, which no model out of the cache here happens to carry.
+     *
+     * An emitter names three vertices and an effector names one, and the client flattens both
+     * into a single run of vertex numbers before the toolkit ever sees them. The numbers chosen
+     * here are spread across the mesh rather than bunched, so a run read in the wrong order
+     * comes back wrong rather than merely shifted.
+     */
+    public static Mesh withParticles(Mesh mesh) {
+        var reach = mesh.vertexCount;
+        mesh.emitters = new ModelParticleEmitter[] {
+            new ModelParticleEmitter(0, 0, reach / 3, reach - 1, (byte) 0),
+            new ModelParticleEmitter(1, reach / 2, 1, reach / 4, (byte) 0)
+        };
+        mesh.effectors = new ModelParticleEffector[] {
+            new ModelParticleEffector(0, reach - 2),
+            new ModelParticleEffector(1, 2),
+            new ModelParticleEffector(2, reach / 5)
+        };
+        return mesh;
     }
 
     /**
