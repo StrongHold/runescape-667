@@ -64,6 +64,7 @@ public sealed interface Scene {
         new PointLit(),
         new Flattened(),
         new Offscreen(),
+        new SharedLight(),
         new Terrain()
     );
 
@@ -777,6 +778,86 @@ public sealed interface Scene {
                 props.matrix().translate((step - 1) * APART - APART / 2, 0, DEPTHS[step]);
                 props.model().renderOrtho(props.matrix(), null, SIZES[step], 0);
             }
+        }
+    }
+
+    /**
+     * Two models standing against one another, shaded as though they were one.
+     *
+     * The client builds a wall as a model per panel. Each panel is shaded only by its own faces,
+     * so the upright edge where two of them meet shows as a hard line between two flat shades.
+     * Telling the pair that they meet hands each vertex of the join the other panel's direction
+     * as well, and the corner shades as a curve.
+     *
+     * Three corners are drawn. The first is left alone, the second is told that its panels meet
+     * where they stand, and the third has its second panel built somewhere else and is told how
+     * far along that is, which is the offset the client passes for a panel that was not built
+     * about the same middle.
+     */
+    record SharedLight() implements Scene {
+
+        /** How far from the middle the outer edge of a panel stands. */
+        private static final int REACH = 90;
+
+        /** How far back an outer edge leans, which is what makes the two panels differ. */
+        private static final int LEAN = 150;
+
+        private static final int TALL = 110;
+
+        private static final int APART = 170;
+
+        /** How far along the third corner's second panel is built. */
+        private static final int ELSEWHERE = 4000;
+
+        /**
+         * A model may only be told that it meets another while it still says its light can
+         * change. The client drops the right once the wall is built and the light is settled.
+         */
+        private static final int MAY_SHARE_LIGHT = 0x10000;
+
+        private static final int FEATURES = 64;
+
+        private static final int AMBIENT = 64;
+
+        private static final int CONTRAST = 768;
+
+        private static final short COLOUR = (short) ((10 << 10) | (7 << 7) | 70);
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            draw(toolkit, props, -APART, 0, false);
+            draw(toolkit, props, 0, 0, true);
+            draw(toolkit, props, APART, ELSEWHERE, true);
+        }
+
+        /**
+         * One corner: a panel leaning away to the left and another leaning away to the right,
+         * meeting along the upright edge between them.
+         */
+        private void draw(Toolkit toolkit, Props props, int across, int built, boolean meeting) {
+            var left = panel(toolkit, -REACH, 0);
+            var right = panel(toolkit, REACH, built);
+
+            if (meeting) {
+                /* The last thing the client passes is the one the toolkit never reads. */
+                left.method7481(right, -built, 0, 0, true);
+            }
+
+            props.matrix().makeRotationZ(0);
+            props.matrix().applyTranslation(across, 0, DEPTH);
+            left.render(props.matrix(), null, 1);
+
+            props.matrix().makeRotationZ(0);
+            props.matrix().applyTranslation(across - built, 0, DEPTH);
+            right.render(props.matrix(), null, 1);
+        }
+
+        private Model panel(Toolkit toolkit, int reach, int shift) {
+            var mesh = new PanelMesh(reach, LEAN, TALL, shift, COLOUR).build();
+            return toolkit.createModel(mesh, MAY_SHARE_LIGHT, FEATURES, AMBIENT, CONTRAST);
         }
     }
 

@@ -38,6 +38,9 @@ public final class ModelProbe {
     private static final int CONTRAST = 768;
     private static final int MODEL_FACES = 200;
 
+    /** How many vertices beyond the ones its faces use a model is asked to carry. */
+    private static final int[] SPARES = {0, 1, 4};
+
     /** Two emitters of three vertices each, and three effectors of one. */
     private static final int PARTICLE_PLACES = 2 * 3 + 3;
 
@@ -104,6 +107,7 @@ public final class ModelProbe {
             animations(toolkit, lines);
             lights(toolkit, lines);
             particles(toolkit, lines);
+            spareVertices(toolkit, lines);
 
             Files.write(Path.of(args[1]), lines);
             System.out.println("recorded " + lines.size() + " model answers");
@@ -480,6 +484,22 @@ public final class ModelProbe {
         Arrays.fill(places, -1);
         plain.method3688(places, matrix);
         lines.add("particles on a model with none " + Arrays.toString(places));
+    }
+
+    /**
+     * A model that carries vertices no face is built from.
+     *
+     * Those vertices hang billboards and particles rather than being part of the shape, and the
+     * box the toolkit measures leaves them out. They stand a long way outside the shape here, so
+     * a box drawn around every vertex the model holds is nothing like the right one.
+     */
+    private static void spareVertices(Toolkit toolkit, List<String> lines) {
+        for (var spare : SPARES) {
+            var model = toolkit.createModel(
+                new FlatMesh(160, spare).build(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
+
+            lines.add("spare " + spare + " " + measure(model));
+        }
     }
 
     private static Model build(Toolkit toolkit) throws Exception {

@@ -6,18 +6,25 @@ import com.jagex.graphics.Mesh;
  * It is a square standing upright, split into two faces of different colours, with a third face
  * behind it at a different depth. Two faces that share an edge say whether the rasteriser fills
  * the shared edge once, and a face behind says whether it is hidden.
+ *
+ * `spare` adds vertices that belong to no face, the way a model that hangs billboards or
+ * particles carries them. They stand well outside the shape, so anything that measures the model
+ * by walking every vertex it holds rather than only the ones the faces use says so.
  */
-public record FlatMesh(int size) {
+public record FlatMesh(int size, int spare) {
 
-    public static final FlatMesh INSTANCE = new FlatMesh(160);
+    public static final FlatMesh INSTANCE = new FlatMesh(160, 0);
 
     private static final int VERTICES = 7;
     private static final int FACES = 3;
 
-    public Mesh build() {
-        var mesh = new Mesh(VERTICES, FACES, 0);
+    /** How far out of the shape a vertex that belongs to no face stands. */
+    private static final int ASIDE = 5000;
 
-        mesh.vertexCount = VERTICES;
+    public Mesh build() {
+        var mesh = new Mesh(VERTICES + spare, FACES, 0);
+
+        mesh.vertexCount = VERTICES + spare;
         mesh.maxVertex = VERTICES;
         mesh.faceCount = FACES;
         mesh.texSpaceCount = 0;
@@ -35,6 +42,11 @@ public record FlatMesh(int size) {
         face(mesh, 0, 0, 1, 2, hsl(0, 7, 96));
         face(mesh, 1, 0, 2, 3, hsl(21, 7, 96));
         face(mesh, 2, 4, 5, 6, hsl(42, 7, 96));
+
+        for (var extra = 0; extra < spare; extra++) {
+            var sign = extra % 2 == 0 ? ASIDE : -ASIDE;
+            put(mesh, VERTICES + extra, sign, sign, sign);
+        }
 
         return mesh;
     }

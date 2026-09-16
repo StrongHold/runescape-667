@@ -39,7 +39,7 @@ enum {
     MAY_CHANGE_ALPHA = 0x100,
     MAY_TURN_NORMALS_WHILE_ANIMATING = 0x200,
     MAY_RETEXTURE = 0x8000,
-    MAY_ANIMATE = 0x10000
+    MAY_SHARE_LIGHT = 0x10000
 };
 
 /**
@@ -226,6 +226,17 @@ typedef struct {
     Normal *faceNormals;
 
     /**
+     * The direction a vertex faces once a neighbouring model has had a say, or null while no
+     * neighbour has.
+     *
+     * Two models built side by side meet along an edge, and a vertex on that edge is shaded by
+     * the faces of both of them rather than only by its own. This is where the neighbour's
+     * directions are gathered, and a vertex with anything here is shaded by this instead of by
+     * the direction its own faces gave it.
+     */
+    Normal *sharedNormals;
+
+    /**
      * The colour each corner of each face takes, or null when it has yet to be worked out.
      *
      * It is worked out the first time the model is drawn rather than when it is built, because
@@ -405,6 +416,10 @@ static signed char *copyBytes(JNIEnv *env, jbyteArray source, int count) {
  * The cylinder ignores height, because the client turns models about the upright axis and a radius
  * that ignores height does not change when it does.
  *
+ * Only the vertices the faces are built from are measured. A model carries more than those: the
+ * ones past that point hold billboards and particles, and a box drawn around those would not be
+ * the box the faces fill.
+ *
  * The box starts at the ends of what a short can hold rather than at nothing, so a model that sits
  * entirely to one side of the middle is measured where it is rather than being stretched back to
  * include the middle. Every one of these is kept as a short, and a model larger than a short can
@@ -420,7 +435,7 @@ static void measure(Model *model) {
     float widest = 0.0f;
     float furthest = 0.0f;
 
-    for (int vertex = 0; vertex < model->vertexCount; vertex++) {
+    for (int vertex = 0; vertex < model->maxVertex; vertex++) {
         const float *at = vertexAt(model, vertex);
         float x = at[0];
         float y = at[1];
@@ -527,6 +542,18 @@ static void calculateNormals(Model *model) {
 }
 
 /**
+ * The direction a vertex is shaded by, which is the one a neighbouring model gave it if any
+ * neighbour has, and the one its own faces gave it otherwise.
+ */
+static const Normal *cornerNormal(const Model *model, int vertex) {
+    if (model->sharedNormals != NULL && model->sharedNormals[vertex].magnitude != 0.0f) {
+        return &model->sharedNormals[vertex];
+    } else {
+        return &model->normals[vertex];
+    }
+}
+
+/**
  * Works out what colour each corner of each face takes, from where the vertices are now.
  *
  * A model that has no directions worked out for it gets them here, because everything that moves
@@ -562,7 +589,7 @@ static void lightModel(Model *model) {
         for (int corner = 0; corner < 3; corner++) {
             const Normal *normal = flat
                 ? &model->faceNormals[face]
-                : &model->normals[corners[corner][face]];
+                : cornerNormal(model, corners[corner][face]);
 
             model->shade[face * 3 + corner] = normal->magnitude == 0.0f
                 ? unlit
@@ -592,8 +619,10 @@ static void geometryChanged(Model *model) {
 
     free(model->normals);
     free(model->faceNormals);
+    free(model->sharedNormals);
     model->normals = NULL;
     model->faceNormals = NULL;
+    model->sharedNormals = NULL;
 
     if ((model->features & NEEDS_NORMALS) != 0 && model->faceA != NULL
         && model->faceB != NULL && model->faceC != NULL) {
@@ -814,6 +843,7 @@ static void emptyModel(Model *model) {
     free(model->labelVertices);
     free(model->normals);
     free(model->faceNormals);
+    free(model->sharedNormals);
     free(model->shade);
 
     memset(model, 0, sizeof *model);
@@ -1172,7 +1202,7 @@ JNIEXPORT void JNICALL Java_i_s(JNIEnv *env, jobject self, jint functions) {
         return;
     }
 
-    if ((model->functions & MAY_ANIMATE) != 0 && (functions & MAY_ANIMATE) == 0) {
+    if ((model->functions & MAY_SHARE_LIGHT) != 0 && (functions & MAY_SHARE_LIGHT) == 0) {
         if (model->shadingType != NULL) {
             for (int face = 0; face < model->faceCount; face++) {
                 if (model->shadingType[face] == SHADED_WHEN_ANIMATED) {
@@ -1770,6 +1800,122 @@ JNIEXPORT void JNICALL Java_i_wa(JNIEnv *env, jobject self) {
     }
 
     model->measured = 0;
+}
+
+/**
+ * How far apart two vertices may be and still count as the same place.
+ *
+ * The client hands the two models over in whole numbers, but a model that has been resized or
+ * turned keeps its vertices between whole numbers, so the meeting is looked for by nearness
+ * rather than by equality.
+ */
+static const float SAME_PLACE = 0.01f;
+
+/** Somewhere for a neighbour's directions to be gathered, made the first time one is offered. */
+static Normal *sharedNormalsOf(Model *model) {
+    if (model->sharedNormals == NULL && model->maxVertex > 0) {
+        model->sharedNormals = calloc((size_t) model->maxVertex, sizeof(Normal));
+    }
+    return model->sharedNormals;
+}
+
+/**
+ * Lets two models that meet shade the edge they meet along as one surface.
+ *
+ * The client builds a wall as several models and stands them next to one another, and a corner
+ * between two of them would otherwise show as a hard line, because each vertex of the join is
+ * shaded only by the faces of the model it belongs to. Every vertex of one model that sits where
+ * a vertex of the other does hands its direction over and takes the other's, and both are shaded
+ * as though the two models were one.
+ *
+ * The second model is given where it stands relative to the first, because the two are built
+ * about their own middles and only the client knows how far apart they are put.
+ *
+ * Both models have to have been built saying their light may still change, or neither has a light
+ * left to change by the time this is asked for.
+ *
+ * The last thing the client passes asks for the faces of the join to be marked as shaded while
+ * animating. The toolkit has never read it.
+ */
+JNIEXPORT void JNICALL Java_a_r(JNIEnv *env, jobject self, jlong worker, jlong first,
+                                 jlong second, jint x, jint y, jint z, jboolean marked) {
+    (void) self;
+    (void) worker;
+    (void) marked;
+
+    Model *model = (Model *) (intptr_t) first;
+    Model *neighbour = (Model *) (intptr_t) second;
+    if (model == NULL || neighbour == NULL) {
+        return;
+    }
+
+    if (!allowed(env, model, MAY_SHARE_LIGHT) || !allowed(env, neighbour, MAY_SHARE_LIGHT)) {
+        return;
+    }
+
+    measure(model);
+    calculateNormals(model);
+    measure(neighbour);
+    calculateNormals(neighbour);
+
+    if (model->normals == NULL || neighbour->normals == NULL) {
+        return;
+    }
+
+    float awayX = (float) x;
+    float awayY = (float) y;
+    float awayZ = (float) z;
+
+    for (int vertex = 0; vertex < model->maxVertex; vertex++) {
+        Normal here = model->normals[vertex];
+        if (here.magnitude == 0.0f) {
+            continue;
+        }
+
+        const float *at = vertexAt(model, vertex);
+        float upright = at[1] - awayY;
+        if ((float) neighbour->minY > upright || upright > (float) neighbour->maxY) {
+            continue;
+        }
+
+        float across = at[0] - awayX;
+        if ((float) neighbour->minX > across || across > (float) neighbour->maxX) {
+            continue;
+        }
+
+        float depth = at[2] - awayZ;
+        if ((float) neighbour->minZ > depth || depth > (float) neighbour->maxZ) {
+            continue;
+        }
+
+        for (int other = 0; other < neighbour->maxVertex; other++) {
+            Normal there = neighbour->normals[other];
+            const float *meets = vertexAt(neighbour, other);
+
+            if (fabsf(across - meets[0]) >= SAME_PLACE
+                || fabsf(depth - meets[2]) >= SAME_PLACE
+                || fabsf(upright - meets[1]) >= SAME_PLACE
+                || there.magnitude == 0.0f) {
+                continue;
+            }
+
+            Normal *mine = sharedNormalsOf(model);
+            Normal *theirs = sharedNormalsOf(neighbour);
+            if (mine == NULL || theirs == NULL) {
+                return;
+            }
+
+            mine[vertex].x += there.x;
+            mine[vertex].y += there.y;
+            mine[vertex].z += there.z;
+            mine[vertex].magnitude += there.magnitude;
+
+            theirs[other].x += here.x;
+            theirs[other].y += here.y;
+            theirs[other].z += here.z;
+            theirs[other].magnitude += here.magnitude;
+        }
+    }
 }
 
 /**
