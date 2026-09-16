@@ -55,6 +55,7 @@ public sealed interface Scene {
         new Masked(),
         new Rotated(),
         new LiftedOut(),
+        new Scrolled(),
         new Turned(),
         new Copied(),
         new Animated(),
@@ -191,6 +192,33 @@ public sealed interface Scene {
             toolkit.line(100, 300, 100, 300, 0xFFFFFFFF, 0);
             toolkit.line(-50, 250, 560, 260, 0xFFFF00FF, 0);
             toolkit.line(200, -50, 260, 430, 0xFF00FFFF, 0);
+        }
+    }
+
+    /**
+     * Everything already drawn moved by a whole number of pixels.
+     *
+     * The client moves the buffer rather than drawing it again when the view shifts by a little,
+     * and draws only the strip left behind. Nothing fills that strip here, so what the move left
+     * of the old picture is part of what is checked.
+     */
+    record Scrolled() implements Scene {
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            props.gradient().render(30, 30, 0, 0xFFFFFF, 0);
+            toolkit.aa(200, 40, 90, 60, 0xFF20C080, 0);
+            toolkit.aa(60, 150, 140, 40, 0xFFC02040, 0);
+
+            toolkit.F(40, 25);
+            toolkit.aa(0, 0, WIDTH, 20, 0xFF2040A0, 0);
+
+            toolkit.F(-15, -8);
+            props.gradient().render(300, 240, 1, 0, 1);
+
+            toolkit.F(0, 60);
+            toolkit.F(70, 0);
+            toolkit.F(-90, -120);
         }
     }
 

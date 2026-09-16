@@ -268,13 +268,53 @@ JNIEXPORT jint JNICALL Java_oa_M(JNIEnv *env, jobject self) {
 }
 
 /**
- * Whether the toolkit can draw a shadow, which this one cannot.
+ * How many faces were drawn, which the client shows in its own count of what a frame cost.
+ *
+ * The toolkit this replaces never counted them and answers nothing, so the client's count has
+ * always read zero on this renderer. That is kept.
  */
 JNIEXPORT jint JNICALL Java_oa_I(JNIEnv *env, jobject self) {
     (void) env;
     (void) self;
 
     return 0;
+}
+
+/**
+ * Moves everything already drawn, and how far away it all is, by a whole number of pixels.
+ *
+ * Both buffers are moved together and nothing is put in the room left behind, so the client
+ * draws over that itself. A move of one row plus a few columns is one move of the whole buffer
+ * rather than a move per row, which is why this takes a distance rather than a rectangle.
+ */
+JNIEXPORT void JNICALL Java_oa_F(JNIEnv *env, jobject self, jint x, jint y) {
+    (void) env;
+    (void) self;
+
+    if (raster.pixels == NULL) {
+        return;
+    }
+
+    int shift = y * raster.width + x;
+    int held = raster.width * raster.height;
+
+    if (shift > 0) {
+        int count = held - shift;
+        for (int at = count - 1; at >= 0; at--) {
+            raster.pixels[at + shift] = raster.pixels[at];
+            if (raster.depths != NULL) {
+                raster.depths[at + shift] = raster.depths[at];
+            }
+        }
+    } else if (shift < 0) {
+        int count = held + shift;
+        for (int at = 0; at < count; at++) {
+            raster.pixels[at] = raster.pixels[at - shift];
+            if (raster.depths != NULL) {
+                raster.depths[at] = raster.depths[at - shift];
+            }
+        }
+    }
 }
 
 /**
