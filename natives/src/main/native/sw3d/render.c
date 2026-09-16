@@ -178,12 +178,18 @@ static Corner cornerAt(const Projected *point, uint32_t colour) {
 /**
  * Where a corner sits on its texture, kept divided by how far away the corner is.
  */
-static Corner onTexture(Corner corner, float u, float v, float away) {
-    float over = 1.0f / away;
-
-    corner.u = u * over;
-    corner.v = v * over;
-    corner.w = over;
+/**
+ * Where a corner sits on its texture, kept divided by how far away the corner is.
+ *
+ * What it is divided by is the corner's own distance as the buffer keeps it, running from nothing
+ * at the near plane to one at the far plane, rather than one over the distance the camera left
+ * behind. The two differ, and reading a texture through the second puts the wrong texel down on
+ * two pixels in five.
+ */
+static Corner onTexture(Corner corner, float u, float v) {
+    corner.u = u * corner.depth;
+    corner.v = v * corner.depth;
+    corner.w = corner.depth;
     return corner;
 }
 
@@ -302,7 +308,7 @@ enum { TEXTURE_EDGE = 127 };
  * close the approximation comes belongs to the instruction set.
  */
 static uint32_t texelAt(float u, float v, float w) {
-    float away = 1.0f / w;
+    float away = reciprocalOfFour(w);
     int across = (int) (u * away);
     int down = (int) (v * away);
 
@@ -991,12 +997,10 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
             texels = texturePixels(texture);
             texelsRepeat = metrics->repeatsU || metrics->repeatsV;
 
-            const Projected *at[3] = {a, b, c};
             for (int corner = 0; corner < 3; corner++) {
                 walked[corner] = onTexture(walked[corner],
                     FACE_CORNERS[corner][0] + slidU,
-                    FACE_CORNERS[corner][1] + slidV,
-                    at[corner]->away);
+                    FACE_CORNERS[corner][1] + slidV);
             }
         }
 

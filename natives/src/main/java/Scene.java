@@ -116,11 +116,6 @@ public sealed interface Scene {
         private static final int LEAN = 0x600;
 
         @Override
-        public boolean written() {
-            return false;
-        }
-
-        @Override
         public void draw(Toolkit toolkit, Props props) {
             if (props.textured() == null) {
                 return;
