@@ -1,6 +1,8 @@
 import com.jagex.graphics.Ground;
 import com.jagex.graphics.Toolkit;
 
+import java.util.Arrays;
+
 /**
  * A patch of terrain built here rather than loaded from a map.
  *
@@ -69,6 +71,55 @@ public final class HandGround {
 
     private static Ground build(Toolkit toolkit, int texture, int size) {
         return build(toolkit, texture, size, FEATURE_FLAGS);
+    }
+
+    /**
+     * A patch whose tiles are cut into four about a corner in the middle of each.
+     *
+     * The client cuts a tile up wherever one kind of ground meets another, and a corner of a face
+     * is then not a corner of the grid. How the ground faces there has to be worked out from the
+     * four corners around it; a patch whose corners all sit on the grid never asks the question.
+     */
+    public static Ground buildShaped(Toolkit toolkit) {
+        var heights = heights();
+        var ground = toolkit.createGround(TILES, TILES, heights, heights,
+            GROUND_FLAGS, FEATURE_FLAGS);
+
+        for (var x = 0; x < TILES; x++) {
+            for (var z = 0; z < TILES; z++) {
+                addCutTile(ground, x, z);
+            }
+        }
+
+        ground.YA();
+        return ground;
+    }
+
+    /** How many faces a tile cut about its middle has. */
+    private static final int CUT_FACES = 4;
+
+    /** A texture apiece saying the face wears none. */
+    private static int[] bare() {
+        var none = new int[CUT_FACES];
+        Arrays.fill(none, -1);
+        return none;
+    }
+
+    private static void addCutTile(Ground ground, int x, int z) {
+        var offsetX = new int[] {0, TILE, TILE, 0, TILE / 2};
+        var offsetY = new int[] {0, 0, TILE, TILE, TILE / 2};
+
+        var faceA = new int[] {0, 1, 2, 3};
+        var faceB = new int[] {4, 4, 4, 4};
+        var faceC = new int[] {1, 2, 3, 0};
+
+        var colours = new int[CUT_FACES];
+        for (var face = 0; face < CUT_FACES; face++) {
+            colours[face] = hslOf(x, z, face);
+        }
+
+        ground.addTile(x, z, offsetX, null, offsetY, null, faceA, faceB, faceC,
+            colours, null, bare(), new int[CUT_FACES], 0, 0, 0);
     }
 
     private static Ground build(Toolkit toolkit, int texture, int size, int features) {

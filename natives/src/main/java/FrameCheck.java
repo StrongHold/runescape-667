@@ -114,11 +114,37 @@ public final class FrameCheck {
                 continue;
             }
 
+            if (!scene.contains("(empty on purpose)")) {
+                emptiness(shipped.frame(index), scene).ifPresent(report::add);
+            }
+
             compare(shipped.frame(index), ours.frame(index), marks, scene, "the shipped toolkit", "we")
                 .ifPresent(report::add);
         }
 
         return report;
+    }
+
+    /**
+     * Complains about a scene that covers no pixels at all.
+     *
+     * Two toolkits that both draw nothing agree, so such a scene passes while checking nothing.
+     * Three of them have been found that way, each after resting work on it for some time, so it
+     * is worth a check of its own: a scene that is finished has to put something on the screen.
+     */
+    private static Optional<String> emptiness(Path frame, String scene) throws IOException {
+        var picture = ImageIO.read(frame.toFile());
+
+        for (var y = 0; y < picture.getHeight(); y++) {
+            for (var x = 0; x < picture.getWidth(); x++) {
+                if ((picture.getRGB(x, y) & 0xFFFFFF) != (BLANK & 0xFFFFFF)) {
+                    return Optional.empty();
+                }
+            }
+        }
+
+        return Optional.of(scene + " covers no pixels at all, so it checks nothing. Either give it"
+            + " something to draw or mark it as not yet drawn.");
     }
 
     /**

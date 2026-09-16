@@ -75,6 +75,7 @@ public sealed interface Scene {
         new FadedFaces(),
         new TexturesOff(),
         new TexturedGround(),
+        new CutGround(),
         new Textured()
     );
 
@@ -84,11 +85,22 @@ public sealed interface Scene {
      */
     record Props(Sprite gradient, Model model, Model simple, Matrix matrix,
                  Font mono, Font proportional, Ground ground, Mesh mesh, Model textured,
-                 Model faded, Model plain, Ground floor) {
+                 Model faded, Model plain, Ground floor, Ground cut) {
         /* empty */
     }
 
     void draw(Toolkit toolkit, Props props);
+
+    /**
+     * Whether an empty picture is what this scene is for.
+     *
+     * Two toolkits that both draw nothing agree, so a scene that draws nothing by accident passes
+     * while checking nothing, and three have been found that way. A scene whose whole point is
+     * that nothing comes out says so here, and every other one has to cover something.
+     */
+    default boolean drawsNothing() {
+        return false;
+    }
 
     /**
      * Whether our toolkit is expected to draw this scene yet.
@@ -755,6 +767,11 @@ public sealed interface Scene {
     record UnderTheGround() implements Scene {
 
         @Override
+        public boolean drawsNothing() {
+            return true;
+        }
+
+        @Override
         public void draw(Toolkit toolkit, Props props) {
             toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
             toolkit.f(NEAR, Integer.MAX_VALUE);
@@ -882,6 +899,47 @@ public sealed interface Scene {
             props.matrix().rotateAxisX(LEAN);
             props.matrix().applyTranslation(0, 0, DEPTH);
             props.plain().render(props.matrix(), null, 1);
+        }
+    }
+
+    /**
+     * A patch of ground whose tiles are cut into four about a corner in the middle of each.
+     *
+     * The client cuts a tile up wherever one kind of ground meets another, and a corner of a face
+     * is then not a corner of the grid. Every other patch here has its corners on the grid, so
+     * nothing else asks how the ground faces at a place between them.
+     */
+    record CutGround() implements Scene {
+
+        /**
+         * Fifteen thousand of its pixels are a shade out, almost all of them by one or two. The
+         * corners between the corners of the grid are lit from the four around them, which is
+         * most of it; what is left is the same small difference the textured patch has.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            var camera = toolkit.createMatrix();
+            camera.createCamera(HandGround.TILES * HandGround.TILE / 2, Terrain.UP,
+                -Terrain.BACK, TURN / 8, 0, 0);
+            toolkit.setCamera(camera);
+
+            var visible = new boolean[HandGround.TILES * 2][HandGround.TILES * 2];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            props.cut().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
+                HandGround.TILES, visible, false, 0);
         }
     }
 

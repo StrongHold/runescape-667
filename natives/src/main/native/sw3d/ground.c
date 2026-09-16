@@ -424,7 +424,38 @@ enum { LIGHT_WHOLE = 256 };
  * and the colour that makes is then lit by the sun according to which way the ground faces there.
  * A corner facing away from the sun takes only what the world gives it.
  */
-static uint32_t litCorner(const Ground *ground, int packed, int shade, int x, int z) {
+/**
+ * The way the ground faces at a place inside a tile.
+ *
+ * A corner of a face is not always a corner of the grid. The client cuts a tile into shapes and
+ * puts corners part way along its edges, and the way the ground faces there is worked out from
+ * the four corners of the tile around it rather than snapped to the nearest one. Snapping gives
+ * every face of such a tile the light of whichever corner it rounded to, which shows as a patch
+ * of ground lighter or darker than the one beside it along the line the tile was cut on.
+ */
+static void facingInside(const Ground *ground, int x, int z, int across, int along, float *into) {
+    const float *near = groundCornerNormal(ground, x, z);
+    const float *far = groundCornerNormal(ground, x + 1, z);
+    const float *nearAlong = groundCornerNormal(ground, x, z + 1);
+    const float *farAlong = groundCornerNormal(ground, x + 1, z + 1);
+
+    if (near == NULL || far == NULL || nearAlong == NULL || farAlong == NULL) {
+        into[3] = 0.0f;
+        return;
+    }
+
+    float partAcross = (float) across / (float) ground->tileSize;
+    float partAlong = (float) along / (float) ground->tileSize;
+
+    for (int lane = 0; lane < NORMAL_PARTS; lane++) {
+        float nearer = near[lane] + (far[lane] - near[lane]) * partAcross;
+        float further = nearAlong[lane] + (farAlong[lane] - nearAlong[lane]) * partAcross;
+        into[lane] = nearer + (further - nearer) * partAlong;
+    }
+}
+
+static uint32_t litCorner(const Ground *ground, int packed, int shade, int x, int z,
+                          int across, int along) {
     int lightness = ((packed & (LIGHTNESS_WHOLE - 1)) * (GROUND_LIGHTNESS - shade))
         / LIGHTNESS_WHOLE;
 
@@ -436,7 +467,10 @@ static uint32_t litCorner(const Ground *ground, int packed, int shade, int x, in
 
     uint32_t colour = colourOf((packed & ~(LIGHTNESS_WHOLE - 1)) | lightness);
 
-    const float *normal = groundCornerNormal(ground, x, z);
+    float facing[NORMAL_PARTS];
+    facingInside(ground, x, z, across, along, facing);
+
+    const float *normal = facing;
     const Sun *light = sun();
 
     /*
@@ -573,7 +607,7 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
             tile->colour[corner] = colours[corner] == -1
                 ? 0
                 : litCorner(ground, colours[corner] & 0xFFFF, tile->light[corner],
-                    worldX >> ground->tileShift, worldZ >> ground->tileShift);
+                    x, z, tile->across[corner], tile->along[corner]);
         }
     }
 

@@ -114,14 +114,17 @@ public final class FrameCapture {
             texturedModel(toolkit, textured, FEATURES, FORCED_TEXTURE),
             toolkit.createModel(fadedMesh(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
             texturedModel(toolkit, textured, FEATURES | TEXTURES_OFF, TEXTURE_THAT_MAY_GO),
-            HandGround.buildTextured(toolkit));
+            HandGround.buildTextured(toolkit),
+            HandGround.buildShaped(toolkit));
 
         var manifest = new ArrayList<String>();
 
         for (var scene : Scene.ALL) {
             for (var repeat = 0; repeat < REPEATS; repeat++) {
                 drawOnce(toolkit, scene, props, camera);
-                manifest.add(scene.written() ? scene.title() : scene.title() + " (outstanding)");
+                manifest.add(scene.title()
+                    + (scene.written() ? "" : " (outstanding)")
+                    + (scene.drawsNothing() ? " (empty on purpose)" : ""));
             }
         }
 
