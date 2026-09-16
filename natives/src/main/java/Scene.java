@@ -61,6 +61,7 @@ public sealed interface Scene {
         new Copied(),
         new Animated(),
         new PointLit(),
+        new Flattened(),
         new Terrain()
     );
 
@@ -565,7 +566,6 @@ public sealed interface Scene {
              */
             for (var step = 0; step < 4; step++) {
                 props.matrix().makeRotationZ(0);
-                props.matrix().rotateAxisY(step * TURN / 4);
                 props.matrix().translate((step - 2) * SPREAD, 0, DEPTH);
                 props.model().render(props.matrix(), null, 1);
             }
@@ -731,6 +731,50 @@ public sealed interface Scene {
             props.simple().render(props.matrix(), null, 1);
 
             software.N(0, LIGHTS, STRENGTHS);
+        }
+    }
+
+    /**
+     * The same model drawn through a picture taken from no particular place.
+     *
+     * Nothing shrinks with distance in that picture, and the client chooses how much smaller it
+     * is than the one the eye sees. Three sizes are drawn side by side, and a fourth stands far
+     * enough back that the eye's own picture would have shrunk it to nothing.
+     */
+    record Flattened() implements Scene {
+
+        /** How much smaller than the eye's picture each of the four is asked to be. */
+        private static final int[] SIZES = {900, 1400, 2200, 1200};
+
+        private static final int APART = 128;
+
+        /**
+         * How far away each one stands. A picture taken from no particular place puts them all
+         * the same size, so the only thing distance settles is what covers what.
+         */
+        private static final int[] DEPTHS = {DEPTH, DEPTH * 2, DEPTH * 3, DEPTH * 4};
+
+        /**
+         * A far plane the client has picked with the scene in mind.
+         *
+         * A model drawn this way is dropped whole once its distance is a small enough part of
+         * the way to the far plane, somewhere under a twenty thousandth of it. The eye's own
+         * picture never comes near that, because what it records grows towards one as a model
+         * goes back rather than towards nothing.
+         */
+        private static final int FAR = DEPTH * 8;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, FAR);
+
+            for (var step = 0; step < SIZES.length; step++) {
+                props.matrix().makeRotationZ(0);
+                props.matrix().rotateAxisY(step * TURN / 4);
+                props.matrix().translate((step - 1) * APART - APART / 2, 0, DEPTHS[step]);
+                props.model().renderOrtho(props.matrix(), null, SIZES[step], 0);
+            }
         }
     }
 

@@ -397,6 +397,43 @@ static Transform projectionMatrix(void) {
 }
 
 /**
+ * The picture a model is put through when the client wants it seen from no particular place.
+ *
+ * Nothing in it carries a distance into the fourth place, so every point comes back with a
+ * fourth place of one and nothing shrinks with distance. The picture is that much smaller than
+ * the one the eye sees, which is what the client asks for when it is drawing a model into a
+ * corner of the screen rather than into the world.
+ */
+static Transform flatProjection(int smaller) {
+    const Projection *view = projection();
+    float range = view->far - view->near;
+    float shrink = (float) smaller;
+
+    Transform matrix;
+    memset(&matrix, 0, sizeof matrix);
+    matrix.row[0][0] = view->scaleX / shrink;
+    matrix.row[1][1] = view->scaleY / shrink;
+    matrix.row[2][2] = 1.0f / range;
+    matrix.row[3][2] = -view->near / range;
+    matrix.row[3][3] = 1.0f;
+    return matrix;
+}
+
+/**
+ * How the picture is taken, which the client chooses each time it asks for a model to be drawn.
+ * Anything below nothing means the eye's own picture.
+ */
+enum { THROUGH_THE_EYE = -1 };
+
+static Transform pictureOf(int smaller) {
+    if (smaller < 0) {
+        return projectionMatrix();
+    } else {
+        return flatProjection(smaller);
+    }
+}
+
+/**
  * Puts one matrix after another, adding the four terms of a row in pairs.
  *
  * Four numbers added in a different order are a different number as soon as they stop fitting
@@ -577,7 +614,59 @@ static uint32_t litByNearby(void *model, int face, int vertex, uint32_t colour,
     return pointLitColour(colour, place, normal, nearby);
 }
 
-static void renderModel(void *model, const void *matrix, jint *cylinder) {
+/**
+ * Whether the whole model can be thrown away without looking at a single face.
+ *
+ * The model is stood in for by a cylinder: the two ends of its upright reach, and one radius
+ * around them. Both ends go through the matrix, and the cylinder is then measured against the
+ * near and far planes and against the four edges of the picture.
+ *
+ * The one radius is the reach across, and it is used for the upright measurement as well as for
+ * the two across it. That makes the cylinder taller than the model, which only ever keeps a
+ * model that could have been thrown away.
+ *
+ * What the two across are divided by is the whole of the difference between the two pictures.
+ * The eye's picture divides by the far end of the cylinder, so that a model standing further
+ * back is measured smaller. A picture taken from no particular place divides by how much smaller
+ * it was asked to be, and distance does not come into it.
+ */
+static int wholeModelIsOut(void *model, const float *rows, int smaller) {
+    const Projection *view = projection();
+
+    int reach[6];
+    modelBounds(model, reach);
+    float radius = (float) modelRadius(model);
+
+    float low[ROWS];
+    float high[ROWS];
+    for (int lane = 0; lane < ROWS; lane++) {
+        low[lane] = (float) reach[2] * rows[4 + lane] + rows[12 + lane];
+        high[lane] = (float) reach[3] * rows[4 + lane] + rows[12 + lane];
+    }
+
+    float nearest = fminf(low[2], high[2]) - radius;
+    float furthest = fmaxf(low[2], high[2]) + radius;
+
+    if (nearest >= view->far || view->near >= furthest) {
+        return 1;
+    }
+
+    float divideBy = smaller < 0 ? furthest : (float) smaller;
+
+    float leftmost = (fminf(low[0], high[0]) - radius) * view->scaleX / divideBy;
+    float rightmost = (fmaxf(low[0], high[0]) + radius) * view->scaleX / divideBy;
+
+    if (leftmost >= view->rightEdge || view->leftEdge >= rightmost) {
+        return 1;
+    }
+
+    float topmost = (fminf(low[1], high[1]) - radius) * view->scaleY / divideBy;
+    float bottommost = (fmaxf(low[1], high[1]) + radius) * view->scaleY / divideBy;
+
+    return topmost >= view->bottomEdge || view->topEdge >= bottommost;
+}
+
+static void renderModel(void *model, const void *matrix, jint *cylinder, int smaller) {
     if (model == NULL || matrix == NULL || raster.pixels == NULL || raster.depths == NULL) {
         return;
     }
@@ -602,7 +691,12 @@ static void renderModel(void *model, const void *matrix, jint *cylinder) {
         matrixCompose(matrix, camera, combined);
     }
 
-    Transform projector = projectionMatrix();
+    if (wholeModelIsOut(model, matrixRows(combined), smaller)) {
+        free(combined);
+        return;
+    }
+
+    Transform projector = pictureOf(smaller);
     Transform onto = after(matrixRows(combined), &projector);
 
     if (cylinder != NULL) {
@@ -645,7 +739,9 @@ static void renderModel(void *model, const void *matrix, jint *cylinder) {
 
         Projected *landed = &projected[vertex];
         landed->depth = signedAs(point[2] / away, point[2]);
-        landed->visible = away >= view->near && away <= view->far;
+
+        /* A picture taken from no particular place has nothing behind it and nothing beyond. */
+        landed->visible = smaller >= 0 || (away >= view->near && away <= view->far);
 
         if (landed->visible) {
             landed->x = point[0] / away + acrossFromClip;
@@ -790,12 +886,8 @@ void renderGroundTile(const void *ground, int x, int z) {
  * screen to be clicked. The client clears the last of them before asking, so leaving them alone
  * is how it is told the model cannot be clicked at all.
  */
-JNIEXPORT void JNICALL Java_a_UA(JNIEnv *env, jobject self, jlong worker, jlong model,
-                                  jlong matrix, jintArray cylinder, jint flags) {
-    (void) self;
-    (void) worker;
-    (void) flags;
-
+static void drawModelFor(JNIEnv *env, jlong model, jlong matrix, jintArray cylinder,
+        int smaller) {
     jint answer[CYLINDER_PARTS];
     int wanted = cylinder != NULL && (*env)->GetArrayLength(env, cylinder) >= CYLINDER_PARTS;
     if (wanted) {
@@ -803,11 +895,36 @@ JNIEXPORT void JNICALL Java_a_UA(JNIEnv *env, jobject self, jlong worker, jlong 
     }
 
     renderModel((void *) (intptr_t) model, (const void *) (intptr_t) matrix,
-        wanted ? answer : NULL);
+        wanted ? answer : NULL, smaller);
 
     if (wanted) {
         (*env)->SetIntArrayRegion(env, cylinder, 0, CYLINDER_PARTS, answer);
     }
+}
+
+JNIEXPORT void JNICALL Java_a_UA(JNIEnv *env, jobject self, jlong worker, jlong model,
+                                  jlong matrix, jintArray cylinder, jint flags) {
+    (void) self;
+    (void) worker;
+    (void) flags;
+
+    drawModelFor(env, model, matrix, cylinder, THROUGH_THE_EYE);
+}
+
+/**
+ * Draws one model through a picture taken from no particular place, that much smaller than the
+ * one the eye sees.
+ *
+ * The client asks for this when a model belongs to the screen rather than to the world, and it
+ * hands over a second number that the toolkit has never looked at.
+ */
+JNIEXPORT void JNICALL Java_a_f(JNIEnv *env, jobject self, jlong worker, jlong model,
+                                 jlong matrix, jintArray cylinder, jint smaller, jint unused) {
+    (void) self;
+    (void) worker;
+    (void) unused;
+
+    drawModelFor(env, model, matrix, cylinder, smaller);
 }
 
 /**
