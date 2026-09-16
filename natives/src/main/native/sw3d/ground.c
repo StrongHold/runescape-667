@@ -13,6 +13,7 @@
  */
 
 #include <stdlib.h>
+#include <math.h>
 #include <string.h>
 
 #include "sw3d.h"
@@ -82,7 +83,20 @@ typedef struct {
 
     /** Which tiles have had a shadow move over them since their picture was last worked out. */
     unsigned char *reshade;
+
+    /**
+     * The way the ground faces at every corner of the grid, four floats each, and how much of
+     * the sun each corner is kept out of.
+     */
+    float *normals;
+    unsigned char *corners;
 } Ground;
+
+/** How many floats one corner's direction takes: the three parts and a length. */
+enum { NORMAL_PARTS = 4 };
+
+/** How many channels of a colour the sun reaches. */
+enum { CHANNELS_LIT = 3 };
 
 static Ground *groundOf(JNIEnv *env, jobject self) {
     return (Ground *) (intptr_t) nativeIdOf(env, self);
@@ -151,6 +165,8 @@ static void groundFree(Ground *ground) {
     free(ground->lights);
     free(ground->shade);
     free(ground->reshade);
+    free(ground->normals);
+    free(ground->corners);
     free(ground);
 }
 
@@ -196,6 +212,12 @@ static int shiftOf(int size) {
     }
     return shift;
 }
+
+/**
+ * Works out the way the ground faces at every corner of the grid, which is what the sun is
+ * weighed against when a tile is lit.
+ */
+static void measureCorners(Ground *ground);
 
 /**
  * The feature that says the ground takes the shadows of what stands on it, and the one that says
@@ -262,6 +284,7 @@ JNIEXPORT void JNICALL Java_t_ga(JNIEnv *env, jobject self, jobject toolkit, job
 
     allocatedGrew((size_t) (sizeX + 1) * (size_t) (sizeZ + 1) * sizeof(int));
     takeShadows(ground);
+    measureCorners(ground);
     setNativeId(env, self, (jlong) (intptr_t) ground);
 }
 
@@ -371,6 +394,88 @@ static int16_t *shortsFrom(JNIEnv *env, jintArray source, int count) {
 }
 
 /**
+ * How dark the ground is where nothing stands over it, out of the hundred and twenty eight the
+ * lightness of a colour is held in.
+ *
+ * A corner kept from the sun by what stands on it is darker again, and the amount it is kept out
+ * of is taken off this before the lightness is scaled.
+ */
+enum { GROUND_LIGHTNESS = 74 };
+
+/** What the lightness of a colour is held out of, and the ends it is kept away from. */
+enum { LIGHTNESS_WHOLE = 128, LIGHTNESS_LEAST = 2, LIGHTNESS_MOST = 126 };
+
+/** The ends a lit channel is kept away from, so that no part of the ground is wholly one thing. */
+enum { CHANNEL_LEAST = 4, CHANNEL_MOST = 252 };
+
+/** What a light level is held out of once it is a whole number. */
+enum { LIGHT_WHOLE = 256 };
+
+/**
+ * What one corner of a tile is painted.
+ *
+ * The lightness the client gave is brought down by how much of the sun the corner is kept out of,
+ * and the colour that makes is then lit by the sun according to which way the ground faces there.
+ * A corner facing away from the sun takes only what the world gives it.
+ */
+static uint32_t litCorner(const Ground *ground, int packed, int shade, int x, int z) {
+    int lightness = ((packed & (LIGHTNESS_WHOLE - 1)) * (GROUND_LIGHTNESS - shade))
+        / LIGHTNESS_WHOLE;
+
+    if (lightness < LIGHTNESS_LEAST) {
+        lightness = LIGHTNESS_LEAST;
+    } else if (lightness > LIGHTNESS_MOST) {
+        lightness = LIGHTNESS_MOST;
+    }
+
+    uint32_t colour = colourOf((packed & ~(LIGHTNESS_WHOLE - 1)) | lightness);
+
+    const float *normal = groundCornerNormal(ground, x, z);
+    const Sun *light = sun();
+
+    /*
+     * A corner on the rim of the grid faces nowhere, and the toolkit this replaces divides by
+     * that direction's length of nothing. What comes back is not a number, and turning it into a
+     * whole one lands below anything, so every channel of such a corner ends at the floor. The
+     * same answer is reached here by saying so, because what a machine makes of a number that is
+     * not one differs between the two this is built for.
+     */
+    if (normal == NULL || normal[3] == 0.0f) {
+        return ((uint32_t) CHANNEL_LEAST << 16)
+            | ((uint32_t) CHANNEL_LEAST << 8)
+            | (uint32_t) CHANNEL_LEAST;
+    }
+
+    float towards = (light->x * normal[0] + light->y * normal[1] + light->z * normal[2])
+        / normal[3];
+
+    /*
+     * A corner turned away from the sun is not merely left in the shade: the light it faces away
+     * from is taken off what the world gives it, by the second of the two strengths the client
+     * sets the sun with.
+     */
+    float reach = towards > 0.0f ? light->intensity : light->reverseIntensity;
+    int strength = (int) ((globalAmbient() + reach * towards) * LIGHT_WHOLE);
+    unsigned char sunColour[CHANNELS_LIT] = {light->red, light->green, light->blue};
+
+    uint32_t lit = 0;
+    for (int part = 0; part < CHANNELS_LIT; part++) {
+        int channel = (int) ((colour >> ((2 - part) * 8)) & 0xff);
+        channel = (((channel * sunColour[part]) >> 8) * strength) >> 8;
+
+        if (channel < CHANNEL_LEAST) {
+            channel = CHANNEL_LEAST;
+        } else if (channel > CHANNEL_MOST) {
+            channel = CHANNEL_MOST;
+        }
+
+        lit |= (uint32_t) channel << ((2 - part) * 8);
+    }
+
+    return lit;
+}
+
+/**
  * Builds one tile out of the corners the client hands over.
  *
  * Every corner arrives three to a face, already spread out of the indexed list the client keeps,
@@ -437,9 +542,12 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
             int worldZ = (z << ground->tileShift) + tile->along[corner];
 
             tile->up[corner] = (int16_t) (averageHeight(ground, worldX, worldZ) + levels[corner]);
+            tile->light[corner] = (unsigned char) groundCornerShade(ground,
+                worldX >> ground->tileShift, worldZ >> ground->tileShift);
             tile->colour[corner] = colours[corner] == -1
                 ? 0
-                : colourOf(colours[corner] & 0xFFFF);
+                : litCorner(ground, colours[corner] & 0xFFFF, tile->light[corner],
+                    worldX >> ground->tileShift, worldZ >> ground->tileShift);
         }
     }
 
@@ -759,4 +867,78 @@ void groundTilePlanCorner(const void *at, int corner, int *across, int *along, u
     *across = tile->across[corner];
     *along = tile->along[corner];
     *colour = tile->colour[corner];
+}
+
+/**
+ * How far apart in height two places one tile apart have to be for the ground between them to
+ * stand at forty five degrees.
+ *
+ * The client counts height in the same units it counts distance, and the ground is measured
+ * across two tiles at once, so half a tile is what one step of height is weighed against.
+ */
+enum { UPRIGHT_PER_STEP = 256 };
+
+/**
+ * Works out the way the ground faces at every corner of the grid.
+ *
+ * A corner's direction comes from how the height changes either side of it, one step each way.
+ * The upright part is the same everywhere and points the way the client counts up, which is the
+ * way heights grow more negative, so the whole of it leans away from a rise.
+ *
+ * A corner on the edge of the grid is left facing nowhere at all, because the step either side of
+ * it would run off the heights. Such a corner takes no sun and is left with only the light the
+ * world gives everything, which is what darkens the rim of a patch of ground.
+ */
+static void measureCorners(Ground *ground) {
+    int across = ground->sizeX + 1;
+    int along = ground->sizeZ + 1;
+
+    ground->normals = calloc((size_t) across * (size_t) along * NORMAL_PARTS, sizeof(float));
+    ground->corners = calloc((size_t) across * (size_t) along, sizeof(unsigned char));
+    if (ground->normals == NULL || ground->corners == NULL) {
+        return;
+    }
+
+    for (int x = 0; x < across; x++) {
+        for (int z = 0; z < along; z++) {
+            float *normal = &ground->normals[((size_t) x * (size_t) along + (size_t) z)
+                * NORMAL_PARTS];
+
+            if (x == 0 || z == 0 || x == across - 1 || z == along - 1) {
+                continue;
+            }
+
+            int stepX = heightAt(ground, x + 1, z) - heightAt(ground, x - 1, z);
+            int stepZ = heightAt(ground, x, z + 1) - heightAt(ground, x, z - 1);
+
+            float length = sqrtf((float) (stepX * stepX)
+                + (float) (UPRIGHT_PER_STEP * UPRIGHT_PER_STEP)
+                + (float) (stepZ * stepZ));
+            float over = 1.0f / length;
+
+            normal[0] = (float) stepX * over;
+            normal[1] = (float) -UPRIGHT_PER_STEP * over;
+            normal[2] = (float) stepZ * over;
+            normal[3] = 1.0f;
+        }
+    }
+}
+
+const float *groundCornerNormal(const void *handle, int x, int z) {
+    const Ground *ground = handle;
+    if (ground->normals == NULL || x < 0 || z < 0 || x > ground->sizeX || z > ground->sizeZ) {
+        return NULL;
+    }
+
+    return &ground->normals[((size_t) x * (size_t) (ground->sizeZ + 1) + (size_t) z)
+        * NORMAL_PARTS];
+}
+
+int groundCornerShade(const void *handle, int x, int z) {
+    const Ground *ground = handle;
+    if (ground->corners == NULL || x < 0 || z < 0 || x > ground->sizeX || z > ground->sizeZ) {
+        return 0;
+    }
+
+    return ground->corners[(size_t) x * (size_t) (ground->sizeZ + 1) + (size_t) z];
 }

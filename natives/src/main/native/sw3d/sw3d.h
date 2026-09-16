@@ -229,6 +229,15 @@ int groundHeightAt(const void *ground, int x, int z);
 /** How high the ground is at a place between its corners. */
 int groundHeightBetween(const void *ground, int x, int z);
 
+/**
+ * The way the ground faces at one corner of the grid, worked out from how the height changes
+ * either side of it. Four floats: the three parts of the direction and a length of one.
+ */
+const float *groundCornerNormal(const void *ground, int x, int z);
+
+/** How much of the sun one corner of the grid is kept out of by what stands on it. */
+int groundCornerShade(const void *ground, int x, int z);
+
 /** How many faces one tile of the ground is drawn as. */
 int groundTileFaces(const void *tile);
 
