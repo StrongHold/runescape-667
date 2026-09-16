@@ -70,6 +70,7 @@ public sealed interface Scene {
         new Terrain(),
         new Plan(),
         new OverTheGround(),
+        new UnderTheGround(),
         new Textured()
     );
 
@@ -736,6 +737,38 @@ public sealed interface Scene {
 
         /** How many places along the patch a model is put. */
         private static final int ALONG = 5;
+    }
+
+    /**
+     * The ground seen from the far side, where every tile is turned away from the eye.
+     *
+     * The ground is drawn from one side only, so this is what proves it: the same patch the
+     * terrain scene draws, looked at from the other end, has to come out empty on both sides.
+     * Without the test that decides which way a tile is wound, the underside of the world shows
+     * through.
+     */
+    record UnderTheGround() implements Scene {
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            var camera = toolkit.createMatrix();
+            camera.createCamera(HandGround.TILES * HandGround.TILE / 2, -Terrain.UP,
+                HandGround.TILES * HandGround.TILE + Terrain.BACK, -TURN / 8, TURN / 2, 0);
+            toolkit.setCamera(camera);
+
+            var visible = new boolean[HandGround.TILES * 2][HandGround.TILES * 2];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            props.ground().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
+                HandGround.TILES, visible, false, 0);
+        }
     }
 
     /**

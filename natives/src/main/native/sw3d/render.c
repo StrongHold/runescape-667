@@ -1025,6 +1025,25 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
  * the projection and nothing else. Each face is filled between its three corners the same way a
  * model's face is, because that is what the toolkit fills it with.
  */
+/**
+ * Whether a face of the ground is turned towards the eye once it has landed on the picture.
+ *
+ * The ground is drawn from one side only. A face wound the other way round is the underside of
+ * the world, and drawing it would let the ground show through itself wherever the eye gets below
+ * it. Which way a face is wound is the sign of the area it covers once it has been laid down.
+ *
+ * A model is not treated this way. The client hands a model over already knowing which of its
+ * faces are worth drawing, and the ground it works out here.
+ */
+static int facesTheEye(const Projected *a, const Projected *b, const Projected *c) {
+    float acrossA = a->x - b->x;
+    float downA = a->y - b->y;
+    float acrossC = c->x - b->x;
+    float downC = c->y - b->y;
+
+    return acrossA * downC > downA * acrossC;
+}
+
 void renderGroundTile(const void *ground, int x, int z) {
     int corners = 0;
     const void *tile = groundTile(ground, x, z, &corners);
@@ -1078,7 +1097,7 @@ void renderGroundTile(const void *ground, int x, int z) {
         const Projected *b = &projected[face * 3 + 1];
         const Projected *c = &projected[face * 3 + 2];
 
-        if (!a->visible || !b->visible || !c->visible) {
+        if (!a->visible || !b->visible || !c->visible || !facesTheEye(a, b, c)) {
             continue;
         }
 
