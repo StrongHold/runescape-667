@@ -93,6 +93,10 @@ public final class ModelProbe {
             camera.makeIdentity();
             toolkit.setCamera(camera);
 
+            if (!System.getenv("SW3D_SURVEY").isEmpty()) {
+                CacheMesh.surveyMappingTypes();
+            }
+
             var lines = new ArrayList<String>();
             refusals(toolkit, lines);
             moves(toolkit, lines);

@@ -786,6 +786,7 @@ fun registerProbe(name: String, probe: String, what: String): TaskProvider<JavaE
         description = "Records what the shipped toolkit answers for $what."
         dependsOn(patchToolkit)
         mainClass = probe
+        environment("SW3D_SURVEY", providers.environmentVariable("SW3D_SURVEY").getOrElse(""))
         classpath = sourceSets["main"].runtimeClasspath
         setExecutable(x64Java)
         jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
@@ -798,6 +799,7 @@ fun registerProbe(name: String, probe: String, what: String): TaskProvider<JavaE
         description = "Records what our toolkit answers for $what."
         dependsOn(compileSoftwareToolkit, ":unpackX64Jdk")
         mainClass = probe
+        environment("SW3D_SURVEY", providers.environmentVariable("SW3D_SURVEY").getOrElse(""))
         classpath = sourceSets["main"].runtimeClasspath
         setExecutable(x64Java)
         jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")

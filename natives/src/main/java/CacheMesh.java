@@ -113,6 +113,35 @@ public final class CacheMesh {
         return new Mesh(found.toArray(new Mesh[0]), found.size());
     }
 
+    /**
+     * Counts how each model in the cache asks for its textures to be placed, so that the ways worth
+     * writing can be told from the ways that are never used.
+     */
+    public static void surveyMappingTypes() throws Exception {
+        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
+        if (!new File(cache, "main_file_cache.dat2").isFile()) {
+            return;
+        }
+
+        var held = at(cache);
+        var ways = new java.util.TreeMap<Integer, Integer>();
+        var textured = 0;
+
+        for (var group = 0; group < GROUP_LIMIT; group++) {
+            var mesh = held.read(group);
+            if (mesh.isEmpty() || mesh.get().texMappingType == null) {
+                continue;
+            }
+
+            textured++;
+            for (var way : mesh.get().texMappingType) {
+                ways.merge((int) way, 1, Integer::sum);
+            }
+        }
+
+        System.out.println("SURVEY " + textured + " textured models, spaces by way " + ways);
+    }
+
     public static CacheMesh at(File cache) throws Exception {
         var data = new FileOnDisk(new File(cache, "main_file_cache.dat2"), "r", Long.MAX_VALUE);
         var index = new FileOnDisk(
