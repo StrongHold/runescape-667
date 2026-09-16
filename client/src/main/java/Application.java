@@ -80,6 +80,7 @@ public final class Application implements AppletStub {
     }
 
     private void start() {
+        StallReport.watchIfAsked();
         installKeys();
         NativeLibraries.install();
         Jawt.tryLoad();

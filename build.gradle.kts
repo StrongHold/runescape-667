@@ -102,6 +102,14 @@ subprojects {
                 systemProperty("toolkit.jaggl.library", openGlLibrary.asFile.absolutePath)
                 systemProperty("toolkit.jaclib.library", memoryLibrary.asFile.absolutePath)
                 systemProperty("toolkit.sw3d.library", softwareToolkit.asFile.absolutePath)
+
+                /*
+                 * Passed through so that a client which stops responding can be asked where it
+                 * stopped, with -Dclient.stalls=<seconds> on the command line.
+                 */
+                providers.systemProperty("client.stalls").orNull?.let {
+                    systemProperty("client.stalls", it)
+                }
             }
         }
     }
