@@ -74,6 +74,7 @@ public sealed interface Scene {
         new Underwater(),
         new FadedFaces(),
         new TexturesOff(),
+        new TexturedGround(),
         new Textured()
     );
 
@@ -83,7 +84,7 @@ public sealed interface Scene {
      */
     record Props(Sprite gradient, Model model, Model simple, Matrix matrix,
                  Font mono, Font proportional, Ground ground, Mesh mesh, Model textured,
-                 Model faded, Model plain) {
+                 Model faded, Model plain, Ground floor) {
         /* empty */
     }
 
@@ -881,6 +882,48 @@ public sealed interface Scene {
             props.matrix().rotateAxisX(LEAN);
             props.matrix().applyTranslation(0, 0, DEPTH);
             props.plain().render(props.matrix(), null, 1);
+        }
+    }
+
+    /**
+     * A patch of ground whose tiles wear a texture.
+     *
+     * A tile carries a texture and a size beside its colours, and the size decides how much of
+     * the texture one tile covers. The patch drawn here wears one texture at two sizes with a
+     * strip of bare tiles between them, so one picture shows all three.
+     */
+    record TexturedGround() implements Scene {
+
+        /**
+         * The tiles wear their texture and cover exactly the right pixels, and the tiles wearing
+         * none are drawn exactly right. What a textured tile comes to is about a fifth too dark,
+         * evenly across the patch, so what is left is how a texel and the light on a tile are put
+         * together rather than which texel is read.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            var camera = toolkit.createMatrix();
+            camera.createCamera(HandGround.TILES * HandGround.TILE / 2, Terrain.UP,
+                -Terrain.BACK, TURN / 8, 0, 0);
+            toolkit.setCamera(camera);
+
+            var visible = new boolean[HandGround.TILES * 2][HandGround.TILES * 2];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            props.floor().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
+                HandGround.TILES, visible, false, 0);
         }
     }
 

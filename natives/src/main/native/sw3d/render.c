@@ -1163,6 +1163,43 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
  * model's face is, because that is what the toolkit fills it with.
  */
 /**
+ * Where a corner of a tile sits on the texture the tile wears.
+ *
+ * One tile covers the whole of its texture, whatever size the tile is, so a corner's place in its
+ * own square is all that decides where it reads from. The last texel rather than the whole width
+ * is what a corner at the far edge reaches, the same as a face of a model wearing the whole of
+ * one.
+ */
+static void layTextureOnTile(const void *tile, int face, int tileSize, Corner *walked) {
+    texels = NULL;
+
+    int wears = groundTileFaceTexture(tile, face);
+    if (wears == -1) {
+        return;
+    }
+
+    const Texture *texture = textureFor(wears);
+    if (texture == NULL) {
+        return;
+    }
+
+    const TextureMetrics *metrics = textureMetrics(texture);
+    texels = texturePixels(texture);
+    texelsRepeat = metrics->repeatsU || metrics->repeatsV;
+
+    float over = (float) TEXTURE_EDGE / (float) tileSize;
+
+    for (int corner = 0; corner < 3; corner++) {
+        int across;
+        int along;
+        uint32_t colour;
+        groundTilePlanCorner(tile, face * 3 + corner, &across, &along, &colour);
+
+        walked[corner] = onTexture(walked[corner], (float) across * over, (float) along * over);
+    }
+}
+
+/**
  * Whether a face of the ground is turned towards the eye once it has landed on the picture.
  *
  * The ground is drawn from one side only. A face wound the other way round is the underside of
@@ -1238,11 +1275,17 @@ void renderGroundTile(const void *ground, int x, int z) {
             continue;
         }
 
-        fillTriangle(cornerAt(a, shade[face * 3]),
-                     cornerAt(b, shade[face * 3 + 1]),
-                     cornerAt(c, shade[face * 3 + 2]));
+        Corner walked[3] = {
+            cornerAt(a, shade[face * 3]),
+            cornerAt(b, shade[face * 3 + 1]),
+            cornerAt(c, shade[face * 3 + 2])
+        };
+
+        layTextureOnTile(tile, face, tileSize, walked);
+        fillTriangle(walked[0], walked[1], walked[2]);
     }
 
+    texels = NULL;
     free(shade);
 }
 

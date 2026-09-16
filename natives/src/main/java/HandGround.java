@@ -42,13 +42,32 @@ public final class HandGround {
     }
 
     public static Ground build(Toolkit toolkit) {
+        return build(toolkit, TEXTURE, 0);
+    }
+
+    /**
+     * A patch whose tiles wear a texture, which the plain one does not.
+     *
+     * The size a tile gives its texture decides how much of the texture one tile covers, so a
+     * patch built here gives the near half of it one size and the far half another, and a strip
+     * down the middle none at all. One picture then shows a tile wearing a texture, a tile
+     * wearing the same texture at another size, and a tile wearing none.
+     */
+    public static Ground buildTextured(Toolkit toolkit) {
+        return build(toolkit, TEXTURED_WITH, TILE);
+    }
+
+    /** The texture a textured patch wears, which is one the player is not allowed to turn off. */
+    private static final int TEXTURED_WITH = 6;
+
+    private static Ground build(Toolkit toolkit, int texture, int size) {
         var heights = heights();
         var ground = toolkit.createGround(TILES, TILES, heights, heights,
             GROUND_FLAGS, FEATURE_FLAGS);
 
         for (var x = 0; x < TILES; x++) {
             for (var z = 0; z < TILES; z++) {
-                addTile(ground, x, z);
+                addTile(ground, x, z, texture, size);
             }
         }
 
@@ -67,7 +86,10 @@ public final class HandGround {
         return heights;
     }
 
-    private static void addTile(Ground ground, int x, int z) {
+    private static void addTile(Ground ground, int x, int z, int texture, int size) {
+        var wears = x == TILES / 2 ? -1 : texture;
+        var across = z < TILES / 2 ? size : size * 2;
+
         var offsetX = new int[] {0, TILE, TILE, 0};
         var offsetY = new int[] {0, 0, TILE, TILE};
         var faceA = new int[] {0, 0};
@@ -79,8 +101,8 @@ public final class HandGround {
             colours[face] = hslOf(x, z, face);
         }
 
-        var textures = new int[] {TEXTURE, TEXTURE};
-        var sizes = new int[] {0, 0};
+        var textures = new int[] {wears, wears};
+        var sizes = new int[] {across, across};
 
         var overlay = OVERLAID ? colours.clone() : null;
         var levels = LEVELLED ? new int[] {0, 0, 0, 0} : null;
