@@ -79,6 +79,7 @@ public final class ModelProbe {
             masks(toolkit, lines);
             copies(toolkit, lines);
             picks(toolkit, lines);
+            pieces(toolkit, lines);
             animations(toolkit, lines);
             lights(toolkit, lines);
 
@@ -266,6 +267,46 @@ public final class ModelProbe {
         behind.makeRotationZ(0);
         behind.translate(0, 0, -DEPTH);
         lines.add("picked behind " + model.picked(Scene.WIDTH / 2, Scene.HEIGHT / 2, behind, false, 0));
+    }
+
+    /**
+     * Animating only some of the pieces a model was built from.
+     *
+     * A player is one model built from a head, a torso and so on, and the client animates it
+     * several times over naming a different set of those pieces each time. The model here is two
+     * models from the cache joined, which is the only kind that records which piece each vertex
+     * came from.
+     */
+    private static void pieces(Toolkit toolkit, List<String> lines) throws Exception {
+        int[] masks = {0, 0x1, 0x2, 0x3, 0xFFFF};
+        int[] labels = {0, 1, 2};
+
+        for (var mask : masks) {
+            var moved = joined(toolkit);
+            moved.NA();
+            moved.I(1, labels, 4000, -3000, 2500, false, mask, null);
+            moved.wa();
+            lines.add("piece moved " + mask + " " + measure(moved));
+
+            var turned = joined(toolkit);
+            turned.NA();
+            turned.I(0, labels, 2000, 2000, 2000, false, mask, null);
+            turned.I(2, labels, 1024, 2748, 8192, false, mask, null);
+            turned.wa();
+            lines.add("piece turned " + mask + " " + measure(turned));
+
+            var stretched = joined(toolkit);
+            stretched.NA();
+            stretched.I(0, labels, 3, -4, 5, false, mask, null);
+            stretched.I(3, labels, 256, 64, 300, false, mask, null);
+            stretched.wa();
+            lines.add("piece stretched " + mask + " " + measure(stretched));
+        }
+    }
+
+    private static i joined(Toolkit toolkit) throws Exception {
+        return (i) toolkit.createModel(
+            CacheMesh.twoUntexturedJoined(MODEL_FACES), FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
     }
 
     /**

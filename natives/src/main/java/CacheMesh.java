@@ -6,6 +6,8 @@ import com.jagex.js5.Js5Archive;
 import com.jagex.js5.js5;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -53,6 +55,27 @@ public final class CacheMesh {
         return found.get();
     }
 
+    /**
+     * Two models out of the cache joined into one.
+     *
+     * A model built from several pieces is the only kind that records which piece each vertex
+     * came from, and that is what the client names when it animates one part of a player and
+     * leaves the rest standing still.
+     */
+    public static Mesh twoUntexturedJoined(int faces) throws Exception {
+        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
+        if (!new File(cache, "main_file_cache.dat2").isFile()) {
+            return FlatMesh.INSTANCE.build();
+        }
+
+        var found = at(cache).firstUntexturedWithFaces(faces, 2);
+        if (found.size() < 2) {
+            return FlatMesh.INSTANCE.build();
+        }
+
+        return new Mesh(found.toArray(new Mesh[0]), found.size());
+    }
+
     public static CacheMesh at(File cache) throws Exception {
         var data = new FileOnDisk(new File(cache, "main_file_cache.dat2"), "r", Long.MAX_VALUE);
         var index = new FileOnDisk(
@@ -82,6 +105,34 @@ public final class CacheMesh {
         }
 
         return Optional.empty();
+    }
+
+    /**
+     * The first few models in the cache with at least this many faces and none of them textured.
+     */
+    public List<Mesh> firstUntexturedWithFaces(int faces, int wanted) {
+        var found = new ArrayList<Mesh>();
+
+        for (var group = 0; group < GROUP_LIMIT && found.size() < wanted; group++) {
+            var mesh = read(group);
+            if (mesh.isPresent() && mesh.get().faceCount >= faces && untextured(mesh.get())
+                && plain(mesh.get())) {
+                found.add(mesh.get());
+            }
+        }
+
+        return found;
+    }
+
+    /**
+     * Whether the model carries nothing but geometry.
+     *
+     * A billboard is described by a type read from the configuration, which needs a client
+     * connected to a server to read, and particles need a toolkit built to carry them. A model
+     * with neither can be built from the cache alone.
+     */
+    private static boolean plain(Mesh mesh) {
+        return mesh.billboards == null && mesh.emitters == null && mesh.effectors == null;
     }
 
     private static boolean untextured(Mesh mesh) {

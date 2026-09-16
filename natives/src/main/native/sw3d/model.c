@@ -1211,6 +1211,21 @@ JNIEXPORT void JNICALL Java_i_aa(JNIEnv *env, jobject self, jshort from, jshort 
 }
 
 /**
+ * Which vertices a step of an animation moves.
+ *
+ * The labels name groups. A step may also be told to move only the pieces of the model named by
+ * a mask, which is how a player's arms animate while the rest of it stands still, and a vertex is
+ * then moved only if the piece it came from is one of them. A model built from a single piece
+ * carries no piece to name, and is moved whatever the mask says.
+ */
+typedef struct {
+    const int *labels;
+    int count;
+    int pieces;
+    int byPiece;
+} Chosen;
+
+/**
  * The vertices a label names, or nothing when the label names no group.
  */
 static const LabelGroup *groupOf(const Model *model, int label) {
@@ -1233,21 +1248,31 @@ static int groupVertex(const Model *model, const LabelGroup *group, int within) 
  * group at all, or naming only groups with nothing in them, puts it at the amount given on its
  * own.
  */
-static void pivotAt(Model *model, const int *labels, int count, int x, int y, int z) {
+static int moves(const Model *model, const Chosen *chosen, int vertex) {
+    return !chosen->byPiece || model->vertexPiece == NULL
+        || (model->vertexPiece[vertex] & chosen->pieces) != 0;
+}
+
+static void pivotAt(Model *model, const Chosen *chosen, int x, int y, int z) {
     model->pivot[0] = 0.0f;
     model->pivot[1] = 0.0f;
     model->pivot[2] = 0.0f;
 
     int gathered = 0;
 
-    for (int named = 0; named < count; named++) {
-        const LabelGroup *group = groupOf(model, labels[named]);
+    for (int named = 0; named < chosen->count; named++) {
+        const LabelGroup *group = groupOf(model, chosen->labels[named]);
         if (group == NULL) {
             continue;
         }
 
         for (int within = 0; within < group->count; within++) {
-            const float *at = vertexAt(model, groupVertex(model, group, within));
+            int vertex = groupVertex(model, group, within);
+            if (!moves(model, chosen, vertex)) {
+                continue;
+            }
+
+            const float *at = vertexAt(model, vertex);
             model->pivot[0] += at[0];
             model->pivot[1] += at[1];
             model->pivot[2] += at[2];
@@ -1266,15 +1291,20 @@ static void pivotAt(Model *model, const int *labels, int count, int x, int y, in
     }
 }
 
-static void moveBy(Model *model, const int *labels, int count, int x, int y, int z) {
-    for (int named = 0; named < count; named++) {
-        const LabelGroup *group = groupOf(model, labels[named]);
+static void moveBy(Model *model, const Chosen *chosen, int x, int y, int z) {
+    for (int named = 0; named < chosen->count; named++) {
+        const LabelGroup *group = groupOf(model, chosen->labels[named]);
         if (group == NULL) {
             continue;
         }
 
         for (int within = 0; within < group->count; within++) {
-            float *at = vertexAt(model, groupVertex(model, group, within));
+            int vertex = groupVertex(model, group, within);
+            if (!moves(model, chosen, vertex)) {
+                continue;
+            }
+
+            float *at = vertexAt(model, vertex);
             at[0] += (float) x;
             at[1] += (float) y;
             at[2] += (float) z;
@@ -1315,18 +1345,23 @@ static void turnAboutPivot(float *place, int across, int upright, int away, int 
  * Turns the named groups about the pivot, and their directions with them when the model was
  * built to allow it and the caller asked.
  */
-static void turnBy(Model *model, const int *labels, int count, int across, int upright, int away,
+static void turnBy(Model *model, const Chosen *chosen, int across, int upright, int away,
                    int order, int alsoNormals) {
     int acrossFirst = (order & TURN_ACROSS_FIRST) != 0;
 
-    for (int named = 0; named < count; named++) {
-        const LabelGroup *group = groupOf(model, labels[named]);
+    for (int named = 0; named < chosen->count; named++) {
+        const LabelGroup *group = groupOf(model, chosen->labels[named]);
         if (group == NULL) {
             continue;
         }
 
         for (int within = 0; within < group->count; within++) {
-            float *at = vertexAt(model, groupVertex(model, group, within));
+            int vertex = groupVertex(model, group, within);
+            if (!moves(model, chosen, vertex)) {
+                continue;
+            }
+
+            float *at = vertexAt(model, vertex);
 
             at[0] -= model->pivot[0];
             at[1] -= model->pivot[1];
@@ -1345,15 +1380,20 @@ static void turnBy(Model *model, const int *labels, int count, int across, int u
         return;
     }
 
-    for (int named = 0; named < count; named++) {
-        const LabelGroup *group = groupOf(model, labels[named]);
+    for (int named = 0; named < chosen->count; named++) {
+        const LabelGroup *group = groupOf(model, chosen->labels[named]);
         if (group == NULL) {
             continue;
         }
 
         for (int within = 0; within < group->count; within++) {
-            Normal *normal = &model->normals[groupVertex(model, group, within)];
-            turnAboutPivot(normalPlace(normal), across, upright, away, acrossFirst);
+            int vertex = groupVertex(model, group, within);
+            if (!moves(model, chosen, vertex)) {
+                continue;
+            }
+
+            turnAboutPivot(normalPlace(&model->normals[vertex]),
+                across, upright, away, acrossFirst);
         }
     }
 }
@@ -1362,17 +1402,22 @@ static void turnBy(Model *model, const int *labels, int count, int across, int u
  * Stretches the named groups away from the pivot, where a hundred and twenty eight leaves an
  * axis the length it already is.
  */
-static void stretchBy(Model *model, const int *labels, int count, int x, int y, int z) {
+static void stretchBy(Model *model, const Chosen *chosen, int x, int y, int z) {
     float scale[3] = {(float) x, (float) y, (float) z};
 
-    for (int named = 0; named < count; named++) {
-        const LabelGroup *group = groupOf(model, labels[named]);
+    for (int named = 0; named < chosen->count; named++) {
+        const LabelGroup *group = groupOf(model, chosen->labels[named]);
         if (group == NULL) {
             continue;
         }
 
         for (int within = 0; within < group->count; within++) {
-            float *at = vertexAt(model, groupVertex(model, group, within));
+            int vertex = groupVertex(model, group, within);
+            if (!moves(model, chosen, vertex)) {
+                continue;
+            }
+
+            float *at = vertexAt(model, vertex);
 
             for (int lane = 0; lane < 3; lane++) {
                 at[lane] -= model->pivot[lane];
@@ -1397,6 +1442,41 @@ static void stretchBy(Model *model, const int *labels, int count, int x, int y, 
  * built yet, and fading needs the faces gathered by label, which the toolkit works out while it
  * works out where a texture sits.
  */
+/**
+ * One step of an animation, applied to whichever vertices the step names.
+ */
+static void animationStep(Model *model, const Chosen *chosen, int step,
+                          int x, int y, int z, int order, int alsoNormals) {
+    if (step == PIVOT_AT) {
+        pivotAt(model, chosen, x, y, z);
+    } else if (step == MOVE_BY) {
+        moveBy(model, chosen, x, y, z);
+    } else if (step == TURN_BY) {
+        turnBy(model, chosen, x, y, z, order, alsoNormals);
+    } else if (step == STRETCH_BY) {
+        stretchBy(model, chosen, x, y, z);
+    }
+}
+
+/**
+ * Reads the labels a step names out of the array the client handed over.
+ */
+static int *labelsOf(JNIEnv *env, jintArray named, int *count) {
+    *count = named == NULL ? 0 : (*env)->GetArrayLength(env, named);
+    if (*count <= 0) {
+        return NULL;
+    }
+
+    int *labels = calloc((size_t) *count, sizeof(int));
+    if (labels == NULL) {
+        *count = 0;
+        return NULL;
+    }
+
+    (*env)->GetIntArrayRegion(env, named, 0, *count, (jint *) labels);
+    return labels;
+}
+
 JNIEXPORT void JNICALL Java_i_l(JNIEnv *env, jobject self, jlong handle, jint step,
                                  jintArray named, jint x, jint y, jint z, jint order,
                                  jboolean alsoNormals) {
@@ -1407,28 +1487,45 @@ JNIEXPORT void JNICALL Java_i_l(JNIEnv *env, jobject self, jlong handle, jint st
         return;
     }
 
-    int count = named == NULL ? 0 : (*env)->GetArrayLength(env, named);
-    int *labels = NULL;
+    Chosen chosen;
+    chosen.labels = labelsOf(env, named, &chosen.count);
+    chosen.pieces = 0;
+    chosen.byPiece = 0;
 
-    if (count > 0) {
-        labels = calloc((size_t) count, sizeof(int));
-        if (labels == NULL) {
-            return;
-        }
-        (*env)->GetIntArrayRegion(env, named, 0, count, (jint *) labels);
+    animationStep(model, &chosen, step, x, y, z, order, alsoNormals == JNI_TRUE);
+
+    free((void *) chosen.labels);
+}
+
+/**
+ * One step of an animation, applied only to the pieces of the model the mask names.
+ *
+ * This is how a player waves an arm while the rest of it stands still: the client animates the
+ * same model several times over, naming a different set of the pieces it was built from each
+ * time.
+ *
+ * The client also has room to weigh each step by a matrix handed over alongside, and never uses
+ * it: every call site passes nothing. The toolkit this replaces has a second copy of every step
+ * for that case, and none of it is written here.
+ */
+JNIEXPORT void JNICALL Java_i_I(JNIEnv *env, jobject self, jint step, jintArray named,
+                                 jint x, jint y, jint z, jboolean alsoNormals,
+                                 jint pieces, jintArray weights) {
+    (void) weights;
+
+    Model *model = modelOf(env, self);
+    if (model == NULL || model->vertices == NULL) {
+        return;
     }
 
-    if (step == PIVOT_AT) {
-        pivotAt(model, labels, count, x, y, z);
-    } else if (step == MOVE_BY) {
-        moveBy(model, labels, count, x, y, z);
-    } else if (step == TURN_BY) {
-        turnBy(model, labels, count, x, y, z, order, alsoNormals == JNI_TRUE);
-    } else if (step == STRETCH_BY) {
-        stretchBy(model, labels, count, x, y, z);
-    }
+    Chosen chosen;
+    chosen.labels = labelsOf(env, named, &chosen.count);
+    chosen.pieces = pieces;
+    chosen.byPiece = 1;
 
-    free(labels);
+    animationStep(model, &chosen, step, x, y, z, 0, alsoNormals == JNI_TRUE);
+
+    free((void *) chosen.labels);
 }
 
 /**
