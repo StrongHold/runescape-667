@@ -193,6 +193,26 @@ public sealed interface Scene {
             toolkit.line(100, 300, 100, 300, 0xFFFFFFFF, 0);
             toolkit.line(-50, 250, 560, 260, 0xFFFF00FF, 0);
             toolkit.line(200, -50, 260, 430, 0xFF00FFFF, 0);
+
+            /*
+             * Lines whose ends are a long way outside the buffer. The toolkit cuts the walk to
+             * what may be drawn on before it starts, so where a line lands depends on what the
+             * cut end carries with it rather than only on the two points given.
+             */
+            toolkit.line(-9000, 100, 9000, 300, 0xFFFF8800, 0);
+            toolkit.line(9000, 340, -9000, 90, 0xFF88FF00, 0);
+            toolkit.line(120, -9000, 400, 9000, 0xFF0088FF, 0);
+            toolkit.line(-4000, -4000, 4000, 4000, 0xFFFFFFFF, 0);
+            toolkit.line(4000, -4000, -4000, 4000, 0xFFFF4444, 0);
+
+            /*
+             * Slopes whose step does not divide evenly, where rounding the step and truncating
+             * it part company.
+             */
+            for (var step = 1; step <= 7; step++) {
+                toolkit.line(40, 260 + step * 14, 470, 262 + step * 14 + step * 3,
+                    0xFFCCCCCC, 0);
+            }
         }
     }
 

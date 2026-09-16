@@ -43,13 +43,6 @@ static void vertical(int x, int y, int length, uint32_t colour, int mode) {
     }
 }
 
-static void plot(int x, int y, uint32_t colour, int mode) {
-    if (x >= raster.clipLeft && x < raster.clipRight && y >= raster.clipTop && y < raster.clipBottom) {
-        uint32_t *pixel = raster.pixels + (size_t) y * (size_t) raster.width + x;
-        *pixel = blend(*pixel, colour, mode);
-    }
-}
-
 /**
  * Narrows what may be drawn on to a rectangle, given by two corners.
  */
@@ -63,10 +56,33 @@ JNIEXPORT void JNICALL Java_oa_KA(JNIEnv *env, jobject self, jint x1, jint y1, j
     raster.clipBottom = y2 > raster.height ? raster.height : y2;
 }
 
+/**
+ * Fills a rectangle.
+ *
+ * The rectangle is cut to what may be drawn on before anything is drawn rather than a row at a
+ * time. That is how the toolkit does it, and it matters: the client is free to ask for a
+ * rectangle a billion rows tall, and cutting each row as it comes still walks a billion of them.
+ */
 JNIEXPORT void JNICALL Java_oa_aa(JNIEnv *env, jobject self, jint x, jint y, jint width,
                                    jint height, jint colour, jint mode) {
     (void) env;
     (void) self;
+
+    if (raster.clipLeft > x) {
+        width -= raster.clipLeft - x;
+        x = raster.clipLeft;
+    }
+    if (raster.clipTop > y) {
+        height -= raster.clipTop - y;
+        y = raster.clipTop;
+    }
+    if (x + width > raster.clipRight) {
+        width = raster.clipRight - x;
+    }
+    if (y + height > raster.clipBottom) {
+        height = raster.clipBottom - y;
+    }
+
     for (int row = 0; row < height; row++) {
         horizontal(x, y + row, width, (uint32_t) colour, mode);
     }
@@ -86,58 +102,21 @@ JNIEXPORT void JNICALL Java_oa_P(JNIEnv *env, jobject self, jint x, jint y, jint
     vertical(x, y, length, (uint32_t) colour, mode);
 }
 
-/**
- * Walks the longer axis a pixel at a time and carries the other one as a fraction.
- *
- * The fraction starts half a pixel in, so a point that falls exactly between two pixels is put on
- * the further one. Without that bias a steep line lands a pixel to one side of where the toolkit
- * this replaces puts it, which is invisible on a short line and obvious on a long one.
- */
-static void walkLine(int x1, int y1, int x2, int y2, uint32_t colour, int mode) {
-    if (raster.pixels == NULL) {
-        return;
-    }
-
-    uint32_t value = colour;
-
-    int dx = x2 - x1;
-    int dy = y2 - y1;
-    int alongX = dx < 0 ? -dx : dx;
-    int alongY = dy < 0 ? -dy : dy;
-
-    if (alongX == 0 && alongY == 0) {
-        plot(x1, y1, value, mode);
-        return;
-    }
-
-    int steps = alongX > alongY ? alongX : alongY;
-    int64_t x = ((int64_t) x1 << FRACTION) + HALF;
-    int64_t y = ((int64_t) y1 << FRACTION) + HALF;
-    int64_t stepX = ((int64_t) dx << FRACTION) / steps;
-    int64_t stepY = ((int64_t) dy << FRACTION) / steps;
-
-    for (int i = 0; i <= steps; i++) {
-        plot((int) (x >> FRACTION), (int) (y >> FRACTION), value, mode);
-        x += stepX;
-        y += stepY;
-    }
-}
-
-JNIEXPORT void JNICALL Java_oa_wa(JNIEnv *env, jobject self, jint x1, jint y1, jint x2, jint y2,
-                                   jint colour, jint mode) {
-    (void) env;
-    (void) self;
-
-    walkLine(x1, y1, x2, y2, (uint32_t) colour, mode);
-}
-
 /*
- * A line cut to a shape.
+ * Lines.
  *
- * This is not the plain line with a test added. The toolkit walks it differently: it steps the
- * longer axis a whole pixel at a time from one clipped end to the other, carries the shorter one
- * as a rounded fraction, and never looks at the ends it walked past. The minimap draws the
- * outline of every landmark this way.
+ * A line is walked along whichever axis it covers more of, a whole pixel at a time, carrying the
+ * other axis as a fraction of a pixel. Three things about that are worth keeping in mind:
+ *
+ * The walk is cut to what may be drawn on **before** it starts rather than a pixel at a time.
+ * The client is free to ask for a line between two points far outside the buffer, and walking
+ * every step of one only to throw each away costs as much as drawing it.
+ *
+ * The step of the shorter axis is rounded rather than truncated, and the fraction starts half a
+ * pixel in. Without either, a long line lands a pixel to one side of where the toolkit puts it.
+ *
+ * A line along a single row or column is drawn as that run instead, but only when the client
+ * gives no shape to cut it to.
  */
 
 /** Where a step of the shorter axis is held, as a fraction of a pixel. */
@@ -157,16 +136,28 @@ static int slopeOf(int shorter, int longer) {
     return (int) floor((double) (shorter << LINE_FRACTION) / (double) longer + 0.5);
 }
 
-static void maskedLine(int x1, int y1, int x2, int y2, uint32_t colour, int mode,
-                       const void *mask, int across, int down) {
-    if (raster.pixels == NULL || mask == NULL) {
+/**
+ * Draws a line, cut to a shape when the client gives one.
+ *
+ * A shape holds one run per row and also says which rows it covers at all, so a line given one
+ * is bounded twice over.
+ */
+static void drawLine(int x1, int y1, int x2, int y2, uint32_t colour, int mode,
+                     const void *mask, int across, int down) {
+    if (raster.pixels == NULL) {
         return;
     }
 
-    int firstRow = raster.clipTop > down ? raster.clipTop : down;
+    int firstRow = raster.clipTop;
     int lastRow = raster.clipBottom;
-    if (lastRow >= down + maskRows(mask)) {
-        lastRow = down + maskRows(mask);
+
+    if (mask != NULL) {
+        if (firstRow < down) {
+            firstRow = down;
+        }
+        if (lastRow >= down + maskRows(mask)) {
+            lastRow = down + maskRows(mask);
+        }
     }
 
     int alongX = x2 - x1;
@@ -174,7 +165,7 @@ static void maskedLine(int x1, int y1, int x2, int y2, uint32_t colour, int mode
 
     /*
      * The line is always walked in the direction that leaves both steps positive, so one end is
-     * taken as the start and the other is worked out from it rather than being used directly.
+     * taken as the start and the other worked out from it rather than used directly.
      */
     if (alongX + alongY < 0) {
         x1 += alongX;
@@ -205,10 +196,14 @@ static void maskedLine(int x1, int y1, int x2, int y2, uint32_t colour, int mode
                 continue;
             }
 
-            maskRowRun(mask, row, across, down, &from, &count);
-            if (x >= from && x < from + count) {
-                plotAt(x, row, colour, mode);
+            if (mask != NULL) {
+                maskRowRun(mask, row, across, down, &from, &count);
+                if (x < from || x >= from + count) {
+                    continue;
+                }
             }
+
+            plotAt(x, row, colour, mode);
         }
     } else {
         int held = (x1 << LINE_FRACTION) + (1 << (LINE_FRACTION - 1));
@@ -229,20 +224,49 @@ static void maskedLine(int x1, int y1, int x2, int y2, uint32_t colour, int mode
                 continue;
             }
 
-            maskRowRun(mask, y, across, down, &from, &count);
-            if (x >= from && x < from + count) {
-                plotAt(x, y, colour, mode);
+            if (mask != NULL) {
+                maskRowRun(mask, y, across, down, &from, &count);
+                if (x < from || x >= from + count) {
+                    continue;
+                }
             }
+
+            plotAt(x, y, colour, mode);
         }
     }
 }
 
+JNIEXPORT void JNICALL Java_oa_wa(JNIEnv *env, jobject self, jint x1, jint y1, jint x2, jint y2,
+                                   jint colour, jint mode) {
+    (void) env;
+    (void) self;
+
+    if (y2 - y1 == 0) {
+        int left = x2 < x1 ? x2 : x1;
+        int span = x2 < x1 ? x1 - x2 : x2 - x1;
+        horizontal(left, y1, span + 1, (uint32_t) colour, mode);
+    } else if (x2 - x1 == 0) {
+        int top = y2 < y1 ? y2 : y1;
+        int span = y2 < y1 ? y1 - y2 : y2 - y1;
+        vertical(x1, top, span + 1, (uint32_t) colour, mode);
+    } else {
+        drawLine(x1, y1, x2, y2, (uint32_t) colour, mode, NULL, 0, 0);
+    }
+}
+
+/**
+ * A line cut to a shape, which is how the minimap draws the outline of every landmark.
+ */
 JNIEXPORT void JNICALL Java_oa_Z(JNIEnv *env, jobject self, jint x1, jint y1, jint x2, jint y2,
                                   jint colour, jint mode, jobject mask, jint across, jint down) {
     (void) self;
 
-    maskedLine(x1, y1, x2, y2, (uint32_t) colour, mode,
-        (const void *) (intptr_t) nativeIdOf(env, mask), across, down);
+    const void *shape = (const void *) (intptr_t) nativeIdOf(env, mask);
+    if (shape == NULL) {
+        return;
+    }
+
+    drawLine(x1, y1, x2, y2, (uint32_t) colour, mode, shape, across, down);
 }
 
 /*
