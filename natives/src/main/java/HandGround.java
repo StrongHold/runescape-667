@@ -70,8 +70,8 @@ public final class HandGround {
         var offsetX = new int[] {0, TILE, TILE, 0};
         var offsetY = new int[] {0, 0, TILE, TILE};
         var faceA = new int[] {0, 0};
-        var faceB = new int[] {1, 2};
-        var faceC = new int[] {2, 3};
+        var faceB = new int[] {2, 3};
+        var faceC = new int[] {1, 2};
 
         var colours = new int[FLAT_FACES];
         for (var face = 0; face < FLAT_FACES; face++) {
