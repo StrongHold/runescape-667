@@ -85,13 +85,21 @@ public final class FrameCapture {
         toolkit.ZA(0xFFFFFF, sun, sun, 20.0F, -50.0F, 30.0F);
 
         toolkit.method7938(toolkit.createHeap(POOL_SIZE));
+
+        /*
+         * The ground is drawn through a worker, one per thread, which the client asks the toolkit
+         * to make and then claims for whichever thread is drawing.
+         */
+        toolkit.allocateThreads(1);
+        toolkit.linkThreads(0);
         var props = new Scene.Props(
             gradient,
             toolkit.createModel(CacheMesh.anyUntextured(MODEL_FACES), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
             toolkit.createModel(fewFaces(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
             toolkit.createMatrix(),
             toolkit.createFont(HandFont.metrics(), HandFont.letters(), true),
-            toolkit.createFont(HandFont.metrics(), HandFont.letters(), false));
+            toolkit.createFont(HandFont.metrics(), HandFont.letters(), false),
+            HandGround.build(toolkit));
 
         var manifest = new ArrayList<String>();
 

@@ -1,4 +1,5 @@
 import com.jagex.graphics.Font;
+import com.jagex.graphics.Ground;
 import com.jagex.graphics.Matrix;
 import com.jagex.graphics.Model;
 import com.jagex.graphics.Sprite;
@@ -50,7 +51,8 @@ public sealed interface Scene {
         new IndexedSprites(),
         new Text(),
         new StretchedAndTiled(),
-        new Masked()
+        new Masked(),
+        new Terrain()
     );
 
     /**
@@ -58,7 +60,7 @@ public sealed interface Scene {
      * scene from having to know what another one wanted.
      */
     record Props(Sprite gradient, Model model, Model simple, Matrix matrix,
-                 Font mono, Font proportional) {
+                 Font mono, Font proportional, Ground ground) {
         /* empty */
     }
 
@@ -264,6 +266,48 @@ public sealed interface Scene {
             props.matrix().makeRotationZ(0);
             props.matrix().translate(across, 0, away);
             props.model().render(props.matrix(), null, 1);
+        }
+    }
+
+    /**
+     * The ground, seen from above and to one side.
+     *
+     * Terrain is a grid of tiles whose corners are shared, and a tile is handed over once and
+     * drawn every frame afterwards. This is not finished: the light a tile takes, the water over
+     * it, its textures and the order its faces are drawn in are all still to write, so the scene
+     * reports how far apart the two pictures are rather than passing or failing.
+     */
+    record Terrain() implements Scene {
+
+        /** How far back and up the eye stands from the corner of the patch. */
+        private static final int BACK = 2600;
+
+        private static final int UP = 1500;
+
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            var camera = toolkit.createMatrix();
+            camera.createCamera(HandGround.TILES * HandGround.TILE / 2, UP, -BACK,
+                TURN / 8, 0, 0);
+            toolkit.setCamera(camera);
+
+            var visible = new boolean[HandGround.TILES * 2][HandGround.TILES * 2];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            props.ground().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
+                HandGround.TILES, visible, false, 0);
         }
     }
 

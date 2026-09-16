@@ -155,7 +155,8 @@ public final class FrameCheck {
         var right = ImageIO.read(actual.toFile());
 
         var drawn = 0;
-        var coverage = 0;
+        var onlyExpected = 0;
+        var onlyActual = 0;
         var shade = 0;
         var worst = 0;
         var worstX = -1;
@@ -171,8 +172,10 @@ public final class FrameCheck {
                 }
 
                 if (wanted != got) {
-                    if (wanted == BLANK || got == BLANK) {
-                        coverage++;
+                    if (got == BLANK) {
+                        onlyExpected++;
+                    } else if (wanted == BLANK) {
+                        onlyActual++;
                     } else {
                         shade++;
                         if (apart(wanted, got) > worst) {
@@ -185,8 +188,9 @@ public final class FrameCheck {
             }
         }
 
-        return "%d drawn, %d only one side drew, %d shaded differently, worst part off by %d at %d,%d"
-            .formatted(drawn, coverage, shade, worst, worstX, worstY);
+        return ("%d drawn, %d the shipped toolkit drew and we did not, %d we drew and it did not, "
+            + "%d shaded differently, worst part off by %d at %d,%d")
+            .formatted(drawn, onlyExpected, onlyActual, shade, worst, worstX, worstY);
     }
 
     /** How far apart two colours are, measured by the part of them that differs most. */

@@ -137,6 +137,20 @@ int maskRun(const void *held, int row, int across, int down, int *from, int *cou
 
 void maskFree(void *held);
 
+/**
+ * One tile of the ground, and where its corners sit in the world.
+ *
+ * A tile keeps its corners relative to its own square, so the tile it belongs to has to be named
+ * when a corner is asked for. Nothing outside the ground file knows how a tile is laid out.
+ */
+const void *groundTile(const void *held, int x, int z, int *corners);
+void groundTileCorner(const void *held, const void *at, int corner, int tileSize,
+                      int x, int z, int *into, uint32_t *colour);
+int groundTileSize(const void *held);
+
+/** Draws one tile of the ground, or one depth of it. */
+void renderGroundTile(const void *ground, int x, int z);
+
 /** The pool a model's geometry is taken from, or null before the client has given one. */
 Pool *modelPoolInUse(void);
 

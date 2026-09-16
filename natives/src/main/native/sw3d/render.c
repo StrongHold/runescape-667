@@ -532,6 +532,78 @@ static void renderModel(const void *model, const void *matrix) {
     }
 }
 
+/**
+ * Draws one tile of the ground.
+ *
+ * A tile's corners are already where they belong in the world, so they go through the camera and
+ * the projection and nothing else. Each face is filled between its three corners the same way a
+ * model's face is, because that is what the toolkit fills it with.
+ */
+void renderGroundTile(const void *ground, int x, int z) {
+    int corners = 0;
+    const void *tile = groundTile(ground, x, z, &corners);
+    const void *camera = cameraMatrix();
+
+    if (tile == NULL || camera == NULL || raster.pixels == NULL || raster.depths == NULL) {
+        return;
+    }
+
+    if (!room((void **) &projected, &projectedRoom, corners, sizeof(Projected))) {
+        return;
+    }
+
+    Transform projector = projectionMatrix();
+    Transform onto = after(matrixRows(camera), &projector);
+
+    const Projection *view = projection();
+    float acrossFromClip = view->centreX - (float) raster.clipLeft;
+    float downFromClip = view->centreY - (float) raster.clipTop;
+    int tileSize = groundTileSize(ground);
+
+    uint32_t *shade = calloc((size_t) corners, sizeof(uint32_t));
+    if (shade == NULL) {
+        return;
+    }
+
+    for (int corner = 0; corner < corners; corner++) {
+        int where[3];
+        groundTileCorner(ground, tile, corner, tileSize, x, z, where, &shade[corner]);
+
+        float point[ROWS];
+        for (int lane = 0; lane < ROWS; lane++) {
+            point[lane] = (float) where[0] * onto.row[0][lane]
+                + (float) where[1] * onto.row[1][lane]
+                + (float) where[2] * onto.row[2][lane] + onto.row[3][lane];
+        }
+
+        float away = point[3];
+        Projected *landed = &projected[corner];
+        landed->depth = signedAs(point[2] / away, point[2]);
+        landed->visible = away >= view->near && away <= view->far;
+
+        if (landed->visible) {
+            landed->x = point[0] / away + acrossFromClip;
+            landed->y = point[1] / away + downFromClip;
+        }
+    }
+
+    for (int face = 0; face * 3 + 2 < corners; face++) {
+        const Projected *a = &projected[face * 3];
+        const Projected *b = &projected[face * 3 + 1];
+        const Projected *c = &projected[face * 3 + 2];
+
+        if (!a->visible || !b->visible || !c->visible) {
+            continue;
+        }
+
+        fillTriangle(cornerAt(a, shade[face * 3]),
+                     cornerAt(b, shade[face * 3 + 1]),
+                     cornerAt(c, shade[face * 3 + 2]));
+    }
+
+    free(shade);
+}
+
 JNIEXPORT void JNICALL Java_a_UA(JNIEnv *env, jobject self, jlong worker, jlong model,
                                   jlong matrix, jintArray cylinder, jint flags) {
     (void) env;
@@ -541,4 +613,30 @@ JNIEXPORT void JNICALL Java_a_UA(JNIEnv *env, jobject self, jlong worker, jlong 
     (void) flags;
 
     renderModel((const void *) (intptr_t) model, (const void *) (intptr_t) matrix);
+}
+
+/**
+ * Draws one tile of the ground, every depth of it.
+ */
+JNIEXPORT void JNICALL Java_a_H(JNIEnv *env, jobject self, jlong worker, jlong ground,
+                                 jint x, jint z) {
+    (void) env;
+    (void) self;
+    (void) worker;
+
+    renderGroundTile((const void *) (intptr_t) ground, x, z);
+}
+
+/**
+ * Draws one depth of one tile of the ground. Nothing here keeps its faces apart by depth yet, so
+ * this draws the whole tile.
+ */
+JNIEXPORT void JNICALL Java_a_Z(JNIEnv *env, jobject self, jlong worker, jlong ground,
+                                 jint x, jint z, jint depth) {
+    (void) env;
+    (void) self;
+    (void) worker;
+    (void) depth;
+
+    renderGroundTile((const void *) (intptr_t) ground, x, z);
 }
