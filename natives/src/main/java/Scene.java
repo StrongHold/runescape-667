@@ -54,6 +54,7 @@ public sealed interface Scene {
         new StretchedAndTiled(),
         new Masked(),
         new Rotated(),
+        new LiftedOut(),
         new Turned(),
         new Copied(),
         new Animated(),
@@ -190,6 +191,46 @@ public sealed interface Scene {
             toolkit.line(100, 300, 100, 300, 0xFFFFFFFF, 0);
             toolkit.line(-50, 250, 560, 260, 0xFFFF00FF, 0);
             toolkit.line(200, -50, 260, 430, 0xFF00FFFF, 0);
+        }
+    }
+
+    /**
+     * Lifting what has been drawn back out into a sprite.
+     *
+     * This is how the minimap is built: the client draws into the buffer and then takes it out a
+     * square at a time. A pixel left at nothing stays clear and every other one becomes solid,
+     * so the picture is drawn on a background of nothing rather than on the usual one.
+     */
+    record LiftedOut() implements Scene {
+
+        private static final int SIZE = 100;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.GA(0);
+
+            props.gradient().render(10, 10, 0, 0xFFFFFF, 0);
+            toolkit.aa(40, 40, 60, 40, 0xFF20C080, 0);
+            toolkit.aa(120, 20, 50, 90, 0xFFC02040, 0);
+            props.mono().setTextColours(0xFFFFFF, 0x000000);
+            props.mono().render("lift", 20, 100, 0xFFFFFF, 0x000000, null, null);
+
+            var lifted = toolkit.createSprite(SIZE, SIZE, true);
+            lifted.copyRect(0, 0, SIZE, SIZE, 20, 20);
+
+            var cut = toolkit.createSprite(SIZE, SIZE, true);
+            cut.copyRect(0, 0, SIZE, SIZE, 0, 0);
+            cut.copyAlpha(40, 40, 3);
+
+            toolkit.aa(0, 140, WIDTH, HEIGHT - 140, 0xFF303060, 0);
+
+            lifted.render(20, 160, 1, 0, 0);
+            lifted.render(140, 160, 1, 0, 1);
+            cut.render(260, 160, 1, 0, 1);
+            cut.render(380, 160, 0, 0xFF8040, 1);
+
+            lifted.render(20, 270, 1, 0, 2);
+            cut.render(140, 270, 2, 0x80FFFFFF, 1);
         }
     }
 

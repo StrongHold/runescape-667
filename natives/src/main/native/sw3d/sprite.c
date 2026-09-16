@@ -793,6 +793,69 @@ JNIEXPORT void JNICALL Java_j_P(JNIEnv *env, jobject self, jlong handle, jint x,
     raster.clipBottom = wasBottom;
 }
 
+/**
+ * Takes a rectangle of what has been drawn and keeps it in the sprite.
+ *
+ * This is how the minimap is built: the client draws the ground into the buffer and then lifts it
+ * out a square at a time. A pixel that was left at nothing stays at nothing, and every other one
+ * is made solid, because what the buffer holds carries no alpha of its own.
+ *
+ * Nothing here is clipped. The client says where in the sprite and where in the buffer, and both
+ * are taken as given.
+ */
+JNIEXPORT void JNICALL Java_j_YA(JNIEnv *env, jobject self, jlong handle, jint x, jint y,
+                                  jint width, jint height, jint fromX, jint fromY) {
+    (void) env;
+    (void) self;
+
+    Sprite *sprite = (Sprite *) (intptr_t) handle;
+    if (sprite == NULL || sprite->pixels == NULL || raster.pixels == NULL) {
+        return;
+    }
+
+    for (int row = 0; row < height; row++) {
+        const uint32_t *from = raster.pixels
+            + (size_t) (fromY + row) * (size_t) raster.width + (size_t) fromX;
+        uint32_t *into = sprite->pixels
+            + (size_t) (y + row) * (size_t) sprite->width + (size_t) x;
+
+        for (int column = 0; column < width; column++) {
+            into[column] = from[column] == 0 ? 0 : from[column] | 0xFF000000u;
+        }
+    }
+}
+
+/**
+ * Takes how see-through the sprite is from what has been drawn, keeping its own colours.
+ *
+ * Where the buffer holds anything at all the sprite becomes solid, and where it holds nothing the
+ * sprite becomes clear. The client uses it to cut a sprite to the shape of whatever it last drew.
+ *
+ * The toolkit can also take one of the three colours as the alpha instead, and the client never
+ * asks for that, so it is not written.
+ */
+JNIEXPORT void JNICALL Java_j_N(JNIEnv *env, jobject self, jlong handle, jint x, jint y,
+                                 jint part) {
+    (void) env;
+    (void) self;
+
+    Sprite *sprite = (Sprite *) (intptr_t) handle;
+    if (sprite == NULL || sprite->pixels == NULL || raster.pixels == NULL || part != PARTS - 1) {
+        return;
+    }
+
+    for (int row = 0; row < sprite->height; row++) {
+        const uint32_t *from = raster.pixels
+            + (size_t) (y + row) * (size_t) raster.width + (size_t) x;
+        uint32_t *into = sprite->pixels + (size_t) row * (size_t) sprite->width;
+
+        for (int column = 0; column < sprite->width; column++) {
+            into[column] = (into[column] & 0x00FFFFFFu)
+                | (from[column] == 0 ? 0 : 0xFF000000u);
+        }
+    }
+}
+
 JNIEXPORT void JNICALL Java_j_R(JNIEnv *env, jobject self, jlong handle, jboolean immediate) {
     (void) self;
     (void) immediate;
