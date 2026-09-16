@@ -980,3 +980,18 @@ int groundCornerShade(const void *handle, int x, int z) {
 
     return ground->corners[(size_t) x * (size_t) (ground->sizeZ + 1) + (size_t) z];
 }
+
+/**
+ * How much of the world one whole width of a face's texture covers.
+ *
+ * A tile whose texture is given the size of a tile is covered by exactly one of it; one given
+ * half that is covered by four.
+ */
+int groundTileFaceSize(const void *at, int face) {
+    const Tile *tile = at;
+    if (tile->size == NULL || face * 3 >= tile->corners) {
+        return 0;
+    }
+
+    return tile->size[face * 3];
+}

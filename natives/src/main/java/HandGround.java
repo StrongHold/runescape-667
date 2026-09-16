@@ -100,7 +100,12 @@ public final class HandGround {
     private static void addTile(Ground ground, int x, int z, int texture, int size) {
         var wears = texture == -1 || x == TILES / 2 ? -1
             : z < TILES / 2 ? texture : TEXTURED_WITH_ONE_THAT_MAY_GO;
-        var across = size;
+
+        /*
+         * The two halves either side of the bare strip give their texture different sizes, so one
+         * picture holds a tile covered by the whole of a texture and one covered by four of it.
+         */
+        var across = x < TILES / 2 ? size : size / 2;
 
         var offsetX = new int[] {0, TILE, TILE, 0};
         var offsetY = new int[] {0, 0, TILE, TILE};

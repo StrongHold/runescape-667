@@ -334,6 +334,7 @@ static int distanceDecides = 1;
  * filled rather than carried down through every side and every row.
  */
 static const uint32_t *texels;
+
 static int texelsRepeat;
 
 /**
@@ -358,18 +359,23 @@ enum { WHOLLY_SOLID = 0 };
  * what the span carries, not a true division, because that is what the toolkit asks for and how
  * close the approximation comes belongs to the instruction set.
  */
+/**
+ * Brings one coordinate back onto the texture, either by carrying on round it or by holding it at
+ * the edge it ran off. Each way round the texture is asked about on its own, because a texture may
+ * carry on across and not down.
+ */
+static int onTheTexture(int at, int carriesOn) {
+    if (carriesOn) {
+        return at & TEXTURE_EDGE;
+    }
+
+    return at < 0 ? 0 : (at > TEXTURE_EDGE ? TEXTURE_EDGE : at);
+}
+
 static uint32_t texelAt(float u, float v, float w) {
     float away = reciprocalOfFour(w);
-    int across = (int) (u * away);
-    int down = (int) (v * away);
-
-    if (texelsRepeat) {
-        across &= TEXTURE_EDGE;
-        down &= TEXTURE_EDGE;
-    } else {
-        across = across < 0 ? 0 : (across > TEXTURE_EDGE ? TEXTURE_EDGE : across);
-        down = down < 0 ? 0 : (down > TEXTURE_EDGE ? TEXTURE_EDGE : down);
-    }
+    int across = onTheTexture((int) (u * away), texelsRepeat);
+    int down = onTheTexture((int) (v * away), texelsRepeat);
 
     return texels[(down << 8) | across];
 }
@@ -1187,7 +1193,16 @@ static void layTextureOnTile(const void *tile, int face, int tileSize, Corner *w
     texels = texturePixels(texture);
     texelsRepeat = metrics->repeatsU || metrics->repeatsV;
 
-    float over = (float) TEXTURE_EDGE / (float) tileSize;
+    /*
+     * How much of the world one whole width of the texture covers. A tile that names nothing is
+     * covered by exactly one of it, which is the size of a tile.
+     */
+    int wide = groundTileFaceSize(tile, face);
+    if (wide <= 0) {
+        wide = tileSize;
+    }
+
+    float over = (float) TEXTURE_EDGE / (float) wide;
 
     for (int corner = 0; corner < 3; corner++) {
         int across;

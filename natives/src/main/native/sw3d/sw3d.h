@@ -251,6 +251,9 @@ int groundTileFaces(const void *tile);
 /** Which texture a face of the tile wears, or nothing where it wears none. */
 int groundTileFaceTexture(const void *tile, int face);
 
+/** How much of the world one whole width of a face's texture covers. */
+int groundTileFaceSize(const void *tile, int face);
+
 /** Where one corner of the tile sits in its own square, and what colour it is. */
 void groundTilePlanCorner(const void *tile, int corner, int *across, int *along,
                           uint32_t *colour);
