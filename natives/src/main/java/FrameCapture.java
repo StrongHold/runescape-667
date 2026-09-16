@@ -174,8 +174,19 @@ public final class FrameCapture {
      */
     private static final short FORCED_TEXTURE = 6;
 
+    /**
+     * The way of placing a texture the model is picked for.
+     *
+     * A model that wraps a texture round an axis happens also to carry spaces placed both other
+     * written ways, and faces belonging to no space at all, so naming this one reaches all four.
+     */
+    private static final int WRAPPED_AROUND = 1;
+
     private static com.jagex.graphics.Model texturedModel(Toolkit toolkit) throws Exception {
-        var mesh = CacheMesh.anyTextured(MODEL_FACES);
+        var mesh = CacheMesh.anyPlaced(WRAPPED_AROUND, MODEL_FACES, MODEL_FACES * 2);
+        if (mesh.isEmpty()) {
+            mesh = CacheMesh.anyTextured(MODEL_FACES);
+        }
         if (mesh.isEmpty()) {
             System.out.println("no textured model in the cache");
             return null;

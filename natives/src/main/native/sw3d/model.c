@@ -778,7 +778,7 @@ JNIEXPORT void JNICALL Java_i_oa(JNIEnv *env, jobject self, jobject toolkit) {
 enum { CORNERS = 3, UV = 2 };
 
 /** The ways of placing a texture that are worked out here. */
-enum { PLACED_BY_THREE_VERTICES = 0, PLACED_BY_NEAREST_AXIS = 2 };
+enum { PLACED_BY_THREE_VERTICES = 0, PLACED_AROUND_AN_AXIS = 1, PLACED_BY_NEAREST_AXIS = 2 };
 
 /**
  * Where the corners of a face given the whole of its texture sit on it.
@@ -805,6 +805,42 @@ static const float SHIFT_WHOLE = 256.0f;
 
 /** Where the middle of a texture falls, as a part of the whole of it. */
 static const float TEXTURE_MIDDLE = 0.5f;
+
+/** A whole turn, which is what an angle round an axis is taken as a part of. */
+static const float WHOLE_TURN = 6.2831855f;
+
+/** What a space's three numbers are held out of when they scale a row of its turn. */
+static const float SCALE_WHOLE = 1024.0f;
+
+/**
+ * How much of its turn each row of a space carries, which is not the same by way.
+ *
+ * A space laid along the nearest axis divides by its three numbers. One laid around an axis keeps
+ * its first row whole and divides only the second, and reads its third number backwards when it is
+ * given as a negative. Every other way multiplies.
+ */
+static void scalesOfSpace(int way, const int *named, float *into) {
+    if (way == PLACED_BY_NEAREST_AXIS) {
+        for (int row = 0; row < 3; row++) {
+            into[row] = named[row] == 0 ? 0.0f : AXIS_WHOLE / (float) named[row];
+        }
+    } else if (way == PLACED_AROUND_AN_AXIS) {
+        into[0] = 1.0f;
+        into[2] = 1.0f;
+
+        if (named[0] > 0) {
+            into[2] = (float) named[0] / SCALE_WHOLE;
+        } else if (named[0] < 0) {
+            into[0] = (float) -named[0] / SCALE_WHOLE;
+        }
+
+        into[1] = named[1] == 0 ? 0.0f : AXIS_WHOLE / (float) named[1];
+    } else {
+        for (int row = 0; row < 3; row++) {
+            into[row] = (float) named[row] / SCALE_WHOLE;
+        }
+    }
+}
 
 /**
  * The turn a space's texture is laid down through, as nine floats.
@@ -1086,6 +1122,56 @@ static void placeByNearestAxis(Model *model, int face, int space, const float *t
     }
 }
 
+/**
+ * Where a face's corners sit on a texture wrapped round an axis.
+ *
+ * How far round the axis the corner stands is the angle its place makes when the two rows square
+ * to the axis are read as an across and an away, taken as a part of the whole turn. How far along
+ * the axis it stands is the remaining row. That is what puts a texture round a barrel without a
+ * seam anywhere but where the turn comes back to itself.
+ */
+static void placeAroundAxis(Model *model, int face, int space, const float *turn,
+                            const SpaceNumbers *numbers, const SpaceBox *box) {
+    const short *corners[CORNERS] = {model->faceA, model->faceB, model->faceC};
+    float round = (float) numbers->scale[2][space] / SCALE_WHOLE;
+    float shift = (float) numbers->shift[0][space] / SHIFT_WHOLE;
+    int quarter = numbers->facing == NULL ? 0 : numbers->facing[space];
+
+    for (int corner = 0; corner < CORNERS; corner++) {
+        float stands[3];
+        for (int axis = 0; axis < 3; axis++) {
+            stands[axis] = model->vertices[(size_t) corners[corner][face] * MODEL_VERTEX_STRIDE
+                + axis] - box->middle[axis];
+        }
+
+        float across = atan2f(dot(turn, stands), dot(turn + 6, stands)) / WHOLE_TURN
+            + TEXTURE_MIDDLE;
+        if (round != 1.0f) {
+            across *= round;
+        }
+
+        float down = dot(turn + 3, stands) + TEXTURE_MIDDLE + shift;
+
+        float turnedAcross = across;
+        float turnedDown = down;
+
+        if (quarter == 1) {
+            turnedAcross = -down;
+            turnedDown = across;
+        } else if (quarter == 2) {
+            turnedAcross = -across;
+            turnedDown = -down;
+        } else if (quarter == 3) {
+            turnedAcross = down;
+            turnedDown = -across;
+        }
+
+        float *into = model->faceUV + ((size_t) face * CORNERS + corner) * UV;
+        into[0] = turnedAcross * TEXTURE_ACROSS;
+        into[1] = turnedDown * TEXTURE_ACROSS;
+    }
+}
+
 static void placeOnTexture(Model *model, const signed char *faceSpace, const signed char *wayOf,
                            int spaces, const short *originOf, const short *acrossOf,
                            const short *downOf, const SpaceNumbers *numbers) {
@@ -1121,11 +1207,10 @@ static void placeOnTexture(Model *model, const signed char *faceSpace, const sig
             continue;
         }
 
+        int named[3] = {numbers->scale[0][space], numbers->scale[1][space],
+                        numbers->scale[2][space]};
         float scale[3];
-        for (int row = 0; row < 3; row++) {
-            int named = numbers->scale[row][space];
-            scale[row] = named == 0 ? 0.0f : AXIS_WHOLE / (float) named;
-        }
+        scalesOfSpace(wayOf[space], named, scale);
 
         turnOfSpace(originOf[space], acrossOf[space], downOf[space],
                     numbers->turn == NULL ? 0 : numbers->turn[space], scale, turns + space * 9);
@@ -1143,9 +1228,15 @@ static void placeOnTexture(Model *model, const signed char *faceSpace, const sig
          */
         int way = wayOf == NULL ? PLACED_BY_THREE_VERTICES : wayOf[space];
 
-        if (way == PLACED_BY_NEAREST_AXIS) {
+        if (way == PLACED_BY_NEAREST_AXIS || way == PLACED_AROUND_AN_AXIS) {
             if (boxes[space].held && space < numbers->along) {
-                placeByNearestAxis(model, face, space, turns + space * 9, numbers, &boxes[space]);
+                if (way == PLACED_BY_NEAREST_AXIS) {
+                    placeByNearestAxis(model, face, space, turns + space * 9, numbers,
+                                       &boxes[space]);
+                } else {
+                    placeAroundAxis(model, face, space, turns + space * 9, numbers,
+                                    &boxes[space]);
+                }
             }
             continue;
         }
@@ -1300,6 +1391,18 @@ JNIEXPORT void JNICALL Java_i_R(JNIEnv *env, jobject self, jobject toolkit, jobj
         && model->faceC != NULL) {
         model->faceUV = calloc((size_t) faceCount * CORNERS * UV, sizeof(float));
 
+        /*
+         * A mesh may say it has more spaces than it carries the numbers for, so the count is
+         * brought down to what every space needs before any of it is read.
+         */
+        jarray everySpace[] = {texSpaceDefA, texSpaceDefB, texSpaceDefC, texMappingType};
+        for (size_t which = 0; which < sizeof(everySpace) / sizeof(everySpace[0]); which++) {
+            int held = lengthOf(env, everySpace[which]);
+            if (held < texSpaceCount) {
+                texSpaceCount = held;
+            }
+        }
+
         short *originOf = copyShorts(env, texSpaceDefA, texSpaceCount);
         short *acrossOf = copyShorts(env, texSpaceDefB, texSpaceCount);
         short *downOf = copyShorts(env, texSpaceDefC, texSpaceCount);
@@ -1310,7 +1413,15 @@ JNIEXPORT void JNICALL Java_i_R(JNIEnv *env, jobject self, jobject toolkit, jobj
          * them as the spaces that do. Each is therefore taken at the length it arrived with, and
          * how many there are decides how many spaces may be placed along an axis.
          */
-        int along = lengthOf(env, texSpaceScaleX);
+        jarray alongSpace[] = {texSpaceScaleX, texSpaceScaleY, texSpaceScaleZ,
+                               texOffsetX, texOffsetY, texOffsetZ, texRotation, texDirection};
+        int along = texSpaceCount;
+        for (size_t which = 0; which < sizeof(alongSpace) / sizeof(alongSpace[0]); which++) {
+            int held = lengthOf(env, alongSpace[which]);
+            if (held < along) {
+                along = held;
+            }
+        }
         int *scaleAcross = copyInts(env, texSpaceScaleX, along);
         int *scaleDown = copyInts(env, texSpaceScaleY, along);
         int *scaleAway = copyInts(env, texSpaceScaleZ, along);

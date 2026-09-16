@@ -142,6 +142,46 @@ public final class CacheMesh {
         System.out.println("SURVEY " + textured + " textured models, spaces by way " + ways);
     }
 
+    /**
+     * The first model in the cache with at least this many faces and a texture space placed the
+     * named way, so that a way can be given a picture of its own to be judged against.
+     */
+    public static Optional<Mesh> anyPlaced(int way, int faces, int most) throws Exception {
+        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
+        if (!new File(cache, "main_file_cache.dat2").isFile()) {
+            return Optional.empty();
+        }
+
+        var held = at(cache);
+        for (var group = 0; group < GROUP_LIMIT; group++) {
+            var mesh = held.read(group);
+            if (mesh.isEmpty() || mesh.get().faceCount < faces || mesh.get().faceCount > most
+                || !plain(mesh.get())
+                || mesh.get().texMappingType == null || mesh.get().faceTexSpace == null) {
+                continue;
+            }
+
+            for (var space = 0; space < mesh.get().texMappingType.length; space++) {
+                if (mesh.get().texMappingType[space] == way && wears(mesh.get(), space)) {
+                    return mesh;
+                }
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /** Whether any face of the mesh belongs to a space, which an unused one does not. */
+    private static boolean wears(Mesh mesh, int space) {
+        for (var face = 0; face < mesh.faceCount; face++) {
+            if (mesh.faceTexSpace[face] == space) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static CacheMesh at(File cache) throws Exception {
         var data = new FileOnDisk(new File(cache, "main_file_cache.dat2"), "r", Long.MAX_VALUE);
         var index = new FileOnDisk(
