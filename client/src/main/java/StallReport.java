@@ -1,3 +1,5 @@
+import com.jagex.graphics.Toolkit;
+
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -9,6 +11,10 @@ import java.util.concurrent.TimeUnit;
  * A client that freezes gives nothing away on its own: the window stops repainting and there is
  * no exception to read. Running with this on turns that into a stack every few seconds, and the
  * frame that appears in all of them is the one to look at.
+ *
+ * Each report opens with the renderer that is drawing. A client that meets an exception while
+ * drawing puts itself back on the Java renderer and carries on, so a client that is merely slow
+ * from that point on looks the same from outside as one that is stuck.
  *
  * It is off unless asked for, because it prints a great deal:
  *
@@ -50,7 +56,10 @@ public final class StallReport {
 
     private static void print() {
         var threads = ManagementFactory.getThreadMXBean();
-        var report = new StringBuilder("\n--- what every thread is doing ---\n");
+        var report = new StringBuilder("\n--- what every thread is doing ---\n")
+            .append("drawing with: ")
+            .append(renderer())
+            .append('\n');
 
         for (var info : threads.dumpAllThreads(false, false)) {
             if (uninteresting(info.getThreadName())) {
@@ -68,6 +77,15 @@ public final class StallReport {
         }
 
         System.out.println(report);
+    }
+
+    private static String renderer() {
+        var toolkit = Toolkit.active;
+        if (toolkit == null) {
+            return "nothing yet";
+        } else {
+            return toolkit.getClass().getName();
+        }
     }
 
     /**
