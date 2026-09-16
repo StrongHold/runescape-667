@@ -20,9 +20,30 @@ public final class HandGround {
 
     private static final int FLAT_FACES = 2;
 
+    /**
+     * What each tile is handed over carrying, so that one thing can be changed at a time while
+     * the reason the shipped toolkit draws no ground at all is looked for.
+     */
+    private static final int TEXTURE = number("SW3D_GROUND_TEXTURE", -1);
+    private static final boolean OVERLAID = number("SW3D_GROUND_OVERLAY", 0) != 0;
+    private static final boolean LEVELLED = number("SW3D_GROUND_LEVELS", 0) != 0;
+
+    /**
+     * What the ground itself is built asking for. The client works these out from its settings
+     * and never asks for nothing, which is what was asked for here.
+     */
+    private static final int GROUND_FLAGS = number("SW3D_GROUND_FLAGS", 0);
+    private static final int FEATURE_FLAGS = number("SW3D_GROUND_FEATURES", 0);
+
+    private static int number(String name, int fallback) {
+        var held = System.getenv(name);
+        return held == null || held.isEmpty() ? fallback : Integer.parseInt(held);
+    }
+
     public static Ground build(Toolkit toolkit) {
         var heights = heights();
-        var ground = toolkit.createGround(TILES, TILES, heights, heights, 0, 0);
+        var ground = toolkit.createGround(TILES, TILES, heights, heights,
+            GROUND_FLAGS, FEATURE_FLAGS);
 
         for (var x = 0; x < TILES; x++) {
             for (var z = 0; z < TILES; z++) {
@@ -57,11 +78,14 @@ public final class HandGround {
             colours[face] = hslOf(x, z, face);
         }
 
-        var textures = new int[] {-1, -1};
+        var textures = new int[] {TEXTURE, TEXTURE};
         var sizes = new int[] {0, 0};
 
-        ground.addTile(x, z, offsetX, null, offsetY, null, faceA, faceB, faceC,
-            colours, null, textures, sizes, 0, 0, 0);
+        var overlay = OVERLAID ? colours.clone() : null;
+        var levels = LEVELLED ? new int[] {0, 0, 0, 0} : null;
+
+        ground.addTile(x, z, offsetX, levels, offsetY, null, faceA, faceB, faceC,
+            colours, overlay, textures, sizes, 0, 0, 0);
     }
 
     /** A colour packed the way the client packs one: hue, then saturation, then lightness. */

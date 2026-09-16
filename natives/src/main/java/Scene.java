@@ -68,6 +68,8 @@ public sealed interface Scene {
         new DepthShifted(),
         new Particles(),
         new Terrain(),
+        new Plan(),
+        new OverTheGround(),
         new Textured()
     );
 
@@ -674,9 +676,9 @@ public sealed interface Scene {
     record Terrain() implements Scene {
 
         /** How far back and up the eye stands from the corner of the patch. */
-        private static final int BACK = 2600;
+        static final int BACK = 2600;
 
-        private static final int UP = 1500;
+        static final int UP = 1500;
 
         @Override
         public boolean written() {
@@ -702,6 +704,75 @@ public sealed interface Scene {
 
             props.ground().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
                 HandGround.TILES, visible, false, 0);
+        }
+    }
+
+    /**
+     * A model standing where the ground stands, seen through the eye the terrain scene uses.
+     *
+     * The terrain scene draws nothing at all through the shipped toolkit. This tells one reason
+     * from another: whether nothing can be seen from that eye, or whether the eye is fine and
+     * the ground alone is refused.
+     */
+    record OverTheGround() implements Scene {
+
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            var camera = toolkit.createMatrix();
+            camera.createCamera(HandGround.TILES * HandGround.TILE / 2, Terrain.UP,
+                -Terrain.BACK, TURN / 8, 0, 0);
+            toolkit.setCamera(camera);
+
+            /*
+             * A model at each of five places along the patch, so that whichever of them the eye
+             * can see says where the eye is looking. One place alone says nothing: it may be off
+             * the picture for reasons of its own.
+             */
+            for (var step = 0; step < ALONG; step++) {
+                props.matrix().makeRotationZ(0);
+                props.matrix().translate(HandGround.TILES * HandGround.TILE / 2, 0,
+                    step * HandGround.TILES * HandGround.TILE / (ALONG - 1));
+                props.model().render(props.matrix(), null, 1);
+            }
+        }
+
+        /** How many places along the patch a model is put. */
+        private static final int ALONG = 5;
+    }
+
+    /**
+     * The ground seen from straight above, which is the map.
+     *
+     * This draws the same tiles the terrain scene draws, through a different native and with no
+     * camera, no light and no distance. It is here to tell one question from another: whether
+     * the tiles the client handed over are in the ground at all, or whether they are there and
+     * something later refuses to draw them.
+     */
+    record Plan() implements Scene {
+
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            var visible = new boolean[HandGround.TILES][HandGround.TILES];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            props.ground().drawMinimap(0, 0, HandGround.TILES, HandGround.TILES, visible);
         }
     }
 

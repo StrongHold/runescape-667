@@ -84,6 +84,23 @@ val patchToolkit by tasks.registering(Exec::class) {
     }
 }
 
+/**
+ * What a scene reads out of the environment, and what it reads when the environment says nothing.
+ *
+ * Both capture tasks hand the same set through, because a setting that reaches one side and not
+ * the other shows up as a difference between the two toolkits rather than as a broken experiment.
+ */
+val sceneSettings = mapOf(
+    "SW3D_FACE_COLOUR" to "",
+    "SW3D_AMBIENT" to "64",
+    "SW3D_SUN_TENTHS" to "5",
+    "SW3D_GROUND_TEXTURE" to "-1",
+    "SW3D_GROUND_OVERLAY" to "0",
+    "SW3D_GROUND_LEVELS" to "0",
+    "SW3D_GROUND_FLAGS" to "0",
+    "SW3D_GROUND_FEATURES" to "0"
+)
+
 val captureFrames by tasks.registering(JavaExec::class) {
     description = "Renders a fixed scene through the software toolkit and writes each frame as a PNG."
     dependsOn(patchToolkit)
@@ -94,9 +111,9 @@ val captureFrames by tasks.registering(JavaExec::class) {
 
     val frames = layout.buildDirectory.dir("frames").get().asFile
     environment("JAWTSHIM_DUMP", frames.absolutePath)
-    environment("SW3D_FACE_COLOUR", providers.environmentVariable("SW3D_FACE_COLOUR").getOrElse(""))
-    environment("SW3D_AMBIENT", providers.environmentVariable("SW3D_AMBIENT").getOrElse("64"))
-    environment("SW3D_SUN_TENTHS", providers.environmentVariable("SW3D_SUN_TENTHS").getOrElse("5"))
+    sceneSettings.forEach { (name, fallback) ->
+        environment(name, providers.environmentVariable(name).getOrElse(fallback))
+    }
     args(patchedToolkit.get().asFile.absolutePath)
     outputs.dir(frames)
 
@@ -741,12 +758,11 @@ val captureOwnFrames by tasks.registering(JavaExec::class) {
     args(toolkitLibrary.get().asFile.absolutePath)
     environment("SW3D_DUMP", directory.absolutePath)
     environment("SW3D_VERBOSE", providers.environmentVariable("SW3D_VERBOSE").getOrElse(""))
-    environment("SW3D_FACE_COLOUR", providers.environmentVariable("SW3D_FACE_COLOUR").getOrElse(""))
-    environment("SW3D_AMBIENT", providers.environmentVariable("SW3D_AMBIENT").getOrElse("64"))
-    environment("SW3D_SUN_TENTHS", providers.environmentVariable("SW3D_SUN_TENTHS").getOrElse("5"))
-    inputs.property("faceColour", providers.environmentVariable("SW3D_FACE_COLOUR").getOrElse(""))
-    inputs.property("ambient", providers.environmentVariable("SW3D_AMBIENT").getOrElse("64"))
-    inputs.property("sunTenths", providers.environmentVariable("SW3D_SUN_TENTHS").getOrElse("5"))
+    sceneSettings.forEach { (name, fallback) ->
+        val held = providers.environmentVariable(name).getOrElse(fallback)
+        environment(name, held)
+        inputs.property(name, held)
+    }
     inputs.file(toolkitLibrary)
     inputs.files(sourceSets["main"].runtimeClasspath)
     outputs.dir(ownFrames)
