@@ -83,6 +83,29 @@ JNIEXPORT void JNICALL Java_na_w(JNIEnv *env, jobject self, jboolean immediate) 
  * The row is given in the buffer's own rows, and where the mask sits on the buffer is given
  * alongside, because a mask is placed when it is used.
  */
+/**
+ * How many rows the shape describes, which is what bounds a line drawn through it.
+ */
+int maskRows(const void *held) {
+    const Mask *mask = (const Mask *) held;
+    return mask == NULL ? 0 : mask->rows;
+}
+
+/**
+ * The run the shape allows on one row, as the client gave it and not narrowed to what may be
+ * drawn on. A line is measured against this one and clipped separately.
+ */
+int maskRowRun(const void *held, int row, int across, int down, int *from, int *count) {
+    const Mask *mask = (const Mask *) held;
+    if (mask == NULL || row < down || row - down >= mask->rows) {
+        return 0;
+    }
+
+    *from = across + mask->starts[row - down];
+    *count = mask->lengths[row - down];
+    return 1;
+}
+
 int maskRun(const void *held, int row, int across, int down, int *from, int *count) {
     const Mask *mask = (const Mask *) held;
     if (mask == NULL || row < down || row - down >= mask->rows) {

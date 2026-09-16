@@ -5,6 +5,7 @@
  * loops, clipped to the rectangle the client last set.
  */
 
+#include <math.h>
 #include <stdint.h>
 
 #include "sw3d.h"
@@ -92,16 +93,12 @@ JNIEXPORT void JNICALL Java_oa_P(JNIEnv *env, jobject self, jint x, jint y, jint
  * the further one. Without that bias a steep line lands a pixel to one side of where the toolkit
  * this replaces puts it, which is invisible on a short line and obvious on a long one.
  */
-JNIEXPORT void JNICALL Java_oa_wa(JNIEnv *env, jobject self, jint x1, jint y1, jint x2, jint y2,
-                                   jint colour, jint mode) {
-    (void) env;
-    (void) self;
-
+static void walkLine(int x1, int y1, int x2, int y2, uint32_t colour, int mode) {
     if (raster.pixels == NULL) {
         return;
     }
 
-    uint32_t value = (uint32_t) colour;
+    uint32_t value = colour;
 
     int dx = x2 - x1;
     int dy = y2 - y1;
@@ -124,6 +121,128 @@ JNIEXPORT void JNICALL Java_oa_wa(JNIEnv *env, jobject self, jint x1, jint y1, j
         x += stepX;
         y += stepY;
     }
+}
+
+JNIEXPORT void JNICALL Java_oa_wa(JNIEnv *env, jobject self, jint x1, jint y1, jint x2, jint y2,
+                                   jint colour, jint mode) {
+    (void) env;
+    (void) self;
+
+    walkLine(x1, y1, x2, y2, (uint32_t) colour, mode);
+}
+
+/*
+ * A line cut to a shape.
+ *
+ * This is not the plain line with a test added. The toolkit walks it differently: it steps the
+ * longer axis a whole pixel at a time from one clipped end to the other, carries the shorter one
+ * as a rounded fraction, and never looks at the ends it walked past. The minimap draws the
+ * outline of every landmark this way.
+ */
+
+/** Where a step of the shorter axis is held, as a fraction of a pixel. */
+enum { LINE_FRACTION = 16 };
+
+static void plotAt(int x, int y, uint32_t colour, int mode) {
+    uint32_t *pixel = raster.pixels + (size_t) y * (size_t) raster.width + x;
+    *pixel = blend(*pixel, colour, mode);
+}
+
+/** How far the shorter axis moves for each whole pixel of the longer one. */
+static int slopeOf(int shorter, int longer) {
+    if (longer == 0) {
+        return 0;
+    }
+
+    return (int) floor((double) (shorter << LINE_FRACTION) / (double) longer + 0.5);
+}
+
+static void maskedLine(int x1, int y1, int x2, int y2, uint32_t colour, int mode,
+                       const void *mask, int across, int down) {
+    if (raster.pixels == NULL || mask == NULL) {
+        return;
+    }
+
+    int firstRow = raster.clipTop > down ? raster.clipTop : down;
+    int lastRow = raster.clipBottom;
+    if (lastRow >= down + maskRows(mask)) {
+        lastRow = down + maskRows(mask);
+    }
+
+    int alongX = x2 - x1;
+    int alongY = y2 - y1;
+
+    /*
+     * The line is always walked in the direction that leaves both steps positive, so one end is
+     * taken as the start and the other is worked out from it rather than being used directly.
+     */
+    if (alongX + alongY < 0) {
+        x1 += alongX;
+        alongX = -alongX;
+        y1 += alongY;
+        alongY = -alongY;
+    }
+
+    int from = 0;
+    int count = 0;
+
+    if (alongX > alongY) {
+        int held = (y1 << LINE_FRACTION) + (1 << (LINE_FRACTION - 1));
+        int slope = slopeOf(alongY, alongX);
+        int last = x1 + alongX;
+
+        if (x1 < raster.clipLeft) {
+            held += (raster.clipLeft - x1) * slope;
+            x1 = raster.clipLeft;
+        }
+        if (last >= raster.clipRight) {
+            last = raster.clipRight - 1;
+        }
+
+        for (int x = x1; x <= last; x++, held += slope) {
+            int row = held >> LINE_FRACTION;
+            if (row < firstRow || row >= lastRow) {
+                continue;
+            }
+
+            maskRowRun(mask, row, across, down, &from, &count);
+            if (x >= from && x < from + count) {
+                plotAt(x, row, colour, mode);
+            }
+        }
+    } else {
+        int held = (x1 << LINE_FRACTION) + (1 << (LINE_FRACTION - 1));
+        int slope = slopeOf(alongX, alongY);
+        int last = y1 + alongY;
+
+        if (y1 < firstRow) {
+            held += (firstRow - y1) * slope;
+            y1 = firstRow;
+        }
+        if (last >= lastRow) {
+            last = lastRow - 1;
+        }
+
+        for (int y = y1; y <= last; y++, held += slope) {
+            int x = held >> LINE_FRACTION;
+            if (x < raster.clipLeft || x >= raster.clipRight) {
+                continue;
+            }
+
+            maskRowRun(mask, y, across, down, &from, &count);
+            if (x >= from && x < from + count) {
+                plotAt(x, y, colour, mode);
+            }
+        }
+    }
+}
+
+JNIEXPORT void JNICALL Java_oa_Z(JNIEnv *env, jobject self, jint x1, jint y1, jint x2, jint y2,
+                                  jint colour, jint mode, jobject mask, jint across, jint down) {
+    (void) self;
+
+    maskedLine(x1, y1, x2, y2, (uint32_t) colour, mode,
+        (const void *) (intptr_t) nativeIdOf(env, mask), across, down);
 }
 
 /*

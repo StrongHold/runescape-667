@@ -692,6 +692,22 @@ public sealed interface Scene {
             props.mono().render("Masked", 170, 170, 160, 130, mask, null, null);
             props.proportional().setTextColours(0xFFFFFF, -1);
             props.proportional().render("Masked", 170, 200, 160, 130, mask, null, null);
+
+            /*
+             * Lines cut to the same shape, at every slope, so that the row a line is on and the
+             * run the shape allows on that row are matched against one another rather than by
+             * chance.
+             */
+            for (var step = 0; step < 8; step++) {
+                toolkit.line(300, 40 + step * 8, 460, 110 - step * 8, 0xFFFFCC00, 1,
+                    mask, 300, 20);
+                toolkit.line(300 + step * 20, 20, 460 - step * 20, 130, 0xFF00CCFF, 1,
+                    mask, 300, 20);
+            }
+
+            toolkit.line(40, 260, 40, 380, 0xFFFF6600, 1, mask, 20, 260);
+            toolkit.line(20, 300, 160, 300, 0xFFFF6600, 1, mask, 20, 260);
+            toolkit.line(90, 320, 90, 320, 0xFFFFFFFF, 1, mask, 20, 260);
         }
 
         /** How far into the row the shape starts, which rounds the corners and waists the middle. */

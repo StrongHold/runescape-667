@@ -146,6 +146,10 @@ const Fog *distanceFog(void);
  * brought inside the clip.
  */
 int maskRun(const void *held, int row, int across, int down, int *from, int *count);
+/** How many rows the shape describes. */
+int maskRows(const void *held);
+/** The run one row allows, as the client gave it rather than narrowed to what may be drawn on. */
+int maskRowRun(const void *held, int row, int across, int down, int *from, int *count);
 
 void maskFree(void *held);
 
