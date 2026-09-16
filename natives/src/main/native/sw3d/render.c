@@ -1451,3 +1451,138 @@ JNIEXPORT void JNICALL Java_a_e(JNIEnv *env, jobject self, jlong worker, jlong m
         (*env)->SetIntArrayRegion(env, into, which * 3, 3, landed);
     }
 }
+
+/*
+ * Particles.
+ *
+ * The client hands the whole cloud over at once: three whole numbers for where each one is, one
+ * for its colour, one for how big it is, and the texture it wears. Each is a single point put
+ * through the camera and the picture, and what is drawn at that point is a filled circle when it
+ * wears no texture and a square of that texture when it does.
+ */
+
+/**
+ * How many places of a fraction the client keeps a particle's position and size in. The two are
+ * not the same: a position carries twelve and a size eleven.
+ */
+enum { PLACE_PLACES = 12, SIZE_PLACES = 11 };
+
+/** How a particle is laid over what is already there, which is the only way the toolkit puts one. */
+enum { PARTICLE_BLEND = BLEND_ALPHA };
+
+/**
+ * The processor's approximate reciprocal, which is what the toolkit divides a particle by rather
+ * than taking a true reciprocal. It carries about twelve bits, so a particle lands a pixel to one
+ * side of where an exact divide would put it often enough to matter.
+ */
+static float roughReciprocal(float value) {
+#if defined(__SSE__) || defined(_M_X64)
+    return _mm_cvtss_f32(_mm_rcp_ss(_mm_set_ss(value)));
+#else
+    return 1.0f / value;
+#endif
+}
+
+/** A float cut to a whole number the way the processor does it, to the nearest and ties to even. */
+static int nearestWhole(float value) {
+    return (int) nearbyintf(value);
+}
+
+/**
+ * Whether a particle landed somewhere worth drawing.
+ *
+ * The three that matter are cut to whole numbers first, and to what a short holds, so a particle
+ * a long way off the side is measured at the end of the range rather than wherever the arithmetic
+ * took it. The edges are the whole buffer rather than what may be drawn on, and both ends count
+ * as inside.
+ */
+static int particleIsOn(float across, float down, float depth) {
+    int x = nearestWhole(across);
+    int y = nearestWhole(down);
+    int z = nearestWhole(depth);
+
+    x = x > 32767 ? 32767 : (x < -32768 ? -32768 : x);
+    y = y > 32767 ? 32767 : (y < -32768 ? -32768 : y);
+    z = z > 32767 ? 32767 : (z < -32768 ? -32768 : z);
+
+    return x >= 0 && x <= raster.width
+        && y >= 0 && y <= raster.height
+        && z >= 0;
+}
+
+/**
+ * Draws a cloud of particles, each one a point the client has already worked out where to put.
+ *
+ * The toolkit the client passes alongside the worker is not looked at, because there is only ever
+ * the one and the toolkit reaches it without being told.
+ */
+JNIEXPORT void JNICALL Java_a_O(JNIEnv *env, jobject self, jlong worker, jobject toolkit,
+                                 jintArray placesArray, jintArray coloursArray,
+                                 jintArray sizesArray, jshortArray texturesArray, jint count) {
+    (void) self;
+    (void) worker;
+    (void) toolkit;
+
+    if (placesArray == NULL || coloursArray == NULL || sizesArray == NULL
+        || texturesArray == NULL || count <= 0 || raster.pixels == NULL) {
+        return;
+    }
+
+    int *places = calloc((size_t) count * 3, sizeof(int));
+    int *colours = calloc((size_t) count, sizeof(int));
+    int *sizes = calloc((size_t) count, sizeof(int));
+    short *textures = calloc((size_t) count, sizeof(short));
+
+    if (places != NULL && colours != NULL && sizes != NULL && textures != NULL) {
+        (*env)->GetIntArrayRegion(env, placesArray, 0, count * 3, (jint *) places);
+        (*env)->GetIntArrayRegion(env, coloursArray, 0, count, (jint *) colours);
+        (*env)->GetIntArrayRegion(env, sizesArray, 0, count, (jint *) sizes);
+        (*env)->GetShortArrayRegion(env, texturesArray, 0, count, (jshort *) textures);
+
+        const Projection *view = projection();
+        const void *camera = cameraMatrix();
+
+        Transform projector = projectionMatrix();
+        Transform onto = camera == NULL ? projector : after(matrixRows(camera), &projector);
+
+        for (int which = 0; which < count; which++) {
+            float x = (float) (places[which * 3] >> PLACE_PLACES);
+            float y = (float) (places[which * 3 + 1] >> PLACE_PLACES);
+            float z = (float) (places[which * 3 + 2] >> PLACE_PLACES);
+
+            float point[ROWS];
+            for (int lane = 0; lane < ROWS; lane++) {
+                point[lane] = x * onto.row[0][lane] + y * onto.row[1][lane]
+                    + z * onto.row[2][lane] + onto.row[3][lane];
+            }
+
+            float nearness = roughReciprocal(point[3]);
+            float across = point[0] * nearness + view->centreX;
+            float down = point[1] * nearness + view->centreY;
+            float depth = signedAs(point[2] * nearness, point[2]);
+
+            if (!particleIsOn(across, down, depth)) {
+                continue;
+            }
+
+            int wide = nearestWhole((float) (sizes[which] >> SIZE_PLACES)
+                * view->scaleX * nearness);
+            if (wide <= 0) {
+                continue;
+            }
+
+            /* A texture is not written yet, so a particle wearing one is left out. */
+            if (textures[which] != -1) {
+                continue;
+            }
+
+            fillCircle((int) across, (int) down, depth, wide >> 1,
+                (uint32_t) colours[which], PARTICLE_BLEND);
+        }
+    }
+
+    free(places);
+    free(colours);
+    free(sizes);
+    free(textures);
+}

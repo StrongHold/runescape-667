@@ -302,7 +302,7 @@ static void runOfCircle(int y, int from, int to, uint32_t colour, int mode, floa
     }
 }
 
-static void fillCircle(int x, int y, float depth, int radius, uint32_t colour, int mode) {
+void fillCircle(int x, int y, float depth, int radius, uint32_t colour, int mode) {
     if (raster.pixels == NULL) {
         return;
     }

@@ -66,6 +66,7 @@ public sealed interface Scene {
         new Offscreen(),
         new SharedLight(),
         new DepthShifted(),
+        new Particles(),
         new Terrain()
     );
 
@@ -779,6 +780,109 @@ public sealed interface Scene {
                 props.matrix().translate((step - 1) * APART - APART / 2, 0, DEPTHS[step]);
                 props.model().renderOrtho(props.matrix(), null, SIZES[step], 0);
             }
+        }
+    }
+
+    /**
+     * A cloud of particles, each one a point the client has already worked out where to put.
+     *
+     * The client hands the whole cloud over at once, three whole numbers for where each one is,
+     * one for its colour, one for how big it is, and the texture it wears. A particle wearing no
+     * texture is a filled circle laid over whatever is already there, sized by how far away it
+     * ended up. A model stands among them, so a particle behind it is hidden by it.
+     *
+     * The last few stand somewhere a particle cannot be drawn: off each side, behind the eye,
+     * and so far away that nothing is left of it.
+     *
+     * This is not finished. The shipped toolkit draws no particle at all when it is driven this
+     * way, and why it does not is still to find, so the scene reports how far apart the two
+     * pictures are rather than passing or failing.
+     */
+    record Particles() implements Scene {
+
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+
+        /** How many places of a fraction the client keeps a place and a size in. */
+        private static final int PLACE_PLACES = 12;
+        private static final int SIZE_PLACES = 11;
+
+        private static final int ACROSS = 6;
+        private static final int DOWN = 4;
+
+        /** Where each one of the grid stands, and how far apart. */
+        private static final int SPREAD_X = 120;
+        private static final int SPREAD_Y = 110;
+
+        /** Every one of these stands somewhere nothing is drawn. */
+        private static final int[][] NOWHERE = {
+            {-4000, 0, DEPTH, 60, 0xFFFFFFFF},
+            {4000, 0, DEPTH, 60, 0xFFFFFFFF},
+            {0, -4000, DEPTH, 60, 0xFFFFFFFF},
+            {0, 0, -DEPTH, 60, 0xFFFFFFFF},
+            {0, 0, DEPTH * 400, 60, 0xFFFFFFFF}
+        };
+
+        /** A particle wearing no texture, which is the only kind drawn yet. */
+        private static final short BARE = -1;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            props.matrix().makeRotationZ(0);
+            props.matrix().applyTranslation(0, 0, DEPTH);
+            props.model().render(props.matrix(), null, 1);
+
+            var count = ACROSS * DOWN + NOWHERE.length;
+            var places = new int[count * 3];
+            var colours = new int[count];
+            var sizes = new int[count];
+            var textures = new short[count];
+
+            var which = 0;
+            for (var column = 0; column < ACROSS; column++) {
+                for (var row = 0; row < DOWN; row++) {
+                    var x = (column - (ACROSS - 1) / 2) * SPREAD_X;
+                    var y = (row - (DOWN - 1) / 2) * SPREAD_Y;
+                    var z = DEPTH + (column - 2) * 160;
+
+                    put(places, colours, sizes, textures, which,
+                        x, y, z, 24 + row * 14, shade(column, row));
+                    which++;
+                }
+            }
+
+            for (var beyond : NOWHERE) {
+                put(places, colours, sizes, textures, which,
+                    beyond[0], beyond[1], beyond[2], beyond[3], beyond[4]);
+                which++;
+            }
+
+            ((oa) toolkit).method6087().method4(toolkit, places, colours, sizes, textures, count);
+        }
+
+        /** Solid down one side of the grid and half see-through down the other. */
+        private static int shade(int column, int row) {
+            var alpha = column < ACROSS / 2 ? 0xFF : 0x60;
+            var red = 40 + column * 34;
+            var green = 220 - row * 40;
+            var blue = 90 + row * 50;
+            return alpha << 24 | red << 16 | green << 8 | blue;
+        }
+
+        private static void put(int[] places, int[] colours, int[] sizes, short[] textures,
+                                int which, int x, int y, int z, int size, int colour) {
+            places[which * 3] = x << PLACE_PLACES;
+            places[which * 3 + 1] = y << PLACE_PLACES;
+            places[which * 3 + 2] = z << PLACE_PLACES;
+            colours[which] = colour;
+            sizes[which] = size << SIZE_PLACES;
+            textures[which] = BARE;
         }
     }
 

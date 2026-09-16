@@ -159,6 +159,11 @@ typedef struct {
 const Fog *distanceFog(void);
 
 /**
+ * Fills a circle, keeping whatever is already nearer than the distance given.
+ */
+void fillCircle(int x, int y, float depth, int radius, uint32_t colour, int mode);
+
+/**
  * A shape the client draws through, kept as one run of pixels per row.
  *
  * Nothing outside the mask file knows how a mask is laid out. A caller asks what a mask lets
