@@ -554,6 +554,25 @@ static const Normal *cornerNormal(const Model *model, int vertex) {
 }
 
 /**
+ * The colour a face is lit from once the texture it wears has had its say.
+ *
+ * A face wearing no texture, or one the client has none to give, is lit from its own colour.
+ */
+static uint32_t throughTexture(const Model *model, int face, uint32_t unlit) {
+    if (model->faceTexture == NULL || model->faceTexture[face] == -1) {
+        return unlit;
+    }
+
+    const TextureMetrics *metrics =
+        textureMetricsFor((unsigned short) model->faceTexture[face]);
+    if (metrics == NULL) {
+        return unlit;
+    }
+
+    return texturedUnlitColour(unlit, model->ambient, metrics->alpha, metrics->aByte57);
+}
+
+/**
  * Works out what colour each corner of each face takes, from where the vertices are now.
  *
  * A model that has no directions worked out for it gets them here, because everything that moves
@@ -582,6 +601,7 @@ static void lightModel(Model *model) {
 
     for (int face = 0; face < model->faceCount; face++) {
         uint32_t unlit = unlitColour(model->faceColour[face] & 0xFFFF, model->ambient);
+        unlit = throughTexture(model, face, unlit);
         const short *corners[3] = {model->faceA, model->faceB, model->faceC};
 
         int flat = model->shadingType != NULL && model->shadingType[face] != 0;
@@ -2036,6 +2056,11 @@ const short *modelFaceB(const void *handle) {
 
 const short *modelFaceC(const void *handle) {
     return ((const Model *) handle)->faceC;
+}
+
+const short *modelFaceTexture(const void *handle) {
+    const Model *model = handle;
+    return model->faceTexture;
 }
 
 const short *modelFaceColour(const void *handle) {

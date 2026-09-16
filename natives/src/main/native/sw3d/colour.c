@@ -134,6 +134,57 @@ static int held(int value) {
  * The light is the ambient plus the sun, and how much sun depends on whether the surface faces it
  * at all. Each channel is tinted by the sun's own colour before it is scaled.
  */
+/**
+ * What a texture does to the colour a face is lit from.
+ *
+ * A textured face is not lit from its own colour alone. The texture says how far that colour is
+ * carried towards a grey made from the model's own ambient, and then how much to brighten what is
+ * left. Both are the texture's, so two textures that answer differently light the same face
+ * differently, which is why swapping one for the other throws the face's light away.
+ */
+uint32_t texturedUnlitColour(uint32_t unlit, int ambient, int towardsGrey, int brighten) {
+    uint32_t colour = unlit;
+
+    if (towardsGrey != 0) {
+        uint32_t redBlue = 0xFF00FF;
+        uint32_t green = 0xFF00;
+
+        if (ambient <= 0x7F) {
+            uint32_t grey = (uint32_t) ambient * 0x20202;
+            redBlue = grey & 0xFF00FF;
+            green = grey & 0xFF00;
+        }
+
+        uint32_t rest = 0x100 - (uint32_t) towardsGrey;
+        uint32_t mixedGreen = (green * (uint32_t) towardsGrey + (colour & 0xFF00) * rest)
+            & 0xFF0000;
+        uint32_t mixedRedBlue = (redBlue * (uint32_t) towardsGrey + (colour & 0xFF00FF) * rest)
+            & 0xFF00FF00;
+        colour = (mixedGreen + mixedRedBlue) >> 8;
+    }
+
+    if (brighten != 0) {
+        uint32_t scale = 0x100 + (uint32_t) brighten;
+        uint32_t red = ((colour & 0xFF0000) >> 16) * scale;
+        uint32_t green = ((colour >> 8) & 0xFF) * scale;
+        uint32_t blue = (colour & 0xFF) * scale;
+
+        if (red > 0xFFFF) {
+            red = 0xFFFF;
+        }
+        if (green > 0xFFFF) {
+            green = 0xFFFF;
+        }
+        if (blue > 0xFFFF) {
+            blue = 0xFFFF;
+        }
+
+        colour = (red << 8 & 0xFF0000) + (green & 0xFF00) + (blue >> 8);
+    }
+
+    return colour;
+}
+
 uint32_t sunlitColour(uint32_t unlit, const Normal *normal, float strength) {
     const Sun *light = sun();
 

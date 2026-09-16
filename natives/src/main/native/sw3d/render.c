@@ -90,6 +90,9 @@ typedef struct {
     float x;
     float y;
     float depth;
+
+    /** How far from the eye the point ended up, which a texture is read back through. */
+    float away;
     int visible;
 } Projected;
 
@@ -123,6 +126,19 @@ typedef struct {
     float y;
     float depth;
     uint16_t colour[CHANNELS];
+
+    /**
+     * Where the corner sits on its texture, divided by how far away it is, along with one over
+     * that distance.
+     *
+     * They are kept divided because a texture has to be read in the world's own units rather than
+     * the buffer's: stepping the two across a row and dividing one by the other at each pixel is
+     * what keeps a texture lying flat on a face that leans away, instead of sliding as the face
+     * turns.
+     */
+    float u;
+    float v;
+    float w;
 } Corner;
 
 /** One side of a triangle, either where it has reached or how far it moves in a row. */
@@ -130,6 +146,9 @@ typedef struct {
     float x;
     float depth;
     int16_t colour[CHANNELS];
+    float u;
+    float v;
+    float w;
 } Side;
 
 static Corner cornerAt(const Projected *point, uint32_t colour) {
@@ -149,8 +168,37 @@ static Corner cornerAt(const Projected *point, uint32_t colour) {
      */
     corner.colour[3] = 0xFF00;
 
+    corner.u = 0.0f;
+    corner.v = 0.0f;
+    corner.w = 0.0f;
+
     return corner;
 }
+
+/**
+ * Where a corner sits on its texture, kept divided by how far away the corner is.
+ */
+static Corner onTexture(Corner corner, float u, float v, float away) {
+    float over = 1.0f / away;
+
+    corner.u = u * over;
+    corner.v = v * over;
+    corner.w = over;
+    return corner;
+}
+
+/**
+ * Where the three corners of a face sit on the texture it wears.
+ *
+ * Every textured face wears the whole of its texture, laid down the same way round. A model whose
+ * mesh carries texture spaces places its textures by those instead, and nothing here reads one
+ * yet, so such a model is textured as though it carried none.
+ */
+static const float FACE_CORNERS[3][2] = {
+    { 0.0f, 127.0f },
+    { 127.0f, 127.0f },
+    { 0.0f, 0.0f }
+};
 
 /**
  * How far a side moves in one row.
@@ -165,6 +213,9 @@ static Side sideBetween(const Corner *from, const Corner *to, int rows) {
     Side side;
     side.x = (to->x - from->x) * over;
     side.depth = (to->depth - from->depth) * over;
+    side.u = (to->u - from->u) * over;
+    side.v = (to->v - from->v) * over;
+    side.w = (to->w - from->w) * over;
 
     for (int part = 0; part < CHANNELS; part++) {
         side.colour[part] = narrow(((float) to->colour[part] - (float) from->colour[part]) * over);
@@ -177,6 +228,9 @@ static Side sideAt(const Corner *corner) {
     Side side;
     side.x = corner->x;
     side.depth = corner->depth;
+    side.u = corner->u;
+    side.v = corner->v;
+    side.w = corner->w;
 
     for (int part = 0; part < CHANNELS; part++) {
         side.colour[part] = (int16_t) corner->colour[part];
@@ -189,6 +243,9 @@ static Side sideAt(const Corner *corner) {
 static void carry(Side *side, const Side *step, int rows) {
     side->x += (float) rows * step->x;
     side->depth += (float) rows * step->depth;
+    side->u += (float) rows * step->u;
+    side->v += (float) rows * step->v;
+    side->w += (float) rows * step->w;
 
     for (int part = 0; part < CHANNELS; part++) {
         side->colour[part] = (int16_t) (side->colour[part] + (int16_t) rows * step->colour[part]);
@@ -198,6 +255,9 @@ static void carry(Side *side, const Side *step, int rows) {
 static void advance(Side *side, const Side *step) {
     side->x += step->x;
     side->depth += step->depth;
+    side->u += step->u;
+    side->v += step->v;
+    side->w += step->w;
 
     for (int part = 0; part < CHANNELS; part++) {
         side->colour[part] = (int16_t) (side->colour[part] + step->colour[part]);
@@ -220,6 +280,42 @@ static void advance(Side *side, const Side *step) {
  * fills those without reading or writing a distance at all.
  */
 static int distanceDecides = 1;
+
+/**
+ * The texture the faces being drawn wear, and how a coordinate that runs off it is brought back.
+ *
+ * A texture belongs to the face rather than to the span, so it is put here once before a face is
+ * filled rather than carried down through every side and every row.
+ */
+static const uint32_t *texels;
+static int texelsRepeat;
+
+/** How wide a texture is, and the mask that wraps a coordinate back onto it. */
+enum { TEXTURE_EDGE = 127 };
+
+/**
+ * Where on its texture one pixel of a span reads from.
+ *
+ * The two coordinates arrive divided by how far away the pixel is, so each is brought back by
+ * multiplying by that distance again. The distance is the processor's approximate reciprocal of
+ * what the span carries, not a true division, because that is what the toolkit asks for and how
+ * close the approximation comes belongs to the instruction set.
+ */
+static uint32_t texelAt(float u, float v, float w) {
+    float away = reciprocalOfFour(w);
+    int across = (int) (u * away);
+    int down = (int) (v * away);
+
+    if (texelsRepeat) {
+        across &= TEXTURE_EDGE;
+        down &= TEXTURE_EDGE;
+    } else {
+        across = across < 0 ? 0 : (across > TEXTURE_EDGE ? TEXTURE_EDGE : across);
+        down = down < 0 ? 0 : (down > TEXTURE_EDGE ? TEXTURE_EDGE : down);
+    }
+
+    return texels[(down << 8) | across];
+}
 
 static void fillSpan(int y, const Side *left, const Side *right) {
     int from = (int) lrintf(left->x);
@@ -244,6 +340,13 @@ static void fillSpan(int y, const Side *left, const Side *right) {
     float depthStep = (right->depth - left->depth) * over;
     float depth = left->depth + (float) skipped * depthStep;
 
+    float uStep = (right->u - left->u) * over;
+    float vStep = (right->v - left->v) * over;
+    float wStep = (right->w - left->w) * over;
+    float u = left->u + (float) skipped * uStep;
+    float v = left->v + (float) skipped * vStep;
+    float w = left->w + (float) skipped * wStep;
+
     uint16_t colour[CHANNELS];
     int16_t colourStep[CHANNELS];
 
@@ -265,13 +368,33 @@ static void fillSpan(int y, const Side *left, const Side *right) {
                 held[x] = depth;
             }
 
-            row[x] = (uint32_t) (colour[0] >> 8)
-                | (uint32_t) (colour[1] >> 8) << 8
-                | (uint32_t) (colour[2] >> 8) << 16
-                | (uint32_t) (colour[3] >> 8) << 24;
+            if (texels == NULL) {
+                row[x] = (uint32_t) (colour[0] >> 8)
+                    | (uint32_t) (colour[1] >> 8) << 8
+                    | (uint32_t) (colour[2] >> 8) << 16
+                    | (uint32_t) (colour[3] >> 8) << 24;
+            } else {
+                /*
+                 * A texel is shaded by the light the span has reached rather than replacing it,
+                 * and the product keeps its top half, which is what turns a byte times a
+                 * sixteenth part back into a byte.
+                 */
+                uint32_t texel = texelAt(u, v, w);
+                uint32_t written = 0;
+
+                for (int part = 0; part < CHANNELS; part++) {
+                    uint32_t channel = texel >> (part * 8) & 0xFF;
+                    written |= (channel * colour[part] >> 16) << (part * 8);
+                }
+
+                row[x] = written;
+            }
         }
 
         depth += depthStep;
+        u += uStep;
+        v += vStep;
+        w += wStep;
         for (int part = 0; part < CHANNELS; part++) {
             colour[part] = (uint16_t) (colour[part] + colourStep[part]);
         }
@@ -757,6 +880,7 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
         float away = point[3];
 
         Projected *landed = &projected[vertex];
+        landed->away = away;
         landed->depth = signedAs(point[2] / away, point[2]);
 
         /* A picture taken from no particular place has nothing behind it and nothing beyond. */
@@ -772,6 +896,7 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
     const short *faceB = modelFaceB(model);
     const short *faceC = modelFaceC(model);
     const short *faceColour = modelFaceColour(model);
+    const short *faceTexture = modelFaceTexture(model);
 
     const uint32_t *shade = modelShade(model);
 
@@ -801,9 +926,20 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
             continue;
         }
 
-        uint32_t unlit = shade == NULL
-            ? unlitColour(faceColour == NULL ? 0 : faceColour[face] & 0xFFFF, modelAmbient(model))
-            : 0;
+        uint32_t unlit = 0;
+        if (shade == NULL) {
+            unlit = unlitColour(faceColour == NULL ? 0 : faceColour[face] & 0xFFFF,
+                                modelAmbient(model));
+
+            if (faceTexture != NULL && faceTexture[face] != -1) {
+                const TextureMetrics *metrics =
+                    textureMetricsFor((unsigned short) faceTexture[face]);
+                if (metrics != NULL) {
+                    unlit = texturedUnlitColour(unlit, modelAmbient(model), metrics->alpha,
+                                                metrics->aByte57);
+                }
+            }
+        }
 
         uint32_t colours[3];
         for (int corner = 0; corner < 3; corner++) {
@@ -819,11 +955,39 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
             }
         }
 
-        fillTriangle(
+        Corner walked[3] = {
             cornerAt(a, colours[0]),
             cornerAt(b, colours[1]),
-            cornerAt(c, colours[2]));
+            cornerAt(c, colours[2])
+        };
+
+        const Texture *texture = faceTexture == NULL || faceTexture[face] == -1
+            ? NULL
+            : textureFor((unsigned short) faceTexture[face]);
+
+        texels = NULL;
+        if (texture != NULL) {
+            const TextureMetrics *metrics = textureMetrics(texture);
+            float slidU = 0.0f;
+            float slidV = 0.0f;
+            textureOffsets(texture, &slidU, &slidV);
+
+            texels = texturePixels(texture);
+            texelsRepeat = metrics->repeatsU || metrics->repeatsV;
+
+            const Projected *at[3] = {a, b, c};
+            for (int corner = 0; corner < 3; corner++) {
+                walked[corner] = onTexture(walked[corner],
+                    FACE_CORNERS[corner][0] + slidU,
+                    FACE_CORNERS[corner][1] + slidV,
+                    at[corner]->away);
+            }
+        }
+
+        fillTriangle(walked[0], walked[1], walked[2]);
     }
+
+    texels = NULL;
 }
 
 /**

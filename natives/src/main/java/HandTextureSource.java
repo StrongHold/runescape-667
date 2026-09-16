@@ -51,8 +51,8 @@ public final class HandTextureSource implements TextureSource {
         metrics.effectParam1 = (byte) (id & 7);
         metrics.effectParam2 = id * 17;
         metrics.small = (id & 8) != 0;
-        metrics.alpha = (byte) (id == 3 ? 200 : 255);
-        metrics.aByte57 = (byte) (id == 3 ? 7 : 1);
+        metrics.alpha = (byte) (id == 3 ? 200 : 96);
+        metrics.aByte57 = (byte) (id == 3 ? 7 : 24);
         metrics.speedU = (byte) (id == 1 ? 3 : 0);
         metrics.speedV = (byte) (id == 2 ? 5 : 0);
         metrics.disableable = false;

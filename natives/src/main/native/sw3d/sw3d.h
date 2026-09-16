@@ -233,6 +233,12 @@ typedef struct {
 uint32_t unlitColour(int hsl, int ambient);
 
 /**
+ * The same colour once the texture the face wears has had its say, which is how far the colour is
+ * carried towards a grey and how much what is left is brightened.
+ */
+uint32_t texturedUnlitColour(uint32_t unlit, int ambient, int towardsGrey, int brighten);
+
+/**
  * The colour a surface facing this way takes, given what it looks like unlit.
  */
 uint32_t sunlitColour(uint32_t unlit, const Normal *normal, float strength);
@@ -374,6 +380,8 @@ const short *modelFaceA(const void *handle);
 const short *modelFaceB(const void *handle);
 const short *modelFaceC(const void *handle);
 const short *modelFaceColour(const void *handle);
+/** The texture each face wears, or null when no face wears one. */
+const short *modelFaceTexture(const void *handle);
 /**
  * Whether the client built this model to be drawn with the directions its vertices face.
  *

@@ -192,6 +192,12 @@ public final class FrameCapture {
             held.faceTexSpace[face] = 0;
         }
 
+        held.texSpaceCount = 0;
+        held.texSpaceDefA = null;
+        held.texSpaceDefB = null;
+        held.texSpaceDefC = null;
+        held.faceTexSpace = null;
+
         return toolkit.createModel(held, FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
     }
 
