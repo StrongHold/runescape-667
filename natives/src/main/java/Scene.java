@@ -48,7 +48,8 @@ public sealed interface Scene {
         new ReadBack(),
         new SpriteMatrix(),
         new IndexedSprites(),
-        new Text()
+        new Text(),
+        new StretchedAndTiled()
     );
 
     /**
@@ -262,6 +263,50 @@ public sealed interface Scene {
             props.matrix().makeRotationZ(0);
             props.matrix().translate(across, 0, away);
             props.model().render(props.matrix(), null, 1);
+        }
+    }
+
+    /**
+     * Sprites stretched to fill a rectangle and sprites tiled to fill one, at sizes that divide
+     * evenly and sizes that do not.
+     *
+     * This is how the client draws the frame around every interface: the corners go down as they
+     * are and the runs between them are stretched or repeated. A rectangle that is not a whole
+     * number of copies across, or that starts outside what may be drawn on, is where both go
+     * wrong, so both are asked for here.
+     */
+    record StretchedAndTiled() implements Scene {
+
+        private static final int[][] SIZES = {
+            {96, 48}, {24, 12}, {200, 17}, {13, 90}, {1, 40}, {70, 1}
+        };
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.aa(0, 0, WIDTH, HEIGHT, 0xFF303048, 0);
+            toolkit.aa(0, 120, WIDTH, 60, 0xFF906030, 0);
+
+            var picture = toolkit.createSprite(IndexedGlyph.solid(), true);
+
+            for (var size = 0; size < SIZES.length; size++) {
+                var x = 20 + size * 80;
+                picture.render(x, 20, SIZES[size][0], SIZES[size][1]);
+                picture.renderTiled(x, 130, SIZES[size][0], SIZES[size][1]);
+            }
+
+            /*
+             * Starting outside what may be drawn on, on every side, because how much of a stretch
+             * was cut off decides where the rest of it reads from.
+             */
+            toolkit.T(60, 230, 460, 350);
+            picture.render(-30, 210, 180, 90);
+            picture.render(430, 250, 180, 90);
+            picture.renderTiled(-40, 300, 200, 80);
+            picture.renderTiled(420, 300, 200, 80);
+            toolkit.la();
+
+            props.gradient().render(30, HEIGHT - 40, 200, 30, 2, 0x80CC3311, 1);
+            props.gradient().renderTiled(260, HEIGHT - 40, 200, 30, 3, 0xFF204080, 2);
         }
     }
 

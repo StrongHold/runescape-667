@@ -247,15 +247,37 @@ JNIEXPORT void JNICALL Java_j_ua(JNIEnv *env, jobject self, jobject toolkit, jin
     setNativeId(env, self, (jlong) (intptr_t) sprite);
 }
 
+/** One pixel of the sprite, put together with the colour and laid onto what was there. */
+static uint32_t putPixel(int op, int mode, uint32_t from, uint32_t held, int colour,
+                         const Mixture *mixture) {
+    int put[PARTS];
+    for (int part = 0; part < PARTS; part++) {
+        put[part] = combine(op, partOf(from, part), partOf((uint32_t) colour, part),
+                            mixture, part, mode == BLEND_ALPHA);
+    }
+
+    int alpha = put[PARTS - 1];
+    int laid[PARTS];
+    for (int part = 0; part < PARTS; part++) {
+        laid[part] = lay(mode, put[part], partOf(held, part), alpha);
+    }
+
+    return fromParts(laid);
+}
+
+/** The size a sprite takes up including the empty room that was cut off its sides. */
+static int fullWidth(const Sprite *sprite) {
+    return sprite->width + sprite->fromLeft + sprite->fromRight;
+}
+
+static int fullHeight(const Sprite *sprite) {
+    return sprite->height + sprite->fromTop + sprite->fromBottom;
+}
+
 /**
  * Draws a sprite at a place on the back buffer, clipped to it.
  */
-JNIEXPORT void JNICALL Java_j_W(JNIEnv *env, jobject self, jlong handle, jint x, jint y,
-                                 jint op, jint colour, jint mode) {
-    (void) env;
-    (void) self;
-
-    Sprite *sprite = (Sprite *) (intptr_t) handle;
+static void drawSprite(const Sprite *sprite, int x, int y, int op, int colour, int mode) {
     if (sprite == NULL || raster.pixels == NULL) {
         return;
     }
@@ -283,24 +305,178 @@ JNIEXPORT void JNICALL Java_j_W(JNIEnv *env, jobject self, jlong handle, jint x,
         uint32_t *to = raster.pixels + (size_t) (y + row) * (size_t) raster.width + x;
 
         for (int column = firstColumn; column < lastColumn; column++) {
-            int put[PARTS];
-
-            for (int part = 0; part < PARTS; part++) {
-                put[part] = combine(op, partOf(from[column], part),
-                                    partOf((uint32_t) colour, part), &mixture, part,
-                                    mode == BLEND_ALPHA);
-            }
-
-            int alpha = put[PARTS - 1];
-            int laid[PARTS];
-
-            for (int part = 0; part < PARTS; part++) {
-                laid[part] = lay(mode, put[part], partOf(to[column], part), alpha);
-            }
-
-            to[column] = fromParts(laid);
+            to[column] = putPixel(op, mode, from[column], to[column], colour, &mixture);
         }
     }
+}
+
+/** How many pixels of the answer are lost off the near side of the clip. */
+static int lostBefore(int at, int edge) {
+    return at < edge ? edge - at : 0;
+}
+
+/**
+ * Draws a sprite stretched to fill a rectangle.
+ *
+ * Nothing is mixed between one source pixel and the next: each pixel of the answer is whichever
+ * source pixel it landed on. The empty room cut off the sprite's sides is stretched by the same
+ * amount as the ink, so a frame whose corners were cut away keeps its proportions.
+ *
+ * How far along the source a row has got is added up four pixels at a time for as long as four
+ * fit, and then divided out for the few left over. Those are not the same answer once the numbers
+ * stop fitting exactly, and the toolkit answers both ways in the one row.
+ */
+static void drawStretched(const Sprite *sprite, int x, int y, int wantedWidth, int wantedHeight,
+                          int op, int colour, int mode) {
+    if (sprite == NULL || raster.pixels == NULL || sprite->width <= 0 || sprite->height <= 0) {
+        return;
+    }
+
+    if (op < OP_MULTIPLY || op > OP_SUBTRACT || mode < BLEND_OPAQUE || mode > BLEND_ADD) {
+        return;
+    }
+
+    float acrossBy = (float) wantedWidth / (float) fullWidth(sprite);
+    float downBy = (float) wantedHeight / (float) fullHeight(sprite);
+
+    x += (int) ((float) sprite->fromLeft * acrossBy);
+    y += (int) ((float) sprite->fromTop * downBy);
+
+    int inkWidth = wantedWidth - (int) ((float) sprite->fromLeft * acrossBy)
+        - (int) ((float) sprite->fromRight * acrossBy);
+    int inkHeight = wantedHeight - (int) ((float) sprite->fromTop * downBy)
+        - (int) ((float) sprite->fromBottom * downBy);
+
+    float perSource = (float) inkWidth / (float) sprite->width;
+    float perSourceRow = (float) inkHeight / (float) sprite->height;
+    if (perSource == 0.0f || perSourceRow == 0.0f) {
+        return;
+    }
+
+    int lostLeft = lostBefore(x, raster.clipLeft);
+    int lostTop = lostBefore(y, raster.clipTop);
+    int left = x < raster.clipLeft ? raster.clipLeft : x;
+    int top = y < raster.clipTop ? raster.clipTop : y;
+
+    int width = inkWidth - lostLeft;
+    if (width > raster.clipRight - left) {
+        width = raster.clipRight - left;
+    }
+
+    int height = inkHeight - lostTop;
+    if (height > raster.clipBottom - top) {
+        height = raster.clipBottom - top;
+    }
+
+    if (width <= 0 || height <= 0) {
+        return;
+    }
+
+    int firstColumn = (int) ((float) lostLeft / perSource);
+    int firstRow = (int) ((float) lostTop / perSourceRow);
+
+    Mixture mixture = mixtureOf((uint32_t) colour);
+    int blocks = width >> 2;
+    float overSource = 1.0f / perSource;
+    float sourceRow = 0.0f;
+
+    for (int row = 0; row < height; row++) {
+        const uint32_t *from = sprite->pixels
+            + ((size_t) firstRow + (size_t) (int) sourceRow) * (size_t) sprite->width
+            + (size_t) firstColumn;
+        uint32_t *to = raster.pixels
+            + (size_t) (top + row) * (size_t) raster.width + (size_t) left;
+
+        float held[4] = {0.0f, overSource, overSource * 2.0f, overSource * 3.0f};
+
+        for (int block = 0; block < blocks; block++) {
+            for (int lane = 0; lane < 4; lane++) {
+                int column = block * 4 + lane;
+                to[column] = putPixel(op, mode, from[(int) held[lane]], to[column],
+                                      colour, &mixture);
+            }
+
+            for (int lane = 0; lane < 4; lane++) {
+                held[lane] += overSource * 4.0f;
+            }
+        }
+
+        for (int column = blocks * 4; column < width; column++) {
+            int taken = (int) ((float) column / perSource);
+            to[column] = putPixel(op, mode, from[taken], to[column], colour, &mixture);
+        }
+
+        sourceRow += 1.0f / perSourceRow;
+    }
+}
+
+JNIEXPORT void JNICALL Java_j_W(JNIEnv *env, jobject self, jlong handle, jint x, jint y,
+                                 jint op, jint colour, jint mode) {
+    (void) env;
+    (void) self;
+
+    drawSprite((const Sprite *) (intptr_t) handle, x, y, op, colour, mode);
+}
+
+/**
+ * Draws a sprite stretched to fill a rectangle. The last number the client passes says whether the
+ * stretch should be smoothed, and this toolkit never smooths it.
+ */
+JNIEXPORT void JNICALL Java_j_RA(JNIEnv *env, jobject self, jlong handle, jint x, jint y,
+                                  jint width, jint height, jint op, jint colour, jint mode,
+                                  jint smooth) {
+    (void) env;
+    (void) self;
+    (void) smooth;
+
+    drawStretched((const Sprite *) (intptr_t) handle, x, y, width, height, op, colour, mode);
+}
+
+/**
+ * Fills a rectangle with copies of the sprite, side by side and row below row.
+ *
+ * The copies run from the corner the client asked for, so a copy that would overhang the far side
+ * is drawn and cut off there rather than being left out. Only the far side and the bottom are cut:
+ * the near side and the top are wherever the clip already was, so a rectangle that starts left of
+ * the clip still draws its copies from where it says it starts.
+ */
+JNIEXPORT void JNICALL Java_j_P(JNIEnv *env, jobject self, jlong handle, jint x, jint y,
+                                 jint width, jint height, jint op, jint colour, jint mode) {
+    (void) env;
+    (void) self;
+
+    const Sprite *sprite = (const Sprite *) (intptr_t) handle;
+    if (sprite == NULL) {
+        return;
+    }
+
+    int across = fullWidth(sprite);
+    int down = fullHeight(sprite);
+    if (across <= 0 || down <= 0) {
+        return;
+    }
+
+    int wasRight = raster.clipRight;
+    int wasBottom = raster.clipBottom;
+
+    if (raster.clipRight > x + width) {
+        raster.clipRight = x + width;
+    }
+    if (raster.clipBottom > y + height) {
+        raster.clipBottom = y + height;
+    }
+
+    int columns = (width - 1 + across) / across;
+    int rows = (height - 1 + down) / down;
+
+    for (int row = 0; row < rows; row++) {
+        for (int column = 0; column < columns; column++) {
+            drawSprite(sprite, x + column * across, y + row * down, op, colour, mode);
+        }
+    }
+
+    raster.clipRight = wasRight;
+    raster.clipBottom = wasBottom;
 }
 
 JNIEXPORT void JNICALL Java_j_R(JNIEnv *env, jobject self, jlong handle, jboolean immediate) {
