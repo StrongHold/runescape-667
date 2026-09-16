@@ -32,6 +32,7 @@ public final class HandGround {
      * What the ground itself is built asking for. The client works these out from its settings
      * and never asks for nothing, which is what was asked for here.
      */
+    private static final boolean FLAT = number("SW3D_GROUND_FLAT", 0) != 0;
     private static final int GROUND_FLAGS = number("SW3D_GROUND_FLAGS", 0);
     private static final int FEATURE_FLAGS = number("SW3D_GROUND_FEATURES", 0);
 
@@ -60,7 +61,7 @@ public final class HandGround {
         var heights = new int[TILES + 1][TILES + 1];
         for (var x = 0; x <= TILES; x++) {
             for (var z = 0; z <= TILES; z++) {
-                heights[x][z] = -(x * 40 + (z % 3) * 90 + (x % 4) * 60);
+                heights[x][z] = FLAT ? 0 : -(x * 40 + (z % 3) * 90 + (x % 4) * 60);
             }
         }
         return heights;

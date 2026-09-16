@@ -669,9 +669,8 @@ public sealed interface Scene {
      * The ground, seen from above and to one side.
      *
      * Terrain is a grid of tiles whose corners are shared, and a tile is handed over once and
-     * drawn every frame afterwards. This is not finished: the light a tile takes, the water over
-     * it, its textures and the order its faces are drawn in are all still to write, so the scene
-     * reports how far apart the two pictures are rather than passing or failing.
+     * drawn every frame afterwards. The water over a tile and the order its faces are drawn in
+     * are still to write, and no tile here asks for either.
      */
     record Terrain() implements Scene {
 
@@ -679,11 +678,6 @@ public sealed interface Scene {
         static final int BACK = 2600;
 
         static final int UP = 1500;
-
-        @Override
-        public boolean written() {
-            return false;
-        }
 
         @Override
         public void draw(Toolkit toolkit, Props props) {
@@ -710,16 +704,12 @@ public sealed interface Scene {
     /**
      * A model standing where the ground stands, seen through the eye the terrain scene uses.
      *
-     * The terrain scene draws nothing at all through the shipped toolkit. This tells one reason
-     * from another: whether nothing can be seen from that eye, or whether the eye is fine and
-     * the ground alone is refused.
+     * When the ground scene drew nothing at all through the shipped toolkit, this told one reason
+     * from another: whether nothing could be seen from that eye, or whether the eye was fine and
+     * the ground alone was refused. It was the eye that was fine, and the scene is kept because it
+     * is the only one that draws models through a camera that is not the plain one.
      */
     record OverTheGround() implements Scene {
-
-        @Override
-        public boolean written() {
-            return false;
-        }
 
         @Override
         public void draw(Toolkit toolkit, Props props) {
@@ -754,14 +744,10 @@ public sealed interface Scene {
      * This draws the same tiles the terrain scene draws, through a different native and with no
      * camera, no light and no distance. It is here to tell one question from another: whether
      * the tiles the client handed over are in the ground at all, or whether they are there and
-     * something later refuses to draw them.
+     * something later refuses to draw them. It is kept because it reaches the plan native, which
+     * nothing else does.
      */
     record Plan() implements Scene {
-
-        @Override
-        public boolean written() {
-            return false;
-        }
 
         @Override
         public void draw(Toolkit toolkit, Props props) {

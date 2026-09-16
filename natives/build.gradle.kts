@@ -99,7 +99,8 @@ val sceneSettings = mapOf(
     "SW3D_GROUND_LEVELS" to "0",
     "SW3D_GROUND_FLAGS" to "0",
     "SW3D_GROUND_FEATURES" to "0",
-    "SW3D_GROUND_COLOUR" to "-1"
+    "SW3D_GROUND_COLOUR" to "-1",
+    "SW3D_GROUND_FLAT" to "0"
 )
 
 val captureFrames by tasks.registering(JavaExec::class) {
@@ -113,7 +114,9 @@ val captureFrames by tasks.registering(JavaExec::class) {
     val frames = layout.buildDirectory.dir("frames").get().asFile
     environment("JAWTSHIM_DUMP", frames.absolutePath)
     sceneSettings.forEach { (name, fallback) ->
-        environment(name, providers.environmentVariable(name).getOrElse(fallback))
+        val held = providers.environmentVariable(name).getOrElse(fallback)
+        environment(name, held)
+        inputs.property(name, held)
     }
     args(patchedToolkit.get().asFile.absolutePath)
     outputs.dir(frames)

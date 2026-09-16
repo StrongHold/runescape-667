@@ -904,7 +904,19 @@ static void measureCorners(Ground *ground) {
             float *normal = &ground->normals[((size_t) x * (size_t) along + (size_t) z)
                 * NORMAL_PARTS];
 
-            if (x == 0 || z == 0 || x == across - 1 || z == along - 1) {
+            if (x == 0 || z == 0) {
+                continue;
+            }
+
+            /*
+             * A corner on the far side of the grid faces nowhere in particular rather than
+             * nowhere at all: it has a length, so it takes the light the world gives everything
+             * and none of the sun. A corner on the near side has no length either, and is left
+             * darker still. Both were measured from the frames the shipped toolkit draws; why the
+             * two sides are not alike has not been read out of it.
+             */
+            if (x == across - 1 || z == along - 1) {
+                normal[3] = 1.0f;
                 continue;
             }
 
