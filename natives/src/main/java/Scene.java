@@ -45,7 +45,8 @@ public sealed interface Scene {
         new DepthOrder(),
         new SubClip(),
         new ReadBack(),
-        new SpriteMatrix()
+        new SpriteMatrix(),
+        new IndexedSprites()
     );
 
     /**
@@ -258,6 +259,44 @@ public sealed interface Scene {
             props.matrix().makeRotationZ(0);
             props.matrix().translate(across, 0, away);
             props.model().render(props.matrix(), null, 1);
+        }
+    }
+
+    /**
+     * Sprites made from the client's own kind of picture, drawn over a background that is not flat.
+     *
+     * The client makes most of its artwork this way, and the size a sprite answers when it is asked
+     * how wide it is includes the empty room that was cut off its sides, which is what interfaces
+     * are laid out by. Both are drawn here, and both sizes are drawn as a rectangle so that a
+     * wrong answer shows as a rectangle of the wrong size.
+     */
+    record IndexedSprites() implements Scene {
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.aa(0, 0, WIDTH, 200, 0xFF404060, 0);
+            toolkit.aa(0, 60, WIDTH, 60, 0xFF906030, 0);
+
+            var solid = toolkit.createSprite(IndexedGlyph.solid(), true);
+            var translucent = toolkit.createSprite(IndexedGlyph.translucent(), true);
+
+            for (var mode = 0; mode < 3; mode++) {
+                solid.render(30 + mode * 90, 40, 0, 0xFFFFFFFF, mode);
+                translucent.render(30 + mode * 90, 100, 0, 0xFFFFFFFF, mode);
+                solid.render(30 + mode * 90, 160, 1, 0xFF33CC11, mode);
+            }
+
+            toolkit.outlineRect(320, 40, solid.getWidth(), solid.getHeight(), 0xFF00FF00, 0);
+            toolkit.outlineRect(400, 40, translucent.getWidth(), translucent.getHeight(),
+                0xFFFF00FF, 0);
+
+            /*
+             * An empty sprite is only measured, never drawn. The toolkit asks the system for its
+             * pixels and does not clear them, so what it holds is whatever was there before and
+             * two runs of the same scene do not agree with each other.
+             */
+            var empty = toolkit.createSprite(40, 24, true);
+            toolkit.outlineRect(400, 120, empty.getWidth(), empty.getHeight(), 0xFF00FFFF, 0);
         }
     }
 

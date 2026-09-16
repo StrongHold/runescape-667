@@ -13,8 +13,39 @@
 typedef struct {
     int width;
     int height;
+
+    /**
+     * How much empty room the client cut off each side when it made the sprite.
+     *
+     * The client draws a sprite at the corner of the room it once took up rather than at the
+     * corner of its ink, and it lays out interfaces by the size including that room. So a sprite
+     * answers its own width plus what was cut off either side when it is asked how wide it is.
+     */
+    int fromLeft;
+    int fromTop;
+    int fromRight;
+    int fromBottom;
+
     uint32_t *pixels;
 } Sprite;
+
+/** Room for a sprite's pixels, replacing whatever it held. */
+static int spriteRoom(Sprite *sprite, int width, int height) {
+    free(sprite->pixels);
+
+    sprite->width = width;
+    sprite->height = height;
+    sprite->pixels = calloc((size_t) width * (size_t) height, sizeof(uint32_t));
+
+    if (sprite->pixels == NULL) {
+        sprite->width = 0;
+        sprite->height = 0;
+        return 0;
+    }
+
+    allocatedGrew((size_t) width * (size_t) height * sizeof(uint32_t));
+    return 1;
+}
 
 static void spriteFree(Sprite *sprite) {
     if (sprite != NULL) {
@@ -187,16 +218,15 @@ JNIEXPORT void JNICALL Java_j_ua(JNIEnv *env, jobject self, jobject toolkit, jin
         return;
     }
 
+    spriteFree((Sprite *) (intptr_t) nativeIdOf(env, self));
+    setNativeId(env, self, 0);
+
     Sprite *sprite = calloc(1, sizeof(Sprite));
     if (sprite == NULL) {
         return;
     }
 
-    sprite->width = width;
-    sprite->height = height;
-    sprite->pixels = calloc((size_t) width * (size_t) height, sizeof(uint32_t));
-
-    if (sprite->pixels == NULL) {
+    if (!spriteRoom(sprite, width, height)) {
         free(sprite);
         return;
     }
@@ -233,6 +263,13 @@ JNIEXPORT void JNICALL Java_j_W(JNIEnv *env, jobject self, jlong handle, jint x,
     if (op < OP_MULTIPLY || op > OP_SUBTRACT || mode < BLEND_OPAQUE || mode > BLEND_ADD) {
         return;
     }
+
+    /*
+     * The client asks for the corner of the room the sprite once took up, not the corner of its
+     * ink, so what was cut off the top and the left is added back here.
+     */
+    x += sprite->fromLeft;
+    y += sprite->fromTop;
 
     int firstRow = y < raster.clipTop ? raster.clipTop - y : 0;
     int firstColumn = x < raster.clipLeft ? raster.clipLeft - x : 0;
@@ -287,4 +324,158 @@ JNIEXPORT jint JNICALL Java_j_I(JNIEnv *env, jobject self, jlong handle) {
 
     Sprite *sprite = (Sprite *) (intptr_t) handle;
     return sprite == NULL ? 0 : sprite->height;
+}
+
+/**
+ * How much empty room the client cut off each side, in the order left, top, right, bottom.
+ */
+JNIEXPORT void JNICALL Java_j_A(JNIEnv *env, jobject self, jlong handle, jint left, jint top,
+                                 jint right, jint bottom) {
+    (void) env;
+    (void) self;
+
+    Sprite *sprite = (Sprite *) (intptr_t) handle;
+    if (sprite == NULL) {
+        return;
+    }
+
+    sprite->fromLeft = left;
+    sprite->fromTop = top;
+    sprite->fromRight = right;
+    sprite->fromBottom = bottom;
+}
+
+JNIEXPORT void JNICALL Java_j_CA(JNIEnv *env, jobject self, jlong handle, jintArray destination) {
+    (void) self;
+
+    Sprite *sprite = (Sprite *) (intptr_t) handle;
+    if (sprite == NULL || destination == NULL) {
+        return;
+    }
+
+    jint written[4] = {
+        sprite->fromLeft,
+        sprite->fromTop,
+        sprite->fromRight,
+        sprite->fromBottom
+    };
+
+    (*env)->SetIntArrayRegion(env, destination, 0, 4, written);
+}
+
+/** How wide the sprite was before the empty room either side of it was cut off. */
+JNIEXPORT jint JNICALL Java_j_wa(JNIEnv *env, jobject self, jlong handle) {
+    (void) env;
+    (void) self;
+
+    Sprite *sprite = (Sprite *) (intptr_t) handle;
+    return sprite == NULL ? 0 : sprite->width + sprite->fromLeft + sprite->fromRight;
+}
+
+JNIEXPORT jint JNICALL Java_j_JA(JNIEnv *env, jobject self, jlong handle) {
+    (void) env;
+    (void) self;
+
+    Sprite *sprite = (Sprite *) (intptr_t) handle;
+    return sprite == NULL ? 0 : sprite->height + sprite->fromTop + sprite->fromBottom;
+}
+
+/**
+ * An empty sprite of a given size, for the client to draw into.
+ */
+JNIEXPORT void JNICALL Java_j_EA(JNIEnv *env, jobject self, jobject toolkit,
+                                  jint width, jint height) {
+    (void) toolkit;
+
+    spriteFree((Sprite *) (intptr_t) nativeIdOf(env, self));
+    setNativeId(env, self, 0);
+
+    if (width <= 0 || height <= 0) {
+        return;
+    }
+
+    Sprite *sprite = calloc(1, sizeof(Sprite));
+    if (sprite == NULL) {
+        return;
+    }
+
+    if (!spriteRoom(sprite, width, height)) {
+        free(sprite);
+        return;
+    }
+
+    setNativeId(env, self, (jlong) (intptr_t) sprite);
+}
+
+/**
+ * A sprite from a picture the client holds as one byte per pixel and a table of colours.
+ *
+ * Where the client supplies no alpha, the byte nought means nothing is there at all and every
+ * other byte is opaque. Where it does supply one, the byte is looked up whatever it is and the
+ * alpha decides on its own, so nought is a colour like any other.
+ */
+JNIEXPORT void JNICALL Java_j_ma(JNIEnv *env, jobject self, jobject toolkit, jintArray palette,
+                                  jbyteArray ink, jbyteArray alpha, jint offset, jint stride,
+                                  jint width, jint height) {
+    (void) toolkit;
+
+    spriteFree((Sprite *) (intptr_t) nativeIdOf(env, self));
+    setNativeId(env, self, 0);
+
+    if (palette == NULL || ink == NULL || width <= 0 || height <= 0) {
+        return;
+    }
+
+    Sprite *sprite = calloc(1, sizeof(Sprite));
+    if (sprite == NULL) {
+        return;
+    }
+
+    if (!spriteRoom(sprite, width, height)) {
+        free(sprite);
+        return;
+    }
+
+    int colours = (int) (*env)->GetArrayLength(env, palette);
+    int taken = (int) (*env)->GetArrayLength(env, ink);
+
+    uint32_t *table = calloc((size_t) colours, sizeof(uint32_t));
+    signed char *held = calloc((size_t) taken, 1);
+    signed char *clear = alpha == NULL
+        ? NULL
+        : calloc((size_t) (*env)->GetArrayLength(env, alpha), 1);
+
+    if (table != NULL && held != NULL && (alpha == NULL || clear != NULL)) {
+        (*env)->GetIntArrayRegion(env, palette, 0, colours, (jint *) table);
+        (*env)->GetByteArrayRegion(env, ink, 0, taken, (jbyte *) held);
+        if (clear != NULL) {
+            (*env)->GetByteArrayRegion(env, alpha, 0,
+                                       (*env)->GetArrayLength(env, alpha), (jbyte *) clear);
+        }
+
+        for (int row = 0; row < height; row++) {
+            for (int column = 0; column < width; column++) {
+                size_t at = (size_t) offset + (size_t) row * (size_t) stride + (size_t) column;
+                if (at >= (size_t) taken) {
+                    continue;
+                }
+
+                int which = held[at] & 0xFF;
+                uint32_t colour = which < colours ? table[which] : 0;
+                uint32_t *into = sprite->pixels + (size_t) row * (size_t) width + (size_t) column;
+
+                if (clear == NULL) {
+                    *into = which == 0 ? 0 : colour | 0xFF000000u;
+                } else {
+                    *into = (colour & 0xFFFFFFu) | ((uint32_t) (clear[at] & 0xFF) << 24);
+                }
+            }
+        }
+    }
+
+    free(table);
+    free(held);
+    free(clear);
+
+    setNativeId(env, self, (jlong) (intptr_t) sprite);
 }
