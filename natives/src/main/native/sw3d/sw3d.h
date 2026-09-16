@@ -112,6 +112,18 @@ typedef struct {
      */
     float near;
     float far;
+
+    /**
+     * Where the edges of what may be drawn on sit, counted from the middle of the picture.
+     *
+     * These are worked out when the client says where the middle is and are not touched again, so
+     * narrowing what may be drawn on afterwards does not move them. That is how the toolkit keeps
+     * them and it is what anything projecting a point is measured against.
+     */
+    float leftEdge;
+    float rightEdge;
+    float topEdge;
+    float bottomEdge;
 } Projection;
 
 const Projection *projection(void);

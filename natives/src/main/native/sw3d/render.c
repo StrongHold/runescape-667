@@ -479,8 +479,8 @@ static void pickingCylinder(void *model, const float *seen, int zoom, jint *into
 
     if (low[2] >= near) {
         float away = zoom < 0 ? low[2] : (float) zoom;
-        bottomAcross = view->scaleX * low[0] / away + view->centreX;
-        bottomDown = view->scaleY * low[1] / away + view->centreY;
+        bottomAcross = view->scaleX * low[0] / away - view->leftEdge;
+        bottomDown = view->scaleY * low[1] / away - view->topEdge;
         bottomBehind = 0;
     }
 
@@ -488,8 +488,8 @@ static void pickingCylinder(void *model, const float *seen, int zoom, jint *into
 
     if (high[2] >= near) {
         float away = zoom < 0 ? high[2] : (float) zoom;
-        topAcross = view->scaleX * high[0] / away + view->centreX;
-        topDown = view->scaleY * high[1] / away + view->centreY;
+        topAcross = view->scaleX * high[0] / away - view->leftEdge;
+        topDown = view->scaleY * high[1] / away - view->topEdge;
         settled = !bottomBehind;
     }
 
@@ -501,23 +501,23 @@ static void pickingCylinder(void *model, const float *seen, int zoom, jint *into
         float along = (high[2] - near) / (high[2] - low[2]);
         float away = zoom < 0 ? near : (float) zoom;
         bottomAcross = ((high[0] - low[0]) * along + high[0]) * view->scaleX / away
-            + view->centreX;
+            - view->leftEdge;
         bottomDown = ((high[1] - low[1]) * along + high[1]) * view->scaleY / away
-            + view->centreY;
+            - view->topEdge;
     } else if (!settled && near > high[2]) {
         float along = (low[2] - near) / (low[2] - high[2]);
         float away = zoom < 0 ? near : (float) zoom;
-        topAcross = ((low[0] - high[0]) * along + low[0]) * view->scaleX / away + view->centreX;
-        topDown = ((low[1] - high[1]) * along + low[1]) * view->scaleY / away + view->centreY;
+        topAcross = ((low[0] - high[0]) * along + low[0]) * view->scaleX / away - view->leftEdge;
+        topDown = ((low[1] - high[1]) * along + low[1]) * view->scaleY / away - view->topEdge;
     }
 
     float across;
     if (low[2] > high[2]) {
         float away = zoom < 0 ? low[2] : (float) zoom;
-        across = (radius + low[0]) * view->scaleX / away + view->centreX - bottomAcross;
+        across = (radius + low[0]) * view->scaleX / away - view->leftEdge - bottomAcross;
     } else {
         float away = zoom < 0 ? high[2] : (float) zoom;
-        across = (radius + high[0]) * view->scaleX / away + view->centreX - topAcross;
+        across = (radius + high[0]) * view->scaleX / away - view->leftEdge - topAcross;
     }
 
     into[0] = (jint) bottomAcross;
@@ -1008,4 +1008,107 @@ JNIEXPORT jboolean JNICALL Java_a_n(JNIEnv *env, jobject self, jlong worker, jlo
 
     return pointOnModel((void *) (intptr_t) model, (const void *) (intptr_t) matrix,
         x, y, quick == JNI_TRUE, zoom) ? JNI_TRUE : JNI_FALSE;
+}
+
+/*
+ * Whether a line in the world is worth drawing.
+ *
+ * The client asks this of an upright line at every corner of the ground it is about to draw, and
+ * from the answers works out which tiles can be left out altogether. The answer is not yes or no
+ * but which edge of the picture both ends of the line fell outside, so that a tile is only left
+ * out when all four of its corners fell outside the same one.
+ */
+
+enum {
+    PAST_THE_LEFT = 0x1,
+    PAST_THE_RIGHT = 0x2,
+    ABOVE_THE_TOP = 0x4,
+    BELOW_THE_BOTTOM = 0x8,
+    NEARER_THAN_THE_NEAR = 0x10,
+    FURTHER_THAN_THE_FAR = 0x20
+};
+
+/** How near the eye a point is allowed to come before it is held there. */
+static const float NEAREST = 1.0f;
+
+/**
+ * One place of a point put through the camera, which is the only matrix this is measured in.
+ */
+static float throughCamera(const float *camera, int lane, float x, float y, float z) {
+    return x * camera[lane] + y * camera[ROWS + lane] + z * camera[2 * ROWS + lane]
+        + camera[3 * ROWS + lane];
+}
+
+/**
+ * Which edges of the picture both ends of the line fell outside.
+ *
+ * A zoom of less than nothing asks for the line in perspective, where how far away a point is
+ * decides how far from the middle it lands. Anything else divides by the zoom instead.
+ */
+static int lineOffScreen(int x1, int y1, int z1, int x2, int y2, int z2, int zoom) {
+    const void *held = cameraMatrix();
+    if (held == NULL) {
+        return 0;
+    }
+
+    const float *camera = matrixRows(held);
+    const Projection *view = projection();
+
+    float first[3] = {(float) x1, (float) y1, (float) z1};
+    float second[3] = {(float) x2, (float) y2, (float) z2};
+
+    float awayFirst = fmaxf(NEAREST, throughCamera(camera, 2, first[0], first[1], first[2]));
+    float awaySecond = fmaxf(NEAREST, throughCamera(camera, 2, second[0], second[1], second[2]));
+
+    int outside = 0;
+    if (view->near > awayFirst && view->near > awaySecond) {
+        outside = NEARER_THAN_THE_NEAR;
+    } else if (awayFirst > view->far && awaySecond > view->far) {
+        outside = FURTHER_THAN_THE_FAR;
+    }
+
+    float overFirst = zoom < 0 ? awayFirst : (float) zoom;
+    float overSecond = zoom < 0 ? awaySecond : (float) zoom;
+
+    float acrossFirst = throughCamera(camera, 0, first[0], first[1], first[2])
+        * view->scaleX / overFirst;
+    float acrossSecond = throughCamera(camera, 0, second[0], second[1], second[2])
+        * view->scaleX / overSecond;
+
+    if (view->leftEdge > acrossFirst && view->leftEdge > acrossSecond) {
+        outside |= PAST_THE_LEFT;
+    } else if (acrossFirst > view->rightEdge && acrossSecond > view->rightEdge) {
+        outside |= PAST_THE_RIGHT;
+    }
+
+    float downFirst = throughCamera(camera, 1, first[0], first[1], first[2])
+        * view->scaleY / overFirst;
+    float downSecond = throughCamera(camera, 1, second[0], second[1], second[2])
+        * view->scaleY / overSecond;
+
+    if (view->topEdge > downFirst && view->topEdge > downSecond) {
+        return outside | ABOVE_THE_TOP;
+    }
+
+    if (downFirst > view->bottomEdge && downSecond > view->bottomEdge) {
+        outside |= BELOW_THE_BOTTOM;
+    }
+
+    return outside;
+}
+
+JNIEXPORT jint JNICALL Java_oa_JA(JNIEnv *env, jobject self, jint x1, jint y1, jint z1,
+                                   jint x2, jint y2, jint z2) {
+    (void) env;
+    (void) self;
+
+    return lineOffScreen(x1, y1, z1, x2, y2, z2, -1);
+}
+
+JNIEXPORT jint JNICALL Java_oa_r(JNIEnv *env, jobject self, jint x1, jint y1, jint z1,
+                                  jint x2, jint y2, jint z2, jint zoom) {
+    (void) env;
+    (void) self;
+
+    return lineOffScreen(x1, y1, z1, x2, y2, z2, zoom);
 }

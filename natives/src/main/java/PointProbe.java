@@ -1,6 +1,8 @@
 import com.jagex.graphics.Toolkit;
 import rs2.client.loading.library.LibraryManager;
 
+import java.awt.Canvas;
+import java.awt.Frame;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -68,13 +70,28 @@ public final class PointProbe {
             Watchdog.arm("The point probe", 120);
             LibraryManager.putLibrary(new File(args[0]), "sw3d");
 
-            var toolkit = oa.create(null, new StubTextureSource(), WIDTH, HEIGHT);
+            /*
+             * A canvas, because what may be drawn on is the whole buffer only once there is a
+             * buffer. With none the clip is empty, every point is answered as being off the
+             * picture, and the check can no longer tell one answer from another.
+             */
+            var canvas = new Canvas();
+            canvas.setSize(WIDTH, HEIGHT);
+
+            var window = new Frame("point probe");
+            window.add(canvas);
+            window.pack();
+            window.setVisible(true);
+            Thread.sleep(1000);
+
+            var toolkit = oa.create(canvas, new StubTextureSource(), WIDTH, HEIGHT);
             var lines = new ArrayList<String>();
 
             camerasAndFields(toolkit, lines);
             clips(toolkit, lines);
             planes(toolkit, lines);
             laidFlat(toolkit, lines);
+            lines(toolkit, lines);
 
             Files.write(Path.of(args[1]), lines);
             System.out.println("recorded " + lines.size() + " projection answers");
@@ -165,6 +182,43 @@ public final class PointProbe {
                 lines.add("flat " + spread + " " + text(point) + " -> " + text(flat));
             }
         }
+    }
+
+    /**
+     * Which edge of the picture a line in the world fell outside.
+     *
+     * The client asks this of an upright line at every corner of the ground before it draws, and
+     * leaves a tile out when all four of its corners fell outside the same edge. An answer of
+     * nothing where it should be something only costs time, but an answer of something where it
+     * should be nothing takes a piece of the world away.
+     */
+    private static void lines(Toolkit toolkit, List<String> lines) {
+        var camera = toolkit.createMatrix();
+        camera.makeIdentity();
+        camera.translate(0, 0, 700);
+        toolkit.setCamera(camera);
+        toolkit.la();
+        toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+        toolkit.f(50, Integer.MAX_VALUE);
+
+        for (var clip : CLIPS) {
+            toolkit.la();
+            toolkit.T(clip[0], clip[1], clip[2], clip[3]);
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+
+            for (var point : POINTS) {
+                var low = point[1] - 2000;
+                var high = point[1] + 2000;
+                lines.add("line " + clip[0] + "," + clip[1] + " " + text(point)
+                    + " -> " + toolkit.JA(point[0], low, point[2], point[0], high, point[2])
+                    + " " + toolkit.JA(point[0], high, point[2], point[0], low, point[2])
+                    + " " + toolkit.r(point[0], low, point[2], point[0], high, point[2], 128)
+                    + " " + toolkit.r(point[0], low, point[2], point[0], high, point[2], 4096));
+            }
+        }
+
+        toolkit.la();
+        toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
     }
 
     private static void record(Toolkit toolkit, List<String> lines, String what,

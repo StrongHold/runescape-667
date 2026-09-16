@@ -219,6 +219,11 @@ JNIEXPORT void JNICALL Java_oa_DA(JNIEnv *env, jobject self, jint x, jint y,
     view.centreY = (float) y;
     view.scaleX = (float) width;
     view.scaleY = (float) height;
+
+    view.leftEdge = (float) raster.clipLeft - view.centreX;
+    view.rightEdge = (float) raster.clipRight - view.centreX;
+    view.topEdge = (float) raster.clipTop - view.centreY;
+    view.bottomEdge = (float) raster.clipBottom - view.centreY;
 }
 
 /**
