@@ -302,7 +302,7 @@ enum { TEXTURE_EDGE = 127 };
  * close the approximation comes belongs to the instruction set.
  */
 static uint32_t texelAt(float u, float v, float w) {
-    float away = reciprocalOfFour(w);
+    float away = 1.0f / w;
     int across = (int) (u * away);
     int down = (int) (v * away);
 
@@ -343,9 +343,18 @@ static void fillSpan(int y, const Side *left, const Side *right) {
     float uStep = (right->u - left->u) * over;
     float vStep = (right->v - left->v) * over;
     float wStep = (right->w - left->w) * over;
-    float u = left->u + (float) skipped * uStep;
-    float v = left->v + (float) skipped * vStep;
-    float w = left->w + (float) skipped * wStep;
+
+    /*
+     * A texture is read four pixels at a time, and the four are worked out from where the group of
+     * four starts rather than one from the last. The groups line up with the buffer rather than
+     * with the run, so the first of them begins before the run does. Stepping one pixel at a time
+     * instead gathers a little more error with every pixel, and a texture read at a coarse enough
+     * angle turns that into the wrong texel.
+     */
+    int group = from & ~3;
+    float uBase = left->u + (float) skipped * uStep - (float) (from - group) * uStep;
+    float vBase = left->v + (float) skipped * vStep - (float) (from - group) * vStep;
+    float wBase = left->w + (float) skipped * wStep - (float) (from - group) * wStep;
 
     uint16_t colour[CHANNELS];
     int16_t colourStep[CHANNELS];
@@ -379,7 +388,10 @@ static void fillSpan(int y, const Side *left, const Side *right) {
                  * and the product keeps its top half, which is what turns a byte times a
                  * sixteenth part back into a byte.
                  */
-                uint32_t texel = texelAt(u, v, w);
+                int lane = x - group;
+                uint32_t texel = texelAt(uBase + (float) lane * uStep,
+                                         vBase + (float) lane * vStep,
+                                         wBase + (float) lane * wStep);
                 uint32_t written = 0;
 
                 for (int part = 0; part < CHANNELS; part++) {
@@ -392,9 +404,13 @@ static void fillSpan(int y, const Side *left, const Side *right) {
         }
 
         depth += depthStep;
-        u += uStep;
-        v += vStep;
-        w += wStep;
+
+        if (x - group == 3) {
+            group += 4;
+            uBase += 4.0f * uStep;
+            vBase += 4.0f * vStep;
+            wBase += 4.0f * wStep;
+        }
         for (int part = 0; part < CHANNELS; part++) {
             colour[part] = (uint16_t) (colour[part] + colourStep[part]);
         }

@@ -170,7 +170,9 @@ static int slotFor(Ordering *ordering, int texture) {
  * They do not add up to one. What a texel is divided by is worked out as it is gathered, because
  * a texel the blur was told to leave out takes its weight out of the sum with it.
  */
-static const float BLUR[5] = { 0.05399097f, 0.24197072f, 0.39894229f, 0.24197072f, 0.05399097f };
+static const float BLUR[5] = {
+    0.053990967f, 0.24197072f, 0.39894229f, 0.24197072f, 0.053990967f
+};
 
 /** Where a tap lands when the texture does not repeat: pinned to the edge it ran off. */
 static int pinned(int at) {
