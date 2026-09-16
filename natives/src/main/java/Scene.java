@@ -42,6 +42,7 @@ public sealed interface Scene {
         new BlendMatrix(),
         new BlendMode(),
         new OutlineAndLine(),
+        new ThickLines(),
         new Clip(),
         new Geometry(),
         new FewFaces(),
@@ -1055,6 +1056,51 @@ public sealed interface Scene {
      * or not at all, shows up rather than passing unnoticed. The last fill is drawn after the
      * clip is opened again, so a clip left closed shows up too.
      */
+    /**
+     * Lines with a width to them, which the toolkit draws as two triangles rather than as a walk.
+     *
+     * A width that does not halve evenly puts the extra pixel on one side, and which side that
+     * is depends on which way the line leans, so the fan below turns the whole way round. The
+     * last few run off the edges and lie exactly along them.
+     */
+    record ThickLines() implements Scene {
+
+        private static final int MIDDLE_X = 170;
+
+        private static final int MIDDLE_Y = 180;
+
+        private static final int REACH = 140;
+
+        private static final int SPOKES = 12;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            for (var spoke = 0; spoke < SPOKES; spoke++) {
+                var angle = spoke * 2.0 * Math.PI / SPOKES;
+                var endX = MIDDLE_X + (int) (Math.cos(angle) * REACH);
+                var endY = MIDDLE_Y + (int) (Math.sin(angle) * REACH);
+                toolkit.strongLine(MIDDLE_X, MIDDLE_Y, endX, endY,
+                    0xFF000000 | (spoke * 0x2010 + 0x40C080), spoke + 1, 0);
+            }
+
+            /* Odd and even widths side by side, on a line that leans the other way. */
+            for (var width = 1; width <= 8; width++) {
+                toolkit.strongLine(360, 40 + width * 20, 470, 60 + width * 20,
+                    0xFFCCCC22, width, 0);
+            }
+
+            /* Upright, flat, and no length at all. */
+            toolkit.strongLine(330, 210, 330, 360, 0xFF22CCCC, 7, 0);
+            toolkit.strongLine(350, 210, 490, 210, 0xFF22CC22, 6, 0);
+            toolkit.strongLine(400, 280, 400, 280, 0xFFFFFFFF, 9, 0);
+
+            /* Off every edge, including one that lies along the top row. */
+            toolkit.strongLine(-200, 330, 700, 350, 0xFFFF6600, 11, 0);
+            toolkit.strongLine(60, -200, 90, 700, 0xFF6600FF, 5, 0);
+            toolkit.strongLine(-40, 0, 552, 0, 0xFFFFFF00, 3, 0);
+        }
+    }
+
     record Clip() implements Scene {
 
         @Override

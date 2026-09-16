@@ -205,6 +205,15 @@ static void advance(Side *side, const Side *step) {
  * whole number of eight-hundredths per pixel, worked out from the ends before either was brought
  * inside the buffer, so clipping a run does not change the light along the part that is left.
  */
+/**
+ * Whether how far away a pixel is decides anything.
+ *
+ * Most of what the toolkit fills is part of the world and is settled a pixel at a time by how far
+ * away it is. A thick line is not: it is two triangles laid flat on the picture, and the toolkit
+ * fills those without reading or writing a distance at all.
+ */
+static int distanceDecides = 1;
+
 static void fillSpan(int y, const Side *left, const Side *right) {
     int from = (int) lrintf(left->x);
     int to = (int) lrintf(right->x);
@@ -244,8 +253,11 @@ static void fillSpan(int y, const Side *left, const Side *right) {
     float *held = raster.depths + start;
 
     for (int x = from; x < to; x++) {
-        if (depth <= held[x]) {
-            held[x] = depth;
+        if (!distanceDecides || depth <= held[x]) {
+            if (distanceDecides) {
+                held[x] = depth;
+            }
+
             row[x] = (uint32_t) (colour[0] >> 8)
                 | (uint32_t) (colour[1] >> 8) << 8
                 | (uint32_t) (colour[2] >> 8) << 16
@@ -1292,4 +1304,98 @@ JNIEXPORT jint JNICALL Java_oa_r(JNIEnv *env, jobject self, jint x1, jint y1, ji
     (void) self;
 
     return lineOffScreen(x1, y1, z1, x2, y2, z2, zoom);
+}
+
+/**
+ * How far a step along a line is kept: sixteen places, and one more for the halving.
+ */
+enum { LINE_PLACES = 16, LINE_HALF_PLACES = 17 };
+
+/** A corner of a shape laid flat on the picture, which nothing behind it can cover. */
+static Corner flatCorner(int x, int y, uint32_t colour) {
+    Projected landed;
+    landed.x = (float) x;
+    landed.y = (float) y;
+    landed.depth = 0.0f;
+    landed.visible = 1;
+
+    return cornerAt(&landed, colour);
+}
+
+/**
+ * Draws a line with a width to it, as two triangles rather than as a walk.
+ *
+ * The line is turned into a four cornered shape by stepping away from it to either side. The
+ * step is the line's own step with the two parts swapped and one of them turned round, which is
+ * the direction across the line, and which of the two is turned round depends on which way the
+ * line leans. It is then taken out to half the width that was asked for.
+ *
+ * The two sides are not the same. One is half the width rounded down and the other is half the
+ * width with one added first, so a width that does not halve evenly puts the extra pixel on the
+ * same side every time.
+ *
+ * Nothing about this reads or writes how far away a pixel is, so a thick line covers whatever it
+ * is drawn over and does not stop anything drawn afterwards.
+ */
+JNIEXPORT void JNICALL Java_a_na(JNIEnv *env, jobject self, jlong worker, jobject surface,
+                                  jint x1, jint y1, jint x2, jint y2, jint colour, jint width,
+                                  jint mode) {
+    (void) env;
+    (void) self;
+    (void) worker;
+    (void) surface;
+    (void) mode;
+
+    if (raster.pixels == NULL) {
+        return;
+    }
+
+    int across = x2 - x1;
+    int down = y2 - y1;
+
+    int longest = abs(down);
+    if (abs(across) >= abs(down)) {
+        if (across == 0) {
+            return;
+        }
+
+        longest = abs(across);
+    }
+
+    int alongX = (int) ((uint32_t) across << LINE_PLACES) / longest;
+    int alongY = (int) ((uint32_t) down << LINE_PLACES) / longest;
+
+    int outX;
+    int outY;
+    if (alongX >= alongY) {
+        outX = alongY;
+        outY = -alongX;
+    } else {
+        outX = -alongY;
+        outY = alongX;
+    }
+
+    int wideX = (int) ((uint32_t) outX * (uint32_t) width);
+    int wideY = (int) ((uint32_t) outY * (uint32_t) width);
+
+    int oneSideX = wideX >> LINE_HALF_PLACES;
+    int oneSideY = wideY >> LINE_HALF_PLACES;
+    int otherSideX = (wideX + 1) >> LINE_HALF_PLACES;
+    int otherSideY = (wideY + 1) >> LINE_HALF_PLACES;
+
+    int left = x1 - raster.clipLeft;
+    int top = y1 - raster.clipTop;
+    int right = left + across;
+    int bottom = top + down;
+
+    uint32_t paint = (uint32_t) colour;
+    Corner start = flatCorner(left + oneSideX, top + oneSideY, paint);
+    Corner behind = flatCorner(left - otherSideX, top - otherSideY, paint);
+    Corner ahead = flatCorner(right - otherSideX, bottom - otherSideY, paint);
+    Corner end = flatCorner(right + oneSideX, bottom + oneSideY, paint);
+
+    distanceDecides = 0;
+    fillTriangle(start, behind, ahead);
+    fillTriangle(start, ahead, end);
+    distanceDecides = 1;
 }
