@@ -17,6 +17,13 @@
 
 #include "sw3d.h"
 
+/** How many steps the client's packed colour holds for each of its three parts. */
+enum {
+    HUES = 64,
+    SATURATIONS = 8,
+    LIGHTNESSES = 128
+};
+
 enum {
     COLOURS = 65536
 };
@@ -59,9 +66,15 @@ static void build(void) {
     }
 
     for (int i = 0; i < COLOURS; i++) {
-        float hue = (float) ((i >> 10) & 0x3F) / 64.0f + 0.0078125f;
-        float saturation = (float) ((i >> 7) & 0x7) / 8.0f + 0.0625f;
-        float lightness = (float) (i & 0x7F) / 128.0f;
+        /*
+         * A hue and a saturation are read at the middle of the step they name rather than at its
+         * near edge, so the steps are spread evenly round the wheel instead of all leaning one
+         * way. Half a step is what is added.
+         */
+        float hue = (float) ((i >> 10) & (HUES - 1)) / (float) HUES + 0.5f / (float) HUES;
+        float saturation = (float) ((i >> 7) & (SATURATIONS - 1)) / (float) SATURATIONS
+            + 0.5f / (float) SATURATIONS;
+        float lightness = (float) (i & (LIGHTNESSES - 1)) / (float) LIGHTNESSES;
 
         float red = lightness;
         float green = lightness;
