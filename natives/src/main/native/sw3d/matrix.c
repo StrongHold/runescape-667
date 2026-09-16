@@ -160,17 +160,20 @@ static void writePoint(JNIEnv *env, jintArray destination, const float *point) {
 
 /**
  * Takes the move off a point and then turns it back, which is the matrix transposed.
+ *
+ * Only three of the four numbers take part. The fourth row and column are read and then never
+ * added in, so whatever a fourth number held does not reach the answer.
  */
-static void relative(const Matrix *matrix, float *point, float *into) {
-    for (int lane = 0; lane < ROWS; lane++) {
-        point[lane] -= matrix->row[3][lane];
+static void relative(const Matrix *matrix, const float *point, float *into) {
+    float moved[3];
+    for (int lane = 0; lane < 3; lane++) {
+        moved[lane] = point[lane] - matrix->row[3][lane];
     }
 
-    for (int lane = 0; lane < ROWS; lane++) {
-        into[lane] = 0.0f;
-        for (int term = 0; term < ROWS; term++) {
-            into[lane] += point[term] * matrix->row[lane][term];
-        }
+    for (int lane = 0; lane < 3; lane++) {
+        into[lane] = moved[0] * matrix->row[lane][0]
+            + moved[1] * matrix->row[lane][1]
+            + moved[2] * matrix->row[lane][2];
     }
 }
 
@@ -427,13 +430,11 @@ JNIEXPORT void JNICALL Java_ja_w(JNIEnv *env, jobject self, jlong handle, jintAr
         return;
     }
 
-    jint held[ROWS];
-    (*env)->GetIntArrayRegion(env, destination, 0, ROWS, held);
+    jint held[3];
+    (*env)->GetIntArrayRegion(env, destination, 0, 3, held);
 
-    float point[ROWS];
-    float moved[ROWS] = {
-        (float) held[0], (float) held[1], (float) held[2], (float) held[3]
-    };
+    float point[3];
+    float moved[3] = {(float) held[0], (float) held[1], (float) held[2]};
 
     relative(matrix, moved, point);
     writePoint(env, destination, point);
@@ -452,8 +453,8 @@ JNIEXPORT void JNICALL Java_ja_va(JNIEnv *env, jobject self, jlong handle, jint 
         return;
     }
 
-    float moved[ROWS] = {(float) x, (float) y, (float) z, 1.0f};
-    float point[ROWS];
+    float moved[3] = {(float) x, (float) y, (float) z};
+    float point[3];
     relative(matrix, moved, point);
     writePoint(env, destination, point);
 }

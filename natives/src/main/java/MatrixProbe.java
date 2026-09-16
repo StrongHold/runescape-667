@@ -260,6 +260,17 @@ public final class MatrixProbe {
 
         matrix.project(destination);
         lines.add(what + " | project -> " + describe(destination));
+
+        /*
+         * The client passes an array of three here as well as one of four, and the toolkit reads
+         * four numbers out of whichever it is given. It gets away with reading past the end of a
+         * three because it reads through a pinned pointer, and it gets away with the fourth number
+         * being whatever happened to be there because it never adds it in. Both sizes are asked
+         * for, because an implementation that reads the array properly throws on the smaller one.
+         */
+        var three = new int[] {destination[0], destination[1], destination[2]};
+        matrix.project(three);
+        lines.add(what + " | project into three -> " + describe(three));
     }
 
     private static String describe(int[] values) {
