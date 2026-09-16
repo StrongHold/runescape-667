@@ -53,6 +53,7 @@ public sealed interface Scene {
         new Text(),
         new StretchedAndTiled(),
         new Masked(),
+        new Rotated(),
         new Turned(),
         new Copied(),
         new Animated(),
@@ -189,6 +190,57 @@ public sealed interface Scene {
             toolkit.line(100, 300, 100, 300, 0xFFFFFFFF, 0);
             toolkit.line(-50, 250, 560, 260, 0xFFFF00FF, 0);
             toolkit.line(200, -50, 260, 430, 0xFF00FFFF, 0);
+        }
+    }
+
+    /**
+     * A sprite turned, which the client asks for by where the corners land rather than by an
+     * angle.
+     *
+     * Every angle here is off the whole quarters, because a turn that lands on a quarter walks
+     * the sprite a pixel at a time and says nothing about the fractions the rest of them read
+     * from. The last row is drawn through a shape, which is how the minimap turns inside its
+     * round window.
+     */
+    record Rotated() implements Scene {
+
+        private static final int SIZE = 96;
+
+        /** How far the client counts a sprite as being at its own size. */
+        private static final int SAME_SIZE = 4096;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            var angles = new int[] {0, 2731, 8000, 13000, 20000, 41000};
+
+            for (var step = 0; step < angles.length; step++) {
+                props.gradient().renderRotated(48.0F + step * 80.0F, 60.0F,
+                    SAME_SIZE, angles[step]);
+            }
+
+            for (var step = 0; step < angles.length; step++) {
+                props.gradient().renderRotated(48.0F + step * 80.0F, 170.0F,
+                    SAME_SIZE / 2 + step * 900, angles[step], 0xFF4488CC);
+            }
+
+
+
+            var starts = new int[SIZE];
+            var lengths = new int[SIZE];
+            for (var row = 0; row < SIZE; row++) {
+                var half = SIZE / 2;
+                var reach = (int) Math.sqrt(half * half - (row - half) * (row - half));
+                starts[row] = half - reach;
+                lengths[row] = reach * 2;
+            }
+
+            var mask = toolkit.createMask(SIZE, SIZE, starts, lengths);
+
+            for (var step = 0; step < angles.length; step++) {
+                var x = 20 + step * 80;
+                props.gradient().renderRotated(x + SIZE / 2.0F, 280.0F + SIZE / 2.0F,
+                    24.0F, 24.0F, SAME_SIZE, angles[step], mask, x, 280);
+            }
         }
     }
 

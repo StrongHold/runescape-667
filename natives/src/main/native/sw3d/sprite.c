@@ -5,6 +5,7 @@
  * the client is free to reuse that array the moment it returns.
  */
 
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -456,6 +457,259 @@ static void drawMasked(const Sprite *sprite, int x, int y, int op, int colour, i
             into[column] = putPixel(op, mode, ink[column - x], into[column], colour, &mixture);
         }
     }
+}
+
+/*
+ * Drawing a sprite into a parallelogram.
+ *
+ * The client turns a sprite by working out where its three corners land and handing them over. It
+ * is how the compass turns, how the minimap turns under it, and how any interface picture with an
+ * angle on it is drawn.
+ *
+ * Walking the answer rather than the sprite is what makes a turned sprite leave no holes: every
+ * pixel of the answer asks which pixel of the sprite it came from, in sixteen bit fractions of
+ * one, and the two run along the row and down the column by a fixed step each.
+ */
+
+/** How many fraction bits are kept in the place a pixel is read from. */
+enum { PLACE_BITS = 12 };
+
+/** One whole pixel of the sprite, in the units the place is kept in. */
+static const float WHOLE_PLACE = 4096.0f;
+
+/**
+ * What a corner is measured in while the first place is worked out, which is sixteenths of a
+ * pixel. Half of one is added so that the place lands in the middle of the pixel rather than at
+ * its corner.
+ */
+static const float SIXTEENTHS = 16.0f;
+static const float HALF_A_PIXEL = 8.0f;
+
+/** A whole number multiply that is allowed to run over, because the toolkit's does. */
+static int overrunning(int left, int right) {
+    return (int) ((uint32_t) left * (uint32_t) right);
+}
+
+/** The corners of the parallelogram, in the order the client hands them over. */
+typedef struct {
+    float acrossFirst;
+    float acrossSecond;
+    float acrossThird;
+    float downFirst;
+    float downSecond;
+    float downThird;
+} Corners;
+
+/**
+ * Moves the corners in by the empty room the client cut off the sprite's sides.
+ *
+ * The corners describe where the sprite would be if it still had that room, so the ink inside
+ * them starts a little way in from each edge.
+ */
+static void insetByMargins(const Sprite *sprite, Corners *corner) {
+    float acrossStep = (corner->acrossSecond - corner->acrossFirst) / (float) fullWidth(sprite);
+    float downStep = (corner->downSecond - corner->downFirst) / (float) fullWidth(sprite);
+    float acrossDrop = (corner->acrossThird - corner->acrossFirst) / (float) fullHeight(sprite);
+    float downDrop = (corner->downThird - corner->downFirst) / (float) fullHeight(sprite);
+
+    float fromTop = (float) sprite->fromTop;
+    float fromLeft = (float) sprite->fromLeft;
+    float fromRight = (float) sprite->fromRight;
+    float fromBottom = (float) sprite->fromBottom;
+
+    corner->acrossFirst += acrossStep * fromLeft + acrossDrop * fromTop;
+    corner->downFirst += downStep * fromLeft + downDrop * fromTop;
+    corner->acrossSecond += acrossDrop * fromTop - acrossStep * fromRight;
+    corner->downSecond += downDrop * fromTop - downStep * fromRight;
+    corner->acrossThird += acrossStep * fromLeft - acrossDrop * fromBottom;
+    corner->downThird += downStep * fromLeft - downDrop * fromBottom;
+}
+
+static float leastOf(float first, float second, float third, float fourth) {
+    float pair = first < second ? first : second;
+    return fminf(fourth, fminf(third, pair));
+}
+
+static float mostOf(float first, float second, float third, float fourth) {
+    float pair = first < second ? second : first;
+    return fmaxf(fourth, fmaxf(third, pair));
+}
+
+/**
+ * Where in the sprite the answer's pixels come from, and how that place moves.
+ *
+ * The four steps are the inverse of the parallelogram, so the whole of it can be walked by
+ * adding rather than by working anything out per pixel.
+ */
+typedef struct {
+    int place[2];
+    int alongRow[2];
+    int downColumn[2];
+} Walk;
+
+static Walk walkOf(const Sprite *sprite, const Corners *corner, float left, float top) {
+    float acrossSpan = corner->acrossSecond - corner->acrossFirst;
+    float downSpan = corner->downSecond - corner->downFirst;
+    float acrossDrop = corner->acrossThird - corner->acrossFirst;
+    float downDrop = corner->downThird - corner->downFirst;
+
+    float area = acrossSpan * downDrop - downSpan * acrossDrop;
+    float against = downSpan * acrossDrop - acrossSpan * downDrop;
+
+    float wide = (float) sprite->width;
+    float tall = (float) sprite->height;
+
+    Walk walk;
+    walk.alongRow[0] = (int) (downDrop * WHOLE_PLACE * wide / area);
+    walk.alongRow[1] = (int) (downSpan * WHOLE_PLACE * tall / against);
+    walk.downColumn[0] = (int) (acrossDrop * WHOLE_PLACE * wide / against);
+    walk.downColumn[1] = (int) (acrossSpan * WHOLE_PLACE * tall / area);
+
+    /*
+     * Where the middle of the first pixel sits, counted from the middle of the parallelogram in
+     * sixteenths of a pixel. The eight is half a pixel, which puts it at the middle rather than
+     * at the corner.
+     */
+    float fourthAcross = acrossSpan + corner->acrossThird;
+    float fourthDown = downDrop + corner->downSecond;
+    int fromMiddleAcross = (int) (left * SIXTEENTHS + HALF_A_PIXEL
+        + (corner->acrossFirst + corner->acrossSecond + corner->acrossThird + fourthAcross)
+            * 0.25f * -SIXTEENTHS);
+    int fromMiddleDown = (int) (top * SIXTEENTHS + HALF_A_PIXEL
+        + (corner->downFirst + corner->downSecond + corner->downThird + fourthDown)
+            * 0.25f * -SIXTEENTHS);
+
+    walk.place[0] = (overrunning(walk.downColumn[0], fromMiddleDown) >> 4)
+        + ((sprite->width >> 1) << PLACE_BITS)
+        + (overrunning(walk.alongRow[0], fromMiddleAcross) >> 4);
+    walk.place[1] = (overrunning(walk.downColumn[1], fromMiddleDown) >> 4)
+        + ((sprite->height >> 1) << PLACE_BITS)
+        + (overrunning(walk.alongRow[1], fromMiddleAcross) >> 4);
+
+    return walk;
+}
+
+/**
+ * Draws a sprite into the parallelogram the client's three corners describe, clipped to the
+ * buffer and, when the client gives one, to a shape.
+ */
+static void drawParallelogram(const Sprite *sprite, Corners corner, int op, int colour, int mode,
+                              const void *mask, int across, int down) {
+    if (sprite == NULL || raster.pixels == NULL) {
+        return;
+    }
+
+    if (op < OP_MULTIPLY || op > OP_SUBTRACT || mode < BLEND_OPAQUE || mode > BLEND_ADD) {
+        return;
+    }
+
+    if (sprite->width != fullWidth(sprite) || sprite->height != fullHeight(sprite)) {
+        insetByMargins(sprite, &corner);
+    }
+
+    float fourthAcross = corner.acrossSecond - corner.acrossFirst + corner.acrossThird;
+    float fourthDown = corner.downThird - corner.downFirst + corner.downSecond;
+
+    float left = fmaxf((float) raster.clipLeft, leastOf(corner.acrossFirst, corner.acrossSecond,
+        corner.acrossThird, fourthAcross));
+    float right = fminf((float) raster.clipRight, mostOf(corner.acrossFirst, corner.acrossSecond,
+        corner.acrossThird, fourthAcross));
+    float top = fmaxf((float) raster.clipTop, leastOf(corner.downFirst, corner.downSecond,
+        corner.downThird, fourthDown));
+    float bottom = fminf((float) raster.clipBottom, mostOf(corner.downFirst, corner.downSecond,
+        corner.downThird, fourthDown));
+
+    if (!(left - right < 0.0f) || !(top - bottom < 0.0f)) {
+        return;
+    }
+
+    int columns = -(int) (left - right);
+    int rows = -(int) (top - bottom);
+    int start = (int) ((float) ((int) top * raster.width) + left);
+
+    Walk walk = walkOf(sprite, &corner, left, top);
+
+    int highest = sprite->width << PLACE_BITS;
+    int lowest = sprite->height << PLACE_BITS;
+    Mixture mixture = mixtureOf((uint32_t) colour);
+
+    int rowPlace[2] = {walk.place[0], walk.place[1]};
+    int at = start;
+
+    for (int row = 0; row < rows; row++) {
+        int firstColumn = 0;
+        int lastColumn = columns;
+
+        if (mask != NULL) {
+            int from = 0;
+            int count = 0;
+            int buffer = (int) top + row;
+
+            if (!maskRun(mask, buffer, across, down, &from, &count)) {
+                firstColumn = lastColumn;
+            } else {
+                int leftEdge = from - (int) left;
+                int rightEdge = leftEdge + count;
+                firstColumn = leftEdge > 0 ? leftEdge : 0;
+                lastColumn = rightEdge < columns ? rightEdge : columns;
+            }
+        }
+
+        int place[2] = {
+            rowPlace[0] + overrunning(walk.alongRow[0], firstColumn),
+            rowPlace[1] + overrunning(walk.alongRow[1], firstColumn)
+        };
+        uint32_t *into = raster.pixels + at;
+
+        for (int column = firstColumn; column < lastColumn; column++) {
+            if (place[0] >= 0 && place[0] < highest && place[1] >= 0 && place[1] < lowest) {
+                uint32_t from = sprite->pixels[(size_t) (place[1] >> PLACE_BITS)
+                    * (size_t) sprite->width + (size_t) (place[0] >> PLACE_BITS)];
+                into[column] = putPixel(op, mode, from, into[column], colour, &mixture);
+            }
+
+            place[0] += walk.alongRow[0];
+            place[1] += walk.alongRow[1];
+        }
+
+        rowPlace[0] += walk.downColumn[0];
+        rowPlace[1] += walk.downColumn[1];
+        at += raster.width;
+    }
+}
+
+/**
+ * Draws a sprite turned, which the client asks for by where the corners land rather than by an
+ * angle.
+ */
+JNIEXPORT void JNICALL Java_j_b(JNIEnv *env, jobject self, jlong handle,
+                                 jfloat acrossFirst, jfloat downFirst,
+                                 jfloat acrossSecond, jfloat downSecond,
+                                 jfloat acrossThird, jfloat downThird,
+                                 jint op, jint colour, jint mode, jint unused) {
+    (void) env;
+    (void) self;
+    (void) unused;
+
+    Corners corner = {acrossFirst, acrossSecond, acrossThird, downFirst, downSecond, downThird};
+    drawParallelogram((const Sprite *) (intptr_t) handle, corner, op, colour, mode, NULL, 0, 0);
+}
+
+/**
+ * Draws a sprite turned and cut to a shape, which is how the minimap turns inside its round
+ * window.
+ */
+JNIEXPORT void JNICALL Java_j_UA(JNIEnv *env, jobject self, jlong handle,
+                                  jfloat acrossFirst, jfloat downFirst,
+                                  jfloat acrossSecond, jfloat downSecond,
+                                  jfloat acrossThird, jfloat downThird,
+                                  jint op, jlong mask, jint across, jint down) {
+    (void) env;
+    (void) self;
+
+    Corners corner = {acrossFirst, acrossSecond, acrossThird, downFirst, downSecond, downThird};
+    drawParallelogram((const Sprite *) (intptr_t) handle, corner, op, 0, BLEND_ALPHA,
+        (const void *) (intptr_t) mask, across, down);
 }
 
 JNIEXPORT void JNICALL Java_j_W(JNIEnv *env, jobject self, jlong handle, jint x, jint y,
