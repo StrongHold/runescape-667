@@ -8,6 +8,7 @@
  */
 
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -302,6 +303,11 @@ static int allowed(JNIEnv *env, const Model *model, int functions) {
 
 static float *vertexAt(Model *model, int vertex) {
     return model->vertices + (size_t) vertex * VERTEX_STRIDE;
+}
+
+/** How many the client put in an array, or none at all when it gave none. */
+static int lengthOf(JNIEnv *env, jarray source) {
+    return source == NULL ? 0 : (int) (*env)->GetArrayLength(env, source);
 }
 
 static int *copyInts(JNIEnv *env, jintArray source, int count) {
@@ -771,8 +777,96 @@ JNIEXPORT void JNICALL Java_i_oa(JNIEnv *env, jobject self, jobject toolkit) {
 /** How many corners a face has, and how many numbers each of them sits on its texture by. */
 enum { CORNERS = 3, UV = 2 };
 
-/** The one way of placing a texture that is worked out here: three of the model's own vertices. */
-enum { PLACED_BY_THREE_VERTICES = 0 };
+/** The ways of placing a texture that are worked out here. */
+enum { PLACED_BY_THREE_VERTICES = 0, PLACED_BY_NEAREST_AXIS = 2 };
+
+/**
+ * Where the corners of a face given the whole of its texture sit on it.
+ *
+ * A mesh that names no texture space at all reaches the far edge at a hundred and twenty seven,
+ * one short of the width of a texture. A face inside a mesh that does name spaces, but belongs to
+ * none of them, reaches a hundred and twenty eight. The two are not the same and both are kept.
+ */
+static const float WHOLE_TEXTURE[3][2] = {
+    { 0.0f, 128.0f },
+    { 128.0f, 128.0f },
+    { 0.0f, 0.0f }
+};
+
+/** What the face's own direction is weighed against when the nearest axis is chosen. */
+static const float AXIS_WHOLE = 64.0f;
+
+/** What a direction a space names is held out of, and what one step of its turn is worth. */
+static const float DIRECTION_WHOLE = 32767.0f;
+enum { TURN_STEP = 64 };
+
+/** What the numbers a space is shifted by are held out of. */
+static const float SHIFT_WHOLE = 256.0f;
+
+/** Where the middle of a texture falls, as a part of the whole of it. */
+static const float TEXTURE_MIDDLE = 0.5f;
+
+/**
+ * The turn a space's texture is laid down through, as nine floats.
+ *
+ * A space names a direction and a turn about it, and the two together say which way round the
+ * texture goes. The direction is held as whole numbers out of thirty two thousand seven hundred
+ * and sixty seven, and the turn is counted in the same sixteen thousand three hundred and eighty
+ * four steps of a circle as every other angle here.
+ *
+ * Each row is scaled by one of the three numbers the space carries, and a space of this way
+ * divides by them rather than multiplying, so a larger number lays the texture across the model
+ * more times rather than fewer.
+ */
+static void turnOfSpace(int directionAcross, int alongDirection, int directionAway, int turn,
+                        const float *scale, float *into) {
+    float cosine = (float) alongDirection / DIRECTION_WHOLE;
+    float sine = -sqrtf(1.0f - cosine * cosine);
+    float rest = 1.0f - cosine;
+
+    float reach = sqrtf((float) (directionAway * directionAway
+        + directionAcross * directionAcross));
+
+    /* A direction with no length at all leaves the turn about the first axis. */
+    float axisAcross = 1.0f;
+    float axisDown = 0.0f;
+    float acrossSquared = 1.0f;
+    float downSquared = 0.0f;
+    float bothAxes = 0.0f;
+    float acrossTurned = -0.0f;
+    float downTurned = -1.0f;
+
+    if (reach != 0.0f) {
+        axisAcross = (float) -directionAway / reach;
+        axisDown = (float) directionAcross / reach;
+        acrossSquared = axisAcross * axisAcross;
+        downSquared = axisDown * axisDown;
+        bothAxes = axisAcross * axisDown;
+        acrossTurned = -axisDown;
+        downTurned = -axisAcross;
+    }
+
+    float held[5];
+    held[0] = acrossSquared * rest + cosine;
+    held[1] = axisDown * sine;
+    held[2] = bothAxes * rest;
+    held[3] = downTurned * sine;
+    held[4] = downSquared * rest + cosine;
+
+    int angle = turn * TURN_STEP;
+    float turnCosine = cosineOf(angle);
+    float turnSine = sineOf(angle);
+
+    into[0] = (held[0] * turnCosine + held[2] * turnSine) * scale[0];
+    into[1] = (held[1] * turnCosine + held[3] * turnSine) * scale[0];
+    into[2] = (held[2] * turnCosine + held[4] * turnSine) * scale[0];
+    into[3] = acrossTurned * sine * scale[1];
+    into[4] = cosine * scale[1];
+    into[5] = axisAcross * sine * scale[1];
+    into[6] = (held[2] * turnCosine - held[0] * turnSine) * scale[2];
+    into[7] = (held[3] * turnCosine - held[1] * turnSine) * scale[2];
+    into[8] = (held[4] * turnCosine - held[2] * turnSine) * scale[2];
+}
 
 /** How many texels across a texture is, which is what a coordinate of one comes out as. */
 static const float TEXTURE_ACROSS = 128.0f;
@@ -814,14 +908,228 @@ static int spaceVertex(const Model *model, const short *named, int space) {
  * Each is found through the direction square to both the other edge and the face of them, which
  * is what leaves the two answers independent of one another.
  */
+/** Everything a space carries beyond the three numbers that name its direction. */
+typedef struct {
+    const int *scale[3];
+    const int *shift[3];
+    const signed char *turn;
+    const signed char *facing;
+
+    /** How many spaces carry these, which is not how many spaces the mesh has. */
+    int along;
+} SpaceNumbers;
+
+/** The middle of the box every face of a space stands in, which is what it is measured from. */
+typedef struct {
+    float middle[3];
+    int held;
+} SpaceBox;
+
+/**
+ * The box each space's faces stand in, so that a texture laid along an axis is measured from the
+ * middle of what wears it rather than from where the model happens to sit in the world.
+ */
+static void boxesOfSpaces(const Model *model, const signed char *faceSpace, int spaces,
+                          SpaceBox *boxes) {
+    const short *corners[CORNERS] = {model->faceA, model->faceB, model->faceC};
+    float least[64][3];
+    float most[64][3];
+
+    if (spaces > 64) {
+        spaces = 64;
+    }
+
+    for (int space = 0; space < spaces; space++) {
+        boxes[space].held = 0;
+        for (int axis = 0; axis < 3; axis++) {
+            least[space][axis] = 2.0e9f;
+            most[space][axis] = -2.0e9f;
+        }
+    }
+
+    for (int face = 0; face < model->faceCount; face++) {
+        int space = faceSpace[face];
+        if (space < 0 || space >= spaces) {
+            continue;
+        }
+
+        boxes[space].held = 1;
+        for (int corner = 0; corner < CORNERS; corner++) {
+            const float *at = model->vertices
+                + (size_t) corners[corner][face] * MODEL_VERTEX_STRIDE;
+
+            for (int axis = 0; axis < 3; axis++) {
+                if (least[space][axis] > at[axis]) {
+                    least[space][axis] = at[axis];
+                }
+                if (at[axis] > most[space][axis]) {
+                    most[space][axis] = at[axis];
+                }
+            }
+        }
+    }
+
+    for (int space = 0; space < spaces; space++) {
+        for (int axis = 0; axis < 3; axis++) {
+            boxes[space].middle[axis] = (least[space][axis] + most[space][axis]) * 0.5f;
+        }
+    }
+}
+
+/**
+ * Where a face's corners sit on a texture laid along whichever axis the face is most square to.
+ *
+ * The direction square to the face goes through the space's turn, and whichever of the three
+ * answers is largest names the axis. The face is then laid on its texture by the other two, which
+ * is what keeps a texture on a wall running up it and one on a floor running along it.
+ *
+ * Only the pairing this has a picture to be judged against is worked out. A face that names any
+ * other is left alone and keeps the whole texture, as a space of a way that is not written does.
+ */
+static void placeByNearestAxis(Model *model, int face, int space, const float *turn,
+                               const SpaceNumbers *numbers, const SpaceBox *box) {
+    const short *corners[CORNERS] = {model->faceA, model->faceB, model->faceC};
+    const float *first = model->vertices + (size_t) corners[0][face] * MODEL_VERTEX_STRIDE;
+
+    float edgeOne[3];
+    float edgeTwo[3];
+    for (int axis = 0; axis < 3; axis++) {
+        edgeOne[axis] = model->vertices[(size_t) corners[1][face] * MODEL_VERTEX_STRIDE + axis]
+            - first[axis];
+        edgeTwo[axis] = model->vertices[(size_t) corners[2][face] * MODEL_VERTEX_STRIDE + axis]
+            - first[axis];
+    }
+
+    float square[3];
+    cross(edgeOne, edgeTwo, square);
+
+    float facing[3];
+    float reach[3];
+
+    for (int row = 0; row < 3; row++) {
+        facing[row] = dot(turn + row * 3, square)
+            / (AXIS_WHOLE / (float) numbers->scale[row][space]);
+        reach[row] = fabsf(facing[row]);
+    }
+
+    /*
+     * The second axis is asked for first and the third next, and each has to beat both of the
+     * others outright. A face that leans the same way towards two of them is therefore laid on the
+     * first, whichever two they were.
+     */
+    int nearest = 0;
+    if (reach[1] > reach[0] && reach[1] > reach[2]) {
+        nearest = 1;
+    } else if (reach[2] > reach[0] && reach[2] > reach[1]) {
+        nearest = 2;
+    }
+
+    int backwards = facing[nearest] <= 0.0f;
+    int quarter = numbers->facing == NULL ? 0 : numbers->facing[space];
+
+    float shift[3];
+    for (int axis = 0; axis < 3; axis++) {
+        shift[axis] = (float) numbers->shift[axis][space] / SHIFT_WHOLE;
+    }
+
+    for (int corner = 0; corner < CORNERS; corner++) {
+        float stands[3];
+        for (int axis = 0; axis < 3; axis++) {
+            stands[axis] = model->vertices[(size_t) corners[corner][face] * MODEL_VERTEX_STRIDE
+                + axis] - box->middle[axis];
+        }
+
+        float along[3];
+        for (int row = 0; row < 3; row++) {
+            along[row] = dot(turn + row * 3, stands);
+        }
+
+        /*
+         * The two axes the face is not square to lay it on its texture, and which way round each
+         * of them runs is decided by the side of the third the face is on.
+         */
+        float across;
+        float down;
+
+        if (nearest == 0) {
+            across = backwards ? shift[2] - along[2] : along[2] + shift[2];
+            down = shift[1] - along[1];
+        } else if (nearest == 1) {
+            across = along[0] + shift[0];
+            down = backwards ? along[2] + shift[2] : shift[2] - along[2];
+        } else {
+            across = backwards ? along[0] + shift[0] : shift[0] - along[0];
+            down = shift[1] - along[1];
+        }
+
+        across += TEXTURE_MIDDLE;
+        down += TEXTURE_MIDDLE;
+
+        /* A space may ask for its texture to be given a quarter turn, or two, or three. */
+        float turnedAcross = across;
+        float turnedDown = down;
+
+        if (quarter == 1) {
+            turnedAcross = -down;
+            turnedDown = across;
+        } else if (quarter == 2) {
+            turnedAcross = -across;
+            turnedDown = -down;
+        } else if (quarter == 3) {
+            turnedAcross = down;
+            turnedDown = -across;
+        }
+
+        float *into = model->faceUV + ((size_t) face * CORNERS + corner) * UV;
+        into[0] = turnedAcross * TEXTURE_ACROSS;
+        into[1] = turnedDown * TEXTURE_ACROSS;
+    }
+}
+
 static void placeOnTexture(Model *model, const signed char *faceSpace, const signed char *wayOf,
                            int spaces, const short *originOf, const short *acrossOf,
-                           const short *downOf) {
+                           const short *downOf, const SpaceNumbers *numbers) {
     if (model->faceUV == NULL || model->vertices == NULL) {
         return;
     }
 
     const short *corners[CORNERS] = {model->faceA, model->faceB, model->faceC};
+
+    enum { SPACE_LIMIT = 64 };
+    if (spaces > SPACE_LIMIT) {
+        spaces = SPACE_LIMIT;
+    }
+
+    SpaceBox boxes[SPACE_LIMIT];
+    float turns[SPACE_LIMIT * 9];
+    boxesOfSpaces(model, faceSpace, spaces, boxes);
+
+    /*
+     * A face that belongs to no space, or to one placed a way that is not written, keeps the whole
+     * of its texture, which is what a mesh naming no space at all gets.
+     */
+    for (int face = 0; face < model->faceCount; face++) {
+        for (int corner = 0; corner < CORNERS; corner++) {
+            float *into = model->faceUV + ((size_t) face * CORNERS + corner) * UV;
+            into[0] = WHOLE_TEXTURE[corner][0];
+            into[1] = WHOLE_TEXTURE[corner][1];
+        }
+    }
+
+    for (int space = 0; space < spaces; space++) {
+        if (space >= numbers->along || wayOf == NULL || wayOf[space] == PLACED_BY_THREE_VERTICES) {
+            continue;
+        }
+
+        float scale[3];
+        for (int row = 0; row < 3; row++) {
+            int named = numbers->scale[row][space];
+            scale[row] = named == 0 ? 0.0f : AXIS_WHOLE / (float) named;
+        }
+
+        turnOfSpace(originOf[space], acrossOf[space], downOf[space],
+                    numbers->turn == NULL ? 0 : numbers->turn[space], scale, turns + space * 9);
+    }
 
     for (int face = 0; face < model->faceCount; face++) {
         int space = faceSpace[face];
@@ -830,10 +1138,19 @@ static void placeOnTexture(Model *model, const signed char *faceSpace, const sig
         }
 
         /*
-         * Only one of the several ways a texture may be placed is worked out here. A space that
+         * Only some of the several ways a texture may be placed are worked out here. A space that
          * asks for another of them is left alone, and its faces are given the whole texture.
          */
-        if (wayOf != NULL && wayOf[space] != PLACED_BY_THREE_VERTICES) {
+        int way = wayOf == NULL ? PLACED_BY_THREE_VERTICES : wayOf[space];
+
+        if (way == PLACED_BY_NEAREST_AXIS) {
+            if (boxes[space].held && space < numbers->along) {
+                placeByNearestAxis(model, face, space, turns + space * 9, numbers, &boxes[space]);
+            }
+            continue;
+        }
+
+        if (way != PLACED_BY_THREE_VERTICES) {
             continue;
         }
 
@@ -948,14 +1265,6 @@ JNIEXPORT void JNICALL Java_i_R(JNIEnv *env, jobject self, jobject toolkit, jobj
     (void) faceLabel;
     (void) globalPriority;
     (void) unknown;
-    (void) texSpaceScaleX;
-    (void) texSpaceScaleY;
-    (void) texSpaceScaleZ;
-    (void) texRotation;
-    (void) texDirection;
-    (void) texOffsetX;
-    (void) texOffsetY;
-    (void) texOffsetZ;
     (void) billboards;
 
     Model *model = calloc(1, sizeof(Model));
@@ -996,8 +1305,44 @@ JNIEXPORT void JNICALL Java_i_R(JNIEnv *env, jobject self, jobject toolkit, jobj
         short *downOf = copyShorts(env, texSpaceDefC, texSpaceCount);
         signed char *wayOf = (signed char *) copyBytes(env, texMappingType, texSpaceCount);
 
-        placeOnTexture(model, faceSpace, wayOf, texSpaceCount, originOf, acrossOf, downOf);
+        /*
+         * A space placed by three vertices carries none of these, and a mesh only holds as many of
+         * them as the spaces that do. Each is therefore taken at the length it arrived with, and
+         * how many there are decides how many spaces may be placed along an axis.
+         */
+        int along = lengthOf(env, texSpaceScaleX);
+        int *scaleAcross = copyInts(env, texSpaceScaleX, along);
+        int *scaleDown = copyInts(env, texSpaceScaleY, along);
+        int *scaleAway = copyInts(env, texSpaceScaleZ, along);
+        int *shiftAcross = copyInts(env, texOffsetX, along);
+        int *shiftDown = copyInts(env, texOffsetY, along);
+        int *shiftAway = copyInts(env, texOffsetZ, along);
 
+        SpaceNumbers numbers;
+        numbers.scale[0] = scaleAcross;
+        numbers.scale[1] = scaleDown;
+        numbers.scale[2] = scaleAway;
+        numbers.shift[0] = shiftAcross;
+        numbers.shift[1] = shiftDown;
+        numbers.shift[2] = shiftAway;
+        numbers.turn = (signed char *) copyBytes(env, texRotation, along);
+        numbers.facing = (signed char *) copyBytes(env, texDirection, along);
+        numbers.along = along;
+
+        if (scaleAcross != NULL && scaleDown != NULL && scaleAway != NULL && shiftAcross != NULL
+            && shiftDown != NULL && shiftAway != NULL) {
+            placeOnTexture(model, faceSpace, wayOf, texSpaceCount, originOf, acrossOf, downOf,
+                           &numbers);
+        }
+
+        free(scaleAcross);
+        free(scaleDown);
+        free(scaleAway);
+        free(shiftAcross);
+        free(shiftDown);
+        free(shiftAway);
+        free((void *) numbers.turn);
+        free((void *) numbers.facing);
         free(wayOf);
         free(originOf);
         free(acrossOf);
