@@ -89,7 +89,13 @@ public final class HandGround {
     }
 
     /** A colour packed the way the client packs one: hue, then saturation, then lightness. */
+    private static final int FORCED_COLOUR = number("SW3D_GROUND_COLOUR", -1);
+
     private static int hslOf(int x, int z, int face) {
+        if (FORCED_COLOUR >= 0) {
+            return FORCED_COLOUR;
+        }
+
         var hue = (x * 5 + z * 3) & 0x3F;
         var saturation = (x + face) % 8;
         var lightness = 40 + ((z * 7 + face * 20) % 80);
