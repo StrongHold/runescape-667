@@ -1,7 +1,10 @@
 import com.jagex.graphics.Model;
+import com.jagex.graphics.PickingCylinder;
 import com.jagex.graphics.Toolkit;
 import rs2.client.loading.library.LibraryManager;
 
+import java.awt.Canvas;
+import java.awt.Frame;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -57,7 +60,20 @@ public final class ModelProbe {
             Watchdog.arm("The model probe", 120);
             LibraryManager.putLibrary(new File(args[0]), "sw3d");
 
-            var toolkit = oa.create(null, new StubTextureSource(), Scene.WIDTH, Scene.HEIGHT);
+            /*
+             * A canvas, because the cylinder a model may be clicked on is only worked out on the
+             * way to drawing it and the toolkit stops before that when it has nowhere to draw.
+             */
+            var canvas = new Canvas();
+            canvas.setSize(Scene.WIDTH, Scene.HEIGHT);
+
+            var window = new Frame("model probe");
+            window.add(canvas);
+            window.pack();
+            window.setVisible(true);
+            Thread.sleep(1000);
+
+            var toolkit = oa.create(canvas, new StubTextureSource(), Scene.WIDTH, Scene.HEIGHT);
             toolkit.xa(1.0F);
             toolkit.ZA(0xFFFFFF, 0.5F, 0.5F, 20.0F, -50.0F, 30.0F);
             toolkit.method7938(toolkit.createHeap(POOL_SIZE));
@@ -80,6 +96,7 @@ public final class ModelProbe {
             copies(toolkit, lines);
             picks(toolkit, lines);
             pieces(toolkit, lines);
+            cylinders(toolkit, lines);
             animations(toolkit, lines);
             lights(toolkit, lines);
 
@@ -307,6 +324,34 @@ public final class ModelProbe {
     private static i joined(Toolkit toolkit) throws Exception {
         return (i) toolkit.createModel(
             CacheMesh.twoUntexturedJoined(MODEL_FACES), FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
+    }
+
+    /**
+     * The cylinder the client tests the mouse against before it asks the model itself.
+     *
+     * A model with no cylinder is unclickable however well it answers being picked, so this is
+     * asked at several distances including two that put an end of the model behind the eye,
+     * where the cylinder is pulled along to the near plane rather than dropped, and one that puts
+     * the whole of it behind, where nothing is written at all.
+     */
+    private static void cylinders(Toolkit toolkit, List<String> lines) throws Exception {
+        int[] depths = {DEPTH, 200, 60, 0, -100, -DEPTH};
+
+        var model = build(toolkit);
+        var matrix = toolkit.createMatrix();
+
+        for (var depth : depths) {
+            var cylinder = new PickingCylinder();
+
+            matrix.makeRotationZ(0);
+            matrix.translate(0, 0, depth);
+            model.render(matrix, cylinder, 1);
+
+            lines.add("cylinder " + depth + " " + cylinder.aBoolean352
+                + " " + cylinder.anInt4504 + " " + cylinder.anInt4505
+                + " " + cylinder.anInt4501 + " " + cylinder.anInt4503
+                + " " + cylinder.anInt4502);
+        }
     }
 
     /**

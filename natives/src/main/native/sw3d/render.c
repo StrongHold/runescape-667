@@ -360,6 +360,12 @@ static void fillTriangle(Corner a, Corner b, Corner c) {
 
 enum { ROWS = 4 };
 
+/**
+ * How many numbers the client reads back about where a model may be clicked: two points and a
+ * radius, and a sixth saying whether the rest were written.
+ */
+enum { CYLINDER_PARTS = 6 };
+
 typedef struct {
     float row[ROWS][ROWS];
 } Transform;
@@ -423,9 +429,109 @@ static float signedAs(float value, float before) {
 }
 
 /**
+ * Puts a point through the sixteen floats of a matrix, leaving all four places as they came out.
+ */
+static void throughRows(const float *rows, float x, float y, float z, float *into) {
+    for (int lane = 0; lane < ROWS; lane++) {
+        into[lane] = x * rows[lane] + y * rows[ROWS + lane] + z * rows[2 * ROWS + lane]
+            + rows[3 * ROWS + lane];
+    }
+}
+
+/**
+ * The upright cylinder a model fits inside, as the client sees it.
+ *
+ * This is what makes a thing in the world clickable. The client tests the mouse against the
+ * cylinder first and only asks the model itself when the cylinder says yes, so a cylinder that
+ * is never worked out leaves everything in the world unclickable however well the model answers.
+ *
+ * It is two points and a radius: the middle of the model at its lowest and at its highest, each
+ * put through the camera and divided by how far away it ended up, and how far the radius reaches
+ * across the screen beside whichever of the two is nearer. An end behind the near plane is pulled
+ * along the line to the plane rather than dropped, and a model with both ends behind it is left
+ * alone, which is how the client is told it cannot be clicked.
+ *
+ * The last of the six the client reads is what says an answer was written at all.
+ */
+static void pickingCylinder(void *model, const float *seen, int zoom, jint *into) {
+    const Projection *view = projection();
+
+    int bounds[6];
+    modelBounds(model, bounds);
+
+    float middle[2] = {
+        (float) ((bounds[0] + bounds[1]) >> 1),
+        (float) ((bounds[4] + bounds[5]) >> 1)
+    };
+    float radius = (float) modelRadius(model);
+
+    float low[ROWS];
+    float high[ROWS];
+    throughRows(seen, middle[0], (float) bounds[2], middle[1], low);
+    throughRows(seen, middle[0], (float) bounds[3], middle[1], high);
+
+    float near = view->near;
+    float bottomAcross = 0.0f;
+    float bottomDown = 0.0f;
+    float topAcross = 0.0f;
+    float topDown = 0.0f;
+    int bottomBehind = 1;
+
+    if (low[2] >= near) {
+        float away = zoom < 0 ? low[2] : (float) zoom;
+        bottomAcross = view->scaleX * low[0] / away + view->centreX;
+        bottomDown = view->scaleY * low[1] / away + view->centreY;
+        bottomBehind = 0;
+    }
+
+    int settled = 0;
+
+    if (high[2] >= near) {
+        float away = zoom < 0 ? high[2] : (float) zoom;
+        topAcross = view->scaleX * high[0] / away + view->centreX;
+        topDown = view->scaleY * high[1] / away + view->centreY;
+        settled = !bottomBehind;
+    }
+
+    if (!settled && near > low[2]) {
+        if (near > high[2]) {
+            return;
+        }
+
+        float along = (high[2] - near) / (high[2] - low[2]);
+        float away = zoom < 0 ? near : (float) zoom;
+        bottomAcross = ((high[0] - low[0]) * along + high[0]) * view->scaleX / away
+            + view->centreX;
+        bottomDown = ((high[1] - low[1]) * along + high[1]) * view->scaleY / away
+            + view->centreY;
+    } else if (!settled && near > high[2]) {
+        float along = (low[2] - near) / (low[2] - high[2]);
+        float away = zoom < 0 ? near : (float) zoom;
+        topAcross = ((low[0] - high[0]) * along + low[0]) * view->scaleX / away + view->centreX;
+        topDown = ((low[1] - high[1]) * along + low[1]) * view->scaleY / away + view->centreY;
+    }
+
+    float across;
+    if (low[2] > high[2]) {
+        float away = zoom < 0 ? low[2] : (float) zoom;
+        across = (radius + low[0]) * view->scaleX / away + view->centreX - bottomAcross;
+    } else {
+        float away = zoom < 0 ? high[2] : (float) zoom;
+        across = (radius + high[0]) * view->scaleX / away + view->centreX - topAcross;
+    }
+
+    into[0] = (jint) bottomAcross;
+    into[1] = (jint) bottomDown;
+    into[2] = (jint) topAcross;
+    into[3] = (jint) topDown;
+    into[4] = (jint) across;
+    into[5] = 1;
+}
+
+/**
  * Draws one model through one matrix.
  */
-static void renderModel(void *model, const void *matrix) {
+static void renderModel(void *model, const void *matrix, jint *cylinder) {
     if (model == NULL || matrix == NULL || raster.pixels == NULL || raster.depths == NULL) {
         return;
     }
@@ -433,10 +539,6 @@ static void renderModel(void *model, const void *matrix) {
     int vertices = modelVertexCount(model);
     int faces = modelFaceCount(model);
     if (vertices <= 0 || faces <= 0) {
-        return;
-    }
-
-    if (!room((void **) &projected, &projectedRoom, vertices, sizeof(Projected))) {
         return;
     }
 
@@ -456,7 +558,20 @@ static void renderModel(void *model, const void *matrix) {
 
     Transform projector = projectionMatrix();
     Transform onto = after(matrixRows(combined), &projector);
+
+    if (cylinder != NULL) {
+        pickingCylinder(model, matrixRows(combined), -1, cylinder);
+    }
+
     free(combined);
+
+    if (raster.pixels == NULL || raster.depths == NULL) {
+        return;
+    }
+
+    if (!room((void **) &projected, &projectedRoom, vertices, sizeof(Projected))) {
+        return;
+    }
 
     /* Where the middle of the picture sits, counted from the corner that may be drawn on. */
     float acrossFromClip = view->centreX - (float) raster.clipLeft;
@@ -604,15 +719,31 @@ void renderGroundTile(const void *ground, int x, int z) {
     free(shade);
 }
 
+/**
+ * Draws one model, and answers where the client may click on it.
+ *
+ * The six numbers the client reads back are only written when the model has somewhere on the
+ * screen to be clicked. The client clears the last of them before asking, so leaving them alone
+ * is how it is told the model cannot be clicked at all.
+ */
 JNIEXPORT void JNICALL Java_a_UA(JNIEnv *env, jobject self, jlong worker, jlong model,
                                   jlong matrix, jintArray cylinder, jint flags) {
-    (void) env;
     (void) self;
     (void) worker;
-    (void) cylinder;
     (void) flags;
 
-    renderModel((void *) (intptr_t) model, (const void *) (intptr_t) matrix);
+    jint answer[CYLINDER_PARTS];
+    int wanted = cylinder != NULL && (*env)->GetArrayLength(env, cylinder) >= CYLINDER_PARTS;
+    if (wanted) {
+        (*env)->GetIntArrayRegion(env, cylinder, 0, CYLINDER_PARTS, answer);
+    }
+
+    renderModel((void *) (intptr_t) model, (const void *) (intptr_t) matrix,
+        wanted ? answer : NULL);
+
+    if (wanted) {
+        (*env)->SetIntArrayRegion(env, cylinder, 0, CYLINDER_PARTS, answer);
+    }
 }
 
 /**

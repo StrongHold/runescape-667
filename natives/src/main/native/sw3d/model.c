@@ -1770,6 +1770,14 @@ void modelBounds(void *handle, int *into) {
     into[5] = model->maxZ;
 }
 
+/** How wide the model is about its upright axis, measuring it again first if anything has moved. */
+int modelRadius(void *handle) {
+    Model *model = handle;
+
+    measureIfNeeded(model);
+    return model->radiusCylinder;
+}
+
 int modelVertexCount(const void *handle) {
     const Model *model = handle;
     return model == NULL ? 0 : model->vertexCount;
