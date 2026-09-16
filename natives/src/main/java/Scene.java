@@ -71,6 +71,7 @@ public sealed interface Scene {
         new Plan(),
         new OverTheGround(),
         new UnderTheGround(),
+        new Underwater(),
         new Textured()
     );
 
@@ -768,6 +769,56 @@ public sealed interface Scene {
 
             props.ground().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
                 HandGround.TILES, visible, false, 0);
+        }
+    }
+
+    /**
+     * Everything seen from under water.
+     *
+     * The client tells the toolkit where the surface of the water is and how deep it goes, and
+     * everything below the surface fades towards one colour the further down it sits. Past the
+     * depth given nothing shows at all.
+     *
+     * Two models stand at the same place, one drawn while the water is on and one after it is
+     * turned off again, so the scene shows both what the water does and that turning it off puts
+     * everything back.
+     */
+    record Underwater() implements Scene {
+
+        /**
+         * Two hundred and seventy of the scene's pixels are still a shade out, each by one part
+         * of one channel. How far a corner has faded and which faces are dropped are both right;
+         * what is not yet known is how the toolkit this replaces carries the fade across a face.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        /** Where the surface sits, and how far below it the last of the light reaches. */
+        private static final int SURFACE = 40;
+        private static final int REACH = 260;
+
+        /** What the water fades everything towards, and a number the toolkit has never read. */
+        private static final int WATER = 0x20507A;
+        private static final int BIAS = 0;
+
+        private static final int ASIDE = 130;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            toolkit.ra(SURFACE, WATER, REACH, BIAS);
+            props.matrix().makeRotationZ(0);
+            props.matrix().applyTranslation(-ASIDE, 0, DEPTH);
+            props.model().render(props.matrix(), null, 1);
+
+            toolkit.pa();
+            props.matrix().makeRotationZ(0);
+            props.matrix().applyTranslation(ASIDE, 0, DEPTH);
+            props.model().render(props.matrix(), null, 1);
         }
     }
 

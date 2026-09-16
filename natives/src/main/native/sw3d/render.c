@@ -94,7 +94,33 @@ typedef struct {
     /** How far from the eye the point ended up, which a texture is read back through. */
     float away;
     int visible;
+
+    /** How far this point has faded towards the water, where one is wholly water. */
+    float fade;
 } Projected;
+
+/**
+ * How far a point has faded towards the water, from where it stands in the world.
+ *
+ * The client counts height downwards, so the height of a thing is the other way round from the
+ * place it stands at. A point at the surface has none of the water in it and one as deep as the
+ * water reaches has nothing else, and everything between is a straight run from one to the other.
+ */
+static float fadeAt(const float *place, float x, float y, float z) {
+    const Underwater *water = underwater();
+    if (!water->under) {
+        return 0.0f;
+    }
+
+    float height = -(x * place[1] + y * place[5] + z * place[9] + place[13]);
+    float fade = (height - water->surface) * water->perDepth;
+
+    if (fade < 0.0f) {
+        return 0.0f;
+    }
+
+    return fade > 1.0f ? 1.0f : fade;
+}
 
 static Projected *projected;
 static int projectedRoom;
@@ -151,6 +177,8 @@ typedef struct {
     float w;
 } Side;
 
+static uint16_t fadedPart(uint16_t held, float fade, int part);
+
 static Corner cornerAt(const Projected *point, uint32_t colour) {
     Corner corner;
     corner.x = point->x;
@@ -167,6 +195,15 @@ static Corner cornerAt(const Projected *point, uint32_t colour) {
      * as a sprite does, so what is written there has to say solid rather than say nothing.
      */
     corner.colour[3] = 0xFF00;
+
+    /*
+     * The water is put on here rather than at every pixel. A corner is faded and the fade is then
+     * carried across the face the same way the light is, which is what the toolkit this replaces
+     * comes to, and it costs one pass over three corners instead of one over every pixel.
+     */
+    for (int part = 0; part < CHANNELS - 1; part++) {
+        corner.colour[part] = fadedPart(corner.colour[part], point->fade, part);
+    }
 
     corner.u = 0.0f;
     corner.v = 0.0f;
@@ -321,6 +358,22 @@ static uint32_t texelAt(float u, float v, float w) {
     }
 
     return texels[(down << 8) | across];
+}
+
+/**
+ * Fades one part of a pixel towards the water it is seen through.
+ *
+ * The fade is worked out before the part is cut back down to a byte, in the same eight places
+ * after the point the light is carried in, because cutting first and fading afterwards loses the
+ * places that decide which way the answer rounds.
+ */
+static uint16_t fadedPart(uint16_t held, float fade, int part) {
+    if (fade <= 0.0f) {
+        return held;
+    }
+
+    const Underwater *water = underwater();
+    return (uint16_t) ((float) held + (water->towards[part] - (float) held) * fade);
 }
 
 static void fillSpan(int y, const Side *left, const Side *right) {
@@ -869,6 +922,13 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
 
     free(combined);
 
+    /*
+     * How far below the surface of the water every vertex sits, worked out from where the model
+     * stands in the world rather than from where it landed on the picture. Nothing is worked out
+     * at all while the eye is above water, which is almost always.
+     */
+    const float *place = matrixRows(matrix);
+
     float nearby[POINT_LIGHTS][4];
     int lights = modelNeedsNormals(model) ? pointLightCount() : 0;
     bringLightsIn(matrixRows(matrix), lights, nearby);
@@ -904,6 +964,7 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
         Projected *landed = &projected[vertex];
         landed->away = away;
         landed->depth = signedAs(point[2] / away, point[2]);
+        landed->fade = fadeAt(place, x, y, z);
 
         /* A picture taken from no particular place has nothing behind it and nothing beyond. */
         landed->visible = smaller >= 0 || (away >= view->near && away <= view->far);
@@ -935,6 +996,15 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
         const Projected *c = &projected[faceC[face]];
 
         if (!a->visible || !b->visible || !c->visible) {
+            continue;
+        }
+
+        /*
+         * A face with any corner as deep as the water reaches is dropped rather than drawn in the
+         * water's own colour. One corner is enough: the face is on its way out of sight and the
+         * toolkit this replaces gives up on the whole of it.
+         */
+        if (a->fade >= 1.0f || b->fade >= 1.0f || c->fade >= 1.0f) {
             continue;
         }
 
