@@ -67,8 +67,8 @@ public sealed interface Scene {
         new SharedLight(),
         new DepthShifted(),
         new Particles(),
-        new Textured(),
-        new Terrain()
+        new Terrain(),
+        new Textured()
     );
 
     /**

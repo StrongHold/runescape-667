@@ -107,7 +107,7 @@ public final class FrameCapture {
 
         for (var scene : Scene.ALL) {
             for (var repeat = 0; repeat < REPEATS; repeat++) {
-                drawOnce(toolkit, scene, props);
+                drawOnce(toolkit, scene, props, camera);
                 manifest.add(scene.written() ? scene.title() : scene.title() + " (outstanding)");
             }
         }
@@ -117,9 +117,16 @@ public final class FrameCapture {
         window.dispose();
     }
 
-    private static void drawOnce(Toolkit toolkit, Scene scene, Scene.Props props) throws Exception {
+    private static void drawOnce(Toolkit toolkit, Scene scene, Scene.Props props,
+                                 com.jagex.graphics.Matrix camera) throws Exception {
         toolkit.GA(Scene.CLEAR_COLOUR);
         toolkit.ya();
+
+        /*
+         * A scene that wants its own camera puts one in, and this puts the plain one back
+         * afterwards, so that a scene is drawn the same whatever was drawn before it.
+         */
+        toolkit.setCamera(camera);
         scene.draw(toolkit, props);
         toolkit.flip(0, 0);
         Thread.sleep(60);
