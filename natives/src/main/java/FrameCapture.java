@@ -174,6 +174,12 @@ public final class FrameCapture {
      */
     private static final short FORCED_TEXTURE = 6;
 
+    /**
+     * The texture space every face is put in. The model carries two and they are placed different
+     * ways, so naming one keeps the scene to the way that is written.
+     */
+    private static final byte FORCED_SPACE = 1;
+
     private static com.jagex.graphics.Model texturedModel(Toolkit toolkit) throws Exception {
         var mesh = CacheMesh.anyTextured(MODEL_FACES);
         if (mesh.isEmpty()) {
@@ -189,14 +195,8 @@ public final class FrameCapture {
          */
         for (var face = 0; face < held.faceCount; face++) {
             held.faceTexture[face] = FORCED_TEXTURE;
-            held.faceTexSpace[face] = 0;
+            held.faceTexSpace[face] = FORCED_SPACE;
         }
-
-        held.texSpaceCount = 0;
-        held.texSpaceDefA = null;
-        held.texSpaceDefB = null;
-        held.texSpaceDefC = null;
-        held.faceTexSpace = null;
 
         return toolkit.createModel(held, FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
     }

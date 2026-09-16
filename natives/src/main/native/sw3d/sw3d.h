@@ -383,6 +383,11 @@ const short *modelFaceColour(const void *handle);
 /** The texture each face wears, or null when no face wears one. */
 const short *modelFaceTexture(const void *handle);
 /**
+ * Where each corner of each face sits on the texture it wears, six floats to a face, or null when
+ * the mesh named no texture space and every face is given the whole of its texture instead.
+ */
+const float *modelFaceUV(const void *handle);
+/**
  * Whether the client built this model to be drawn with the directions its vertices face.
  *
  * A model built without that is never reached by a light with a place, however many places the

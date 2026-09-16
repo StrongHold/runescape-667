@@ -148,6 +148,12 @@ typedef struct {
     short *faceTexture;
 
     /**
+     * Where each corner of each face sits on the texture it wears, six floats to a face, worked
+     * out once when the model is built and never again.
+     */
+    float *faceUV;
+
+    /**
      * Which of the pieces the client built the model from each vertex came from, one bit per
      * piece. A player is one model built from a head, a torso and so on, and each piece is moved
      * into place on its own.
@@ -762,6 +768,120 @@ JNIEXPORT void JNICALL Java_i_oa(JNIEnv *env, jobject self, jobject toolkit) {
  * The client is free to reuse every array it hands over the moment this returns, and it does, so
  * nothing here may be a view onto one of them.
  */
+/** How many corners a face has, and how many numbers each of them sits on its texture by. */
+enum { CORNERS = 3, UV = 2 };
+
+/** The one way of placing a texture that is worked out here: three of the model's own vertices. */
+enum { PLACED_BY_THREE_VERTICES = 0 };
+
+/** How many texels across a texture is, which is what a coordinate of one comes out as. */
+static const float TEXTURE_ACROSS = 128.0f;
+
+static void cross(const float *first, const float *second, float *into) {
+    into[0] = first[1] * second[2] - first[2] * second[1];
+    into[1] = first[2] * second[0] - first[0] * second[2];
+    into[2] = first[0] * second[1] - first[1] * second[0];
+}
+
+static float dot(const float *first, const float *second) {
+    return first[0] * second[0] + first[1] * second[1] + first[2] * second[2];
+}
+
+/**
+ * One of the three vertices a texture space is built from, or none.
+ *
+ * A space that places its texture some other way leaves numbers here that are not vertices at all,
+ * so what comes back is checked against the model rather than trusted.
+ */
+static int spaceVertex(const Model *model, const short *named, int space) {
+    if (named == NULL) {
+        return -1;
+    }
+
+    int vertex = named[space];
+    return vertex >= 0 && vertex < model->vertexCount ? vertex : -1;
+}
+
+/**
+ * Where a face's corners sit on the texture it wears.
+ *
+ * A texture space is three of the model's own vertices. The first is an origin and the other two
+ * are the edges away from it, so a corner is placed by writing where it stands, relative to that
+ * origin, in terms of those two edges. The two numbers that come out run from nothing at the
+ * origin to one at the far end of an edge, and a texture is a hundred and twenty eight across.
+ *
+ * Neither edge need be square to the other, so neither is found by projecting straight onto it.
+ * Each is found through the direction square to both the other edge and the face of them, which
+ * is what leaves the two answers independent of one another.
+ */
+static void placeOnTexture(Model *model, const signed char *faceSpace, const signed char *wayOf,
+                           int spaces, const short *originOf, const short *acrossOf,
+                           const short *downOf) {
+    if (model->faceUV == NULL || model->vertices == NULL) {
+        return;
+    }
+
+    const short *corners[CORNERS] = {model->faceA, model->faceB, model->faceC};
+
+    for (int face = 0; face < model->faceCount; face++) {
+        int space = faceSpace[face];
+        if (space < 0 || space >= spaces) {
+            continue;
+        }
+
+        /*
+         * Only one of the several ways a texture may be placed is worked out here. A space that
+         * asks for another of them is left alone, and its faces are given the whole texture.
+         */
+        if (wayOf != NULL && wayOf[space] != PLACED_BY_THREE_VERTICES) {
+            continue;
+        }
+
+        int origin = spaceVertex(model, originOf, space);
+        int across = spaceVertex(model, acrossOf, space);
+        int down = spaceVertex(model, downOf, space);
+
+        if (origin == -1 || across == -1 || down == -1) {
+            continue;
+        }
+
+        const float *at = model->vertices + (size_t) origin * MODEL_VERTEX_STRIDE;
+        float edgeAcross[3];
+        float edgeDown[3];
+
+        for (int axis = 0; axis < 3; axis++) {
+            edgeAcross[axis] =
+                model->vertices[(size_t) across * MODEL_VERTEX_STRIDE + axis] - at[axis];
+            edgeDown[axis] =
+                model->vertices[(size_t) down * MODEL_VERTEX_STRIDE + axis] - at[axis];
+        }
+
+        float square[3];
+        cross(edgeAcross, edgeDown, square);
+
+        float alongAcross[3];
+        float alongDown[3];
+        cross(edgeDown, square, alongAcross);
+        cross(edgeAcross, square, alongDown);
+
+        float overAcross = 1.0f / dot(alongAcross, edgeAcross);
+        float overDown = 1.0f / dot(alongDown, edgeDown);
+
+        for (int corner = 0; corner < CORNERS; corner++) {
+            float stands[3];
+            for (int axis = 0; axis < 3; axis++) {
+                stands[axis] =
+                    model->vertices[(size_t) corners[corner][face] * MODEL_VERTEX_STRIDE + axis]
+                    - at[axis];
+            }
+
+            float *into = model->faceUV + ((size_t) face * CORNERS + corner) * UV;
+            into[0] = dot(alongAcross, stands) * overAcross * TEXTURE_ACROSS;
+            into[1] = dot(alongDown, stands) * overDown * TEXTURE_ACROSS;
+        }
+    }
+}
+
 /**
  * Asks for every texture the model wears while it is being built, and keeps what the answers say
  * about the model as a whole.
@@ -825,15 +945,9 @@ JNIEXPORT void JNICALL Java_i_R(JNIEnv *env, jobject self, jobject toolkit, jobj
     (void) pool;
 
     (void) facePriority;
-    (void) faceTexSpace;
     (void) faceLabel;
     (void) globalPriority;
     (void) unknown;
-    (void) texSpaceCount;
-    (void) texMappingType;
-    (void) texSpaceDefA;
-    (void) texSpaceDefB;
-    (void) texSpaceDefC;
     (void) texSpaceScaleX;
     (void) texSpaceScaleY;
     (void) texSpaceScaleZ;
@@ -872,6 +986,25 @@ JNIEXPORT void JNICALL Java_i_R(JNIEnv *env, jobject self, jobject toolkit, jobj
     model->shadingType = copyBytes(env, shadingType, faceCount);
     gatherLabels(env, model, vertexLabel);
 
+    signed char *faceSpace = (signed char *) copyBytes(env, faceTexSpace, faceCount);
+    if (faceSpace != NULL && model->faceA != NULL && model->faceB != NULL
+        && model->faceC != NULL) {
+        model->faceUV = calloc((size_t) faceCount * CORNERS * UV, sizeof(float));
+
+        short *originOf = copyShorts(env, texSpaceDefA, texSpaceCount);
+        short *acrossOf = copyShorts(env, texSpaceDefB, texSpaceCount);
+        short *downOf = copyShorts(env, texSpaceDefC, texSpaceCount);
+        signed char *wayOf = (signed char *) copyBytes(env, texMappingType, texSpaceCount);
+
+        placeOnTexture(model, faceSpace, wayOf, texSpaceCount, originOf, acrossOf, downOf);
+
+        free(wayOf);
+        free(originOf);
+        free(acrossOf);
+        free(downOf);
+    }
+    free(faceSpace);
+
     takeTextures(model);
 
     if (model->vertices != NULL) {
@@ -895,6 +1028,7 @@ static void emptyModel(Model *model) {
     free(model->faceC);
     free(model->faceColour);
     free(model->faceTexture);
+    free(model->faceUV);
     free(model->vertexPiece);
     free(model->particleVertices);
     free(model->faceAlpha);
@@ -1762,6 +1896,7 @@ JNIEXPORT void JNICALL Java_i_ZA(JNIEnv *env, jobject self, jobject into, jobjec
     copy->faceC = duplicate(source->faceC, faces * sizeof(short));
     copy->faceColour = duplicate(source->faceColour, faces * sizeof(short));
     copy->faceTexture = duplicate(source->faceTexture, faces * sizeof(short));
+    copy->faceUV = duplicate(source->faceUV, faces * CORNERS * 2 * sizeof(float));
     copy->faceAlpha = duplicate(source->faceAlpha, faces * sizeof(signed char));
     copy->shadingType = duplicate(source->shadingType, faces * sizeof(signed char));
     copy->vertexPiece = duplicate(source->vertexPiece, vertices * sizeof(short));
@@ -2056,6 +2191,11 @@ const short *modelFaceB(const void *handle) {
 
 const short *modelFaceC(const void *handle) {
     return ((const Model *) handle)->faceC;
+}
+
+const float *modelFaceUV(const void *handle) {
+    const Model *model = handle;
+    return model->faceUV;
 }
 
 const short *modelFaceTexture(const void *handle) {

@@ -997,10 +997,18 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
             texels = texturePixels(texture);
             texelsRepeat = metrics->repeatsU || metrics->repeatsV;
 
+            const float *placed = modelFaceUV(model);
+
             for (int corner = 0; corner < 3; corner++) {
+                float acrossTexture = placed == NULL
+                    ? FACE_CORNERS[corner][0]
+                    : placed[(face * 3 + corner) * 2];
+                float downTexture = placed == NULL
+                    ? FACE_CORNERS[corner][1]
+                    : placed[(face * 3 + corner) * 2 + 1];
+
                 walked[corner] = onTexture(walked[corner],
-                    FACE_CORNERS[corner][0] + slidU,
-                    FACE_CORNERS[corner][1] + slidV);
+                    acrossTexture + slidU, downTexture + slidV);
             }
         }
 
