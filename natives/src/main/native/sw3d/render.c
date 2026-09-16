@@ -193,6 +193,9 @@ static Corner onTexture(Corner corner, float u, float v) {
     return corner;
 }
 
+/** The last texel of a texture each way, and the mask that wraps a coordinate back onto it. */
+enum { TEXTURE_EDGE = 127 };
+
 /**
  * Where the three corners of a face sit on the texture it wears.
  *
@@ -200,9 +203,6 @@ static Corner onTexture(Corner corner, float u, float v) {
  * mesh carries texture spaces places its textures by those instead, and nothing here reads one
  * yet, so such a model is textured as though it carried none.
  */
-/** The last texel of a texture each way, and the mask that wraps a coordinate back onto it. */
-enum { TEXTURE_EDGE = 127 };
-
 static const float FACE_CORNERS[3][2] = {
     { 0.0f, (float) TEXTURE_EDGE },
     { (float) TEXTURE_EDGE, (float) TEXTURE_EDGE },

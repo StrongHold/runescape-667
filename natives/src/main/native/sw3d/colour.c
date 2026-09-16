@@ -24,8 +24,9 @@ enum {
     LIGHTNESSES = 128
 };
 
+/** How many colours the client can pack, which is every hue against every other part. */
 enum {
-    COLOURS = 65536
+    COLOURS = HUES * SATURATIONS * LIGHTNESSES
 };
 
 static const float GAMMA = 0.7f;

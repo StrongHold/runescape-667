@@ -205,9 +205,8 @@ static int shiftOf(int size) {
 enum { TAKES_SHADOWS = 0x10, TAKES_NO_SHADOWS = 0x20 };
 
 /**
- * How far apart two places of the shadow map sit, which is the tile size brought down to the
- * detail a shadow is drawn at. The map reaches a place beyond the ground each way, so that a
- * shadow that hangs over the edge still has somewhere to land.
+ * How many places wider than the ground the shadow map is: one spare at each end, so that a
+ * shadow thrown by a model at the edge of the world still has somewhere to land.
  */
 enum { SHADE_MARGIN = 2 };
 
@@ -536,8 +535,14 @@ static void reshadeTiles(Ground *ground, int left, int top, int right, int botto
 }
 
 /**
- * How many places of the shadow map fall on one tile, which turns the places a shadow moved over
- * back into the tiles whose picture has to be worked out again.
+ * How many places of the shadow map fall on one tile, which turns the run of places a shadow
+ * moved over back into the tiles whose picture has to be worked out again.
+ *
+ * Sixteen is not worked out from the tile size and the detail shadows are drawn at, though it is
+ * what those two come to here: a tile is five hundred and twelve across and shadows are asked
+ * for at thirty two, which is five shifts, and five hundred and twelve shifted down five times
+ * is sixteen. The toolkit this stands in for holds the sixteen rather than the sum, so a tile of
+ * another size or a shadow asked for at another detail would not change it. Kept as it is.
  */
 enum { PLACES_PER_TILE_SHIFT = 4 };
 
