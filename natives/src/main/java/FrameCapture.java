@@ -111,9 +111,9 @@ public final class FrameCapture {
             toolkit.createFont(HandFont.metrics(), HandFont.letters(), false),
             HandGround.build(toolkit),
             CacheMesh.anyUntextured(MODEL_FACES),
-            texturedModel(toolkit, textured, FEATURES),
+            texturedModel(toolkit, textured, FEATURES, FORCED_TEXTURE),
             toolkit.createModel(fadedMesh(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
-            texturedModel(toolkit, textured, FEATURES | TEXTURES_OFF));
+            texturedModel(toolkit, textured, FEATURES | TEXTURES_OFF, TEXTURE_THAT_MAY_GO));
 
         var manifest = new ArrayList<String>();
 
@@ -194,12 +194,10 @@ public final class FrameCapture {
     private static final short FORCED_TEXTURE = 6;
 
     /**
-     * The way of placing a texture the model is picked for.
-     *
-     * A model that wraps a texture round an axis happens also to carry spaces placed both other
-     * written ways, and faces belonging to no space at all, so naming this one reaches all four.
+     * A texture the player is allowed to turn off, which the one above is not. A model built
+     * asking for textures off keeps the first and loses this one.
      */
-    private static final int WRAPPED_AROUND = 1;
+    private static final short TEXTURE_THAT_MAY_GO = 7;
 
     /**
      * The feature the client asks for when the player has turned textures off. It is one of the
@@ -215,10 +213,7 @@ public final class FrameCapture {
      * scene handed nothing quietly draws nothing, which is a check that cannot fail.
      */
     private static Mesh texturedMesh() throws Exception {
-        var mesh = CacheMesh.anyPlaced(WRAPPED_AROUND, MODEL_FACES, MODEL_FACES * 2);
-        if (mesh.isEmpty()) {
-            mesh = CacheMesh.anyTextured(MODEL_FACES);
-        }
+        var mesh = CacheMesh.anyTextured(MODEL_FACES);
         if (mesh.isEmpty()) {
             System.out.println("no textured model in the cache");
             return null;
@@ -227,9 +222,8 @@ public final class FrameCapture {
         return mesh.get();
     }
 
-    private static Model texturedModel(Toolkit toolkit,
-                                                          Mesh held,
-                                                          int features) throws Exception {
+    private static Model texturedModel(Toolkit toolkit, Mesh held, int features, short texture)
+            throws Exception {
         if (held == null) {
             return null;
         }
@@ -241,7 +235,7 @@ public final class FrameCapture {
          * two the model carries are placed different ways, so the scene draws both.
          */
         for (var face = 0; face < held.faceCount; face++) {
-            held.faceTexture[face] = FORCED_TEXTURE;
+            held.faceTexture[face] = texture;
         }
 
         return toolkit.createModel(held, FUNCTIONS, features, AMBIENT, CONTRAST);

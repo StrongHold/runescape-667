@@ -1115,6 +1115,7 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
             ? NULL
             : textureFor((unsigned short) faceTexture[face]);
 
+
         /*
          * A face the client gave no alpha to is drawn solid, and so is one whose alpha says it is
          * wholly there. The client counts an alpha the other way round from how much shows.

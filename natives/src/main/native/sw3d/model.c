@@ -72,6 +72,12 @@ enum { SHADED_WHEN_ANIMATED = 2 };
 enum { NEEDS_NORMALS = 0x10 };
 
 /**
+ * The feature the client asks for when the player has turned textures off. It reaches the toolkit
+ * as one of the features a model is built with, so what it comes to is settled per model.
+ */
+enum { TEXTURES_TURNED_OFF = 0x40 };
+
+/**
  * The three turns about the upright axis that are whole quarters of a circle, which are done by
  * swapping two places over rather than through the table.
  */
@@ -1333,6 +1339,16 @@ static void takeTextures(Model *model) {
         if (metrics->speedU != 0 || metrics->speedV != 0) {
             model->movingTextures = 1;
         }
+
+        /*
+         * A player who has turned textures off keeps the ones the artwork says may not be turned
+         * off. What the model says about its textures is settled first and from the real one, so
+         * a model whose texture slides still says so; the face itself is then left bare, and is
+         * lit and drawn as though it never carried one.
+         */
+        if ((model->features & TEXTURES_TURNED_OFF) != 0 && metrics->disableable) {
+            model->faceTexture[face] = -1;
+        }
     }
 }
 
@@ -1911,9 +1927,22 @@ JNIEXPORT void JNICALL Java_i_aa(JNIEnv *env, jobject self, jshort from, jshort 
         return;
     }
 
+    /*
+     * A player who has turned textures off is swapped onto a bare face rather than onto a texture
+     * they asked not to see. What the model then says about sliding is settled from what it is
+     * actually wearing, which is nothing, so it says it wears none.
+     */
+    const TextureMetrics *wanted = to == -1
+        ? NULL
+        : textureMetricsFor((unsigned short) to);
+    short worn = wanted != NULL && (model->features & TEXTURES_TURNED_OFF) != 0
+        && wanted->disableable ? (short) -1 : to;
+
+    int swapped = 0;
     for (int face = 0; face < model->faceCount; face++) {
         if (model->faceTexture[face] == from) {
-            model->faceTexture[face] = to;
+            model->faceTexture[face] = worn;
+            swapped++;
         }
     }
 
@@ -1929,8 +1958,8 @@ JNIEXPORT void JNICALL Java_i_aa(JNIEnv *env, jobject self, jshort from, jshort 
 
     unsigned char toAlpha = 0;
     unsigned char toByte57 = 0;
-    if (to != -1) {
-        const TextureMetrics *metrics = textureMetricsFor((unsigned short) to);
+    if (worn != -1 && swapped > 0) {
+        const TextureMetrics *metrics = textureMetricsFor((unsigned short) worn);
         if (metrics != NULL) {
             toAlpha = metrics->alpha;
             toByte57 = metrics->aByte57;

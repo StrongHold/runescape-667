@@ -120,17 +120,6 @@ public sealed interface Scene {
      */
     record Textured() implements Scene {
 
-        /**
-         * Neither toolkit draws anything at all in this scene, so it proves nothing and is
-         * marked as not yet drawn rather than left looking like a check that passes. The model
-         * reaches the scene and the draw is made; what comes back is an empty picture on both
-         * sides, and why is not yet known. Every texture check rested on this.
-         */
-        @Override
-        public boolean written() {
-            return false;
-        }
-
         private static final int LEAN = 0x600;
 
         @Override
@@ -146,7 +135,7 @@ public sealed interface Scene {
             for (var step = 0; step < 2; step++) {
                 props.matrix().makeRotationZ(0);
                 props.matrix().rotateAxisX(step == 0 ? 0 : LEAN);
-                props.matrix().translate((step * 2 - 1) * SPREAD / 2, 0, DEPTH);
+                props.matrix().translate((step * 2 - 1) * SPREAD / 4, 0, DEPTH / 2);
                 props.textured().render(props.matrix(), null, 1);
             }
         }
@@ -876,12 +865,6 @@ public sealed interface Scene {
      * scene is what says what it comes to.
      */
     record TexturesOff() implements Scene {
-
-        /** Blank on both sides for the same reason the textured scene is. */
-        @Override
-        public boolean written() {
-            return false;
-        }
 
         private static final int LEAN = TURN / 5;
 
