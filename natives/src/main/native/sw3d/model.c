@@ -742,6 +742,42 @@ JNIEXPORT void JNICALL Java_i_oa(JNIEnv *env, jobject self, jobject toolkit) {
  * The client is free to reuse every array it hands over the moment this returns, and it does, so
  * nothing here may be a view onto one of them.
  */
+/**
+ * Asks for every texture the model wears while it is being built, and keeps what the answers say
+ * about the model as a whole.
+ *
+ * The asking is the point as much as the answers are. A texture the client has not handed over yet
+ * is fetched here rather than in the middle of drawing, so the first frame a model appears in is
+ * not the one that goes back to the client for its pixels.
+ *
+ * A face whose texture is blended keeps the whole model marked as see through, and a texture that
+ * slides marks the model as wearing one. A blended texture is not looked at for sliding, because
+ * the two are decided in that order and the first ends the matter.
+ */
+static void takeTextures(Model *model) {
+    if (model->faceTexture == NULL) {
+        return;
+    }
+
+    for (int face = 0; face < model->faceCount; face++) {
+        if (model->faceTexture[face] == -1) {
+            continue;
+        }
+
+        const Texture *texture = textureFor(model->faceTexture[face]);
+        if (texture == NULL) {
+            continue;
+        }
+
+        const TextureMetrics *metrics = textureMetrics(texture);
+        if (metrics->alphaBlendMode == 2) {
+            model->transparent = 1;
+        } else if (metrics->speedU != 0 || metrics->speedV != 0) {
+            model->movingTextures = 1;
+        }
+    }
+}
+
 JNIEXPORT void JNICALL Java_i_R(JNIEnv *env, jobject self, jobject toolkit, jobject pool,
                                  jint vertexCount, jint maxVertex,
                                  jintArray vertexX, jintArray vertexY, jintArray vertexZ,
@@ -813,6 +849,8 @@ JNIEXPORT void JNICALL Java_i_R(JNIEnv *env, jobject self, jobject toolkit, jobj
     model->faceAlpha = copyBytes(env, faceAlpha, faceCount);
     model->shadingType = copyBytes(env, shadingType, faceCount);
     gatherLabels(env, model, vertexLabel);
+
+    takeTextures(model);
 
     if (model->vertices != NULL) {
         measure(model);
@@ -1238,11 +1276,10 @@ JNIEXPORT jboolean JNICALL Java_i_r(JNIEnv *env, jobject self) {
 /**
  * Gives every face wearing one texture another one.
  *
- * The toolkit this replaces goes on to compare what it knows about the two textures, keeping the
- * light the model already has when they are shaded through alike and marking the model as wearing
- * a texture that slides when the new one does. None of that is reached by a model built the way
- * these are, because it sits behind a face texture array the toolkit allocated for itself rather
- * than the one the mesh arrived with, and nothing here builds one.
+ * The light a model has already been given is kept unless the two textures are shaded through
+ * differently, because working a model's light out again is far dearer than comparing two numbers
+ * and most swaps are between textures that agree on both. A model swapped onto a texture that
+ * slides either way is marked as wearing one.
  */
 JNIEXPORT void JNICALL Java_i_aa(JNIEnv *env, jobject self, jshort from, jshort to) {
     Model *model = modelOf(env, self);
@@ -1260,7 +1297,33 @@ JNIEXPORT void JNICALL Java_i_aa(JNIEnv *env, jobject self, jshort from, jshort 
         }
     }
 
-    unlight(model);
+    unsigned char fromAlpha = 0;
+    unsigned char fromByte57 = 0;
+    if (from != -1) {
+        const TextureMetrics *metrics = textureMetricsFor((unsigned short) from);
+        if (metrics != NULL) {
+            fromAlpha = metrics->alpha;
+            fromByte57 = metrics->aByte57;
+        }
+    }
+
+    unsigned char toAlpha = 0;
+    unsigned char toByte57 = 0;
+    if (to != -1) {
+        const TextureMetrics *metrics = textureMetricsFor((unsigned short) to);
+        if (metrics != NULL) {
+            toAlpha = metrics->alpha;
+            toByte57 = metrics->aByte57;
+
+            if (metrics->speedU != 0 || metrics->speedV != 0) {
+                model->movingTextures = 1;
+            }
+        }
+    }
+
+    if (toAlpha != fromAlpha || fromByte57 != toByte57) {
+        unlight(model);
+    }
 }
 
 /**

@@ -168,7 +168,11 @@ public final class FrameCapture {
      * A mesh built here cannot stand in. A texture sits on a face through a texture space, and
      * nothing built by hand carries one, so a model built here would be textured nowhere.
      */
-    private static final short FORCED_TEXTURE = 185;
+    /**
+     * The texture every face of the textured model is put on. Its blend mode has to be one that
+     * leaves the face in the ordinary pass, which rules out every third number.
+     */
+    private static final short FORCED_TEXTURE = 6;
 
     private static com.jagex.graphics.Model texturedModel(Toolkit toolkit) throws Exception {
         var mesh = CacheMesh.anyTextured(MODEL_FACES);

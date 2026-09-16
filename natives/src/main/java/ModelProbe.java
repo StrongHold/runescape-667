@@ -412,6 +412,18 @@ public final class ModelProbe {
             return;
         }
 
+        /*
+         * Texture one slides across, and the toolkit marks a model as wearing a moving texture
+         * while it builds it, so a model every face of which has been put on texture one says
+         * whether a change made to the mesh reaches the toolkit at all.
+         */
+        var forced = CacheMesh.anyTextured(MODEL_FACES).get();
+        for (var face = 0; face < forced.faceCount; face++) {
+            forced.faceTexture[face] = 1;
+        }
+        var marked = (i) toolkit.createModel(forced, FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
+        lines.add("every face on a sliding texture " + marked.r());
+
         for (var id = 0; id < 5; id++) {
             var model = (i) toolkit.createModel(
                 mesh.get(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST);

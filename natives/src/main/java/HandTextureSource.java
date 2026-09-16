@@ -11,6 +11,15 @@ import com.jagex.graphics.TextureSource;
  * The first few numbers are laid out to exercise one thing each. Nought stands still, one slides
  * across, two slides down and not across, and three differs from nought in the two numbers a model
  * compares when it swaps one texture for another.
+ *
+ * Two of the numbers decide whether a face wearing the texture is drawn with it at all, and both
+ * are answered as no here so that a texture always shows. A face whose texture may be turned off
+ * is drawn flat, and a face whose texture is marked the other way is dropped from the model
+ * entirely, which leaves a model that looks exactly like an untextured one.
+ *
+ * A blend mode of two takes a face out of the pass that draws the rest, so a caller that wants a
+ * texture it can see on an ordinary face wants a number that is not two more than a multiple of
+ * three.
  */
 public final class HandTextureSource implements TextureSource {
 
@@ -46,8 +55,8 @@ public final class HandTextureSource implements TextureSource {
         metrics.aByte57 = (byte) (id == 3 ? 7 : 1);
         metrics.speedU = (byte) (id == 1 ? 3 : 0);
         metrics.speedV = (byte) (id == 2 ? 5 : 0);
-        metrics.disableable = (id & 16) != 0;
-        metrics.aBoolean234 = (id & 32) != 0;
+        metrics.disableable = false;
+        metrics.aBoolean234 = false;
         metrics.aBoolean239 = (id & 64) != 0;
         metrics.aBoolean236 = (id & 1) != 0;
         metrics.aBoolean235 = (id & 2) != 0;
