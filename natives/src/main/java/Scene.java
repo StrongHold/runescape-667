@@ -67,6 +67,7 @@ public sealed interface Scene {
         new SharedLight(),
         new DepthShifted(),
         new Particles(),
+        new Textured(),
         new Terrain()
     );
 
@@ -75,7 +76,7 @@ public sealed interface Scene {
      * scene from having to know what another one wanted.
      */
     record Props(Sprite gradient, Model model, Model simple, Matrix matrix,
-                 Font mono, Font proportional, Ground ground, Mesh mesh) {
+                 Font mono, Font proportional, Ground ground, Mesh mesh, Model textured) {
         /* empty */
     }
 
@@ -102,6 +103,40 @@ public sealed interface Scene {
 
     private static int grey(int value) {
         return (value << 16) | (value << 8) | value;
+    }
+
+    /**
+     * A model whose faces wear a texture, which is the only thing that reads a texture back out.
+     *
+     * Two copies side by side at different distances, because a texture is read through the
+     * distance of the pixel it lands on and a face square to the eye would not show that.
+     */
+    record Textured() implements Scene {
+
+        private static final int LEAN = 0x600;
+
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            if (props.textured() == null) {
+                return;
+            }
+
+
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            for (var step = 0; step < 2; step++) {
+                props.matrix().makeRotationZ(0);
+                props.matrix().rotateAxisX(step == 0 ? 0 : LEAN);
+                props.matrix().translate((step * 2 - 1) * SPREAD / 2, 0, DEPTH);
+                props.textured().render(props.matrix(), null, 1);
+            }
+        }
     }
 
     /**

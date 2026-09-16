@@ -64,7 +64,7 @@ public final class FrameCapture {
         window.setVisible(true);
         Thread.sleep(1000);
 
-        var toolkit = oa.create(canvas, new StubTextureSource(), Scene.WIDTH, Scene.HEIGHT);
+        var toolkit = oa.create(canvas, new HandTextureSource(), Scene.WIDTH, Scene.HEIGHT);
         var sprite = GradientSprite.INSTANCE;
         var gradient = toolkit.createSprite(
             sprite.width(), sprite.width(), sprite.height(), sprite.pixels());
@@ -100,7 +100,8 @@ public final class FrameCapture {
             toolkit.createFont(HandFont.metrics(), HandFont.letters(), true),
             toolkit.createFont(HandFont.metrics(), HandFont.letters(), false),
             HandGround.build(toolkit),
-            CacheMesh.anyUntextured(MODEL_FACES));
+            CacheMesh.anyUntextured(MODEL_FACES),
+            texturedModel(toolkit));
 
         var manifest = new ArrayList<String>();
 
@@ -159,6 +160,35 @@ public final class FrameCapture {
         }
 
         return mesh;
+    }
+
+    /**
+     * A model out of the cache that wears a texture, or nothing when the cache holds none.
+     *
+     * A mesh built here cannot stand in. A texture sits on a face through a texture space, and
+     * nothing built by hand carries one, so a model built here would be textured nowhere.
+     */
+    private static final short FORCED_TEXTURE = 185;
+
+    private static com.jagex.graphics.Model texturedModel(Toolkit toolkit) throws Exception {
+        var mesh = CacheMesh.anyTextured(MODEL_FACES);
+        if (mesh.isEmpty()) {
+            System.out.println("no textured model in the cache");
+            return null;
+        }
+
+        var held = mesh.get();
+        /*
+         * Every face is put on the same texture and the same texture space, so that a texture
+         * either shows across the whole model or does not show at all. A handful of textured
+         * faces among three hundred says nothing either way.
+         */
+        for (var face = 0; face < held.faceCount; face++) {
+            held.faceTexture[face] = FORCED_TEXTURE;
+            held.faceTexSpace[face] = 0;
+        }
+
+        return toolkit.createModel(held, FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
     }
 
     /**
