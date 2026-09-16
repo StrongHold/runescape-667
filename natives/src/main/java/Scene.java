@@ -54,6 +54,7 @@ public sealed interface Scene {
         new StretchedAndTiled(),
         new Masked(),
         new Turned(),
+        new Animated(),
         new Terrain()
     );
 
@@ -187,6 +188,64 @@ public sealed interface Scene {
             toolkit.line(100, 300, 100, 300, 0xFFFFFFFF, 0);
             toolkit.line(-50, 250, 560, 260, 0xFFFF00FF, 0);
             toolkit.line(200, -50, 260, 430, 0xFF00FFFF, 0);
+        }
+    }
+
+    /**
+     * A model with an animation applied to it, one step at a time.
+     *
+     * Each copy is drawn once before it is animated and once after, side by side, so the frame
+     * shows what the step did as well as where it left the model. Drawing it first also settles
+     * the direction each vertex faces, which the step that turns a group needs and which a model
+     * that has never been drawn does not have.
+     */
+    record Animated() implements Scene {
+
+        /** Everything a model may be asked to do, including turning its directions mid animation. */
+        private static final int FUNCTIONS = 0xFFFF;
+
+        private static final int FEATURES = 64;
+        private static final int AMBIENT = 64;
+        private static final int CONTRAST = 768;
+
+        /** The groups the step names, which are the first few labels the model carries. */
+        private static final int[] NAMED = {0, 1, 2};
+
+        private static final int MOVE = 1;
+        private static final int TURN = 2;
+        private static final int STRETCH = 3;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            step(toolkit, props, -2, MOVE, 60, -30, 20, false);
+            step(toolkit, props, -1, TURN, 1024, 2748, 0, false);
+            step(toolkit, props, 0, TURN, 1024, 2748, 0, true);
+            step(toolkit, props, 1, STRETCH, 200, 64, 128, false);
+        }
+
+        /**
+         * Draws one copy where it started, applies one step to it, and draws it again beside it.
+         */
+        private static void step(Toolkit toolkit, Props props, int column, int kind,
+                                 int x, int y, int z, boolean alsoNormals) {
+            var model = (i) toolkit.createModel(props.mesh(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
+            place(props, column * 2, model);
+
+            model.NA();
+            model.l(model.nativeid, 0, NAMED, 0, 0, 0, 0, false);
+            model.l(model.nativeid, kind, NAMED, x, y, z, 0, alsoNormals);
+            model.wa();
+
+            place(props, column * 2 + 1, model);
+        }
+
+        private static void place(Props props, int step, Model model) {
+            props.matrix().makeRotationZ(0);
+            props.matrix().translate(step * (SPREAD / 2), 0, DEPTH);
+            model.render(props.matrix(), null, 1);
         }
     }
 

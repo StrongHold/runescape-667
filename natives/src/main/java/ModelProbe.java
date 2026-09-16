@@ -194,8 +194,57 @@ public final class ModelProbe {
         model.wa();
         lines.add("closed " + measure(model));
 
+        steps(toolkit, lines);
+
         model.aa((short) 0, (short) 1);
         lines.add("retextured " + measure(model) + " moving textures " + model.r());
+    }
+
+    /**
+     * The steps an animation is made of, each applied to a fresh model so that one step cannot
+     * hide behind another.
+     *
+     * The point a step turns about is set by the step before it, so each of them is preceded by
+     * the step that sets it. Two of the labels name groups the model has and one names a group
+     * it does not, because an animation names labels from a frame that may have been built
+     * against a different model.
+     *
+     * No step here asks for the directions to be turned as well. The toolkit this is checked
+     * against reads them without looking, and a model that has not been drawn yet has none, so
+     * asking ends the process rather than answering.
+     */
+    private static void steps(Toolkit toolkit, List<String> lines) throws Exception {
+        int[][] named = {{0}, {1}, {0, 1, 2}, {999}, {}};
+
+        for (var labels : named) {
+            var pivoted = (i) build(toolkit);
+            pivoted.NA();
+            pivoted.l(pivoted.nativeid, 0, labels, 5, -9, 17, 0, false);
+            pivoted.wa();
+            lines.add("pivoted " + labels.length + " " + measure(pivoted));
+
+            var moved = (i) build(toolkit);
+            moved.NA();
+            moved.l(moved.nativeid, 1, labels, 40, -12, 7, 0, false);
+            moved.wa();
+            lines.add("stepped " + labels.length + " " + measure(moved));
+
+            for (var order = 0; order < 2; order++) {
+                var turned = (i) build(toolkit);
+                turned.NA();
+                turned.l(turned.nativeid, 0, labels, 0, 0, 0, 0, false);
+                turned.l(turned.nativeid, 2, labels, 1024, 2748, 8192, order, false);
+                turned.wa();
+                lines.add("swung " + labels.length + " " + order + " " + measure(turned));
+            }
+
+            var stretched = (i) build(toolkit);
+            stretched.NA();
+            stretched.l(stretched.nativeid, 0, labels, 0, 0, 0, 0, false);
+            stretched.l(stretched.nativeid, 3, labels, 256, 64, 300, 0, false);
+            stretched.wa();
+            lines.add("stretched " + labels.length + " " + measure(stretched));
+        }
     }
 
     /**

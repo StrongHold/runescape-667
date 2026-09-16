@@ -72,6 +72,38 @@ static const float OVER_FULL = 1.0f / (float) FULL;
 /** How many floats a vertex takes, which is one more than it needs so that four fit a register. */
 enum { VERTEX_STRIDE = 4 };
 
+/**
+ * What an animation does to the vertices of the group it names.
+ *
+ * The three that move particles and the one that fades a face are not here. Particles are not
+ * built yet, and fading needs the faces gathered by label, which is built from what working out
+ * the texture coordinates leaves behind.
+ */
+enum {
+    PIVOT_AT = 0,
+    MOVE_BY = 1,
+    TURN_BY = 2,
+    STRETCH_BY = 3
+};
+
+/** What the client counts a full stretch as, where a hundred and twenty eight leaves an axis be. */
+static const float OVER_STRETCH = 1.0f / 128.0f;
+
+/**
+ * Whether a turn is applied about the across axis before the into-the-picture one, which is the
+ * low bit of the number the client passes alongside the three angles.
+ */
+enum { TURN_ACROSS_FIRST = 0x1 };
+
+/** What a model has to have been built to allow before an animation turns its directions too. */
+enum { MAY_TURN_NORMALS_WHILE_ANIMATING = 0x200 };
+
+/** Where in the group list a label's vertices sit. */
+typedef struct {
+    int start;
+    int count;
+} LabelGroup;
+
 typedef struct {
     int vertexCount;
 
@@ -104,8 +136,16 @@ typedef struct {
     signed char *faceAlpha;
     signed char *shadingType;
 
-    /** Which vertices move together, which is what an animation is applied through. */
-    int *vertexLabel;
+    /**
+     * Which vertices move together, gathered into a list per label.
+     *
+     * An animation names a label and everything it does applies to the whole group at once. The
+     * client hands over a label per vertex; this is that turned inside out, because an animation
+     * asks the question the other way round and asks it several hundred times a frame.
+     */
+    LabelGroup *labelTable;
+    int labelGroups;
+    unsigned short *labelVertices;
 
     int minX;
     int maxX;
@@ -143,13 +183,16 @@ typedef struct {
     /** Whether any face wears a texture that moves of its own accord. */
     int movingTextures;
 
-    /** Whether the animation now open has moved anything. */
+    /** Whether the animation now open has moved anything the light depends on. */
     int animated;
 
-    /** How far the animation now open has carried the whole model. */
-    int carriedX;
-    int carriedY;
-    int carriedZ;
+    /**
+     * Where the animation now open is turning and stretching the model about.
+     *
+     * An animation sets this from the average of a group of vertices and then works relative to
+     * it, so it is carried from one step of the animation to the next.
+     */
+    float pivot[3];
 
     Normal *normals;
     Normal *faceNormals;
@@ -228,16 +271,79 @@ static short *copyShorts(JNIEnv *env, jshortArray source, int count) {
     return copy;
 }
 
-static int *copyInts(JNIEnv *env, jintArray source, int count) {
-    if (source == NULL || count <= 0) {
-        return NULL;
+/**
+ * Turns the label the client puts on each vertex into a list of vertices per label.
+ *
+ * A label of less than nothing means the vertex belongs to no group and is left out. The groups
+ * run from nothing to the largest label that appeared, so a model that uses only high labels
+ * carries empty groups below them.
+ */
+static void gatherLabels(JNIEnv *env, Model *model, jintArray vertexLabel) {
+    if (vertexLabel == NULL || (*env)->GetArrayLength(env, vertexLabel) == 0) {
+        return;
     }
 
-    int *copy = calloc((size_t) count, sizeof(int));
-    if (copy != NULL) {
-        (*env)->GetIntArrayRegion(env, source, 0, count, (jint *) copy);
+    int given = (*env)->GetArrayLength(env, vertexLabel);
+    int room = given > model->vertexCount ? given : model->vertexCount;
+    int *labels = calloc((size_t) room, sizeof(int));
+    if (labels == NULL) {
+        return;
     }
-    return copy;
+    (*env)->GetIntArrayRegion(env, vertexLabel, 0, given, (jint *) labels);
+
+    int groups = 1;
+    int largest = 0;
+    for (int vertex = 0; vertex < model->vertexCount; vertex++) {
+        if (labels[vertex] > largest) {
+            largest = labels[vertex];
+        }
+    }
+    if (model->vertexCount > 0) {
+        groups = largest + 1;
+    }
+
+    model->labelTable = calloc((size_t) groups, sizeof(LabelGroup));
+    if (model->labelTable == NULL) {
+        free(labels);
+        return;
+    }
+    model->labelGroups = groups;
+
+    for (int vertex = 0; vertex < model->vertexCount; vertex++) {
+        if (labels[vertex] >= 0) {
+            model->labelTable[labels[vertex]].count++;
+        }
+    }
+
+    int running = 0;
+    for (int group = 0; group < groups; group++) {
+        model->labelTable[group].start = running;
+        running += model->labelTable[group].count;
+    }
+
+    model->labelVertices = calloc((size_t) (running == 0 ? 1 : running), sizeof(unsigned short));
+    if (model->labelVertices == NULL) {
+        free(labels);
+        return;
+    }
+
+    int *placed = calloc((size_t) groups, sizeof(int));
+    if (placed == NULL) {
+        free(labels);
+        return;
+    }
+
+    for (int vertex = 0; vertex < model->vertexCount; vertex++) {
+        int label = labels[vertex];
+        if (label >= 0) {
+            model->labelVertices[model->labelTable[label].start + placed[label]] =
+                (unsigned short) vertex;
+            placed[label]++;
+        }
+    }
+
+    free(placed);
+    free(labels);
 }
 
 static signed char *copyBytes(JNIEnv *env, jbyteArray source, int count) {
@@ -636,7 +742,7 @@ JNIEXPORT void JNICALL Java_i_R(JNIEnv *env, jobject self, jobject toolkit, jobj
     model->faceTexture = copyShorts(env, faceTexture, faceCount);
     model->faceAlpha = copyBytes(env, faceAlpha, faceCount);
     model->shadingType = copyBytes(env, shadingType, faceCount);
-    model->vertexLabel = copyInts(env, vertexLabel, vertexCount);
+    gatherLabels(env, model, vertexLabel);
 
     if (model->vertices != NULL) {
         measure(model);
@@ -665,7 +771,8 @@ JNIEXPORT void JNICALL Java_i_w(JNIEnv *env, jobject self, jboolean immediate) {
     free(model->faceTexture);
     free(model->faceAlpha);
     free(model->shadingType);
-    free(model->vertexLabel);
+    free(model->labelTable);
+    free(model->labelVertices);
     free(model->normals);
     free(model->faceNormals);
     free(model->shade);
@@ -1073,6 +1180,227 @@ JNIEXPORT void JNICALL Java_i_aa(JNIEnv *env, jobject self, jshort from, jshort 
 }
 
 /**
+ * The vertices a label names, or nothing when the label names no group.
+ */
+static const LabelGroup *groupOf(const Model *model, int label) {
+    if (model->labelTable == NULL || label < 0 || label >= model->labelGroups) {
+        return NULL;
+    }
+
+    const LabelGroup *group = &model->labelTable[label];
+    return group->count <= 0 ? NULL : group;
+}
+
+static int groupVertex(const Model *model, const LabelGroup *group, int within) {
+    return model->labelVertices[group->start + within];
+}
+
+/**
+ * Sets the point the rest of the animation turns and stretches about.
+ *
+ * It is the average of where the named groups are, moved by the amount given. A step naming no
+ * group at all, or naming only groups with nothing in them, puts it at the amount given on its
+ * own.
+ */
+static void pivotAt(Model *model, const int *labels, int count, int x, int y, int z) {
+    model->pivot[0] = 0.0f;
+    model->pivot[1] = 0.0f;
+    model->pivot[2] = 0.0f;
+
+    int gathered = 0;
+
+    for (int named = 0; named < count; named++) {
+        const LabelGroup *group = groupOf(model, labels[named]);
+        if (group == NULL) {
+            continue;
+        }
+
+        for (int within = 0; within < group->count; within++) {
+            const float *at = vertexAt(model, groupVertex(model, group, within));
+            model->pivot[0] += at[0];
+            model->pivot[1] += at[1];
+            model->pivot[2] += at[2];
+            gathered++;
+        }
+    }
+
+    if (gathered == 0) {
+        model->pivot[0] = (float) x;
+        model->pivot[1] = (float) y;
+        model->pivot[2] = (float) z;
+    } else {
+        model->pivot[0] = model->pivot[0] / (float) gathered + (float) x;
+        model->pivot[1] = model->pivot[1] / (float) gathered + (float) y;
+        model->pivot[2] = model->pivot[2] / (float) gathered + (float) z;
+    }
+}
+
+static void moveBy(Model *model, const int *labels, int count, int x, int y, int z) {
+    for (int named = 0; named < count; named++) {
+        const LabelGroup *group = groupOf(model, labels[named]);
+        if (group == NULL) {
+            continue;
+        }
+
+        for (int within = 0; within < group->count; within++) {
+            float *at = vertexAt(model, groupVertex(model, group, within));
+            at[0] += (float) x;
+            at[1] += (float) y;
+            at[2] += (float) z;
+        }
+    }
+}
+
+/**
+ * Turns a place about the pivot by three angles in turn.
+ *
+ * Which of the three goes first is the caller's, because the client asks for the across axis
+ * first for some steps and the into-the-picture one first for others, and the two orders do not
+ * give the same answer. An angle of nothing is skipped rather than turned through, which matters
+ * because the table's sine of nothing is exact and its cosine of nothing is one.
+ */
+static void turnAboutPivot(float *place, int across, int upright, int away, int acrossFirst) {
+    int order[3] = {away, across, upright};
+    int axes[3][2] = {{ACROSS, UPRIGHT}, {AWAY, UPRIGHT}, {ACROSS, AWAY}};
+
+    if (acrossFirst) {
+        order[0] = across;
+        order[1] = away;
+        axes[0][0] = AWAY;
+        axes[0][1] = UPRIGHT;
+        axes[1][0] = ACROSS;
+        axes[1][1] = UPRIGHT;
+    }
+
+    for (int step = 0; step < 3; step++) {
+        if (order[step] != 0) {
+            turnPlace(place, axes[step][0], axes[step][1],
+                sineOf(order[step]), cosineOf(order[step]));
+        }
+    }
+}
+
+/**
+ * Turns the named groups about the pivot, and their directions with them when the model was
+ * built to allow it and the caller asked.
+ */
+static void turnBy(Model *model, const int *labels, int count, int across, int upright, int away,
+                   int order, int alsoNormals) {
+    int acrossFirst = (order & TURN_ACROSS_FIRST) != 0;
+
+    for (int named = 0; named < count; named++) {
+        const LabelGroup *group = groupOf(model, labels[named]);
+        if (group == NULL) {
+            continue;
+        }
+
+        for (int within = 0; within < group->count; within++) {
+            float *at = vertexAt(model, groupVertex(model, group, within));
+
+            at[0] -= model->pivot[0];
+            at[1] -= model->pivot[1];
+            at[2] -= model->pivot[2];
+
+            turnAboutPivot(at, across, upright, away, acrossFirst);
+
+            at[0] += model->pivot[0];
+            at[1] += model->pivot[1];
+            at[2] += model->pivot[2];
+        }
+    }
+
+    if (!alsoNormals || model->normals == NULL
+        || (model->functions & MAY_TURN_NORMALS_WHILE_ANIMATING) == 0) {
+        return;
+    }
+
+    for (int named = 0; named < count; named++) {
+        const LabelGroup *group = groupOf(model, labels[named]);
+        if (group == NULL) {
+            continue;
+        }
+
+        for (int within = 0; within < group->count; within++) {
+            Normal *normal = &model->normals[groupVertex(model, group, within)];
+            turnAboutPivot(normalPlace(normal), across, upright, away, acrossFirst);
+        }
+    }
+}
+
+/**
+ * Stretches the named groups away from the pivot, where a hundred and twenty eight leaves an
+ * axis the length it already is.
+ */
+static void stretchBy(Model *model, const int *labels, int count, int x, int y, int z) {
+    float scale[3] = {(float) x, (float) y, (float) z};
+
+    for (int named = 0; named < count; named++) {
+        const LabelGroup *group = groupOf(model, labels[named]);
+        if (group == NULL) {
+            continue;
+        }
+
+        for (int within = 0; within < group->count; within++) {
+            float *at = vertexAt(model, groupVertex(model, group, within));
+
+            for (int lane = 0; lane < 3; lane++) {
+                at[lane] -= model->pivot[lane];
+            }
+            for (int lane = 0; lane < 3; lane++) {
+                at[lane] = scale[lane] * at[lane] * OVER_STRETCH;
+            }
+            for (int lane = 0; lane < 3; lane++) {
+                at[lane] += model->pivot[lane];
+            }
+        }
+    }
+}
+
+/**
+ * One step of an animation, applied to every vertex carrying one of the labels named.
+ *
+ * The model is named by the handle rather than by the object, because the client has it to hand
+ * and calls this several hundred times a frame.
+ *
+ * The steps that move a particle, fade a face or turn a billboard are not here. Particles are not
+ * built yet, and fading needs the faces gathered by label, which the toolkit works out while it
+ * works out where a texture sits.
+ */
+JNIEXPORT void JNICALL Java_i_l(JNIEnv *env, jobject self, jlong handle, jint step,
+                                 jintArray named, jint x, jint y, jint z, jint order,
+                                 jboolean alsoNormals) {
+    (void) self;
+
+    Model *model = (Model *) (intptr_t) handle;
+    if (model == NULL || model->vertices == NULL) {
+        return;
+    }
+
+    int count = named == NULL ? 0 : (*env)->GetArrayLength(env, named);
+    int *labels = NULL;
+
+    if (count > 0) {
+        labels = calloc((size_t) count, sizeof(int));
+        if (labels == NULL) {
+            return;
+        }
+        (*env)->GetIntArrayRegion(env, named, 0, count, (jint *) labels);
+    }
+
+    if (step == PIVOT_AT) {
+        pivotAt(model, labels, count, x, y, z);
+    } else if (step == MOVE_BY) {
+        moveBy(model, labels, count, x, y, z);
+    } else if (step == TURN_BY) {
+        turnBy(model, labels, count, x, y, z, order, alsoNormals == JNI_TRUE);
+    } else if (step == STRETCH_BY) {
+        stretchBy(model, labels, count, x, y, z);
+    }
+
+    free(labels);
+}
+
+/**
  * Opens an animation, answering whether the model can be animated at all.
  *
  * A model with no labels on its vertices has nothing for an animation to move, so the client is
@@ -1081,13 +1409,13 @@ JNIEXPORT void JNICALL Java_i_aa(JNIEnv *env, jobject self, jshort from, jshort 
  */
 JNIEXPORT jboolean JNICALL Java_i_NA(JNIEnv *env, jobject self) {
     Model *model = modelOf(env, self);
-    if (model == NULL || model->vertexLabel == NULL) {
+    if (model == NULL || model->labelTable == NULL) {
         return JNI_FALSE;
     }
 
-    model->carriedX = 0;
-    model->carriedY = 0;
-    model->carriedZ = 0;
+    model->pivot[0] = 0.0f;
+    model->pivot[1] = 0.0f;
+    model->pivot[2] = 0.0f;
     return JNI_TRUE;
 }
 
