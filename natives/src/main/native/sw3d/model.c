@@ -751,8 +751,8 @@ JNIEXPORT void JNICALL Java_i_oa(JNIEnv *env, jobject self, jobject toolkit) {
  * not the one that goes back to the client for its pixels.
  *
  * A face whose texture is blended keeps the whole model marked as see through, and a texture that
- * slides marks the model as wearing one. A blended texture is not looked at for sliding, because
- * the two are decided in that order and the first ends the matter.
+ * slides either way marks the model as wearing one. The two are answered separately, so one
+ * texture may say both.
  */
 static void takeTextures(Model *model) {
     if (model->faceTexture == NULL) {
@@ -764,7 +764,7 @@ static void takeTextures(Model *model) {
             continue;
         }
 
-        const Texture *texture = textureFor(model->faceTexture[face]);
+        const Texture *texture = textureFor((unsigned short) model->faceTexture[face]);
         if (texture == NULL) {
             continue;
         }
@@ -772,7 +772,9 @@ static void takeTextures(Model *model) {
         const TextureMetrics *metrics = textureMetrics(texture);
         if (metrics->alphaBlendMode == 2) {
             model->transparent = 1;
-        } else if (metrics->speedU != 0 || metrics->speedV != 0) {
+        }
+
+        if (metrics->speedU != 0 || metrics->speedV != 0) {
             model->movingTextures = 1;
         }
     }

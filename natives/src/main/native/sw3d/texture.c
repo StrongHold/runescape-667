@@ -31,8 +31,14 @@ enum { TEXTURE_SLOTS = 200 };
 /** The client names a texture by an unsigned short, and this one means none. */
 enum { NO_TEXTURE = 0xffff };
 
-/** What a slot that holds nothing, and a list that has run out, are marked with. */
-enum { NO_SLOT = -1 };
+/**
+ * What a slot that holds nothing, and a list that has run out, are marked with.
+ *
+ * A slot is counted in a single byte and there are two hundred of them, so the byte has to be
+ * unsigned: the last seventy two slots do not fit in a signed one, and a slot read back as a
+ * negative number indexes everything here from outside itself.
+ */
+enum { NO_SLOT = 0xff };
 
 struct Texture {
     TextureMetrics metrics;
@@ -58,12 +64,12 @@ struct Texture {
  * list answers both without looking at the other hundred and ninety nine.
  */
 typedef struct {
-    signed char slotOf[NO_TEXTURE + 1];
+    unsigned char slotOf[NO_TEXTURE + 1];
     unsigned short textureIn[TEXTURE_SLOTS];
-    signed char head;
-    signed char tail;
-    signed char next[TEXTURE_SLOTS];
-    signed char previous[TEXTURE_SLOTS];
+    unsigned char head;
+    unsigned char tail;
+    unsigned char next[TEXTURE_SLOTS];
+    unsigned char previous[TEXTURE_SLOTS];
 } Ordering;
 
 /**
@@ -103,13 +109,13 @@ static void orderingReset(Ordering *ordering) {
 
     for (int slot = 0; slot < TEXTURE_SLOTS; slot++) {
         ordering->textureIn[slot] = UNHELD;
-        ordering->next[slot] = (signed char) (slot + 1);
-        ordering->previous[slot] = (signed char) (slot - 1);
+        ordering->next[slot] = (unsigned char) (slot + 1);
+        ordering->previous[slot] = (unsigned char) (slot - 1);
     }
 
     ordering->head = 0;
     ordering->previous[0] = NO_SLOT;
-    ordering->tail = (signed char) (TEXTURE_SLOTS - 1);
+    ordering->tail = (unsigned char) (TEXTURE_SLOTS - 1);
     ordering->next[TEXTURE_SLOTS - 1] = NO_SLOT;
 }
 
@@ -117,25 +123,25 @@ static void orderingReset(Ordering *ordering) {
  * Moves a slot to the end of the order, so that the head is always the one wanted longest ago.
  */
 static void wantedNow(Ordering *ordering, int slot) {
-    signed char previous = ordering->previous[slot];
+    unsigned char previous = ordering->previous[slot];
     if (previous == NO_SLOT) {
         ordering->head = ordering->next[slot];
     } else {
         ordering->next[previous] = ordering->next[slot];
     }
 
-    signed char next = ordering->next[slot];
+    unsigned char next = ordering->next[slot];
     if (next == NO_SLOT) {
         ordering->tail = ordering->previous[slot];
     } else {
         ordering->previous[next] = ordering->previous[slot];
     }
 
-    signed char tail = ordering->tail;
+    unsigned char tail = ordering->tail;
     ordering->previous[slot] = tail;
     ordering->next[slot] = NO_SLOT;
-    ordering->next[tail] = (signed char) slot;
-    ordering->tail = (signed char) slot;
+    ordering->next[tail] = (unsigned char) slot;
+    ordering->tail = (unsigned char) slot;
 }
 
 /**
@@ -154,7 +160,7 @@ static int slotFor(Ordering *ordering, int texture) {
     }
 
     ordering->textureIn[slot] = (unsigned short) texture;
-    ordering->slotOf[texture] = (signed char) slot;
+    ordering->slotOf[texture] = (unsigned char) slot;
     return slot;
 }
 
@@ -315,11 +321,11 @@ static int askClient(jmethodID method, int texture) {
 }
 
 const Texture *textureFor(int texture) {
-    if (texture == NO_TEXTURE || cache.store == NULL) {
+    if (texture < 0 || texture >= NO_TEXTURE || cache.store == NULL) {
         return NULL;
     }
 
-    signed char slot = cache.pixelOrder.slotOf[texture];
+    unsigned char slot = cache.pixelOrder.slotOf[texture];
     if (slot == NO_SLOT) {
         if (!askClient(cache.askForTexture, texture)) {
             return NULL;
@@ -341,11 +347,11 @@ const Texture *textureFor(int texture) {
 }
 
 const TextureMetrics *textureMetricsFor(int texture) {
-    if (texture == NO_TEXTURE || cache.store == NULL) {
+    if (texture < 0 || texture >= NO_TEXTURE || cache.store == NULL) {
         return NULL;
     }
 
-    signed char slot = cache.pixelOrder.slotOf[texture];
+    unsigned char slot = cache.pixelOrder.slotOf[texture];
     if (slot != NO_SLOT) {
         wantedNow(&cache.pixelOrder, slot);
 
@@ -494,6 +500,14 @@ JNIEXPORT void JNICALL Java_oa_CA(JNIEnv *env, jobject self, jshort texture, jin
         repeatsV, aByte53, aBoolean237, aBoolean238, colourOp);
     held->offsetU = 0.0f;
     held->offsetV = 0.0f;
+
+    /*
+     * The client is asked for a square of a fixed size and hands one back, but it is the whole of
+     * that square that is read here, so a shorter one would be read past its end.
+     */
+    if ((*env)->GetArrayLength(env, given) < TEXTURE_SIZE * TEXTURE_SIZE) {
+        return;
+    }
 
     jint *from = (*env)->GetPrimitiveArrayCritical(env, given, NULL);
     if (from != NULL) {

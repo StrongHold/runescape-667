@@ -309,6 +309,9 @@ typedef struct Texture Texture;
 /**
  * The texture the client gave this number, asking the client for it if the toolkit has never
  * been given it, or null when the client has none to give.
+ *
+ * The client names a texture by an unsigned short, and the largest of those means none, so a
+ * number outside that range is answered with nothing rather than looked for.
  */
 const Texture *textureFor(int texture);
 

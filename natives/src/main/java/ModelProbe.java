@@ -444,6 +444,34 @@ public final class ModelProbe {
         var model = (i) toolkit.createModel(mesh.get(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
         model.aa((short) 0, (short) 1);
         lines.add("swapped onto one after a flood " + model.r() + " " + measure(model));
+
+        everySlot(toolkit, lines);
+    }
+
+    /**
+     * A model built on each of more textures than there is room for, one after another.
+     *
+     * Building a model asks for the textures its faces wear, and asking moves the slot that
+     * answered to the end of the order, so this walks the whole store rather than landing on the
+     * same slot every time. Nothing else here reaches past the first few slots, and a slot counted
+     * in the wrong half of a byte only goes wrong once the store is more than half used.
+     */
+    private static void everySlot(Toolkit toolkit, List<String> lines) {
+        var sliding = 0;
+
+        for (var id = 0; id < HandTextureSource.COUNT; id++) {
+            var mesh = FlatMesh.INSTANCE.build();
+            for (var face = 0; face < mesh.faceCount; face++) {
+                mesh.faceTexture[face] = (short) id;
+            }
+
+            var model = (i) toolkit.createModel(mesh, FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
+            if (model.r()) {
+                sliding++;
+            }
+        }
+
+        lines.add("models built on every texture, sliding " + sliding);
     }
 
     /**
