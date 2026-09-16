@@ -1,4 +1,5 @@
 import com.jagex.graphics.Matrix;
+import com.jagex.graphics.Toolkit;
 import rs2.client.loading.library.LibraryManager;
 
 import java.io.File;
@@ -73,7 +74,7 @@ public final class MatrixProbe {
      * is correct at the quarter turns and a unit out between them. One point through one rotation
      * per angle pins the whole table for the price of 16384 lines.
      */
-    private static void sineTable(com.jagex.graphics.Toolkit toolkit, List<String> lines) {
+    private static void sineTable(Toolkit toolkit, List<String> lines) {
         var matrix = toolkit.createMatrix();
         var destination = new int[4];
 
@@ -91,7 +92,7 @@ public final class MatrixProbe {
      * asked would otherwise answer the second and third questions about a different matrix, and
      * the difference would look like a difference between the three.
      */
-    private static void projectionVariants(com.jagex.graphics.Toolkit toolkit, List<String> lines) {
+    private static void projectionVariants(Toolkit toolkit, List<String> lines) {
         for (var angle = 0; angle < TURN; angle += TURN / 8) {
             for (var point : POINTS) {
                 var destination = new int[4];
@@ -120,7 +121,7 @@ public final class MatrixProbe {
      * A turn applied to an identity matrix cannot say whether it replaced the matrix or combined
      * with it, because both give the same answer. Only a chain can, and the client uses chains.
      */
-    private static void chains(com.jagex.graphics.Toolkit toolkit, List<String> lines) {
+    private static void chains(Toolkit toolkit, List<String> lines) {
         for (var angle = TURN / 16; angle < TURN; angle += TURN / 8) {
             var chained = toolkit.createMatrix();
             chained.makeRotationZ(angle);
@@ -145,13 +146,13 @@ public final class MatrixProbe {
         }
     }
 
-    private static void identity(com.jagex.graphics.Toolkit toolkit, List<String> lines) {
+    private static void identity(Toolkit toolkit, List<String> lines) {
         var matrix = toolkit.createMatrix();
         matrix.makeIdentity();
         record(lines, "identity", matrix);
     }
 
-    private static void rotations(com.jagex.graphics.Toolkit toolkit, List<String> lines) {
+    private static void rotations(Toolkit toolkit, List<String> lines) {
         for (var angle = 0; angle < TURN; angle += SWEEP) {
             var made = toolkit.createMatrix();
 
@@ -180,7 +181,7 @@ public final class MatrixProbe {
         }
     }
 
-    private static void translations(com.jagex.graphics.Toolkit toolkit, List<String> lines) {
+    private static void translations(Toolkit toolkit, List<String> lines) {
         for (var point : POINTS) {
             var moved = toolkit.createMatrix();
             moved.makeIdentity();
@@ -200,7 +201,7 @@ public final class MatrixProbe {
      * where all three are turned together, because several orders fit. One axis at a time pins
      * each turn, and the combinations then pin the order.
      */
-    private static void cameras(com.jagex.graphics.Toolkit toolkit, List<String> lines) {
+    private static void cameras(Toolkit toolkit, List<String> lines) {
         for (var angle = 0; angle < TURN; angle += TURN / 8) {
             var aboutX = toolkit.createMatrix();
             aboutX.createCamera(100, -200, 300, angle, 0, 0);
@@ -224,7 +225,7 @@ public final class MatrixProbe {
      * One matrix applied to another, which is where an operation built the right transform but
      * multiplied it on the wrong side.
      */
-    private static void composition(com.jagex.graphics.Toolkit toolkit, List<String> lines) {
+    private static void composition(Toolkit toolkit, List<String> lines) {
         for (var angle = 0; angle < TURN; angle += TURN / 16) {
             var first = toolkit.createMatrix();
             first.makeRotationX(angle);

@@ -1,3 +1,6 @@
+import com.jagex.graphics.Matrix;
+import com.jagex.graphics.Mesh;
+import com.jagex.graphics.Model;
 import com.jagex.graphics.Toolkit;
 import rs2.client.loading.library.LibraryManager;
 
@@ -92,6 +95,13 @@ public final class FrameCapture {
          */
         toolkit.allocateThreads(1);
         toolkit.linkThreads(0);
+
+        /*
+         * Read once and shared by both textured models. Reading the cache a second time hands
+         * back nothing, and a scene handed nothing quietly draws nothing.
+         */
+        var textured = texturedMesh();
+        
         var props = new Scene.Props(
             gradient,
             toolkit.createModel(CacheMesh.anyUntextured(MODEL_FACES), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
@@ -101,8 +111,9 @@ public final class FrameCapture {
             toolkit.createFont(HandFont.metrics(), HandFont.letters(), false),
             HandGround.build(toolkit),
             CacheMesh.anyUntextured(MODEL_FACES),
-            texturedModel(toolkit),
-            toolkit.createModel(fadedMesh(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST));
+            texturedModel(toolkit, textured, FEATURES),
+            toolkit.createModel(fadedMesh(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
+            texturedModel(toolkit, textured, FEATURES | TEXTURES_OFF));
 
         var manifest = new ArrayList<String>();
 
@@ -119,7 +130,7 @@ public final class FrameCapture {
     }
 
     private static void drawOnce(Toolkit toolkit, Scene scene, Scene.Props props,
-                                 com.jagex.graphics.Matrix camera) throws Exception {
+                                 Matrix camera) throws Exception {
         toolkit.GA(Scene.CLEAR_COLOUR);
         toolkit.ya();
 
@@ -152,7 +163,7 @@ public final class FrameCapture {
      * A model the toolkit accepts is the only kind worth checking against, and three hundred
      * faces say only that something is wrong. Two faces can be worked out by hand.
      */
-    private static com.jagex.graphics.Mesh fewFaces() throws Exception {
+    private static Mesh fewFaces() throws Exception {
         var mesh = CacheMesh.anyUntextured(MODEL_FACES);
         mesh.faceCount = Math.min(mesh.faceCount, VISIBLE_FACES);
 
@@ -190,7 +201,20 @@ public final class FrameCapture {
      */
     private static final int WRAPPED_AROUND = 1;
 
-    private static com.jagex.graphics.Model texturedModel(Toolkit toolkit) throws Exception {
+    /**
+     * The feature the client asks for when the player has turned textures off. It is one of the
+     * features a model is built with rather than something the toolkit is told once, so a model
+     * built before the player changed their mind keeps the textures it was built with.
+     */
+    private static final int TEXTURES_OFF = 0x40;
+
+    /**
+     * The mesh both textured models are built from.
+     *
+     * It is read once and shared. Reading the cache a second time hands back nothing, and a
+     * scene handed nothing quietly draws nothing, which is a check that cannot fail.
+     */
+    private static Mesh texturedMesh() throws Exception {
         var mesh = CacheMesh.anyPlaced(WRAPPED_AROUND, MODEL_FACES, MODEL_FACES * 2);
         if (mesh.isEmpty()) {
             mesh = CacheMesh.anyTextured(MODEL_FACES);
@@ -200,7 +224,16 @@ public final class FrameCapture {
             return null;
         }
 
-        var held = mesh.get();
+        return mesh.get();
+    }
+
+    private static Model texturedModel(Toolkit toolkit,
+                                                          Mesh held,
+                                                          int features) throws Exception {
+        if (held == null) {
+            return null;
+        }
+
         /*
          * Every face is put on the same texture so that a texture either shows across the whole
          * model or does not show at all. A handful of textured faces among three hundred says
@@ -211,7 +244,7 @@ public final class FrameCapture {
             held.faceTexture[face] = FORCED_TEXTURE;
         }
 
-        return toolkit.createModel(held, FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
+        return toolkit.createModel(held, FUNCTIONS, features, AMBIENT, CONTRAST);
     }
 
     /**
@@ -223,7 +256,7 @@ public final class FrameCapture {
      * the alphas are put on here, running from solid at one end of the model to almost clear at
      * the other.
      */
-    private static com.jagex.graphics.Mesh fadedMesh() throws Exception {
+    private static Mesh fadedMesh() throws Exception {
         var mesh = CacheMesh.anyUntextured(MODEL_FACES);
         mesh.faceAlpha = new byte[mesh.faceCount];
 

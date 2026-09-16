@@ -100,7 +100,8 @@ val sceneSettings = mapOf(
     "SW3D_GROUND_FLAGS" to "0",
     "SW3D_GROUND_FEATURES" to "0",
     "SW3D_GROUND_COLOUR" to "-1",
-    "SW3D_GROUND_FLAT" to "0"
+    "SW3D_GROUND_FLAT" to "0",
+    "SW3D_TEXTURE_DISABLEABLE" to "0"
 )
 
 val captureFrames by tasks.registering(JavaExec::class) {

@@ -73,6 +73,7 @@ public sealed interface Scene {
         new UnderTheGround(),
         new Underwater(),
         new FadedFaces(),
+        new TexturesOff(),
         new Textured()
     );
 
@@ -82,7 +83,7 @@ public sealed interface Scene {
      */
     record Props(Sprite gradient, Model model, Model simple, Matrix matrix,
                  Font mono, Font proportional, Ground ground, Mesh mesh, Model textured,
-                 Model faded) {
+                 Model faded, Model plain) {
         /* empty */
     }
 
@@ -118,6 +119,17 @@ public sealed interface Scene {
      * distance of the pixel it lands on and a face square to the eye would not show that.
      */
     record Textured() implements Scene {
+
+        /**
+         * Neither toolkit draws anything at all in this scene, so it proves nothing and is
+         * marked as not yet drawn rather than left looking like a check that passes. The model
+         * reaches the scene and the draw is made; what comes back is an empty picture on both
+         * sides, and why is not yet known. Every texture check rested on this.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
 
         private static final int LEAN = 0x600;
 
@@ -853,6 +865,39 @@ public sealed interface Scene {
             props.matrix().makeRotationZ(0);
             props.matrix().applyTranslation(ASIDE, 0, DEPTH);
             props.model().render(props.matrix(), null, 1);
+        }
+    }
+
+    /**
+     * The same textured model built by a client whose player has turned textures off.
+     *
+     * Turning textures off is one of the features a model is built with rather than something the
+     * toolkit is told once, so what it comes to has to be decided when the model is built. This
+     * scene is what says what it comes to.
+     */
+    record TexturesOff() implements Scene {
+
+        /** Blank on both sides for the same reason the textured scene is. */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        private static final int LEAN = TURN / 5;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            if (props.plain() == null) {
+                return;
+            }
+
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            props.matrix().makeRotationZ(0);
+            props.matrix().rotateAxisX(LEAN);
+            props.matrix().applyTranslation(0, 0, DEPTH);
+            props.plain().render(props.matrix(), null, 1);
         }
     }
 

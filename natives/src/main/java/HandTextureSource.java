@@ -23,6 +23,13 @@ import com.jagex.graphics.TextureSource;
  */
 public final class HandTextureSource implements TextureSource {
 
+    private static final boolean DISABLEABLE = number("SW3D_TEXTURE_DISABLEABLE", 0) != 0;
+
+    private static int number(String name, int fallback) {
+        var held = System.getenv(name);
+        return held == null || held.isEmpty() ? fallback : Integer.parseInt(held);
+    }
+
     /** How many textures this pretends to hold, which is more than the toolkit has room for. */
     public static final int COUNT = 256;
 
@@ -55,7 +62,12 @@ public final class HandTextureSource implements TextureSource {
         metrics.aByte57 = (byte) (id == 3 ? 7 : 24);
         metrics.speedU = (byte) (id == 1 ? 3 : 0);
         metrics.speedV = (byte) (id == 2 ? 5 : 0);
-        metrics.disableable = false;
+        /*
+         * Whether the player is allowed to turn this texture off. The scenes drive it from the
+         * environment, because what a model built with textures off comes to depends on it and
+         * nothing else here would ever set it.
+         */
+        metrics.disableable = DISABLEABLE;
         metrics.aBoolean234 = false;
         metrics.aBoolean239 = (id & 64) != 0;
         metrics.aBoolean236 = (id & 1) != 0;

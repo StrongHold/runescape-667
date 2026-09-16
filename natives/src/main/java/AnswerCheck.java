@@ -1,6 +1,7 @@
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.stream.IntStream;
 
 /**
  * Compares what the shipped toolkit answered against what ours answered, line for line.
@@ -46,7 +47,7 @@ public final class AnswerCheck {
                 }
             }
 
-            var wrong = (int) java.util.stream.IntStream.range(0, shipped.size())
+            var wrong = (int) IntStream.range(0, shipped.size())
                 .filter(line -> !shipped.get(line).equals(ours.get(line)))
                 .count();
 

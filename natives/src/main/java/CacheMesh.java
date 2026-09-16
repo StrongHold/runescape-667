@@ -11,6 +11,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.TreeMap;
 
 /**
  * Reads a model straight out of the cache on disk.
@@ -124,7 +125,7 @@ public final class CacheMesh {
         }
 
         var held = at(cache);
-        var ways = new java.util.TreeMap<Integer, Integer>();
+        var ways = new TreeMap<Integer, Integer>();
         var textured = 0;
 
         for (var group = 0; group < GROUP_LIMIT; group++) {
