@@ -95,6 +95,59 @@ public final class HandGround {
         return ground;
     }
 
+    /**
+     * A patch whose corners each carry a colour of their own.
+     *
+     * The client hands its tiles over one corner at a time rather than one face at a time, and
+     * gives every corner the colour the ground is at that corner, so the colour runs smoothly from
+     * one tile into the next. A patch handed over face by face gives all three corners of a face
+     * the same colour, and no amount of that ever asks whether a face is shaded across.
+     */
+    public static Ground buildSmooth(Toolkit toolkit) {
+        var heights = heights();
+        var ground = toolkit.createGround(TILES, TILES, heights, heights,
+            GROUND_FLAGS, FEATURE_FLAGS);
+
+        for (var x = 0; x < TILES; x++) {
+            for (var z = 0; z < TILES; z++) {
+                addCornerLitTile(ground, x, z);
+            }
+        }
+
+        ground.YA();
+        return ground;
+    }
+
+    /** Which corner of the tile each of the six slots of its two faces stands at. */
+    private static final int[] SLOT_ACROSS = {0, TILE, TILE, 0, 0, TILE};
+    private static final int[] SLOT_ALONG = {0, TILE, 0, 0, TILE, TILE};
+
+    private static void addCornerLitTile(Ground ground, int x, int z) {
+        var slots = SLOT_ACROSS.length;
+        var across = new int[slots];
+        var along = new int[slots];
+        var colours = new int[slots];
+        var textures = new int[slots];
+        var sizes = new int[slots];
+
+        for (var slot = 0; slot < slots; slot++) {
+            across[slot] = SLOT_ACROSS[slot];
+            along[slot] = SLOT_ALONG[slot];
+            textures[slot] = -1;
+            colours[slot] = cornerHsl(x + SLOT_ACROSS[slot] / TILE, z + SLOT_ALONG[slot] / TILE);
+        }
+
+        ground.U(x, z, across, null, along, null, colours, null, textures, sizes, 0, 0, 0, false);
+    }
+
+    /** A colour that belongs to a corner of the grid rather than to a face, so it is shared. */
+    private static int cornerHsl(int x, int z) {
+        var hue = (x * 3 + z * 5) & 0x3F;
+        var saturation = (x + z) % 8;
+        var lightness = 30 + ((x * 9 + z * 11) % 90);
+        return hue << 10 | saturation << 7 | lightness;
+    }
+
     /** How many faces a tile cut about its middle has. */
     private static final int CUT_FACES = 4;
 

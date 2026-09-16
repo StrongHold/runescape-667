@@ -115,7 +115,8 @@ public final class FrameCapture {
             toolkit.createModel(fadedMesh(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
             texturedModel(toolkit, textured, FEATURES | TEXTURES_OFF, TEXTURE_THAT_MAY_GO),
             HandGround.buildTextured(toolkit),
-            HandGround.buildShaped(toolkit));
+            HandGround.buildShaped(toolkit),
+            HandGround.buildSmooth(toolkit));
 
         var manifest = new ArrayList<String>();
 

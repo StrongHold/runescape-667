@@ -76,6 +76,7 @@ public sealed interface Scene {
         new TexturesOff(),
         new TexturedGround(),
         new CutGround(),
+        new SmoothGround(),
         new Textured()
     );
 
@@ -85,7 +86,7 @@ public sealed interface Scene {
      */
     record Props(Sprite gradient, Model model, Model simple, Matrix matrix,
                  Font mono, Font proportional, Ground ground, Mesh mesh, Model textured,
-                 Model faded, Model plain, Ground floor, Ground cut) {
+                 Model faded, Model plain, Ground floor, Ground cut, Ground smooth) {
         /* empty */
     }
 
@@ -899,6 +900,38 @@ public sealed interface Scene {
             props.matrix().rotateAxisX(LEAN);
             props.matrix().applyTranslation(0, 0, DEPTH);
             props.plain().render(props.matrix(), null, 1);
+        }
+    }
+
+    /**
+     * A patch whose corners each carry a colour of their own.
+     *
+     * The client hands its tiles over one corner at a time and gives every corner the colour the
+     * ground is at that corner. Every other patch here is handed over face by face, which gives
+     * all three corners of a face the same colour, so nothing else asks whether a face is shaded
+     * across at all.
+     */
+    record SmoothGround() implements Scene {
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            var camera = toolkit.createMatrix();
+            camera.createCamera(HandGround.TILES * HandGround.TILE / 2, Terrain.UP,
+                -Terrain.BACK, TURN / 8, 0, 0);
+            toolkit.setCamera(camera);
+
+            var visible = new boolean[HandGround.TILES * 2][HandGround.TILES * 2];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            props.smooth().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
+                HandGround.TILES, visible, false, 0);
         }
     }
 
