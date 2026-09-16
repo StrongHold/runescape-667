@@ -34,6 +34,9 @@ public final class ModelProbe {
     private static final int CONTRAST = 768;
     private static final int MODEL_FACES = 200;
 
+    /** How far in front of the camera the model stands when it is asked whether it was picked. */
+    private static final int DEPTH = 900;
+
     private static final int[][] MOVES = {
         {0, 0, 0}, {10, 0, 0}, {0, -40, 0}, {0, 0, 300}, {-7, 13, -29}, {-32000, 0, 0}
     };
@@ -60,6 +63,12 @@ public final class ModelProbe {
             toolkit.method7938(toolkit.createHeap(POOL_SIZE));
             toolkit.allocateThreads(1);
             toolkit.linkThreads(0);
+            toolkit.DA(Scene.WIDTH / 2, Scene.HEIGHT / 2, 512, 512);
+            toolkit.f(Scene.NEAR, Integer.MAX_VALUE);
+
+            var camera = toolkit.createMatrix();
+            camera.makeIdentity();
+            toolkit.setCamera(camera);
 
             var lines = new ArrayList<String>();
             refusals(toolkit, lines);
@@ -69,6 +78,7 @@ public final class ModelProbe {
             mirrors(toolkit, lines);
             masks(toolkit, lines);
             copies(toolkit, lines);
+            picks(toolkit, lines);
             animations(toolkit, lines);
             lights(toolkit, lines);
 
@@ -219,6 +229,43 @@ public final class ModelProbe {
                 lines.add("copy recoloured " + measure(copy) + " original " + measure(model));
             }
         }
+    }
+
+    /**
+     * Whether a point on the screen lands on a model.
+     *
+     * The client asks this of everything under the mouse, so an answer that is wrong anywhere
+     * makes something in the world unclickable or makes the wrong thing answer. The grid is
+     * walked coarsely across the whole picture and then finely across one edge of the model,
+     * because the answer only changes at an edge.
+     */
+    private static void picks(Toolkit toolkit, List<String> lines) throws Exception {
+        var model = build(toolkit);
+
+        var matrix = toolkit.createMatrix();
+        matrix.makeRotationZ(0);
+        matrix.translate(0, 0, DEPTH);
+
+        var coarse = new StringBuilder();
+        for (var y = 0; y < Scene.HEIGHT; y += 24) {
+            for (var x = 0; x < Scene.WIDTH; x += 24) {
+                coarse.append(model.picked(x, y, matrix, false, 0) ? '#' : '.');
+            }
+            lines.add("picked " + y + " " + coarse);
+            coarse.setLength(0);
+        }
+
+        for (var x = 150; x < 370; x++) {
+            lines.add("picked edge " + x
+                + " " + model.picked(x, 192, matrix, false, 0)
+                + " " + model.picked(x, 192, matrix, true, 0)
+                + " " + model.pickedOrtho(x, 192, matrix, false, 0, 128));
+        }
+
+        var behind = toolkit.createMatrix();
+        behind.makeRotationZ(0);
+        behind.translate(0, 0, -DEPTH);
+        lines.add("picked behind " + model.picked(Scene.WIDTH / 2, Scene.HEIGHT / 2, behind, false, 0));
     }
 
     /**

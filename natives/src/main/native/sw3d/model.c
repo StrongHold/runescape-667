@@ -1654,6 +1654,25 @@ JNIEXPORT void JNICALL Java_i_wa(JNIEnv *env, jobject self) {
     model->measured = 0;
 }
 
+/**
+ * The box the model sits in, measuring it again first when something has moved.
+ *
+ * The six are the least and most of each axis in turn, which is the order a caller wanting the
+ * eight corners of the box wants them in.
+ */
+void modelBounds(void *handle, int *into) {
+    Model *model = handle;
+
+    measureIfNeeded(model);
+
+    into[0] = model->minX;
+    into[1] = model->maxX;
+    into[2] = model->minY;
+    into[3] = model->maxY;
+    into[4] = model->minZ;
+    into[5] = model->maxZ;
+}
+
 int modelVertexCount(const void *handle) {
     const Model *model = handle;
     return model == NULL ? 0 : model->vertexCount;

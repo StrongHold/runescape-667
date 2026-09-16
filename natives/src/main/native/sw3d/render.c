@@ -640,3 +640,241 @@ JNIEXPORT void JNICALL Java_a_Z(JNIEnv *env, jobject self, jlong worker, jlong g
 
     renderGroundTile((const void *) (intptr_t) ground, x, z);
 }
+
+/*
+ * Finding out whether a point on the screen lands on a model.
+ *
+ * The client asks this of every thing in the world under the mouse, several times a frame, so it
+ * is two tests rather than one. The first projects the eight corners of the box the model sits in
+ * and asks whether the point is inside what they cover. Only if it is, and only if the client
+ * asked for more than a guess, is every face projected and asked in turn.
+ *
+ * A face is asked the same crude question as the box: whether the point is inside the rectangle
+ * the face's three corners cover. That is not the same as being inside the face, so a point in
+ * the corner of a long thin triangle picks it. That is what the toolkit does.
+ */
+
+/** How far out the box starts before any corner has been looked at. */
+static const float OUTSIDE_EVERYTHING = 100000.0f;
+
+enum { BOX_CORNERS = 8 };
+
+/**
+ * The matrix a model is put through when the client wants it flat rather than in perspective.
+ *
+ * Distance no longer makes a thing smaller, so the field is divided by the zoom the client asks
+ * for instead, and the fourth place comes out as one for every point.
+ */
+static Transform flatMatrix(int zoom) {
+    const Projection *view = projection();
+    float range = view->far - view->near;
+
+    Transform matrix;
+    memset(&matrix, 0, sizeof matrix);
+    matrix.row[0][0] = view->scaleX / (float) zoom;
+    matrix.row[1][1] = view->scaleY / (float) zoom;
+    matrix.row[2][2] = 1.0f / range;
+    matrix.row[3][2] = -view->near / range;
+    matrix.row[3][3] = 1.0f;
+    return matrix;
+}
+
+/**
+ * Where one point of the model lands, as three places across, down and away from the eye.
+ */
+static void placeOnScreen(const Transform *onto, const Projection *view,
+                          float x, float y, float z, float *into) {
+    float point[ROWS];
+    for (int lane = 0; lane < ROWS; lane++) {
+        point[lane] = x * onto->row[0][lane] + y * onto->row[1][lane]
+            + z * onto->row[2][lane] + onto->row[3][lane];
+    }
+
+    float away = point[3];
+    into[0] = point[0] / away + view->centreX;
+    into[1] = point[1] / away + view->centreY;
+    into[2] = signedAs(point[2] / away, point[2]);
+}
+
+/** Whether all three of a face's corners sit past the point along one axis. */
+static int allPast(float first, float second, float third, float mark) {
+    return first > mark && second > mark && third > mark;
+}
+
+/** Whether all three of a face's corners sit short of the point along one axis. */
+static int allShort(float first, float second, float third, float mark) {
+    return mark > first && mark > second && mark > third;
+}
+
+/**
+ * The matrix everything in the model is put through, which is the one the client gave, then the
+ * camera, then the opening out of the picture.
+ */
+static int lookThrough(const void *matrix, int zoom, Transform *into) {
+    const void *camera = cameraMatrix();
+
+    void *combined = malloc(matrixSize());
+    if (combined == NULL) {
+        return 0;
+    }
+
+    if (camera == NULL) {
+        memcpy(combined, matrix, matrixSize());
+    } else {
+        matrixCompose(matrix, camera, combined);
+    }
+
+    Transform projector = zoom < 0 ? projectionMatrix() : flatMatrix(zoom);
+    *into = after(matrixRows(combined), &projector);
+    free(combined);
+    return 1;
+}
+
+/**
+ * Whether the point is inside what the eight corners of the model's box cover.
+ *
+ * A corner behind the near plane is left out. If every one of them is, the model is behind the
+ * eye and nothing is picked.
+ */
+static int insideTheBox(void *model, const Transform *onto, const Projection *view,
+                        int x, int y) {
+    int bounds[6];
+    modelBounds(model, bounds);
+
+    float least[3] = {(float) bounds[0], (float) bounds[2], (float) bounds[4]};
+    float most[3] = {(float) bounds[1], (float) bounds[3], (float) bounds[5]};
+
+    float leastAcross = OUTSIDE_EVERYTHING;
+    float mostAcross = -OUTSIDE_EVERYTHING;
+    float leastDown = OUTSIDE_EVERYTHING;
+    float mostDown = -OUTSIDE_EVERYTHING;
+    int anyInFront = 0;
+
+    for (int corner = 0; corner < BOX_CORNERS; corner++) {
+        float landed[3];
+        placeOnScreen(onto, view,
+            (corner & 0x1) == 0 ? least[0] : most[0],
+            (corner & 0x2) == 0 ? least[1] : most[1],
+            (corner & 0x4) == 0 ? least[2] : most[2],
+            landed);
+
+        if (landed[2] < 0.0f) {
+            continue;
+        }
+
+        anyInFront = 1;
+        leastAcross = fminf(landed[0], leastAcross);
+        mostAcross = fmaxf(landed[0], mostAcross);
+        leastDown = fminf(landed[1], leastDown);
+        mostDown = fmaxf(landed[1], mostDown);
+    }
+
+    if (!anyInFront) {
+        return 0;
+    }
+
+    float across = (float) x;
+    float down = (float) y;
+
+    return across > leastAcross && mostAcross > across
+        && down > leastDown && mostDown > down;
+}
+
+/**
+ * Whether any face of the model covers the point.
+ */
+static int onAnyFace(void *model, const Transform *onto, const Projection *view, int x, int y) {
+    int vertices = modelVertexCount(model);
+    int faces = modelFaceCount(model);
+
+    float *landed = calloc((size_t) vertices * 3, sizeof(float));
+    if (landed == NULL) {
+        return 0;
+    }
+
+    const float *held = modelVertices(model);
+    for (int vertex = 0; vertex < vertices; vertex++) {
+        placeOnScreen(onto, view,
+            held[(size_t) vertex * MODEL_VERTEX_STRIDE],
+            held[(size_t) vertex * MODEL_VERTEX_STRIDE + 1],
+            held[(size_t) vertex * MODEL_VERTEX_STRIDE + 2],
+            landed + (size_t) vertex * 3);
+    }
+
+    const short *faceA = modelFaceA(model);
+    const short *faceB = modelFaceB(model);
+    const short *faceC = modelFaceC(model);
+
+    float across = (float) x;
+    float down = (float) y;
+    int found = 0;
+
+    for (int face = 0; face < faces && !found; face++) {
+        const float *a = landed + (size_t) faceA[face] * 3;
+        const float *b = landed + (size_t) faceB[face] * 3;
+        const float *c = landed + (size_t) faceC[face] * 3;
+
+        /*
+         * The third corner is not asked whether it is in front of the eye. Only the first two
+         * are, which is what the toolkit does.
+         */
+        if (a[2] < 0.0f || b[2] < 0.0f) {
+            continue;
+        }
+
+        found = !allPast(a[1], b[1], c[1], down)
+            && !allShort(a[1], b[1], c[1], down)
+            && !allPast(a[0], b[0], c[0], across)
+            && !allShort(a[0], b[0], c[0], across);
+    }
+
+    free(landed);
+    return found;
+}
+
+/**
+ * Whether a point on the screen lands on the model.
+ */
+static int pointOnModel(void *model, const void *matrix, int x, int y, int quick, int zoom) {
+    if (model == NULL || matrix == NULL || modelFaceCount(model) == 0) {
+        return 0;
+    }
+
+    Transform onto;
+    if (!lookThrough(matrix, zoom, &onto)) {
+        return 0;
+    }
+
+    const Projection *view = projection();
+    if (!insideTheBox(model, &onto, view, x, y)) {
+        return 0;
+    }
+
+    return quick || onAnyFace(model, &onto, view, x, y);
+}
+
+/**
+ * Whether a point on the screen lands on the model, seen in perspective.
+ */
+JNIEXPORT jboolean JNICALL Java_a_R(JNIEnv *env, jobject self, jlong worker, jlong model,
+                                     jint x, jint y, jlong matrix, jboolean quick) {
+    (void) env;
+    (void) self;
+    (void) worker;
+
+    return pointOnModel((void *) (intptr_t) model, (const void *) (intptr_t) matrix,
+        x, y, quick == JNI_TRUE, -1) ? JNI_TRUE : JNI_FALSE;
+}
+
+/**
+ * Whether a point on the screen lands on the model, seen flat at the zoom the client gives.
+ */
+JNIEXPORT jboolean JNICALL Java_a_n(JNIEnv *env, jobject self, jlong worker, jlong model,
+                                     jint x, jint y, jlong matrix, jboolean quick, jint zoom) {
+    (void) env;
+    (void) self;
+    (void) worker;
+
+    return pointOnModel((void *) (intptr_t) model, (const void *) (intptr_t) matrix,
+        x, y, quick == JNI_TRUE, zoom) ? JNI_TRUE : JNI_FALSE;
+}

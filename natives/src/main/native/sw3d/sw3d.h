@@ -237,6 +237,8 @@ const short *modelFaceColour(const void *handle);
 const Normal *modelNormals(const void *handle);
 const Normal *modelFaceNormals(const void *handle);
 const uint32_t *modelShade(void *handle);
+/** The least and most of each axis in turn, measured again first if anything has moved. */
+void modelBounds(void *handle, int *into);
 int modelFaceIsFlat(const void *handle, int face);
 int modelAmbient(const void *handle);
 int modelContrast(const void *handle);
