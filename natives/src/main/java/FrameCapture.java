@@ -101,7 +101,8 @@ public final class FrameCapture {
             toolkit.createFont(HandFont.metrics(), HandFont.letters(), false),
             HandGround.build(toolkit),
             CacheMesh.anyUntextured(MODEL_FACES),
-            texturedModel(toolkit));
+            texturedModel(toolkit),
+            toolkit.createModel(fadedMesh(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST));
 
         var manifest = new ArrayList<String>();
 
@@ -211,6 +212,26 @@ public final class FrameCapture {
         }
 
         return toolkit.createModel(held, FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
+    }
+
+    /**
+     * The same model from the cache with every face given an alpha of its own.
+     *
+     * A face the client hands over with an alpha is drawn through what is already there rather
+     * than over it, and the client leans on that for a shadow under a player, for a window, and
+     * for anything that fades as it appears. A model out of the cache carries no alpha at all, so
+     * the alphas are put on here, running from solid at one end of the model to almost clear at
+     * the other.
+     */
+    private static com.jagex.graphics.Mesh fadedMesh() throws Exception {
+        var mesh = CacheMesh.anyUntextured(MODEL_FACES);
+        mesh.faceAlpha = new byte[mesh.faceCount];
+
+        for (var face = 0; face < mesh.faceCount; face++) {
+            mesh.faceAlpha[face] = (byte) (face * 0xFF / mesh.faceCount);
+        }
+
+        return mesh;
     }
 
     /**

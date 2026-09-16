@@ -551,6 +551,12 @@ const uint32_t *modelShade(void *handle);
 void modelBounds(void *handle, int *into);
 /** How wide the model is about its upright axis. */
 int modelRadius(void *handle);
+/**
+ * How much of a face the client asked to be drawn through what is behind it, counted the other
+ * way round: nothing means solid.
+ */
+int modelFaceAlpha(const void *model, int face);
+
 int modelFaceIsFlat(const void *handle, int face);
 int modelAmbient(const void *handle);
 int modelContrast(const void *handle);

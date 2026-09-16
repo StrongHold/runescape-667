@@ -72,6 +72,7 @@ public sealed interface Scene {
         new OverTheGround(),
         new UnderTheGround(),
         new Underwater(),
+        new FadedFaces(),
         new Textured()
     );
 
@@ -80,7 +81,8 @@ public sealed interface Scene {
      * scene from having to know what another one wanted.
      */
     record Props(Sprite gradient, Model model, Model simple, Matrix matrix,
-                 Font mono, Font proportional, Ground ground, Mesh mesh, Model textured) {
+                 Font mono, Font proportional, Ground ground, Mesh mesh, Model textured,
+                 Model faded) {
         /* empty */
     }
 
@@ -816,6 +818,38 @@ public sealed interface Scene {
             props.model().render(props.matrix(), null, 1);
 
             toolkit.pa();
+            props.matrix().makeRotationZ(0);
+            props.matrix().applyTranslation(ASIDE, 0, DEPTH);
+            props.model().render(props.matrix(), null, 1);
+        }
+    }
+
+    /**
+     * A model whose faces are each drawn through what is already there by a different amount.
+     *
+     * The client leans on this for the shadow under a player, which is a flat disc of faces with
+     * an alpha apiece, and for anything that fades as it appears. A model drawn solid where an
+     * alpha was asked for shows as a hard blot.
+     *
+     * The model is drawn over a sprite rather than over nothing, because a face drawn through the
+     * background looks the same whether it was blended or not.
+     */
+    record FadedFaces() implements Scene {
+
+        private static final int ASIDE = 120;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            props.gradient().render(0, 0);
+            props.gradient().render(WIDTH / 2, HEIGHT / 2);
+
+            props.matrix().makeRotationZ(0);
+            props.matrix().applyTranslation(-ASIDE, 0, DEPTH);
+            props.faded().render(props.matrix(), null, 1);
+
             props.matrix().makeRotationZ(0);
             props.matrix().applyTranslation(ASIDE, 0, DEPTH);
             props.model().render(props.matrix(), null, 1);

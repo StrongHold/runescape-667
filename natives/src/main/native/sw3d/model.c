@@ -3259,3 +3259,16 @@ JNIEXPORT void JNICALL Java_i_p(JNIEnv *env, jobject self, jint way, jint amount
 
     geometryChanged(model);
 }
+
+/**
+ * How much of a face the client asked to be drawn through what is behind it, counted the other
+ * way round: nothing means the face is solid and the most means it is not there at all.
+ */
+int modelFaceAlpha(const void *handle, int face) {
+    const Model *model = handle;
+    if (model->faceAlpha == NULL) {
+        return 0;
+    }
+
+    return (unsigned char) model->faceAlpha[face];
+}

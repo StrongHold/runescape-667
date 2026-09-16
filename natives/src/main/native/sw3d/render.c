@@ -337,6 +337,20 @@ static const uint32_t *texels;
 static int texelsRepeat;
 
 /**
+ * How much of the face being drawn shows, out of two hundred and fifty five, or nothing at all
+ * when the face is drawn solid.
+ *
+ * The client hands over an alpha per face and counts it the other way round from how much shows,
+ * so a face with no alpha is solid and one with the most is not there at all. Like the texture,
+ * it belongs to the face rather than to the span, so it is put here once before the face is
+ * filled.
+ */
+static int faceShows;
+
+/** What a face with no alpha of its own is drawn as. */
+enum { WHOLLY_SOLID = 0 };
+
+/**
  * Where on its texture one pixel of a span reads from.
  *
  * The two coordinates arrive divided by how far away the pixel is, so each is brought back by
@@ -374,6 +388,42 @@ static uint16_t fadedPart(uint16_t held, float fade, int part) {
 
     const Underwater *water = underwater();
     return (uint16_t) ((float) held + (water->towards[part] - (float) held) * fade);
+}
+
+/**
+ * Puts one pixel of a face over what is already there.
+ *
+ * A solid face replaces what it covers. One the client gave an alpha to is mixed with it: each
+ * side is cut down on its own before they are added, so the answer is up to one lower than
+ * cutting the sum once would give, and the part of the face being drawn keeps the places after
+ * the point that the walk across the row carries it in.
+ *
+ * How much the face hides is one less than the whole rather than one more than how much it
+ * shows, so a face drawn at its most solid still lets a little of what is behind it through.
+ */
+static uint32_t laidOver(uint32_t there, const uint16_t *colour) {
+    uint32_t packed = (uint32_t) (colour[3] >> 8) << 24;
+
+    if (faceShows == WHOLLY_SOLID) {
+        for (int part = 0; part < CHANNELS - 1; part++) {
+            packed |= (uint32_t) (colour[part] >> 8) << (part * 8);
+        }
+
+        return packed;
+    }
+
+    uint32_t shows = (uint32_t) faceShows;
+    uint32_t hides = 0xFFu - shows;
+
+    for (int part = 0; part < CHANNELS - 1; part++) {
+        uint32_t mine = ((uint32_t) colour[part] * shows) >> 16;
+        uint32_t held = (((there >> (part * 8)) & 0xFFu) * hides) >> 8;
+        uint32_t both = mine + held;
+
+        packed |= (both > 0xFFu ? 0xFFu : both) << (part * 8);
+    }
+
+    return packed;
 }
 
 static void fillSpan(int y, const Side *left, const Side *right) {
@@ -432,15 +482,17 @@ static void fillSpan(int y, const Side *left, const Side *right) {
 
     for (int x = from; x < to; x++) {
         if (!distanceDecides || depth <= held[x]) {
-            if (distanceDecides) {
+            /*
+             * A face drawn through what is behind it does not record how far away it is. What it
+             * covers stays as near as whatever was there, so a second blended face over the same
+             * place is drawn through both rather than hidden by the first.
+             */
+            if (distanceDecides && faceShows == WHOLLY_SOLID) {
                 held[x] = depth;
             }
 
             if (texels == NULL) {
-                row[x] = (uint32_t) (colour[0] >> 8)
-                    | (uint32_t) (colour[1] >> 8) << 8
-                    | (uint32_t) (colour[2] >> 8) << 16
-                    | (uint32_t) (colour[3] >> 8) << 24;
+                row[x] = laidOver(row[x], colour);
             } else {
                 /*
                  * A texel is shaded by the light the span has reached rather than replacing it,
@@ -458,7 +510,13 @@ static void fillSpan(int y, const Side *left, const Side *right) {
                     written |= (channel * colour[part] >> 16) << (part * 8);
                 }
 
-                row[x] = written;
+                uint16_t lifted[CHANNELS] = {
+                (uint16_t) ((written & 0xFF) << 8),
+                (uint16_t) (((written >> 8) & 0xFF) << 8),
+                (uint16_t) (((written >> 16) & 0xFF) << 8),
+                (uint16_t) (((written >> 24) & 0xFF) << 8)
+            };
+            row[x] = laidOver(row[x], lifted);
             }
         }
 
@@ -1057,6 +1115,13 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
             ? NULL
             : textureFor((unsigned short) faceTexture[face]);
 
+        /*
+         * A face the client gave no alpha to is drawn solid, and so is one whose alpha says it is
+         * wholly there. The client counts an alpha the other way round from how much shows.
+         */
+        int alpha = modelFaceAlpha(model, face);
+        faceShows = alpha == 0 ? WHOLLY_SOLID : 0xFF - alpha;
+
         texels = NULL;
         if (texture != NULL) {
             const TextureMetrics *metrics = textureMetrics(texture);
@@ -1086,6 +1151,7 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
     }
 
     texels = NULL;
+    faceShows = WHOLLY_SOLID;
 }
 
 /**
