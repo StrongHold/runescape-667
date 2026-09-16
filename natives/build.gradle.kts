@@ -695,6 +695,13 @@ val compileSoftwareToolkit by tasks.registering(Exec::class) {
 
     val target = toolkitLibrary.get().asFile
     val written = fileTree(toolkitDirectory) { include("**/*.c", "**/*.m") }
+
+    /*
+     * The headers are not compiled, but a change to one changes what the sources compile to, so
+     * the build has to know about them. Without this a change to a header alone leaves the last
+     * library in place and the checks compare the new sources against the old build.
+     */
+    val headers = fileTree(toolkitDirectory) { include("**/*.h") }
     val stubs = toolkitStubs.get().asFile
     val includes = listOf(
         jdkHome.dir("include").asFile.absolutePath,
@@ -703,6 +710,7 @@ val compileSoftwareToolkit by tasks.registering(Exec::class) {
     )
 
     inputs.files(written)
+    inputs.files(headers)
     inputs.file(toolkitStubs)
     outputs.file(toolkitLibrary)
 

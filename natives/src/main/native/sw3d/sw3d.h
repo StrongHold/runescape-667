@@ -69,8 +69,15 @@ typedef struct {
 
 extern Raster raster;
 
-/** The distance an untouched pixel is, which is further than anything can be drawn. */
-#define FURTHEST 3.4e38f
+/**
+ * The distance an untouched pixel is.
+ *
+ * A distance runs from nothing at the near plane to one at the far plane, so one is as far as
+ * anything drawn through the projection ever reaches. It is not merely a large number: a thing
+ * handed over at a distance past the far plane is kept out by an untouched pixel, and the
+ * particles rely on that without meaning to.
+ */
+#define FURTHEST 1.0f
 
 /**
  * Points the renderer at a buffer, or at nothing, and opens the clip over all of it.

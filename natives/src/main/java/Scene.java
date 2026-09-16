@@ -887,11 +887,6 @@ public sealed interface Scene {
      */
     record Particles() implements Scene {
 
-        @Override
-        public boolean written() {
-            return false;
-        }
-
 
         /** How many places of a fraction the client keeps a place and a size in. */
         private static final int PLACE_PLACES = 12;

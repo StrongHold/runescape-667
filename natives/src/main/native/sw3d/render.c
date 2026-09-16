@@ -1703,6 +1703,22 @@ static int particleIsOn(float across, float down, float depth) {
 }
 
 /**
+ * How far away a particle is, as the toolkit this replaces hands it to the circle it draws.
+ *
+ * The circle takes a whole number and turns it into a distance. The particles hand it the bits of
+ * the distance they worked out instead of the number, so what the circle makes of it is a distance
+ * far beyond anything the scene holds, and the particle is kept out by whatever was drawn first.
+ *
+ * That is a mistake in the toolkit, and it is what the toolkit does, so it is what this does. A
+ * particle drawn any other way would be a particle the client never sees.
+ */
+static float depthAsTheToolkitPassesIt(float depth) {
+    int32_t bits;
+    memcpy(&bits, &depth, sizeof(bits));
+    return (float) bits;
+}
+
+/**
  * Draws a cloud of particles, each one a point the client has already worked out where to put.
  *
  * The toolkit the client passes alongside the worker is not looked at, because there is only ever
@@ -1768,7 +1784,7 @@ JNIEXPORT void JNICALL Java_a_O(JNIEnv *env, jobject self, jlong worker, jobject
                 continue;
             }
 
-            fillCircle((int) across, (int) down, depth, wide >> 1,
+            fillCircle((int) across, (int) down, depthAsTheToolkitPassesIt(depth), wide >> 1,
                 (uint32_t) colours[which], PARTICLE_BLEND);
         }
     }
