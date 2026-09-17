@@ -53,7 +53,8 @@ Each library has a README of its own saying what it replaces, how far along it i
 differs from the shipped binary on purpose, and what is known to be wrong with the original. See
 `sw3d/README.md`.
 
-`jawtshim` is not one of the six. It is a shim that rewrites the shipped renderer's window-server
-import so that 2011 binary can still be loaded for comparison. The client does not use it: our own
-renderer asks for the modern interface directly. It goes when there is nothing left to compare
-against.
+`jawtshim` is not one of the six and is not on its way out. It lets the shipped toolkits obtain a
+drawing surface on a current JDK, which they cannot do by themselves, so without it neither could
+be driven and nothing could be compared against them. The client never loads it. It lives as long
+as the checks do, which is as long as the shipped binaries are the specification. See
+`jawtshim/README.md`.

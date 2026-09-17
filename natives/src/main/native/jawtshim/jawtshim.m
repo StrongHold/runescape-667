@@ -1,5 +1,15 @@
 /*
- * A drawing surface for the toolkits on modern macOS.
+ * A drawing surface for the shipped toolkits on modern macOS.
+ *
+ * This is not one of the libraries being replaced, and the client never loads it. It belongs to
+ * the checks: the shipped toolkits are what ours are measured against, and neither of them can
+ * obtain a drawing surface on a current JDK, so neither could be driven at all without this. Our
+ * own renderer asks the JDK for the modern interface directly and wants nothing from here.
+ *
+ * It is not a step on the way to anything, so it is not waiting to be deleted. It lives as long as
+ * the checks do, which is as long as there is a shipped binary worth comparing against, and that
+ * is the whole of the toolkit's life rather than the end of writing it: the comparison is what
+ * catches a change that quietly stops matching, not merely what guided the first draft.
  *
  * Both toolkits ask JavaVM.framework for a drawing surface, the software one at
  * JAWT_VERSION_1_3 and the hardware one at JAWT_VERSION_1_4. That framework now serves only
