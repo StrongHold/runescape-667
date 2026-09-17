@@ -335,6 +335,13 @@ val generateOpenGlBinding by tasks.registering {
         "glBindFramebufferEXT",
         "glDrawBuffer",
         "glReadBuffer",
+        // And these take a picture out of it, which needs the piece read brought down to one
+        // sample a pixel first, so each says which piece it is about to read.
+        "glReadPixelsi",
+        "glReadPixelsub",
+        "glCopyTexImage2D",
+        "glCopyTexSubImage2D",
+        "glBlitFramebufferEXT",
     )
 
     doLast {
@@ -542,6 +549,24 @@ val captureBinding = registerBindingCapture(
     "captureBinding", patchedOpenGlBinding, bindingAnswers, patchOpenGlBinding)
 val captureOwnBinding = registerBindingCapture(
     "captureOwnBinding", openGlLibrary, ownBindingAnswers, compileOpenGlBinding)
+
+/**
+ * The samples are not compared against the shipped binding, because the two do not agree on them
+ * and cannot: the shipped one gives two where none are asked for. What is held here is that this
+ * one draws with as many as it was asked for and can still be read back afterwards.
+ */
+val verifyOpenGlSamples by tasks.registering(JavaExec::class) {
+    description = "Draws through the OpenGL binding at each sample count and reads the picture back."
+    dependsOn(compileOpenGlBinding, ":unpackX64Jdk")
+
+    mainClass = "GlSamples"
+    classpath = sourceSets["main"].runtimeClasspath
+    setExecutable(x64JavaExecutable)
+    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+    environment("JAWTSHIM_WAIT_FOR_VIEW", "1")
+    args(openGlLibrary.get().asFile.absolutePath)
+    inputs.file(openGlLibrary)
+}
 
 /**
  * What a binding carries is held to being identical. What sort of context it built is not, and is
@@ -1116,6 +1141,7 @@ val verifyNatives by tasks.registering {
         verifyMemoryLibrary,
         verifyMemoryAnswers,
         verifyOpenGlBinding,
+        verifyOpenGlSamples,
         verifyMiscLibrary,
         verifySpriteLift,
         verifyMatrices,
