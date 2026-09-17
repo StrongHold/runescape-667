@@ -90,41 +90,52 @@ not.
 Matching the shipped binding here would mean writing an attribute list that discards its own
 request. It is not done, and nothing about it is accidental.
 
-## Antialiasing is not honoured, and what it would take
+## Antialiasing, which is written but not switched on
 
-Turning antialiasing up does nothing here. The client asks for none, two samples
-a pixel or four, and this library draws every one of them with one.
+The client asks for none, two samples a pixel, or four. It gets none, and the code that would give
+it what it asked for is here behind `JAGGL_SAMPLES`, off unless asked for.
 
-The reason is the drawable. The client is given a framebuffer of this library's
-own rather than the one the window carries, because the picture is shown through
-a layer. How finely a pixel is drawn is decided by the buffers hung on the
-framebuffer that is bound, so choosing a pixel format with four samples changes
-nothing while those buffers are plain.
+Two things had to be solved and both are done. The samples reached nothing because the client is
+given a framebuffer of this library's own rather than the one the window carries, and how finely a
+pixel is drawn is settled by the buffers hung on the framebuffer that is bound rather than by the
+format the context was made with, so the buffers now carry the samples. Nothing may then be read
+out of such a buffer, and the client reads its own picture back, so every native that takes a
+picture out of the framebuffer says which piece it is about to read and that piece is brought down
+to one sample in a plain buffer beside it first. Those are the two `glReadPixels`, both `glCopyTex`
+calls and the client's own `glBlitFramebuffer`. Only the piece read is brought down, never the
+whole picture, because the client reads its buffer back a row at a time.
 
-Hanging buffers of four samples on it instead is not the answer, and was tried:
+    ./gradlew :natives:verifyOpenGlSamples
 
-    samples=4 setSurface=true GL_SAMPLES=4 middlePixel=0 error=1282
+draws at each of the three counts, checks the buffer carries what was asked for, reads the picture
+back and checks what came back. It passes.
 
-`1282` is `GL_INVALID_OPERATION`. Reading pixels back out of a framebuffer object
-of more than one sample a pixel is not allowed, the client reads its framebuffer
-back, and every read failing leaves the screen black. The shipped library does
-not meet this because it draws into the window's own drawable, where the window
-system resolves a read for it.
+It is off all the same, because it has been switched on twice and left the client with a black
+screen both times, and neither failure is anything this check can reach. What no harness here
+drives is the showing of a frame: the layer draws in a context of its own while both buffers are
+made in the client's, and whether a buffer made in one is known in the other is a question only the
+client asks. Reporting is in place for exactly that, and says whether each buffer is known where
+the frame is shown and what OpenGL made of each step.
 
-So doing it properly means every way the client reads that framebuffer going
-through a plain buffer first: the two `glReadPixels`, the `glCopyTexImage` and
-`glCopyTexSubImage` calls, and anything else that takes a picture out of it.
-Each would have to bring the samples down and read from the result instead, and
-each is a pass-through today. That is the work, and it is not small.
+To find out:
 
-Worth knowing while it is undone: the shipped library answers two samples when
-asked for none, four when asked for four, and two when asked for two. So the
-antialiasing setting does something there and nothing here, and the setting can
-never be turned fully off there.
+    JAGGL_SAMPLES=1 JAGGL_VERBOSE=1 ./gradlew client:run --args="..."
 
-None of this touches the software toolkit. The client never hands it the setting,
-and `AntialiasingMode.validate` forces the setting to zero whenever the toolkit
-in use is not a hardware one.
+Both are forwarded from the shell by the client's own build, because the build daemon outlives the
+shell that starts it.
+
+The lesson is worth keeping whatever the answer turns out to be. The first check written for this
+asked the buffer how many samples it had and never asked whether anything drew, so it answered four
+over a black screen. The second asked whether anything drew and never showed a frame, so it passed
+over a black screen too.
+
+The shipped library answers two samples when asked for none, two for two and four for four. Asking
+it for none and being given two is the fault below: it sends the count as an attribute and a count
+of none ends the list it is in.
+
+None of this touches the software toolkit. The client never hands it the setting, and
+`AntialiasingMode.validate` forces the setting to zero whenever the toolkit in use is not a
+hardware one.
 
 ## Faults in the original
 
