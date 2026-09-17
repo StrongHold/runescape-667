@@ -130,14 +130,14 @@ JNIEXPORT void JNICALL Java_jaclib_memory_heap_NativeHeap_allocateHeap(JNIEnv *e
                                                                        jint capacity) {
     Heap *heap = calloc(1, sizeof(Heap));
     if (heap == NULL) {
-        throwByName(env, "java/lang/OutOfMemoryError", "");
+        throwByName(env, "java/lang/OutOfMemoryError", NULL);
         return;
     }
 
     heap->base = malloc(capacity <= 0 ? 1 : (size_t) capacity);
     if (heap->base == NULL) {
         free(heap);
-        throwByName(env, "java/lang/OutOfMemoryError", "");
+        throwByName(env, "java/lang/OutOfMemoryError", NULL);
         return;
     }
 
@@ -172,18 +172,27 @@ JNIEXPORT jint JNICALL Java_jaclib_memory_heap_NativeHeap_allocateBuffer(JNIEnv 
         return 0;
     }
 
+    /*
+     * A size below zero would otherwise pass the test below, because it makes the heap look
+     * emptier rather than fuller, and would then be handed back as a buffer nothing can hold.
+     */
+    if (size < 0) {
+        throwByName(env, "java/lang/OutOfMemoryError", NULL);
+        return 0;
+    }
+
     if (used(heap) + size > heap->capacity) {
         compact(heap);
 
         if (used(heap) + size > heap->capacity) {
-            throwByName(env, "java/lang/OutOfMemoryError", "");
+            throwByName(env, "java/lang/OutOfMemoryError", NULL);
             return 0;
         }
     }
 
     Buffer *buffer = calloc(1, sizeof(Buffer));
     if (buffer == NULL) {
-        throwByName(env, "java/lang/OutOfMemoryError", "");
+        throwByName(env, "java/lang/OutOfMemoryError", NULL);
         return 0;
     }
 
@@ -326,6 +335,13 @@ JNIEXPORT void JNICALL Java_jaclib_peer_Peer_init(JNIEnv *env, jclass owner, jcl
  * The seven fields of the hardware survey the client sends at login. Only the memory size is
  * available on every machine this runs on, and the rest describe an x86 processor, so they are
  * left at zero where there is none.
+ *
+ * The shipped library reports a different size here, and it is the one place its answer cannot be
+ * copied, because there is no answer to copy. It asks for HW_MEMSIZE with an output buffer it
+ * declares to be two bytes rather than eight, so the call fails and writes nothing, and it then
+ * shifts and returns whatever the stack happened to hold. The number it gives changes on every
+ * run and has no relation to how much memory the machine has. The value below is the size the
+ * kernel reports. Do not make this agree with the shipped library: nothing would be agreed with.
  */
 JNIEXPORT jintArray JNICALL Java_jaclib_hardware_1info_HardwareInfo_getCPUInfo(JNIEnv *env, jclass owner) {
     (void) owner;
@@ -347,20 +363,24 @@ JNIEXPORT jintArray JNICALL Java_jaclib_hardware_1info_HardwareInfo_getCPUInfo(J
 }
 
 /**
- * Answers nothing. The properties these report come from DXDiag and from a Direct3D device, and
- * this client asks for neither.
+ * Answers nothing, which is what the shipped library answers here and is not the same as an empty
+ * list. The properties these report come from DXDiag and from a Direct3D device, neither of which
+ * exists on this system, and nothing in the client reads any of the three.
  */
 JNIEXPORT jobjectArray JNICALL Java_jaclib_hardware_1info_HardwareInfo_getOpenGLProps(JNIEnv *env, jclass owner) {
+    (void) env;
     (void) owner;
-    return (*env)->NewObjectArray(env, 0, (*env)->FindClass(env, "java/lang/String"), NULL);
+    return NULL;
 }
 
 JNIEXPORT jobjectArray JNICALL Java_jaclib_hardware_1info_HardwareInfo_getDXDiagSystemProps(JNIEnv *env, jclass owner) {
+    (void) env;
     (void) owner;
-    return (*env)->NewObjectArray(env, 0, (*env)->FindClass(env, "java/lang/String"), NULL);
+    return NULL;
 }
 
 JNIEXPORT jobjectArray JNICALL Java_jaclib_hardware_1info_HardwareInfo_getDXDiagDisplayDevicesProps(JNIEnv *env, jclass owner) {
+    (void) env;
     (void) owner;
-    return (*env)->NewObjectArray(env, 0, (*env)->FindClass(env, "[Ljava/lang/String;"), NULL);
+    return NULL;
 }

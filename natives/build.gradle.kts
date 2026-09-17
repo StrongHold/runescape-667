@@ -13,6 +13,7 @@ dependencies {
  * has no arm64 slice.
  */
 val jdkHome = rootProject.layout.projectDirectory.dir(".gradle/jdk-x64/unpacked/Home")
+val x64JavaExecutable = jdkHome.file("bin/java").asFile.absolutePath
 val shimSource = layout.projectDirectory.file("src/main/native/jawtshim/jawtshim.m")
 val shimLibrary = layout.buildDirectory.file("natives/libjawtshim.dylib")
 
@@ -527,6 +528,92 @@ val verifyMemoryLibrary by tasks.registering(JavaExec::class) {
     args(memoryLibrary.get().asFile.absolutePath)
 }
 
+/**
+ * The shipped memory library, thinned to the one slice a virtual machine here can run and pointed
+ * at the shim.
+ *
+ * It asks JavaVM.framework for its JNI entry points exactly as the software toolkit does, so it
+ * needs the same shim, and it is thinned first because install_name_tool cannot read the ppc slice
+ * this one still carries.
+ */
+val shippedMemoryLibrary = providers.gradleProperty("jaclibLibrary")
+    .orElse(providers.systemProperty("user.home").map { "$it/.jagex_cache_32/runescape/libjaclib.dylib" })
+val patchedMemoryLibrary = layout.buildDirectory.file("natives/libjaclib-patched.dylib")
+
+val patchMemoryLibrary by tasks.registering(Exec::class) {
+    description = "Copies the shipped memory library and points its JNI import at the shim."
+    dependsOn(compileJawtShim)
+    outputs.file(patchedMemoryLibrary)
+
+    val source = shippedMemoryLibrary.get()
+    val target = patchedMemoryLibrary.get().asFile
+    val shimName = "@loader_path/libjawtshim.dylib"
+    val javaVm = "/System/Library/Frameworks/JavaVM.framework/Versions/A/JavaVM"
+
+    executable = "sh"
+    args("-c", listOf(
+        "lipo -thin x86_64 '$source' -output '$target'",
+        "install_name_tool -change '$javaVm' '$shimName' '$target'",
+        "codesign -f -s - '$target'",
+    ).joinToString(" && "))
+
+    doFirst {
+        require(File(source).isFile) { "No memory library at $source. Point -PjaclibLibrary at one." }
+        target.parentFile.mkdirs()
+    }
+}
+
+val memoryAnswers = layout.buildDirectory.file("answers/memory-shipped.txt")
+val ownMemoryAnswers = layout.buildDirectory.file("answers/memory-ours.txt")
+
+val captureMemory by tasks.registering(JavaExec::class) {
+    description = "Records what the shipped memory library answers."
+    dependsOn(patchMemoryLibrary)
+
+    val written = memoryAnswers.get().asFile
+
+    mainClass = "MemoryProbe"
+    classpath = sourceSets["main"].runtimeClasspath
+    setExecutable(x64JavaExecutable)
+    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+    args(patchedMemoryLibrary.get().asFile.absolutePath, written.absolutePath)
+    outputs.file(memoryAnswers)
+    doFirst { written.parentFile.mkdirs() }
+}
+
+val captureOwnMemory by tasks.registering(JavaExec::class) {
+    description = "Records what our memory library answers."
+    dependsOn(compileMemoryLibrary, ":unpackX64Jdk")
+
+    val written = ownMemoryAnswers.get().asFile
+
+    mainClass = "MemoryProbe"
+    classpath = sourceSets["main"].runtimeClasspath
+    setExecutable(x64JavaExecutable)
+    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+    args(memoryLibrary.get().asFile.absolutePath, written.absolutePath)
+    inputs.file(memoryLibrary)
+    inputs.files(sourceSets["main"].runtimeClasspath)
+    outputs.file(ownMemoryAnswers)
+    doFirst { written.parentFile.mkdirs() }
+}
+
+/**
+ * Both are driven through the x86_64 virtual machine, because the shipped library has no slice
+ * for anything else and the two have to be asked the same questions on the same machine.
+ */
+val verifyMemoryAnswers by tasks.registering(JavaExec::class) {
+    description = "Checks our memory library against the shipped one, answer for answer."
+    dependsOn(captureMemory, captureOwnMemory)
+    mainClass = "AnswerCheck"
+    classpath = sourceSets["main"].runtimeClasspath
+    args(
+        memoryAnswers.get().asFile.absolutePath,
+        ownMemoryAnswers.get().asFile.absolutePath,
+        "memory library answers",
+    )
+}
+
 val miscSource = layout.projectDirectory.file("src/main/native/jagmisc/jagmisc.c")
 val miscLibrary = layout.buildDirectory.file("natives/libjagmisc.dylib")
 
@@ -947,6 +1034,7 @@ val verifyNatives by tasks.registering {
         verifyToolkitLifetime,
         verifyToolkitSkeleton,
         verifyMemoryLibrary,
+        verifyMemoryAnswers,
         verifyMiscLibrary,
         verifySpriteLift,
         verifyMatrices,

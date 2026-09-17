@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.stream.IntStream;
 
 /**
- * Compares what the shipped toolkit answered against what ours answered, line for line.
+ * Compares what a shipped library answered against what ours answered, line for line.
  *
  * Not everything a toolkit does ends up on the screen. A matrix, a projected point and a clip
  * rectangle are all answered as integers, which can be compared exactly and over far more inputs
@@ -28,12 +28,12 @@ public final class AnswerCheck {
             var what = args[2];
 
             if (shipped.isEmpty()) {
-                throw new IllegalStateException("The shipped toolkit answered nothing.");
+                throw new IllegalStateException("The shipped library answered nothing.");
             }
 
             if (shipped.size() != ours.size()) {
                 throw new IllegalStateException(
-                    "The shipped toolkit gave %d answers and we gave %d."
+                    "The shipped library gave %d answers and we gave %d."
                         .formatted(shipped.size(), ours.size()));
             }
 
@@ -52,7 +52,7 @@ public final class AnswerCheck {
                 .count();
 
             if (wrong == 0) {
-                System.out.println(shipped.size() + " " + what + " identical to the shipped toolkit");
+                System.out.println(shipped.size() + " " + what + " identical to the shipped library");
                 System.exit(0);
             }
 
