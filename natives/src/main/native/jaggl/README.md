@@ -90,6 +90,42 @@ not.
 Matching the shipped binding here would mean writing an attribute list that discards its own
 request. It is not done, and nothing about it is accidental.
 
+## Antialiasing is not honoured, and what it would take
+
+Turning antialiasing up does nothing here. The client asks for none, two samples
+a pixel or four, and this library draws every one of them with one.
+
+The reason is the drawable. The client is given a framebuffer of this library's
+own rather than the one the window carries, because the picture is shown through
+a layer. How finely a pixel is drawn is decided by the buffers hung on the
+framebuffer that is bound, so choosing a pixel format with four samples changes
+nothing while those buffers are plain.
+
+Hanging buffers of four samples on it instead is not the answer, and was tried:
+
+    samples=4 setSurface=true GL_SAMPLES=4 middlePixel=0 error=1282
+
+`1282` is `GL_INVALID_OPERATION`. Reading pixels back out of a framebuffer object
+of more than one sample a pixel is not allowed, the client reads its framebuffer
+back, and every read failing leaves the screen black. The shipped library does
+not meet this because it draws into the window's own drawable, where the window
+system resolves a read for it.
+
+So doing it properly means every way the client reads that framebuffer going
+through a plain buffer first: the two `glReadPixels`, the `glCopyTexImage` and
+`glCopyTexSubImage` calls, and anything else that takes a picture out of it.
+Each would have to bring the samples down and read from the result instead, and
+each is a pass-through today. That is the work, and it is not small.
+
+Worth knowing while it is undone: the shipped library answers two samples when
+asked for none, four when asked for four, and two when asked for two. So the
+antialiasing setting does something there and nothing here, and the setting can
+never be turned fully off there.
+
+None of this touches the software toolkit. The client never hands it the setting,
+and `AntialiasingMode.validate` forces the setting to zero whenever the toolkit
+in use is not a hardware one.
+
 ## Faults in the original
 
 The shipped macOS binding does not have all hundred and eighty. It exports a hundred and seventy
