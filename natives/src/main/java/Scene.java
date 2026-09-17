@@ -1416,8 +1416,14 @@ public sealed interface Scene {
 
 
         /**
-         * What is left is a shade out on eight hundredths of the patch, which is the two toolkits
-         * carrying a share across a face a shade differently.
+         * Three thousand of its pixels are a shade out and all but a hundred and fifty of those
+         * are out by one. Give every corner a texture the size of a tile and the whole patch
+         * comes within two, so what is left is the same thing the textured patch is left with: a
+         * texture laid smaller than the tile it covers, read over and over across it.
+         *
+         * Laying all three at the size the face names rather than at the size each corner names
+         * is further off still, so it is not that the sizes are read and it is not that they are
+         * ignored.
          */
         @Override
         public boolean written() {
