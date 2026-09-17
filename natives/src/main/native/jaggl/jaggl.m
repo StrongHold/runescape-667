@@ -43,6 +43,7 @@
 #include <dlfcn.h>
 #include <limits.h>
 #include <sys/time.h>
+#include <stdatomic.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -114,6 +115,9 @@ static GLint offscreenWidth;
 static GLint offscreenHeight;
 static BOOL defaultBound;
 static uint64_t shownFrames;
+
+/** Set when the client finishes a frame, cleared when the screen takes one. */
+static _Atomic bool frameWaiting;
 
 static Surface *currentSurface;
 
@@ -282,7 +286,18 @@ static void complain(const char *what) {
 - (instancetype)init {
     self = [super init];
     if (self != nil) {
-        self.asynchronous = NO;
+        /*
+         * Core Animation asks this layer for a frame at the rate the screen refreshes, rather than
+         * being told to take one at the rate the client finishes them. Those are not the same rate
+         * and never will be, and telling it loses frames: two told between one refresh and the next
+         * become one shown, and the other is never seen. Asked instead, it takes the newest whole
+         * frame there is every time it refreshes and none is lost.
+         *
+         * This is only safe because the client draws into a buffer of its own. Asked for a frame at
+         * any moment, what this layer reads is the last one finished rather than the one being
+         * painted.
+         */
+        self.asynchronous = YES;
         self.opaque = YES;
         self.needsDisplayOnBoundsChange = YES;
     }
@@ -305,20 +320,19 @@ static void complain(const char *what) {
  */
 - (void)present {
     glFlush();
-
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [CATransaction begin];
-        [CATransaction setDisableActions:YES];
-        [self setNeedsDisplay];
-        [CATransaction commit];
-    });
+    atomic_store(&frameWaiting, true);
 }
 
+/*
+ * Answered at every refresh of the screen. Yes only where a frame has been finished since the last
+ * one was shown, so a screen that refreshes faster than the client draws does not show the same
+ * frame twice over, and one that refreshes slower shows the newest rather than the oldest.
+ */
 - (BOOL)canDrawInCGLContext:(CGLContextObj)context
                 pixelFormat:(CGLPixelFormatObj)format
                forLayerTime:(CFTimeInterval)layerTime
                 displayTime:(const CVTimeStamp *)displayTime {
-    return defaultFramebuffer != 0;
+    return defaultFramebuffer != 0 && atomic_load(&frameWaiting);
 }
 
 - (void)drawInCGLContext:(CGLContextObj)context
@@ -344,6 +358,7 @@ static void complain(const char *what) {
         glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, 0);
     }
 
+    atomic_store(&frameWaiting, false);
     shownFrames++;
     [super drawInCGLContext:context pixelFormat:format forLayerTime:layerTime displayTime:displayTime];
 }
