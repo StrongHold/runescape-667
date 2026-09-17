@@ -264,7 +264,25 @@ public final class HandGround {
      * shadow slides depends on how far above the ground the thing throwing it stands.
      */
     public static Ground buildShadowed(Toolkit toolkit, Shadow shadow) {
-        var ground = buildCornerLit(toolkit, false, FEATURE_FLAGS | TAKES_SHADOWS, false);
+        return buildShadowed(toolkit, shadow, false);
+    }
+
+    /**
+     * The shadowed patch again, with a column of tiles covered by their texture more than once.
+     *
+     * Where the shadow over a tile is read is worked out from where the tile sits on its texture,
+     * so a tile that names a texture narrower than itself asks for a place its picture of the
+     * shadow does not hold. Every other shadowed tile here lays its texture at exactly the size
+     * of a tile, and a shadow over one that does not had never been drawn.
+     *
+     * The client lays most of its ground this way. Water is the plainest case of it.
+     */
+    public static Ground buildShadowedRepeat(Toolkit toolkit, Shadow shadow) {
+        return buildShadowed(toolkit, shadow, true);
+    }
+
+    private static Ground buildShadowed(Toolkit toolkit, Shadow shadow, boolean repeated) {
+        var ground = buildCornerLit(toolkit, false, FEATURE_FLAGS | TAKES_SHADOWS, false, repeated);
 
         if (shadow != null) {
             for (var x = 1; x < TILES; x += 2) {
@@ -293,6 +311,17 @@ public final class HandGround {
 
     private static Ground buildCornerLit(Toolkit toolkit, boolean overlaid, int features,
             boolean blended) {
+        return buildCornerLit(toolkit, overlaid, features, blended, false);
+    }
+
+    /**
+     * How wide each column of a repeating patch lays its texture, so that one picture holds a
+     * tile covered by the whole of its texture, one covered by four of it, and one by sixteen.
+     */
+    private static final int[] REPEATED_AT = {TILE, TILE / 2, TILE / 4};
+
+    private static Ground buildCornerLit(Toolkit toolkit, boolean overlaid, int features,
+            boolean blended, boolean repeated) {
         var heights = heights();
         var ground = toolkit.createGround(TILES, TILES, heights, heights,
             GROUND_FLAGS, features);
@@ -320,7 +349,7 @@ public final class HandGround {
 
         for (var x = 0; x < TILES; x++) {
             for (var z = 0; z < TILES; z++) {
-                addCornerLitTile(ground, x, z, overlaid, blended);
+                addCornerLitTile(ground, x, z, overlaid, blended, repeated);
             }
         }
 
@@ -333,7 +362,7 @@ public final class HandGround {
     private static final int[] SLOT_ALONG = {0, TILE, 0, 0, TILE, TILE};
 
     private static void addCornerLitTile(Ground ground, int x, int z, boolean overlaid,
-            boolean blended) {
+            boolean blended, boolean repeated) {
         var slots = SLOT_ACROSS.length;
         var across = new int[slots];
         var along = new int[slots];
@@ -369,9 +398,10 @@ public final class HandGround {
              * A corner names how wide its texture is laid as well as which one it is, and the
              * client lets the corners of a face disagree about both at once.
              */
-            sizes[slot] = !blended ? TILE
-                : x == TILES / 4 ? TILE / 2
-                : (SLOT_ACROSS[slot] + SLOT_ALONG[slot]) % (TILE * 2) == 0 ? TILE / 4 : TILE;
+            sizes[slot] = blended
+                ? (x == TILES / 4 ? TILE / 2
+                    : (SLOT_ACROSS[slot] + SLOT_ALONG[slot]) % (TILE * 2) == 0 ? TILE / 4 : TILE)
+                : repeated ? REPEATED_AT[x % REPEATED_AT.length] : TILE;
             /*
              * A corner the client gives no colour to is a corner with no ground under it, which
              * is what it hands over at the mouth of a stairwell and anywhere else the floor opens

@@ -87,6 +87,7 @@ public sealed interface Scene {
         new SeenThrough(),
         new OverlaidGround(),
         new ShadowedGround(),
+        new ShadowedRepeat(),
         new BlendedGround(),
         new Stairs(),
         new Priorities(),
@@ -106,7 +107,8 @@ public sealed interface Scene {
                  Model faded, Model plain, Ground floor, Ground cut, Ground smooth,
                  Model roundPoint, Model rock, Model seenThrough, Ground overlaid, Ground hollow,
                  Ground shadowed, Ground blended, Model stairs, Model priorities,
-                 Model billboards, Mesh located, Mesh blackBacked, Model doubled) {
+                 Model billboards, Mesh located, Mesh blackBacked, Model doubled,
+                 Ground shadowedRepeat) {
         /* empty */
     }
 
@@ -1440,28 +1442,9 @@ public sealed interface Scene {
          * of the shadow over it meets the next, which is the same small difference the other
          * textured patches have. A hundred and twenty seven pixels of it.
          *
-         * That is not the whole of what is wrong with a shadow, and this scene is too kind to
-         * show it. Water in the client comes out in blocks a tile across, light and dark in a
-         * patchwork, where the shipped toolkit's is smooth. Turning ground shadows off makes the
-         * blocks go away, so it is the shadow and nothing else.
-         *
-         * What has been ruled out. The picture of a shadow over a tile is built here exactly as
-         * the shipped toolkit builds it: five places of the shadow map counted, multiplied by
-         * nine, and turned inside out, which is the same arithmetic down to the instruction. The
-         * client asks for the same shadow resolution this scene asks for, thirty two, so the
-         * picture is the same four places across either way. Where the picture is kept and how it
-         * is found again both work out right.
-         *
-         * What is left is how the picture is read across a tile. Four places stretched over a
-         * tile forty pixels wide, read one place at a time, is blocks ten pixels across, and
-         * blocks are what the client shows. The shipped toolkit reads the same four places and
-         * does not, so it reads them differently, and reading them differently is the thing to
-         * find. Its rasteriser has a routine for every combination of shading, texturing and
-         * blending it supports; the one that reads a shadow is the one to disassemble.
-         *
-         * This scene should grow a patch of water with something standing over it before any of
-         * that is attempted, because a hundred and twenty seven pixels is too few to tell whether
-         * a change helped.
+         * Every tile here lays its texture at exactly the size of a tile, which is the one size
+         * at which where a pixel sits on the texture and where it sits on the tile are the same
+         * thing. The patch beside this one lays it smaller.
          */
         @Override
         public boolean written() {
@@ -1486,6 +1469,52 @@ public sealed interface Scene {
             }
 
             props.shadowed().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
+                HandGround.TILES, visible, false, 0);
+        }
+    }
+
+    /**
+     * The same shadowed patch, with each column of it covered by its texture a different number
+     * of times.
+     *
+     * Where a pixel of a tile reads the shadow over it is worked out from where that pixel sits
+     * on the tile's texture, so a tile laying its texture narrower than itself reads the shadow
+     * somewhere the picture of it does not reach. Every other shadowed tile drawn here lays its
+     * texture at exactly the size of a tile, which is the one case where the two happen to agree.
+     *
+     * The client lays hardly any of its ground at the size of a tile, and water none of it.
+     */
+    record ShadowedRepeat() implements Scene {
+
+        /**
+         * A hundred and twenty three pixels are left, along the edges where one tile's picture of
+         * the shadow over it meets the next. It is the same handful the patch laying its texture
+         * at the size of a tile is left with, and no more of it for the texture being laid four
+         * or sixteen times over.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            var camera = toolkit.createMatrix();
+            camera.createCamera(HandGround.TILES * HandGround.TILE / 2, Terrain.UP,
+                -Terrain.BACK, TURN / 8, 0, 0);
+            toolkit.setCamera(camera);
+
+            var visible = new boolean[HandGround.TILES * 2][HandGround.TILES * 2];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            props.shadowedRepeat().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
                 HandGround.TILES, visible, false, 0);
         }
     }

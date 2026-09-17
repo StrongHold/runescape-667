@@ -455,6 +455,14 @@ static const unsigned char *shadowTexels;
 static int shadowTexelShift;
 
 /**
+ * How far a place on the texture is shifted down to reach a place in the picture of the shadow
+ * over the tile, before anything is taken off for a tile covered by its texture more than once.
+ *
+ * The ground works this out once for a tile and every face of that tile starts from it.
+ */
+static int shadowTileShift;
+
+/**
  * How much of the face being drawn shows, out of two hundred and fifty five, or nothing at all
  * when the face is drawn solid.
  *
@@ -1635,6 +1643,24 @@ static int blendTextures(const void *tile, int face, int wide, Corner *walked) {
     return 1;
 }
 
+/**
+ * How many times over a tile is covered by its texture, as a shift.
+ *
+ * A tile names how much of the world one width of its texture covers, and every size the client
+ * names divides the tile exactly. A size that does not is counted as covering the tile once.
+ */
+static int timesLaid(int tileSize, int wide) {
+    int times = wide <= 0 ? 1 : tileSize / wide;
+    int shift = 0;
+
+    while (times > 1) {
+        times >>= 1;
+        shift++;
+    }
+
+    return shift;
+}
+
 static void layTextureOnTile(const void *tile, int face, int tileSize,
                              const unsigned char *shadow, Corner *walked) {
     texels = NULL;
@@ -1687,6 +1713,14 @@ static void layTextureOnTile(const void *tile, int face, int tileSize,
     if (wide <= 0) {
         wide = tileSize;
     }
+
+    /*
+     * Where a pixel reads the shadow over the tile is worked out from where that pixel sits on
+     * the tile's texture, and a tile covered by four of its texture has run four times as far
+     * across it by the far edge. The picture of the shadow is still one tile wide however many
+     * times the texture is laid, so the times over have to come back off again.
+     */
+    shadowTexelShift = shadowTileShift + timesLaid(tileSize, wide);
 
     if (!cornersAgree(tile, face)) {
         blendTextures(tile, face, wide, walked);
@@ -1799,7 +1833,7 @@ void renderGroundTile(const void *ground, int x, int z) {
     int tileSize = groundTileSize(ground);
 
     const unsigned char *shadow =
-        groundTileShadow(ground, (void *) tile, x, z, &shadowTexelShift);
+        groundTileShadow(ground, (void *) tile, x, z, &shadowTileShift);
 
     uint32_t *shade = calloc((size_t) corners, sizeof(uint32_t));
     if (shade == NULL) {

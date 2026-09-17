@@ -121,7 +121,9 @@ public final class FrameCapture {
          * back nothing, and a scene handed nothing quietly draws nothing.
          */
         var textured = texturedMesh();
-        
+
+        var shadow = shadowOf(toolkit);
+
         var props = new Scene.Props(
             gradient,
             toolkit.createModel(CacheMesh.anyUntextured(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
@@ -142,7 +144,7 @@ public final class FrameCapture {
             seenThroughModel(toolkit, textured),
             HandGround.buildOverlaid(toolkit),
             HandGround.buildHollow(toolkit),
-            HandGround.buildShadowed(toolkit, shadowOf(toolkit)),
+            HandGround.buildShadowed(toolkit, shadow),
             HandGround.buildBlended(toolkit),
             namedModel(toolkit, CacheMesh.STAIRS, false, EVERY_FUNCTION),
             toolkit.createModel(PriorityMesh.INSTANCE.build(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
@@ -150,7 +152,8 @@ public final class FrameCapture {
             CacheMesh.numbered(CacheMesh.STAIRS).orElse(null),
             CacheMesh.numbered(CacheMesh.BLACK_BACKED).orElse(null),
             toolkit.createModel(DoubledMesh.INSTANCE.build(), FUNCTIONS, FEATURES,
-                AMBIENT, CONTRAST));
+                AMBIENT, CONTRAST),
+            HandGround.buildShadowedRepeat(toolkit, shadow));
 
         var manifest = new ArrayList<String>();
 
