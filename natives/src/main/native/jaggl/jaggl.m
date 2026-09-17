@@ -172,8 +172,26 @@ static BOOL askedForSamples(void) {
 }
 
 /**
- * Reports what OpenGL made of the last thing asked of it, for the few steps that only a run of the
- * client can exercise.
+ * Throws away whatever OpenGL is already unhappy about.
+ *
+ * What comes back from asking is the oldest complaint outstanding, not the newest, so anything
+ * left lying about by the client is answered in place of the step being watched. Every check of a
+ * step here has to start from nothing or it reports another's fault as its own, which is how the
+ * showing of a frame came to be blamed for a whole picture that arrived intact.
+ */
+static void forget(void) {
+    if (!verbose()) {
+        return;
+    }
+
+    for (int left = 0; left < 32 && glGetError() != GL_NO_ERROR; left++) {
+        /* empty, the point is the asking */
+    }
+}
+
+/**
+ * Reports what OpenGL made of the step just taken, which is only the step just taken where the
+ * complaints outstanding were thrown away before it.
  */
 static void complain(const char *what) {
     if (!verbose()) {
@@ -241,6 +259,7 @@ static void complain(const char *what) {
     /* Read straight from what the client drew. See -present for what that risks. */
     if (defaultFramebuffer != 0) {
         CGSize size = self.bounds.size;
+        forget();
         glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, defaultFramebuffer);
         glBlitFramebufferEXT(0, 0, offscreenWidth, offscreenHeight,
                              0, 0, (GLint) size.width, (GLint) size.height,
@@ -406,6 +425,7 @@ static BOOL resizeOffscreen(GLint width, GLint height) {
         glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT,
                                      GL_RENDERBUFFER_EXT, drawDepth);
 
+        forget();
         GLenum many = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
         JAGGLLOG("plain buffer %u, drawn buffer %u at %d samples, status 0x%x",
                  defaultFramebuffer, drawFramebuffer, wantedSamples, many);
@@ -461,10 +481,10 @@ static void bringDown(const char *who, GLint x, GLint y, GLint width, GLint heig
     GLint top = y + height > offscreenHeight ? offscreenHeight : y + height;
 
     if (right <= left || top <= bottom) {
-        JAGGLLOG("%s wanted %dx%d at %d,%d, which is outside a drawable of %dx%d",
-                 who, width, height, x, y, offscreenWidth, offscreenHeight);
         return;
     }
+
+    forget();
 
     glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, drawFramebuffer);
     glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, defaultFramebuffer);
