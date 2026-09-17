@@ -78,6 +78,9 @@ public final class HandGround {
     /** What the client hands over for a corner of the ground that has no colour of its own. */
     private static final int NO_COLOUR = -1;
 
+    /** The most the client ever asks a corner of the ground to be darkened by. */
+    private static final int DARKENED_MOST = 30;
+
     /**
      * The colour laid over a whole face, which is a red the corner colours never reach so that a
      * face drawn with it cannot be mistaken for one drawn without.
@@ -193,6 +196,17 @@ public final class HandGround {
         var ground = toolkit.createGround(TILES, TILES, heights, heights,
             GROUND_FLAGS, features);
 
+        /*
+         * The client darkens the ground under and around everything that stands on it and casts a
+         * shadow, corner by corner, before it hands any tile over. A block of corners here is
+         * darkened by as much as the client ever asks for and a second by half of it.
+         */
+        for (var x = 2; x < 6; x++) {
+            for (var z = 2; z < 6; z++) {
+                ground.ka(x, z, x < 4 ? DARKENED_MOST : DARKENED_MOST / 2);
+            }
+        }
+
         for (var x = 0; x < TILES; x++) {
             for (var z = 0; z < TILES; z++) {
                 addCornerLitTile(ground, x, z, overlaid, blended);
@@ -250,9 +264,11 @@ public final class HandGround {
             /*
              * A corner the client gives no colour to is a corner with no ground under it, which
              * is what it hands over at the mouth of a stairwell and anywhere else the floor opens
-             * onto the one below. One tile in nine here has one.
+             * onto the one below. One tile in nine here has one, and a whole row of them has
+             * nothing but, because a tile with no ground anywhere on it is what the client hands
+             * over for the hole itself.
              */
-            colours[slot] = (x + z) % 3 == 1 && slot % 2 == 0
+            colours[slot] = (x + z) % 3 == 1 && slot % 2 == 0 || z == TILES - 2
                 ? NO_COLOUR
                 : cornerHsl(x + SLOT_ACROSS[slot] / TILE, z + SLOT_ALONG[slot] / TILE);
 

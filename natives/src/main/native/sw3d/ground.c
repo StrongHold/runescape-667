@@ -393,16 +393,27 @@ JNIEXPORT void JNICALL Java_t_V(JNIEnv *env, jobject self, jint which, jint acro
 /**
  * Forgets a tile, which the client asks for when the world beneath it changes.
  */
-JNIEXPORT void JNICALL Java_t_ka(JNIEnv *env, jobject self, jint x, jint z, jint level) {
-    (void) level;
-
+/**
+ * Darkens one corner of the grid, which is how the client puts the shadow of a thing standing on
+ * the ground onto the ground itself.
+ *
+ * The client walks the corners under and around everything that casts one and asks for each to be
+ * darkened by as much as that thing darkens it. A corner already darker than that is left as it
+ * is, so a corner under two things takes the darker of the two rather than both.
+ *
+ * This is asked for before any tile is handed over, and it is what a tile's corners are lit by.
+ */
+JNIEXPORT void JNICALL Java_t_ka(JNIEnv *env, jobject self, jint x, jint z, jint darker) {
     Ground *ground = groundOf(env, self);
-    if (ground == NULL || x < 0 || z < 0 || x >= ground->sizeX || z >= ground->sizeZ) {
+    if (ground == NULL || ground->corners == NULL
+        || x < 0 || z < 0 || x > ground->sizeX || z > ground->sizeZ) {
         return;
     }
 
-    tileFree(*tileAt(ground, x, z));
-    *tileAt(ground, x, z) = NULL;
+    size_t at = (size_t) x * (size_t) (ground->sizeZ + 1) + (size_t) z;
+    if (ground->corners[at] < darker) {
+        ground->corners[at] = (unsigned char) darker;
+    }
 }
 
 static int16_t *shortsFrom(JNIEnv *env, jintArray source, int count) {
