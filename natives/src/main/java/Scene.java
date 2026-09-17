@@ -84,7 +84,9 @@ public sealed interface Scene {
         new OverlaidGround(),
         new ShadowedGround(),
         new BlendedGround(),
-        new Stairs()
+        new Stairs(),
+        new Priorities(),
+        new Billboards()
     );
 
     /**
@@ -95,7 +97,8 @@ public sealed interface Scene {
                  Font mono, Font proportional, Ground ground, Mesh mesh, Model textured,
                  Model faded, Model plain, Ground floor, Ground cut, Ground smooth,
                  Model roundPoint, Model rock, Model seenThrough, Ground overlaid,
-                 Ground shadowed, Ground blended, Model stairs) {
+                 Ground shadowed, Ground blended, Model stairs, Model priorities,
+                 Model billboards) {
         /* empty */
     }
 
@@ -289,6 +292,63 @@ public sealed interface Scene {
                 props.seenThrough().render(props.matrix(), null, step);
 
             }
+        }
+    }
+
+    /**
+     * Faces lying exactly on top of one another, listed in one order and given priorities in the
+     * other.
+     *
+     * The client hands over a priority for every face of a mesh and one for the mesh as a whole,
+     * and nothing here had ever looked at either. Where two faces stand at the same distance the
+     * one drawn second is the one that shows, so the order they are drawn in decides the colour
+     * of every pixel they share.
+     */
+    record Priorities() implements Scene {
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            if (props.priorities() == null) {
+                return;
+            }
+
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            props.matrix().makeRotationZ(0);
+            props.matrix().translate(0, 0, DEPTH);
+            props.priorities().render(props.matrix(), null, 1);
+        }
+    }
+
+    /**
+     * A model carrying billboards, which are squares the client hangs off a face and keeps turned
+     * towards the eye. Nothing here had ever hung one.
+     */
+    record Billboards() implements Scene {
+
+
+        /**
+         * Nothing hangs one yet. The client packs what each billboard is and which face it hangs
+         * off into the numbers it builds a model from, and the toolkit reads none of it.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            if (props.billboards() == null) {
+                return;
+            }
+
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            props.matrix().makeRotationZ(0);
+            props.matrix().translate(0, 0, DEPTH);
+            props.billboards().render(props.matrix(), null, 1);
         }
     }
 

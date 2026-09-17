@@ -144,7 +144,9 @@ public final class FrameCapture {
             HandGround.buildOverlaid(toolkit),
             HandGround.buildShadowed(toolkit, shadowOf(toolkit)),
             HandGround.buildBlended(toolkit),
-            namedModel(toolkit, CacheMesh.STAIRS));
+            namedModel(toolkit, CacheMesh.STAIRS),
+            toolkit.createModel(PriorityMesh.INSTANCE.build(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
+            toolkit.createModel(BillboardMesh.INSTANCE.build(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST));
 
         var manifest = new ArrayList<String>();
 

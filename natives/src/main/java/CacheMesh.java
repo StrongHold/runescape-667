@@ -40,7 +40,7 @@ public final class CacheMesh {
      * The group holding a flight of stairs whose first step the client draws nothing for, so that
      * the hole beneath the stairs shows through where the step should be.
      */
-    public static final int STAIRS = 29592;
+    public static final int STAIRS = 26910;
 
     private final FileSystem_Client store;
 
@@ -155,7 +155,23 @@ public final class CacheMesh {
             }
         }
 
-        System.out.println("SURVEY " + textured + " textured models, spaces by way " + ways);
+        var billboards = 0;
+        var particles = 0;
+        for (var group = 0; group < GROUP_LIMIT; group++) {
+            var mesh = held.read(group);
+            if (mesh.isEmpty()) {
+                continue;
+            }
+            if (mesh.get().billboards != null && mesh.get().billboards.length > 0) {
+                billboards++;
+            }
+            if (mesh.get().emitters != null && mesh.get().emitters.length > 0) {
+                particles++;
+            }
+        }
+
+        System.out.println("SURVEY " + textured + " textured models, spaces by way " + ways
+            + ", models with billboards " + billboards + ", with particles " + particles);
     }
 
     /**
