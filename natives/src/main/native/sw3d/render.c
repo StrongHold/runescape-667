@@ -2525,8 +2525,14 @@ static Corner planCorner(const void *tile, int corner, float across, float down,
     uint32_t colour;
     groundTilePlanCorner(tile, corner, &alongX, &alongZ, &colour);
 
+    /*
+     * A corner is drawn on the map in the colour the client laid over its face, and in its own
+     * colour only where the client laid none. A face standing for its texture takes neither.
+     */
     if (paint != NO_PAINT) {
         colour = paint;
+    } else {
+        groundTilePlanColour(tile, corner, &colour);
     }
 
     float x = across + (float) alongX * width / (float) size;

@@ -78,6 +78,7 @@ public sealed interface Scene {
         new CutGround(),
         new HollowGround(),
         new HollowPlan(),
+        new OverlaidPlan(),
         new SmoothGround(),
         new Textured(),
         new RoundPoint(),
@@ -1624,6 +1625,40 @@ public sealed interface Scene {
             }
 
             props.hollow().drawMinimap(0, 0, HandGround.TILES, HandGround.TILES, visible);
+        }
+    }
+
+    /**
+     * A patch carrying a colour laid over each face, drawn from straight above.
+     *
+     * The ground keeps two colours for every corner: the one it is drawn in as the world is seen,
+     * and the one it is drawn in on the map. The second is the colour the client lays over a
+     * face, and it is kept only where the client hands one over. Nothing else here draws the map
+     * of a patch that carries one, so what becomes of the second colour is all this shows.
+     */
+    record OverlaidPlan() implements Scene {
+
+        /**
+         * A hundred and sixty of its pixels are a shade out, all of them in the one row where the
+         * client laid no colour over the face and gave the corners none of their own either. The
+         * shipped toolkit draws such a corner in a faint grey that follows the light on it, and
+         * this draws it black. Every corner the client gave either colour to is drawn right.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            var visible = new boolean[HandGround.TILES][HandGround.TILES];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            props.overlaid().drawMinimap(0, 0, HandGround.TILES, HandGround.TILES, visible);
         }
     }
 

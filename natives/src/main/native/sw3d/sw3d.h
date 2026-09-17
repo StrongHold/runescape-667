@@ -262,6 +262,7 @@ int groundTileFaces(const void *tile);
 /** Which texture a face of the tile wears, or nothing where it wears none. */
 int groundTileFaceTexture(const void *tile, int face);
 int groundTileFaceHollow(const void *tile, int face);
+int groundTilePlanColour(const void *tile, int corner, uint32_t *colour);
 
 /** How much of the world one whole width of a face's texture covers. */
 int groundTileFaceSize(const void *tile, int face);

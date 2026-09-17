@@ -32,6 +32,12 @@ typedef struct {
     int16_t *along;
 
     uint32_t *colour;
+
+    /**
+     * The colour each corner is drawn in on the map, where the client lays one over the face the
+     * corner belongs to. Nothing where it laid none, and the corner's own colour serves instead.
+     */
+    uint32_t *plan;
     int16_t *texture;
     int16_t *size;
     unsigned char *light;
@@ -178,6 +184,7 @@ static void tileFree(Tile *tile) {
     free(tile->size);
     free(tile->light);
     free(tile->hollow);
+    free(tile->plan);
     free(tile->depth);
     free(tile);
 }
@@ -502,6 +509,7 @@ enum { NO_COLOUR = -1 };
 /** The colour such a corner is lit as instead, which carries no hue and no lightness at all. */
 enum { BLACK = 0 };
 
+
 /** What the lightness of a colour is held out of, and the ends it is kept away from. */
 enum { LIGHTNESS_WHOLE = 128, LIGHTNESS_SHIFT = 7, LIGHTNESS_LEAST = 2, LIGHTNESS_MOST = 126 };
 
@@ -666,7 +674,6 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
                                  jintArray texture, jintArray size,
                                  jint waterColour, jint waterDepth, jint waterBias,
                                  jboolean shadowed) {
-    (void) overlay;
     (void) waterColour;
     (void) waterDepth;
     (void) waterBias;
@@ -719,6 +726,12 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
 
     int *levels = calloc((size_t) corners, sizeof(int));
     int *colours = calloc((size_t) corners, sizeof(int));
+    int *overlays = overlay == NULL ? NULL : calloc((size_t) corners, sizeof(int));
+
+    if (overlays != NULL) {
+        (*env)->GetIntArrayRegion(env, overlay, 0, corners, (jint *) overlays);
+        tile->plan = calloc((size_t) corners, sizeof(uint32_t));
+    }
 
     if (levels != NULL && colours != NULL) {
         if (level != NULL) {
@@ -752,11 +765,20 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
             tile->colour[corner] = litCorner(ground, named, tile->light[corner],
                     x, z, tile->across[corner], tile->along[corner],
                     tile->texture == NULL ? -1 : tile->texture[corner]);
+
+            if (tile->plan != NULL) {
+                int laid = overlays[corner] == NO_COLOUR ? BLACK : overlays[corner] & 0xFFFF;
+
+                tile->plan[corner] = litCorner(ground, laid, tile->light[corner],
+                        x, z, tile->across[corner], tile->along[corner],
+                        tile->texture == NULL ? -1 : tile->texture[corner]);
+            }
         }
     }
 
     free(levels);
     free(colours);
+    free(overlays);
 
     tileFree(*tileAt(ground, x, z));
     *tileAt(ground, x, z) = tile;
@@ -1195,6 +1217,21 @@ int groundTileFaceTexture(const void *at, int face) {
     }
 
     return tile->texture[face * 3];
+}
+
+/**
+ * The colour one corner is drawn in on the map, which is the colour the client laid over the face
+ * it belongs to. Nothing comes back where the client laid none, and the corner's own colour is
+ * what the map is drawn in instead.
+ */
+int groundTilePlanColour(const void *at, int corner, uint32_t *colour) {
+    const Tile *tile = at;
+    if (tile->plan == NULL || corner >= tile->corners) {
+        return 0;
+    }
+
+    *colour = tile->plan[corner];
+    return 1;
 }
 
 /**
