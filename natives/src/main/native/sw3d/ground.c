@@ -584,6 +584,18 @@ static int shadeInside(const Ground *ground, int x, int z, int across, int along
     return near + (((far - near) * along) >> shift);
 }
 
+/**
+ * Which way the ground faces at a point inside a tile, shared out from the four corners around it.
+ *
+ * The toolkit hands the four over as a ring rather than as two rows: the corner the tile starts
+ * at, the one a step along, the one across from that, and the one a step across. They are paired
+ * here as two rows all the same, because pairing them as they are handed over puts every scene
+ * made of plain tiles out and this one further out still.
+ *
+ * The fourth part of each direction is not shared out. A plain one is written into it and the sun
+ * is divided by that, so a direction blended from four of length one is left shorter than one and
+ * is meant to be.
+ */
 static void facingInside(const Ground *ground, int x, int z, int across, int along, float *into) {
     const float *near = groundCornerNormal(ground, x, z);
     const float *far = groundCornerNormal(ground, x + 1, z);
