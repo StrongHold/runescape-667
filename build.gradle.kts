@@ -105,6 +105,19 @@ subprojects {
                 systemProperty("toolkit.jagmisc.library", miscLibrary.asFile.absolutePath)
 
                 /*
+                 * A shipped toolkit is x86_64 and this machine is not, so a run that asks for one
+                 * is run on the virtual machine it was built for. Everything is slower under that,
+                 * the client included, which is why it is only done when asked.
+                 */
+                val shipped = providers.gradleProperty("shippedSw3d").isPresent
+                    || providers.gradleProperty("shippedJaggl").isPresent
+
+                if (shipped) {
+                    dependsOn(":unpackX64Jdk")
+                    setExecutable(x64Java.asFile.absolutePath)
+                }
+
+                /*
                  * Which toolkit the client draws with is ours unless the shipped one is asked for.
                  *
                  * A library not named here is loaded as it was downloaded, which is what makes the
