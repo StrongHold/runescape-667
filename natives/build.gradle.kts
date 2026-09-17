@@ -881,6 +881,31 @@ val verifyPoints = registerProbe("points", "PointProbe", "projection answers")
 val verifyModels = registerProbe("models", "ModelProbe", "model answers")
 
 /**
+ * Every check the toolkit is held to, in one place.
+ *
+ * Run this before changing anything under the toolkit. It is not part of `check`, because what it
+ * measures against is the shipped library out of the game's own cache, which is on a developer's
+ * machine and not in this repository: a `check` that depended on it would fail for anyone who has
+ * not run the client. Nor can it run anywhere but macOS, because it loads a dylib through a shim
+ * built against the window server, and it needs the x86_64 virtual machine that library was built
+ * for.
+ */
+val verifyNatives by tasks.registering {
+    group = "verification"
+    description = "Runs every check the toolkit is held to against the shipped library."
+    dependsOn(
+        verifyToolkit,
+        verifyToolkitLifetime,
+        verifyToolkitSkeleton,
+        verifyMemoryLibrary,
+        verifySpriteLift,
+        verifyMatrices,
+        verifyPoints,
+        verifyModels,
+    )
+}
+
+/**
  * Lists what the map says stands on one tile, so that a place the client draws wrongly can be
  * turned into the models standing there.
  */
