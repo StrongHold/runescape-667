@@ -119,24 +119,7 @@ static uint64_t shownFrames;
 /** Set when the client finishes a frame, cleared when the screen takes one. */
 static _Atomic bool frameWaiting;
 
-/**
- * Raised each time the screen takes a frame, so that the client can wait for it to.
- *
- * A real swap of buffers waits for the screen before it answers, and that wait is what holds a
- * client to the rate the screen refreshes at. Nothing waited here, so the client finished frames
- * on its own clock and they fell between refreshes wherever they happened to land: shown a
- * hundred out of a hundred, but one eight thousand microseconds after the last and the next thirty
- * three thousand, when every one of them was drawn twenty thousand apart.
- */
-static dispatch_semaphore_t frameTaken;
 
-/**
- * How long the client will wait for the screen to take a frame before going on without it.
- *
- * There has to be a limit. A window nobody can see is not refreshed, so its layer is never asked
- * for a frame, and a client waiting for that with no way out would stop for good.
- */
-enum { LONGEST_WAIT_IN_MILLISECONDS = 100 };
 
 /* What reading the picture back cost, which stops the card dead each time it is asked. */
 static uint64_t reads;
@@ -322,10 +305,6 @@ static void complain(const char *what) {
 - (instancetype)init {
     self = [super init];
     if (self != nil) {
-        static dispatch_once_t once;
-        dispatch_once(&once, ^{
-            frameTaken = dispatch_semaphore_create(0);
-        });
 
         /*
          * Core Animation asks this layer for a frame at the rate the screen refreshes, rather than
@@ -359,18 +338,19 @@ static void complain(const char *what) {
  * over there and then, which is what the software toolkit's own surface does and why that one is
  * smooth.
  */
+/*
+ * Says that a frame is finished, and returns.
+ *
+ * It waited for the screen to take it once, to hold the client to the rate the screen refreshes
+ * at. That cost a quarter of every frame and did worse than cost it. The client is not the only
+ * thread that finishes a frame: the loading screen has one of its own, and it holds a lock the
+ * game thread needs while it draws. Two threads waiting on one screen take each other's turns,
+ * one waits the whole hundred milliseconds it is allowed, and the game thread waits behind the
+ * lock for as long as that lasts.
+ */
 - (void)present {
     glFlush();
     atomic_store(&frameWaiting, true);
-
-    /*
-     * Waits for the screen to take it, which is what a swap of buffers does and what paces the
-     * client to the screen rather than to its own clock. Giving up after a while costs one frame's
-     * smoothness and is the only thing standing between a hidden window and a client that never
-     * runs again.
-     */
-    dispatch_semaphore_wait(frameTaken, dispatch_time(DISPATCH_TIME_NOW,
-                                                      LONGEST_WAIT_IN_MILLISECONDS * NSEC_PER_MSEC));
 }
 
 /*
@@ -409,7 +389,6 @@ static void complain(const char *what) {
     }
 
     atomic_store(&frameWaiting, false);
-    dispatch_semaphore_signal(frameTaken);
     shownFrames++;
 
     if (timing()) {
