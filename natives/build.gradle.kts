@@ -802,7 +802,9 @@ val verifyToolkit by tasks.registering(JavaExec::class) {
         layout.buildDirectory.dir("frames").get().asFile.absolutePath,
         ownFrames.get().asFile.absolutePath,
         layout.buildDirectory.dir("frame-differences").get().asFile.absolutePath,
+        layout.projectDirectory.file("outstanding.txt").asFile.absolutePath,
     )
+    inputs.file(layout.projectDirectory.file("outstanding.txt"))
 }
 
 /**

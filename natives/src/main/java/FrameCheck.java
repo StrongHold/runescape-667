@@ -5,7 +5,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
 /**
  * Checks the frames both toolkits drew from the same scenes.
@@ -54,6 +56,7 @@ public final class FrameCheck {
             var ours = Frames.at("our toolkit", Path.of(args[1]));
             var marks = Path.of(args[2]);
             Files.createDirectories(marks);
+            var allowed = Allowance.read(Path.of(args[3]));
 
             var report = new ArrayList<String>();
             report.addAll(checkRepeatsAgree(shipped, marks));
@@ -61,6 +64,7 @@ public final class FrameCheck {
             report.addAll(checkImplementationsAgree(shipped, ours, marks));
 
             measureOutstanding(shipped, ours).forEach(System.out::println);
+            report.addAll(checkOutstandingHeldGround(shipped, ours, allowed));
 
             if (report.isEmpty()) {
                 System.out.println(shipped.scenes().size() + " frames identical to the shipped toolkit");
@@ -174,6 +178,124 @@ public final class FrameCheck {
         }
 
         return report;
+    }
+
+    /**
+     * How far one unfinished scene is allowed to be from the shipped toolkit.
+     *
+     * A scene that cannot pass would otherwise go unchecked, and a change could take it from a few
+     * pixels out to half the picture without anything noticing. What each one came to when it was
+     * last looked at is written down instead, and a scene that grows past what is written down
+     * fails the same way a finished one does.
+     */
+    private record Allowance(int onlyShipped, int onlyOurs, int shaded) {
+
+        static Map<String, Allowance> read(Path path) throws IOException {
+            var held = new TreeMap<String, Allowance>();
+
+            for (var line : Files.readAllLines(path)) {
+                var said = line.trim();
+                if (said.isEmpty() || said.startsWith("#")) {
+                    continue;
+                }
+
+                var halves = said.split("=", 2);
+                var counts = halves[1].split(",");
+                held.put(halves[0].trim(), new Allowance(
+                    Integer.parseInt(counts[0].trim()),
+                    Integer.parseInt(counts[1].trim()),
+                    Integer.parseInt(counts[2].trim())));
+            }
+
+            return held;
+        }
+
+        boolean grewPast(Allowance now) {
+            return now.onlyShipped > onlyShipped || now.onlyOurs > onlyOurs || now.shaded > shaded;
+        }
+
+        boolean shrankFrom(Allowance now) {
+            return now.onlyShipped < onlyShipped || now.onlyOurs < onlyOurs || now.shaded < shaded;
+        }
+
+        @Override
+        public String toString() {
+            return onlyShipped + ", " + onlyOurs + ", " + shaded;
+        }
+    }
+
+    /**
+     * Checks that no unfinished scene has given back ground it had already gained.
+     */
+    private static List<String> checkOutstandingHeldGround(Frames shipped, Frames ours,
+            Map<String, Allowance> allowed) throws IOException {
+        var report = new ArrayList<String>();
+        var seen = new ArrayList<String>();
+
+        for (var index = 0; index < shipped.scenes().size(); index++) {
+            var scene = shipped.scenes().get(index);
+            if (!outstanding(scene) || seen.contains(scene)
+                || !Files.isRegularFile(ours.frame(index))) {
+                continue;
+            }
+
+            seen.add(scene);
+            var title = scene.substring(0, scene.indexOf(" (outstanding)"));
+            var now = measure(shipped.frame(index), ours.frame(index));
+            var was = allowed.get(title);
+
+            if (was == null) {
+                report.add(title + " is outstanding and nothing says how far out it is allowed to"
+                    + " be. Write " + title + " = " + now + " into the record.");
+            } else if (was.grewPast(now)) {
+                report.add(title + " was allowed to be " + was + " out and is now " + now + ".");
+            } else if (was.shrankFrom(now)) {
+                System.out.println(title + " came in from " + was + " to " + now
+                    + ", so the record is out of date. Bring it down to hold the ground.");
+            }
+        }
+
+        for (var title : allowed.keySet()) {
+            if (!seen.contains(title + " (outstanding)")) {
+                report.add(title + " is in the record of unfinished scenes but was not drawn as"
+                    + " one. Take it out of the record.");
+            }
+        }
+
+        return report;
+    }
+
+    /**
+     * How far apart two pictures of the same scene are, counted the three ways that mean different
+     * things: a face only one side drew, a face only the other drew, and a face both drew in
+     * different shades.
+     */
+    private static Allowance measure(Path expected, Path actual) throws IOException {
+        var left = ImageIO.read(expected.toFile());
+        var right = ImageIO.read(actual.toFile());
+
+        var onlyExpected = 0;
+        var onlyActual = 0;
+        var shade = 0;
+
+        for (var y = 0; y < left.getHeight(); y++) {
+            for (var x = 0; x < left.getWidth(); x++) {
+                var wanted = left.getRGB(x, y) & CHANNELS;
+                var got = right.getRGB(x, y) & CHANNELS;
+
+                if (wanted != got) {
+                    if (got == BLANK) {
+                        onlyExpected++;
+                    } else if (wanted == BLANK) {
+                        onlyActual++;
+                    } else {
+                        shade++;
+                    }
+                }
+            }
+        }
+
+        return new Allowance(onlyExpected, onlyActual, shade);
     }
 
     private static String distance(Path expected, Path actual) throws IOException {

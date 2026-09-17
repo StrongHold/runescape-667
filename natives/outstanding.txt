@@ -1,0 +1,23 @@
+# How far each unfinished scene is allowed to be from the shipped toolkit.
+#
+# A scene listed here is one the toolkit does not yet draw the way the shipped one does, or one
+# it draws differently on purpose. It cannot pass, so it would otherwise go unchecked and a change
+# could take it from a few pixels out to half the picture without anything noticing.
+#
+# Each line records what the scene came to when it was last looked at, and the check fails when a
+# scene grows past it. A scene that shrinks is reported rather than failed, and the number here is
+# then out of date: bring it down, so that the ground it gained cannot be given back.
+#
+# scene = pixels only the shipped toolkit drew, pixels only we drew, pixels shaded differently
+BlackBacked = 0, 0, 155
+BlendedGround = 0, 0, 3189
+CutGround = 0, 0, 15703
+DepthShifted = 0, 0, 62
+HollowPlan = 0, 0, 1600
+OverlaidPlan = 16, 0, 1584
+Plan = 0, 0, 1588
+SeenThrough = 0, 0, 21
+ShadowedGround = 0, 0, 127
+Stairs = 0, 0, 245
+TexturedGround = 0, 0, 2691
+Underwater = 0, 0, 270
