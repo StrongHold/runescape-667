@@ -21,16 +21,26 @@
  *   OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  *   PERFORMANCE OF THIS SOFTWARE.
  *
- * Why it is shaped this way. The client draws from the thread it ticks on, and AppKit refuses the
- * calls that touch an NSOpenGLContext's drawable from any thread but the main one. Waiting on the
- * main thread from the drawing thread deadlocks, because the client is often holding the AWT tree
- * lock that the main thread needs to finish a resize. Not waiting races the driver.
+ * Why it is shaped this way. The client draws into a view inside the window it is shown in, and
+ * showing a frame is that view's buffers being swapped. Nothing is copied anywhere.
  *
- * So AppKit is kept out of the drawing path. The context is a CGL context, which carries no such
- * requirement, and frames reach the screen through a CAOpenGLLayer that Core Animation draws on its
- * own terms. A framebuffer object under a lock is the handoff between the two: the client's frame
- * is copied into it when the client swaps buffers, and copied out of it when Core Animation asks
- * the layer to draw.
+ * That sounds like the obvious arrangement and it was arrived at the long way round. A modern JDK
+ * hands out a layer rather than a view, so there is no view to be had for the asking, and what was
+ * built instead drew into something of this library's own and copied the result to the screen:
+ * first a layer Core Animation drew on its own terms, then a framebuffer object with no drawable
+ * at all. Both work. Both stutter on a machine driving screens the built-in one is not among,
+ * badly enough to be unusable, and a bisect put the start of it at the commit where the client
+ * began using this binding rather than the one it shipped with. The shipped one draws into a view.
+ *
+ * So the view is found rather than asked for: the JDK names the window's own layer, and the window
+ * whose layer that is holds the view the canvas is in. One of ours goes inside it.
+ *
+ * The cost is that giving a context a view, and sizing one, are main thread work, and the client
+ * draws from the thread it ticks on. Those are waited for. Waiting on the main thread from the
+ * drawing thread can deadlock, because the client may hold the AWT tree lock that the main thread
+ * wants to finish a resize, and if that is ever seen this is where it will be. Not waiting was
+ * tried, and leaves the client drawing into a view that is not yet the right size or not yet on
+ * screen.
  */
 
 #import <Cocoa/Cocoa.h>
@@ -52,18 +62,6 @@
 #include <jawt_md.h>
 
 /* The client renders here, off screen, and the layer shows what lands in it. */
-@interface JagGLLayer : CAOpenGLLayer {
-    @private
-    GLuint framebuffer;
-    GLuint colour;
-    GLint width;
-    GLint height;
-    NSLock *lock;
-}
-
-- (void)blit;
-
-@end
 
 /*
  * One per canvas the client draws on. The client holds these as opaque longs and hands them back to
@@ -72,9 +70,17 @@
  * The layer is held as a plain pointer with its retain taken by hand, because this record is
  * allocated by malloc and ARC cannot manage an object reference in memory it did not allocate.
  */
+/*
+ * One per canvas the client draws on. The client holds these as opaque longs and hands them back
+ * to say which one it means.
+ *
+ * The view is one of ours, put inside the window the canvas belongs to. The client's context is
+ * attached to it and draws into it, and showing a frame is the context swapping its own buffers.
+ * There is no layer, no framebuffer of ours, and no copy.
+ */
 typedef struct {
     jobject canvas;
-    void *layer;
+    void *view;
     GLint width;
     GLint height;
 } Surface;
@@ -85,18 +91,10 @@ static CGLPixelFormatObj pixelFormat;
 static CGLContextObj layerContext;
 
 /*
- * Somewhere for the client's own drawing to land.
- *
- * The client draws to the default framebuffer, so the context it draws with needs a real drawable
- * of its own. It is never shown: what reaches the screen is a copy of it taken on each swap.
- *
- * A framebuffer object was tried in its place and is the whole of why this stuttered. A context
- * with no drawable at all is not the same to OpenGL as one with a drawable it never shows, and on
- * a machine driving screens the built-in one is not among, it is a great deal slower.
+ * The client's context as Cocoa sees it, so that it can be given a view to draw into and asked to
+ * swap that view's buffers.
  */
-static NSWindow *unseenWindow;
-static NSView *unseenView;
-static NSOpenGLContext *unseenContext;
+static NSOpenGLContext *drawingContext;
 static CGLContextObj clientContext;
 
 /*
@@ -231,136 +229,6 @@ static void reportTiming(uint64_t spentSwapping) {
     lastReport = now;
 }
 
-@implementation JagGLLayer
-
-- (instancetype)init {
-    self = [super init];
-    if (self != nil) {
-        self.asynchronous = NO;
-        self.opaque = YES;
-        self.needsDisplayOnBoundsChange = YES;
-        lock = [[NSLock alloc] init];
-    }
-    return self;
-}
-
-/*
- * Shows the finished frame, and shows it now.
- *
- * The frame is already in the buffer this layer reads, because the client draws into one of its
- * own and a finished frame is copied across on the swap. So all that is left is to say that there
- * is one, and to see that it is taken.
- *
- * Saying it is not enough on its own. Marking the layer as wanting to be drawn leaves Core
- * Animation to choose when, and a client handing over fifty frames a second is not the rate it
- * chooses: several frames fall into one drawing and the rest are never shown, so the count stays
- * at fifty while what reaches the screen jerks. Committing a transaction around it hands the frame
- * over there and then, which is what the software toolkit's own surface does and why that one is
- * smooth.
- */
-/*
- * Copies the frame the client has just finished into the buffer the layer shows.
- *
- * This runs on the client's thread with the client's context current, which is why the buffer is
- * one both contexts share rather than a drawable handed over. The client goes straight on to the
- * next frame afterwards, and the layer shows the copy whenever the screen next asks for it, so
- * neither waits on the other and a frame half drawn is never shown.
- *
- * The buffer is made here rather than up front, because until a frame is finished there is nothing
- * to say how large it should be.
- */
-- (void)blit {
-    CGSize size = self.bounds.size;
-    GLint wanted = (GLint) size.width;
-    GLint tall = (GLint) size.height;
-    if (wanted <= 0 || tall <= 0) {
-        return;
-    }
-
-    [lock lock];
-
-    if (framebuffer == 0 || wanted != width || tall != height) {
-        if (framebuffer != 0) {
-            glDeleteRenderbuffersEXT(1, &colour);
-            glDeleteFramebuffersEXT(1, &framebuffer);
-        }
-
-        glGenFramebuffersEXT(1, &framebuffer);
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, framebuffer);
-        glGenRenderbuffersEXT(1, &colour);
-        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, colour);
-        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_RGBA8, wanted, tall);
-        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
-                                     GL_RENDERBUFFER_EXT, colour);
-
-        width = wanted;
-        height = tall;
-        JAGGLLOG("the buffer shown is %dx%d", width, height);
-    }
-
-    glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, 0);
-    glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, framebuffer);
-    glBlitFramebufferEXT(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-    glFlush();
-
-    [lock unlock];
-
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self setNeedsDisplay];
-    });
-}
-
-- (BOOL)canDrawInCGLContext:(CGLContextObj)context
-                pixelFormat:(CGLPixelFormatObj)format
-               forLayerTime:(CFTimeInterval)layerTime
-                displayTime:(const CVTimeStamp *)displayTime {
-    return framebuffer != 0;
-}
-
-- (void)drawInCGLContext:(CGLContextObj)context
-             pixelFormat:(CGLPixelFormatObj)format
-            forLayerTime:(CFTimeInterval)layerTime
-             displayTime:(const CVTimeStamp *)displayTime {
-    if (CGLSetCurrentContext(context) != kCGLNoError) {
-        return;
-    }
-
-    glClearColor(0, 0, 0, 1);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    [lock lock];
-    if (framebuffer != 0) {
-        CGSize size = self.bounds.size;
-        glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, framebuffer);
-        glBlitFramebufferEXT(0, 0, width, height,
-                             0, 0, (GLint) size.width, (GLint) size.height,
-                             GL_COLOR_BUFFER_BIT, GL_NEAREST);
-        glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, 0);
-    }
-    [lock unlock];
-
-    shownFrames++;
-    [super drawInCGLContext:context pixelFormat:format forLayerTime:layerTime displayTime:displayTime];
-}
-
-- (CGLPixelFormatObj)copyCGLPixelFormatForDisplayMask:(uint32_t)mask {
-    return pixelFormat;
-}
-
-- (void)releaseCGLPixelFormat:(CGLPixelFormatObj)format {
-    /* empty, the format outlives every layer */
-}
-
-- (CGLContextObj)copyCGLContextForPixelFormat:(CGLPixelFormatObj)format {
-    return layerContext;
-}
-
-- (void)releaseCGLContext:(CGLContextObj)context {
-    /* empty, the context outlives every layer */
-}
-
-@end
 
 /*
  * Reads where a component sits and how big it is, and attaches the layer that shows it.
@@ -385,6 +253,36 @@ static void onMainThreadAndWait(void (^work)(void)) {
     }
 }
 
+/**
+ * Finds the view the canvas's window draws through.
+ *
+ * A modern JDK hands out a layer rather than a view, so the view has to be found by the layer: the
+ * window whose own layer is the one named is the window the canvas is in.
+ */
+static NSView *windowView(id<JAWT_SurfaceLayers> layers) {
+    __block NSView *found = nil;
+    CALayer *windowLayer = layers.windowLayer;
+
+    onMainThreadAndWait(^{
+        for (NSWindow *window in [NSApp windows]) {
+            NSView *content = [window contentView];
+            if (found == nil && content != nil && content.layer == windowLayer) {
+                found = content;
+            }
+        }
+    });
+
+    return found;
+}
+
+/**
+ * Puts a view of our own where the canvas is, for the client's context to draw into.
+ *
+ * The client draws into a view in the window it is shown in, which is what the shipped binding
+ * does and what this machine is quick at. Drawing into anything else and copying the result to the
+ * screen is what made this slow: it was tried through a layer of its own and through a framebuffer
+ * object, and both stutter on a machine driving screens the built-in one is not among.
+ */
 static BOOL attach(JNIEnv *env, jobject canvas, Surface *surface) {
     JawtGetAwt getAwt = jawt(env);
     if (getAwt == NULL) {
@@ -409,22 +307,42 @@ static BOOL attach(JNIEnv *env, jobject canvas, Surface *surface) {
         JAWT_DrawingSurfaceInfo *info = drawing->GetDrawingSurfaceInfo(drawing);
         if (info != NULL) {
             id<JAWT_SurfaceLayers> layers = (__bridge id<JAWT_SurfaceLayers>) info->platformInfo;
-            JagGLLayer *layer = (__bridge JagGLLayer *) surface->layer;
-            CGRect frame = CGRectMake(info->bounds.x, 0, info->bounds.width, info->bounds.height);
+            NSView *host = windowView(layers);
 
             surface->width = info->bounds.width;
             surface->height = info->bounds.height;
-            jint top = info->bounds.y;
 
-            onMainThreadAndWait(^{
-                CGFloat window = layers.windowLayer.bounds.size.height;
-                layer.frame = CGRectMake(frame.origin.x, window - top - frame.size.height,
-                                         frame.size.width, frame.size.height);
-                if (layer.superlayer == nil) {
-                    layers.layer = layer;
-                }
-                attached = YES;
-            });
+            if (host != nil) {
+                jint left = info->bounds.x;
+                jint top = info->bounds.y;
+                GLint wide = info->bounds.width;
+                GLint high = info->bounds.height;
+                __block NSView *ours = (__bridge NSView *) surface->view;
+
+                onMainThreadAndWait(^{
+                    CGFloat window = host.bounds.size.height;
+                    NSRect frame = NSMakeRect(left, window - top - high, wide, high);
+
+                    if (ours == nil) {
+                        ours = [[NSView alloc] initWithFrame:frame];
+
+                        /*
+                         * The client draws at the size it was given and knows nothing of the
+                         * backing store. Left to itself the surface is sized in backing store
+                         * pixels, and on a screen with more than one pixel to a point the picture
+                         * comes out at a fraction of the size in the bottom left corner, which is
+                         * where the OpenGL origin is.
+                         */
+                        ours.wantsBestResolutionOpenGLSurface = NO;
+                        [host addSubview:ours];
+                        surface->view = (__bridge_retained void *) ours;
+                    } else {
+                        ours.frame = frame;
+                    }
+
+                    attached = YES;
+                });
+            }
 
             drawing->FreeDrawingSurfaceInfo(info);
         }
@@ -436,38 +354,6 @@ static BOOL attach(JNIEnv *env, jobject canvas, Surface *surface) {
     return attached;
 }
 
-/*
- * Sizes the drawable the client draws into. It is never shown, so its only job is to be as large as
- * the surface being drawn for.
- */
-static BOOL resizeOffscreen(GLint width, GLint height) {
-    if (width <= 0 || height <= 0) {
-        return NO;
-    }
-
-    if (width == offscreenWidth && height == offscreenHeight) {
-        return YES;
-    }
-
-    offscreenWidth = width;
-    offscreenHeight = height;
-
-    void (^size)(void) = ^{
-        if (unseenWindow == nil) {
-            return;
-        }
-
-        NSRect frame = NSMakeRect(0, 0, width, height);
-        unseenView.frame = frame;
-        [unseenWindow setFrame:[unseenWindow frameRectForContentRect:frame] display:NO];
-        [unseenContext update];
-    };
-
-    onMainThreadAndWait(size);
-
-    JAGGLLOG("drawable %dx%d", width, height);
-    return YES;
-}
 
 JNIEXPORT jlong JNICALL Java_jaggl_OpenGL_prepareSurface(JNIEnv *env, jclass owner, jobject canvas);
 JNIEXPORT jboolean JNICALL Java_jaggl_OpenGL_setSurface(JNIEnv *env, jclass owner, jlong handle);
@@ -521,23 +407,7 @@ JNIEXPORT jlong JNICALL Java_jaggl_OpenGL_init(JNIEnv *env, jclass owner, jobjec
         return 0;
     }
 
-    /*
-     * The drawable the client's own frames land in. Made once, and waited for, because everything
-     * after this wants it already there. The waiting that could not be borne was on each resize,
-     * which is handed over and not waited for.
-     */
-    dispatch_sync(dispatch_get_main_queue(), ^{
-        unseenWindow = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 16, 16)
-                                                   styleMask:NSWindowStyleMaskBorderless
-                                                     backing:NSBackingStoreBuffered
-                                                       defer:NO];
-        unseenView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 16, 16)];
-        unseenView.wantsBestResolutionOpenGLSurface = NO;
-        unseenWindow.contentView = unseenView;
-
-        unseenContext = [[NSOpenGLContext alloc] initWithCGLContextObj:clientContext];
-        unseenContext.view = unseenView;
-    });
+    drawingContext = [[NSOpenGLContext alloc] initWithCGLContextObj:clientContext];
 
     JAGGLLOG("context ready");
 
@@ -557,11 +427,8 @@ JNIEXPORT jlong JNICALL Java_jaggl_OpenGL_prepareSurface(JNIEnv *env, jclass own
     Surface *surface = calloc(1, sizeof(Surface));
     surface->canvas = (*env)->NewGlobalRef(env, canvas);
 
-    surface->layer = (__bridge_retained void *) [[JagGLLayer alloc] init];
-
     if (!attach(env, canvas, surface)) {
         (*env)->DeleteGlobalRef(env, surface->canvas);
-        CFBridgingRelease(surface->layer);
         free(surface);
         return 0;
     }
@@ -569,18 +436,28 @@ JNIEXPORT jlong JNICALL Java_jaggl_OpenGL_prepareSurface(JNIEnv *env, jclass own
     return (jlong) (intptr_t) surface;
 }
 
+/*
+ * Points the client's context at the view it is to draw into, and makes it current.
+ *
+ * Giving a context a view has to happen on the main thread, and is waited for, because the client
+ * is told it may draw the moment this returns.
+ */
 JNIEXPORT jboolean JNICALL Java_jaggl_OpenGL_setSurface(JNIEnv *env, jclass owner, jlong handle) {
     Surface *surface = (Surface *) (intptr_t) handle;
-    if (surface == NULL) {
+    if (surface == NULL || surface->view == NULL) {
         return JNI_FALSE;
     }
 
-    if (CGLSetCurrentContext(clientContext) != kCGLNoError) {
-        return JNI_FALSE;
-    }
+    NSView *view = (__bridge NSView *) surface->view;
+    onMainThreadAndWait(^{
+        if (drawingContext.view != view) {
+            drawingContext.view = view;
+        }
+        [drawingContext update];
+    });
 
     currentSurface = surface;
-    return resizeOffscreen(surface->width, surface->height) ? JNI_TRUE : JNI_FALSE;
+    return CGLSetCurrentContext(clientContext) == kCGLNoError ? JNI_TRUE : JNI_FALSE;
 }
 
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_surfaceResized(JNIEnv *env, jclass owner, jlong handle) {
@@ -590,12 +467,16 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_surfaceResized(JNIEnv *env, jclass owne
     }
 
     attach(env, surface->canvas, surface);
+
     if (surface == currentSurface) {
-        resizeOffscreen(surface->width, surface->height);
+        onMainThreadAndWait(^{
+            [drawingContext update];
+        });
     }
 }
 
-JNIEXPORT void JNICALL Java_jaggl_OpenGL_releaseSurface(JNIEnv *env, jclass owner, jobject canvas, jlong handle) {
+JNIEXPORT void JNICALL Java_jaggl_OpenGL_releaseSurface(JNIEnv *env, jclass owner, jobject canvas,
+                                                        jlong handle) {
     Surface *surface = (Surface *) (intptr_t) handle;
     if (surface == NULL) {
         return;
@@ -605,22 +486,31 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_releaseSurface(JNIEnv *env, jclass owne
         currentSurface = NULL;
     }
 
-    JagGLLayer *layer = (__bridge JagGLLayer *) surface->layer;
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [layer removeFromSuperlayer];
+    NSView *view = (__bridge_transfer NSView *) surface->view;
+    surface->view = NULL;
+    onMainThreadAndWait(^{
+        if (drawingContext.view == view) {
+            [drawingContext clearDrawable];
+        }
+        [view removeFromSuperview];
     });
 
     (*env)->DeleteGlobalRef(env, surface->canvas);
-    CFBridgingRelease(surface->layer);
     free(surface);
 }
 
+/*
+ * Shows the frame the client has just finished, by swapping the buffers of the view it drew into.
+ *
+ * This is what the shipped binding does and it is the whole of why it is smooth here. Everything
+ * else tried in its place drew somewhere of ours and copied the result to the screen, and copying
+ * is what stutters on a machine driving screens the built-in one is not among.
+ */
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_swapBuffers(JNIEnv *env, jclass owner) {
     uint64_t began = timing() ? nowInMicroseconds() : 0;
 
-    if (currentSurface != NULL) {
-        [(__bridge JagGLLayer *) currentSurface->layer blit];
-    }
+    [drawingContext flushBuffer];
+    shownFrames++;
 
     reportTiming(timing() ? nowInMicroseconds() - began : 0);
 }
@@ -641,10 +531,7 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_detachPeer(JNIEnv *env, jclass owner) {
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_release(JNIEnv *env, jclass owner) {
     CGLSetCurrentContext(NULL);
 
-    unseenContext = nil;
-    unseenView = nil;
-    [unseenWindow close];
-    unseenWindow = nil;
+    drawingContext = nil;
 
     if (clientContext != NULL) {
         CGLDestroyContext(clientContext);
