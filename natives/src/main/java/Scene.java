@@ -1436,9 +1436,32 @@ public sealed interface Scene {
 
 
         /**
-         * What is left is a shade out along a handful of the edges where one tile's picture of
-         * the shadow over it meets the next, which is the same small difference the other
-         * textured patches have.
+         * What is left here is a shade out along a handful of the edges where one tile's picture
+         * of the shadow over it meets the next, which is the same small difference the other
+         * textured patches have. A hundred and twenty seven pixels of it.
+         *
+         * That is not the whole of what is wrong with a shadow, and this scene is too kind to
+         * show it. Water in the client comes out in blocks a tile across, light and dark in a
+         * patchwork, where the shipped toolkit's is smooth. Turning ground shadows off makes the
+         * blocks go away, so it is the shadow and nothing else.
+         *
+         * What has been ruled out. The picture of a shadow over a tile is built here exactly as
+         * the shipped toolkit builds it: five places of the shadow map counted, multiplied by
+         * nine, and turned inside out, which is the same arithmetic down to the instruction. The
+         * client asks for the same shadow resolution this scene asks for, thirty two, so the
+         * picture is the same four places across either way. Where the picture is kept and how it
+         * is found again both work out right.
+         *
+         * What is left is how the picture is read across a tile. Four places stretched over a
+         * tile forty pixels wide, read one place at a time, is blocks ten pixels across, and
+         * blocks are what the client shows. The shipped toolkit reads the same four places and
+         * does not, so it reads them differently, and reading them differently is the thing to
+         * find. Its rasteriser has a routine for every combination of shading, texturing and
+         * blending it supports; the one that reads a shadow is the one to disassemble.
+         *
+         * This scene should grow a patch of water with something standing over it before any of
+         * that is attempted, because a hundred and twenty seven pixels is too few to tell whether
+         * a change helped.
          */
         @Override
         public boolean written() {
