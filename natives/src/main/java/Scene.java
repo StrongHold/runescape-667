@@ -1538,10 +1538,15 @@ public sealed interface Scene {
     record TexturedGround() implements Scene {
 
         /**
-         * The tiles wear their texture and cover exactly the right pixels, and the tiles wearing
-         * none are drawn exactly right. What a textured tile comes to is about a fifth too dark,
-         * evenly across the patch, so what is left is how a texel and the light on a tile are put
-         * together rather than which texel is read.
+         * Every tile covered once by its texture is drawn exactly right: give both halves of the
+         * patch a texture the size of a tile and the picture matches to the pixel. The whole of
+         * what is left is the half covered four times over, where about a hundred and eighty
+         * pixels read the texel next to the right one and the rest are a shade out from rounding.
+         *
+         * It is not the size the texture is laid at. Running a whole width for every cover, or a
+         * whole width less a texel, or either of those only where the texture repeats, all come
+         * out further off than leaving it alone. What is left is how far along the texture each
+         * pixel of a span is reckoned to be, which tells only where the steps are steep.
          */
         @Override
         public boolean written() {
