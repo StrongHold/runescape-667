@@ -352,8 +352,20 @@ static BOOL attach(JNIEnv *env, jobject canvas, Surface *surface) {
  * the surface being drawn for.
  */
 /**
- * The framebuffer the client's own drawing goes to, which is the one of many samples where it
- * asked for those and the plain one otherwise.
+ * Hangs a buffer on the renderbuffer that is bound, carrying as many samples a pixel as the client
+ * asked for.
+ */
+static void drawnStorage(GLenum format, GLint width, GLint height) {
+    if (wantedSamples > 0) {
+        glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, wantedSamples, format, width, height);
+    } else {
+        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, format, width, height);
+    }
+}
+
+/**
+ * The framebuffer the client's own drawing goes to, which is never the one being shown while there
+ * is one to draw into.
  */
 static GLuint whereTheClientDraws(void) {
     return drawFramebuffer != 0 ? drawFramebuffer : defaultFramebuffer;
@@ -406,46 +418,42 @@ static BOOL resizeOffscreen(GLint width, GLint height) {
     glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
     glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
 
-    if (wantedSamples > 0) {
-        glGenFramebuffersEXT(1, &drawFramebuffer);
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, drawFramebuffer);
+    glGenFramebuffersEXT(1, &drawFramebuffer);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, drawFramebuffer);
 
-        glGenRenderbuffersEXT(1, &drawColour);
-        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, drawColour);
-        glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, wantedSamples, GL_RGBA8, width, height);
-        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
-                                     GL_RENDERBUFFER_EXT, drawColour);
+    glGenRenderbuffersEXT(1, &drawColour);
+    glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, drawColour);
+    drawnStorage(GL_RGBA8, width, height);
+    glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
+                                 GL_RENDERBUFFER_EXT, drawColour);
 
-        glGenRenderbuffersEXT(1, &drawDepth);
-        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, drawDepth);
-        glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, wantedSamples,
-                                            GL_DEPTH24_STENCIL8_EXT, width, height);
-        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,
-                                     GL_RENDERBUFFER_EXT, drawDepth);
-        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT,
-                                     GL_RENDERBUFFER_EXT, drawDepth);
+    glGenRenderbuffersEXT(1, &drawDepth);
+    glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, drawDepth);
+    drawnStorage(GL_DEPTH24_STENCIL8_EXT, width, height);
+    glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,
+                                 GL_RENDERBUFFER_EXT, drawDepth);
+    glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT,
+                                 GL_RENDERBUFFER_EXT, drawDepth);
 
-        forget();
-        GLenum many = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-        JAGGLLOG("plain buffer %u, drawn buffer %u at %d samples, status 0x%x",
-                 defaultFramebuffer, drawFramebuffer, wantedSamples, many);
-        complain("making the buffer of many samples");
+    forget();
+    GLenum drawn = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+    JAGGLLOG("shown buffer %u, drawn buffer %u at %d samples, status 0x%x",
+             defaultFramebuffer, drawFramebuffer, wantedSamples, drawn);
+    complain("making the buffer the client draws into");
 
-        if (many != GL_FRAMEBUFFER_COMPLETE_EXT) {
-            JAGGLLOG("no buffer of %d samples to draw into", wantedSamples);
-            glDeleteRenderbuffersEXT(1, &drawDepth);
-            glDeleteRenderbuffersEXT(1, &drawColour);
-            glDeleteFramebuffersEXT(1, &drawFramebuffer);
-            drawFramebuffer = 0;
-            drawColour = 0;
-            drawDepth = 0;
-        } else {
-            glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
-            glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
-        }
-
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, whereTheClientDraws());
+    if (drawn != GL_FRAMEBUFFER_COMPLETE_EXT) {
+        JAGGLLOG("no buffer of %d samples to draw into", wantedSamples);
+        glDeleteRenderbuffersEXT(1, &drawDepth);
+        glDeleteRenderbuffersEXT(1, &drawColour);
+        glDeleteFramebuffersEXT(1, &drawFramebuffer);
+        drawFramebuffer = 0;
+        drawColour = 0;
+        drawDepth = 0;
     }
+
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, whereTheClientDraws());
+    glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+    glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
 
     defaultBound = YES;
     offscreenWidth = width;
@@ -466,7 +474,7 @@ static BOOL resizeOffscreen(GLint width, GLint height) {
  * buffer everything reads.
  */
 static void bringDown(const char *who, GLint x, GLint y, GLint width, GLint height) {
-    if (drawFramebuffer == 0 || !defaultBound) {
+    if (drawFramebuffer == 0 || !defaultBound || wantedSamples <= 0) {
         return;
     }
 
@@ -711,8 +719,36 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_releaseSurface(JNIEnv *env, jclass owne
     free(surface);
 }
 
+/**
+ * Copies the finished frame into the buffer the layer shows.
+ *
+ * The client draws into one buffer and the layer shows another, and a frame crosses from one to
+ * the other here and nowhere else. Before this the client drew straight into the buffer being
+ * shown, so Core Animation could read a frame that was still being painted, and what reached the
+ * screen stuttered however many frames were finished.
+ *
+ * The copy is made before the layer is told there is anything to show, and showing flushes, so
+ * the frame the layer reads is a whole one.
+ */
+static void copyForShowing(void) {
+    if (drawFramebuffer == 0 || offscreenWidth <= 0 || offscreenHeight <= 0) {
+        return;
+    }
+
+    forget();
+
+    glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, drawFramebuffer);
+    glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, defaultFramebuffer);
+    glBlitFramebufferEXT(0, 0, offscreenWidth, offscreenHeight,
+                         0, 0, offscreenWidth, offscreenHeight,
+                         GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    complain("copying the finished frame across");
+
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, whereTheClientDraws());
+}
+
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_swapBuffers(JNIEnv *env, jclass owner) {
-    bringDown("showing a frame", 0, 0, offscreenWidth, offscreenHeight);
+    copyForShowing();
 
     if (currentSurface != NULL) {
         [(__bridge JagGLLayer *) currentSurface->layer present];
