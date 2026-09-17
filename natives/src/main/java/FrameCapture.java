@@ -118,7 +118,8 @@ public final class FrameCapture {
             HandGround.buildShaped(toolkit),
             HandGround.buildSmooth(toolkit),
             roundPointModel(toolkit),
-            rockModel(toolkit));
+            rockModel(toolkit),
+            texturedModel(toolkit, textured, FEATURES, TEXTURE_SEEN_THROUGH));
 
         var manifest = new ArrayList<String>();
 
@@ -205,6 +206,12 @@ public final class FrameCapture {
      * asking for textures off keeps the first and loses this one.
      */
     private static final short TEXTURE_THAT_MAY_GO = 7;
+
+    /**
+     * A texture whose blend mode is the one that reads an alpha out of the texture itself rather
+     * than off the face, which is every third number.
+     */
+    private static final short TEXTURE_SEEN_THROUGH = 5;
 
     /**
      * The feature the client asks for when the player has turned textures off. It is one of the

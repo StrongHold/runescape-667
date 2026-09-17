@@ -79,7 +79,8 @@ public sealed interface Scene {
         new SmoothGround(),
         new Textured(),
         new RoundPoint(),
-        new Rock()
+        new Rock(),
+        new SeenThrough()
     );
 
     /**
@@ -89,7 +90,7 @@ public sealed interface Scene {
     record Props(Sprite gradient, Model model, Model simple, Matrix matrix,
                  Font mono, Font proportional, Ground ground, Mesh mesh, Model textured,
                  Model faded, Model plain, Ground floor, Ground cut, Ground smooth,
-                 Model roundPoint, Model rock) {
+                 Model roundPoint, Model rock, Model seenThrough) {
         /* empty */
     }
 
@@ -212,6 +213,40 @@ public sealed interface Scene {
                 props.matrix().rotateAxisX(step == 0 ? 0 : LEAN);
                 props.matrix().translate((step * 2 - 1) * SPREAD / 4, 0, DEPTH / 2);
                 props.rock().render(props.matrix(), null, 1);
+            }
+        }
+    }
+
+    /**
+     * A model wearing a texture whose blend mode says it carries an alpha of its own.
+     *
+     * Every other textured scene wears a texture whose blend mode leaves the face solid, so what
+     * such a texture does has never been drawn. It comes out bare: a face wearing one is left
+     * out of the pass that draws the rest, whichever of the two ways the caller asks for, and
+     * the two copies here ask for one each. It is drawn over a sprite so that a face that let
+     * anything through would show it.
+     */
+    record SeenThrough() implements Scene {
+
+        private static final int LEAN = 0x500;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            if (props.seenThrough() == null) {
+                return;
+            }
+
+            props.gradient().render(0, 0, 0, 0xFFFFFF, 0);
+
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            for (var step = 0; step < 2; step++) {
+                props.matrix().makeRotationZ(0);
+                props.matrix().rotateAxisX(step == 0 ? 0 : LEAN);
+                props.matrix().translate((step * 2 - 1) * SPREAD / 4, 0, DEPTH / 2);
+                props.seenThrough().render(props.matrix(), null, step);
+
             }
         }
     }
