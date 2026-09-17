@@ -315,10 +315,16 @@ public final class HandGround {
     }
 
     /**
-     * How wide each column of a repeating patch lays its texture, so that one picture holds a
-     * tile covered by the whole of its texture, one covered by four of it, and one by sixteen.
+     * How wide each column of a repeating patch lays its texture.
+     *
+     * A tile is five hundred and twelve across and these are the sizes the client asks for on the
+     * ground it lays, read off the ground around a dock. Only the first of them is the width of a
+     * tile, only one other divides a tile, and three of them are wider than the tile they cover.
+     * Ground laid at the width of a tile is the one case where where a pixel sits on its texture
+     * and where it sits on its tile happen to be the same, and it is the case the client hardly
+     * ever asks for.
      */
-    private static final int[] REPEATED_AT = {TILE, TILE / 2, TILE / 4};
+    private static final int[] REPEATED_AT = {TILE, TILE / 2, 560, 692, 768, TILE * 2};
 
     private static Ground buildCornerLit(Toolkit toolkit, boolean overlaid, int features,
             boolean blended, boolean repeated) {

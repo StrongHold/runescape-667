@@ -420,7 +420,62 @@ static const uint32_t *blended[BLENDED];
  * A corner names how wide its texture is laid as well as which one it is, and the three may
  * differ, so each is read at the face's place carried that much further.
  */
+/**
+ * What one place on the tile is multiplied by, and what is then added to it, to reach the place
+ * on the texture it wears.
+ *
+ * The ground lays a tile out on its texture rather than laying a texture on the tile: a tile is
+ * counted a whole texture further along for every tile it stands from the near corner of the
+ * patch, and the whole of that is brought into the size the tile lays its texture at. A tile
+ * laying its texture at a size that divides a tile is moved along a whole number of textures and
+ * never shows it, because a texture carries on round itself.
+ *
+ * Both are worked out for each of the three textures a face can be blended from, and a face
+ * wearing one uses the first of them.
+ *
+ * They are kept apart from where the tile is because the shadow over a tile is read at the place
+ * on the tile. The place on the tile is also the smaller number by far, and it is the one that
+ * has to survive being carried across a face a pixel at a time.
+ */
 static float blendedWider[BLENDED];
+
+static float blendedFromAcross[BLENDED];
+
+static float blendedFromDown[BLENDED];
+
+/** How wide one whole texture is counted as being when the ground lays a tile out on one. */
+enum { TEXTURE_PER_TILE = 128 };
+
+/**
+ * Works out what the place on a tile has to be brought to, to reach the place on one of the
+ * textures the tile wears.
+ */
+/**
+ * Lays a texture on what is drawn as it stands, which is what a model asks for.
+ *
+ * A model carries where each corner of a face sits on its texture already, so there is nothing to
+ * bring the corners into and nothing to move them along by.
+ */
+static void layTexturePlain(void) {
+    for (int which = 0; which < BLENDED; which++) {
+        blendedWider[which] = 1.0f;
+        blendedFromAcross[which] = 0.0f;
+        blendedFromDown[which] = 0.0f;
+    }
+}
+
+static void layTextureAt(int which, int tileSize, int wide, int x, int z) {
+    float laidAt = wide <= 0 || tileSize <= 0 ? 1.0f : (float) tileSize / (float) wide;
+
+    /*
+     * Only what is left over past a whole texture moves a tile anywhere, because a texture on the
+     * ground carries on round itself. Taking the whole ones off keeps the number small, and keeps
+     * a tile that is moved a whole number of textures exactly where it was.
+     */
+    blendedWider[which] = laidAt;
+    blendedFromAcross[which] = fmodf((float) (x * TEXTURE_PER_TILE) * laidAt, (float) TEXTURE_WIDE);
+    blendedFromDown[which] = fmodf((float) (z * TEXTURE_PER_TILE) * laidAt, (float) TEXTURE_WIDE);
+}
 
 static int texelsRepeat;
 
@@ -454,13 +509,6 @@ static const unsigned char *shadowTexels;
 
 static int shadowTexelShift;
 
-/**
- * How far a place on the texture is shifted down to reach a place in the picture of the shadow
- * over the tile, before anything is taken off for a tile covered by its texture more than once.
- *
- * The ground works this out once for a tile and every face of that tile starts from it.
- */
-static int shadowTileShift;
 
 /**
  * How much of the face being drawn shows, out of two hundred and fifty five, or nothing at all
@@ -528,16 +576,24 @@ static uint32_t shadowAt(float u, float v, float w) {
     return shadowTexels[down << 8 | across];
 }
 
-static uint32_t texelFrom(const uint32_t *from, float u, float v, float w) {
+static uint32_t texelFrom(const uint32_t *from, float u, float v, float w, int which) {
     float away = reciprocalOfFour(w);
-    int across = onTheTexture((int) (u * away), texelsRepeat);
-    int down = onTheTexture((int) (v * away), texelsRepeat);
+    int across = onTheTexture(
+        (int) (u * away * blendedWider[which] + blendedFromAcross[which]), texelsRepeat);
+    int down = onTheTexture(
+        (int) (v * away * blendedWider[which] + blendedFromDown[which]), texelsRepeat);
 
     return from[(down << 8) | across];
 }
 
 static uint32_t texelAt(float u, float v, float w) {
-    return texelFrom(texels, u, v, w);
+    float away = reciprocalOfFour(w);
+    int across = onTheTexture(
+        (int) (u * away * blendedWider[0] + blendedFromAcross[0]), texelsRepeat);
+    int down = onTheTexture(
+        (int) (v * away * blendedWider[0] + blendedFromDown[0]), texelsRepeat);
+
+    return texels[(down << 8) | across];
 }
 
 /**
@@ -550,8 +606,7 @@ static uint32_t texelAt(float u, float v, float w) {
 static void mixedTexel(const uint16_t *share, float u, float v, float w, uint32_t *into) {
     uint32_t held[BLENDED];
     for (int which = 0; which < BLENDED; which++) {
-        float wider = blendedWider[which];
-        held[which] = texelFrom(blended[which], u * wider, v * wider, w);
+        held[which] = texelFrom(blended[which], u, v, w, which);
     }
 
     /*
@@ -1547,6 +1602,7 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
                 textureOffsets(texture, &slidU, &slidV);
 
                 texels = texturePixels(texture);
+                layTexturePlain();
                 texelsRepeat = metrics->repeatsU || metrics->repeatsV;
                 texelsBlend = metrics->alphaBlendMode == SEEN_THROUGH_ITSELF;
                 texelsSkipEmpty = metrics->alphaBlendMode == EMPTY_WHERE_NOT_THERE;
@@ -1623,7 +1679,8 @@ static int cornersAgree(const void *tile, int face) {
  * Nothing is blended unless every one of the three is held, because a face drawn from two of
  * three is further from the truth than one drawn from the single texture its first corner names.
  */
-static int blendTextures(const void *tile, int face, int wide, Corner *walked) {
+static int blendTextures(const void *tile, int face, int tileSize, int x, int z,
+                         Corner *walked) {
     for (int corner = 0; corner < 3; corner++) {
         int wears = groundTileCornerTexture(tile, face * 3 + corner);
         const Texture *texture = wears == -1 ? NULL : textureFor(wears);
@@ -1635,7 +1692,7 @@ static int blendTextures(const void *tile, int face, int wide, Corner *walked) {
 
         int own = groundTileCornerSize(tile, face * 3 + corner);
         blended[corner] = texturePixels(texture);
-        blendedWider[corner] = own <= 0 ? 1.0f : (float) wide / (float) own;
+        layTextureAt(corner, tileSize, own <= 0 ? tileSize : own, x, z);
         walked[corner].mix[0] = corner == 0 ? WHOLE_SHARE : 0;
         walked[corner].mix[1] = corner == 1 ? WHOLE_SHARE : 0;
     }
@@ -1644,24 +1701,46 @@ static int blendTextures(const void *tile, int face, int wide, Corner *walked) {
 }
 
 /**
- * How many times over a tile is covered by its texture, as a shift.
+ * Says once for each pair of sizes how a tile wearing a shadow lays its texture, when the client
+ * is started with SW3D_GROUND_SIZES set.
  *
- * A tile names how much of the world one width of its texture covers, and every size the client
- * names divides the tile exactly. A size that does not is counted as covering the tile once.
+ * How a tile is laid out on its texture is worked out from the two together, and the ground the
+ * client lays is the only place the pairs it really asks for can be seen. It lays hardly any of
+ * it at the width of a tile, and most of it wider than one.
  */
-static int timesLaid(int tileSize, int wide) {
-    int times = wide <= 0 ? 1 : tileSize / wide;
-    int shift = 0;
-
-    while (times > 1) {
-        times >>= 1;
-        shift++;
+static void sizesSeen(int tileSize, int wide, float laidAt) {
+    static int listening = -1;
+    if (listening == -1) {
+        listening = getenv("SW3D_GROUND_SIZES") != NULL;
     }
 
-    return shift;
+    if (!listening) {
+        return;
+    }
+
+    enum { KEPT = 32 };
+    static int seenTile[KEPT];
+    static int seenWide[KEPT];
+    static int seen;
+
+    for (int at = 0; at < seen; at++) {
+        if (seenTile[at] == tileSize && seenWide[at] == wide) {
+            return;
+        }
+    }
+
+    if (seen < KEPT) {
+        seenTile[seen] = tileSize;
+        seenWide[seen] = wide;
+        seen++;
+    }
+
+    fprintf(stderr, "sw3d ground: a tile %d across wearing a texture laid %d across,"
+            " a place on the tile brought to one on the texture by %.3f\n",
+            tileSize, wide, (double) laidAt);
 }
 
-static void layTextureOnTile(const void *tile, int face, int tileSize,
+static void layTextureOnTile(const void *tile, int face, int tileSize, int x, int z,
                              const unsigned char *shadow, Corner *walked) {
     texels = NULL;
     texelsBlend = 0;
@@ -1714,19 +1793,19 @@ static void layTextureOnTile(const void *tile, int face, int tileSize,
         wide = tileSize;
     }
 
-    /*
-     * Where a pixel reads the shadow over the tile is worked out from where that pixel sits on
-     * the tile's texture, and a tile covered by four of its texture has run four times as far
-     * across it by the far edge. The picture of the shadow is still one tile wide however many
-     * times the texture is laid, so the times over have to come back off again.
-     */
-    shadowTexelShift = shadowTileShift + timesLaid(tileSize, wide);
+    layTextureAt(0, tileSize, wide, x, z);
+    sizesSeen(tileSize, wide, blendedWider[0]);
 
     if (!cornersAgree(tile, face)) {
-        blendTextures(tile, face, wide, walked);
+        blendTextures(tile, face, tileSize, x, z, walked);
     }
 
-    float over = (float) TEXTURE_EDGE / (float) wide;
+    /*
+     * The corners are put on the tile rather than on the texture. What each texture makes of that
+     * is worked out once for the face and applied a pixel at a time, which is what keeps the
+     * number carried across the face small enough to stay exact.
+     */
+    float over = (float) TEXTURE_EDGE / (float) tileSize;
 
     for (int corner = 0; corner < 3; corner++) {
         int across;
@@ -1833,7 +1912,7 @@ void renderGroundTile(const void *ground, int x, int z) {
     int tileSize = groundTileSize(ground);
 
     const unsigned char *shadow =
-        groundTileShadow(ground, (void *) tile, x, z, &shadowTileShift);
+        groundTileShadow(ground, (void *) tile, x, z, &shadowTexelShift);
 
     uint32_t *shade = calloc((size_t) corners, sizeof(uint32_t));
     if (shade == NULL) {
@@ -1910,7 +1989,7 @@ void renderGroundTile(const void *ground, int x, int z) {
             cornerAt(c, shade[face * 3 + 2])
         };
 
-        layTextureOnTile(tile, face, tileSize, shadow, walked);
+        layTextureOnTile(tile, face, tileSize, x, z, shadow, walked);
         fillTriangle(walked[0], walked[1], walked[2]);
     }
 
