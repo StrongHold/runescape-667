@@ -4,7 +4,8 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -38,11 +39,14 @@ public final class StallReport {
 
     private static final String FREEZES = "client.freezes";
 
-    /** How often the thread that draws is looked at, which bounds how short a freeze can be seen. */
-    private static final long LOOK_EVERY_MILLISECONDS = 10L;
+    /** How often every thread is looked at, which bounds how short a freeze can be seen. */
+    private static final long LOOK_EVERY_MILLISECONDS = 20L;
 
-    /** How much of the stack is compared to decide the thread has not moved. */
-    private static final int DEEP_ENOUGH = 12;
+    /** How much of a stack is kept, which is enough to tell one caller of a thing from another. */
+    private static final int DEEP_ENOUGH = 3;
+
+    /** How many of the places found are worth printing. */
+    private static final int WORTH_SAYING = 12;
 
     /**
      * Starts printing if the property asks for it, and does nothing otherwise.
@@ -62,7 +66,7 @@ public final class StallReport {
     }
 
     /**
-     * Starts watching for a freeze if the property asks for it, and does nothing otherwise.
+     * Starts taking samples if the property asks for it, and does nothing otherwise.
      */
     public static void watchForFreezesIfAsked() {
         var asked = System.getProperty(FREEZES);
@@ -70,27 +74,31 @@ public final class StallReport {
             return;
         }
 
-        var milliseconds = Long.parseLong(asked);
-        var watcher = new Thread(() -> watchForFreezes(milliseconds), "freeze report");
+        var seconds = Integer.parseInt(asked);
+        var watcher = new Thread(() -> sample(seconds), "freeze report");
         watcher.setDaemon(true);
         watcher.start();
 
-        System.out.println("freeze report: anything standing still for " + milliseconds + "ms");
+        System.out.println("freeze report: what every thread is doing, counted every "
+            + seconds + " seconds");
     }
 
     /**
-     * Looks at where the thread that draws is, many times a second, and says so when it has been
-     * in the same place for too long.
+     * Counts where each thread is, many times a second, and says what it found.
      *
-     * A freeze of half a second says nothing to a report printed every few seconds, which will
-     * nearly always look while everything is moving. Looking often and reporting only when nothing
-     * has moved turns that around: what is printed is only ever the thing that was in the way.
+     * A freeze that lasts half a second is not a thread standing still: it is a thread busy doing
+     * one thing for half a second, and its stack changes the whole time it does it. Waiting for a
+     * stack to stop moving never catches that. Counting where the threads are does, because
+     * whatever ate the half second is in far more of the samples than anything else.
+     *
+     * What is counted is the top of the stack and the two frames below it, which is enough to tell
+     * one caller of a thing from another without making every sample its own entry.
      */
-    private static void watchForFreezes(long milliseconds) {
+    private static void sample(int seconds) {
         var threads = ManagementFactory.getThreadMXBean();
-        List<StackTraceElement> standing = List.of();
-        var standingSince = 0L;
-        var told = false;
+        var seen = new HashMap<String, Integer>();
+        var taken = 0;
+        var since = System.currentTimeMillis();
 
         while (true) {
             try {
@@ -100,50 +108,58 @@ public final class StallReport {
                 return;
             }
 
-            var drawing = drawingThread(threads);
-            var now = System.currentTimeMillis();
-            var here = drawing == null
-                ? List.<StackTraceElement>of()
-                : Arrays.stream(drawing.getStackTrace()).limit(DEEP_ENOUGH).toList();
-
-            if (!here.equals(standing)) {
-                standing = here;
-                standingSince = now;
-                told = false;
-            } else if (!told && !here.isEmpty() && now - standingSince >= milliseconds) {
-                told = true;
-                say(drawing, now - standingSince, here);
-            }
-        }
-    }
-
-    /**
-     * The thread the client draws and ticks on, which is the one whose stack runs through the game
-     * shell rather than through the window system.
-     */
-    private static ThreadInfo drawingThread(ThreadMXBean threads) {
-        for (var info : threads.dumpAllThreads(false, false)) {
-            for (var frame : info.getStackTrace()) {
-                if (frame.getClassName().endsWith("GameShell")) {
-                    return info;
+            for (var info : threads.dumpAllThreads(false, false)) {
+                if (uninteresting(info.getThreadName()) || info.getStackTrace().length == 0) {
+                    continue;
                 }
+                if (info.getThreadState() == Thread.State.WAITING
+                    || info.getThreadState() == Thread.State.TIMED_WAITING) {
+                    continue;
+                }
+
+                seen.merge(where(info), 1, Integer::sum);
             }
+
+            taken++;
+            var now = System.currentTimeMillis();
+            if (now - since < seconds * 1000L) {
+                continue;
+            }
+
+            say(taken, seen);
+            seen.clear();
+            taken = 0;
+            since = now;
         }
-        return null;
     }
 
-    private static void say(ThreadInfo drawing, long standing, List<StackTraceElement> here) {
-        var report = new StringBuilder("\n--- ")
-            .append(drawing.getThreadName())
-            .append(" stood still for ")
-            .append(standing)
-            .append("ms, drawing with ")
+    private static String where(ThreadInfo info) {
+        var stack = info.getStackTrace();
+        var name = new StringBuilder(info.getThreadName()).append(": ");
+        for (var deep = 0; deep < DEEP_ENOUGH && deep < stack.length; deep++) {
+            if (deep > 0) {
+                name.append(" <- ");
+            }
+            name.append(stack[deep].getClassName())
+                .append('.')
+                .append(stack[deep].getMethodName());
+        }
+        return name.toString();
+    }
+
+    private static void say(int taken, Map<String, Integer> seen) {
+        var report = new StringBuilder("\n--- where the time went over ")
+            .append(taken)
+            .append(" looks, drawing with ")
             .append(renderer())
-            .append(", in state ")
-            .append(drawing.getThreadState())
             .append(" ---\n");
 
-        here.forEach(frame -> report.append("    ").append(frame).append('\n'));
+        seen.entrySet().stream()
+            .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+            .limit(WORTH_SAYING)
+            .forEach(each -> report.append(String.format("%5.1f%%  %s%n",
+                100.0 * each.getValue() / taken, each.getKey())));
+
         System.out.println(report);
     }
 
