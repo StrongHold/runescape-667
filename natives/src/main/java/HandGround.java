@@ -81,6 +81,14 @@ public final class HandGround {
     /** The most the client ever asks a corner of the ground to be darkened by. */
     private static final int DARKENED_MOST = 30;
 
+    /** Where a light stands, how far it reaches and how strongly it shines. */
+    private static final int LIGHT_ABOVE = 200;
+    private static final int LIGHT_REACHES = TILE * 3;
+    private static final float LIGHT_STRENGTH = 1.0F;
+
+    /** How many numbers the ground writes back about a light it has been given. */
+    private static final int LIGHT_ANSWERS = 8;
+
     /**
      * The colour laid over a whole face, which is a red the corner colours never reach so that a
      * face drawn with it cannot be mistaken for one drawn without.
@@ -206,6 +214,16 @@ public final class HandGround {
                 ground.ka(x, z, x < 4 ? DARKENED_MOST : DARKENED_MOST / 2);
             }
         }
+
+        /*
+         * Something standing in the world that gives off light of its own. The client puts one in
+         * for a lantern, a fire and anything else that lights the ground around it, and tells the
+         * ground how strongly each is shining before every frame it draws.
+         */
+        var middle = TILES * TILE / 2;
+        ground.method7868(
+            new Node_Sub7_Sub1(middle, LIGHT_ABOVE, middle, LIGHT_REACHES, 0, LIGHT_STRENGTH),
+            new int[LIGHT_ANSWERS]);
 
         for (var x = 0; x < TILES; x++) {
             for (var z = 0; z < TILES; z++) {
