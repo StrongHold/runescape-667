@@ -1579,11 +1579,19 @@ public sealed interface Scene {
          * here is brighter rather than darker: a corner facing away from the sun is darkened by
          * how far it faces away, and one blended short is not darkened far enough.
          *
-         * Dividing by the length the blend has is not the answer on its own. It takes this scene
-         * further off and puts Terrain and HollowGround out, both of which match to the pixel, and
-         * it does it at the rim of the patch where the directions nearly cancel and the length
-         * comes out near nothing. Whatever the toolkit does is something that leaves the rim
-         * alone.
+         * Three ways of blending have been measured and none of them is it.
+         *
+         * Dividing by the length the blend has takes this scene from twelve thousand to twenty
+         * three and puts Terrain and HollowGround out, and both match to the pixel today. Keeping
+         * each direction as it was measured with its own length beside it, and blending the
+         * lengths along with the directions, comes to nineteen thousand and touches nothing else,
+         * which is what it should touch: at a corner of the grid the two are the same sum. Not
+         * blending at all comes to thirty two thousand and puts every ground scene out, so the
+         * blending is real and every corner of every face goes through it, not only a cut one.
+         *
+         * The two that reach further along a direction both went the wrong way, so the sun is
+         * reaching these corners too strongly here rather than too weakly, and what is wanted is
+         * a blend that reaches less far than four directions of length one already do.
          */
         @Override
         public boolean written() {
