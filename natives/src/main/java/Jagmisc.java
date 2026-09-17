@@ -5,7 +5,7 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Holds the odds and ends library to what the machine says by another route.
+ * Holds the miscellaneous library to what the machine says by another route.
  *
  * The game's file store has jagmisc for Windows and for nothing else, so unlike every other
  * native here there is no shipped library to draw the same picture through and compare. What
@@ -35,7 +35,7 @@ public final class Jagmisc {
 
     public static void main(String[] args) {
         try {
-            Watchdog.arm("The odds and ends check", 120);
+            Watchdog.arm("The jagmisc check", 120);
             LibraryManager.putLibrary(new File(args[0]), "jagmisc");
             LibraryManager.loadNative(Jagmisc.class, "jagmisc");
 
@@ -48,7 +48,7 @@ public final class Jagmisc {
             checkUnreachableTimesOut();
             jagmisc.quit();
 
-            System.out.println("the odds and ends library agreed with the machine on "
+            System.out.println("jagmisc agreed with the machine on "
                     + System.getProperty("os.arch"));
             System.exit(0);
         } catch (Throwable failure) {

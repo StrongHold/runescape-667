@@ -1,6 +1,6 @@
 # jagmisc
 
-The odds and ends library. Six natives on `jagex3.jagmisc.jagmisc`: a monotonic clock, the total
+The miscellaneous library. Six natives on `jagex3.jagmisc.jagmisc`: a monotonic clock, the total
 and available size of physical memory, a ping, and the pair that start and stop the library.
 
 Nothing in it belongs with anything else in it. It is where the client put the three questions
@@ -54,7 +54,7 @@ told from one that waited and heard nothing.
 
 ## How it is checked
 
-    ./gradlew :natives:verifyOddsAndEnds
+    ./gradlew :natives:verifyMiscLibrary
 
 Every other library here is held against the shipped one by driving both and comparing. This one
 has no shipped copy to drive, so each answer is held against a second way of asking the machine

@@ -1,5 +1,5 @@
 /*
- * The odds and ends library: a clock, the size of memory, and a ping.
+ * The miscellaneous library: a clock, the size of memory, and a ping.
  *
  * Nothing in here belongs with anything else in here. The client wants a monotonic clock to pace
  * its ticks against, the size of physical memory to report in the debug console, and the round

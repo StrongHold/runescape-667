@@ -50,7 +50,7 @@ val compileJawtShim by tasks.registering(Exec::class) {
 
 tasks.register("assembleNatives") {
     description = "Builds every native this module owns."
-    dependsOn(compileJawtShim, compileOpenGlBinding, compileMemoryLibrary, compileOddsAndEnds)
+    dependsOn(compileJawtShim, compileOpenGlBinding, compileMemoryLibrary, compileMiscLibrary)
 }
 
 /**
@@ -527,19 +527,19 @@ val verifyMemoryLibrary by tasks.registering(JavaExec::class) {
     args(memoryLibrary.get().asFile.absolutePath)
 }
 
-val oddsAndEndsSource = layout.projectDirectory.file("src/main/native/jagmisc/jagmisc.c")
-val oddsAndEndsLibrary = layout.buildDirectory.file("natives/libjagmisc.dylib")
+val miscSource = layout.projectDirectory.file("src/main/native/jagmisc/jagmisc.c")
+val miscLibrary = layout.buildDirectory.file("natives/libjagmisc.dylib")
 
-val compileOddsAndEnds by tasks.registering(Exec::class) {
+val compileMiscLibrary by tasks.registering(Exec::class) {
     description = "Builds the clock, the memory sizes and the ping the client asks jagmisc for."
     dependsOn(":unpackX64Jdk", ":runescape:compileJava")
 
     val headers = project(":runescape").layout.buildDirectory.dir("generated/jni")
-    val target = oddsAndEndsLibrary.get().asFile
+    val target = miscLibrary.get().asFile
 
-    inputs.file(oddsAndEndsSource)
+    inputs.file(miscSource)
     inputs.dir(headers)
-    outputs.file(oddsAndEndsLibrary)
+    outputs.file(miscLibrary)
 
     executable = "clang"
     args(
@@ -554,7 +554,7 @@ val compileOddsAndEnds by tasks.registering(Exec::class) {
         "-I", headers.get().asFile.absolutePath,
         "-install_name", "@loader_path/libjagmisc.dylib",
         "-o", target.absolutePath,
-        oddsAndEndsSource.asFile.absolutePath,
+        miscSource.asFile.absolutePath,
     )
 
     doFirst {
@@ -567,13 +567,13 @@ val compileOddsAndEnds by tasks.registering(Exec::class) {
  * library here to measure against. Each answer is held against a second way of asking the machine
  * the same question instead.
  */
-val verifyOddsAndEnds by tasks.registering(JavaExec::class) {
+val verifyMiscLibrary by tasks.registering(JavaExec::class) {
     description = "Holds the clock, the memory sizes and the ping against what the machine says."
-    dependsOn(compileOddsAndEnds)
+    dependsOn(compileMiscLibrary)
     mainClass = "Jagmisc"
     classpath = sourceSets["main"].runtimeClasspath
     jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
-    args(oddsAndEndsLibrary.get().asFile.absolutePath)
+    args(miscLibrary.get().asFile.absolutePath)
 }
 
 val cacheDirectory = providers.gradleProperty("cache")
@@ -947,7 +947,7 @@ val verifyNatives by tasks.registering {
         verifyToolkitLifetime,
         verifyToolkitSkeleton,
         verifyMemoryLibrary,
-        verifyOddsAndEnds,
+        verifyMiscLibrary,
         verifySpriteLift,
         verifyMatrices,
         verifyPoints,
