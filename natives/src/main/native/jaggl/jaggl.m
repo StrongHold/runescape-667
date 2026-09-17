@@ -138,6 +138,10 @@ static dispatch_semaphore_t frameTaken;
  */
 enum { LONGEST_WAIT_IN_MILLISECONDS = 100 };
 
+/* What reading the picture back cost, which stops the card dead each time it is asked. */
+static uint64_t reads;
+static uint64_t readMicroseconds;
+
 /* How evenly the screen took them, which is the last thing a count of them cannot say. */
 static uint64_t lastShown;
 static uint64_t shownGap;
@@ -246,10 +250,11 @@ static void reportTiming(uint64_t spentSwapping) {
         return;
     }
 
-    JAGGLLOG("%llu frames every %llu us, %llu of that handing over; shown %llu of them, "
-             "one every %llu us, the quickest %llu apart and the slowest %llu",
+    JAGGLLOG("%llu frames every %llu us, %llu handing over; shown %llu, one every %llu us, "
+             "quickest %llu slowest %llu; %llu reads of the picture costing %llu us",
              frames, betweenSwaps / frames, swapping / frames, shownFrames,
-             shownFrames > 1 ? shownGap / (shownFrames - 1) : 0, shownGapLeast, shownGapMost);
+             shownFrames > 1 ? shownGap / (shownFrames - 1) : 0, shownGapLeast, shownGapMost,
+             reads, readMicroseconds);
 
     frames = 0;
     swapping = 0;
@@ -258,6 +263,8 @@ static void reportTiming(uint64_t spentSwapping) {
     shownGap = 0;
     shownGapLeast = 0;
     shownGapMost = 0;
+    reads = 0;
+    readMicroseconds = 0;
     lastReport = now;
 }
 
@@ -680,6 +687,7 @@ static void doneReading(void) {
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_glReadPixelsi(JNIEnv *env, jclass owner, jint x, jint y,
                                                         jint width, jint height, jint format,
                                                         jint type, jintArray pixels, jint offset) {
+    uint64_t began = timing() ? nowInMicroseconds() : 0;
     bringDown("reading pixels", x, y, width, height);
     jint *address = pixels == NULL ? NULL : (*env)->GetPrimitiveArrayCritical(env, pixels, NULL);
     glReadPixels(x, y, width, height, (GLenum) format, (GLenum) type,
@@ -688,6 +696,11 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_glReadPixelsi(JNIEnv *env, jclass owner
         (*env)->ReleasePrimitiveArrayCritical(env, pixels, address, 0);
     }
     doneReading();
+
+    if (timing()) {
+        reads++;
+        readMicroseconds += nowInMicroseconds() - began;
+    }
 }
 
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_glReadPixelsub(JNIEnv *env, jclass owner, jint x, jint y,
