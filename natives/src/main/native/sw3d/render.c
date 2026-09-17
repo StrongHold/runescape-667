@@ -1638,6 +1638,7 @@ static struct {
     int turnedAway;
     int hollow;
     int drawn;
+
     float nearest;
     float farthest;
 } tally = {0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0e30f, -1.0e30f};
@@ -2510,56 +2511,21 @@ JNIEXPORT void JNICALL Java_a_O(JNIEnv *env, jobject self, jlong worker, jobject
 enum { PLAN_SHIFT = 8, PLAN_WHOLE = 1 << PLAN_SHIFT };
 
 /**
- * Stands for a face whose corners each keep the colour the client gave them, which is every face
- * that wears no texture.
- */
-static const uint32_t NO_PAINT = 0xffffffffu;
-
-/**
  * What one corner of a tile looks like from straight above.
  */
 static Corner planCorner(const void *tile, int corner, float across, float down, float width,
-                         int size, uint32_t paint) {
+                         int size) {
     int alongX;
     int alongZ;
     uint32_t colour;
     groundTilePlanCorner(tile, corner, &alongX, &alongZ, &colour);
 
-    /*
-     * A corner is drawn on the map in the colour the client laid over its face, and in its own
-     * colour only where the client laid none. A face standing for its texture takes neither.
-     */
-    if (paint != NO_PAINT) {
-        colour = paint;
-    } else {
-        groundTilePlanColour(tile, corner, &colour);
-    }
+    groundTilePlanColour(tile, corner, &colour);
 
     float x = across + (float) alongX * width / (float) size;
     float y = down - (float) alongZ * width / (float) size;
 
     return flatCorner((int) x - raster.clipLeft, (int) y - raster.clipTop, colour);
-}
-
-/**
- * The colour a whole face is painted in the plan, or nothing where each corner keeps its own.
- *
- * A textured face shows as the one colour that stands for its texture rather than as the texture
- * itself, because a tile on the plan is a handful of pixels across and a texture drawn that small
- * says nothing.
- */
-static uint32_t planPaint(const void *tile, int face) {
-    int texture = groundTileFaceTexture(tile, face);
-    if (texture == -1) {
-        return NO_PAINT;
-    }
-
-    const TextureMetrics *metrics = textureMetricsFor(texture);
-    if (metrics == NULL || metrics->disableable) {
-        return NO_PAINT;
-    }
-
-    return colourOf(metrics->averageColour);
 }
 
 /**
@@ -2570,20 +2536,18 @@ static void renderTilePlan(const void *ground, const void *tile, float across, f
     int size = groundTileSize(ground);
 
     for (int face = 0; face < groundTileFaces(tile); face++) {
-        uint32_t paint = planPaint(tile, face);
-
         /*
-         * A face the floor opens through has nothing of its own to show on the plan either, so
+         * A face the floor opens through has nothing of its own to show on the map either, so
          * whatever the map was drawn over stays where it is.
          */
-        if (paint == NO_PAINT && groundTileFaceHollow(tile, face)) {
+        if (groundTileFaceHollow(tile, face) && groundTileFaceTexture(tile, face) == -1) {
             continue;
         }
 
         fillTriangle(
-            planCorner(tile, face * 3, across, down, width, size, paint),
-            planCorner(tile, face * 3 + 1, across, down, width, size, paint),
-            planCorner(tile, face * 3 + 2, across, down, width, size, paint));
+            planCorner(tile, face * 3, across, down, width, size),
+            planCorner(tile, face * 3 + 1, across, down, width, size),
+            planCorner(tile, face * 3 + 2, across, down, width, size));
     }
 }
 

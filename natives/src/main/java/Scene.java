@@ -1664,6 +1664,20 @@ public sealed interface Scene {
 
     record Plan() implements Scene {
 
+        /**
+         * Nearly every pixel differs on purpose. The shipped toolkit draws the map in the colour
+         * the ground is drawn in as the world is seen, carried through what the texture over a
+         * corner does to its colour and through the colour the sun shines in. A texture carries
+         * every colour towards the same grey, so a map drawn that way comes out in one colour
+         * however many kinds of ground it covers. The client's own renderer lights the map from
+         * the sun and the world's ambient alone and keeps each colour's own hue, which is what
+         * this draws.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
         @Override
         public void draw(Toolkit toolkit, Props props) {
             var visible = new boolean[HandGround.TILES][HandGround.TILES];
