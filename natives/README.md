@@ -26,10 +26,6 @@ literal name. Nothing in `a`, `h`, `i`, `j`, `ja`, `n`, `oa`, `t`, `wa`, `xa`, `
 unrelated libraries that share a package and nothing else, and they are checked in two different
 ways.
 
-`jaggl`'s hundred and eighty are written in two ways, but are not yet compared against the
-shipped binding, which takes a surface here and then makes no context current. See
-`jaggl/README.md`.
-
 `jaggl`'s hundred and eighty are written in two ways. A hundred and fifty three are generated
 from the client's own JNI headers, because they pass their arguments straight to the call of the
 same name and nothing but the types varies. The twenty nine the generator cannot write are in

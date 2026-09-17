@@ -33,51 +33,62 @@ rather than a call forwarded.
 
     ./gradlew :natives:verifyOpenGlBinding
 
-Not against the shipped binding. Against what goes in coming back out.
+Both bindings are driven through the same script and everything either carries is compared. Forty
+six answers, all identical.
 
-That is a weaker claim than the renderer's and it is closer to the whole claim than it sounds. A
-binding has no opinions. Both it and the shipped one reach the same driver on the same machine, so
-nothing it does can be right or wrong except the carrying: an argument put in the wrong place, an
-array read from the wrong offset, a value widened the wrong way. Setting a piece of state and
-reading it back asks exactly that question, and it asks it of the call itself rather than of
-anything behind it.
+Every switch is enabled, disabled and read back. Every whole number and fraction is set and read
+back. Arrays are written into the middle of a larger one, so an offset that is ignored shows as the
+wrong cells changing rather than as nothing at all. Two matrices are built and compared, and a
+texture is uploaded and bound. Each answer is also held to what was asked for, so a binding driven
+on its own still fails on the spot rather than recording a wrong value.
 
-Fifty answers. Every switch enabled and disabled and read back, every whole number and fraction
-set and read back, arrays written into the middle of a larger one so that an ignored offset shows
-as the wrong cells changing, two matrices built and compared, a texture uploaded and bound, and a
-triangle and a textured triangle drawn and read out of the framebuffer, because a vertex and a
-colour set nothing that can be asked for.
+That is a narrower question than the renderer is asked and it is close to the whole question here.
+A binding has no opinions. Both reach the same driver on the same machine, so nothing either does
+can differ except the carrying: an argument put in the wrong place, an array read from the wrong
+offset, a value widened the wrong way.
 
-Each answer is held to what was asked for, so the probe fails on the spot rather than recording a
-wrong value. The answers are also written to `build/answers/binding-ours.txt`, which is what a
-comparison would read when one becomes possible.
+The shipped binding has to be thinned to its x86_64 slice and its JNI import pointed at the shim,
+as the memory library does, and both sides need `JAWTSHIM_WAIT_FOR_VIEW` set. The shipped one
+builds its context out of `NSOpenGLContext` and gives it a view, and the call that takes a view
+makes the context current on whichever thread runs it. The shim hands that call to the main thread
+without waiting, which is what the client needs and which leaves a harness drawing into a context
+that is current on another thread. With that set the shim waits and then takes the context back
+onto the thread that asked for it.
 
-## Why there is no comparison yet
+## Where it does not agree, and why
 
-The shipped binding cannot be driven here. It loads, it takes a surface from the shim, and it
-returns a handle from `init` and `true` from `setSurface`. No context becomes current:
+What each binding carries is identical. What sort of context each builds is not:
+
+| | shipped | this one |
+|---|---|---|
+| sample buffers | 1 | 0 |
+| samples | 2 | 0 |
+| depth bits | 32 | 24 |
+| stencil bits | 0 | 8 |
+
+The client asks for eight bits a channel, twenty four of depth, no stencil and no antialiasing.
+The shipped binding asks OpenGL for this:
 
 ```
-[jawtshim] JAWT_GetAWT 0x00010004
-[jawtshim] made a 256x256 view for the hardware toolkit
-[jawtshim] getDrawingSurfaceInfo 256x256
-init = 140301592318384
-version after init = null
-setSurface = true
-version after setSurface = null
-error = 0
+73 5 55 1 56 [0] 8 24 12 24 [0]
 ```
 
-`glGetString` answering null is a GL call made with nothing current. Every value after it is zero,
-so a comparison would be comparing our answers against fifty nothings and calling it a difference.
-Tried on the main thread and on the event thread, and through `init` and through `prepareSurface`
-and `setSurface` separately. The shim's own log shows it hands over the view it was asked for.
+Reading it: accelerated, double buffered, one sample buffer, and a sample count. The sample count
+is the antialiasing the client asked for, which is zero, and a zero ends an attribute list. The
+eight bits of colour and twenty four of depth that follow are written down and never read. Asking
+for a sample buffer with no count then gets two samples from the driver.
 
-This one builds its context with CGL. The shipped one builds an `NSOpenGLContext` and hands it a
-view, which is why the shim already moves `setView:`, `update` and `clearDrawable` to the main
-thread for it. What is not yet known is whether the context is never created, or created and never
-made current. That is the next thing to find out, and it is the same shape of problem as the
-`JAWT_VERSION_1_3` one the shim was written for.
+So on this system the client has always drawn multisampled with antialiasing turned off, into
+whatever depth buffer the system chose rather than the one it asked for. This one asks for what
+the client asked for and gets it.
+
+The pixels differ for that reason and no other, which is why the picture drawn at the end of the
+probe is reported beside the context rather than compared. Two triangles over a cleared background
+come out the same either way except at their edges, which one context softens and the other does
+not.
+
+Matching the shipped binding here would mean writing an attribute list that discards its own
+request. It is not done, and nothing about it is accidental.
 
 ## Faults in the original
 

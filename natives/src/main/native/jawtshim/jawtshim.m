@@ -27,6 +27,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import <OpenGL/OpenGL.h>
 #import <ImageIO/ImageIO.h>
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
@@ -360,10 +361,42 @@ static void onMainThread(void (^work)(void)) {
     }
 }
 
+/*
+ * Whether to wait for setView: and then take the context back.
+ *
+ * Off, which is what the client wants, the call is handed to the main thread and not waited for.
+ * On, it is waited for and the context is made current again on the thread that asked, because
+ * setView: makes it current on whichever thread runs it and that thread is now the main one.
+ *
+ * A toolkit driven from a harness needs this and the client must not have it. The client is called
+ * with the AWT tree lock held and the main thread needs that same lock to finish a resize, so
+ * waiting there stops the client for good. A harness holds no lock and draws from the thread it
+ * sets the surface on, so without this every call it makes goes to a context current somewhere
+ * else and answers nothing.
+ */
+static BOOL waitForTheView(void) {
+    static BOOL cached;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        cached = getenv("JAWTSHIM_WAIT_FOR_VIEW") != NULL;
+    });
+    return cached;
+}
+
 static void mainThreadSetView(id context, SEL selector, id view) {
-    onMainThread(^{
+    if (!waitForTheView() || [NSThread isMainThread]) {
+        onMainThread(^{
+            ((void (*)(id, SEL, id)) contextSetView)(context, selector, view);
+        });
+        return;
+    }
+
+    dispatch_sync(dispatch_get_main_queue(), ^{
         ((void (*)(id, SEL, id)) contextSetView)(context, selector, view);
     });
+    [(NSOpenGLContext *) context makeCurrentContext];
+    SHIMLOG("took the context back onto the calling thread: %s",
+            CGLGetCurrentContext() == NULL ? "NOTHING current" : "a context is current");
 }
 
 static void mainThreadUpdate(id context, SEL selector) {
@@ -376,6 +409,54 @@ static void mainThreadClearDrawable(id context, SEL selector) {
     onMainThread(^{
         ((void (*)(id, SEL)) contextClearDrawable)(context, selector);
     });
+}
+
+/*
+ * Reports what a toolkit asks OpenGL for, and what it is given back.
+ *
+ * A toolkit that builds its context out of NSOpenGLPixelFormat can be refused one without saying
+ * so: the format comes back nil, the context built from it is nil too, and making a nil context
+ * current does nothing and reports nothing. Every call after that is made with nothing current
+ * and answers zero, which looks the same as a toolkit that works and draws nothing.
+ *
+ * These are installed only when reporting is switched on, so a normal run is not touched.
+ */
+static IMP pixelFormatWithAttributes;
+static IMP contextWithFormat;
+static IMP contextMakeCurrent;
+
+static id reportedPixelFormat(id self, SEL selector, const uint32_t *attributes) {
+    char asked[512];
+    size_t at = 0;
+    /*
+     * Past the terminating zero on purpose. A zero ends the list as far as OpenGL is concerned, so
+     * anything after one is a request that was written down and will not be read, which is worth
+     * seeing rather than stopping at.
+     */
+    for (size_t i = 0; attributes != NULL && i < 20; i++) {
+        at += (size_t) snprintf(asked + at, sizeof(asked) - at,
+                attributes[i] == 0 ? "[0] " : "%u ", attributes[i]);
+    }
+    asked[at] = '\0';
+
+    id made = ((id (*)(id, SEL, const uint32_t *)) pixelFormatWithAttributes)(self, selector, attributes);
+    SHIMLOG("pixel format for [ %s] %s", asked, made == nil ? "REFUSED" : "granted");
+    return made;
+}
+
+static id reportedContext(id self, SEL selector, id format, id share) {
+    id made = ((id (*)(id, SEL, id, id)) contextWithFormat)(self, selector, format, share);
+    SHIMLOG("context from %s format %s",
+            format == nil ? "a nil" : "a", made == nil ? "REFUSED" : "granted");
+    return made;
+}
+
+static void reportedMakeCurrent(id self, SEL selector) {
+    ((void (*)(id, SEL)) contextMakeCurrent)(self, selector);
+    SHIMLOG("makeCurrentContext on %s left %s current, on the %s thread",
+            self == nil ? "nothing" : "a context",
+            CGLGetCurrentContext() == NULL ? "NOTHING" : "a context",
+            [NSThread isMainThread] ? "main" : "calling");
 }
 
 static BOOL replace(Class owner, SEL selector, IMP replacement, IMP *original) {
@@ -394,6 +475,23 @@ static BOOL replace(Class owner, SEL selector, IMP replacement, IMP *original) {
  * where they are on purpose: they act on the thread that calls them, so running them on the main
  * thread would make the context current on the wrong one.
  */
+/*
+ * Watches from the moment the library is loaded, because a toolkit builds its context before it
+ * asks for a surface and anything installed at the surface would miss the building of it.
+ */
+__attribute__((constructor)) static void reportWhatOpenGlIsAskedFor(void) {
+    if (!verbose()) {
+        return;
+    }
+
+    Class format = NSClassFromString(@"NSOpenGLPixelFormat");
+    Class context = NSClassFromString(@"NSOpenGLContext");
+    replace(format, @selector(initWithAttributes:), (IMP) reportedPixelFormat, &pixelFormatWithAttributes);
+    replace(context, @selector(initWithFormat:shareContext:), (IMP) reportedContext, &contextWithFormat);
+    replace(context, @selector(makeCurrentContext), (IMP) reportedMakeCurrent, &contextMakeCurrent);
+    SHIMLOG("watching what OpenGL is asked for");
+}
+
 static void passDrawableCallsToTheMainThread(void) {
     static dispatch_once_t once;
     dispatch_once(&once, ^{

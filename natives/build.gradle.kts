@@ -39,6 +39,7 @@ val compileJawtShim by tasks.registering(Exec::class) {
         "-framework", "Cocoa",
         "-framework", "QuartzCore",
         "-framework", "ImageIO",
+        "-framework", "OpenGL",
         "-install_name", "@loader_path/libjawtshim.dylib",
         "-o", shimLibrary.get().asFile.absolutePath,
         shimSource.asFile.absolutePath,
@@ -480,33 +481,82 @@ val compileOpenGlBinding by tasks.registering(Exec::class) {
     }
 }
 
-val bindingAnswers = layout.buildDirectory.file("answers/binding-ours.txt")
+val shippedOpenGlBinding = providers.gradleProperty("jagglLibrary")
+    .orElse(providers.systemProperty("user.home").map { "$it/.jagex_cache_32/runescape/libjaggl.dylib" })
+val patchedOpenGlBinding = layout.buildDirectory.file("natives/libjaggl-patched.dylib")
+
+val patchOpenGlBinding by tasks.registering(Exec::class) {
+    description = "Copies the shipped OpenGL binding and points its JNI import at the shim."
+    dependsOn(compileJawtShim)
+    outputs.file(patchedOpenGlBinding)
+
+    val source = shippedOpenGlBinding.get()
+    val target = patchedOpenGlBinding.get().asFile
+    val shimName = "@loader_path/libjawtshim.dylib"
+    val javaVm = "/System/Library/Frameworks/JavaVM.framework/Versions/A/JavaVM"
+
+    executable = "sh"
+    args("-c", listOf(
+        "lipo -thin x86_64 '$source' -output '$target'",
+        "install_name_tool -change '$javaVm' '$shimName' '$target'",
+        "codesign -f -s - '$target'",
+    ).joinToString(" && "))
+
+    doFirst {
+        require(File(source).isFile) { "No OpenGL binding at $source. Point -PjagglLibrary at one." }
+        target.parentFile.mkdirs()
+    }
+}
+
+val bindingAnswers = layout.buildDirectory.file("answers/binding-shipped.txt")
+val ownBindingAnswers = layout.buildDirectory.file("answers/binding-ours.txt")
 
 /**
- * Holds the OpenGL binding to what goes into it coming back out.
+ * Drives a binding through the same script and writes down what it carried back.
  *
- * This is not a comparison against the shipped binding, because the shipped one cannot yet be
- * driven here: it takes a surface from the shim and reports a context, but makes none current, so
- * every value it answers is zero. See `jaggl/README.md`.
- *
- * A binding needs less than a renderer does to be checked, which is why that is not fatal. Both
- * sides of a binding reach the same driver, so what it is for is that an argument arrives where it
- * was sent and an answer comes back as it was given. Setting a piece of state and reading it back
- * asks exactly that, and it asks it of the call itself rather than of anything downstream.
+ * Both sides need the shim to wait for the view it hands over. The shipped binding builds its
+ * context out of NSOpenGLContext and gives it a view, and the call that takes a view makes the
+ * context current on whichever thread runs it. The shim hands that call to the main thread and
+ * does not wait, which is what the client needs and what leaves a harness drawing into a context
+ * current somewhere else.
+ */
+fun registerBindingCapture(name: String, library: Provider<RegularFile>, answers: Provider<RegularFile>,
+                           after: TaskProvider<*>) =
+    tasks.register<JavaExec>(name) {
+        dependsOn(after, ":unpackX64Jdk")
+
+        val written = answers.get().asFile
+
+        mainClass = "GlProbe"
+        classpath = sourceSets["main"].runtimeClasspath
+        setExecutable(x64JavaExecutable)
+        jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+        environment("JAWTSHIM_WAIT_FOR_VIEW", "1")
+        args(library.get().asFile.absolutePath, written.absolutePath)
+        inputs.file(library)
+        outputs.file(answers)
+        doFirst { written.parentFile.mkdirs() }
+    }
+
+val captureBinding = registerBindingCapture(
+    "captureBinding", patchedOpenGlBinding, bindingAnswers, patchOpenGlBinding)
+val captureOwnBinding = registerBindingCapture(
+    "captureOwnBinding", openGlLibrary, ownBindingAnswers, compileOpenGlBinding)
+
+/**
+ * What a binding carries is held to being identical. What sort of context it built is not, and is
+ * reported instead: the two do not build the same one, and `jaggl/README.md` says why.
  */
 val verifyOpenGlBinding by tasks.registering(JavaExec::class) {
-    description = "Sets a piece of state through the OpenGL binding and reads every one of them back."
-    dependsOn(compileOpenGlBinding, ":unpackX64Jdk")
-
-    val written = bindingAnswers.get().asFile
-
-    mainClass = "GlProbe"
+    description = "Checks our OpenGL binding against the shipped one, answer for answer."
+    dependsOn(captureBinding, captureOwnBinding)
+    mainClass = "AnswerCheck"
     classpath = sourceSets["main"].runtimeClasspath
-    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
-    args(openGlLibrary.get().asFile.absolutePath, written.absolutePath)
-    inputs.file(openGlLibrary)
-    outputs.file(bindingAnswers)
-    doFirst { written.parentFile.mkdirs() }
+    args(
+        bindingAnswers.get().asFile.absolutePath,
+        ownBindingAnswers.get().asFile.absolutePath,
+        "OpenGL binding answers",
+    )
 }
 
 val memorySource = layout.projectDirectory.file("src/main/native/jaclib/jaclib.c")

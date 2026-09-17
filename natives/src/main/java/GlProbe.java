@@ -39,6 +39,12 @@ public final class GlProbe {
     private static final int RENDERER = 0x1F01;
     private static final int VERSION = 0x1F02;
 
+    private static final int SAMPLE_BUFFERS = 0x80A8;
+    private static final int SAMPLES_HELD = 0x80A9;
+    private static final int RED_BITS = 0x0D52;
+    private static final int DEPTH_BITS = 0x0D56;
+    private static final int STENCIL_BITS = 0x0D57;
+
     private static final int DEPTH_TEST = 0x0B71;
     private static final int BLEND = 0x0BE2;
     private static final int CULL_FACE = 0x0B44;
@@ -108,9 +114,11 @@ public final class GlProbe {
             LibraryManager.loadNative(GlProbe.class, "jaggl");
 
             var answers = new ArrayList<String>();
-            probe(answers);
+            var context = new ArrayList<String>();
+            probe(answers, context);
 
             Files.write(Path.of(args[1]), answers);
+            Files.write(Path.of(args[1].replace(".txt", "-context.txt")), context);
             System.out.println("the binding carried " + answers.size() + " answers back unchanged");
             System.exit(0);
         } catch (Throwable failure) {
@@ -119,7 +127,7 @@ public final class GlProbe {
         }
     }
 
-    private static void probe(List<String> answers) throws Exception {
+    private static void probe(List<String> answers, List<String> context) throws Exception {
         var canvas = new Canvas();
         canvas.setSize(WIDTH, HEIGHT);
 
@@ -144,7 +152,7 @@ public final class GlProbe {
             throw new IllegalStateException("the binding would not make its surface current");
         }
 
-        askWhoIsDrawing(answers);
+        askWhoIsDrawing(answers, context);
         askSwitches(answers);
         askWholeNumbers(answers);
         askFractions(answers);
@@ -152,6 +160,7 @@ public final class GlProbe {
         askMatrices(answers);
         askTexture(answers);
         askPixels(answers);
+        context.add("pixels drawn = " + drawnPixels);
 
         binding.releaseSurface(canvas, surface);
         binding.release();
@@ -161,14 +170,26 @@ public final class GlProbe {
      * Both bindings reach the same driver, so this says the context is real rather than that the
      * binding is right. A probe that quietly ran without one would compare two sets of nothing.
      */
-    private static void askWhoIsDrawing(List<String> answers) {
+    /**
+     * What the context is, kept apart from what the binding carries.
+     *
+     * These describe the context a binding built rather than anything it carried afterwards, and
+     * the two bindings do not build the same one. They go in their own file so that the carrying
+     * can be held to being identical while the building is reported instead.
+     */
+    private static void askWhoIsDrawing(List<String> answers, List<String> context) {
         String version = OpenGL.glGetString(VERSION);
         if (version == null) {
             throw new IllegalStateException("the binding made no context current, so nothing below means anything");
         }
-        answers.add("vendor = " + OpenGL.glGetString(VENDOR));
-        answers.add("renderer = " + OpenGL.glGetString(RENDERER));
-        answers.add("version = " + OpenGL.glGetString(VERSION));
+        context.add("vendor = " + OpenGL.glGetString(VENDOR));
+        context.add("renderer = " + OpenGL.glGetString(RENDERER));
+        context.add("version = " + version);
+        context.add("sample buffers = " + whole(SAMPLE_BUFFERS));
+        context.add("samples = " + whole(SAMPLES_HELD));
+        context.add("red bits = " + whole(RED_BITS));
+        context.add("depth bits = " + whole(DEPTH_BITS));
+        context.add("stencil bits = " + whole(STENCIL_BITS));
     }
 
     private static void askSwitches(List<String> answers) {
@@ -317,6 +338,8 @@ public final class GlProbe {
      * The texture is read here rather than through glGetTexImage because the shipped library does
      * not have that call. Drawing with it tests the same upload by a path both libraries have.
      */
+    private static long drawnPixels;
+
     private static void askPixels(List<String> answers) {
         OpenGL.glDisable(TEXTURE_2D);
         OpenGL.glDisable(CULL_FACE);
@@ -361,8 +384,8 @@ public final class GlProbe {
         OpenGL.glReadPixelsi(0, 0, WIDTH, HEIGHT, RGBA, UNSIGNED_BYTE, pixels, OFFSET);
 
         agrees(answers, "untouched before the pixels", "0 0 0", pixels[0] + " " + pixels[1] + " " + pixels[2]);
-        long drawn = sumOf(pixels, OFFSET);
-        answers.add("pixels drawn = " + drawn);
+        drawnPixels = sumOf(pixels, OFFSET);
+        long drawn = drawnPixels;
         if (drawn == 0L) {
             throw new IllegalStateException("nothing reached the pixels");
         }
