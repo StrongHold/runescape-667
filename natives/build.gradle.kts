@@ -889,6 +889,13 @@ val listTerrain by tasks.registering(JavaExec::class) {
     args((providers.gradleProperty("tile").getOrElse("3175 3495 0")).split(" "))
 }
 
+val describeModel by tasks.registering(JavaExec::class) {
+    description = "Says what one model out of the cache is made of."
+    mainClass = "CacheModel"
+    classpath = sourceSets["main"].runtimeClasspath
+    args(providers.gradleProperty("model").getOrElse("32421"))
+}
+
 val listLocType by tasks.registering(JavaExec::class) {
     description = "Lists the models one kind of location is built from."
     mainClass = "CacheLocType"

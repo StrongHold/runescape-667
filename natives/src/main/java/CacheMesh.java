@@ -37,6 +37,14 @@ public final class CacheMesh {
     public static final int ROCK = 64785;
 
     /**
+     * The group holding a piece of scenery a hundred and twenty four of whose faces stand on the
+     * same three corners as another face. Two faces in the same place are settled by how far away
+     * each is reckoned to be, and turning one about is the only way to ask what happens when the
+     * two answers are a hair apart.
+     */
+    public static final int DOUBLED_FACES = 32421;
+
+    /**
      * The group holding the step at the head of a flight of stairs, which the client draws
      * nothing for, so that the hole beneath the stairs shows through where the step should be.
      *
@@ -446,6 +454,18 @@ public final class CacheMesh {
         }
 
         return true;
+    }
+
+    /**
+     * One model out of the cache by the group it is kept in, or nothing where the cache has none.
+     */
+    public static Mesh group(int group) throws Exception {
+        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
+        if (!new File(cache, "main_file_cache.dat2").isFile()) {
+            return null;
+        }
+
+        return at(cache).read(group).orElse(null);
     }
 
     private Optional<Mesh> read(int group) {

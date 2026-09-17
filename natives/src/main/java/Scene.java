@@ -90,6 +90,7 @@ public sealed interface Scene {
         new Stairs(),
         new Priorities(),
         new Billboards(),
+        new DoubledFaces(),
         new OnTheGround(),
         new BlackBacked(),
         new NearAndFar()
@@ -104,7 +105,7 @@ public sealed interface Scene {
                  Model faded, Model plain, Ground floor, Ground cut, Ground smooth,
                  Model roundPoint, Model rock, Model seenThrough, Ground overlaid, Ground hollow,
                  Ground shadowed, Ground blended, Model stairs, Model priorities,
-                 Model billboards, Mesh located, Mesh blackBacked) {
+                 Model billboards, Mesh located, Mesh blackBacked, Model doubled) {
         /* empty */
     }
 
@@ -426,6 +427,37 @@ public sealed interface Scene {
      * A model carrying billboards, which are squares the client hangs off a face and keeps turned
      * towards the eye. Nothing here had ever hung one.
      */
+    /**
+     * A model whose faces double up, turned a little each way.
+     *
+     * A hundred and twenty four faces of this one stand on the same three corners as another
+     * face. Which of two faces in the same place is seen is settled by how far away each is
+     * reckoned to be, and the two answers are a hair apart rather than equal, so the one that
+     * wins can change as the model turns. Nothing else here turns a model with faces like that,
+     * so what the two toolkits make of it has never been asked.
+     */
+    record DoubledFaces() implements Scene {
+
+        /** How far round the model is turned, so that the two answers are not the same twice. */
+        private static final int TURNED = TURN / 7;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            if (props.doubled() == null) {
+                return;
+            }
+
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            props.matrix().makeRotationZ(0);
+            props.matrix().rotateAxisY(TURNED);
+            props.matrix().rotateAxisX(TURN / 32);
+            props.matrix().applyTranslation(0, 0, DEPTH);
+            props.doubled().render(props.matrix(), null, 1);
+        }
+    }
+
     record Billboards() implements Scene {
 
         @Override
