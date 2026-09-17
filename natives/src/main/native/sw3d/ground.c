@@ -48,6 +48,12 @@ typedef struct {
      */
     unsigned char *hollow;
 
+    /**
+     * Whether the client gave the corner no colour of either kind, so that there is nothing to
+     * draw it in even on the map.
+     */
+    unsigned char *bare;
+
     /** How deep the water over the corner is, or nothing where the tile is not underwater. */
     int16_t *depth;
 
@@ -184,6 +190,7 @@ static void tileFree(Tile *tile) {
     free(tile->size);
     free(tile->light);
     free(tile->hollow);
+    free(tile->bare);
     free(tile->plan);
     free(tile->depth);
     free(tile);
@@ -387,6 +394,7 @@ JNIEXPORT void JNICALL Java_t_YA(JNIEnv *env, jobject self) {
 
         fprintf(stderr, "sw3d finished a ground %dx%d: %d tiles held\n",
                 ground->sizeX, ground->sizeZ, held);
+
     }
 
     handed("");
@@ -772,9 +780,10 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
     tile->colour = calloc((size_t) corners, sizeof(uint32_t));
     tile->light = calloc((size_t) corners, 1);
     tile->hollow = calloc((size_t) corners, 1);
+    tile->bare = calloc((size_t) corners, 1);
 
     if (tile->across == NULL || tile->along == NULL || tile->up == NULL
-        || tile->colour == NULL || tile->light == NULL || tile->hollow == NULL) {
+        || tile->colour == NULL || tile->light == NULL || tile->hollow == NULL || tile->bare == NULL) {
         tileFree(tile);
         return;
     }
@@ -814,7 +823,15 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
              * else the floor opens onto the one below, and a corner left as nothing carries no
              * light into the corners beside it, which leaves the whole tile a shade out.
              */
+            /*
+             * A corner the client gives no colour of its own to stands where the floor opens onto
+             * the one below. Nothing of it is drawn as the world is seen, so what is under the
+             * floor shows through, but the map still shows the floor it stands in: the client
+             * lays a colour over such a corner for exactly that.
+             */
             tile->hollow[corner] = colours[corner] == NO_COLOUR;
+            tile->bare[corner] = tile->hollow[corner]
+                    && (overlays == NULL || overlays[corner] == NO_COLOUR);
 
             int named = colours[corner] == NO_COLOUR ? BLACK : colours[corner] & 0xFFFF;
 
@@ -1322,6 +1339,19 @@ int groundTileFaceHollow(const void *at, int face) {
     }
 
     return tile->hollow[face * 3] && tile->hollow[face * 3 + 1] && tile->hollow[face * 3 + 2];
+}
+
+/**
+ * Whether the client gave every corner of a face no colour of either kind, so that the face has
+ * nothing to be drawn in even on the map.
+ */
+int groundTileFaceBare(const void *at, int face) {
+    const Tile *tile = at;
+    if (tile->bare == NULL || face * 3 + 2 >= tile->corners) {
+        return 0;
+    }
+
+    return tile->bare[face * 3] && tile->bare[face * 3 + 1] && tile->bare[face * 3 + 2];
 }
 
 /** The texture one corner of a tile names, which its neighbours in the same face may not share. */

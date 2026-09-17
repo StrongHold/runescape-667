@@ -2540,7 +2540,7 @@ static void renderTilePlan(const void *ground, const void *tile, float across, f
          * A face the floor opens through has nothing of its own to show on the map either, so
          * whatever the map was drawn over stays where it is.
          */
-        if (groundTileFaceHollow(tile, face) && groundTileFaceTexture(tile, face) == -1) {
+        if (groundTileFaceBare(tile, face) && groundTileFaceTexture(tile, face) == -1) {
             continue;
         }
 
