@@ -96,6 +96,7 @@ public final class ModelProbe {
             if (!System.getenv("SW3D_SURVEY").isEmpty()) {
                 CacheMesh.surveyMappingTypes();
                 CacheMesh.report(CacheMesh.ROCK);
+                CacheMesh.report(CacheMesh.STAIRS);
             }
 
             var lines = new ArrayList<String>();

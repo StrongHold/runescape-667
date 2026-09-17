@@ -237,7 +237,13 @@ public final class HandGround {
              * A tile naming a size smaller than itself is covered by its texture more than once,
              * which is the only way a place on the ground runs off the far edge of one.
              */
-            sizes[slot] = blended && x == TILES / 4 ? TILE / 2 : TILE;
+            /*
+             * A corner names how wide its texture is laid as well as which one it is, and the
+             * client lets the corners of a face disagree about both at once.
+             */
+            sizes[slot] = !blended ? TILE
+                : x == TILES / 4 ? TILE / 2
+                : (SLOT_ACROSS[slot] + SLOT_ALONG[slot]) % (TILE * 2) == 0 ? TILE / 4 : TILE;
             colours[slot] = cornerHsl(x + SLOT_ACROSS[slot] / TILE, z + SLOT_ALONG[slot] / TILE);
 
             if (overlay != null) {

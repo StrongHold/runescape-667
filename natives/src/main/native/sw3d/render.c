@@ -412,6 +412,14 @@ static const uint32_t *texels;
  */
 static const uint32_t *blended[BLENDED];
 
+/**
+ * How much further round its own texture each of the three runs than the face's own place does.
+ *
+ * A corner names how wide its texture is laid as well as which one it is, and the three may
+ * differ, so each is read at the face's place carried that much further.
+ */
+static float blendedWider[BLENDED];
+
 static int texelsRepeat;
 
 /**
@@ -529,7 +537,8 @@ static uint32_t texelAt(float u, float v, float w) {
 static void mixedTexel(const uint16_t *share, float u, float v, float w, uint32_t *into) {
     uint32_t held[BLENDED];
     for (int which = 0; which < BLENDED; which++) {
-        held[which] = texelFrom(blended[which], u, v, w);
+        float wider = blendedWider[which];
+        held[which] = texelFrom(blended[which], u * wider, v * wider, w);
     }
 
     /*
@@ -1488,7 +1497,7 @@ static int cornersAgree(const void *tile, int face) {
  * Nothing is blended unless every one of the three is held, because a face drawn from two of
  * three is further from the truth than one drawn from the single texture its first corner names.
  */
-static int blendTextures(const void *tile, int face, Corner *walked) {
+static int blendTextures(const void *tile, int face, int wide, Corner *walked) {
     for (int corner = 0; corner < 3; corner++) {
         int wears = groundTileCornerTexture(tile, face * 3 + corner);
         const Texture *texture = wears == -1 ? NULL : textureFor(wears);
@@ -1498,7 +1507,9 @@ static int blendTextures(const void *tile, int face, Corner *walked) {
             return 0;
         }
 
+        int own = groundTileCornerSize(tile, face * 3 + corner);
         blended[corner] = texturePixels(texture);
+        blendedWider[corner] = own <= 0 ? 1.0f : (float) wide / (float) own;
         walked[corner].mix[0] = corner == 0 ? WHOLE_SHARE : 0;
         walked[corner].mix[1] = corner == 1 ? WHOLE_SHARE : 0;
     }
@@ -1542,10 +1553,6 @@ static void layTextureOnTile(const void *tile, int face, int tileSize,
     texelsSkipEmpty = metrics->alphaBlendMode == EMPTY_WHERE_NOT_THERE;
     shadowTexels = shadow;
 
-    if (!cornersAgree(tile, face)) {
-        blendTextures(tile, face, walked);
-    }
-
     /*
      * How much of the world one whole width of the texture covers. A tile that names nothing is
      * covered by exactly one of it, which is the size of a tile.
@@ -1553,6 +1560,10 @@ static void layTextureOnTile(const void *tile, int face, int tileSize,
     int wide = groundTileFaceSize(tile, face);
     if (wide <= 0) {
         wide = tileSize;
+    }
+
+    if (!cornersAgree(tile, face)) {
+        blendTextures(tile, face, wide, walked);
     }
 
     float over = (float) TEXTURE_EDGE / (float) wide;

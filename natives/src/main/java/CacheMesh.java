@@ -36,6 +36,12 @@ public final class CacheMesh {
      */
     public static final int ROCK = 64785;
 
+    /**
+     * The group holding a flight of stairs whose first step the client draws nothing for, so that
+     * the hole beneath the stairs shows through where the step should be.
+     */
+    public static final int STAIRS = 29592;
+
     private final FileSystem_Client store;
 
     private CacheMesh(FileSystem_Client store) {
@@ -278,7 +284,11 @@ public final class CacheMesh {
             + (held.faceTexture == null ? "no textures" : "textured")
             + ", faces by way " + ways
             + ", spaces " + held.texSpaceCount
-            + ", numbers " + lengths(held));
+            + ", numbers " + lengths(held)
+            + ", billboards " + (held.billboards == null ? 0 : held.billboards.length)
+            + ", alphas " + (held.faceAlpha == null ? "none" : "some")
+            + ", priorities " + (held.facePriority == null ? "none" : "some")
+            + ", globalPriority " + held.globalPriority);
     }
 
     /** How many spaces the mesh carries each of the numbers only some ways need. */

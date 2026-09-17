@@ -143,7 +143,8 @@ public final class FrameCapture {
             seenThroughModel(toolkit, textured),
             HandGround.buildOverlaid(toolkit),
             HandGround.buildShadowed(toolkit, shadowOf(toolkit)),
-            HandGround.buildBlended(toolkit));
+            HandGround.buildBlended(toolkit),
+            namedModel(toolkit, CacheMesh.STAIRS));
 
         var manifest = new ArrayList<String>();
 
@@ -305,13 +306,17 @@ public final class FrameCapture {
     }
 
     /**
-     * The reported piece of scenery, with every face given a texture so that where the texture
+     * A reported piece of scenery, with every face given a texture so that where the texture
      * lands is what the picture shows.
      */
     private static Model rockModel(Toolkit toolkit) throws Exception {
-        var mesh = CacheMesh.numbered(CacheMesh.ROCK);
+        return namedModel(toolkit, CacheMesh.ROCK);
+    }
+
+    private static Model namedModel(Toolkit toolkit, int group) throws Exception {
+        var mesh = CacheMesh.numbered(group);
         if (mesh.isEmpty()) {
-            System.out.println("model " + CacheMesh.ROCK + " is not in the cache");
+            System.out.println("model " + group + " is not in the cache");
             return null;
         }
 
