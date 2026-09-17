@@ -90,42 +90,41 @@ not.
 Matching the shipped binding here would mean writing an attribute list that discards its own
 request. It is not done, and nothing about it is accidental.
 
-## Antialiasing
+## Antialiasing is not honoured, and what it would take
 
-The client asks for none, two samples a pixel, or four, and gets what it asks for.
+Turning antialiasing up does nothing here. The client asks for none, two samples
+a pixel or four, and this library draws every one of them with one.
 
-Getting there took more than choosing a pixel format with those samples in it. The client is given
-a framebuffer of this library's own rather than the one the window carries, because the picture is
-shown through a layer, and how finely a pixel is drawn is settled by the buffers hung on the
-framebuffer that is bound rather than by the format the context was made with. So the buffers carry
-the samples.
+The reason is the drawable. The client is given a framebuffer of this library's
+own rather than the one the window carries, because the picture is shown through
+a layer. How finely a pixel is drawn is decided by the buffers hung on the
+framebuffer that is bound, so choosing a pixel format with four samples changes
+nothing while those buffers are plain.
 
-That is also the one thing that can stop the client reading its own picture back, because nothing
-may be read out of a buffer of more than one sample a pixel. Every native that takes a picture out
-of the framebuffer therefore says which piece it is about to read, and where the client's buffer
-carries several samples that piece is brought down to one in a plain buffer beside it and read from
-there. Those are the two `glReadPixels`, both `glCopyTex` calls and the client's own
-`glBlitFramebuffer`, and they are written by hand for that reason alone.
+Hanging buffers of four samples on it instead is not the answer, and was tried:
 
-Only the piece read is brought down, never the whole picture. The client reads its buffer back one
-row at a time, so bringing the whole down for each row would cost the picture over for every row of
-it.
+    samples=4 setSurface=true GL_SAMPLES=4 middlePixel=0 error=1282
 
-    ./gradlew :natives:verifyOpenGlSamples
+`1282` is `GL_INVALID_OPERATION`. Reading pixels back out of a framebuffer object
+of more than one sample a pixel is not allowed, the client reads its framebuffer
+back, and every read failing leaves the screen black. The shipped library does
+not meet this because it draws into the window's own drawable, where the window
+system resolves a read for it.
 
-draws at each of the three counts, checks the buffer carries the samples asked for, reads the
-picture back, and checks what came back. Both halves matter: asking only how many samples the
-buffer has answers four while the screen stays black, which is how a broken version of this went in
-once and had to be taken out again.
+So doing it properly means every way the client reads that framebuffer going
+through a plain buffer first: the two `glReadPixels`, the `glCopyTexImage` and
+`glCopyTexSubImage` calls, and anything else that takes a picture out of it.
+Each would have to bring the samples down and read from the result instead, and
+each is a pass-through today. That is the work, and it is not small.
 
-The shipped library answers two samples when asked for none, two for two and four for four. Asking
-it for none and being given two is the fault below: it sends the count as an attribute and a count
-of none ends the list it is in. This one gives none when none is asked for, so the setting can be
-turned off here and cannot be there.
+Worth knowing while it is undone: the shipped library answers two samples when
+asked for none, four when asked for four, and two when asked for two. So the
+antialiasing setting does something there and nothing here, and the setting can
+never be turned fully off there.
 
-None of this touches the software toolkit. The client never hands it the setting, and
-`AntialiasingMode.validate` forces the setting to zero whenever the toolkit in use is not a
-hardware one.
+None of this touches the software toolkit. The client never hands it the setting,
+and `AntialiasingMode.validate` forces the setting to zero whenever the toolkit
+in use is not a hardware one.
 
 ## Faults in the original
 
