@@ -8,14 +8,29 @@ dependencies {
     implementation(libs.jcommander)
 }
 
+/**
+ * How much heap the client is given, and whether it says what the collector is doing.
+ *
+ * The applet was given two hundred and fifty six megabytes and that is what it gets here, because
+ * what it does with what it has is part of what is being kept. A collection of a heap that small
+ * stops the client for as long as it takes, which is long enough to see, so `-PclientHeap=1g`
+ * raises it and `-PclientGcLog` says when a collection happens and how long it took. Between them
+ * a freeze can be laid at the collector's door or taken away from it.
+ */
+val clientHeap = providers.gradleProperty("clientHeap").getOrElse("256m")
+val clientGcLog = providers.gradleProperty("clientGcLog").isPresent
+
 application {
     mainClass = "Application"
-    applicationDefaultJvmArgs = listOf(
-        "-Xmx256m",
-        "-Dsun.java2d.noddraw=true",
-        "--add-opens",
-        "java.base/java.lang=ALL-UNNAMED",
-    )
+    applicationDefaultJvmArgs = buildList {
+        add("-Xmx$clientHeap")
+        add("-Dsun.java2d.noddraw=true")
+        if (clientGcLog) {
+            add("-Xlog:gc")
+        }
+        add("--add-opens")
+        add("java.base/java.lang=ALL-UNNAMED")
+    }
 }
 
 /**
