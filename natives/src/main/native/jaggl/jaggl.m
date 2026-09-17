@@ -369,6 +369,22 @@ static void reportTiming(uint64_t spentSwapping) {
  * layer is placed in the window's coordinates, which count up from the bottom where AWT counts down
  * from the top.
  */
+/**
+ * Runs the work on the main thread and waits for it.
+ *
+ * Attaching a layer and sizing a drawable were both handed over without waiting once, to keep the
+ * drawing thread off the main one. They are waited for again because the binding was smooth when
+ * they were and has not been since: what the client draws into and what shows it are settled
+ * before the client is told it may draw, rather than a frame or two afterwards.
+ */
+static void onMainThreadAndWait(void (^work)(void)) {
+    if ([NSThread isMainThread]) {
+        work();
+    } else {
+        dispatch_sync(dispatch_get_main_queue(), work);
+    }
+}
+
 static BOOL attach(JNIEnv *env, jobject canvas, Surface *surface) {
     JawtGetAwt getAwt = jawt(env);
     if (getAwt == NULL) {
@@ -399,15 +415,15 @@ static BOOL attach(JNIEnv *env, jobject canvas, Surface *surface) {
             surface->width = info->bounds.width;
             surface->height = info->bounds.height;
             jint top = info->bounds.y;
-            attached = YES;
 
-            dispatch_async(dispatch_get_main_queue(), ^{
+            onMainThreadAndWait(^{
                 CGFloat window = layers.windowLayer.bounds.size.height;
                 layer.frame = CGRectMake(frame.origin.x, window - top - frame.size.height,
                                          frame.size.width, frame.size.height);
                 if (layer.superlayer == nil) {
                     layers.layer = layer;
                 }
+                attached = YES;
             });
 
             drawing->FreeDrawingSurfaceInfo(info);
@@ -433,7 +449,6 @@ static BOOL resizeOffscreen(GLint width, GLint height) {
         return YES;
     }
 
-    BOOL first = offscreenWidth == 0;
     offscreenWidth = width;
     offscreenHeight = height;
 
@@ -448,19 +463,7 @@ static BOOL resizeOffscreen(GLint width, GLint height) {
         [unseenContext update];
     };
 
-    /*
-     * The first sizing is waited for and the rest are not.
-     *
-     * Waiting on a later one is the deadlock: a resize reaches this while the client holds the AWT
-     * tree lock, and the main thread wants that same lock to finish the resize. The first comes
-     * while the client is still building its toolkit and holds nothing, and waiting for it is what
-     * keeps the first frames from being drawn into a drawable of sixteen pixels.
-     */
-    if (first && ![NSThread isMainThread]) {
-        dispatch_sync(dispatch_get_main_queue(), size);
-    } else {
-        dispatch_async(dispatch_get_main_queue(), size);
-    }
+    onMainThreadAndWait(size);
 
     JAGGLLOG("drawable %dx%d", width, height);
     return YES;
