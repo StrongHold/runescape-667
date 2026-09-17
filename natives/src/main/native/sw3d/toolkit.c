@@ -143,6 +143,8 @@ static int depthWriteAsked;
 
 static Fog fog;
 
+static void fogFromHere(void);
+
 static Underwater water;
 
 /**
@@ -313,6 +315,7 @@ JNIEXPORT void JNICALL Java_oa_f(JNIEnv *env, jobject self, jint near, jint far)
 
     view.near = (float) near;
     view.far = (float) far;
+    fogFromHere();
 }
 
 /** How close a thing may come before it is cut away, back as the whole number it started as. */
@@ -480,6 +483,26 @@ JNIEXPORT void JNICALL Java_oa_b(JNIEnv *env, jobject self, jint x, jint y, jint
  * The colour the distance fades everything towards, and how far away the fade is complete. The
  * client offers a third number that the toolkit has never read.
  */
+/**
+ * Works out where the fade begins as a depth, from how far away it is complete.
+ *
+ * A depth is not how far away a thing is: it is what the projection leaves once the distance has
+ * been divided out, so the distance the client names has to be put through the same projection
+ * before a corner's depth can be weighed against it. A fade that is complete at the far edge of
+ * the world begins at the far edge, which leaves nothing before it and fades nothing.
+ */
+static void fogFromHere(void) {
+    float begins = view.far - fog.range;
+    float between = (view.far - view.near) * begins;
+
+    fog.from = between == 0.0f
+        ? 1.0f
+        : (begins * view.far - view.far * view.near) / between;
+
+    float rest = 1.0f - fog.from;
+    fog.overRest = rest == 0.0f ? 0.0f : 1.0f / rest;
+}
+
 JNIEXPORT void JNICALL Java_oa_L(JNIEnv *env, jobject self, jint colour, jint range, jint offset) {
     (void) env;
     (void) self;
@@ -487,6 +510,7 @@ JNIEXPORT void JNICALL Java_oa_L(JNIEnv *env, jobject self, jint colour, jint ra
 
     fog.colour = (uint32_t) colour;
     fog.range = range < 0 ? 0.0f : (float) range;
+    fogFromHere();
 }
 
 const Fog *distanceFog(void) {

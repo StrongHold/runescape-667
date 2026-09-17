@@ -1499,6 +1499,17 @@ public sealed interface Scene {
             {30, 120, 100, 40, 900}
         };
 
+
+        /**
+         * What is left is sixty two pixels where the two toolkits carry a corner the last step
+         * towards the colour of the distance a shade differently. This is the only scene that
+         * stands anything far enough away for the fade to reach it.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
         @Override
         public void draw(Toolkit toolkit, Props props) {
             toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);

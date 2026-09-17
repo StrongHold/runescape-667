@@ -37,6 +37,10 @@ public final class FrameCapture {
 
     /** How finely a shadow is drawn, which is what the client asks the toolkit for. */
     private static final int SHADOW_DETAIL = 32;
+
+    /** What the distance fades towards, and how far away it has finished fading. */
+    private static final int FOG_COLOUR = 0x8090C0;
+    private static final int FOG_RANGE = 3000;
     private static final int FEATURES = 64;
     private static final int MODEL_FACES = 200;
     private static final int VISIBLE_FACES = 2;
@@ -96,6 +100,13 @@ public final class FrameCapture {
          * which left every shadow drawn at one place to the world unit.
          */
         toolkit.X(SHADOW_DETAIL);
+
+        /*
+         * The colour the distance fades everything towards, and how far away the fade is
+         * complete. The client asks for this whenever the player has fog turned on, and nothing
+         * here had ever asked for it at all.
+         */
+        toolkit.L(FOG_COLOUR, FOG_RANGE, 0);
 
         toolkit.method7938(toolkit.createHeap(POOL_SIZE));
 

@@ -161,6 +161,17 @@ void projectionMiddled(int width, int height);
 typedef struct {
     uint32_t colour;
     float range;
+
+    /**
+     * How deep a point has to be before the fade begins, and one over what is left of the depth
+     * beyond it, both worked out from how far away the fade is complete and where the near and
+     * far edges of the world stand.
+     *
+     * They are kept here rather than worked out as each corner is faded because they change only
+     * when the client moves one of the three, and every corner of every face reads them.
+     */
+    float from;
+    float overRest;
 } Fog;
 
 const Fog *distanceFog(void);

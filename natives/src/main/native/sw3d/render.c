@@ -204,6 +204,19 @@ typedef struct {
 
 static uint16_t fadedPart(uint16_t held, float fade, int part);
 
+/**
+ * How much of the distance's own colour a corner this deep has taken on, where one is all of it.
+ *
+ * The fade runs from the depth it begins at to the far edge of the world, and a corner nearer
+ * than it begins has none of it.
+ */
+static float fadedByDistance(float depth) {
+    const Fog *fog = distanceFog();
+    float taken = (depth - fog->from) * fog->overRest;
+
+    return taken < 0.0f ? 0.0f : (taken > 1.0f ? 1.0f : taken);
+}
+
 static Corner cornerAt(const Projected *point, uint32_t colour) {
     Corner corner;
     corner.mix[0] = 0;
@@ -230,6 +243,21 @@ static Corner cornerAt(const Projected *point, uint32_t colour) {
      */
     for (int part = 0; part < CHANNELS - 1; part++) {
         corner.colour[part] = fadedPart(corner.colour[part], point->fade, part);
+    }
+
+    /*
+     * The distance takes a corner towards its own colour, which is held in the same eight places
+     * after the point the light is.
+     */
+    float away = fadedByDistance(point->depth);
+    if (away > 0.0f) {
+        uint32_t fogColour = distanceFog()->colour;
+
+        for (int part = 0; part < CHANNELS; part++) {
+            float towards = (float) ((fogColour >> (part * 8) & 0xFF) << 8);
+            corner.colour[part] =
+                (uint16_t) ((float) corner.colour[part] * (1.0f - away) + towards * away);
+        }
     }
 
     corner.u = 0.0f;
