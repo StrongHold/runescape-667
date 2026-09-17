@@ -119,6 +119,12 @@ static uint64_t shownFrames;
 /** Set when the client finishes a frame, cleared when the screen takes one. */
 static _Atomic bool frameWaiting;
 
+/* How evenly the screen took them, which is the last thing a count of them cannot say. */
+static uint64_t lastShown;
+static uint64_t shownGap;
+static uint64_t shownGapLeast;
+static uint64_t shownGapMost;
+
 static Surface *currentSurface;
 
 /*
@@ -221,14 +227,18 @@ static void reportTiming(uint64_t spentSwapping) {
         return;
     }
 
-    JAGGLLOG("%llu frames handed over every %llu microseconds, %llu of that spent handing over; "
-             "the layer showed %llu of them",
-             frames, betweenSwaps / frames, swapping / frames, shownFrames);
+    JAGGLLOG("%llu frames every %llu us, %llu of that handing over; shown %llu of them, "
+             "one every %llu us, the quickest %llu apart and the slowest %llu",
+             frames, betweenSwaps / frames, swapping / frames, shownFrames,
+             shownFrames > 1 ? shownGap / (shownFrames - 1) : 0, shownGapLeast, shownGapMost);
 
     frames = 0;
     swapping = 0;
     betweenSwaps = 0;
     shownFrames = 0;
+    shownGap = 0;
+    shownGapLeast = 0;
+    shownGapMost = 0;
     lastReport = now;
 }
 
@@ -360,6 +370,22 @@ static void complain(const char *what) {
 
     atomic_store(&frameWaiting, false);
     shownFrames++;
+
+    if (timing()) {
+        uint64_t now = nowInMicroseconds();
+        if (lastShown != 0) {
+            uint64_t gap = now - lastShown;
+            shownGap += gap;
+            if (shownGapLeast == 0 || gap < shownGapLeast) {
+                shownGapLeast = gap;
+            }
+            if (gap > shownGapMost) {
+                shownGapMost = gap;
+            }
+        }
+        lastShown = now;
+    }
+
     [super drawInCGLContext:context pixelFormat:format forLayerTime:layerTime displayTime:displayTime];
 }
 
