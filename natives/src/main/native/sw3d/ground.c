@@ -454,8 +454,13 @@ static void facingInside(const Ground *ground, int x, int z, int across, int alo
     }
 }
 
+/**
+ * The effect that leaves a face's colour alone. Every other one carries it towards a grey.
+ */
+enum { LEAVES_THE_COLOUR_BE = 4 };
+
 static uint32_t litCorner(const Ground *ground, int packed, int shade, int x, int z,
-                          int across, int along) {
+                          int across, int along, int texture) {
     int lightness = ((packed & (LIGHTNESS_WHOLE - 1)) * (GROUND_LIGHTNESS - shade))
         / LIGHTNESS_WHOLE;
 
@@ -466,6 +471,20 @@ static uint32_t litCorner(const Ground *ground, int packed, int shade, int x, in
     }
 
     uint32_t colour = colourOf((packed & ~(LIGHTNESS_WHOLE - 1)) | lightness);
+
+    /* The grey a texture carries the colour towards is made from how much sun the corner gets. */
+    int reaching = GROUND_LIGHTNESS - shade;
+
+    /*
+     * A tile wearing a texture is not lit from its own colour alone. The texture says how far that
+     * colour is carried towards a grey made from the lightness the tile ended up with, and then
+     * how much to brighten what is left, which is the same thing a texture does to a face of a
+     * model. One effect leaves the colour where it is.
+     */
+    const TextureMetrics *worn = texture == -1 ? NULL : textureMetricsFor(texture);
+    if (worn != NULL && worn->effectType != LEAVES_THE_COLOUR_BE) {
+        colour = texturedUnlitColour(colour, reaching, worn->alpha, worn->aByte57);
+    }
 
     float facing[NORMAL_PARTS];
     facingInside(ground, x, z, across, along, facing);
@@ -607,7 +626,8 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
             tile->colour[corner] = colours[corner] == -1
                 ? 0
                 : litCorner(ground, colours[corner] & 0xFFFF, tile->light[corner],
-                    x, z, tile->across[corner], tile->along[corner]);
+                    x, z, tile->across[corner], tile->along[corner],
+                    tile->texture == NULL ? -1 : tile->texture[corner]);
         }
     }
 

@@ -133,7 +133,13 @@ public final class HandGround {
         for (var slot = 0; slot < slots; slot++) {
             across[slot] = SLOT_ACROSS[slot];
             along[slot] = SLOT_ALONG[slot];
-            textures[slot] = -1;
+            /*
+             * Every tile but one column wears a texture, so that a smoothly coloured patch is
+             * covered the way the ground the client bands light and dark across is covered. The
+             * bare column leaves the same patch drawn both ways in one picture.
+             */
+            textures[slot] = x == TILES / 2 ? -1 : TEXTURED_WITH;
+            sizes[slot] = TILE;
             colours[slot] = cornerHsl(x + SLOT_ACROSS[slot] / TILE, z + SLOT_ALONG[slot] / TILE);
         }
 
