@@ -1495,9 +1495,11 @@ public sealed interface Scene {
     record CutGround() implements Scene {
 
         /**
-         * Fifteen thousand of its pixels are a shade out, almost all of them by one or two. The
-         * corners between the corners of the grid are lit from the four around them, which is
-         * most of it; what is left is the same small difference the textured patch has.
+         * Fifteen thousand of its pixels are a shade out, every one of them by a hand's breadth
+         * at the dark end of the range. They lie in the band along the far edge, where the ground
+         * runs down to the least a channel is allowed to reach and a face is shaded between a
+         * corner at that floor and one above it. What is left is how the shade between two
+         * corners is rounded, not which shade either corner was given.
          */
         @Override
         public boolean written() {

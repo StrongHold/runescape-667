@@ -132,6 +132,17 @@ public final class HandGround {
         var ground = toolkit.createGround(TILES, TILES, heights, heights,
             GROUND_FLAGS, FEATURE_FLAGS);
 
+        /*
+         * The client darkens the corners of the grid and nothing between them, so a corner cut
+         * into the middle of a tile has to take its share of the four around it. Without a patch
+         * darkened unevenly nothing here ever asks how that share is worked out.
+         */
+        for (var x = 1; x < 9; x++) {
+            for (var z = 1; z < 9; z++) {
+                ground.ka(x, z, DARKENED_BY[(x + z) % DARKENED_BY.length]);
+            }
+        }
+
         for (var x = 0; x < TILES; x++) {
             for (var z = 0; z < TILES; z++) {
                 addCutTile(ground, x, z);

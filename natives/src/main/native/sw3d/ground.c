@@ -552,6 +552,25 @@ enum { GROUND_LIGHT_WHOLE = LIGHTNESS_WHOLE / 2 };
  * every face of such a tile the light of whichever corner it rounded to, which shows as a patch
  * of ground lighter or darker than the one beside it along the line the tile was cut on.
  */
+/**
+ * How much of the sun is kept out of a place inside a tile.
+ *
+ * The client darkens the corners of the grid and nothing between them, so a corner it puts inside
+ * a tile takes its share of the four corners around it. A tile cut into more than two faces has
+ * corners like that all over it, and one of them darkened by the corner of the grid below it
+ * rather than by all four is a shade out from its neighbours.
+ */
+static int shadeInside(const Ground *ground, int x, int z, int across, int along) {
+    int rest = ground->tileSize - across;
+
+    int near = groundCornerShade(ground, x, z) * rest
+        + groundCornerShade(ground, x + 1, z) * across;
+    int far = groundCornerShade(ground, x, z + 1) * rest
+        + groundCornerShade(ground, x + 1, z + 1) * across;
+
+    return (near * (ground->tileSize - along) + far * along) >> (ground->tileShift * 2);
+}
+
 static void facingInside(const Ground *ground, int x, int z, int across, int along, float *into) {
     const float *near = groundCornerNormal(ground, x, z);
     const float *far = groundCornerNormal(ground, x + 1, z);
@@ -815,8 +834,8 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
             }
 
             tile->up[corner] = (int16_t) (averageHeight(ground, worldX, worldZ) + levels[corner]);
-            tile->light[corner] = (unsigned char) groundCornerShade(ground,
-                worldX >> ground->tileShift, worldZ >> ground->tileShift);
+            tile->light[corner] = (unsigned char) shadeInside(ground, x, z,
+                tile->across[corner], tile->along[corner]);
             /*
              * A corner the client gives no colour to is lit as though it were black rather than
              * left as nothing. The client hands one over at the mouth of a stairwell and anywhere
