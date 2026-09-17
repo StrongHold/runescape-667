@@ -1623,8 +1623,18 @@ public sealed interface Scene {
          * off, and so is dividing exactly rather than by the rough reciprocal the machine offers,
          * so the shipped toolkit divides at every pixel and takes the rough answer.
          *
-         * What is left is how far along the texture each pixel of a span is reckoned to be, which
-         * tells only where the steps are steep.
+         * Nor is it where along a span a pixel is reckoned to be, which was the last thing left
+         * to suspect. Stepping the reckoning one pixel on from the last, rather than working each
+         * one out from where the group of four it falls in begins, is further off here and puts
+         * two scenes out that match to the pixel now. So the toolkit works each one out afresh,
+         * as this does.
+         *
+         * What the wrong pixels look like, which is where to start next. They are scattered one
+         * at a time rather than gathered anywhere, four hundred of them read the texel beside the
+         * right one and the rest are a shade out, and in five of every six the green is exactly
+         * right while the red and blue are out in both directions. Green being the channel a
+         * grass texture varies least in, that is a texel being chosen wrongly rather than a
+         * colour being mixed wrongly, and it happens where a step lands nearest a boundary.
          */
         @Override
         public boolean written() {
