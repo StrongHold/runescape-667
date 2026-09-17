@@ -305,6 +305,7 @@ val generateOpenGlBinding by tasks.registering {
         "glBufferSubDataARBub" to "glBufferSubDataARB",
         "glDrawPixelsi" to "glDrawPixels",
         "glDrawPixelsub" to "glDrawPixels",
+        // Neither of these is in the Mac build of the shipped library, under any name.
         "glGetTexImagei" to "glGetTexImage",
         "glGetTexImageub" to "glGetTexImage",
         "glReadPixelsi" to "glReadPixels",

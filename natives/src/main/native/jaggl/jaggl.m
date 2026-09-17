@@ -569,6 +569,14 @@ JNIEXPORT jint JNICALL Java_jaggl_OpenGL_glGenProgramARB(JNIEnv *env, jclass own
     return (jint) program;
 }
 
+/*
+ * Named in the singular by the client where OpenGL takes a count and a list, so this needs a body
+ * rather than a pass-through.
+ *
+ * The Mac build of the shipped library exports this as glDeleteProgram, which is not the name the
+ * Java declares, so GlToolkit and GlxToolkit both fail against it the first time they tear a
+ * shader down. The name here is the one the Java declares.
+ */
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_glDeleteProgramARB(JNIEnv *env, jclass owner, jint program) {
     GLuint name = (GLuint) program;
     glDeleteProgramsARB(1, &name);
