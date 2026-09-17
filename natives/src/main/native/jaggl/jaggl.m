@@ -445,16 +445,39 @@ static BOOL resizeOffscreen(GLint width, GLint height) {
  * Where the client draws into the plain buffer already there is nothing to do, because that is the
  * buffer everything reads.
  */
-static void bringDown(GLint x, GLint y, GLint width, GLint height) {
-    if (drawFramebuffer == 0 || !defaultBound || width <= 0 || height <= 0) {
+static void bringDown(const char *who, GLint x, GLint y, GLint width, GLint height) {
+    if (drawFramebuffer == 0 || !defaultBound) {
+        return;
+    }
+
+    /*
+     * Held to what the buffers actually cover. A piece reaching past the edge is not refused by a
+     * blit, but a piece that is wholly outside leaves nothing to copy and asking for it is how one
+     * of these came to be refused.
+     */
+    GLint left = x < 0 ? 0 : x;
+    GLint bottom = y < 0 ? 0 : y;
+    GLint right = x + width > offscreenWidth ? offscreenWidth : x + width;
+    GLint top = y + height > offscreenHeight ? offscreenHeight : y + height;
+
+    if (right <= left || top <= bottom) {
+        JAGGLLOG("%s wanted %dx%d at %d,%d, which is outside a drawable of %dx%d",
+                 who, width, height, x, y, offscreenWidth, offscreenHeight);
         return;
     }
 
     glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, drawFramebuffer);
     glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, defaultFramebuffer);
-    glBlitFramebufferEXT(x, y, x + width, y + height, x, y, x + width, y + height,
+    glBlitFramebufferEXT(left, bottom, right, top, left, bottom, right, top,
                          GL_COLOR_BUFFER_BIT, GL_NEAREST);
-    complain("bringing a piece down to read it");
+
+    if (verbose()) {
+        GLenum trouble = glGetError();
+        if (trouble != GL_NO_ERROR) {
+            JAGGLLOG("%s: bringing %d,%d to %d,%d down failed with 0x%x, drawable %dx%d",
+                     who, left, bottom, right, top, trouble, offscreenWidth, offscreenHeight);
+        }
+    }
 
     glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, defaultFramebuffer);
     glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, drawFramebuffer);
@@ -477,7 +500,7 @@ static void doneReading(void) {
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_glReadPixelsi(JNIEnv *env, jclass owner, jint x, jint y,
                                                         jint width, jint height, jint format,
                                                         jint type, jintArray pixels, jint offset) {
-    bringDown(x, y, width, height);
+    bringDown("reading pixels", x, y, width, height);
     jint *address = pixels == NULL ? NULL : (*env)->GetPrimitiveArrayCritical(env, pixels, NULL);
     glReadPixels(x, y, width, height, (GLenum) format, (GLenum) type,
                  address == NULL ? NULL : (void *) (address + offset));
@@ -490,7 +513,7 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_glReadPixelsi(JNIEnv *env, jclass owner
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_glReadPixelsub(JNIEnv *env, jclass owner, jint x, jint y,
                                                          jint width, jint height, jint format,
                                                          jint type, jbyteArray pixels, jint offset) {
-    bringDown(x, y, width, height);
+    bringDown("reading pixels as bytes", x, y, width, height);
     jbyte *address = pixels == NULL ? NULL : (*env)->GetPrimitiveArrayCritical(env, pixels, NULL);
     glReadPixels(x, y, width, height, (GLenum) format, (GLenum) type,
                  address == NULL ? NULL : (void *) (address + offset));
@@ -503,7 +526,7 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_glReadPixelsub(JNIEnv *env, jclass owne
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_glCopyTexImage2D(JNIEnv *env, jclass owner, jint target,
                                                             jint level, jint format, jint x, jint y,
                                                             jint width, jint height, jint border) {
-    bringDown(x, y, width, height);
+    bringDown("copying into a texture", x, y, width, height);
     glCopyTexImage2D((GLenum) target, level, (GLenum) format, x, y, width, height, border);
     doneReading();
 }
@@ -512,7 +535,7 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_glCopyTexSubImage2D(JNIEnv *env, jclass
                                                                jint level, jint intoX, jint intoY,
                                                                jint x, jint y, jint width,
                                                                jint height) {
-    bringDown(x, y, width, height);
+    bringDown("copying into part of a texture", x, y, width, height);
     glCopyTexSubImage2D((GLenum) target, level, intoX, intoY, x, y, width, height);
     doneReading();
 }
@@ -528,7 +551,8 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_glBlitFramebufferEXT(JNIEnv *env, jclas
                                                                jint toY1, jint mask, jint filter) {
     GLint left = fromX0 < fromX1 ? fromX0 : fromX1;
     GLint bottom = fromY0 < fromY1 ? fromY0 : fromY1;
-    bringDown(left, bottom, fromX1 > fromX0 ? fromX1 - fromX0 : fromX0 - fromX1,
+    bringDown("the client's own blit", left, bottom,
+              fromX1 > fromX0 ? fromX1 - fromX0 : fromX0 - fromX1,
               fromY1 > fromY0 ? fromY1 - fromY0 : fromY0 - fromY1);
     glBlitFramebufferEXT(fromX0, fromY0, fromX1, fromY1, toX0, toY0, toX1, toY1,
                          (GLbitfield) mask, (GLenum) filter);
@@ -668,7 +692,7 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_releaseSurface(JNIEnv *env, jclass owne
 }
 
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_swapBuffers(JNIEnv *env, jclass owner) {
-    bringDown(0, 0, offscreenWidth, offscreenHeight);
+    bringDown("showing a frame", 0, 0, offscreenWidth, offscreenHeight);
 
     if (currentSurface != NULL) {
         [(__bridge JagGLLayer *) currentSurface->layer present];
