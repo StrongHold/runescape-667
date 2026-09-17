@@ -564,19 +564,24 @@ enum { GROUND_LIGHT_WHOLE = LIGHTNESS_WHOLE / 2 };
  * The shade at a point inside a tile, shared out from the four corners around it.
  *
  * Each pair of corners is brought down to a shade of its own before the two are mixed, rather than
- * the whole being brought down once at the end. Both halves lose their fraction that way, so the
- * answer is up to one lower than a single shift would give, and it is lower often enough to see.
- * The toolkit does it in two steps and so does this.
+ * the whole being brought down once at the end, and each step is the distance from one corner to
+ * the other taken a share of the way and added back on rather than the two corners weighed against
+ * each other. Both lose a fraction, and they do not lose the same one: a share of a distance that
+ * runs downhill is brought down away from nothing rather than towards it, and weighing the corners
+ * never is.
  */
 static int shadeInside(const Ground *ground, int x, int z, int across, int along) {
-    int rest = ground->tileSize - across;
+    int shift = ground->tileShift;
 
-    int near = (groundCornerShade(ground, x, z) * rest
-        + groundCornerShade(ground, x + 1, z) * across) >> ground->tileShift;
-    int far = (groundCornerShade(ground, x, z + 1) * rest
-        + groundCornerShade(ground, x + 1, z + 1) * across) >> ground->tileShift;
+    int nearLeft = groundCornerShade(ground, x, z);
+    int nearRight = groundCornerShade(ground, x + 1, z);
+    int farLeft = groundCornerShade(ground, x, z + 1);
+    int farRight = groundCornerShade(ground, x + 1, z + 1);
 
-    return (near * (ground->tileSize - along) + far * along) >> ground->tileShift;
+    int near = nearLeft + (((nearRight - nearLeft) * across) >> shift);
+    int far = farLeft + (((farRight - farLeft) * across) >> shift);
+
+    return near + (((far - near) * along) >> shift);
 }
 
 static void facingInside(const Ground *ground, int x, int z, int across, int along, float *into) {
@@ -844,12 +849,6 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
             tile->up[corner] = (int16_t) (averageHeight(ground, worldX, worldZ) + levels[corner]);
             tile->light[corner] = (unsigned char) shadeInside(ground, x, z,
                 tile->across[corner], tile->along[corner]);
-            /*
-             * A corner the client gives no colour to is lit as though it were black rather than
-             * left as nothing. The client hands one over at the mouth of a stairwell and anywhere
-             * else the floor opens onto the one below, and a corner left as nothing carries no
-             * light into the corners beside it, which leaves the whole tile a shade out.
-             */
             /*
              * A corner the client gives no colour of its own to stands where the floor opens onto
              * the one below. Nothing of it is drawn as the world is seen, so what is under the
