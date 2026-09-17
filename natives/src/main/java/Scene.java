@@ -363,6 +363,18 @@ public sealed interface Scene {
      */
     record SeenThrough() implements Scene {
 
+        /**
+         * Twenty one of its pixels are wrong, in two runs of seven or ten on a single row each.
+         *
+         * Neither is about seeing through anything. On the row above and the row below, every
+         * pixel of both runs matches. On the row between them a face reaches one row further down
+         * here than it does in the shipped toolkit, and covers the face behind it that ought to
+         * show there. Two faces out of hundreds do it, so it is a corner landing within a hair of
+         * a row rather than a rule that is wrong: which row a face reaches is taken by throwing
+         * away the part of a corner's height after the point, and every other scene that matches
+         * to the pixel is matching on that.
+         */
+
         private static final int LEAN = 0x500;
 
 
