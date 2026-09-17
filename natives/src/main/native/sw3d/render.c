@@ -24,7 +24,13 @@
 #include "sw3d.h"
 
 /** A colour has a blue, a green, a red and an alpha part, in the order they sit in a pixel. */
-enum { CHANNELS = 4 };
+enum { CHANNELS = 4, ALPHA = 3 };
+
+/**
+ * The blend mode a texture names when it carries an alpha of its own, rather than leaving how
+ * much of a face shows to the face.
+ */
+enum { SEEN_THROUGH_ITSELF = 2 };
 
 /** The smallest number of rows or pixels a side is allowed to be divided by. */
 static const float LEAST = 1.0e-6f;
@@ -338,6 +344,16 @@ static const uint32_t *texels;
 static int texelsRepeat;
 
 /**
+ * Whether the texture the faces being drawn wear says how much of itself shows, place by place.
+ *
+ * A texture's blend mode says where the alpha a face is drawn through comes from. Two of the
+ * three leave it to the face, and the third puts one in the texture, so a face wearing such a
+ * texture is drawn through what is behind it wherever the texture is thin and over it wherever
+ * the texture is not. That is what leaves the sky between the leaves of a tree.
+ */
+static int texelsBlend;
+
+/**
  * The picture of the shadow over the tile being drawn, and how far a place on the tile's texture
  * is shifted down to reach a place in it.
  *
@@ -447,6 +463,30 @@ static uint16_t fadedPart(uint16_t held, float fade, int part) {
  * How much the face hides is one less than the whole rather than one more than how much it
  * shows, so a face drawn at its most solid still lets a little of what is behind it through.
  */
+/**
+ * Puts one pixel of a face over what is already there, through the texture's own alpha.
+ *
+ * How much of the pixel shows is the alpha the texture kept once the light reached it, and every
+ * part of the pixel, the alpha among them, is carried that far from what was already there. Both
+ * sides are held in a whole byte rather than in the sixteenth parts the light is carried in,
+ * because the texture has already brought the pixel back down to bytes.
+ */
+static uint32_t seenThrough(uint32_t there, uint32_t mine) {
+    uint32_t shows = (mine >> (ALPHA * 8)) & 0xFFu;
+    uint32_t hides = 0xFFu - shows;
+    uint32_t packed = 0;
+
+    for (int part = 0; part < CHANNELS; part++) {
+        uint32_t part0 = ((mine >> (part * 8)) & 0xFFu) * shows;
+        uint32_t part1 = ((there >> (part * 8)) & 0xFFu) * hides;
+        uint32_t both = (part0 + part1) >> 8;
+
+        packed |= (both > 0xFFu ? 0xFFu : both) << (part * 8);
+    }
+
+    return packed;
+}
+
 static uint32_t laidOver(uint32_t there, const uint16_t *colour) {
     uint32_t packed = (uint32_t) (colour[3] >> 8) << 24;
 
@@ -533,7 +573,7 @@ static void fillSpan(int y, const Side *left, const Side *right) {
              * covers stays as near as whatever was there, so a second blended face over the same
              * place is drawn through both rather than hidden by the first.
              */
-            if (distanceDecides && faceShows == WHOLLY_SOLID) {
+            if (distanceDecides && faceShows == WHOLLY_SOLID && !texelsBlend) {
                 held[x] = depth;
             }
 
@@ -575,13 +615,18 @@ static void fillSpan(int y, const Side *left, const Side *right) {
                     written |= (channel * reached[part] >> 16) << (part * 8);
                 }
 
-                uint16_t lifted[CHANNELS] = {
-                (uint16_t) ((written & 0xFF) << 8),
-                (uint16_t) (((written >> 8) & 0xFF) << 8),
-                (uint16_t) (((written >> 16) & 0xFF) << 8),
-                (uint16_t) (((written >> 24) & 0xFF) << 8)
-            };
-            row[x] = laidOver(row[x], lifted);
+                if (texelsBlend) {
+                    row[x] = seenThrough(row[x], written);
+                } else {
+                    uint16_t lifted[CHANNELS] = {
+                        (uint16_t) ((written & 0xFF) << 8),
+                        (uint16_t) (((written >> 8) & 0xFF) << 8),
+                        (uint16_t) (((written >> 16) & 0xFF) << 8),
+                        (uint16_t) (((written >> 24) & 0xFF) << 8)
+                    };
+
+                    row[x] = laidOver(row[x], lifted);
+                }
             }
         }
 
@@ -1197,6 +1242,7 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
 
             texels = texturePixels(texture);
             texelsRepeat = metrics->repeatsU || metrics->repeatsV;
+            texelsBlend = metrics->alphaBlendMode == SEEN_THROUGH_ITSELF;
 
             const float *placed = modelFaceUV(model);
 
@@ -1217,6 +1263,7 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
     }
 
     texels = NULL;
+    texelsBlend = 0;
     faceShows = WHOLLY_SOLID;
 }
 
@@ -1238,6 +1285,7 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
 static void layTextureOnTile(const void *tile, int face, int tileSize,
                              const unsigned char *shadow, Corner *walked) {
     texels = NULL;
+    texelsBlend = 0;
 
     /*
      * Where the shadow over a tile is read is where the tile sits on its texture, so a bare face
@@ -1258,6 +1306,7 @@ static void layTextureOnTile(const void *tile, int face, int tileSize,
     const TextureMetrics *metrics = textureMetrics(texture);
     texels = texturePixels(texture);
     texelsRepeat = metrics->repeatsU || metrics->repeatsV;
+    texelsBlend = metrics->alphaBlendMode == SEEN_THROUGH_ITSELF;
     shadowTexels = shadow;
 
     /*
@@ -1371,6 +1420,7 @@ void renderGroundTile(const void *ground, int x, int z) {
     }
 
     texels = NULL;
+    texelsBlend = 0;
     shadowTexels = NULL;
     free(shade);
 }

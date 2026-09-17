@@ -223,11 +223,10 @@ public sealed interface Scene {
     /**
      * A model wearing a texture whose blend mode says it carries an alpha of its own.
      *
-     * Every other textured scene wears a texture whose blend mode leaves the face solid, so what
-     * such a texture does has never been drawn. It comes out bare: a face wearing one is left
-     * out of the pass that draws the rest, whichever of the two ways the caller asks for, and
-     * the two copies here ask for one each. It is drawn over a sprite so that a face that let
-     * anything through would show it.
+     * Every other textured scene wears a texture whose blend mode leaves how much of a face shows
+     * to the face, so a texture that says it place by place had never been drawn. It is drawn
+     * over a sprite so that what shows through it is something other than the background, and
+     * the two copies ask for one of the two passes each.
      */
     record SeenThrough() implements Scene {
 

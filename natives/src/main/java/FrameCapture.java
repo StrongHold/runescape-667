@@ -222,8 +222,11 @@ public final class FrameCapture {
     /**
      * A texture whose blend mode is the one that reads an alpha out of the texture itself rather
      * than off the face, which is every third number.
+     *
+     * It also has to be one the player is not allowed to turn off, because the scenes are built
+     * asking for textures off and a texture that may go would go.
      */
-    private static final short TEXTURE_SEEN_THROUGH = 5;
+    private static final short TEXTURE_SEEN_THROUGH = 8;
 
     /**
      * The feature the client asks for when the player has turned textures off. It is one of the

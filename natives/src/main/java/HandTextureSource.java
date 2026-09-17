@@ -17,9 +17,11 @@ import com.jagex.graphics.TextureSource;
  * is drawn flat, and a face whose texture is marked the other way is dropped from the model
  * entirely, which leaves a model that looks exactly like an untextured one.
  *
- * A blend mode of two takes a face out of the pass that draws the rest, so a caller that wants a
- * texture it can see on an ordinary face wants a number that is not two more than a multiple of
- * three.
+ * A blend mode of two says the texture carries an alpha of its own, and a face wearing one is
+ * drawn through what is behind it place by place rather than over it. Every third number has one.
+ *
+ * Every odd number is one the player is allowed to turn off, so a caller that wants a texture it
+ * can see whatever the scene asks for wants an even one.
  */
 public final class HandTextureSource implements TextureSource {
 
