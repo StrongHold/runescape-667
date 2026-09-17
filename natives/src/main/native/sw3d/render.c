@@ -32,6 +32,9 @@ enum { CHANNELS = 4, ALPHA = 3 };
  */
 enum { SEEN_THROUGH_ITSELF = 2 };
 
+/** The blend mode a texture names when it carries no alpha, and leaves a texel empty instead. */
+enum { EMPTY_WHERE_NOT_THERE = 1 };
+
 /**
  * How many textures a face of the ground is blended from, and how many of their shares are
  * carried across it. The last share is what the other two leave over.
@@ -394,6 +397,14 @@ static int texelsRepeat;
 static int texelsBlend;
 
 /**
+ * Whether the texture the faces being drawn wear says it carries no alpha at all.
+ *
+ * Such a texture says where it is not there by leaving a texel wholly empty rather than by
+ * carrying an alpha, so a face does not cover the pixel it reads one at.
+ */
+static int texelsSkipEmpty;
+
+/**
  * The picture of the shadow over the tile being drawn, and how far a place on the tile's texture
  * is shifted down to reach a place in it.
  *
@@ -652,49 +663,24 @@ static void fillSpan(int y, const Side *left, const Side *right) {
 
     for (int x = from; x < to; x++) {
         if (!distanceDecides || depth <= held[x]) {
-            /*
-             * A face drawn through what is behind it does not record how far away it is. What it
-             * covers stays as near as whatever was there, so a second blended face over the same
-             * place is drawn through both rather than hidden by the first.
-             */
-            if (distanceDecides && faceShows == WHOLLY_SOLID && !texelsBlend) {
-                held[x] = depth;
-            }
-
             int lane = x - group;
             float u = uBase + (float) lane * uStep;
             float v = vBase + (float) lane * vStep;
             float w = wBase + (float) lane * wStep;
 
-            /*
-             * What the span has reached, darkened where the tile being drawn is in shadow. The
-             * light comes back out of the whole of a byte, so the product keeps its top half.
-             */
-            uint16_t reached[CHANNELS];
-            for (int part = 0; part < CHANNELS; part++) {
-                reached[part] = colour[part];
-            }
+            uint32_t worn[CHANNELS];
+            int covers = 1;
 
-            if (shadowTexels != NULL) {
-                uint32_t through = shadowAt(u, v, w);
-
-                for (int part = 0; part < CHANNELS; part++) {
-                    reached[part] = (uint16_t) (through * reached[part] >> 8);
-                }
-            }
-
-            if (texels == NULL) {
-                row[x] = laidOver(row[x], reached);
-            } else {
-                /*
-                 * A texel is shaded by the light the span has reached rather than replacing it,
-                 * and the product keeps its top half, which is what turns a byte times a
-                 * sixteenth part back into a byte.
-                 */
-                uint32_t worn[CHANNELS];
-
+            if (texels != NULL) {
                 if (blended[0] == NULL) {
                     uint32_t texel = texelAt(u, v, w);
+
+                    /*
+                     * A texture that says it carries no alpha says so by leaving a texel wholly
+                     * empty, and a face does not cover what it reads an empty texel at: neither
+                     * what was drawn there nor how far away it was is touched.
+                     */
+                    covers = !texelsSkipEmpty || texel != 0;
 
                     for (int part = 0; part < CHANNELS; part++) {
                         worn[part] = texel >> (part * 8) & 0xFF;
@@ -702,23 +688,61 @@ static void fillSpan(int y, const Side *left, const Side *right) {
                 } else {
                     mixedTexel(mix, u, v, w, worn);
                 }
+            }
 
-                uint32_t written = 0;
-                for (int part = 0; part < CHANNELS; part++) {
-                    written |= (worn[part] * reached[part] >> 16) << (part * 8);
+            if (covers) {
+                /*
+                 * A face drawn through what is behind it does not record how far away it is. What
+                 * it covers stays as near as whatever was there, so a second blended face over
+                 * the same place is drawn through both rather than hidden by the first.
+                 */
+                if (distanceDecides && faceShows == WHOLLY_SOLID && !texelsBlend) {
+                    held[x] = depth;
                 }
 
-                if (texelsBlend) {
-                    row[x] = seenThrough(row[x], written);
-                } else {
-                    uint16_t lifted[CHANNELS] = {
-                        (uint16_t) ((written & 0xFF) << 8),
-                        (uint16_t) (((written >> 8) & 0xFF) << 8),
-                        (uint16_t) (((written >> 16) & 0xFF) << 8),
-                        (uint16_t) (((written >> 24) & 0xFF) << 8)
-                    };
+                /*
+                 * What the span has reached, darkened where the tile being drawn is in shadow.
+                 * The light comes back out of the whole of a byte, so the product keeps its top
+                 * half.
+                 */
+                uint16_t reached[CHANNELS];
+                for (int part = 0; part < CHANNELS; part++) {
+                    reached[part] = colour[part];
+                }
 
-                    row[x] = laidOver(row[x], lifted);
+                if (shadowTexels != NULL) {
+                    uint32_t through = shadowAt(u, v, w);
+
+                    for (int part = 0; part < CHANNELS; part++) {
+                        reached[part] = (uint16_t) (through * reached[part] >> 8);
+                    }
+                }
+
+                if (texels == NULL) {
+                    row[x] = laidOver(row[x], reached);
+                } else {
+                    /*
+                     * A texel is shaded by the light the span has reached rather than replacing
+                     * it, and the product keeps its top half, which is what turns a byte times a
+                     * sixteenth part back into a byte.
+                     */
+                    uint32_t written = 0;
+                    for (int part = 0; part < CHANNELS; part++) {
+                        written |= (worn[part] * reached[part] >> 16) << (part * 8);
+                    }
+
+                    if (texelsBlend) {
+                        row[x] = seenThrough(row[x], written);
+                    } else {
+                        uint16_t lifted[CHANNELS] = {
+                            (uint16_t) ((written & 0xFF) << 8),
+                            (uint16_t) (((written >> 8) & 0xFF) << 8),
+                            (uint16_t) (((written >> 16) & 0xFF) << 8),
+                            (uint16_t) (((written >> 24) & 0xFF) << 8)
+                        };
+
+                        row[x] = laidOver(row[x], lifted);
+                    }
                 }
             }
         }
@@ -1367,6 +1391,7 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
                 texels = texturePixels(texture);
                 texelsRepeat = metrics->repeatsU || metrics->repeatsV;
                 texelsBlend = metrics->alphaBlendMode == SEEN_THROUGH_ITSELF;
+                texelsSkipEmpty = metrics->alphaBlendMode == EMPTY_WHERE_NOT_THERE;
 
                 const float *placed = modelFaceUV(model);
 
@@ -1389,6 +1414,7 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
 
     texels = NULL;
     texelsBlend = 0;
+    texelsSkipEmpty = 0;
     faceShows = WHOLLY_SOLID;
 }
 
@@ -1456,6 +1482,7 @@ static void layTextureOnTile(const void *tile, int face, int tileSize,
                              const unsigned char *shadow, Corner *walked) {
     texels = NULL;
     texelsBlend = 0;
+    texelsSkipEmpty = 0;
     blended[0] = NULL;
 
     /*
@@ -1476,8 +1503,15 @@ static void layTextureOnTile(const void *tile, int face, int tileSize,
 
     const TextureMetrics *metrics = textureMetrics(texture);
     texels = texturePixels(texture);
-    texelsRepeat = metrics->repeatsU || metrics->repeatsV;
+
+    /*
+     * A texture on the ground carries on round whatever it says about itself. Only a model asks
+     * for one held at the edge instead, and one tile covering less than the whole of its texture
+     * is what a tile naming a size smaller than itself means.
+     */
+    texelsRepeat = 1;
     texelsBlend = metrics->alphaBlendMode == SEEN_THROUGH_ITSELF;
+    texelsSkipEmpty = metrics->alphaBlendMode == EMPTY_WHERE_NOT_THERE;
     shadowTexels = shadow;
 
     if (!cornersAgree(tile, face)) {
@@ -1596,6 +1630,7 @@ void renderGroundTile(const void *ground, int x, int z) {
 
     texels = NULL;
     texelsBlend = 0;
+    texelsSkipEmpty = 0;
     blended[0] = NULL;
     shadowTexels = NULL;
     free(shade);

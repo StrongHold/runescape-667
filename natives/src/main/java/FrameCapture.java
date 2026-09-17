@@ -230,6 +230,12 @@ public final class FrameCapture {
     private static final short TEXTURE_SEEN_THROUGH = 8;
 
     /**
+     * A texture whose blend mode says it carries no alpha at all, and says where it is not there
+     * by leaving a texel empty. It is even for the same reason as the one above.
+     */
+    private static final short TEXTURE_EMPTY_WHERE_BARE = 4;
+
+    /**
      * The feature the client asks for when the player has turned textures off. It is one of the
      * features a model is built with rather than something the toolkit is told once, so a model
      * built before the player changed their mind keeps the textures it was built with.
@@ -331,9 +337,11 @@ public final class FrameCapture {
      * The same model with every other face wearing a texture that carries an alpha of its own and
      * the rest wearing none.
      *
-     * A model wearing one everywhere says nothing about the order faces are drawn in, because
-     * every face of it is drawn the same way. A tree is not like that: its leaves are seen
-     * through and its trunk is not, and which is drawn first decides which is in front.
+     * Every third face wears each of the three: one seen through its own alpha, one that says
+     * where it is not there by leaving a texel empty, and one wearing none at all. A model
+     * wearing one everywhere says nothing about the order faces are drawn in, and a tree is not
+     * like that: its leaves are seen through and its trunk is not, and which is drawn first
+     * decides which is in front.
      */
     private static Model seenThroughModel(Toolkit toolkit, Mesh held) {
         if (held == null) {
@@ -341,7 +349,11 @@ public final class FrameCapture {
         }
 
         for (var face = 0; face < held.faceCount; face++) {
-            held.faceTexture[face] = (face & 1) == 0 ? TEXTURE_SEEN_THROUGH : (short) -1;
+            held.faceTexture[face] = switch (face % 3) {
+                case 0 -> TEXTURE_SEEN_THROUGH;
+                case 1 -> TEXTURE_EMPTY_WHERE_BARE;
+                default -> (short) -1;
+            };
         }
 
         return toolkit.createModel(held, FUNCTIONS, FEATURES, AMBIENT, CONTRAST);

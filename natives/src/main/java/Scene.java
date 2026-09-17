@@ -233,6 +233,17 @@ public sealed interface Scene {
 
         private static final int LEAN = 0x500;
 
+
+        /**
+         * What is left is three short runs along the edges of the faces that say where they are
+         * not there by leaving a texel empty, which is the two toolkits deciding the edge of a
+         * span a pixel differently.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
         @Override
         public void draw(Toolkit toolkit, Props props) {
             if (props.seenThrough() == null) {

@@ -70,6 +70,12 @@ public final class HandGround {
     private static final int TEXTURED_BESIDE = 4;
 
     /**
+     * A texture that says it carries on round in neither direction, which a model would hold at
+     * its edge. The ground carries every texture round whatever the texture says.
+     */
+    private static final int TEXTURED_ROUND = 12;
+
+    /**
      * The colour laid over a whole face, which is a red the corner colours never reach so that a
      * face drawn with it cannot be mistaken for one drawn without.
      */
@@ -224,9 +230,14 @@ public final class HandGround {
              */
             textures[slot] = x == TILES / 2 ? -1
                 : !blended ? TEXTURED_WITH
+                : x == TILES / 4 ? TEXTURED_ROUND
                 : (x + z + SLOT_ACROSS[slot] / TILE + SLOT_ALONG[slot] / TILE) % 2 == 0
                     ? TEXTURED_WITH : TEXTURED_BESIDE;
-            sizes[slot] = TILE;
+            /*
+             * A tile naming a size smaller than itself is covered by its texture more than once,
+             * which is the only way a place on the ground runs off the far edge of one.
+             */
+            sizes[slot] = blended && x == TILES / 4 ? TILE / 2 : TILE;
             colours[slot] = cornerHsl(x + SLOT_ACROSS[slot] / TILE, z + SLOT_ALONG[slot] / TILE);
 
             if (overlay != null) {
