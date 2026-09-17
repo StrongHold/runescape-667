@@ -233,6 +233,17 @@ public sealed interface Scene {
 
         private static final int LEAN = 0x400;
 
+
+        /**
+         * What is left is fifty two pixels along the edges of the faces that are drawn through
+         * what is behind them, which is the two toolkits ordering those faces among themselves
+         * differently. Leaving them until the solid faces are drawn took six hundred to fifty two.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
         @Override
         public void draw(Toolkit toolkit, Props props) {
             if (props.stairs() == null) {

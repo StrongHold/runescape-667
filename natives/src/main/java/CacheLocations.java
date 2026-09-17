@@ -8,6 +8,8 @@ import com.jagex.js5.Js5Index;
 import com.jagex.js5.js5;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * Lists what the map says stands on one tile of the world.
@@ -26,6 +28,7 @@ public final class CacheLocations {
         var x = Integer.parseInt(args[0]);
         var z = Integer.parseInt(args[1]);
         var level = args.length > 2 ? Integer.parseInt(args[2]) : 0;
+        var around = args.length > 3 ? Integer.parseInt(args[3]) : 0;
 
         var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
         var name = "l" + (x / TILES_ACROSS_A_SQUARE) + "_" + (z / TILES_ACROSS_A_SQUARE);
@@ -45,28 +48,56 @@ public final class CacheLocations {
 
         System.out.println(name + " group " + index.groupIds[group]);
 
-        var data = unlocked(packed);
+        var data = unlocked(packed, keyFor(name));
         if (data == null) {
             System.out.println("the group is locked with a key this cache does not hold");
             return;
         }
 
-        report(data, x % TILES_ACROSS_A_SQUARE, z % TILES_ACROSS_A_SQUARE, level);
+        report(data, x % TILES_ACROSS_A_SQUARE, z % TILES_ACROSS_A_SQUARE, level, around);
     }
 
     /**
-     * The group as it stands, or unlocked with a key of nothing.
+     * The key one square is locked with, out of a directory holding one file of four numbers per
+     * square, or a key of nothing where there is no such directory.
+     *
+     * The server that serves the world is the only thing that holds these, so where the directory
+     * is has to be said rather than guessed at.
+     */
+    private static int[] keyFor(String name) throws Exception {
+        var held = System.getenv("SW3D_LOCATION_KEYS");
+        if (held == null || held.isEmpty()) {
+            return new int[4];
+        }
+
+        var file = Path.of(held, name + ".txt");
+        if (!Files.isReadable(file)) {
+            System.out.println("no key for " + name + " under " + held);
+            return new int[4];
+        }
+
+        var lines = Files.readAllLines(file);
+        var key = new int[4];
+        for (var part = 0; part < key.length; part++) {
+            key[part] = Integer.parseInt(lines.get(part).trim());
+        }
+
+        return key;
+    }
+
+    /**
+     * The group as it stands, or unlocked with the key the square is locked with.
      *
      * The map locks its locations with a key the server hands the client at the door, so a cache
-     * on its own cannot always read them back. A server that never bothered leaves the key as
-     * nothing, which is still a key and still has to be turned.
+     * on its own cannot read them back. A key of nothing is still a key and still has to be
+     * turned, which is what a server that never bothered leaves behind.
      */
-    private static byte[] unlocked(byte[] packed) {
+    private static byte[] unlocked(byte[] packed, int[] key) {
         try {
             return js5.decodeContainer(packed);
         } catch (RuntimeException plain) {
             var packet = new Packet(packed);
-            packet.tinydec(new int[4], packed.length);
+            packet.tinydec(key, packed.length);
 
             try {
                 return js5.decodeContainer(packet.data);
@@ -80,7 +111,7 @@ public final class CacheLocations {
      * Walks the group the way the client walks it: a run of locations, each holding a run of the
      * places it stands, both counted from the last rather than given outright.
      */
-    private static void report(byte[] data, int wantX, int wantZ, int wantLevel) {
+    private static void report(byte[] data, int wantX, int wantZ, int wantLevel, int around) {
         var packet = new Packet(data);
         var id = -1;
         var found = 0;
@@ -88,8 +119,8 @@ public final class CacheLocations {
         while (true) {
             var idOffset = packet.gExtended1or2();
             if (idOffset == 0) {
-                System.out.println(found + " locations stand on " + wantX + "," + wantZ
-                    + " at level " + wantLevel);
+                System.out.println(found + " locations stand within " + around + " of "
+                    + wantX + "," + wantZ + " at level " + wantLevel);
                 return;
             }
 
@@ -105,10 +136,14 @@ public final class CacheLocations {
                 coord += coordOffset - 1;
                 var shapeAndRotation = packet.g1();
 
-                if ((coord & 0x3F) == wantZ && (coord >> 6 & 0x3F) == wantX
+                var atX = coord >> 6 & 0x3F;
+                var atZ = coord & 0x3F;
+
+                if (Math.abs(atX - wantX) <= around && Math.abs(atZ - wantZ) <= around
                     && coord >> 12 == wantLevel) {
                     found++;
                     System.out.println("  location " + id
+                        + " at " + atX + "," + atZ
                         + " shape " + (shapeAndRotation >> 2)
                         + " rotation " + (shapeAndRotation & 0x3));
                 }

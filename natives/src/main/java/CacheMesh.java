@@ -37,10 +37,13 @@ public final class CacheMesh {
     public static final int ROCK = 64785;
 
     /**
-     * The group holding a flight of stairs whose first step the client draws nothing for, so that
-     * the hole beneath the stairs shows through where the step should be.
+     * The group holding the step at the head of a flight of stairs, which the client draws
+     * nothing for, so that the hole beneath the stairs shows through where the step should be.
+     *
+     * The flight itself is 26910 and stands on the tile beside it. Both were put in front of both
+     * toolkits; the flight came out identical.
      */
-    public static final int STAIRS = 26910;
+    public static final int STAIRS = 32419;
 
     private final FileSystem_Client store;
 

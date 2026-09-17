@@ -17,7 +17,15 @@ public record PriorityMesh(int size) {
 
     public static final PriorityMesh INSTANCE = new PriorityMesh(150);
 
-    private static final int PAIRS = 3;
+    /**
+     * Three pairs are drawn solid and three more are drawn through what is behind them, because
+     * a face that lets anything through is put in a pass of its own and may be sorted there even
+     * where a solid one is not.
+     */
+    private static final int PAIRS = 6;
+
+    /** How much of a face in the second three shows, counted the way the client counts it. */
+    private static final byte THROUGH = 80;
     private static final int VERTICES = PAIRS * 4;
     private static final int FACES = PAIRS * 2;
 
@@ -34,12 +42,13 @@ public record PriorityMesh(int size) {
         mesh.globalPriority = 0;
 
         for (var pair = 0; pair < PAIRS; pair++) {
-            var middle = (pair - 1) * size * BESIDE;
+            var middle = (pair % (PAIRS / 2) - 1) * size * BESIDE;
+            var up = pair < PAIRS / 2 ? -size * 2 : size * 2;
 
-            put(mesh, pair * 4, middle - size, -size, 0);
-            put(mesh, pair * 4 + 1, middle + size, -size, 0);
-            put(mesh, pair * 4 + 2, middle + size, size, 0);
-            put(mesh, pair * 4 + 3, middle - size, size, 0);
+            put(mesh, pair * 4, middle - size, up - size, 0);
+            put(mesh, pair * 4 + 1, middle + size, up - size, 0);
+            put(mesh, pair * 4 + 2, middle + size, up + size, 0);
+            put(mesh, pair * 4 + 3, middle - size, up + size, 0);
 
             face(mesh, pair * 2, pair * 4, pair * 4 + 2, pair * 4 + 1, hsl(0, 7, 90));
             face(mesh, pair * 2 + 1, pair * 4, pair * 4 + 3, pair * 4 + 2, hsl(21, 7, 90));
@@ -54,12 +63,14 @@ public record PriorityMesh(int size) {
             mesh.faceC[pair * 2 + 1] = (short) (pair * 4 + 1);
         }
 
-        mesh.facePriority[0] = 0;
-        mesh.facePriority[1] = 9;
-        mesh.facePriority[2] = 9;
-        mesh.facePriority[3] = 0;
-        mesh.facePriority[4] = 0;
-        mesh.facePriority[5] = 0;
+        var priorities = new byte[] {0, 9, 9, 0, 0, 0};
+        for (var face = 0; face < FACES; face++) {
+            mesh.facePriority[face] = priorities[face % priorities.length];
+
+            if (face >= FACES / 2) {
+                mesh.faceAlpha[face] = THROUGH;
+            }
+        }
 
         return mesh;
     }

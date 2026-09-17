@@ -1217,7 +1217,11 @@ static int wholeModelIsOut(void *model, const float *rows, int smaller) {
  * therefore left until the faces that do record a distance have been drawn, or the trunk of a
  * tree comes out in front of the leaves standing between it and the eye.
  */
-static int seenThroughFace(const short *faceTexture, int face) {
+static int seenThroughFace(const void *model, const short *faceTexture, int face) {
+    if (modelFaceAlpha(model, face) != 0) {
+        return 1;
+    }
+
     if (faceTexture == NULL || faceTexture[face] == -1) {
         return 0;
     }
@@ -1339,7 +1343,7 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
      */
     for (int pass = 0; pass < PASSES; pass++) {
         for (int face = 0; face < faces; face++) {
-            if (seenThroughFace(faceTexture, face) != pass) {
+            if (seenThroughFace(model, faceTexture, face) != pass) {
                 continue;
             }
 

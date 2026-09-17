@@ -894,4 +894,6 @@ val listLocations by tasks.registering(JavaExec::class) {
     mainClass = "CacheLocations"
     classpath = sourceSets["main"].runtimeClasspath
     args((providers.gradleProperty("tile").getOrElse("3084 3452 0")).split(" "))
+    environment("SW3D_LOCATION_KEYS",
+        providers.environmentVariable("SW3D_LOCATION_KEYS").getOrElse(""))
 }

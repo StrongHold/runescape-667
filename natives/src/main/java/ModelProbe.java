@@ -97,6 +97,7 @@ public final class ModelProbe {
                 CacheMesh.surveyMappingTypes();
                 CacheMesh.report(CacheMesh.ROCK);
                 CacheMesh.report(CacheMesh.STAIRS);
+                CacheMesh.report(26910);
             }
 
             var lines = new ArrayList<String>();
