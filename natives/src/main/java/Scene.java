@@ -1566,13 +1566,24 @@ public sealed interface Scene {
          * How the shade between two corners is rounded was the larger part of this and is now
          * right, which took it from fifteen thousand pixels to twelve.
          *
-         * What is left is not rounding. Nine thousand of the rest are out by one or two and are
-         * spread everywhere, and three and a half thousand are out by more than three and lie in
-         * two patches rather than along any edge. Across a patch the three channels are all out by
-         * the same fraction, near enough a fifteenth, and never by the same amount: a shade one
-         * step further along rather than a colour mixed slightly differently. So a corner in those
-         * two patches is being given a shade this toolkit does not give it, and finding which
-         * corner is the next thing rather than looking at the mixing again.
+         * What is left is the sun and nothing else. Draw this scene with the sun turned all the
+         * way down and it matches the shipped toolkit to the pixel, so the colour a corner starts
+         * in, the share it takes of the corners around it and the way it is mixed across a face
+         * are all right, and only how much sun reaches it is not.
+         *
+         * How much reaches it is worked out from a direction, and a corner cut into the middle of
+         * a tile has no direction of its own, so one is blended from the four around it. Four
+         * directions of length one do not blend into a direction of length one, and this divides
+         * by the length each of them had rather than by the length the blend has. That leaves the
+         * sun reaching such a corner less strongly than it should, which is why every wrong pixel
+         * here is brighter rather than darker: a corner facing away from the sun is darkened by
+         * how far it faces away, and one blended short is not darkened far enough.
+         *
+         * Dividing by the length the blend has is not the answer on its own. It takes this scene
+         * further off and puts Terrain and HollowGround out, both of which match to the pixel, and
+         * it does it at the rim of the patch where the directions nearly cancel and the length
+         * comes out near nothing. Whatever the toolkit does is something that leaves the rim
+         * alone.
          */
         @Override
         public boolean written() {
