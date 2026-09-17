@@ -1563,11 +1563,16 @@ public sealed interface Scene {
     record CutGround() implements Scene {
 
         /**
-         * Fifteen thousand of its pixels are a shade out, every one of them by a hand's breadth
-         * at the dark end of the range. They lie in the band along the far edge, where the ground
-         * runs down to the least a channel is allowed to reach and a face is shaded between a
-         * corner at that floor and one above it. What is left is how the shade between two
-         * corners is rounded, not which shade either corner was given.
+         * How the shade between two corners is rounded was the larger part of this and is now
+         * right, which took it from fifteen thousand pixels to twelve.
+         *
+         * What is left is not rounding. Nine thousand of the rest are out by one or two and are
+         * spread everywhere, and three and a half thousand are out by more than three and lie in
+         * two patches rather than along any edge. Across a patch the three channels are all out by
+         * the same fraction, near enough a fifteenth, and never by the same amount: a shade one
+         * step further along rather than a colour mixed slightly differently. So a corner in those
+         * two patches is being given a shade this toolkit does not give it, and finding which
+         * corner is the next thing rather than looking at the mixing again.
          */
         @Override
         public boolean written() {
