@@ -411,6 +411,48 @@ static void drawStretched(const Sprite *sprite, int x, int y, int wantedWidth, i
     }
 }
 
+
+/**
+ * Draws a texture stretched over a rectangle, over whatever is further from the eye than it.
+ *
+ * Nothing about this follows a face: the rectangle stands square to the picture and the whole of
+ * it is the same distance away, which is what makes a billboard a billboard. The texture is read
+ * the way every other texture is, a row at a time out of the wider run they are all kept in.
+ */
+void drawTextureOverRect(const uint32_t *from, int x, int y, int wide, int high, float depth,
+                         int op, int colour, int mode) {
+    if (from == NULL || raster.pixels == NULL || wide <= 0 || high <= 0) {
+        return;
+    }
+
+    if (op < OP_MULTIPLY || op > OP_SUBTRACT || mode < BLEND_OPAQUE || mode > BLEND_ADD) {
+        return;
+    }
+
+    int left = x < raster.clipLeft ? raster.clipLeft : x;
+    int top = y < raster.clipTop ? raster.clipTop : y;
+    int right = x + wide > raster.clipRight ? raster.clipRight : x + wide;
+    int bottom = y + high > raster.clipBottom ? raster.clipBottom : y + high;
+
+    Mixture mixture = mixtureOf((uint32_t) colour);
+
+    for (int row = top; row < bottom; row++) {
+        const uint32_t *texels = from + (((row - y) * TEXTURE_SIDE / high) << TEXTURE_SHIFT);
+        uint32_t *to = raster.pixels + (size_t) row * (size_t) raster.width;
+        const float *deep = raster.depths == NULL
+            ? NULL : raster.depths + (size_t) row * (size_t) raster.width;
+
+        for (int column = left; column < right; column++) {
+            if (deep != NULL && deep[column] <= depth) {
+                continue;
+            }
+
+            to[column] = putPixel(op, mode, texels[(column - x) * TEXTURE_SIDE / wide],
+                                  to[column], colour, &mixture);
+        }
+    }
+}
+
 /**
  * Draws a sprite, but only where a mask lets it through.
  *

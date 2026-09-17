@@ -288,7 +288,7 @@ static Corner onTexture(Corner corner, float u, float v) {
 }
 
 /** The last texel of a texture each way, and the mask that wraps a coordinate back onto it. */
-enum { TEXTURE_EDGE = 127 };
+enum { TEXTURE_EDGE = 127, TEXTURE_WIDE = 128 };
 
 /**
  * Where the three corners of a face sit on the texture it wears.
@@ -1235,6 +1235,93 @@ static int seenThroughFace(const void *model, const short *faceTexture, int face
     return metrics != NULL && metrics->alphaBlendMode == SEEN_THROUGH_ITSELF;
 }
 
+/**
+ * How much of a billboard's size the client counts as the whole of it, which an animation scales
+ * away from and no animation here touches.
+ */
+enum { BILLBOARD_WHOLE = 128 };
+
+/**
+ * Draws the square the client hangs off one face of a model.
+ *
+ * A billboard sits at the middle of the face it hangs off and stays square to the picture however
+ * the model is turned, which is what makes it a billboard rather than a face. It is drawn as a
+ * filled circle where it wears no texture the player has left on, and as its texture stretched
+ * over the square where it does.
+ */
+static void drawBillboard(const void *model, int which, const Transform *onto, const short *faceA,
+                          const short *faceB, const short *faceC, uint32_t colour) {
+    int face;
+    int wide;
+    int high;
+    int texture;
+    int colourOp;
+    int blendMode;
+    int insteadOfTheFace;
+
+    modelBillboard(model, which, &face, &wide, &high, &texture, &colourOp, &blendMode,
+        &insteadOfTheFace);
+    (void) insteadOfTheFace;
+
+    const float *held = modelVertices(model);
+    const short *corners[3] = {faceA, faceB, faceC};
+    float middle[3];
+
+    /*
+     * The middle is the three corners averaged as whole numbers, the way the client averages
+     * them, because a billboard put half a unit from where the client puts it lands on a
+     * different pixel.
+     */
+    for (int part = 0; part < 3; part++) {
+        int summed = 0;
+
+        for (int corner = 0; corner < 3; corner++) {
+            summed += (int) held[(size_t) corners[corner][face] * MODEL_VERTEX_STRIDE + part];
+        }
+
+        middle[part] = (float) (summed / 3);
+    }
+
+    float point[ROWS];
+    for (int lane = 0; lane < ROWS; lane++) {
+        point[lane] = middle[0] * onto->row[0][lane] + middle[1] * onto->row[1][lane]
+            + middle[2] * onto->row[2][lane] + onto->row[3][lane];
+    }
+
+    float away = point[3];
+    const Projection *view = projection();
+
+    if (away <= view->near) {
+        return;
+    }
+
+    int halfWide = (int) (view->scaleX * (float) wide / away);
+    int halfHigh = (int) (view->scaleY * (float) high / away);
+
+    if (halfWide == 0 || halfHigh == 0) {
+        return;
+    }
+
+    int x = (int) (point[0] / away + view->centreX) - raster.clipLeft;
+    int y = (int) (point[1] / away + view->centreY) - raster.clipTop;
+    float depth = signedAs(point[2] / away, point[2]);
+
+    const TextureMetrics *worn = texture == -1 || texture == 0xFFFF
+        ? NULL : textureMetricsFor((unsigned short) texture);
+
+    /*
+     * Nothing is drawn for a billboard wearing no texture, or one wearing a texture the player is
+     * allowed to turn off. A billboard is its texture, and one with none has nothing to show.
+     */
+    if (worn == NULL || worn->disableable) {
+        return;
+    }
+
+    drawTextureOverRect(texturePixels(textureFor((unsigned short) texture)),
+        x - halfWide, y - halfHigh, halfWide * 2, halfHigh * 2, depth,
+        colourOp, (int) colour, blendMode);
+}
+
 /** How many times over the faces of a model are walked, once for each way they are drawn. */
 enum { PASSES = 2 };
 
@@ -1435,6 +1522,13 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
                 continue;
             }
 
+            /*
+             * A face with a billboard hanging off it stands only to say where the billboard goes.
+             * The square is drawn in its place and the face itself never is, whatever the kind of
+             * billboard says about hiding it.
+             */
+            int hanging = modelFaceBillboard(model, face);
+
             faceShows = alpha == 0 ? WHOLLY_SOLID : 0xFF - alpha;
 
             texels = NULL;
@@ -1464,7 +1558,12 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
                 }
             }
 
-            fillTriangle(walked[0], walked[1], walked[2]);
+            if (hanging == -1) {
+                fillTriangle(walked[0], walked[1], walked[2]);
+            } else {
+                texels = NULL;
+                drawBillboard(model, hanging, &onto, faceA, faceB, faceC, colours[0]);
+            }
         }
     }
 

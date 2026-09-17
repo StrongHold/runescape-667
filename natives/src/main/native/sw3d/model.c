@@ -117,6 +117,23 @@ static const float OVER_STRETCH = 1.0f / 128.0f;
  */
 enum { TURN_ACROSS_FIRST = 0x1 };
 
+/**
+ * A square the client hangs off a face of a model and keeps turned towards the eye, whatever way
+ * round the model is. The client reads what one is out of the cache and hands over what it found,
+ * so nothing here has to know where the kinds are kept.
+ */
+typedef struct {
+    int face;
+    int wide;
+    int high;
+    int texture;
+    int colourOp;
+    int blendMode;
+
+    /** Whether the face it hangs off is left undrawn, so that only the square shows. */
+    int insteadOfTheFace;
+} Billboard;
+
 /** Where in the group list a label's vertices sit. */
 typedef struct {
     int start;
@@ -256,6 +273,16 @@ typedef struct {
      * model about a great deal between building it and drawing it.
      */
     uint32_t *shade;
+
+    /** The squares the client hangs off faces and keeps turned towards the eye. */
+    int billboardCount;
+    Billboard *billboards;
+
+    /**
+     * Which billboard hangs off each face, or nothing where none does. This is kept the other way
+     * round from the run above because the face loop asks about a face rather than a billboard.
+     */
+    int *faceBillboard;
 } Model;
 
 static Model *modelOf(JNIEnv *env, jobject self) {
@@ -638,6 +665,8 @@ static void lightModel(Model *model) {
 /** Throws away the light the model is wearing, so that it is worked out again when it is drawn. */
 static void unlight(Model *model) {
     free(model->shade);
+    free(model->billboards);
+    free(model->faceBillboard);
     model->shade = NULL;
 }
 
@@ -1482,6 +1511,72 @@ static void takeTextures(Model *model) {
     }
 }
 
+/**
+ * How many numbers the client sends for every billboard: seven describing it, and one more for
+ * every billboard at the end of the run naming the group it belongs to.
+ */
+enum { BILLBOARD_NUMBERS = 8, BILLBOARD_DESCRIBED_BY = 7 };
+
+/**
+ * Takes the squares the client hangs off the faces of a model.
+ *
+ * The client reads what each one is out of the cache before it hands the model over, so what
+ * arrives is what it found rather than which kind it was. Every billboard is described first and
+ * the groups follow, and nothing here reads the groups: they say which billboards an animation
+ * moves together, and no animation moves one yet.
+ */
+static void readBillboards(JNIEnv *env, Model *model, jintArray given) {
+    if (given == NULL) {
+        return;
+    }
+
+    int numbers = (int) (*env)->GetArrayLength(env, given);
+    int count = numbers / BILLBOARD_NUMBERS;
+    if (count <= 0 || model->faceCount <= 0) {
+        return;
+    }
+
+    int *held = calloc((size_t) numbers, sizeof(int));
+    if (held == NULL) {
+        return;
+    }
+
+    (*env)->GetIntArrayRegion(env, given, 0, numbers, (jint *) held);
+
+    model->billboards = calloc((size_t) count, sizeof(Billboard));
+    model->faceBillboard = calloc((size_t) model->faceCount, sizeof(int));
+
+    if (model->billboards == NULL || model->faceBillboard == NULL) {
+        free(held);
+        return;
+    }
+
+    for (int face = 0; face < model->faceCount; face++) {
+        model->faceBillboard[face] = -1;
+    }
+
+    model->billboardCount = count;
+
+    for (int at = 0; at < count; at++) {
+        const int *said = &held[at * BILLBOARD_DESCRIBED_BY];
+        Billboard *billboard = &model->billboards[at];
+
+        billboard->face = said[0];
+        billboard->wide = said[1];
+        billboard->high = said[2];
+        billboard->texture = said[3];
+        billboard->colourOp = said[4];
+        billboard->blendMode = said[5];
+        billboard->insteadOfTheFace = said[6] != 0;
+
+        if (billboard->face >= 0 && billboard->face < model->faceCount) {
+            model->faceBillboard[billboard->face] = at;
+        }
+    }
+
+    free(held);
+}
+
 JNIEXPORT void JNICALL Java_i_R(JNIEnv *env, jobject self, jobject toolkit, jobject pool,
                                  jint vertexCount, jint maxVertex,
                                  jintArray vertexX, jintArray vertexY, jintArray vertexZ,
@@ -1510,7 +1605,6 @@ JNIEXPORT void JNICALL Java_i_R(JNIEnv *env, jobject self, jobject toolkit, jobj
     (void) faceLabel;
     (void) globalPriority;
     (void) unknown;
-    (void) billboards;
 
     Model *model = calloc(1, sizeof(Model));
     if (model == NULL) {
@@ -1524,6 +1618,8 @@ JNIEXPORT void JNICALL Java_i_R(JNIEnv *env, jobject self, jobject toolkit, jobj
     model->contrast = contrast;
     model->functions = functions;
     model->features = features;
+
+    readBillboards(env, model, billboards);
 
     model->vertices = copyVertices(env, vertexX, vertexY, vertexZ, vertexCount);
 
@@ -1629,6 +1725,8 @@ static void emptyModel(Model *model) {
     free(model->faceNormals);
     free(model->sharedNormals);
     free(model->shade);
+    free(model->billboards);
+    free(model->faceBillboard);
 
     memset(model, 0, sizeof *model);
 }
@@ -2829,6 +2927,32 @@ const uint32_t *modelShade(void *handle) {
 /**
  * Whether this face wanted its own direction rather than the averaged one at its corners.
  */
+/**
+ * Which billboard hangs off a face, or nothing where none does.
+ */
+int modelFaceBillboard(const void *handle, int face) {
+    const Model *model = handle;
+    if (model->faceBillboard == NULL || face < 0 || face >= model->faceCount) {
+        return -1;
+    }
+
+    return model->faceBillboard[face];
+}
+
+void modelBillboard(const void *handle, int which, int *face, int *wide, int *high,
+                    int *texture, int *colourOp, int *blendMode, int *insteadOfTheFace) {
+    const Model *model = handle;
+    const Billboard *billboard = &model->billboards[which];
+
+    *face = billboard->face;
+    *wide = billboard->wide;
+    *high = billboard->high;
+    *texture = billboard->texture;
+    *colourOp = billboard->colourOp;
+    *blendMode = billboard->blendMode;
+    *insteadOfTheFace = billboard->insteadOfTheFace;
+}
+
 int modelFaceIsFlat(const void *handle, int face) {
     const Model *model = handle;
     return model->shadingType != NULL && model->shadingType[face] != 0;

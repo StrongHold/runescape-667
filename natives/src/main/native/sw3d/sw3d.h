@@ -503,6 +503,15 @@ void textureOffsets(const Texture *texture, float *u, float *v);
 /** How many pixels apart two rows of one texture are, which is not how wide a texture is. */
 enum { TEXTURE_STRIDE = 256 };
 
+/** How wide one texture is, and how far one row of the run they are kept in is from the next. */
+enum { TEXTURE_SIDE = 128, TEXTURE_SHIFT = 8 };
+
+/**
+ * Draws a texture stretched over a rectangle, over whatever is further from the eye than it.
+ */
+void drawTextureOverRect(const uint32_t *from, int x, int y, int wide, int high, float depth,
+                         int op, int colour, int mode);
+
 /**
  * Makes room for every texture the client may hand over, and remembers the object to ask when it
  * has handed over none.
@@ -584,6 +593,14 @@ int modelRadius(void *handle);
  * way round: nothing means solid.
  */
 int modelFaceAlpha(const void *model, int face);
+
+/**
+ * The square the client hangs off a face and keeps turned towards the eye, or nothing where the
+ * face has none.
+ */
+int modelFaceBillboard(const void *handle, int face);
+void modelBillboard(const void *handle, int which, int *face, int *wide, int *high,
+                    int *texture, int *colourOp, int *blendMode, int *insteadOfTheFace);
 
 int modelFaceIsFlat(const void *handle, int face);
 int modelAmbient(const void *handle);

@@ -428,16 +428,6 @@ public sealed interface Scene {
      */
     record Billboards() implements Scene {
 
-
-        /**
-         * Nothing hangs one yet. The client packs what each billboard is and which face it hangs
-         * off into the numbers it builds a model from, and the toolkit reads none of it.
-         */
-        @Override
-        public boolean written() {
-            return false;
-        }
-
         @Override
         public void draw(Toolkit toolkit, Props props) {
             if (props.billboards() == null) {
