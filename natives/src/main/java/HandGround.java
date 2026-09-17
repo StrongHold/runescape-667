@@ -78,8 +78,14 @@ public final class HandGround {
     /** What the client hands over for a corner of the ground that has no colour of its own. */
     private static final int NO_COLOUR = -1;
 
-    /** The most the client ever asks a corner of the ground to be darkened by. */
-    private static final int DARKENED_MOST = 30;
+    /**
+     * How much the client asks a corner of the ground to be darkened by.
+     *
+     * Thirty is what it caps a location's own shadow at and fifty is what it asks for beside a
+     * wall. The rest are here because a corner darker than the ground is lit at all is a corner
+     * the sum runs past, and nothing says the client never asks for one.
+     */
+    private static final int[] DARKENED_BY = {0, 15, 30, 50, 74, 90, 127, 255};
 
     /** Where a light stands, how far it reaches and how strongly it shines. */
     private static final int LIGHT_ABOVE = 200;
@@ -209,9 +215,9 @@ public final class HandGround {
          * shadow, corner by corner, before it hands any tile over. A block of corners here is
          * darkened by as much as the client ever asks for and a second by half of it.
          */
-        for (var x = 2; x < 6; x++) {
-            for (var z = 2; z < 6; z++) {
-                ground.ka(x, z, x < 4 ? DARKENED_MOST : DARKENED_MOST / 2);
+        for (var x = 1; x < 9; x++) {
+            for (var z = 1; z < 9; z++) {
+                ground.ka(x, z, DARKENED_BY[(x + z) % DARKENED_BY.length]);
             }
         }
 

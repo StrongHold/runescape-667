@@ -451,7 +451,7 @@ enum { NO_COLOUR = -1 };
 enum { BLACK = 0 };
 
 /** What the lightness of a colour is held out of, and the ends it is kept away from. */
-enum { LIGHTNESS_WHOLE = 128, LIGHTNESS_LEAST = 2, LIGHTNESS_MOST = 126 };
+enum { LIGHTNESS_WHOLE = 128, LIGHTNESS_SHIFT = 7, LIGHTNESS_LEAST = 2, LIGHTNESS_MOST = 126 };
 
 /** The ends a lit channel is kept away from, so that no part of the ground is wholly one thing. */
 enum { CHANNEL_LEAST = 4, CHANNEL_MOST = 252 };
@@ -503,19 +503,29 @@ enum { LEAVES_THE_COLOUR_BE = 4 };
 
 static uint32_t litCorner(const Ground *ground, int packed, int shade, int x, int z,
                           int across, int along, int texture) {
-    int lightness = ((packed & (LIGHTNESS_WHOLE - 1)) * (GROUND_LIGHTNESS - shade))
-        / LIGHTNESS_WHOLE;
+    int reaching = GROUND_LIGHTNESS - shade;
 
-    if (lightness < LIGHTNESS_LEAST) {
-        lightness = LIGHTNESS_LEAST;
-    } else if (lightness > LIGHTNESS_MOST) {
-        lightness = LIGHTNESS_MOST;
+    /*
+     * How much of the sun the corner gets, brought down by seven places rather than divided, so
+     * that a corner darkened past what the ground is lit at comes out one short of nothing rather
+     * than at nothing.
+     */
+    int sunlit = ((packed & (LIGHTNESS_WHOLE - 1)) * reaching) >> LIGHTNESS_SHIFT;
+
+    /*
+     * The two ends it is held between are asked about as though it could not be less than
+     * nothing, so a corner darkened past what the ground is lit at comes out at the brighter end
+     * rather than the darker one. That is what the toolkit this stands in for does, and it is
+     * what keeps such a corner from being drawn black. Kept as it is.
+     */
+    unsigned int held = (unsigned int) sunlit;
+    int lightness = LIGHTNESS_LEAST;
+
+    if (held > 1u) {
+        lightness = held <= (unsigned int) LIGHTNESS_MOST ? (int) held : LIGHTNESS_MOST;
     }
 
     uint32_t colour = colourOf((packed & ~(LIGHTNESS_WHOLE - 1)) | lightness);
-
-    /* The grey a texture carries the colour towards is made from how much sun the corner gets. */
-    int reaching = GROUND_LIGHTNESS - shade;
 
     /*
      * A tile wearing a texture is not lit from its own colour alone. The texture says how far that

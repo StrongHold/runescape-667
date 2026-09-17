@@ -163,7 +163,11 @@ uint32_t texturedUnlitColour(uint32_t unlit, int ambient, int towardsGrey, int b
         uint32_t redBlue = 0xFF00FF;
         uint32_t green = 0xFF00;
 
-        if (ambient <= 0x7F) {
+        /*
+         * The grey is asked about as though it could not be less than nothing, so a light below
+         * nothing leaves the colour carried towards white rather than towards black.
+         */
+        if ((uint32_t) ambient <= 0x7Fu) {
             uint32_t grey = (uint32_t) ambient * 0x20202;
             redBlue = grey & 0xFF00FF;
             green = grey & 0xFF00;
