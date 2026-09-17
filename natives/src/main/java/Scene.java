@@ -80,7 +80,8 @@ public sealed interface Scene {
         new Textured(),
         new RoundPoint(),
         new Rock(),
-        new SeenThrough()
+        new SeenThrough(),
+        new OverlaidGround()
     );
 
     /**
@@ -90,7 +91,7 @@ public sealed interface Scene {
     record Props(Sprite gradient, Model model, Model simple, Matrix matrix,
                  Font mono, Font proportional, Ground ground, Mesh mesh, Model textured,
                  Model faded, Model plain, Ground floor, Ground cut, Ground smooth,
-                 Model roundPoint, Model rock, Model seenThrough) {
+                 Model roundPoint, Model rock, Model seenThrough, Ground overlaid) {
         /* empty */
     }
 
@@ -1027,6 +1028,36 @@ public sealed interface Scene {
             }
 
             props.smooth().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
+                HandGround.TILES, visible, false, 0);
+        }
+    }
+
+    /**
+     * The smoothly coloured patch with a colour laid over each face as well.
+     *
+     * Every tile of the client's terrain arrives carrying both, and no scene had ever handed the
+     * second over, so what the toolkit does with it was never drawn.
+     */
+    record OverlaidGround() implements Scene {
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            var camera = toolkit.createMatrix();
+            camera.createCamera(HandGround.TILES * HandGround.TILE / 2, Terrain.UP,
+                -Terrain.BACK, TURN / 8, 0, 0);
+            toolkit.setCamera(camera);
+
+            var visible = new boolean[HandGround.TILES * 2][HandGround.TILES * 2];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            props.overlaid().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
                 HandGround.TILES, visible, false, 0);
         }
     }

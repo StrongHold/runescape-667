@@ -64,6 +64,12 @@ public final class HandGround {
      * turn off, and the one it wears on its far half, which they are.
      */
     private static final int TEXTURED_WITH = 6;
+
+    /**
+     * The colour laid over a whole face, which is a red the corner colours never reach so that a
+     * face drawn with it cannot be mistaken for one drawn without.
+     */
+    private static final int OVERLAID_WITH = (0 << 10) | (7 << 7) | 60;
     private static final int TEXTURED_WITH_ONE_THAT_MAY_GO = 7;
 
     /** What the client asks the ground for when the player has turned textures off. */
@@ -104,13 +110,29 @@ public final class HandGround {
      * the same colour, and no amount of that ever asks whether a face is shaded across.
      */
     public static Ground buildSmooth(Toolkit toolkit) {
+        return buildCornerLit(toolkit, false);
+    }
+
+    /**
+     * The same patch with a colour laid over each face as well as a colour at every corner.
+     *
+     * The client hands over both for every tile of its terrain. One is blended across the corners
+     * and the other belongs to the face, and where a face carries one it is what the face is
+     * drawn as. Nothing else here hands over the second, so this is the only scene that says what
+     * becomes of it.
+     */
+    public static Ground buildOverlaid(Toolkit toolkit) {
+        return buildCornerLit(toolkit, true);
+    }
+
+    private static Ground buildCornerLit(Toolkit toolkit, boolean overlaid) {
         var heights = heights();
         var ground = toolkit.createGround(TILES, TILES, heights, heights,
             GROUND_FLAGS, FEATURE_FLAGS);
 
         for (var x = 0; x < TILES; x++) {
             for (var z = 0; z < TILES; z++) {
-                addCornerLitTile(ground, x, z);
+                addCornerLitTile(ground, x, z, overlaid);
             }
         }
 
@@ -122,13 +144,14 @@ public final class HandGround {
     private static final int[] SLOT_ACROSS = {0, TILE, TILE, 0, 0, TILE};
     private static final int[] SLOT_ALONG = {0, TILE, 0, 0, TILE, TILE};
 
-    private static void addCornerLitTile(Ground ground, int x, int z) {
+    private static void addCornerLitTile(Ground ground, int x, int z, boolean overlaid) {
         var slots = SLOT_ACROSS.length;
         var across = new int[slots];
         var along = new int[slots];
         var colours = new int[slots];
         var textures = new int[slots];
         var sizes = new int[slots];
+        var overlay = overlaid ? new int[slots] : null;
 
         for (var slot = 0; slot < slots; slot++) {
             across[slot] = SLOT_ACROSS[slot];
@@ -141,9 +164,18 @@ public final class HandGround {
             textures[slot] = x == TILES / 2 ? -1 : TEXTURED_WITH;
             sizes[slot] = TILE;
             colours[slot] = cornerHsl(x + SLOT_ACROSS[slot] / TILE, z + SLOT_ALONG[slot] / TILE);
+
+            if (overlay != null) {
+                /*
+                 * The near half of the patch carries a colour of its own over every face and the
+                 * far half carries none, so one picture holds a face drawn each way.
+                 */
+                overlay[slot] = z < TILES / 2 ? OVERLAID_WITH : -1;
+            }
         }
 
-        ground.U(x, z, across, null, along, null, colours, null, textures, sizes, 0, 0, 0, false);
+        ground.U(x, z, across, null, along, null, colours, overlay, textures, sizes,
+            0, 0, 0, false);
     }
 
     /** A colour that belongs to a corner of the grid rather than to a face, so it is shared. */

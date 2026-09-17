@@ -119,7 +119,8 @@ public final class FrameCapture {
             HandGround.buildSmooth(toolkit),
             roundPointModel(toolkit),
             rockModel(toolkit),
-            texturedModel(toolkit, textured, FEATURES, TEXTURE_SEEN_THROUGH));
+            texturedModel(toolkit, textured, FEATURES, TEXTURE_SEEN_THROUGH),
+            HandGround.buildOverlaid(toolkit));
 
         var manifest = new ArrayList<String>();
 
