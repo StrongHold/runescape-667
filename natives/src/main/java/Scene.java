@@ -1103,9 +1103,8 @@ public sealed interface Scene {
     record TexturedParticles() implements Scene {
 
         /**
-         * Drawn, but not the way the shipped toolkit draws it. The colours are close and the
-         * square is not the same size, so what is left is how big the client makes one and not
-         * what it puts in it.
+         * Every square lands where the shipped toolkit puts one and is the size it makes one, so
+         * what is left is the colour a texel comes out, not where any of it goes.
          */
         @Override
         public boolean written() {

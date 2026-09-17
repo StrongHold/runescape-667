@@ -19,6 +19,6 @@ Plan = 0, 0, 1588
 SeenThrough = 0, 0, 21
 ShadowedGround = 0, 0, 127
 Stairs = 0, 0, 245
-TexturedParticles = 6304, 0, 547
+TexturedParticles = 0, 0, 4988
 TexturedGround = 0, 0, 2691
 Underwater = 0, 0, 270

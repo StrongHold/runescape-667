@@ -2603,6 +2603,12 @@ JNIEXPORT void JNICALL Java_a_O(JNIEnv *env, jobject self, jlong worker, jobject
              * A particle wearing a texture is that texture stretched over a square around where it
              * stands, a texel wider and taller than twice its size. One wearing none is a filled
              * circle of its size. Both are laid down against the depths already there.
+             *
+             * The two are not given the same distance to be laid against. The circle is handed the
+             * bits of the distance rather than the distance, which puts it further away than
+             * anything a scene holds, and the square is handed the distance itself. So a square
+             * stands in front of what it is drawn over and a circle almost never does. That is
+             * what the toolkit does, and both are kept as they are.
              */
             const Texture *worn = textures[which] == -1
                 ? NULL : textureFor((unsigned short) textures[which]);
@@ -2615,7 +2621,7 @@ JNIEXPORT void JNICALL Java_a_O(JNIEnv *env, jobject self, jlong worker, jobject
 
             drawTextureOverRect(texturePixels(worn),
                 (int) across - radius, (int) down - radius, radius * 2 + 1, radius * 2 + 1,
-                depthAsTheToolkitPassesIt(depth), OP_MULTIPLY, colours[which], PARTICLE_BLEND,
+                depth, OP_MULTIPLY, colours[which], PARTICLE_BLEND,
                 0);
         }
     }
