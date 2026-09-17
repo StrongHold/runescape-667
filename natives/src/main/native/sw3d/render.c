@@ -1319,7 +1319,7 @@ static void drawBillboard(const void *model, int which, const Transform *onto, c
 
     drawTextureOverRect(texturePixels(textureFor((unsigned short) texture)),
         x - halfWide, y - halfHigh, halfWide * 2, halfHigh * 2, depth,
-        colourOp, (int) colour, blendMode);
+        colourOp, (int) colour, blendMode, 1);
 }
 
 /** How many times over the faces of a model are walked, once for each way they are drawn. */
@@ -2597,13 +2597,26 @@ JNIEXPORT void JNICALL Java_a_O(JNIEnv *env, jobject self, jlong worker, jobject
                 continue;
             }
 
-            /* A texture is not written yet, so a particle wearing one is left out. */
-            if (textures[which] != -1) {
+            int radius = wide >> 1;
+
+            /*
+             * A particle wearing a texture is that texture stretched over a square around where it
+             * stands, a texel wider and taller than twice its size. One wearing none is a filled
+             * circle of its size. Both are laid down against the depths already there.
+             */
+            const Texture *worn = textures[which] == -1
+                ? NULL : textureFor((unsigned short) textures[which]);
+
+            if (worn == NULL) {
+                fillCircle((int) across, (int) down, depthAsTheToolkitPassesIt(depth), radius,
+                    (uint32_t) colours[which], PARTICLE_BLEND);
                 continue;
             }
 
-            fillCircle((int) across, (int) down, depthAsTheToolkitPassesIt(depth), wide >> 1,
-                (uint32_t) colours[which], PARTICLE_BLEND);
+            drawTextureOverRect(texturePixels(worn),
+                (int) across - radius, (int) down - radius, radius * 2 + 1, radius * 2 + 1,
+                depthAsTheToolkitPassesIt(depth), OP_MULTIPLY, colours[which], PARTICLE_BLEND,
+                0);
         }
     }
 

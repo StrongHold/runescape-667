@@ -55,25 +55,6 @@ static void spriteFree(Sprite *sprite) {
     }
 }
 
-/**
- * How the client wants a sprite's own pixels combined with the colour it passes.
- *
- * Every one of these works a byte at a time on all four bytes of a pixel, the top one included, so
- * the colour's own alpha is combined with the sprite's alpha exactly as the other three are.
- */
-enum {
-    /** Multiply the two, which leaves the sprite as it is when the colour is white. */
-    OP_MULTIPLY = 0,
-    /** Take the sprite as it stands and ignore the colour. */
-    OP_KEEP = 1,
-    /** Run between the sprite and the colour, by how much alpha the colour carries. */
-    OP_MIX = 2,
-    /** Add the colour, holding at white. */
-    OP_ADD = 3,
-    /** Take the colour away, holding at black. */
-    OP_SUBTRACT = 4
-};
-
 /** The four bytes of a pixel: blue, green, red and alpha, in the order they sit in it. */
 enum { PARTS = 4 };
 
@@ -418,9 +399,13 @@ static void drawStretched(const Sprite *sprite, int x, int y, int wantedWidth, i
  * Nothing about this follows a face: the rectangle stands square to the picture and the whole of
  * it is the same distance away, which is what makes a billboard a billboard. The texture is read
  * the way every other texture is, a row at a time out of the wider run they are all kept in.
+ *
+ * A caller that says the texture carries no alpha of its own has every texel taken as solid, and
+ * how much of the rectangle shows is then left wholly to the colour. The client asks that way for
+ * a particle and the other way for a billboard.
  */
 void drawTextureOverRect(const uint32_t *from, int x, int y, int wide, int high, float depth,
-                         int op, int colour, int mode) {
+                         int op, int colour, int mode, int carriesItsOwnAlpha) {
     if (from == NULL || raster.pixels == NULL || wide <= 0 || high <= 0) {
         return;
     }
@@ -447,7 +432,9 @@ void drawTextureOverRect(const uint32_t *from, int x, int y, int wide, int high,
                 continue;
             }
 
-            to[column] = putPixel(op, mode, texels[(column - x) * TEXTURE_SIDE / wide],
+            uint32_t texel = texels[(column - x) * TEXTURE_SIDE / wide];
+
+            to[column] = putPixel(op, mode, carriesItsOwnAlpha ? texel : texel | OPAQUE,
                                   to[column], colour, &mixture);
         }
     }

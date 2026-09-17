@@ -67,6 +67,7 @@ public sealed interface Scene {
         new SharedLight(),
         new DepthShifted(),
         new Particles(),
+        new TexturedParticles(),
         new Terrain(),
         new Plan(),
         new OverTheGround(),
@@ -1090,6 +1091,33 @@ public sealed interface Scene {
      * drawn every frame afterwards. The water over a tile and the order its faces are drawn in
      * are still to write, and no tile here asks for either.
      */
+    /**
+     * Particles wearing a texture.
+     *
+     * A particle with no texture is a filled circle of its own size, and that is the only kind
+     * any scene drew: one wearing a texture was left out of this toolkit entirely. The client
+     * draws it as its texture stretched over a square around where it stands, a texel wider and
+     * taller than twice its size, and takes every texel as solid so that how much shows is left
+     * to the particle's own colour.
+     */
+    record TexturedParticles() implements Scene {
+
+        /**
+         * Drawn, but not the way the shipped toolkit draws it. The colours are close and the
+         * square is not the same size, so what is left is how big the client makes one and not
+         * what it puts in it.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            Particles.drawParticles(toolkit, props, true);
+        }
+    }
+
     record Terrain() implements Scene {
 
         /** How far back and up the eye stands from the corner of the patch. */
@@ -1889,11 +1917,27 @@ public sealed interface Scene {
             {0, 0, DEPTH * 400, 60, 0xFFFFFFFF}
         };
 
-        /** A particle wearing no texture, which is the only kind drawn yet. */
+        /** A particle wearing no texture, which is drawn as a filled circle of its own size. */
         private static final short BARE = -1;
+
+        /**
+         * A texture the player may not turn off, which every other row wears where the scene asks
+         * for it, so that one picture holds a particle drawn as a circle and one drawn as its
+         * texture.
+         */
+        private static final short WEARING = 6;
+
+
 
         @Override
         public void draw(Toolkit toolkit, Props props) {
+            drawParticles(toolkit, props, false);
+        }
+
+        /**
+         * Draws the grid, with every other row wearing a texture where the caller asks for it.
+         */
+        static void drawParticles(Toolkit toolkit, Props props, boolean textured) {
             toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
             toolkit.f(NEAR, Integer.MAX_VALUE);
 
@@ -1916,6 +1960,7 @@ public sealed interface Scene {
 
                     put(places, colours, sizes, textures, which,
                         x, y, z, 24 + row * 14, shade(column, row));
+                    textures[which] = textured && row % 2 == 1 ? WEARING : BARE;
                     which++;
                 }
             }

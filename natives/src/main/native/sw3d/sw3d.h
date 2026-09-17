@@ -109,6 +109,28 @@ enum {
     BLEND_ADD = 2
 };
 
+/**
+ * How the client wants a sprite's own pixels combined with the colour it passes.
+ *
+ * Every one of these works a byte at a time on all four bytes of a pixel, the top one included, so
+ * the colour's own alpha is combined with the sprite's alpha exactly as the other three are.
+ */
+enum {
+    /** Multiply the two, which leaves the sprite as it is when the colour is white. */
+    OP_MULTIPLY = 0,
+    /** Take the sprite as it stands and ignore the colour. */
+    OP_KEEP = 1,
+    /** Run between the sprite and the colour, by how much alpha the colour carries. */
+    OP_MIX = 2,
+    /** Add the colour, holding at white. */
+    OP_ADD = 3,
+    /** Take the colour away, holding at black. */
+    OP_SUBTRACT = 4
+};
+
+/** A pixel wholly there, whatever the texture it came from says about its own alpha. */
+enum { OPAQUE = 0xFF000000u };
+
 uint32_t blend(uint32_t destination, uint32_t colour, int mode);
 
 /**
@@ -510,7 +532,7 @@ enum { TEXTURE_SIDE = 128, TEXTURE_SHIFT = 8 };
  * Draws a texture stretched over a rectangle, over whatever is further from the eye than it.
  */
 void drawTextureOverRect(const uint32_t *from, int x, int y, int wide, int high, float depth,
-                         int op, int colour, int mode);
+                         int op, int colour, int mode, int carriesItsOwnAlpha);
 
 /**
  * Makes room for every texture the client may hand over, and remembers the object to ask when it
