@@ -1102,26 +1102,6 @@ public sealed interface Scene {
      */
     record TexturedParticles() implements Scene {
 
-        /**
-         * Every square lands where the shipped toolkit puts one and is the size it makes one, so
-         * what is left is which texel is read for a pixel rather than where the square goes or
-         * how it meets what is under it.
-         *
-         * How it meets what is under it was tried and is right. A particle laid the way a shape is
-         * laid, out of the alpha in the top byte of its colour, comes out further off than one
-         * laid the way a sprite is, so it is laid the way a sprite is, as a billboard is.
-         *
-         * Which texel is read is not. Across one square the colours here climb evenly while the
-         * shipped toolkit's do not, and the two agree at the left edge and then drift apart and
-         * meet again further along. That is the shape of a divisor that is one out: the square is
-         * a pixel wider than twice the size, and the texture may be spread over the size rather
-         * than over the square.
-         */
-        @Override
-        public boolean written() {
-            return false;
-        }
-
         @Override
         public void draw(Toolkit toolkit, Props props) {
             Particles.drawParticles(toolkit, props, true);
