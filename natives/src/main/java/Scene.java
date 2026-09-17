@@ -1436,21 +1436,11 @@ public sealed interface Scene {
      */
     record ShadowedGround() implements Scene {
 
-
         /**
-         * What is left here is a shade out along a handful of the edges where one tile's picture
-         * of the shadow over it meets the next, which is the same small difference the other
-         * textured patches have. A hundred and twenty seven pixels of it.
-         *
          * Every tile here lays its texture at exactly the size of a tile, which is the one size
          * at which where a pixel sits on the texture and where it sits on the tile are the same
-         * thing. The patch beside this one lays it smaller.
+         * thing. The patch beside this one lays it at the sizes the client really asks for.
          */
-        @Override
-        public boolean written() {
-            return false;
-        }
-
         @Override
         public void draw(Toolkit toolkit, Props props) {
             toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
@@ -1485,17 +1475,6 @@ public sealed interface Scene {
      * The client lays hardly any of its ground at the size of a tile, and water none of it.
      */
     record ShadowedRepeat() implements Scene {
-
-        /**
-         * A hundred and twenty three pixels are left, along the edges where one tile's picture of
-         * the shadow over it meets the next. It is the same handful the patch laying its texture
-         * at the size of a tile is left with, and no more of it for the texture being laid four
-         * or sixteen times over.
-         */
-        @Override
-        public boolean written() {
-            return false;
-        }
 
         @Override
         public void draw(Toolkit toolkit, Props props) {

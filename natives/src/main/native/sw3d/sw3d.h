@@ -16,6 +16,29 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#if defined(__SSE__) || defined(_M_X64)
+#include <xmmintrin.h>
+#endif
+
+/** The smallest number of rows or pixels a side is allowed to be divided by. */
+static const float LEAST = 1.0e-6f;
+
+/**
+ * The reciprocal a side is divided by, taken four at a time.
+ *
+ * This is the processor's approximation rather than a true division. What it scales is cut to a
+ * whole number straight afterwards, so the approximation decides the answer often enough to
+ * matter and has to be the same approximation wherever a side is walked. The sides of a shadow
+ * are walked by the same rasteriser the picture is, so they are divided the same way.
+ */
+static inline float reciprocalOfFour(float value) {
+#if defined(__SSE__) || defined(_M_X64)
+    return _mm_cvtss_f32(_mm_rcp_ps(_mm_set1_ps(value)));
+#else
+    return 1.0f / value;
+#endif
+}
+
 typedef struct Surface Surface;
 typedef struct Pool Pool;
 

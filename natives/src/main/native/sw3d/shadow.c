@@ -10,6 +10,7 @@
  * is brought down to a shadow distance by a shift rather than a divide.
  */
 
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -117,14 +118,21 @@ typedef struct {
 } Edge;
 
 static Edge edgeBetween(float from, float to, int rows) {
+    float over = reciprocalOfFour(fmaxf((float) rows, LEAST));
+
     Edge edge;
     edge.x = from;
-    edge.step = rows > 0 ? (to - from) / (float) rows : 0.0f;
+    edge.step = (to - from) * over;
     return edge;
 }
 
 /**
  * Marks one row of places between two sides.
+ *
+ * Where a run starts and ends is cut back to the place it is standing in rather than rounded to
+ * the nearest, which is not what the toolkit does with a run of the picture. A shadow is filled
+ * by a routine of its own that writes a byte a place and cuts back, and rounding it to the
+ * nearest instead puts the edge of a shadow a place out.
  *
  * The run is brought inside the shadow before it is written. The toolkit this replaces leaves it
  * where it fell, which holds together only while the bounds the shadow was given cover every

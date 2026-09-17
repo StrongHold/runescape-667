@@ -46,9 +46,6 @@ enum { BLENDED = 3, MIXED = 2 };
 /** A whole share of a texture, which is what a corner carries of its own. */
 enum { WHOLE_SHARE = 0xFFFF };
 
-/** The smallest number of rows or pixels a side is allowed to be divided by. */
-static const float LEAST = 1.0e-6f;
-
 /**
  * The reciprocal a side is divided by.
  *
@@ -64,20 +61,6 @@ static float reciprocal(float value) {
 #endif
 }
 
-/**
- * The same reciprocal, taken four at a time.
- *
- * The toolkit divides a whole side at once and a row one value at a time, and the two ways of
- * asking the processor for an approximate reciprocal need not answer alike, so each is asked the
- * way the toolkit asks it.
- */
-static float reciprocalOfFour(float value) {
-#if defined(__SSE__) || defined(_M_X64)
-    return _mm_cvtss_f32(_mm_rcp_ps(_mm_set1_ps(value)));
-#else
-    return 1.0f / value;
-#endif
-}
 
 /** Brings a whole number into the range a light step is held in, holding at the ends. */
 static int16_t narrow(float value) {
