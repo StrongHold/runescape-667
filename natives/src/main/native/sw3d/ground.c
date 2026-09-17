@@ -560,15 +560,23 @@ enum { GROUND_LIGHT_WHOLE = LIGHTNESS_WHOLE / 2 };
  * corners like that all over it, and one of them darkened by the corner of the grid below it
  * rather than by all four is a shade out from its neighbours.
  */
+/**
+ * The shade at a point inside a tile, shared out from the four corners around it.
+ *
+ * Each pair of corners is brought down to a shade of its own before the two are mixed, rather than
+ * the whole being brought down once at the end. Both halves lose their fraction that way, so the
+ * answer is up to one lower than a single shift would give, and it is lower often enough to see.
+ * The toolkit does it in two steps and so does this.
+ */
 static int shadeInside(const Ground *ground, int x, int z, int across, int along) {
     int rest = ground->tileSize - across;
 
-    int near = groundCornerShade(ground, x, z) * rest
-        + groundCornerShade(ground, x + 1, z) * across;
-    int far = groundCornerShade(ground, x, z + 1) * rest
-        + groundCornerShade(ground, x + 1, z + 1) * across;
+    int near = (groundCornerShade(ground, x, z) * rest
+        + groundCornerShade(ground, x + 1, z) * across) >> ground->tileShift;
+    int far = (groundCornerShade(ground, x, z + 1) * rest
+        + groundCornerShade(ground, x + 1, z + 1) * across) >> ground->tileShift;
 
-    return (near * (ground->tileSize - along) + far * along) >> (ground->tileShift * 2);
+    return (near * (ground->tileSize - along) + far * along) >> ground->tileShift;
 }
 
 static void facingInside(const Ground *ground, int x, int z, int across, int along, float *into) {
