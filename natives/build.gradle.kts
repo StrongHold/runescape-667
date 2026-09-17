@@ -479,6 +479,35 @@ val compileOpenGlBinding by tasks.registering(Exec::class) {
     }
 }
 
+val bindingAnswers = layout.buildDirectory.file("answers/binding-ours.txt")
+
+/**
+ * Holds the OpenGL binding to what goes into it coming back out.
+ *
+ * This is not a comparison against the shipped binding, because the shipped one cannot yet be
+ * driven here: it takes a surface from the shim and reports a context, but makes none current, so
+ * every value it answers is zero. See `jaggl/README.md`.
+ *
+ * A binding needs less than a renderer does to be checked, which is why that is not fatal. Both
+ * sides of a binding reach the same driver, so what it is for is that an argument arrives where it
+ * was sent and an answer comes back as it was given. Setting a piece of state and reading it back
+ * asks exactly that, and it asks it of the call itself rather than of anything downstream.
+ */
+val verifyOpenGlBinding by tasks.registering(JavaExec::class) {
+    description = "Sets a piece of state through the OpenGL binding and reads every one of them back."
+    dependsOn(compileOpenGlBinding, ":unpackX64Jdk")
+
+    val written = bindingAnswers.get().asFile
+
+    mainClass = "GlProbe"
+    classpath = sourceSets["main"].runtimeClasspath
+    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+    args(openGlLibrary.get().asFile.absolutePath, written.absolutePath)
+    inputs.file(openGlLibrary)
+    outputs.file(bindingAnswers)
+    doFirst { written.parentFile.mkdirs() }
+}
+
 val memorySource = layout.projectDirectory.file("src/main/native/jaclib/jaclib.c")
 val memoryLibrary = layout.buildDirectory.file("natives/libjaclib.dylib")
 
@@ -1035,6 +1064,7 @@ val verifyNatives by tasks.registering {
         verifyToolkitSkeleton,
         verifyMemoryLibrary,
         verifyMemoryAnswers,
+        verifyOpenGlBinding,
         verifyMiscLibrary,
         verifySpriteLift,
         verifyMatrices,

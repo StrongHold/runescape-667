@@ -15,7 +15,7 @@ literal name. Nothing in `a`, `h`, `i`, `j`, `ja`, `n`, `oa`, `t`, `wa`, `xa`, `
 | library | what it does | natives | written |
 |---|---|---|---|
 | `sw3d` | the software renderer | 171 | all of them |
-| `jaggl` | the OpenGL binding | 180 | 29 |
+| `jaggl` | the OpenGL binding | 180 | all of them |
 | `jagdx` | the Direct3D binding | 97 | none |
 | `jagtheora` | Theora video and Vorbis sound | 67 | none |
 | `jaclib` | memory the client manages itself | 19 | 16, which is all of them |
@@ -25,6 +25,17 @@ literal name. Nothing in `a`, `h`, `i`, `j`, `ja`, `n`, `oa`, `t`, `wa`, `xa`, `
 `jagmisc` and `hw3d` are counted apart although both are declared under `jagex3`. They are two
 unrelated libraries that share a package and nothing else, and they are checked in two different
 ways.
+
+`jaggl`'s hundred and eighty are written in two ways, but are not yet compared against the
+shipped binding, which takes a surface here and then makes no context current. See
+`jaggl/README.md`.
+
+`jaggl`'s hundred and eighty are written in two ways. A hundred and fifty three are generated
+from the client's own JNI headers, because they pass their arguments straight to the call of the
+same name and nothing but the types varies. The twenty nine the generator cannot write are in
+`jaggl/jaggl.m`: the ones that carry a string or an array with an offset, and the ones that get a
+context, a surface or a pbuffer. The generator lists what it left in
+`build/generated/jaggl-outstanding.txt`.
 
 `jaclib`'s sixteen are all of its nineteen. The shipped macOS library exports the same sixteen and
 not the other three, which are Direct3D and cannot be reached on any platform that has none. See
@@ -68,7 +79,7 @@ out to half a picture and nothing would say so.
 
 Each library has a README of its own saying what it replaces, how far along it is, where it
 differs from the shipped binary on purpose, and what is known to be wrong with the original. See
-`sw3d/README.md`, `jaclib/README.md` and `jagmisc/README.md`.
+`sw3d/README.md`, `jaggl/README.md`, `jaclib/README.md` and `jagmisc/README.md`.
 
 `jawtshim` is not one of the six and is not on its way out. It lets the shipped toolkits obtain a
 drawing surface on a current JDK, which they cannot do by themselves, so without it neither could
