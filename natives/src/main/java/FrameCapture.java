@@ -42,7 +42,6 @@ public final class FrameCapture {
     private static final int FOG_COLOUR = 0x8090C0;
     private static final int FOG_RANGE = 3000;
     private static final int FEATURES = 64;
-    private static final int MODEL_FACES = 200;
     private static final int VISIBLE_FACES = 2;
     private static final int AMBIENT = number("SW3D_AMBIENT", 64);
     private static final int CONTRAST = 768;
@@ -125,13 +124,13 @@ public final class FrameCapture {
         
         var props = new Scene.Props(
             gradient,
-            toolkit.createModel(CacheMesh.anyUntextured(MODEL_FACES), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
+            toolkit.createModel(CacheMesh.anyUntextured(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
             toolkit.createModel(fewFaces(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
             toolkit.createMatrix(),
             toolkit.createFont(HandFont.metrics(), HandFont.letters(), true),
             toolkit.createFont(HandFont.metrics(), HandFont.letters(), false),
             HandGround.build(toolkit),
-            CacheMesh.anyUntextured(MODEL_FACES),
+            CacheMesh.anyUntextured(),
             texturedModel(toolkit, textured, FEATURES, FORCED_TEXTURE),
             toolkit.createModel(fadedMesh(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
             texturedModel(toolkit, textured, FEATURES | TEXTURES_OFF, TEXTURE_THAT_MAY_GO),
@@ -204,7 +203,7 @@ public final class FrameCapture {
      * faces say only that something is wrong. Two faces can be worked out by hand.
      */
     private static Mesh fewFaces() throws Exception {
-        var mesh = CacheMesh.anyUntextured(MODEL_FACES);
+        var mesh = CacheMesh.anyUntextured();
         mesh.faceCount = Math.min(mesh.faceCount, VISIBLE_FACES);
 
         /*
@@ -271,7 +270,7 @@ public final class FrameCapture {
      * scene handed nothing quietly draws nothing, which is a check that cannot fail.
      */
     private static Mesh texturedMesh() throws Exception {
-        var mesh = CacheMesh.anyTextured(MODEL_FACES);
+        var mesh = CacheMesh.anyTextured();
         if (mesh.isEmpty()) {
             System.out.println("no textured model in the cache");
             return null;
@@ -367,7 +366,7 @@ public final class FrameCapture {
      * other scenes use was.
      */
     private static Shadow shadowOf(Toolkit toolkit) throws Exception {
-        var model = toolkit.createModel(CacheMesh.anyUntextured(MODEL_FACES),
+        var model = toolkit.createModel(CacheMesh.anyUntextured(),
             FUNCTIONS | MAY_CAST_A_SHADOW, FEATURES, AMBIENT, CONTRAST);
         var shadow = model.ba(null);
 
@@ -433,7 +432,7 @@ public final class FrameCapture {
      * the other.
      */
     private static Mesh fadedMesh() throws Exception {
-        var mesh = CacheMesh.anyUntextured(MODEL_FACES);
+        var mesh = CacheMesh.anyUntextured();
         mesh.faceAlpha = new byte[mesh.faceCount];
 
         for (var face = 0; face < mesh.faceCount; face++) {

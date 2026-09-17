@@ -58,6 +58,22 @@ public final class CacheMesh {
      */
     public static final int BLACK_BACKED = 2030;
 
+    /**
+     * The groups the scenes that want any model at all are given.
+     *
+     * They were once found by looking through the cache for the first model with enough faces of
+     * the kind wanted, which made every scene drawn with one depend on what the cache happened to
+     * hold and in what order. A cache brought up to date could hand a scene a different model and
+     * move every number recorded against it, without anything saying why. These are the groups
+     * that search settled on, written down so that it cannot settle on others.
+     *
+     * CacheModel says which groups the search would find today, so these can be worked out again
+     * if they ever have to be.
+     */
+    public static final int TEXTURED = 1;
+    public static final int UNTEXTURED = 122;
+    public static final int UNTEXTURED_BESIDE = 336;
+
     private final FileSystem_Client store;
 
     private CacheMesh(FileSystem_Client store) {
@@ -68,13 +84,13 @@ public final class CacheMesh {
      * A model out of the cache that wears at least one texture, or nothing when the cache holds
      * none, because a mesh built here carries no texture space for a texture to sit in.
      */
-    public static Optional<Mesh> anyTextured(int faces) throws Exception {
+    public static Optional<Mesh> anyTextured() throws Exception {
         var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
         if (!new File(cache, "main_file_cache.dat2").isFile()) {
             return Optional.empty();
         }
 
-        return at(cache).firstTexturedWithFaces(faces);
+        return at(cache).read(TEXTURED);
     }
 
     /**
@@ -85,14 +101,14 @@ public final class CacheMesh {
      * whether they agree. It decides only how much of the toolkit the check reaches, and a model
      * the client itself drew reaches far more of it than one built by hand.
      */
-    public static Mesh anyUntextured(int faces) throws Exception {
+    public static Mesh anyUntextured() throws Exception {
         var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
         if (!new File(cache, "main_file_cache.dat2").isFile()) {
             System.out.println("no cache at " + cache + ", using the mesh built here");
             return FlatMesh.INSTANCE.build();
         }
 
-        var found = at(cache).firstUntexturedWithFaces(faces);
+        var found = at(cache).read(UNTEXTURED);
         if (found.isEmpty()) {
             return FlatMesh.INSTANCE.build();
         }
@@ -131,13 +147,17 @@ public final class CacheMesh {
      * came from, and that is what the client names when it animates one part of a player and
      * leaves the rest standing still.
      */
-    public static Mesh twoUntexturedJoined(int faces) throws Exception {
+    public static Mesh twoUntexturedJoined() throws Exception {
         var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
         if (!new File(cache, "main_file_cache.dat2").isFile()) {
             return FlatMesh.INSTANCE.build();
         }
 
-        var found = at(cache).firstUntexturedWithFaces(faces, 2);
+        var held = at(cache);
+        var found = new ArrayList<Mesh>();
+        held.read(UNTEXTURED).ifPresent(found::add);
+        held.read(UNTEXTURED_BESIDE).ifPresent(found::add);
+
         if (found.size() < 2) {
             return FlatMesh.INSTANCE.build();
         }
@@ -402,11 +422,53 @@ public final class CacheMesh {
     /**
      * The first model in the cache with at least this many faces and one of them textured.
      */
+    /**
+     * Says which groups a search through the cache would settle on, so that the groups the scenes
+     * name can be worked out again if a cache brought up to date ever makes them wrong.
+     */
+    public static void sayWhichAreScanned() throws Exception {
+        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
+        var held = at(cache);
+
+        held.firstTexturedWithFaces(ENOUGH_FACES).ifPresent(mesh ->
+            System.out.println("a textured model with " + ENOUGH_FACES + " faces or more is"
+                + " group " + held.lastRead));
+
+        for (var group : held.firstUntexturedGroups(ENOUGH_FACES, 2)) {
+            System.out.println("an untextured model with " + ENOUGH_FACES + " faces or more is"
+                + " group " + group);
+        }
+    }
+
+    /** How many faces a model must have before a scene finds it worth drawing. */
+    private static final int ENOUGH_FACES = 200;
+
+    /** The group the last search read, so that a search can say what it found and not only what. */
+    private int lastRead = -1;
+
+    /**
+     * The groups of the first few untextured models with at least this many faces.
+     */
+    public List<Integer> firstUntexturedGroups(int faces, int wanted) {
+        var found = new ArrayList<Integer>();
+
+        for (var group = 0; group < GROUP_LIMIT && found.size() < wanted; group++) {
+            var mesh = read(group);
+            if (mesh.isPresent() && mesh.get().faceCount >= faces && untextured(mesh.get())
+                && plain(mesh.get())) {
+                found.add(group);
+            }
+        }
+
+        return found;
+    }
+
     public Optional<Mesh> firstTexturedWithFaces(int faces) {
         for (var group = 0; group < GROUP_LIMIT; group++) {
             var mesh = read(group);
             if (mesh.isPresent() && mesh.get().faceCount >= faces && !untextured(mesh.get())
                 && plain(mesh.get())) {
+                lastRead = group;
                 return mesh;
             }
         }

@@ -36,7 +36,6 @@ public final class ModelProbe {
     private static final int FEATURES = 64;
     private static final int AMBIENT = 64;
     private static final int CONTRAST = 768;
-    private static final int MODEL_FACES = 200;
 
     /** How many vertices beyond the ones its faces use a model is asked to carry. */
     private static final int[] SPARES = {0, 1, 4};
@@ -132,7 +131,7 @@ public final class ModelProbe {
      */
     private static void refusals(Toolkit toolkit, List<String> lines) throws Exception {
         var model = toolkit.createModel(
-            CacheMesh.anyUntextured(MODEL_FACES), NO_FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
+            CacheMesh.anyUntextured(), NO_FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
 
         lines.add("refused move " + refused(() -> model.H(1, 0, 0)));
         lines.add("refused size " + refused(() -> model.O(64, 128, 128)));
@@ -341,7 +340,7 @@ public final class ModelProbe {
 
     private static i joined(Toolkit toolkit) throws Exception {
         return (i) toolkit.createModel(
-            CacheMesh.twoUntexturedJoined(MODEL_FACES), FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
+            CacheMesh.twoUntexturedJoined(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
     }
 
     /**
@@ -414,7 +413,7 @@ public final class ModelProbe {
         lines.add("metrics beyond the source " + held.c((short) HandTextureSource.COUNT));
         lines.add("texture beyond the source " + held.WA((short) HandTextureSource.COUNT));
 
-        var mesh = CacheMesh.anyTextured(MODEL_FACES);
+        var mesh = CacheMesh.anyTextured();
         if (mesh.isEmpty()) {
             lines.add("no textured model in the cache");
             return;
@@ -425,7 +424,7 @@ public final class ModelProbe {
          * while it builds it, so a model every face of which has been put on texture one says
          * whether a change made to the mesh reaches the toolkit at all.
          */
-        var forced = CacheMesh.anyTextured(MODEL_FACES).get();
+        var forced = CacheMesh.anyTextured().get();
         for (var face = 0; face < forced.faceCount; face++) {
             forced.faceTexture[face] = 1;
         }
@@ -562,7 +561,7 @@ public final class ModelProbe {
      */
     private static void particles(Toolkit toolkit, List<String> lines) throws Exception {
         var model = (i) toolkit.createModel(CacheMesh.withParticles(
-            CacheMesh.anyUntextured(MODEL_FACES)), FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
+            CacheMesh.anyUntextured()), FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
 
         var matrix = toolkit.createMatrix();
         var places = new int[PARTICLE_PLACES * 3];
@@ -605,7 +604,7 @@ public final class ModelProbe {
     }
 
     private static Model build(Toolkit toolkit) throws Exception {
-        return toolkit.createModel(CacheMesh.anyUntextured(MODEL_FACES), FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
+        return toolkit.createModel(CacheMesh.anyUntextured(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
     }
 
     private ModelProbe() {
