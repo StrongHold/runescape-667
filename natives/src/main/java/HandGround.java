@@ -254,6 +254,96 @@ public final class HandGround {
     }
 
     /**
+     * A patch with water lying over the near half of it.
+     *
+     * The client gives a tile a colour for the water over it, how deep the water goes before
+     * nothing more shows through, and how deep the water is at each corner of the tile. A tile is
+     * water when it is given a colour and any of its corners has any depth; every tile handed
+     * over anywhere else here is given none of the three, so nothing about water had ever been
+     * drawn.
+     *
+     * The corners run from no water at the far edge to the deepest at the near one, because how
+     * much shows through water is what the depth decides and a patch at one depth says nothing
+     * about the run between.
+     */
+    public static Ground buildWatered(Toolkit toolkit) {
+        var ground = toolkit.createGround(TILES, TILES, heights(), waterHeights(),
+            GROUND_FLAGS, FEATURE_FLAGS);
+
+        for (var x = 0; x < TILES; x++) {
+            for (var z = 0; z < TILES; z++) {
+                addWateredTile(ground, x, z);
+            }
+        }
+
+        ground.YA();
+        return ground;
+    }
+
+    /** What the client hands over for the colour of the water over a tile, and how deep it goes. */
+    private static final int WATER_COLOUR = number("SW3D_WATER_COLOUR", 0x3A5F8A);
+    private static final int WATER_REACHES = 128 * 8;
+
+    /** A number the toolkit has never read, handed over as the client hands it over. */
+    private static final int WATER_BIAS = 20;
+
+    /** How deep the water is at the near edge of the patch, which is where it is deepest. */
+    private static final int DEEPEST = 700;
+
+    /**
+     * Where the surface of the water sits over every corner of the grid.
+     *
+     * The client builds a patch with water on it out of two grids: where the ground is, and where
+     * the water over it is. Every other patch here is given the same grid twice, which is what
+     * the client hands over where there is no water.
+     */
+    private static int[][] waterHeights() {
+        var ground = heights();
+        var surface = heights();
+
+        for (var x = 0; x <= TILES; x++) {
+            for (var z = 0; z <= TILES; z++) {
+                surface[x][z] = ground[x][z] - depthAt(z);
+            }
+        }
+
+        return surface;
+    }
+
+    /** How deep the water is at one row of the grid, which is nothing across the far half. */
+    private static int depthAt(int along) {
+        return along <= TILES / 2 ? 0 : DEEPEST * (along - TILES / 2) / (TILES - TILES / 2);
+    }
+
+    private static void addWateredTile(Ground ground, int x, int z) {
+        var offsetX = new int[] {0, TILE, TILE, 0};
+        var offsetY = new int[] {0, 0, TILE, TILE};
+        var faceA = new int[] {0, 0};
+        var faceB = new int[] {2, 3};
+        var faceC = new int[] {1, 2};
+
+        /*
+         * Water lies over the near half of the patch only, so one picture holds a tile under
+         * water, a tile beside it with none, and the edge where the two meet.
+         */
+        var depths = new int[offsetX.length];
+        for (var corner = 0; corner < depths.length; corner++) {
+            depths[corner] = depthAt(z + offsetY[corner] / TILE);
+        }
+
+        var colours = new int[FLAT_FACES];
+        for (var face = 0; face < FLAT_FACES; face++) {
+            colours[face] = hslOf(x, z, face);
+        }
+
+        var textures = new int[] {TEXTURED_WITH, TEXTURED_WITH};
+        var sizes = new int[] {TILE, TILE};
+
+        ground.addTile(x, z, offsetX, null, offsetY, depths, faceA, faceB, faceC,
+            colours, colours.clone(), textures, sizes, WATER_COLOUR, WATER_REACHES, WATER_BIAS);
+    }
+
+    /**
      * The same patch with something standing on it throwing a shadow across the middle.
      *
      * The client puts the shadow of everything that stands on the ground onto the ground itself,

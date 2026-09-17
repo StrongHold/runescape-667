@@ -153,7 +153,8 @@ public final class FrameCapture {
             CacheMesh.numbered(CacheMesh.BLACK_BACKED).orElse(null),
             toolkit.createModel(DoubledMesh.INSTANCE.build(), FUNCTIONS, FEATURES,
                 AMBIENT, CONTRAST),
-            HandGround.buildShadowedRepeat(toolkit, shadow));
+            HandGround.buildShadowedRepeat(toolkit, shadow),
+            HandGround.buildWatered(toolkit));
 
         var manifest = new ArrayList<String>();
 

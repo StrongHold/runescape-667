@@ -770,6 +770,44 @@ static int wearsNothing(const Ground *ground, int texture) {
 }
 
 /**
+ * Says once for each set of water numbers what the client hands a tile over carrying, when it is
+ * started with SW3D_WATER set.
+ */
+static void wateredTileSeen(int colour, int reaches, int bias, int carriesDepths) {
+    static int listening = -1;
+    if (listening == -1) {
+        listening = getenv("SW3D_WATER") != NULL;
+    }
+
+    if (!listening) {
+        return;
+    }
+
+    enum { KEPT = 8 };
+    static int seen[KEPT][4];
+    static int count;
+
+    for (int at = 0; at < count; at++) {
+        if (seen[at][0] == colour && seen[at][1] == reaches
+            && seen[at][2] == bias && seen[at][3] == carriesDepths) {
+            return;
+        }
+    }
+
+    if (count < KEPT) {
+        seen[count][0] = colour;
+        seen[count][1] = reaches;
+        seen[count][2] = bias;
+        seen[count][3] = carriesDepths;
+        count++;
+    }
+
+    fprintf(stderr, "sw3d water: a tile carrying colour %06x, reaching %d, bias %d, %s\n",
+            (unsigned) colour & 0xFFFFFF, reaches, bias,
+            carriesDepths ? "with depths" : "with no depths");
+}
+
+/**
  * Builds one tile out of the corners the client hands over.
  *
  * Every corner arrives three to a face, already spread out of the indexed list the client keeps,
@@ -781,6 +819,8 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
                                  jintArray texture, jintArray size,
                                  jint waterColour, jint waterDepth, jint waterBias,
                                  jboolean shadowed) {
+    wateredTileSeen(waterColour, waterDepth, waterBias, depth != NULL);
+
     (void) waterColour;
     (void) waterDepth;
     (void) waterBias;

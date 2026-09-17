@@ -88,6 +88,7 @@ public sealed interface Scene {
         new OverlaidGround(),
         new ShadowedGround(),
         new ShadowedRepeat(),
+        new Watered(),
         new BlendedGround(),
         new Stairs(),
         new Priorities(),
@@ -108,7 +109,7 @@ public sealed interface Scene {
                  Model roundPoint, Model rock, Model seenThrough, Ground overlaid, Ground hollow,
                  Ground shadowed, Ground blended, Model stairs, Model priorities,
                  Model billboards, Mesh located, Mesh blackBacked, Model doubled,
-                 Ground shadowedRepeat) {
+                 Ground shadowedRepeat, Ground watered) {
         /* empty */
     }
 
@@ -1496,6 +1497,81 @@ public sealed interface Scene {
             props.shadowedRepeat().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
                 HandGround.TILES, visible, false, 0);
         }
+    }
+
+    /**
+     * A patch with water lying over the near half of it, and something standing in the water.
+     *
+     * The client gives a tile the colour of the water over it, how far down the water lets
+     * anything be seen, and how deep the water is at each of the tile's corners. Nothing else
+     * here is given any of those, so a tile with water on it had never been drawn at all: every
+     * patch in this harness is dry ground.
+     *
+     * The model stands where the water is, so the picture holds the part of it above the surface
+     * and the part below. What becomes of the part below is the whole point of the scene.
+     */
+    record Watered() implements Scene {
+
+        /** Everything a model may be asked to do. */
+        private static final int EVERY_FUNCTION = 0xFFFF;
+
+        private static final int FEATURES = 64;
+        private static final int AMBIENT = 64;
+        private static final int CONTRAST = 768;
+
+        /**
+         * This scene does not yet reproduce what it was built for, and is kept for what it rules
+         * out.
+         *
+         * The toolkit takes three numbers for the water on a tile and drops all three, and takes
+         * two grids of heights where the client hands over one for the ground and one for the
+         * water over it, and drops the second. So a tile with water on it ought to come out
+         * differently here, and it does not: the shipped toolkit draws this patch exactly as we
+         * do, and goes on doing so with the water colour set to nothing. Handing a tile water is
+         * therefore not by itself what makes water.
+         *
+         * What the client does instead is draw two whole worlds. It swaps in the ground below the
+         * water and everything standing in it, draws that with the eye told it is looking through
+         * water, swaps back, and draws the world above. The water on a tile is read somewhere in
+         * that, and this scene draws one world.
+         */
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            if (props.located() == null) {
+                return;
+            }
+
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            var camera = toolkit.createMatrix();
+            camera.createCamera(HandGround.TILES * HandGround.TILE / 2, Terrain.UP,
+                -Terrain.BACK, TURN / 8, 0, 0);
+            toolkit.setCamera(camera);
+
+            /*
+             * What stands in the water is drawn first and the ground over it, which is the order
+             * that lets water cover what is under it or be seen through.
+             */
+            var model = toolkit.createModel(props.located(), EVERY_FUNCTION, FEATURES,
+                AMBIENT, CONTRAST);
+            props.matrix().makeRotationZ(0);
+            props.matrix().translate(0, 0, STANDS_AT);
+            model.render(props.matrix(), null, 1);
+
+            var visible = new boolean[HandGround.TILES * 2][HandGround.TILES * 2];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            props.watered().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
+                HandGround.TILES, visible, false, 0);
+        }
+
+        /** How far from the eye the thing standing in the water is put. */
+        private static final int STANDS_AT = 900;
     }
 
     /**

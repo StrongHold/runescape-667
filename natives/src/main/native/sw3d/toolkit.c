@@ -587,6 +587,45 @@ static void towardsColour(uint32_t colour, float *into) {
 }
 
 /**
+ * Says once what the client asked for about water, when it is started with SW3D_WATER set.
+ *
+ * What the client asks for is the only thing that says which of the numbers it hands over the
+ * toolkit has to read, and the harness can only ask for what somebody thought to ask for.
+ */
+static void waterAsked(const char *what, int first, int second, int third, int fourth) {
+    static int listening = -1;
+    if (listening == -1) {
+        listening = getenv("SW3D_WATER") != NULL;
+    }
+
+    if (!listening) {
+        return;
+    }
+
+    enum { KEPT = 8 };
+    static int seen[KEPT][4];
+    static int count;
+
+    for (int at = 0; at < count; at++) {
+        if (seen[at][0] == first && seen[at][1] == second
+            && seen[at][2] == third && seen[at][3] == fourth) {
+            return;
+        }
+    }
+
+    if (count < KEPT) {
+        seen[count][0] = first;
+        seen[count][1] = second;
+        seen[count][2] = third;
+        seen[count][3] = fourth;
+        count++;
+    }
+
+    fprintf(stderr, "sw3d water: %s %d, colour %06x, %d, %d\n",
+            what, first, (unsigned) second & 0xFFFFFF, third, fourth);
+}
+
+/**
  * Starts drawing everything as though it were seen through water.
  *
  * The fog colour the water wants goes in over the one above it, which coming back up puts back.
@@ -598,6 +637,8 @@ JNIEXPORT void JNICALL Java_oa_ra(JNIEnv *env, jobject self, jint surface, jint 
     (void) env;
     (void) self;
     (void) bias;
+
+    waterAsked("through water", surface, colour, depth, bias);
 
     fogColourAbove = fog.colour;
     fog.colour = (uint32_t) colour;
