@@ -50,7 +50,7 @@ val compileJawtShim by tasks.registering(Exec::class) {
 
 tasks.register("assembleNatives") {
     description = "Builds every native this module owns."
-    dependsOn(compileJawtShim, compileOpenGlBinding, compileMemoryLibrary)
+    dependsOn(compileJawtShim, compileOpenGlBinding, compileMemoryLibrary, compileOddsAndEnds)
 }
 
 /**
@@ -527,6 +527,55 @@ val verifyMemoryLibrary by tasks.registering(JavaExec::class) {
     args(memoryLibrary.get().asFile.absolutePath)
 }
 
+val oddsAndEndsSource = layout.projectDirectory.file("src/main/native/jagmisc/jagmisc.c")
+val oddsAndEndsLibrary = layout.buildDirectory.file("natives/libjagmisc.dylib")
+
+val compileOddsAndEnds by tasks.registering(Exec::class) {
+    description = "Builds the clock, the memory sizes and the ping the client asks jagmisc for."
+    dependsOn(":unpackX64Jdk", ":runescape:compileJava")
+
+    val headers = project(":runescape").layout.buildDirectory.dir("generated/jni")
+    val target = oddsAndEndsLibrary.get().asFile
+
+    inputs.file(oddsAndEndsSource)
+    inputs.dir(headers)
+    outputs.file(oddsAndEndsLibrary)
+
+    executable = "clang"
+    args(
+        "-arch", "arm64",
+        "-arch", "x86_64",
+        "-dynamiclib",
+        "-Wall",
+        "-Werror",
+        "-O2",
+        "-I", jdkHome.dir("include").asFile.absolutePath,
+        "-I", jdkHome.dir("include/darwin").asFile.absolutePath,
+        "-I", headers.get().asFile.absolutePath,
+        "-install_name", "@loader_path/libjagmisc.dylib",
+        "-o", target.absolutePath,
+        oddsAndEndsSource.asFile.absolutePath,
+    )
+
+    doFirst {
+        target.parentFile.mkdirs()
+    }
+}
+
+/**
+ * The game's file store holds jagmisc for Windows and for nothing else, so there is no shipped
+ * library here to measure against. Each answer is held against a second way of asking the machine
+ * the same question instead.
+ */
+val verifyOddsAndEnds by tasks.registering(JavaExec::class) {
+    description = "Holds the clock, the memory sizes and the ping against what the machine says."
+    dependsOn(compileOddsAndEnds)
+    mainClass = "Jagmisc"
+    classpath = sourceSets["main"].runtimeClasspath
+    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+    args(oddsAndEndsLibrary.get().asFile.absolutePath)
+}
+
 val cacheDirectory = providers.gradleProperty("cache")
     .orElse(providers.systemProperty("user.home").map { "$it/.jagex_cache_32/runescape" })
 
@@ -898,6 +947,7 @@ val verifyNatives by tasks.registering {
         verifyToolkitLifetime,
         verifyToolkitSkeleton,
         verifyMemoryLibrary,
+        verifyOddsAndEnds,
         verifySpriteLift,
         verifyMatrices,
         verifyPoints,

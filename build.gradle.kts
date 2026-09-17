@@ -22,6 +22,7 @@ val surfaceLibrary = layout.projectDirectory.file("natives/build/natives/libjawt
 val openGlLibrary = layout.projectDirectory.file("natives/build/natives/libjaggl.dylib")
 val memoryLibrary = layout.projectDirectory.file("natives/build/natives/libjaclib.dylib")
 val softwareToolkit = layout.projectDirectory.file("natives/build/natives/libsw3d.dylib")
+val oddsAndEndsLibrary = layout.projectDirectory.file("natives/build/natives/libjagmisc.dylib")
 
 val onMacOs = providers.systemProperty("os.name").map { it.startsWith("Mac") }.getOrElse(false)
 
@@ -97,11 +98,13 @@ subprojects {
                     ":natives:compileOpenGlBinding",
                     ":natives:compileMemoryLibrary",
                     ":natives:compileSoftwareToolkit",
+                    ":natives:compileOddsAndEnds",
                 )
                 systemProperty("toolkit.surface.library", surfaceLibrary.asFile.absolutePath)
                 systemProperty("toolkit.jaggl.library", openGlLibrary.asFile.absolutePath)
                 systemProperty("toolkit.jaclib.library", memoryLibrary.asFile.absolutePath)
                 systemProperty("toolkit.sw3d.library", softwareToolkit.asFile.absolutePath)
+                systemProperty("toolkit.jagmisc.library", oddsAndEndsLibrary.asFile.absolutePath)
 
                 /*
                  * Passed through so that a client which stops responding can be asked where it

@@ -19,12 +19,25 @@ literal name. Nothing in `a`, `h`, `i`, `j`, `ja`, `n`, `oa`, `t`, `wa`, `xa`, `
 | `jagdx` | the Direct3D binding | 97 | none |
 | `jagtheora` | Theora video and Vorbis sound | 67 | none |
 | `jaclib` | memory the client manages itself | 19 | 16 |
-| `jagex3` | `jagmisc`, and the hardware toolkit's own interface | 17 | none |
+| `jagmisc` | a clock, the size of memory, a ping | 6 | all of them |
+| `hw3d` | what the hardware toolkit hands its models to | 11 | none |
 
-The store holds them for `windows/x86`, `windows/x86_64`, `macos/x86`, `macos/x86_64`,
-`macos/universal`, `macos/ppc`, `linux/x86` and `linux/x86_64`. Everything written here is built
-as a universal binary for arm64 and x86_64; the other platforms are a later problem, and a Windows
-machine is where `jagdx` will have to be finished.
+`jagmisc` and `hw3d` are counted apart although both are declared under `jagex3`. They are two
+unrelated libraries that share a package and nothing else, and they are checked in two different
+ways.
+
+The store holds these for `windows/x86`, `windows/x86_64`, `macos/x86`, `macos/x86_64`,
+`macos/universal`, `macos/ppc`, `linux/x86` and `linux/x86_64`, but not evenly. Two of them are
+not held for every platform, which decides how each can be checked:
+
+- `jagmisc` is held for Windows alone, so there is no copy of it here to measure against. It is
+  measured against the machine instead. See `jagmisc/README.md`.
+- `jagtheora` is not held for any platform. The archive names 36 groups and every one of them is
+  accounted for, and none is jagtheora, so the client has never played a video from this cache.
+  Writing it would be writing against nothing at all.
+
+Everything written here is built as a universal binary for arm64 and x86_64; the other platforms
+are a later problem, and a Windows machine is where `jagdx` will have to be finished.
 
 ## How a library is known to be right
 
@@ -51,7 +64,7 @@ out to half a picture and nothing would say so.
 
 Each library has a README of its own saying what it replaces, how far along it is, where it
 differs from the shipped binary on purpose, and what is known to be wrong with the original. See
-`sw3d/README.md`.
+`sw3d/README.md` and `jagmisc/README.md`.
 
 `jawtshim` is not one of the six and is not on its way out. It lets the shipped toolkits obtain a
 drawing surface on a current JDK, which they cannot do by themselves, so without it neither could
