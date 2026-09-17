@@ -466,6 +466,9 @@ static int faceShows;
 /** What a face with no alpha of its own is drawn as. */
 enum { WHOLLY_SOLID = 0 };
 
+/** The alpha a face carries when the client wants nothing drawn for it at all. */
+enum { WHOLLY_GONE = 0xFF };
+
 /**
  * Where on its texture one pixel of a span reads from.
  *
@@ -1420,6 +1423,16 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
              * how much shows.
              */
             int alpha = modelFaceAlpha(model, face);
+
+            /*
+             * A face the client wants nothing drawn for is left out rather than drawn. None of it
+             * shows, and how much shows is counted the other way round from the alpha, so such a
+             * face would otherwise come out of the sum as one that is wholly there.
+             */
+            if (alpha == WHOLLY_GONE) {
+                continue;
+            }
+
             faceShows = alpha == 0 ? WHOLLY_SOLID : 0xFF - alpha;
 
             texels = NULL;

@@ -45,6 +45,11 @@ public final class CacheMesh {
      */
     public static final int STAIRS = 32419;
 
+    /**
+     * A model the client draws with a black ground behind it where there should be none.
+     */
+    public static final int BLACK_BACKED = 2030;
+
     private final FileSystem_Client store;
 
     private CacheMesh(FileSystem_Client store) {
@@ -308,6 +313,21 @@ public final class CacheMesh {
             + ", alphas " + (held.faceAlpha == null ? "none" : "some")
             + ", priorities " + (held.facePriority == null ? "none" : "some")
             + ", globalPriority " + held.globalPriority);
+
+        var alphas = new TreeMap<Integer, Integer>();
+        var textures = new TreeMap<Integer, Integer>();
+        var colours = new TreeMap<Integer, Integer>();
+        for (var face = 0; face < held.faceCount; face++) {
+            alphas.merge(held.faceAlpha == null ? 0 : held.faceAlpha[face] & 0xFF, 1, Integer::sum);
+            textures.merge(held.faceTexture == null ? -1 : (int) held.faceTexture[face], 1,
+                Integer::sum);
+            colours.merge((int) held.faceColour[face], 1, Integer::sum);
+        }
+
+        System.out.println("  alphas " + alphas);
+        System.out.println("  textures " + textures);
+        System.out.println("  colours " + colours.size() + " distinct, "
+            + colours.entrySet().stream().limit(8).toList());
     }
 
     /** How many spaces the mesh carries each of the numbers only some ways need. */

@@ -433,6 +433,12 @@ static int16_t *shortsFrom(JNIEnv *env, jintArray source, int count) {
  */
 enum { GROUND_LIGHTNESS = 74 };
 
+/** What the client hands over for a corner of the ground with no colour of its own. */
+enum { NO_COLOUR = -1 };
+
+/** The colour such a corner is lit as instead, which carries no hue and no lightness at all. */
+enum { BLACK = 0 };
+
 /** What the lightness of a colour is held out of, and the ends it is kept away from. */
 enum { LIGHTNESS_WHOLE = 128, LIGHTNESS_LEAST = 2, LIGHTNESS_MOST = 126 };
 
@@ -648,9 +654,15 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
             tile->up[corner] = (int16_t) (averageHeight(ground, worldX, worldZ) + levels[corner]);
             tile->light[corner] = (unsigned char) groundCornerShade(ground,
                 worldX >> ground->tileShift, worldZ >> ground->tileShift);
-            tile->colour[corner] = colours[corner] == -1
-                ? 0
-                : litCorner(ground, colours[corner] & 0xFFFF, tile->light[corner],
+            /*
+             * A corner the client gives no colour to is lit as though it were black rather than
+             * left as nothing. The client hands one over at the mouth of a stairwell and anywhere
+             * else the floor opens onto the one below, and a corner left as nothing carries no
+             * light into the corners beside it, which leaves the whole tile a shade out.
+             */
+            int named = colours[corner] == NO_COLOUR ? BLACK : colours[corner] & 0xFFFF;
+
+            tile->colour[corner] = litCorner(ground, named, tile->light[corner],
                     x, z, tile->across[corner], tile->along[corner],
                     tile->texture == NULL ? -1 : tile->texture[corner]);
         }

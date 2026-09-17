@@ -147,7 +147,8 @@ public final class FrameCapture {
             namedModel(toolkit, CacheMesh.STAIRS, false, EVERY_FUNCTION),
             toolkit.createModel(PriorityMesh.INSTANCE.build(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
             toolkit.createModel(BillboardMesh.INSTANCE.build(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
-            CacheMesh.numbered(CacheMesh.STAIRS).orElse(null));
+            CacheMesh.numbered(CacheMesh.STAIRS).orElse(null),
+            CacheMesh.numbered(CacheMesh.BLACK_BACKED).orElse(null));
 
         var manifest = new ArrayList<String>();
 

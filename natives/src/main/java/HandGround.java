@@ -75,6 +75,9 @@ public final class HandGround {
      */
     private static final int TEXTURED_ROUND = 12;
 
+    /** What the client hands over for a corner of the ground that has no colour of its own. */
+    private static final int NO_COLOUR = -1;
+
     /**
      * The colour laid over a whole face, which is a red the corner colours never reach so that a
      * face drawn with it cannot be mistaken for one drawn without.
@@ -244,7 +247,14 @@ public final class HandGround {
             sizes[slot] = !blended ? TILE
                 : x == TILES / 4 ? TILE / 2
                 : (SLOT_ACROSS[slot] + SLOT_ALONG[slot]) % (TILE * 2) == 0 ? TILE / 4 : TILE;
-            colours[slot] = cornerHsl(x + SLOT_ACROSS[slot] / TILE, z + SLOT_ALONG[slot] / TILE);
+            /*
+             * A corner the client gives no colour to is a corner with no ground under it, which
+             * is what it hands over at the mouth of a stairwell and anywhere else the floor opens
+             * onto the one below. One tile in nine here has one.
+             */
+            colours[slot] = (x + z) % 3 == 1 && slot % 2 == 0
+                ? NO_COLOUR
+                : cornerHsl(x + SLOT_ACROSS[slot] / TILE, z + SLOT_ALONG[slot] / TILE);
 
             if (overlay != null) {
                 /*

@@ -98,6 +98,7 @@ public final class ModelProbe {
                 CacheMesh.report(CacheMesh.ROCK);
                 CacheMesh.report(CacheMesh.STAIRS);
                 CacheMesh.report(26910);
+                CacheMesh.report(CacheMesh.BLACK_BACKED);
             }
 
             var lines = new ArrayList<String>();

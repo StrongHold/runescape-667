@@ -87,7 +87,8 @@ public sealed interface Scene {
         new Stairs(),
         new Priorities(),
         new Billboards(),
-        new OnTheGround()
+        new OnTheGround(),
+        new BlackBacked()
     );
 
     /**
@@ -99,7 +100,7 @@ public sealed interface Scene {
                  Model faded, Model plain, Ground floor, Ground cut, Ground smooth,
                  Model roundPoint, Model rock, Model seenThrough, Ground overlaid,
                  Ground shadowed, Ground blended, Model stairs, Model priorities,
-                 Model billboards, Mesh located) {
+                 Model billboards, Mesh located, Mesh blackBacked) {
         /* empty */
     }
 
@@ -271,6 +272,68 @@ public sealed interface Scene {
              */
             for (var step = 0; step < 2; step++) {
                 var model = toolkit.createModel(props.located(), EVERY_FUNCTION, FEATURES,
+                    AMBIENT, CONTRAST);
+
+                if (step == 1) {
+                    model.k(PUT_DOWN_AT);
+                }
+
+                props.matrix().makeRotationZ(0);
+                props.matrix().rotateAxisX(step == 0 ? 0 : LEAN);
+                props.matrix().translate((step * 2 - 1) * SPREAD / 4, 0, DEPTH / 2);
+                model.render(props.matrix(), null, 1);
+            }
+        }
+    }
+
+    /**
+     * A model the client draws with a black ground behind it where there should be none.
+     *
+     * It names eight texture spaces and carries the numbers for seven of them, which is the shape
+     * that used to leave a face wearing a single texel stretched across it.
+     */
+    record BlackBacked() implements Scene {
+
+        /** The turn the map puts this one down at, out of the sixteen thousand of a whole one. */
+        private static final int PUT_DOWN_AT = 8192;
+
+        /** Everything a model may be asked to do, so that turning it is allowed. */
+        private static final int EVERY_FUNCTION = 0xFFFF;
+
+        private static final int FEATURES = 64;
+        private static final int AMBIENT = 64;
+        private static final int CONTRAST = 768;
+
+        private static final int LEAN = 0x400;
+
+
+
+        /**
+         * What is left is a hundred and fifty five pixels a few shades out along the edges of the
+         * faces this model gives an alpha to, which is the two toolkits carrying an alpha across
+         * a face a little differently.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            if (props.blackBacked() == null) {
+                return;
+            }
+
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            /*
+             * One copy stands as the model was built and one is turned the way the map puts it
+             * down, because turning a model winds its faces the other way round and which way a
+             * face is wound decides whether it is drawn at all.
+             */
+            for (var step = 0; step < 2; step++) {
+                var model = toolkit.createModel(props.blackBacked(), EVERY_FUNCTION, FEATURES,
                     AMBIENT, CONTRAST);
 
                 if (step == 1) {
