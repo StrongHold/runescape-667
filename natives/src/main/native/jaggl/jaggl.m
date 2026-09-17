@@ -76,6 +76,22 @@ static CGLPixelFormatObj pixelFormat;
 
 /* The context Core Animation draws the layer with, and the context the client draws frames with. */
 static CGLContextObj layerContext;
+
+/*
+ * A window nobody sees, and the client's context attached to its view.
+ *
+ * The client draws into a framebuffer of this library's rather than into any window, so on the
+ * face of it a context needs no drawable at all. A context without one is not the same thing to
+ * OpenGL as a context with one it never shows: the binding was smooth when it had a hidden window
+ * and has not been since that was taken away, and the only other thing that changed with it was
+ * where the client's drawing went.
+ *
+ * It is never shown, never drawn into, and sized to whatever is being drawn for, so its only job
+ * is to exist.
+ */
+static NSWindow *unseenWindow;
+static NSView *unseenView;
+static NSOpenGLContext *unseenContext;
 static CGLContextObj clientContext;
 
 /*
@@ -641,6 +657,22 @@ static BOOL resizeOffscreen(GLint width, GLint height) {
     glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
     glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
 
+    /*
+     * The window nobody sees is kept as large as what is being drawn for. It is handed over and
+     * not waited for: the drawing thread must never wait on the main thread, and a window that
+     * catches up a frame late costs nothing, because nothing is ever drawn into it.
+     */
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (unseenWindow == nil) {
+            return;
+        }
+
+        NSRect frame = NSMakeRect(0, 0, width, height);
+        unseenView.frame = frame;
+        [unseenWindow setFrame:[unseenWindow frameRectForContentRect:frame] display:NO];
+        [unseenContext update];
+    });
+
     defaultBound = YES;
     offscreenWidth = width;
     offscreenHeight = height;
@@ -835,7 +867,24 @@ JNIEXPORT jlong JNICALL Java_jaggl_OpenGL_init(JNIEnv *env, jclass owner, jobjec
         return 0;
     }
 
-    JAGGLLOG("context ready");
+    /*
+     * Made where the client asks for a context rather than on the drawing thread's own time,
+     * because it is made once and everything after it wants it there already.
+     */
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        unseenWindow = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 16, 16)
+                                                   styleMask:NSWindowStyleMaskBorderless
+                                                     backing:NSBackingStoreBuffered
+                                                       defer:NO];
+        unseenView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 16, 16)];
+        unseenView.wantsBestResolutionOpenGLSurface = NO;
+        unseenWindow.contentView = unseenView;
+
+        unseenContext = [[NSOpenGLContext alloc] initWithCGLContextObj:clientContext];
+        unseenContext.view = unseenView;
+    });
+
+    JAGGLLOG("context ready, with a window it will never show");
 
     jlong handle = Java_jaggl_OpenGL_prepareSurface(env, owner, canvas);
     if (handle == 0) {
@@ -966,6 +1015,11 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_detachPeer(JNIEnv *env, jclass owner) {
 
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_release(JNIEnv *env, jclass owner) {
     CGLSetCurrentContext(NULL);
+
+    unseenContext = nil;
+    unseenView = nil;
+    [unseenWindow close];
+    unseenWindow = nil;
 
     if (clientContext != NULL) {
         CGLDestroyContext(clientContext);
