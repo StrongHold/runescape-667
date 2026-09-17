@@ -1579,19 +1579,20 @@ public sealed interface Scene {
          * here is brighter rather than darker: a corner facing away from the sun is darkened by
          * how far it faces away, and one blended short is not darkened far enough.
          *
-         * Three ways of blending have been measured and none of them is it.
+         * How the blend is done is settled, and it is what is written here. The shipped toolkit
+         * mixes the three parts of a direction across and then along, and writes a plain one into
+         * the fourth part rather than mixing that too, and then divides the sun by the fourth
+         * part. Three other ways were measured first and each is worse: dividing by the length the
+         * blend has takes this from twelve thousand to twenty three and puts Terrain and
+         * HollowGround out, keeping each direction as measured with its own length beside it comes
+         * to nineteen thousand, and not blending at all comes to thirty two thousand and puts
+         * every ground scene out.
          *
-         * Dividing by the length the blend has takes this scene from twelve thousand to twenty
-         * three and puts Terrain and HollowGround out, and both match to the pixel today. Keeping
-         * each direction as it was measured with its own length beside it, and blending the
-         * lengths along with the directions, comes to nineteen thousand and touches nothing else,
-         * which is what it should touch: at a corner of the grid the two are the same sum. Not
-         * blending at all comes to thirty two thousand and puts every ground scene out, so the
-         * blending is real and every corner of every face goes through it, not only a cut one.
-         *
-         * The two that reach further along a direction both went the wrong way, so the sun is
-         * reaching these corners too strongly here rather than too weakly, and what is wanted is
-         * a blend that reaches less far than four directions of length one already do.
+         * So the blending matches, and the lighting either side of it matches, and the directions
+         * going into it match, because a corner of the grid takes one of them whole and every
+         * scene made of those is right to the pixel. What is left to differ is the two fractions
+         * the blend is made with, which say how far into its tile a corner stands. Those are the
+         * next thing to read, and the only thing left that the blend is made of.
          */
         @Override
         public boolean written() {
