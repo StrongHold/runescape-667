@@ -271,6 +271,19 @@ static void complain(const char *what) {
         }
 
         glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, from);
+
+        static int measured;
+        if (verbose() && measured < 3) {
+            GLint buffers = 0;
+            GLint each = 0;
+            glGetIntegerv(GL_SAMPLE_BUFFERS, &buffers);
+            glGetIntegerv(GL_SAMPLES, &each);
+            measured++;
+            JAGGLLOG("showing %dx%d as %dx%d, into a drawable of %d sample buffers and %d samples",
+                     offscreenWidth, offscreenHeight, (GLint) size.width, (GLint) size.height,
+                     buffers, each);
+        }
+
         glBlitFramebufferEXT(0, 0, offscreenWidth, offscreenHeight,
                              0, 0, (GLint) size.width, (GLint) size.height,
                              GL_COLOR_BUFFER_BIT, GL_NEAREST);
@@ -574,14 +587,18 @@ JNIEXPORT jlong JNICALL Java_jaggl_OpenGL_init(JNIEnv *env, jclass owner, jobjec
         attributes[n++] = kCGLPFAStencilSize;
         attributes[n++] = (CGLPixelFormatAttribute) stencil;
     }
-    if (samples > 0) {
-        attributes[n++] = kCGLPFAMultisample;
-        attributes[n++] = kCGLPFASampleBuffers;
-        attributes[n++] = (CGLPixelFormatAttribute) 1;
-        attributes[n++] = kCGLPFASamples;
-        attributes[n++] = (CGLPixelFormatAttribute) samples;
-    }
     attributes[n] = (CGLPixelFormatAttribute) 0;
+
+    /*
+     * The samples the client asks for are not asked of the format. The format decides what the
+     * window's own drawable carries, and the client never draws into that: it draws into a buffer
+     * of this library's, and the samples belong on the buffers hung there instead.
+     *
+     * Asking for them here as well is worse than useless. The layer shows a frame by blitting into
+     * the window's drawable, that blit scales where the layer is not the size the client drew at,
+     * and a blit that scales is refused where either side carries more than one sample a pixel. It
+     * was asked for here once and every frame came back as an invalid framebuffer operation.
+     */
 
     /*
      * Drawing with more than one sample a pixel is not switched on yet. It works as far as anything
