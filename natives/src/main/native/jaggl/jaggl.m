@@ -409,20 +409,68 @@ static void complain(const char *what) {
     [super drawInCGLContext:context pixelFormat:format forLayerTime:layerTime displayTime:displayTime];
 }
 
+/*
+ * Answers what suits the screen this layer is being shown on, which is what is being asked.
+ *
+ * Core Animation names a screen and asks for a format for it. Handing back the one format made at
+ * the start ignores the question: that one belongs to whichever screen the window happened to be
+ * on when the client started, and where a second screen is plugged in and the window is on it,
+ * every frame has to be carried from one to the other before it can be shown. That carrying is the
+ * stutter, and it is why loading on the software toolkit and changing to this one afterwards is
+ * smooth: by then the window is already where it will stay, and the format is made for the screen
+ * it is actually on.
+ *
+ * A format for a named screen is the same format with that screen named in it.
+ */
 - (CGLPixelFormatObj)copyCGLPixelFormatForDisplayMask:(uint32_t)mask {
-    return pixelFormat;
+    if (mask == 0) {
+        return CGLRetainPixelFormat(pixelFormat);
+    }
+
+    CGLPixelFormatAttribute attributes[8];
+    int n = 0;
+    attributes[n++] = kCGLPFAAccelerated;
+    attributes[n++] = kCGLPFADoubleBuffer;
+    attributes[n++] = kCGLPFADisplayMask;
+    attributes[n++] = (CGLPixelFormatAttribute) mask;
+    attributes[n] = (CGLPixelFormatAttribute) 0;
+
+    CGLPixelFormatObj forTheScreen = NULL;
+    GLint formats = 0;
+    if (CGLChoosePixelFormat(attributes, &forTheScreen, &formats) != kCGLNoError
+        || forTheScreen == NULL) {
+        JAGGLLOG("no format for screen 0x%x, taking the one made at the start", mask);
+        return CGLRetainPixelFormat(pixelFormat);
+    }
+
+    JAGGLLOG("a format for screen 0x%x", mask);
+    return forTheScreen;
 }
 
 - (void)releaseCGLPixelFormat:(CGLPixelFormatObj)format {
-    /* empty, the format outlives every layer */
+    CGLReleasePixelFormat(format);
 }
 
+/*
+ * A context of the format just chosen, sharing everything with the client's.
+ *
+ * It has to share, because what it shows is a buffer the client filled. It has to be of the format
+ * it was handed, because that format is what says which screen it is for, and a context of one
+ * format shown through another is the carrying this is meant to avoid.
+ */
 - (CGLContextObj)copyCGLContextForPixelFormat:(CGLPixelFormatObj)format {
-    return layerContext;
+    CGLContextObj forTheScreen = NULL;
+    if (CGLCreateContext(format, clientContext, &forTheScreen) != kCGLNoError
+        || forTheScreen == NULL) {
+        JAGGLLOG("no context for the screen's own format, taking the one made at the start");
+        return CGLRetainContext(layerContext);
+    }
+
+    return forTheScreen;
 }
 
 - (void)releaseCGLContext:(CGLContextObj)context {
-    /* empty, the context outlives every layer */
+    CGLReleaseContext(context);
 }
 
 @end
