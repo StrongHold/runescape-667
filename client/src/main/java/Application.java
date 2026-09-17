@@ -81,6 +81,7 @@ public final class Application implements AppletStub {
 
     private void start() {
         StallReport.watchIfAsked();
+        StallReport.watchForFreezesIfAsked();
         installKeys();
         NativeLibraries.install();
         Jawt.tryLoad();

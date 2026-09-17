@@ -1,7 +1,10 @@
 import com.jagex.graphics.Toolkit;
 
 import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -19,10 +22,27 @@ import java.util.concurrent.TimeUnit;
  * It is off unless asked for, because it prints a great deal:
  *
  *     ./gradlew client:run -Dclient.stalls=5 ...
+ *
+ * A freeze too short to catch by hand is a different problem, and blind reports every few seconds
+ * will not catch one that lasts half a second. For that, ask to be told when the thread that draws
+ * stops moving for longer than it should:
+ *
+ *     ./gradlew client:run -Dclient.freezes=250 ...
+ *
+ * That watches where that thread is many times a second and prints once each time it has stood
+ * still for longer than the number of milliseconds given. What it prints is where it stood.
  */
 public final class StallReport {
 
     private static final String EVERY = "client.stalls";
+
+    private static final String FREEZES = "client.freezes";
+
+    /** How often the thread that draws is looked at, which bounds how short a freeze can be seen. */
+    private static final long LOOK_EVERY_MILLISECONDS = 10L;
+
+    /** How much of the stack is compared to decide the thread has not moved. */
+    private static final int DEEP_ENOUGH = 12;
 
     /**
      * Starts printing if the property asks for it, and does nothing otherwise.
@@ -39,6 +59,92 @@ public final class StallReport {
         reporter.start();
 
         System.out.println("stall report: every " + seconds + " seconds");
+    }
+
+    /**
+     * Starts watching for a freeze if the property asks for it, and does nothing otherwise.
+     */
+    public static void watchForFreezesIfAsked() {
+        var asked = System.getProperty(FREEZES);
+        if (asked == null || asked.isEmpty()) {
+            return;
+        }
+
+        var milliseconds = Long.parseLong(asked);
+        var watcher = new Thread(() -> watchForFreezes(milliseconds), "freeze report");
+        watcher.setDaemon(true);
+        watcher.start();
+
+        System.out.println("freeze report: anything standing still for " + milliseconds + "ms");
+    }
+
+    /**
+     * Looks at where the thread that draws is, many times a second, and says so when it has been
+     * in the same place for too long.
+     *
+     * A freeze of half a second says nothing to a report printed every few seconds, which will
+     * nearly always look while everything is moving. Looking often and reporting only when nothing
+     * has moved turns that around: what is printed is only ever the thing that was in the way.
+     */
+    private static void watchForFreezes(long milliseconds) {
+        var threads = ManagementFactory.getThreadMXBean();
+        List<StackTraceElement> standing = List.of();
+        var standingSince = 0L;
+        var told = false;
+
+        while (true) {
+            try {
+                TimeUnit.MILLISECONDS.sleep(LOOK_EVERY_MILLISECONDS);
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+
+            var drawing = drawingThread(threads);
+            var now = System.currentTimeMillis();
+            var here = drawing == null
+                ? List.<StackTraceElement>of()
+                : Arrays.stream(drawing.getStackTrace()).limit(DEEP_ENOUGH).toList();
+
+            if (!here.equals(standing)) {
+                standing = here;
+                standingSince = now;
+                told = false;
+            } else if (!told && !here.isEmpty() && now - standingSince >= milliseconds) {
+                told = true;
+                say(drawing, now - standingSince, here);
+            }
+        }
+    }
+
+    /**
+     * The thread the client draws and ticks on, which is the one whose stack runs through the game
+     * shell rather than through the window system.
+     */
+    private static ThreadInfo drawingThread(ThreadMXBean threads) {
+        for (var info : threads.dumpAllThreads(false, false)) {
+            for (var frame : info.getStackTrace()) {
+                if (frame.getClassName().endsWith("GameShell")) {
+                    return info;
+                }
+            }
+        }
+        return null;
+    }
+
+    private static void say(ThreadInfo drawing, long standing, List<StackTraceElement> here) {
+        var report = new StringBuilder("\n--- ")
+            .append(drawing.getThreadName())
+            .append(" stood still for ")
+            .append(standing)
+            .append("ms, drawing with ")
+            .append(renderer())
+            .append(", in state ")
+            .append(drawing.getThreadState())
+            .append(" ---\n");
+
+        here.forEach(frame -> report.append("    ").append(frame).append('\n'));
+        System.out.println(report);
     }
 
     private static void report(int seconds) {
@@ -97,7 +203,8 @@ public final class StallReport {
             || name.startsWith("Signal Dispatcher")
             || name.startsWith("Notification Thread")
             || name.startsWith("Common-Cleaner")
-            || name.equals("stall report");
+            || name.equals("stall report")
+            || name.equals("freeze report");
     }
 
     private StallReport() {

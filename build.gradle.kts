@@ -108,10 +108,16 @@ subprojects {
 
                 /*
                  * Passed through so that a client which stops responding can be asked where it
-                 * stopped, with -Dclient.stalls=<seconds> on the command line.
+                 * stopped, with -Dclient.stalls=<seconds> on the command line, and so that one
+                 * which only catches for a moment can be asked the same with
+                 * -Dclient.freezes=<milliseconds>.
                  */
                 providers.systemProperty("client.stalls").orNull?.let {
                     systemProperty("client.stalls", it)
+                }
+
+                providers.systemProperty("client.freezes").orNull?.let {
+                    systemProperty("client.freezes", it)
                 }
             }
         }
