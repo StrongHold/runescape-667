@@ -81,7 +81,8 @@ public sealed interface Scene {
         new RoundPoint(),
         new Rock(),
         new SeenThrough(),
-        new OverlaidGround()
+        new OverlaidGround(),
+        new ShadowedGround()
     );
 
     /**
@@ -91,7 +92,8 @@ public sealed interface Scene {
     record Props(Sprite gradient, Model model, Model simple, Matrix matrix,
                  Font mono, Font proportional, Ground ground, Mesh mesh, Model textured,
                  Model faded, Model plain, Ground floor, Ground cut, Ground smooth,
-                 Model roundPoint, Model rock, Model seenThrough, Ground overlaid) {
+                 Model roundPoint, Model rock, Model seenThrough, Ground overlaid,
+                 Ground shadowed) {
         /* empty */
     }
 
@@ -1058,6 +1060,47 @@ public sealed interface Scene {
             }
 
             props.overlaid().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
+                HandGround.TILES, visible, false, 0);
+        }
+    }
+
+    /**
+     * The smoothly coloured patch with shadows thrown across it.
+     *
+     * The client puts the shadow of everything standing on the ground into the ground, and the
+     * ground darkens what it draws by however much of the sun each place is kept out of. Nothing
+     * had ever put one down here, so none of that had been drawn.
+     */
+    record ShadowedGround() implements Scene {
+
+
+        /**
+         * The ground darkens itself where a shadow falls by building a picture of the shadow for
+         * each tile and reading it back as the tile is drawn. Nothing reads it back here yet.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            var camera = toolkit.createMatrix();
+            camera.createCamera(HandGround.TILES * HandGround.TILE / 2, Terrain.UP,
+                -Terrain.BACK, TURN / 8, 0, 0);
+            toolkit.setCamera(camera);
+
+            var visible = new boolean[HandGround.TILES * 2][HandGround.TILES * 2];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            props.shadowed().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
                 HandGround.TILES, visible, false, 0);
         }
     }

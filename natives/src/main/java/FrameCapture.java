@@ -1,6 +1,7 @@
 import com.jagex.graphics.Matrix;
 import com.jagex.graphics.Mesh;
 import com.jagex.graphics.Model;
+import com.jagex.graphics.Shadow;
 import com.jagex.graphics.Toolkit;
 import rs2.client.loading.library.LibraryManager;
 
@@ -33,6 +34,9 @@ public final class FrameCapture {
 
     private static final int POOL_SIZE = 1 << 20;
     private static final int FUNCTIONS = 2048;
+
+    /** How finely a shadow is drawn, which is what the client asks the toolkit for. */
+    private static final int SHADOW_DETAIL = 32;
     private static final int FEATURES = 64;
     private static final int MODEL_FACES = 200;
     private static final int VISIBLE_FACES = 2;
@@ -87,6 +91,12 @@ public final class FrameCapture {
         var sun = (float) number("SW3D_SUN_TENTHS", 5) / 10.0F;
         toolkit.ZA(0xFFFFFF, sun, sun, 20.0F, -50.0F, 30.0F);
 
+        /*
+         * How finely a shadow is drawn. The client asks for this once and nothing here ever did,
+         * which left every shadow drawn at one place to the world unit.
+         */
+        toolkit.X(SHADOW_DETAIL);
+
         toolkit.method7938(toolkit.createHeap(POOL_SIZE));
 
         /*
@@ -120,7 +130,8 @@ public final class FrameCapture {
             roundPointModel(toolkit),
             rockModel(toolkit),
             texturedModel(toolkit, textured, FEATURES, TEXTURE_SEEN_THROUGH),
-            HandGround.buildOverlaid(toolkit));
+            HandGround.buildOverlaid(toolkit),
+            HandGround.buildShadowed(toolkit, shadowOf(toolkit)));
 
         var manifest = new ArrayList<String>();
 
@@ -289,6 +300,27 @@ public final class FrameCapture {
         }
 
         return toolkit.createModel(held, FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
+    }
+
+    /** What a model has to be built asking for before it will hand over a shadow. */
+    private static final int MAY_CAST_A_SHADOW = 0x40000;
+
+    /**
+     * The shadow of a model out of the cache, which is the only way to come by one.
+     *
+     * A model only carries a shadow when it was built asking for one, and none of the models the
+     * other scenes use was.
+     */
+    private static Shadow shadowOf(Toolkit toolkit) throws Exception {
+        var model = toolkit.createModel(CacheMesh.anyUntextured(MODEL_FACES),
+            FUNCTIONS | MAY_CAST_A_SHADOW, FEATURES, AMBIENT, CONTRAST);
+        var shadow = model.ba(null);
+
+        if (shadow == null) {
+            System.out.println("the model handed over no shadow");
+        }
+
+        return shadow;
     }
 
     private static Model texturedModel(Toolkit toolkit, Mesh held, int features, short texture)

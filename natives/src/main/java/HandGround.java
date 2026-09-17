@@ -1,4 +1,5 @@
 import com.jagex.graphics.Ground;
+import com.jagex.graphics.Shadow;
 import com.jagex.graphics.Toolkit;
 
 import java.util.Arrays;
@@ -110,7 +111,7 @@ public final class HandGround {
      * the same colour, and no amount of that ever asks whether a face is shaded across.
      */
     public static Ground buildSmooth(Toolkit toolkit) {
-        return buildCornerLit(toolkit, false);
+        return buildCornerLit(toolkit, false, FEATURE_FLAGS);
     }
 
     /**
@@ -122,13 +123,51 @@ public final class HandGround {
      * becomes of it.
      */
     public static Ground buildOverlaid(Toolkit toolkit) {
-        return buildCornerLit(toolkit, true);
+        return buildCornerLit(toolkit, true, FEATURE_FLAGS);
     }
 
-    private static Ground buildCornerLit(Toolkit toolkit, boolean overlaid) {
+    /**
+     * The same patch with something standing on it throwing a shadow across the middle.
+     *
+     * The client puts the shadow of everything that stands on the ground onto the ground itself,
+     * and the ground carries the sum of them and darkens what it draws by it. Nothing else here
+     * puts one down, so the whole of that was drawn by neither toolkit until now.
+     *
+     * One is put down on every other tile, at three heights between them, because how far a
+     * shadow slides depends on how far above the ground the thing throwing it stands.
+     */
+    public static Ground buildShadowed(Toolkit toolkit, Shadow shadow) {
+        var ground = buildCornerLit(toolkit, false, FEATURE_FLAGS | TAKES_SHADOWS);
+
+        if (shadow != null) {
+            for (var x = 1; x < TILES; x += 2) {
+                for (var z = 1; z < TILES; z += 2) {
+                    /*
+                     * Every third one is thrown from higher up, because how far a shadow slides
+                     * depends on how far above the ground the thing throwing it stands.
+                     */
+                    var height = (x + z) % 3 * HIGH_UP;
+                    ground.CA(shadow, x * TILE, height, z * TILE, 0, false);
+                }
+            }
+        }
+
+        return ground;
+    }
+
+    /** How far above the ground the second and third shadows are thrown from. */
+    private static final int HIGH_UP = 256;
+
+    /**
+     * The feature the client asks the ground for when it wants what stands on it to throw a
+     * shadow onto it. Ground not asked for this way keeps no shadow at all.
+     */
+    private static final int TAKES_SHADOWS = 0x10;
+
+    private static Ground buildCornerLit(Toolkit toolkit, boolean overlaid, int features) {
         var heights = heights();
         var ground = toolkit.createGround(TILES, TILES, heights, heights,
-            GROUND_FLAGS, FEATURE_FLAGS);
+            GROUND_FLAGS, features);
 
         for (var x = 0; x < TILES; x++) {
             for (var z = 0; z < TILES; z++) {
