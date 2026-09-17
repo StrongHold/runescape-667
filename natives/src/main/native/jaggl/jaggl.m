@@ -41,6 +41,7 @@
 #include <OpenGL/OpenGL.h>
 #include <dlfcn.h>
 #include <limits.h>
+#include <sys/time.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -111,6 +112,7 @@ static GLuint drawDepth;
 static GLint offscreenWidth;
 static GLint offscreenHeight;
 static BOOL defaultBound;
+static uint64_t shownFrames;
 
 static Surface *currentSurface;
 
@@ -154,6 +156,76 @@ static BOOL verbose(void) {
 
 /* Reports what the binding is doing. Arguments must be free of side effects. */
 #define JAGGLLOG(...) do { if (verbose()) { fprintf(stderr, "[jaggl] " __VA_ARGS__); fputc('\n', stderr); } } while (0)
+
+/**
+ * Whether to report how long the showing of a frame takes.
+ *
+ * Off unless asked for, because it reads the clock twice a frame and the point of it is to find
+ * out where a frame's time goes rather than to add to it.
+ */
+static BOOL timing(void) {
+    static BOOL cached;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        cached = getenv("JAGGL_TIMING") != NULL;
+    });
+    return cached;
+}
+
+static uint64_t nowInMicroseconds(void) {
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    return (uint64_t) now.tv_sec * 1000000u + (uint64_t) now.tv_usec;
+}
+
+/**
+ * Says how a frame's time was spent, once every hundred frames.
+ *
+ * Three numbers, and between them they say which part is at fault. How often a frame is handed
+ * over says whether the client is making them evenly. How long the handing over takes says what
+ * this library costs. How long the layer takes to show one, and how often it is asked to, say
+ * whether what the client finishes is what reaches the screen: a client handing over fifty frames
+ * a second while the layer shows thirty is a client whose frames are being dropped, and that is
+ * choppy however healthy the count looks.
+ */
+static void reportTiming(uint64_t spentSwapping) {
+    static uint64_t frames;
+    static uint64_t swapping;
+    static uint64_t lastReport;
+    static uint64_t lastSwap;
+    static uint64_t betweenSwaps;
+
+    if (!timing()) {
+        return;
+    }
+
+    uint64_t now = nowInMicroseconds();
+    swapping += spentSwapping;
+    if (lastSwap != 0) {
+        betweenSwaps += now - lastSwap;
+    }
+    lastSwap = now;
+    frames++;
+
+    if (lastReport == 0) {
+        lastReport = now;
+        return;
+    }
+
+    if (frames < 100) {
+        return;
+    }
+
+    JAGGLLOG("%llu frames handed over every %llu microseconds, %llu of that spent handing over; "
+             "the layer showed %llu of them",
+             frames, betweenSwaps / frames, swapping / frames, shownFrames);
+
+    frames = 0;
+    swapping = 0;
+    betweenSwaps = 0;
+    shownFrames = 0;
+    lastReport = now;
+}
 
 /**
  * Whether the client's own buffer may be drawn with more than one sample a pixel.
@@ -268,6 +340,7 @@ static void complain(const char *what) {
         glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, 0);
     }
 
+    shownFrames++;
     [super drawInCGLContext:context pixelFormat:format forLayerTime:layerTime displayTime:displayTime];
 }
 
@@ -748,11 +821,15 @@ static void copyForShowing(void) {
 }
 
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_swapBuffers(JNIEnv *env, jclass owner) {
+    uint64_t began = timing() ? nowInMicroseconds() : 0;
+
     copyForShowing();
 
     if (currentSurface != NULL) {
         [(__bridge JagGLLayer *) currentSurface->layer present];
     }
+
+    reportTiming(timing() ? nowInMicroseconds() - began : 0);
 }
 
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_setSwapInterval(JNIEnv *env, jclass owner, jint interval) {

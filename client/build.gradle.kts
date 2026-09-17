@@ -35,6 +35,7 @@ val rendererSwitches = listOf(
     "SW3D_GROUND_TALLY",
     "JAGGL_SAMPLES",
     "JAGGL_VERBOSE",
+    "JAGGL_TIMING",
 )
 
 tasks.named<JavaExec>("run") {
