@@ -877,3 +877,21 @@ val verifySpriteLift by tasks.registering(JavaExec::class) {
 val verifyMatrices = registerProbe("matrices", "MatrixProbe", "matrix answers")
 val verifyPoints = registerProbe("points", "PointProbe", "projection answers")
 val verifyModels = registerProbe("models", "ModelProbe", "model answers")
+
+/**
+ * Lists what the map says stands on one tile, so that a place the client draws wrongly can be
+ * turned into the models standing there.
+ */
+val listLocType by tasks.registering(JavaExec::class) {
+    description = "Lists the models one kind of location is built from."
+    mainClass = "CacheLocType"
+    classpath = sourceSets["main"].runtimeClasspath
+    args(providers.gradleProperty("loc").getOrElse("29592"))
+}
+
+val listLocations by tasks.registering(JavaExec::class) {
+    description = "Lists the locations standing on one tile of the world."
+    mainClass = "CacheLocations"
+    classpath = sourceSets["main"].runtimeClasspath
+    args((providers.gradleProperty("tile").getOrElse("3084 3452 0")).split(" "))
+}
