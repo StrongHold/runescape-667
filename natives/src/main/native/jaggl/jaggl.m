@@ -35,6 +35,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <QuartzCore/CAOpenGLLayer.h>
+#import <QuartzCore/CATransaction.h>
 
 #include <OpenGL/gl.h>
 #include <OpenGL/glext.h>
@@ -289,24 +290,27 @@ static void complain(const char *what) {
 }
 
 /*
- * Asks for the finished frame to be shown. The frame itself is already where the layer reads it,
- * because the client draws into a framebuffer both contexts share, so there is nothing to copy.
+ * Shows the finished frame, and shows it now.
  *
- * Nothing stops the client drawing the next frame into that framebuffer while Core Animation is
- * reading it for the last one. If frames ever tear or flicker, this is why, and the fix is a
- * second framebuffer: on each swap, copy the finished frame into it under a lock, and have the
- * layer read the copy instead. openrs2-natives does exactly that, and keeps the copy the size of
- * the layer so the resize is handled in the same step.
+ * The frame is already in the buffer this layer reads, because the client draws into one of its
+ * own and a finished frame is copied across on the swap. So all that is left is to say that there
+ * is one, and to see that it is taken.
  *
- * It is not done here because nothing torn has been seen, and one framebuffer with one blit is
- * both quicker and easier to follow than two with a lock between them. Add the copy when there is
- * a reason to, not before.
+ * Saying it is not enough on its own. Marking the layer as wanting to be drawn leaves Core
+ * Animation to choose when, and a client handing over fifty frames a second is not the rate it
+ * chooses: several frames fall into one drawing and the rest are never shown, so the count stays
+ * at fifty while what reaches the screen jerks. Committing a transaction around it hands the frame
+ * over there and then, which is what the software toolkit's own surface does and why that one is
+ * smooth.
  */
 - (void)present {
     glFlush();
 
     dispatch_async(dispatch_get_main_queue(), ^{
+        [CATransaction begin];
+        [CATransaction setDisableActions:YES];
         [self setNeedsDisplay];
+        [CATransaction commit];
     });
 }
 
