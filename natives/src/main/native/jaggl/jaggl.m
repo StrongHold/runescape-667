@@ -93,18 +93,21 @@ static GLuint defaultColour;
 static GLuint defaultDepth;
 
 /*
- * How many samples a pixel of the client's own drawable is drawn from, and the plain framebuffer
- * that many are brought back down to.
+ * Where the client draws when it asks for more than one sample a pixel, and how many.
  *
- * The client draws into a framebuffer of this library's own rather than into the one the window
- * carries, so the samples the pixel format was chosen for reach nothing by themselves: how finely
- * a pixel is drawn is decided by the buffers hung on the framebuffer that is bound. Where the
- * client asks for more than one sample the buffers carry that many and are brought back down to
- * one before the picture is shown, because a blit that scales cannot read a multisampled buffer.
+ * The plain framebuffer above is what the layer shows and what anything reads, and it keeps that
+ * job whatever the client asks for. Where the client asks for one sample a pixel it also draws
+ * there and this is unused. Where it asks for more it draws here instead, and what it drew is
+ * brought down into the plain one before anything shows or reads it.
+ *
+ * It is this way round on purpose. The layer draws in a context of its own, framebuffers are not
+ * shared between contexts, and the plain one is the only framebuffer the layer has ever touched.
+ * Handing it a second one to read is refused there, which is a black screen and was twice.
  */
 static GLint wantedSamples;
-static GLuint resolveFramebuffer;
-static GLuint resolveColour;
+static GLuint drawFramebuffer;
+static GLuint drawColour;
+static GLuint drawDepth;
 static GLint offscreenWidth;
 static GLint offscreenHeight;
 static BOOL defaultBound;
@@ -238,52 +241,7 @@ static void complain(const char *what) {
     /* Read straight from what the client drew. See -present for what that risks. */
     if (defaultFramebuffer != 0) {
         CGSize size = self.bounds.size;
-        GLuint from = defaultFramebuffer;
-
-        /*
-         * A blit that scales cannot read a buffer of more than one sample a pixel, so where there
-         * is one it is brought down to a plain buffer of its own size first and the picture is
-         * taken from that.
-         */
-        if (resolveFramebuffer != 0) {
-            /*
-             * The layer draws in a context of its own. Both buffers were made in the client's, and
-             * whether a buffer made in one is known in the other is the one thing no harness here
-             * can ask, because nothing but the client shows a frame.
-             */
-            static int reported;
-            if (verbose() && reported < 3) {
-                reported++;
-                JAGGLLOG("showing a frame: the drawn buffer %u is %sknown here, the plain one %u is %sknown",
-                         defaultFramebuffer, glIsFramebufferEXT(defaultFramebuffer) ? "" : "NOT ",
-                         resolveFramebuffer, glIsFramebufferEXT(resolveFramebuffer) ? "" : "NOT ");
-            }
-
-            glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, defaultFramebuffer);
-            glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, resolveFramebuffer);
-            complain("binding the buffers to bring the samples down");
-            glBlitFramebufferEXT(0, 0, offscreenWidth, offscreenHeight,
-                                 0, 0, offscreenWidth, offscreenHeight,
-                                 GL_COLOR_BUFFER_BIT, GL_NEAREST);
-            complain("bringing the samples down");
-            glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
-            from = resolveFramebuffer;
-        }
-
-        glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, from);
-
-        static int measured;
-        if (verbose() && measured < 3) {
-            GLint buffers = 0;
-            GLint each = 0;
-            glGetIntegerv(GL_SAMPLE_BUFFERS, &buffers);
-            glGetIntegerv(GL_SAMPLES, &each);
-            measured++;
-            JAGGLLOG("showing %dx%d as %dx%d, into a drawable of %d sample buffers and %d samples",
-                     offscreenWidth, offscreenHeight, (GLint) size.width, (GLint) size.height,
-                     buffers, each);
-        }
-
+        glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, defaultFramebuffer);
         glBlitFramebufferEXT(0, 0, offscreenWidth, offscreenHeight,
                              0, 0, (GLint) size.width, (GLint) size.height,
                              GL_COLOR_BUFFER_BIT, GL_NEAREST);
@@ -375,15 +333,11 @@ static BOOL attach(JNIEnv *env, jobject canvas, Surface *surface) {
  * the surface being drawn for.
  */
 /**
- * Hangs a buffer on the renderbuffer that is bound, with as many samples a pixel as the client
- * asked the context for.
+ * The framebuffer the client's own drawing goes to, which is the one of many samples where it
+ * asked for those and the plain one otherwise.
  */
-static void storage(GLenum format, GLint width, GLint height) {
-    if (wantedSamples > 0) {
-        glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, wantedSamples, format, width, height);
-    } else {
-        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, format, width, height);
-    }
+static GLuint whereTheClientDraws(void) {
+    return drawFramebuffer != 0 ? drawFramebuffer : defaultFramebuffer;
 }
 
 static BOOL resizeOffscreen(GLint width, GLint height) {
@@ -401,11 +355,13 @@ static BOOL resizeOffscreen(GLint width, GLint height) {
         glDeleteFramebuffersEXT(1, &defaultFramebuffer);
     }
 
-    if (resolveFramebuffer != 0) {
-        glDeleteRenderbuffersEXT(1, &resolveColour);
-        glDeleteFramebuffersEXT(1, &resolveFramebuffer);
-        resolveFramebuffer = 0;
-        resolveColour = 0;
+    if (drawFramebuffer != 0) {
+        glDeleteRenderbuffersEXT(1, &drawDepth);
+        glDeleteRenderbuffersEXT(1, &drawColour);
+        glDeleteFramebuffersEXT(1, &drawFramebuffer);
+        drawFramebuffer = 0;
+        drawColour = 0;
+        drawDepth = 0;
     }
 
     glGenFramebuffersEXT(1, &defaultFramebuffer);
@@ -413,12 +369,12 @@ static BOOL resizeOffscreen(GLint width, GLint height) {
 
     glGenRenderbuffersEXT(1, &defaultColour);
     glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, defaultColour);
-    storage(GL_RGBA8, width, height);
+    glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_RGBA8, width, height);
     glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, defaultColour);
 
     glGenRenderbuffersEXT(1, &defaultDepth);
     glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, defaultDepth);
-    storage(GL_DEPTH24_STENCIL8_EXT, width, height);
+    glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH24_STENCIL8_EXT, width, height);
     glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, defaultDepth);
     glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, defaultDepth);
 
@@ -428,33 +384,48 @@ static BOOL resizeOffscreen(GLint width, GLint height) {
         return NO;
     }
 
-    if (wantedSamples > 0) {
-        glGenFramebuffersEXT(1, &resolveFramebuffer);
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, resolveFramebuffer);
-        glGenRenderbuffersEXT(1, &resolveColour);
-        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, resolveColour);
-        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_RGBA8, width, height);
-        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
-                                     GL_RENDERBUFFER_EXT, resolveColour);
-
-        GLenum plain = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-        JAGGLLOG("drawn buffer %u at %d samples, plain buffer %u, status 0x%x",
-                 defaultFramebuffer, wantedSamples, resolveFramebuffer, plain);
-        complain("making the plain buffer");
-
-        if (plain != GL_FRAMEBUFFER_COMPLETE_EXT) {
-            JAGGLLOG("no plain framebuffer to bring %d samples down to", wantedSamples);
-            glDeleteRenderbuffersEXT(1, &resolveColour);
-            glDeleteFramebuffersEXT(1, &resolveFramebuffer);
-            resolveFramebuffer = 0;
-            resolveColour = 0;
-        }
-
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, defaultFramebuffer);
-    }
-
     glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
     glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
+
+    if (wantedSamples > 0) {
+        glGenFramebuffersEXT(1, &drawFramebuffer);
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, drawFramebuffer);
+
+        glGenRenderbuffersEXT(1, &drawColour);
+        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, drawColour);
+        glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, wantedSamples, GL_RGBA8, width, height);
+        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
+                                     GL_RENDERBUFFER_EXT, drawColour);
+
+        glGenRenderbuffersEXT(1, &drawDepth);
+        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, drawDepth);
+        glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, wantedSamples,
+                                            GL_DEPTH24_STENCIL8_EXT, width, height);
+        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,
+                                     GL_RENDERBUFFER_EXT, drawDepth);
+        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT,
+                                     GL_RENDERBUFFER_EXT, drawDepth);
+
+        GLenum many = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+        JAGGLLOG("plain buffer %u, drawn buffer %u at %d samples, status 0x%x",
+                 defaultFramebuffer, drawFramebuffer, wantedSamples, many);
+        complain("making the buffer of many samples");
+
+        if (many != GL_FRAMEBUFFER_COMPLETE_EXT) {
+            JAGGLLOG("no buffer of %d samples to draw into", wantedSamples);
+            glDeleteRenderbuffersEXT(1, &drawDepth);
+            glDeleteRenderbuffersEXT(1, &drawColour);
+            glDeleteFramebuffersEXT(1, &drawFramebuffer);
+            drawFramebuffer = 0;
+            drawColour = 0;
+            drawDepth = 0;
+        } else {
+            glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+            glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
+        }
+
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, whereTheClientDraws());
+    }
 
     defaultBound = YES;
     offscreenWidth = width;
@@ -464,42 +435,37 @@ static BOOL resizeOffscreen(GLint width, GLint height) {
 }
 
 /**
- * Makes a piece of what the client drew readable, and answers what was bound to read it before.
+ * Brings a piece of what the client drew down into the plain buffer, where it can be read.
  *
- * Nothing may be read out of a buffer of more than one sample a pixel, so where the client's own
- * buffer carries several the piece wanted is brought down to one in the plain buffer beside it and
- * that is what is read instead. Only the piece is brought down rather than the whole picture,
- * because the client reads its buffer back a row at a time and bringing the whole down for each
- * row would cost the picture over for every row of it.
+ * Nothing may be read out of a buffer of many samples a pixel, so where the client has been drawing
+ * into one the piece wanted is brought down first. Only the piece, never the whole picture: the
+ * client reads its buffer back one row at a time, and bringing the whole down for each row would
+ * cost the picture over for every row of it.
  *
- * Where there is one sample a pixel, or where the client is reading a buffer of its own, nothing
- * is done and nothing needs putting back.
+ * Where the client draws into the plain buffer already there is nothing to do, because that is the
+ * buffer everything reads.
  */
-static GLuint readableRegion(GLint x, GLint y, GLint width, GLint height) {
-    if (resolveFramebuffer == 0 || !defaultBound || width <= 0 || height <= 0) {
-        return 0;
+static void bringDown(GLint x, GLint y, GLint width, GLint height) {
+    if (drawFramebuffer == 0 || !defaultBound || width <= 0 || height <= 0) {
+        return;
     }
 
-    GLint bound = 0;
-    glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING_EXT, &bound);
-
-    glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, defaultFramebuffer);
-    glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, resolveFramebuffer);
+    glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, drawFramebuffer);
+    glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, defaultFramebuffer);
     glBlitFramebufferEXT(x, y, x + width, y + height, x, y, x + width, y + height,
                          GL_COLOR_BUFFER_BIT, GL_NEAREST);
-    glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, defaultFramebuffer);
-    glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, resolveFramebuffer);
     complain("bringing a piece down to read it");
 
-    return (GLuint) bound;
+    glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, defaultFramebuffer);
+    glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, drawFramebuffer);
 }
 
 /**
- * Puts back whatever was bound to read before a piece was made readable.
+ * Puts the read back where the client left it, which is wherever it draws.
  */
-static void doneReading(GLuint bound) {
-    if (resolveFramebuffer != 0 && defaultBound) {
-        glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, bound);
+static void doneReading(void) {
+    if (drawFramebuffer != 0 && defaultBound) {
+        glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, drawFramebuffer);
     }
 }
 
@@ -511,44 +477,44 @@ static void doneReading(GLuint bound) {
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_glReadPixelsi(JNIEnv *env, jclass owner, jint x, jint y,
                                                         jint width, jint height, jint format,
                                                         jint type, jintArray pixels, jint offset) {
-    GLuint bound = readableRegion(x, y, width, height);
+    bringDown(x, y, width, height);
     jint *address = pixels == NULL ? NULL : (*env)->GetPrimitiveArrayCritical(env, pixels, NULL);
     glReadPixels(x, y, width, height, (GLenum) format, (GLenum) type,
                  address == NULL ? NULL : (void *) (address + offset));
     if (address != NULL) {
         (*env)->ReleasePrimitiveArrayCritical(env, pixels, address, 0);
     }
-    doneReading(bound);
+    doneReading();
 }
 
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_glReadPixelsub(JNIEnv *env, jclass owner, jint x, jint y,
                                                          jint width, jint height, jint format,
                                                          jint type, jbyteArray pixels, jint offset) {
-    GLuint bound = readableRegion(x, y, width, height);
+    bringDown(x, y, width, height);
     jbyte *address = pixels == NULL ? NULL : (*env)->GetPrimitiveArrayCritical(env, pixels, NULL);
     glReadPixels(x, y, width, height, (GLenum) format, (GLenum) type,
                  address == NULL ? NULL : (void *) (address + offset));
     if (address != NULL) {
         (*env)->ReleasePrimitiveArrayCritical(env, pixels, address, 0);
     }
-    doneReading(bound);
+    doneReading();
 }
 
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_glCopyTexImage2D(JNIEnv *env, jclass owner, jint target,
                                                             jint level, jint format, jint x, jint y,
                                                             jint width, jint height, jint border) {
-    GLuint bound = readableRegion(x, y, width, height);
+    bringDown(x, y, width, height);
     glCopyTexImage2D((GLenum) target, level, (GLenum) format, x, y, width, height, border);
-    doneReading(bound);
+    doneReading();
 }
 
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_glCopyTexSubImage2D(JNIEnv *env, jclass owner, jint target,
                                                                jint level, jint intoX, jint intoY,
                                                                jint x, jint y, jint width,
                                                                jint height) {
-    GLuint bound = readableRegion(x, y, width, height);
+    bringDown(x, y, width, height);
     glCopyTexSubImage2D((GLenum) target, level, intoX, intoY, x, y, width, height);
-    doneReading(bound);
+    doneReading();
 }
 
 /**
@@ -562,11 +528,11 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_glBlitFramebufferEXT(JNIEnv *env, jclas
                                                                jint toY1, jint mask, jint filter) {
     GLint left = fromX0 < fromX1 ? fromX0 : fromX1;
     GLint bottom = fromY0 < fromY1 ? fromY0 : fromY1;
-    GLuint bound = readableRegion(left, bottom, (fromX1 > fromX0 ? fromX1 - fromX0 : fromX0 - fromX1),
-                                  (fromY1 > fromY0 ? fromY1 - fromY0 : fromY0 - fromY1));
+    bringDown(left, bottom, fromX1 > fromX0 ? fromX1 - fromX0 : fromX0 - fromX1,
+              fromY1 > fromY0 ? fromY1 - fromY0 : fromY0 - fromY1);
     glBlitFramebufferEXT(fromX0, fromY0, fromX1, fromY1, toX0, toY0, toX1, toY1,
                          (GLbitfield) mask, (GLenum) filter);
-    doneReading(bound);
+    doneReading();
 }
 
 JNIEXPORT jlong JNICALL Java_jaggl_OpenGL_prepareSurface(JNIEnv *env, jclass owner, jobject canvas);
@@ -702,6 +668,8 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_releaseSurface(JNIEnv *env, jclass owne
 }
 
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_swapBuffers(JNIEnv *env, jclass owner) {
+    bringDown(0, 0, offscreenWidth, offscreenHeight);
+
     if (currentSurface != NULL) {
         [(__bridge JagGLLayer *) currentSurface->layer present];
     }
@@ -737,6 +705,7 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_release(JNIEnv *env, jclass owner) {
     }
 
     defaultFramebuffer = 0;
+    drawFramebuffer = 0;
     defaultColour = 0;
     defaultDepth = 0;
     offscreenWidth = 0;
@@ -872,7 +841,7 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_glGetInfoLogARB(JNIEnv *env, jclass own
  */
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_glBindFramebufferEXT(JNIEnv *env, jclass owner,
                                                               jint target, jint framebuffer) {
-    GLuint wanted = framebuffer == 0 ? defaultFramebuffer : (GLuint) framebuffer;
+    GLuint wanted = framebuffer == 0 ? whereTheClientDraws() : (GLuint) framebuffer;
     glBindFramebufferEXT((GLenum) target, wanted);
 
     if (target == GL_FRAMEBUFFER_EXT || target == GL_DRAW_FRAMEBUFFER_EXT) {
