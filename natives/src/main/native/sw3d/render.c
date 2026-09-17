@@ -293,9 +293,9 @@ enum { TEXTURE_EDGE = 127, TEXTURE_WIDE = 128 };
 /**
  * Where the three corners of a face sit on the texture it wears.
  *
- * Every textured face wears the whole of its texture, laid down the same way round. A model whose
- * mesh carries texture spaces places its textures by those instead, and nothing here reads one
- * yet, so such a model is textured as though it carried none.
+ * These are what a face wears where the mesh carries no texture space for it: the whole of the
+ * texture, laid down the same way round. A face whose texture is placed by a space of its own is
+ * given the corners that space worked out instead.
  */
 static const float FACE_CORNERS[3][2] = {
     { 0.0f, (float) TEXTURE_EDGE },

@@ -970,7 +970,7 @@ static int shadowLands(int place, int height, int lean) {
 
 /**
  * Notes that the picture of these tiles has to be worked out again, because a shadow moved over
- * them. Nothing draws a shadow yet, so nothing reads this back.
+ * them. The tile reads the mark back when it is next drawn and builds its picture afresh.
  */
 static void reshadeTiles(Ground *ground, int left, int top, int right, int bottom) {
     for (int x = left; x <= right; x++) {
