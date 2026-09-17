@@ -13,6 +13,35 @@
 
 Raster raster;
 
+/**
+ * How many parts of the renderer may be switched off at once, which is as many as there are names
+ * below.
+ */
+enum { SWITCHES = 8 };
+
+int switchedOff(const char *name) {
+    static const char *asked[SWITCHES];
+    static int answer[SWITCHES];
+    static int known;
+
+    for (int at = 0; at < known; at++) {
+        if (strcmp(asked[at], name) == 0) {
+            return answer[at];
+        }
+    }
+
+    const char *said = getenv(name);
+    int off = said != NULL && said[0] != '\0' && strcmp(said, "0") != 0;
+
+    if (known < SWITCHES) {
+        asked[known] = name;
+        answer[known] = off;
+        known++;
+    }
+
+    return off;
+}
+
 void rasterResetClip(void) {
     raster.clipLeft = 0;
     raster.clipTop = 0;

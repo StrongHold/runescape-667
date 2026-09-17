@@ -76,6 +76,8 @@ public sealed interface Scene {
         new TexturesOff(),
         new TexturedGround(),
         new CutGround(),
+        new HollowGround(),
+        new HollowPlan(),
         new SmoothGround(),
         new Textured(),
         new RoundPoint(),
@@ -88,7 +90,8 @@ public sealed interface Scene {
         new Priorities(),
         new Billboards(),
         new OnTheGround(),
-        new BlackBacked()
+        new BlackBacked(),
+        new NearAndFar()
     );
 
     /**
@@ -98,7 +101,7 @@ public sealed interface Scene {
     record Props(Sprite gradient, Model model, Model simple, Matrix matrix,
                  Font mono, Font proportional, Ground ground, Mesh mesh, Model textured,
                  Model faded, Model plain, Ground floor, Ground cut, Ground smooth,
-                 Model roundPoint, Model rock, Model seenThrough, Ground overlaid,
+                 Model roundPoint, Model rock, Model seenThrough, Ground overlaid, Ground hollow,
                  Ground shadowed, Ground blended, Model stairs, Model priorities,
                  Model billboards, Mesh located, Mesh blackBacked) {
         /* empty */
@@ -1297,6 +1300,49 @@ public sealed interface Scene {
     }
 
     /**
+     * The smoothly coloured patch with the near and far edges of the world cutting through it.
+     *
+     * Every other patch here stands wholly between the two, so what becomes of a corner nearer
+     * than the eye may see, or further than it may see, had never been drawn. The client draws
+     * ground on both sides of both edges every frame.
+     */
+    record NearAndFar() implements Scene {
+
+        /**
+         * A near edge that cuts through the patch, and a far edge well beyond everything, so that
+         * what is drawn shows the near edge alone and not the distance fading it.
+         */
+        private static final int CLOSEST = 3000;
+        private static final int FURTHEST = Integer.MAX_VALUE;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            /*
+             * The near and far edges the client asks for, which cut through a patch this size
+             * rather than standing well outside it. Ground nearer than the near edge is the
+             * ground under the eye itself, and the client draws a great deal of it.
+             */
+            toolkit.f(CLOSEST, FURTHEST);
+
+            var camera = toolkit.createMatrix();
+            camera.createCamera(HandGround.TILES * HandGround.TILE / 2, Terrain.UP,
+                -Terrain.BACK, TURN / 8, 0, 0);
+            toolkit.setCamera(camera);
+
+            var visible = new boolean[HandGround.TILES * 2][HandGround.TILES * 2];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            props.smooth().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
+                HandGround.TILES, visible, false, 0);
+        }
+    }
+
+    /**
      * The smoothly coloured patch with a colour laid over each face as well.
      *
      * Every tile of the client's terrain arrives carrying both, and no scene had ever handed the
@@ -1416,6 +1462,45 @@ public sealed interface Scene {
      * is then not a corner of the grid. Every other patch here has its corners on the grid, so
      * nothing else asks how the ground faces at a place between them.
      */
+    /**
+     * A patch of ground with a hole in it, laid over a picture that is not black.
+     *
+     * The client gives a tile no colour and no texture where the floor opens onto the one below,
+     * which is what it hands over at the mouth of a stairwell. Nothing of such a tile is drawn,
+     * so what is under the floor shows through.
+     *
+     * Every other patch here is drawn over a cleared picture, where a tile wrongly painted black
+     * cannot be told from one not painted at all. This one fills the picture first, so the two
+     * differ by the whole of the hole.
+     */
+    record HollowGround() implements Scene {
+
+        /** A colour no lit corner of the patch reaches, so that anything left of it stands out. */
+        private static final int UNDER_THE_FLOOR = 0xFFD08040;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+            toolkit.fillRect(0, 0, WIDTH, HEIGHT, UNDER_THE_FLOOR);
+
+            var camera = toolkit.createMatrix();
+            camera.createCamera(HandGround.TILES * HandGround.TILE / 2, Terrain.UP,
+                -Terrain.BACK, TURN / 8, 0, 0);
+            toolkit.setCamera(camera);
+
+            var visible = new boolean[HandGround.TILES * 2][HandGround.TILES * 2];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            props.hollow().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
+                HandGround.TILES, visible, false, 0);
+        }
+    }
+
     record CutGround() implements Scene {
 
         /**
@@ -1501,6 +1586,47 @@ public sealed interface Scene {
      * something later refuses to draw them. It is kept because it reaches the plan native, which
      * nothing else does.
      */
+    /**
+     * The patch with a hole through it, drawn from straight above over a picture that is not
+     * black.
+     *
+     * A patch drawn as the world is seen stands almost edge on, and the tiles behind a hole cover
+     * it. From straight above nothing covers anything, so what becomes of a face the floor opens
+     * through is all this shows.
+     */
+    record HollowPlan() implements Scene {
+
+        /** A colour no tile of the patch is drawn in, so that a hole through it stands out. */
+        private static final int UNDER_THE_FLOOR = 0xFFD08040;
+
+        /**
+         * Fifty four of its pixels are the hole itself, and they differ on purpose.
+         *
+         * The shipped toolkit paints a face the floor opens through in the colour a corner with
+         * no colour comes to, which is black. The client's own renderer draws no such face at
+         * all, and the world behind it is drawn expecting to be seen, so a stairwell drawn the
+         * shipped way is a black square with the steps behind it. This leaves the hole open.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.fillRect(0, 0, WIDTH, HEIGHT, UNDER_THE_FLOOR);
+
+            var visible = new boolean[HandGround.TILES][HandGround.TILES];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            props.hollow().drawMinimap(0, 0, HandGround.TILES, HandGround.TILES, visible);
+        }
+    }
+
     record Plan() implements Scene {
 
         @Override

@@ -261,6 +261,7 @@ int groundTileFaces(const void *tile);
 
 /** Which texture a face of the tile wears, or nothing where it wears none. */
 int groundTileFaceTexture(const void *tile, int face);
+int groundTileFaceHollow(const void *tile, int face);
 
 /** How much of the world one whole width of a face's texture covers. */
 int groundTileFaceSize(const void *tile, int face);
@@ -617,6 +618,12 @@ uint32_t *spritePixelsOf(void *handle);
 int distanceBufferWidth(const void *handle);
 int distanceBufferHeight(const void *handle);
 float *distanceBufferRows(void *handle);
+
+/**
+ * Whether a named part of the renderer has been switched off from outside, so that a picture the
+ * client draws can be taken apart a layer at a time. Each is asked about once and remembered.
+ */
+int switchedOff(const char *name);
 
 jlong nativeIdOf(JNIEnv *env, jobject owner);
 void setNativeId(JNIEnv *env, jobject owner, jlong value);

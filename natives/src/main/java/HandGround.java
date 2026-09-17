@@ -178,6 +178,71 @@ public final class HandGround {
     }
 
     /**
+     * A patch with a hole through the middle of it.
+     *
+     * The client gives a corner no colour, in neither the colours it blends across a face nor the
+     * colour it lays over one, where the floor opens onto the one below. That is what it hands
+     * over at the mouth of a stairwell. A face whose corners are all like that and which wears no
+     * texture is not the floor at all, and nothing of it is drawn.
+     *
+     * The hole is in the middle of the patch rather than at its edge, because a face at the edge
+     * is thrown away for facing away or for standing too near the eye before anything asks what
+     * colour it is.
+     */
+    public static Ground buildHollow(Toolkit toolkit) {
+        var heights = heights();
+        var ground = toolkit.createGround(TILES, TILES, heights, heights,
+            GROUND_FLAGS, FEATURE_FLAGS);
+
+        for (var x = 0; x < TILES; x++) {
+            for (var z = 0; z < TILES; z++) {
+                addHollowTile(ground, x, z);
+            }
+        }
+
+        ground.YA();
+        return ground;
+    }
+
+    /** How far either way from the middle of the patch the floor opens onto the one below. */
+    private static final int HOLE_REACHES = 2;
+
+    private static boolean openFloor(int x, int z) {
+        return Math.abs(x - TILES / 2) < HOLE_REACHES && Math.abs(z - TILES / 2) < HOLE_REACHES;
+    }
+
+    private static void addHollowTile(Ground ground, int x, int z) {
+        var slots = SLOT_ACROSS.length;
+        var across = new int[slots];
+        var along = new int[slots];
+        var colours = new int[slots];
+        var textures = new int[slots];
+        var sizes = new int[slots];
+        var overlay = new int[slots];
+        var open = openFloor(x, z);
+
+        for (var slot = 0; slot < slots; slot++) {
+            across[slot] = SLOT_ACROSS[slot];
+            along[slot] = SLOT_ALONG[slot];
+            /*
+             * Only the first face of the tile opens. The client never hands a tile over with
+             * every face of it open, so a patch built that way says nothing about what it does
+             * with the tiles it really hands over.
+             */
+            var opens = open && slot < 3;
+
+            sizes[slot] = TILE;
+            textures[slot] = opens ? -1 : TEXTURED_WITH;
+            overlay[slot] = opens ? NO_COLOUR : OVERLAID_WITH;
+            colours[slot] = opens ? NO_COLOUR
+                : cornerHsl(x + SLOT_ACROSS[slot] / TILE, z + SLOT_ALONG[slot] / TILE);
+        }
+
+        ground.U(x, z, across, null, along, null, colours, overlay, textures, sizes,
+            0, 0, 0, false);
+    }
+
+    /**
      * The same patch with something standing on it throwing a shadow across the middle.
      *
      * The client puts the shadow of everything that stands on the ground onto the ground itself,

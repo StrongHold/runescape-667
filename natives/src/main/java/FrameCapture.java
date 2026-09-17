@@ -142,6 +142,7 @@ public final class FrameCapture {
             rockModel(toolkit),
             seenThroughModel(toolkit, textured),
             HandGround.buildOverlaid(toolkit),
+            HandGround.buildHollow(toolkit),
             HandGround.buildShadowed(toolkit, shadowOf(toolkit)),
             HandGround.buildBlended(toolkit),
             namedModel(toolkit, CacheMesh.STAIRS, false, EVERY_FUNCTION),

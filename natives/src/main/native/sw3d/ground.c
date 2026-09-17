@@ -16,6 +16,8 @@
 #include <math.h>
 #include <string.h>
 
+#include <stdio.h>
+
 #include "sw3d.h"
 
 /**
@@ -33,6 +35,12 @@ typedef struct {
     int16_t *texture;
     int16_t *size;
     unsigned char *light;
+
+    /**
+     * Whether the client gave the corner no colour at all, which it does where the floor opens
+     * onto the one below.
+     */
+    unsigned char *hollow;
 
     /** How deep the water over the corner is, or nothing where the tile is not underwater. */
     int16_t *depth;
@@ -169,6 +177,7 @@ static void tileFree(Tile *tile) {
     free(tile->texture);
     free(tile->size);
     free(tile->light);
+    free(tile->hollow);
     free(tile->depth);
     free(tile);
 }
@@ -329,9 +338,52 @@ JNIEXPORT void JNICALL Java_t_w(JNIEnv *env, jobject self, jboolean immediate) {
 /**
  * Nothing is left to do once every tile has been given. The tiles are built as they arrive.
  */
+/** A running count of what becomes of the tiles the client hands over. */
+static struct {
+    int handed;
+    int noGround;
+    int outside;
+    int tooFewCorners;
+    int noRoom;
+    int kept;
+} handing;
+
+static void handed(const char *why) {
+    static int listening = -1;
+    if (listening == -1) {
+        listening = getenv("SW3D_GROUND_TALLY") != NULL;
+    }
+
+    if (!listening) {
+        return;
+    }
+
+    if (why != NULL && handing.handed > 0) {
+        fprintf(stderr, "sw3d handed: %d handed over, %d no ground, %d outside, %d too few"
+                " corners, %d no room, %d kept\n",
+                handing.handed, handing.noGround, handing.outside, handing.tooFewCorners,
+                handing.noRoom, handing.kept);
+        fflush(stderr);
+    }
+}
+
 JNIEXPORT void JNICALL Java_t_YA(JNIEnv *env, jobject self) {
-    (void) env;
-    (void) self;
+    Ground *ground = groundOf(env, self);
+
+    if (ground != NULL) {
+        int held = 0;
+        for (int at = 0; at < ground->sizeX * ground->sizeZ; at++) {
+            if (ground->tiles[at] != NULL) {
+                held++;
+            }
+        }
+
+        fprintf(stderr, "sw3d finished a ground %dx%d: %d tiles held\n",
+                ground->sizeX, ground->sizeZ, held);
+    }
+
+    handed("");
+    handing = (typeof(handing)) {0};
 }
 
 /**
@@ -405,7 +457,7 @@ JNIEXPORT void JNICALL Java_t_V(JNIEnv *env, jobject self, jint which, jint acro
  */
 JNIEXPORT void JNICALL Java_t_ka(JNIEnv *env, jobject self, jint x, jint z, jint darker) {
     Ground *ground = groundOf(env, self);
-    if (ground == NULL || ground->corners == NULL
+    if (switchedOff("SW3D_NO_GROUND_SHADOW") || ground == NULL || ground->corners == NULL
         || x < 0 || z < 0 || x > ground->sizeX || z > ground->sizeZ) {
         return;
     }
@@ -619,14 +671,25 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
     (void) waterDepth;
     (void) waterBias;
 
+    handing.handed++;
+
     Ground *ground = groundOf(env, self);
-    if (ground == NULL || across == NULL || x < 0 || z < 0
-        || x >= ground->sizeX || z >= ground->sizeZ) {
+    if (ground == NULL) {
+        handing.noGround++;
+        handed("");
+        return;
+    }
+
+    if (across == NULL || x < 0 || z < 0 || x >= ground->sizeX || z >= ground->sizeZ) {
+        handing.outside++;
+        handed("");
         return;
     }
 
     int corners = (int) (*env)->GetArrayLength(env, across);
     if (corners < 3) {
+        handing.tooFewCorners++;
+        handed("");
         return;
     }
 
@@ -646,9 +709,10 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
     tile->up = calloc((size_t) corners, sizeof(int16_t));
     tile->colour = calloc((size_t) corners, sizeof(uint32_t));
     tile->light = calloc((size_t) corners, 1);
+    tile->hollow = calloc((size_t) corners, 1);
 
     if (tile->across == NULL || tile->along == NULL || tile->up == NULL
-        || tile->colour == NULL || tile->light == NULL) {
+        || tile->colour == NULL || tile->light == NULL || tile->hollow == NULL) {
         tileFree(tile);
         return;
     }
@@ -681,6 +745,8 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
              * else the floor opens onto the one below, and a corner left as nothing carries no
              * light into the corners beside it, which leaves the whole tile a shade out.
              */
+            tile->hollow[corner] = colours[corner] == NO_COLOUR;
+
             int named = colours[corner] == NO_COLOUR ? BLACK : colours[corner] & 0xFFFF;
 
             tile->colour[corner] = litCorner(ground, named, tile->light[corner],
@@ -694,6 +760,7 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
 
     tileFree(*tileAt(ground, x, z));
     *tileAt(ground, x, z) = tile;
+    handing.kept++;
     allocatedGrew((size_t) corners * sizeof(uint32_t));
 }
 
@@ -888,8 +955,10 @@ JNIEXPORT void JNICALL Java_t_CA(JNIEnv *env, jobject self, jobject shadow, jint
     (void) unused;
     (void) immediate;
 
-    moveShadow(groundOf(env, self), (const Shadow *) (intptr_t) nativeIdOf(env, shadow),
-        x, height, z, 1);
+    if (!switchedOff("SW3D_NO_GROUND_SHADOW")) {
+        moveShadow(groundOf(env, self), (const Shadow *) (intptr_t) nativeIdOf(env, shadow),
+            x, height, z, 1);
+    }
 }
 
 /**
@@ -900,8 +969,10 @@ JNIEXPORT void JNICALL Java_t_wa(JNIEnv *env, jobject self, jobject shadow, jint
     (void) unused;
     (void) immediate;
 
-    moveShadow(groundOf(env, self), (const Shadow *) (intptr_t) nativeIdOf(env, shadow),
-        x, height, z, 0);
+    if (!switchedOff("SW3D_NO_GROUND_SHADOW")) {
+        moveShadow(groundOf(env, self), (const Shadow *) (intptr_t) nativeIdOf(env, shadow),
+            x, height, z, 0);
+    }
 }
 
 /**
@@ -1124,6 +1195,19 @@ int groundTileFaceTexture(const void *at, int face) {
     }
 
     return tile->texture[face * 3];
+}
+
+/**
+ * Whether the client gave every corner of a face no colour, which is how it says the floor opens
+ * onto the one below rather than how it says the floor is black.
+ */
+int groundTileFaceHollow(const void *at, int face) {
+    const Tile *tile = at;
+    if (tile->hollow == NULL || face * 3 + 2 >= tile->corners) {
+        return 0;
+    }
+
+    return tile->hollow[face * 3] && tile->hollow[face * 3 + 1] && tile->hollow[face * 3 + 2];
 }
 
 /** The texture one corner of a tile names, which its neighbours in the same face may not share. */

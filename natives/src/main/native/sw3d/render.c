@@ -21,6 +21,8 @@
 #include <xmmintrin.h>
 #endif
 
+#include <stdio.h>
+
 #include "sw3d.h"
 
 /** A colour has a blue, a green, a red and an alpha part, in the order they sit in a pixel. */
@@ -1557,6 +1559,10 @@ static void layTextureOnTile(const void *tile, int face, int tileSize,
         return;
     }
 
+    if (switchedOff("SW3D_GROUND_UNTEXTURED")) {
+        return;
+    }
+
     texels = texturePixels(texture);
 
     /*
@@ -1618,12 +1624,65 @@ static int facesTheEye(const Projected *a, const Projected *b, const Projected *
     return acrossA * downC > downA * acrossC;
 }
 
+/**
+ * A running count of what becomes of the tiles the client asks for, kept only when the client is
+ * started with somewhere to write it.
+ */
+static struct {
+    int asked;
+    int missing;
+    int faces;
+    int behindTheEye;
+    int tooNear;
+    int tooFar;
+    int turnedAway;
+    int hollow;
+    int drawn;
+    float nearest;
+    float farthest;
+} tally = {0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0e30f, -1.0e30f};
+
+static void tallied(const char *what) {
+    static int listening = -1;
+    if (listening == -1) {
+        listening = getenv("SW3D_GROUND_TALLY") != NULL;
+    }
+
+    if (!listening) {
+        return;
+    }
+
+    if (what != NULL) {
+        const Projection *view = projection();
+        fprintf(stderr, "sw3d ground: %d asked, %d not held, %d faces, %d off (%d too near,"
+                " %d too far), %d turned away, %d hollow, %d drawn; away %.1f..%.1f,"
+                " near %.1f far %.1f\n",
+                tally.asked, tally.missing, tally.faces, tally.behindTheEye, tally.tooNear,
+                tally.tooFar, tally.turnedAway, tally.hollow, tally.drawn,
+                (double) tally.nearest, (double) tally.farthest,
+                (double) view->near, (double) view->far);
+        fflush(stderr);
+        tally = (typeof(tally)) {0};
+        tally.nearest = 1.0e30f;
+        tally.farthest = -1.0e30f;
+        return;
+    }
+
+    if (tally.asked >= 20000) {
+        tallied("");
+    }
+}
+
 void renderGroundTile(const void *ground, int x, int z) {
     int corners = 0;
     const void *tile = groundTile(ground, x, z, &corners);
     const void *camera = cameraMatrix();
 
+    tally.asked++;
+    tallied(NULL);
+
     if (tile == NULL || camera == NULL || raster.pixels == NULL || raster.depths == NULL) {
+        tally.missing++;
         return;
     }
 
@@ -1659,6 +1718,20 @@ void renderGroundTile(const void *ground, int x, int z) {
         }
 
         float away = point[3];
+
+        if (away < tally.nearest) {
+            tally.nearest = away;
+        }
+        if (away > tally.farthest) {
+            tally.farthest = away;
+        }
+
+        if (away < view->near) {
+            tally.tooNear++;
+        } else if (away > view->far) {
+            tally.tooFar++;
+        }
+
         Projected *landed = &projected[corner];
         landed->depth = signedAs(point[2] / away, point[2]);
         landed->visible = away >= view->near && away <= view->far;
@@ -1674,9 +1747,28 @@ void renderGroundTile(const void *ground, int x, int z) {
         const Projected *b = &projected[face * 3 + 1];
         const Projected *c = &projected[face * 3 + 2];
 
-        if (!a->visible || !b->visible || !c->visible || !facesTheEye(a, b, c)) {
+        tally.faces++;
+
+        /*
+         * A face the client gave no colour and no texture is where the floor opens onto the one
+         * below. Nothing of it is drawn, so what is under the floor shows through.
+         */
+        if (groundTileFaceHollow(tile, face) && groundTileFaceTexture(tile, face) == -1) {
+            tally.hollow++;
             continue;
         }
+
+        if (!a->visible || !b->visible || !c->visible) {
+            tally.behindTheEye++;
+            continue;
+        }
+
+        if (!facesTheEye(a, b, c)) {
+            tally.turnedAway++;
+            continue;
+        }
+
+        tally.drawn++;
 
         Corner walked[3] = {
             cornerAt(a, shade[face * 3]),
@@ -1725,7 +1817,9 @@ JNIEXPORT void JNICALL Java_a_UA(JNIEnv *env, jobject self, jlong worker, jlong 
     (void) worker;
     (void) flags;
 
-    drawModelFor(env, model, matrix, cylinder, THROUGH_THE_EYE);
+    if (!switchedOff("SW3D_NO_MODELS")) {
+        drawModelFor(env, model, matrix, cylinder, THROUGH_THE_EYE);
+    }
 }
 
 /**
@@ -1741,7 +1835,9 @@ JNIEXPORT void JNICALL Java_a_f(JNIEnv *env, jobject self, jlong worker, jlong m
     (void) worker;
     (void) unused;
 
-    drawModelFor(env, model, matrix, cylinder, smaller);
+    if (!switchedOff("SW3D_NO_MODELS")) {
+        drawModelFor(env, model, matrix, cylinder, smaller);
+    }
 }
 
 /**
@@ -1753,7 +1849,9 @@ JNIEXPORT void JNICALL Java_a_H(JNIEnv *env, jobject self, jlong worker, jlong g
     (void) self;
     (void) worker;
 
-    renderGroundTile((const void *) (intptr_t) ground, x, z);
+    if (!switchedOff("SW3D_NO_GROUND")) {
+        renderGroundTile((const void *) (intptr_t) ground, x, z);
+    }
 }
 
 /**
@@ -1767,7 +1865,9 @@ JNIEXPORT void JNICALL Java_a_Z(JNIEnv *env, jobject self, jlong worker, jlong g
     (void) worker;
     (void) depth;
 
-    renderGroundTile((const void *) (intptr_t) ground, x, z);
+    if (!switchedOff("SW3D_NO_GROUND")) {
+        renderGroundTile((const void *) (intptr_t) ground, x, z);
+    }
 }
 
 /*
@@ -2465,6 +2565,14 @@ static void renderTilePlan(const void *ground, const void *tile, float across, f
 
     for (int face = 0; face < groundTileFaces(tile); face++) {
         uint32_t paint = planPaint(tile, face);
+
+        /*
+         * A face the floor opens through has nothing of its own to show on the plan either, so
+         * whatever the map was drawn over stays where it is.
+         */
+        if (paint == NO_PAINT && groundTileFaceHollow(tile, face)) {
+            continue;
+        }
 
         fillTriangle(
             planCorner(tile, face * 3, across, down, width, size, paint),

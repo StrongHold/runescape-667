@@ -17,3 +17,26 @@ application {
         "java.base/java.lang=ALL-UNNAMED",
     )
 }
+
+/**
+ * Switches that take a layer of the software renderer out of the picture, so that what draws a
+ * given pixel can be found by elimination. Each is forwarded from the shell that starts the build
+ * rather than inherited, because the build daemon outlives the shell and keeps the environment it
+ * started with.
+ */
+val rendererSwitches = listOf(
+    "SW3D_NO_GROUND",
+    "SW3D_NO_MODELS",
+    "SW3D_NO_GROUND_SHADOW",
+    "SW3D_GROUND_UNTEXTURED",
+    "SW3D_GROUND_TALLY",
+)
+
+tasks.named<JavaExec>("run") {
+    for (name in rendererSwitches) {
+        val said = providers.environmentVariable(name)
+        if (said.isPresent) {
+            environment(name, said.get())
+        }
+    }
+}
