@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -26,11 +27,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class NativeLibraries {
 
     /**
-     * The library that asks JavaVM.framework for a drawing surface, by the name it is registered
-     * under. Only the software toolkit is left: everything else that wanted one is ours now and
-     * takes its surface from Cocoa directly.
+     * The libraries that ask JavaVM.framework for a drawing surface, by the name each is registered
+     * under.
+     *
+     * Both are ours now and neither asks for one, so in an ordinary run this reaches nothing. It is
+     * here for a run that asks for a shipped toolkit instead, to look at what one draws beside what
+     * the other draws, and a shipped toolkit cannot obtain a surface without it.
      */
-    private static final String SURFACE_DEPENDENT = "sw3d";
+    private static final List<String> SURFACE_DEPENDENTS = List.of("sw3d", "jaggl");
 
     /**
      * Names the library that provides the drawing surface.
@@ -81,7 +85,7 @@ public final class NativeLibraries {
         }
 
         File surface = surfaceLibrary();
-        if (!SURFACE_DEPENDENT.equals(name) || surface == null) {
+        if (!SURFACE_DEPENDENTS.contains(name) || surface == null) {
             return null;
         }
 

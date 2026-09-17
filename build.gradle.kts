@@ -101,10 +101,28 @@ subprojects {
                     ":natives:compileMiscLibrary",
                 )
                 systemProperty("toolkit.surface.library", surfaceLibrary.asFile.absolutePath)
-                systemProperty("toolkit.jaggl.library", openGlLibrary.asFile.absolutePath)
                 systemProperty("toolkit.jaclib.library", memoryLibrary.asFile.absolutePath)
-                systemProperty("toolkit.sw3d.library", softwareToolkit.asFile.absolutePath)
                 systemProperty("toolkit.jagmisc.library", miscLibrary.asFile.absolutePath)
+
+                /*
+                 * Which toolkit the client draws with is ours unless the shipped one is asked for.
+                 *
+                 * A library not named here is loaded as it was downloaded, which is what makes the
+                 * two comparable in the client rather than only in the harness: -PshippedSw3d and
+                 * -PshippedJaggl put the original back for one run, so that anything that looks
+                 * wrong can be looked at side by side with what it is meant to look like.
+                 *
+                 * The shipped software toolkit needs the surface named above, and the shipped
+                 * OpenGL binding needs it as well, which is why that one is named whatever is asked
+                 * for.
+                 */
+                if (!providers.gradleProperty("shippedSw3d").isPresent) {
+                    systemProperty("toolkit.sw3d.library", softwareToolkit.asFile.absolutePath)
+                }
+
+                if (!providers.gradleProperty("shippedJaggl").isPresent) {
+                    systemProperty("toolkit.jaggl.library", openGlLibrary.asFile.absolutePath)
+                }
 
                 /*
                  * Passed through so that a client which stops responding can be asked where it
