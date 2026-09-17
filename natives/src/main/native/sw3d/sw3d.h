@@ -253,6 +253,8 @@ int groundTileFaceTexture(const void *tile, int face);
 
 /** How much of the world one whole width of a face's texture covers. */
 int groundTileFaceSize(const void *tile, int face);
+int groundTileCornerTexture(const void *tile, int corner);
+int groundTileCornerSize(const void *tile, int corner);
 
 /**
  * The picture of the shadow over one tile, worked out again where a shadow has moved over it.

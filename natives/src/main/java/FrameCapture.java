@@ -131,7 +131,8 @@ public final class FrameCapture {
             rockModel(toolkit),
             seenThroughModel(toolkit, textured),
             HandGround.buildOverlaid(toolkit),
-            HandGround.buildShadowed(toolkit, shadowOf(toolkit)));
+            HandGround.buildShadowed(toolkit, shadowOf(toolkit)),
+            HandGround.buildBlended(toolkit));
 
         var manifest = new ArrayList<String>();
 

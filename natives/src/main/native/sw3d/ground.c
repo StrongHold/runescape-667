@@ -1093,6 +1093,26 @@ int groundTileFaceTexture(const void *at, int face) {
     return tile->texture[face * 3];
 }
 
+/** The texture one corner of a tile names, which its neighbours in the same face may not share. */
+int groundTileCornerTexture(const void *at, int corner) {
+    const Tile *tile = at;
+    if (tile->texture == NULL || corner >= tile->corners) {
+        return -1;
+    }
+
+    return tile->texture[corner];
+}
+
+/** How wide a texture one corner of a tile names is laid, in the world's own units. */
+int groundTileCornerSize(const void *at, int corner) {
+    const Tile *tile = at;
+    if (tile->size == NULL || corner >= tile->corners) {
+        return 0;
+    }
+
+    return tile->size[corner];
+}
+
 int groundTileFaces(const void *at) {
     return ((const Tile *) at)->faces;
 }

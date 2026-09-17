@@ -66,6 +66,9 @@ public final class HandGround {
      */
     private static final int TEXTURED_WITH = 6;
 
+    /** A second texture the player may not turn off either, so a corner can differ from its own. */
+    private static final int TEXTURED_BESIDE = 4;
+
     /**
      * The colour laid over a whole face, which is a red the corner colours never reach so that a
      * face drawn with it cannot be mistaken for one drawn without.
@@ -111,7 +114,7 @@ public final class HandGround {
      * the same colour, and no amount of that ever asks whether a face is shaded across.
      */
     public static Ground buildSmooth(Toolkit toolkit) {
-        return buildCornerLit(toolkit, false, FEATURE_FLAGS);
+        return buildCornerLit(toolkit, false, FEATURE_FLAGS, false);
     }
 
     /**
@@ -122,8 +125,19 @@ public final class HandGround {
      * drawn as. Nothing else here hands over the second, so this is the only scene that says what
      * becomes of it.
      */
+    /**
+     * The same patch with the corners of a tile naming different textures from one another.
+     *
+     * The client gives every corner of the ground the texture of whatever it stands nearest, so
+     * the corners of a face disagree wherever one kind of ground meets another, and a face whose
+     * corners disagree is blended from all three rather than drawn with one of them.
+     */
+    public static Ground buildBlended(Toolkit toolkit) {
+        return buildCornerLit(toolkit, false, FEATURE_FLAGS, true);
+    }
+
     public static Ground buildOverlaid(Toolkit toolkit) {
-        return buildCornerLit(toolkit, true, FEATURE_FLAGS);
+        return buildCornerLit(toolkit, true, FEATURE_FLAGS, false);
     }
 
     /**
@@ -137,7 +151,7 @@ public final class HandGround {
      * shadow slides depends on how far above the ground the thing throwing it stands.
      */
     public static Ground buildShadowed(Toolkit toolkit, Shadow shadow) {
-        var ground = buildCornerLit(toolkit, false, FEATURE_FLAGS | TAKES_SHADOWS);
+        var ground = buildCornerLit(toolkit, false, FEATURE_FLAGS | TAKES_SHADOWS, false);
 
         if (shadow != null) {
             for (var x = 1; x < TILES; x += 2) {
@@ -164,14 +178,15 @@ public final class HandGround {
      */
     private static final int TAKES_SHADOWS = 0x10;
 
-    private static Ground buildCornerLit(Toolkit toolkit, boolean overlaid, int features) {
+    private static Ground buildCornerLit(Toolkit toolkit, boolean overlaid, int features,
+            boolean blended) {
         var heights = heights();
         var ground = toolkit.createGround(TILES, TILES, heights, heights,
             GROUND_FLAGS, features);
 
         for (var x = 0; x < TILES; x++) {
             for (var z = 0; z < TILES; z++) {
-                addCornerLitTile(ground, x, z, overlaid);
+                addCornerLitTile(ground, x, z, overlaid, blended);
             }
         }
 
@@ -183,7 +198,8 @@ public final class HandGround {
     private static final int[] SLOT_ACROSS = {0, TILE, TILE, 0, 0, TILE};
     private static final int[] SLOT_ALONG = {0, TILE, 0, 0, TILE, TILE};
 
-    private static void addCornerLitTile(Ground ground, int x, int z, boolean overlaid) {
+    private static void addCornerLitTile(Ground ground, int x, int z, boolean overlaid,
+            boolean blended) {
         var slots = SLOT_ACROSS.length;
         var across = new int[slots];
         var along = new int[slots];
@@ -200,7 +216,16 @@ public final class HandGround {
              * covered the way the ground the client bands light and dark across is covered. The
              * bare column leaves the same patch drawn both ways in one picture.
              */
-            textures[slot] = x == TILES / 2 ? -1 : TEXTURED_WITH;
+            /*
+             * The client picks a corner's texture from the ground the corner stands nearest, so
+             * the corners of one tile disagree wherever one kind of ground meets another. A tile
+             * whose corners all agree says nothing about which of them the face takes its own
+             * from.
+             */
+            textures[slot] = x == TILES / 2 ? -1
+                : !blended ? TEXTURED_WITH
+                : (x + z + SLOT_ACROSS[slot] / TILE + SLOT_ALONG[slot] / TILE) % 2 == 0
+                    ? TEXTURED_WITH : TEXTURED_BESIDE;
             sizes[slot] = TILE;
             colours[slot] = cornerHsl(x + SLOT_ACROSS[slot] / TILE, z + SLOT_ALONG[slot] / TILE);
 

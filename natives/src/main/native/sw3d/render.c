@@ -32,6 +32,15 @@ enum { CHANNELS = 4, ALPHA = 3 };
  */
 enum { SEEN_THROUGH_ITSELF = 2 };
 
+/**
+ * How many textures a face of the ground is blended from, and how many of their shares are
+ * carried across it. The last share is what the other two leave over.
+ */
+enum { BLENDED = 3, MIXED = 2 };
+
+/** A whole share of a texture, which is what a corner carries of its own. */
+enum { WHOLE_SHARE = 0xFFFF };
+
 /** The smallest number of rows or pixels a side is allowed to be divided by. */
 static const float LEAST = 1.0e-6f;
 
@@ -171,6 +180,12 @@ typedef struct {
     float u;
     float v;
     float w;
+
+    /**
+     * How much of the first two of the textures a face is blended from this corner carries, out
+     * of the whole. What is left over is how much of the third it carries.
+     */
+    uint16_t mix[MIXED];
 } Corner;
 
 /** One side of a triangle, either where it has reached or how far it moves in a row. */
@@ -181,12 +196,15 @@ typedef struct {
     float u;
     float v;
     float w;
+    int16_t mix[MIXED];
 } Side;
 
 static uint16_t fadedPart(uint16_t held, float fade, int part);
 
 static Corner cornerAt(const Projected *point, uint32_t colour) {
     Corner corner;
+    corner.mix[0] = 0;
+    corner.mix[1] = 0;
     corner.x = point->x;
     corner.y = point->y;
     corner.depth = point->depth;
@@ -273,6 +291,10 @@ static Side sideBetween(const Corner *from, const Corner *to, int rows) {
         side.colour[part] = narrow(((float) to->colour[part] - (float) from->colour[part]) * over);
     }
 
+    for (int part = 0; part < MIXED; part++) {
+        side.mix[part] = narrow(((float) to->mix[part] - (float) from->mix[part]) * over);
+    }
+
     return side;
 }
 
@@ -286,6 +308,10 @@ static Side sideAt(const Corner *corner) {
 
     for (int part = 0; part < CHANNELS; part++) {
         side.colour[part] = (int16_t) corner->colour[part];
+    }
+
+    for (int part = 0; part < MIXED; part++) {
+        side.mix[part] = (int16_t) corner->mix[part];
     }
 
     return side;
@@ -302,6 +328,10 @@ static void carry(Side *side, const Side *step, int rows) {
     for (int part = 0; part < CHANNELS; part++) {
         side->colour[part] = (int16_t) (side->colour[part] + (int16_t) rows * step->colour[part]);
     }
+
+    for (int part = 0; part < MIXED; part++) {
+        side->mix[part] = (int16_t) (side->mix[part] + (int16_t) rows * step->mix[part]);
+    }
 }
 
 static void advance(Side *side, const Side *step) {
@@ -313,6 +343,10 @@ static void advance(Side *side, const Side *step) {
 
     for (int part = 0; part < CHANNELS; part++) {
         side->colour[part] = (int16_t) (side->colour[part] + step->colour[part]);
+    }
+
+    for (int part = 0; part < MIXED; part++) {
+        side->mix[part] = (int16_t) (side->mix[part] + step->mix[part]);
     }
 }
 
@@ -340,6 +374,12 @@ static int distanceDecides = 1;
  * filled rather than carried down through every side and every row.
  */
 static const uint32_t *texels;
+
+/**
+ * The three textures a face of the ground is blended from, where its corners do not all name the
+ * same one, or nothing where the face wears a single texture.
+ */
+static const uint32_t *blended[BLENDED];
 
 static int texelsRepeat;
 
@@ -428,12 +468,46 @@ static uint32_t shadowAt(float u, float v, float w) {
     return shadowTexels[down << 8 | across];
 }
 
-static uint32_t texelAt(float u, float v, float w) {
+static uint32_t texelFrom(const uint32_t *from, float u, float v, float w) {
     float away = reciprocalOfFour(w);
     int across = onTheTexture((int) (u * away), texelsRepeat);
     int down = onTheTexture((int) (v * away), texelsRepeat);
 
-    return texels[(down << 8) | across];
+    return from[(down << 8) | across];
+}
+
+static uint32_t texelAt(float u, float v, float w) {
+    return texelFrom(texels, u, v, w);
+}
+
+/**
+ * One texel of a face blended from three textures.
+ *
+ * Every one of the three is read at the same place, and the shares the corners carry are what
+ * decide how much of each shows. A share is held out of the whole of a short, so the product of a
+ * texel and a share keeps its top half.
+ */
+static void mixedTexel(const uint16_t *share, float u, float v, float w, uint32_t *into) {
+    uint32_t held[BLENDED];
+    for (int which = 0; which < BLENDED; which++) {
+        held[which] = texelFrom(blended[which], u, v, w);
+    }
+
+    /*
+     * What the first two leave over is worked out in the same short they are carried in, so two
+     * shares that come to more than the whole between them leave a share that has come round.
+     */
+    uint16_t rest = (uint16_t) (WHOLE_SHARE - share[0] - share[1]);
+    uint32_t shares[BLENDED] = {share[0], share[1], rest};
+
+    for (int part = 0; part < CHANNELS; part++) {
+        uint32_t channel = 0;
+        for (int which = 0; which < BLENDED; which++) {
+            channel += ((held[which] >> (part * 8) & 0xFFu) * shares[which]) >> 16;
+        }
+
+        into[part] = channel;
+    }
 }
 
 /**
@@ -561,6 +635,16 @@ static void fillSpan(int y, const Side *left, const Side *right) {
         colourStep[part] = narrow(each);
     }
 
+    uint16_t mix[MIXED];
+    int16_t mixStep[MIXED];
+
+    for (int part = 0; part < MIXED; part++) {
+        float each = ((float) (uint16_t) right->mix[part]
+                      - (float) (uint16_t) left->mix[part]) * over;
+        mix[part] = hold((float) (uint16_t) left->mix[part] + (float) skipped * each);
+        mixStep[part] = narrow(each);
+    }
+
     size_t start = (size_t) (y + raster.clipTop) * (size_t) raster.width
         + (size_t) raster.clipLeft;
     uint32_t *row = raster.pixels + start;
@@ -607,12 +691,21 @@ static void fillSpan(int y, const Side *left, const Side *right) {
                  * and the product keeps its top half, which is what turns a byte times a
                  * sixteenth part back into a byte.
                  */
-                uint32_t texel = texelAt(u, v, w);
-                uint32_t written = 0;
+                uint32_t worn[CHANNELS];
 
+                if (blended[0] == NULL) {
+                    uint32_t texel = texelAt(u, v, w);
+
+                    for (int part = 0; part < CHANNELS; part++) {
+                        worn[part] = texel >> (part * 8) & 0xFF;
+                    }
+                } else {
+                    mixedTexel(mix, u, v, w, worn);
+                }
+
+                uint32_t written = 0;
                 for (int part = 0; part < CHANNELS; part++) {
-                    uint32_t channel = texel >> (part * 8) & 0xFF;
-                    written |= (channel * reached[part] >> 16) << (part * 8);
+                    written |= (worn[part] * reached[part] >> 16) << (part * 8);
                 }
 
                 if (texelsBlend) {
@@ -640,6 +733,10 @@ static void fillSpan(int y, const Side *left, const Side *right) {
         }
         for (int part = 0; part < CHANNELS; part++) {
             colour[part] = (uint16_t) (colour[part] + colourStep[part]);
+        }
+
+        for (int part = 0; part < MIXED; part++) {
+            mix[part] = (uint16_t) (mix[part] + mixStep[part]);
         }
     }
 }
@@ -1310,10 +1407,56 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
  * is what a corner at the far edge reaches, the same as a face of a model wearing the whole of
  * one.
  */
+/**
+ * Whether the three corners of a face all name the same texture laid at the same size.
+ *
+ * The client gives every corner of the ground the texture of whatever it stands nearest, so the
+ * corners of a face disagree wherever one kind of ground meets another. A face whose corners
+ * agree wears the one texture they name; one whose corners do not is blended from all three.
+ */
+static int cornersAgree(const void *tile, int face) {
+    int wears = groundTileCornerTexture(tile, face * 3);
+    int wide = groundTileCornerSize(tile, face * 3);
+
+    for (int corner = 1; corner < 3; corner++) {
+        if (groundTileCornerTexture(tile, face * 3 + corner) != wears
+            || groundTileCornerSize(tile, face * 3 + corner) != wide) {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+/**
+ * Gathers the three textures a face is blended from, and gives each corner the whole of its own.
+ *
+ * Nothing is blended unless every one of the three is held, because a face drawn from two of
+ * three is further from the truth than one drawn from the single texture its first corner names.
+ */
+static int blendTextures(const void *tile, int face, Corner *walked) {
+    for (int corner = 0; corner < 3; corner++) {
+        int wears = groundTileCornerTexture(tile, face * 3 + corner);
+        const Texture *texture = wears == -1 ? NULL : textureFor(wears);
+
+        if (texture == NULL) {
+            blended[0] = NULL;
+            return 0;
+        }
+
+        blended[corner] = texturePixels(texture);
+        walked[corner].mix[0] = corner == 0 ? WHOLE_SHARE : 0;
+        walked[corner].mix[1] = corner == 1 ? WHOLE_SHARE : 0;
+    }
+
+    return 1;
+}
+
 static void layTextureOnTile(const void *tile, int face, int tileSize,
                              const unsigned char *shadow, Corner *walked) {
     texels = NULL;
     texelsBlend = 0;
+    blended[0] = NULL;
 
     /*
      * Where the shadow over a tile is read is where the tile sits on its texture, so a bare face
@@ -1336,6 +1479,10 @@ static void layTextureOnTile(const void *tile, int face, int tileSize,
     texelsRepeat = metrics->repeatsU || metrics->repeatsV;
     texelsBlend = metrics->alphaBlendMode == SEEN_THROUGH_ITSELF;
     shadowTexels = shadow;
+
+    if (!cornersAgree(tile, face)) {
+        blendTextures(tile, face, walked);
+    }
 
     /*
      * How much of the world one whole width of the texture covers. A tile that names nothing is
@@ -1449,6 +1596,7 @@ void renderGroundTile(const void *ground, int x, int z) {
 
     texels = NULL;
     texelsBlend = 0;
+    blended[0] = NULL;
     shadowTexels = NULL;
     free(shade);
 }
