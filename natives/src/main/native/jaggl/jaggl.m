@@ -119,6 +119,25 @@ static uint64_t shownFrames;
 /** Set when the client finishes a frame, cleared when the screen takes one. */
 static _Atomic bool frameWaiting;
 
+/**
+ * Raised each time the screen takes a frame, so that the client can wait for it to.
+ *
+ * A real swap of buffers waits for the screen before it answers, and that wait is what holds a
+ * client to the rate the screen refreshes at. Nothing waited here, so the client finished frames
+ * on its own clock and they fell between refreshes wherever they happened to land: shown a
+ * hundred out of a hundred, but one eight thousand microseconds after the last and the next thirty
+ * three thousand, when every one of them was drawn twenty thousand apart.
+ */
+static dispatch_semaphore_t frameTaken;
+
+/**
+ * How long the client will wait for the screen to take a frame before going on without it.
+ *
+ * There has to be a limit. A window nobody can see is not refreshed, so its layer is never asked
+ * for a frame, and a client waiting for that with no way out would stop for good.
+ */
+enum { LONGEST_WAIT_IN_MILLISECONDS = 100 };
+
 /* How evenly the screen took them, which is the last thing a count of them cannot say. */
 static uint64_t lastShown;
 static uint64_t shownGap;
@@ -296,6 +315,11 @@ static void complain(const char *what) {
 - (instancetype)init {
     self = [super init];
     if (self != nil) {
+        static dispatch_once_t once;
+        dispatch_once(&once, ^{
+            frameTaken = dispatch_semaphore_create(0);
+        });
+
         /*
          * Core Animation asks this layer for a frame at the rate the screen refreshes, rather than
          * being told to take one at the rate the client finishes them. Those are not the same rate
@@ -331,6 +355,15 @@ static void complain(const char *what) {
 - (void)present {
     glFlush();
     atomic_store(&frameWaiting, true);
+
+    /*
+     * Waits for the screen to take it, which is what a swap of buffers does and what paces the
+     * client to the screen rather than to its own clock. Giving up after a while costs one frame's
+     * smoothness and is the only thing standing between a hidden window and a client that never
+     * runs again.
+     */
+    dispatch_semaphore_wait(frameTaken, dispatch_time(DISPATCH_TIME_NOW,
+                                                      LONGEST_WAIT_IN_MILLISECONDS * NSEC_PER_MSEC));
 }
 
 /*
@@ -369,6 +402,7 @@ static void complain(const char *what) {
     }
 
     atomic_store(&frameWaiting, false);
+    dispatch_semaphore_signal(frameTaken);
     shownFrames++;
 
     if (timing()) {
