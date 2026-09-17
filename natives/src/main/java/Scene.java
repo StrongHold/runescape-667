@@ -77,7 +77,9 @@ public sealed interface Scene {
         new TexturedGround(),
         new CutGround(),
         new SmoothGround(),
-        new Textured()
+        new Textured(),
+        new RoundPoint(),
+        new Rock()
     );
 
     /**
@@ -86,7 +88,8 @@ public sealed interface Scene {
      */
     record Props(Sprite gradient, Model model, Model simple, Matrix matrix,
                  Font mono, Font proportional, Ground ground, Mesh mesh, Model textured,
-                 Model faded, Model plain, Ground floor, Ground cut, Ground smooth) {
+                 Model faded, Model plain, Ground floor, Ground cut, Ground smooth,
+                 Model roundPoint, Model rock) {
         /* empty */
     }
 
@@ -151,6 +154,64 @@ public sealed interface Scene {
                 props.matrix().rotateAxisX(step == 0 ? 0 : LEAN);
                 props.matrix().translate((step * 2 - 1) * SPREAD / 4, 0, DEPTH / 2);
                 props.textured().render(props.matrix(), null, 1);
+            }
+        }
+    }
+
+    /**
+     * A model whose texture is wrapped round a point rather than laid flat or round an axis.
+     *
+     * A handful of models in the cache ask for that, and nothing else in these scenes does. It is
+     * turned about two axes so that the seam, where the texture comes back to itself, falls
+     * across faces rather than between them.
+     */
+    record RoundPoint() implements Scene {
+
+        private static final int LEAN = 0x600;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            if (props.roundPoint() == null) {
+                return;
+            }
+
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            for (var step = 0; step < 2; step++) {
+                props.matrix().makeRotationZ(0);
+                props.matrix().rotateAxisX(step == 0 ? 0 : LEAN);
+                props.matrix().translate((step * 2 - 1) * SPREAD / 4, 0, DEPTH / 2);
+                props.roundPoint().render(props.matrix(), null, 1);
+            }
+        }
+    }
+
+    /**
+     * A piece of scenery the client draws with its textures in the wrong places.
+     *
+     * It is here because it was reported rather than because it covers anything the other scenes
+     * do not name, and it carries spaces placed three different ways at once, which no model
+     * built by hand here does.
+     */
+    record Rock() implements Scene {
+
+        private static final int LEAN = 0x400;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            if (props.rock() == null) {
+                return;
+            }
+
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            for (var step = 0; step < 2; step++) {
+                props.matrix().makeRotationZ(0);
+                props.matrix().rotateAxisX(step == 0 ? 0 : LEAN);
+                props.matrix().translate((step * 2 - 1) * SPREAD / 4, 0, DEPTH / 2);
+                props.rock().render(props.matrix(), null, 1);
             }
         }
     }

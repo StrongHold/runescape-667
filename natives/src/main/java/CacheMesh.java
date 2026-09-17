@@ -9,6 +9,7 @@ import com.jagex.js5.js5;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -26,6 +27,14 @@ import java.util.TreeMap;
 public final class CacheMesh {
 
     private static final int GROUP_LIMIT = 4096;
+
+    /**
+     * The group holding a piece of scenery the client drew with its textures in the wrong places.
+     *
+     * It carries nine texture spaces but the numbers for only seven of them, and three ways of
+     * placing a texture at once, which is why it showed what a model built by hand here did not.
+     */
+    public static final int ROCK = 64785;
 
     private final FileSystem_Client store;
 
@@ -170,6 +179,125 @@ public final class CacheMesh {
         }
 
         return Optional.empty();
+    }
+
+    /**
+     * The model in the cache with the most faces placed the named way.
+     *
+     * The first model that uses a way at all may use it on a handful of faces buried inside
+     * itself, which draws a picture that would look the same if the way were never worked out.
+     * The most is the one that has something to show.
+     */
+    public static Optional<Mesh> mostPlaced(int way) throws Exception {
+        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
+        if (!new File(cache, "main_file_cache.dat2").isFile()) {
+            return Optional.empty();
+        }
+
+        var held = at(cache);
+        var best = Optional.<Mesh>empty();
+        var most = 0;
+
+        for (var group = 0; group < GROUP_LIMIT; group++) {
+            var mesh = held.read(group);
+            if (mesh.isEmpty() || mesh.get().texMappingType == null
+                || mesh.get().faceTexSpace == null || !plain(mesh.get())) {
+                continue;
+            }
+
+            var placed = placedFaces(mesh.get(), way);
+            if (placed > most) {
+                most = placed;
+                best = mesh;
+            }
+        }
+
+        return best;
+    }
+
+    /** How many faces of the mesh belong to a space placed the named way. */
+    public static int placedFaces(Mesh mesh, int way) {
+        var ways = mesh.texMappingType;
+        var placed = 0;
+
+        for (var face = 0; face < mesh.faceCount; face++) {
+            var space = mesh.faceTexSpace[face];
+            if (space >= 0 && space < ways.length && ways[space] == way) {
+                placed++;
+            }
+        }
+
+        return placed;
+    }
+
+    /**
+     * One model out of the cache, named by its group.
+     *
+     * A model the client draws wrongly is named by its group and nothing else, so a scene that
+     * has to draw the same thing the client drew asks for it by that number.
+     */
+    public static Optional<Mesh> numbered(int group) throws Exception {
+        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
+        if (!new File(cache, "main_file_cache.dat2").isFile()) {
+            return Optional.empty();
+        }
+
+        return at(cache).read(group);
+    }
+
+    /**
+     * What one model in the cache asks for, named by its group.
+     *
+     * A picture the client draws wrongly names a model, and this says what that model asks the
+     * toolkit to do, so a scene can be pointed at the same thing the client was.
+     */
+    public static void report(int group) throws Exception {
+        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
+        if (!new File(cache, "main_file_cache.dat2").isFile()) {
+            return;
+        }
+
+        var mesh = at(cache).read(group);
+        if (mesh.isEmpty()) {
+            System.out.println("MODEL " + group + " is not in the cache");
+            return;
+        }
+
+        var held = mesh.get();
+        var ways = new TreeMap<Integer, Integer>();
+        if (held.texMappingType != null && held.faceTexSpace != null) {
+            for (var way : held.texMappingType) {
+                ways.merge((int) way, 0, Integer::sum);
+            }
+            for (var way : ways.keySet()) {
+                ways.put(way, placedFaces(held, way));
+            }
+        }
+
+        System.out.println("MODEL " + group + ": " + held.faceCount + " faces, "
+            + (held.faceTexture == null ? "no textures" : "textured")
+            + ", faces by way " + ways
+            + ", spaces " + held.texSpaceCount
+            + ", numbers " + lengths(held));
+    }
+
+    /** How many spaces the mesh carries each of the numbers only some ways need. */
+    private static String lengths(Mesh mesh) {
+        var held = new int[] {
+            length(mesh.texSpaceScaleX), length(mesh.texSpaceScaleY), length(mesh.texSpaceScaleZ),
+            length(mesh.texOffsetX), length(mesh.texOffsetY), length(mesh.texOffsetZ),
+            length(mesh.texRotation), length(mesh.texDirection)
+        };
+
+        return Arrays.toString(held);
+    }
+
+    private static int length(int[] held) {
+        return held == null ? 0 : held.length;
+    }
+
+    private static int length(byte[] held) {
+        return held == null ? 0 : held.length;
     }
 
     /** Whether any face of the mesh belongs to a space, which an unused one does not. */

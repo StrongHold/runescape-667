@@ -116,7 +116,9 @@ public final class FrameCapture {
             texturedModel(toolkit, textured, FEATURES | TEXTURES_OFF, TEXTURE_THAT_MAY_GO),
             HandGround.buildTextured(toolkit),
             HandGround.buildShaped(toolkit),
-            HandGround.buildSmooth(toolkit));
+            HandGround.buildSmooth(toolkit),
+            roundPointModel(toolkit),
+            rockModel(toolkit));
 
         var manifest = new ArrayList<String>();
 
@@ -211,6 +213,9 @@ public final class FrameCapture {
      */
     private static final int TEXTURES_OFF = 0x40;
 
+    /** The way of placing a texture that wraps it round a point rather than laying it flat. */
+    private static final int ROUND_A_POINT = 3;
+
     /**
      * The mesh both textured models are built from.
      *
@@ -225,6 +230,57 @@ public final class FrameCapture {
         }
 
         return mesh.get();
+    }
+
+    /**
+     * A model out of the cache that asks for a texture to be wrapped round a point.
+     *
+     * Only the faces that ask for it are given a texture, so that a difference in the picture is
+     * a difference in that one way of placing a texture and not in the two the rest of the model
+     * would have used.
+     */
+    private static Model roundPointModel(Toolkit toolkit) throws Exception {
+        var mesh = CacheMesh.mostPlaced(ROUND_A_POINT);
+        if (mesh.isEmpty()) {
+            System.out.println("no model in the cache places a texture round a point");
+            return null;
+        }
+
+        var held = mesh.get();
+        var ways = held.texMappingType;
+        var placed = 0;
+
+        for (var face = 0; face < held.faceCount; face++) {
+            var space = held.faceTexSpace[face];
+            if (space >= 0 && space < ways.length && ways[space] == ROUND_A_POINT) {
+                held.faceTexture[face] = FORCED_TEXTURE;
+                placed++;
+            } else {
+                held.faceTexture[face] = -1;
+            }
+        }
+
+        System.out.println("round a point: " + placed + " of " + held.faceCount + " faces");
+        return toolkit.createModel(held, FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
+    }
+
+    /**
+     * The reported piece of scenery, with every face given a texture so that where the texture
+     * lands is what the picture shows.
+     */
+    private static Model rockModel(Toolkit toolkit) throws Exception {
+        var mesh = CacheMesh.numbered(CacheMesh.ROCK);
+        if (mesh.isEmpty()) {
+            System.out.println("model " + CacheMesh.ROCK + " is not in the cache");
+            return null;
+        }
+
+        var held = mesh.get();
+        for (var face = 0; face < held.faceCount; face++) {
+            held.faceTexture[face] = FORCED_TEXTURE;
+        }
+
+        return toolkit.createModel(held, FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
     }
 
     private static Model texturedModel(Toolkit toolkit, Mesh held, int features, short texture)
