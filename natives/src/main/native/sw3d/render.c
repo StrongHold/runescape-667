@@ -1051,6 +1051,26 @@ static int wholeModelIsOut(void *model, const float *rows, int smaller) {
     return topmost >= view->bottomEdge || view->topEdge >= bottommost;
 }
 
+/**
+ * Whether a face is one of those drawn after the rest.
+ *
+ * A face wearing a texture that says how much of itself shows is drawn through what is behind it
+ * and records no distance, so nothing drawn after it can be hidden by it. Every such face is
+ * therefore left until the faces that do record a distance have been drawn, or the trunk of a
+ * tree comes out in front of the leaves standing between it and the eye.
+ */
+static int seenThroughFace(const short *faceTexture, int face) {
+    if (faceTexture == NULL || faceTexture[face] == -1) {
+        return 0;
+    }
+
+    const TextureMetrics *metrics = textureMetricsFor((unsigned short) faceTexture[face]);
+    return metrics != NULL && metrics->alphaBlendMode == SEEN_THROUGH_ITSELF;
+}
+
+/** How many times over the faces of a model are walked, once for each way they are drawn. */
+enum { PASSES = 2 };
+
 static void renderModel(void *model, const void *matrix, jint *cylinder, int smaller) {
     if (model == NULL || matrix == NULL || raster.pixels == NULL || raster.depths == NULL) {
         return;
@@ -1152,114 +1172,122 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
     const uint32_t *shade = modelShade(model);
 
     /*
-     * The faces are drawn in the order the model lists them. Nothing sorts them: what covers what
-     * is settled a pixel at a time by how far away each one is, and two faces that meet exactly
-     * are settled by which of them the model lists second. Sorting them first would change that
-     * answer wherever they meet, which on a model whose faces line up with an axis is a great
-     * many pixels.
+     * The faces are drawn in the order the model lists them, save that every face seen through
+     * its own texture is left until the rest have been drawn. Nothing else sorts them: what
+     * covers what is settled a pixel at a time by how far away each one is, and two faces that
+     * meet exactly are settled by which of them the model lists second. Sorting them further
+     * would change that answer wherever they meet, which on a model whose faces line up with an
+     * axis is a great many pixels.
      */
-    for (int face = 0; face < faces; face++) {
-        const Projected *a = &projected[faceA[face]];
-        const Projected *b = &projected[faceB[face]];
-        const Projected *c = &projected[faceC[face]];
+    for (int pass = 0; pass < PASSES; pass++) {
+        for (int face = 0; face < faces; face++) {
+            if (seenThroughFace(faceTexture, face) != pass) {
+                continue;
+            }
 
-        if (!a->visible || !b->visible || !c->visible) {
-            continue;
-        }
+            const Projected *a = &projected[faceA[face]];
+            const Projected *b = &projected[faceB[face]];
+            const Projected *c = &projected[faceC[face]];
 
-        /*
-         * A face with any corner as deep as the water reaches is dropped rather than drawn in the
-         * water's own colour. One corner is enough: the face is on its way out of sight and the
-         * toolkit this replaces gives up on the whole of it.
-         */
-        if (a->fade >= 1.0f || b->fade >= 1.0f || c->fade >= 1.0f) {
-            continue;
-        }
+            if (!a->visible || !b->visible || !c->visible) {
+                continue;
+            }
 
-        /*
-         * A face turned away from the eye is inside the model and is not drawn. Which way round
-         * that is comes from the order its corners were given in, so the test is the sign of the
-         * area the three landed points enclose.
-         */
-        float area = (b->x - a->x) * (c->y - a->y) - (c->x - a->x) * (b->y - a->y);
-        if (area >= 0.0f) {
-            continue;
-        }
+            /*
+             * A face with any corner as deep as the water reaches is dropped rather than
+             * drawn in the water's own colour. One corner is enough: the face is on its way
+             * out of sight and the toolkit this replaces gives up on the whole of it.
+             */
+            if (a->fade >= 1.0f || b->fade >= 1.0f || c->fade >= 1.0f) {
+                continue;
+            }
 
-        uint32_t unlit = 0;
-        if (shade == NULL) {
-            unlit = unlitColour(faceColour == NULL ? 0 : faceColour[face] & 0xFFFF,
-                                modelAmbient(model));
+            /*
+             * A face turned away from the eye is inside the model and is not drawn. Which
+             * way round that is comes from the order its corners were given in, so the test
+             * is the sign of the area the three landed points enclose.
+             */
+            float area = (b->x - a->x) * (c->y - a->y) - (c->x - a->x) * (b->y - a->y);
+            if (area >= 0.0f) {
+                continue;
+            }
 
-            if (faceTexture != NULL && faceTexture[face] != -1) {
-                const TextureMetrics *metrics =
-                    textureMetricsFor((unsigned short) faceTexture[face]);
-                if (metrics != NULL) {
-                    unlit = texturedUnlitColour(unlit, modelAmbient(model), metrics->alpha,
-                                                metrics->aByte57);
+            uint32_t unlit = 0;
+            if (shade == NULL) {
+                unlit = unlitColour(faceColour == NULL ? 0 : faceColour[face] & 0xFFFF,
+                                    modelAmbient(model));
+
+                if (faceTexture != NULL && faceTexture[face] != -1) {
+                    const TextureMetrics *metrics =
+                        textureMetricsFor((unsigned short) faceTexture[face]);
+                    if (metrics != NULL) {
+                        unlit = texturedUnlitColour(unlit, modelAmbient(model), metrics->alpha,
+                                                    metrics->aByte57);
+                    }
                 }
             }
-        }
 
-        uint32_t colours[3];
-        for (int corner = 0; corner < 3; corner++) {
-            colours[corner] = shade == NULL ? unlit : shade[face * 3 + corner];
-        }
-
-        if (lights > 0) {
-            const short *corners[3] = {faceA, faceB, faceC};
-
+            uint32_t colours[3];
             for (int corner = 0; corner < 3; corner++) {
-                colours[corner] = litByNearby(model, face, corners[corner][face],
-                    colours[corner], nearby);
+                colours[corner] = shade == NULL ? unlit : shade[face * 3 + corner];
             }
-        }
 
-        Corner walked[3] = {
-            cornerAt(a, colours[0]),
-            cornerAt(b, colours[1]),
-            cornerAt(c, colours[2])
-        };
+            if (lights > 0) {
+                const short *corners[3] = {faceA, faceB, faceC};
 
-        const Texture *texture = faceTexture == NULL || faceTexture[face] == -1
-            ? NULL
-            : textureFor((unsigned short) faceTexture[face]);
-
-
-        /*
-         * A face the client gave no alpha to is drawn solid, and so is one whose alpha says it is
-         * wholly there. The client counts an alpha the other way round from how much shows.
-         */
-        int alpha = modelFaceAlpha(model, face);
-        faceShows = alpha == 0 ? WHOLLY_SOLID : 0xFF - alpha;
-
-        texels = NULL;
-        if (texture != NULL) {
-            const TextureMetrics *metrics = textureMetrics(texture);
-            float slidU = 0.0f;
-            float slidV = 0.0f;
-            textureOffsets(texture, &slidU, &slidV);
-
-            texels = texturePixels(texture);
-            texelsRepeat = metrics->repeatsU || metrics->repeatsV;
-            texelsBlend = metrics->alphaBlendMode == SEEN_THROUGH_ITSELF;
-
-            const float *placed = modelFaceUV(model);
-
-            for (int corner = 0; corner < 3; corner++) {
-                float acrossTexture = placed == NULL
-                    ? FACE_CORNERS[corner][0]
-                    : placed[(face * 3 + corner) * 2];
-                float downTexture = placed == NULL
-                    ? FACE_CORNERS[corner][1]
-                    : placed[(face * 3 + corner) * 2 + 1];
-
-                walked[corner] = onTexture(walked[corner],
-                    acrossTexture + slidU, downTexture + slidV);
+                for (int corner = 0; corner < 3; corner++) {
+                    colours[corner] = litByNearby(model, face, corners[corner][face],
+                        colours[corner], nearby);
+                }
             }
-        }
 
-        fillTriangle(walked[0], walked[1], walked[2]);
+            Corner walked[3] = {
+                cornerAt(a, colours[0]),
+                cornerAt(b, colours[1]),
+                cornerAt(c, colours[2])
+            };
+
+            const Texture *texture = faceTexture == NULL || faceTexture[face] == -1
+                ? NULL
+                : textureFor((unsigned short) faceTexture[face]);
+
+
+            /*
+             * A face the client gave no alpha to is drawn solid, and so is one whose alpha
+             * says it is wholly there. The client counts an alpha the other way round from
+             * how much shows.
+             */
+            int alpha = modelFaceAlpha(model, face);
+            faceShows = alpha == 0 ? WHOLLY_SOLID : 0xFF - alpha;
+
+            texels = NULL;
+            if (texture != NULL) {
+                const TextureMetrics *metrics = textureMetrics(texture);
+                float slidU = 0.0f;
+                float slidV = 0.0f;
+                textureOffsets(texture, &slidU, &slidV);
+
+                texels = texturePixels(texture);
+                texelsRepeat = metrics->repeatsU || metrics->repeatsV;
+                texelsBlend = metrics->alphaBlendMode == SEEN_THROUGH_ITSELF;
+
+                const float *placed = modelFaceUV(model);
+
+                for (int corner = 0; corner < 3; corner++) {
+                    float acrossTexture = placed == NULL
+                        ? FACE_CORNERS[corner][0]
+                        : placed[(face * 3 + corner) * 2];
+                    float downTexture = placed == NULL
+                        ? FACE_CORNERS[corner][1]
+                        : placed[(face * 3 + corner) * 2 + 1];
+
+                    walked[corner] = onTexture(walked[corner],
+                        acrossTexture + slidU, downTexture + slidV);
+                }
+            }
+
+            fillTriangle(walked[0], walked[1], walked[2]);
+        }
     }
 
     texels = NULL;

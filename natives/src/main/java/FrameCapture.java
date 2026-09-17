@@ -129,7 +129,7 @@ public final class FrameCapture {
             HandGround.buildSmooth(toolkit),
             roundPointModel(toolkit),
             rockModel(toolkit),
-            texturedModel(toolkit, textured, FEATURES, TEXTURE_SEEN_THROUGH),
+            seenThroughModel(toolkit, textured),
             HandGround.buildOverlaid(toolkit),
             HandGround.buildShadowed(toolkit, shadowOf(toolkit)));
 
@@ -324,6 +324,26 @@ public final class FrameCapture {
         }
 
         return shadow;
+    }
+
+    /**
+     * The same model with every other face wearing a texture that carries an alpha of its own and
+     * the rest wearing none.
+     *
+     * A model wearing one everywhere says nothing about the order faces are drawn in, because
+     * every face of it is drawn the same way. A tree is not like that: its leaves are seen
+     * through and its trunk is not, and which is drawn first decides which is in front.
+     */
+    private static Model seenThroughModel(Toolkit toolkit, Mesh held) {
+        if (held == null) {
+            return null;
+        }
+
+        for (var face = 0; face < held.faceCount; face++) {
+            held.faceTexture[face] = (face & 1) == 0 ? TEXTURE_SEEN_THROUGH : (short) -1;
+        }
+
+        return toolkit.createModel(held, FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
     }
 
     private static Model texturedModel(Toolkit toolkit, Mesh held, int features, short texture)
