@@ -338,6 +338,18 @@ static const uint32_t *texels;
 static int texelsRepeat;
 
 /**
+ * The picture of the shadow over the tile being drawn, and how far a place on the tile's texture
+ * is shifted down to reach a place in it.
+ *
+ * The ground darkens what it draws by however much of the sun each place is kept out of, and the
+ * picture says that place by place. It is read at the same place on the tile the texture is, so a
+ * tile is only shaded where it is covered.
+ */
+static const unsigned char *shadowTexels;
+
+static int shadowTexelShift;
+
+/**
  * How much of the face being drawn shows, out of two hundred and fifty five, or nothing at all
  * when the face is drawn solid.
  *
@@ -370,6 +382,34 @@ static int onTheTexture(int at, int carriesOn) {
     }
 
     return at < 0 ? 0 : (at > TEXTURE_EDGE ? TEXTURE_EDGE : at);
+}
+
+/**
+ * How much of the light gets through to one pixel of the tile being drawn, out of the whole.
+ */
+/**
+ * Which place of the picture of a shadow one place on a texture falls in.
+ *
+ * The toolkit shifts the whole place down as two halves rather than as one number, and then cuts
+ * it to a byte twice over, holding it first inside a signed half and then inside an unsigned
+ * byte. A place that ran off the near side of the texture comes back out of that at the far end
+ * rather than at nought, which is what the shipped toolkit does and is kept.
+ */
+static int shadowPlace(int at) {
+    uint32_t low = ((uint32_t) at & 0xFFFF) >> shadowTexelShift;
+    uint32_t high = ((uint32_t) at >> 16) >> shadowTexelShift;
+    int32_t both = (int32_t) (high << 16 | low);
+
+    int held = both > 0x7FFF ? 0x7FFF : (both < -0x8000 ? -0x8000 : both);
+    return held < 0 ? 0 : (held > 0xFF ? 0xFF : held);
+}
+
+static uint32_t shadowAt(float u, float v, float w) {
+    float away = reciprocalOfFour(w);
+    int across = shadowPlace((int) (u * away));
+    int down = shadowPlace((int) (v * away));
+
+    return shadowTexels[down << 8 | across];
 }
 
 static uint32_t texelAt(float u, float v, float w) {
@@ -497,23 +537,42 @@ static void fillSpan(int y, const Side *left, const Side *right) {
                 held[x] = depth;
             }
 
+            int lane = x - group;
+            float u = uBase + (float) lane * uStep;
+            float v = vBase + (float) lane * vStep;
+            float w = wBase + (float) lane * wStep;
+
+            /*
+             * What the span has reached, darkened where the tile being drawn is in shadow. The
+             * light comes back out of the whole of a byte, so the product keeps its top half.
+             */
+            uint16_t reached[CHANNELS];
+            for (int part = 0; part < CHANNELS; part++) {
+                reached[part] = colour[part];
+            }
+
+            if (shadowTexels != NULL) {
+                uint32_t through = shadowAt(u, v, w);
+
+                for (int part = 0; part < CHANNELS; part++) {
+                    reached[part] = (uint16_t) (through * reached[part] >> 8);
+                }
+            }
+
             if (texels == NULL) {
-                row[x] = laidOver(row[x], colour);
+                row[x] = laidOver(row[x], reached);
             } else {
                 /*
                  * A texel is shaded by the light the span has reached rather than replacing it,
                  * and the product keeps its top half, which is what turns a byte times a
                  * sixteenth part back into a byte.
                  */
-                int lane = x - group;
-                uint32_t texel = texelAt(uBase + (float) lane * uStep,
-                                         vBase + (float) lane * vStep,
-                                         wBase + (float) lane * wStep);
+                uint32_t texel = texelAt(u, v, w);
                 uint32_t written = 0;
 
                 for (int part = 0; part < CHANNELS; part++) {
                     uint32_t channel = texel >> (part * 8) & 0xFF;
-                    written |= (channel * colour[part] >> 16) << (part * 8);
+                    written |= (channel * reached[part] >> 16) << (part * 8);
                 }
 
                 uint16_t lifted[CHANNELS] = {
@@ -1176,8 +1235,15 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
  * is what a corner at the far edge reaches, the same as a face of a model wearing the whole of
  * one.
  */
-static void layTextureOnTile(const void *tile, int face, int tileSize, Corner *walked) {
+static void layTextureOnTile(const void *tile, int face, int tileSize,
+                             const unsigned char *shadow, Corner *walked) {
     texels = NULL;
+
+    /*
+     * Where the shadow over a tile is read is where the tile sits on its texture, so a bare face
+     * has nowhere to read it and is left unshaded.
+     */
+    shadowTexels = NULL;
 
     int wears = groundTileFaceTexture(tile, face);
     if (wears == -1) {
@@ -1192,6 +1258,7 @@ static void layTextureOnTile(const void *tile, int face, int tileSize, Corner *w
     const TextureMetrics *metrics = textureMetrics(texture);
     texels = texturePixels(texture);
     texelsRepeat = metrics->repeatsU || metrics->repeatsV;
+    shadowTexels = shadow;
 
     /*
      * How much of the world one whole width of the texture covers. A tile that names nothing is
@@ -1254,6 +1321,9 @@ void renderGroundTile(const void *ground, int x, int z) {
     float downFromClip = view->centreY - (float) raster.clipTop;
     int tileSize = groundTileSize(ground);
 
+    const unsigned char *shadow =
+        groundTileShadow(ground, (void *) tile, x, z, &shadowTexelShift);
+
     uint32_t *shade = calloc((size_t) corners, sizeof(uint32_t));
     if (shade == NULL) {
         return;
@@ -1296,11 +1366,12 @@ void renderGroundTile(const void *ground, int x, int z) {
             cornerAt(c, shade[face * 3 + 2])
         };
 
-        layTextureOnTile(tile, face, tileSize, walked);
+        layTextureOnTile(tile, face, tileSize, shadow, walked);
         fillTriangle(walked[0], walked[1], walked[2]);
     }
 
     texels = NULL;
+    shadowTexels = NULL;
     free(shade);
 }
 

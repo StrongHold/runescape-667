@@ -254,6 +254,15 @@ int groundTileFaceTexture(const void *tile, int face);
 /** How much of the world one whole width of a face's texture covers. */
 int groundTileFaceSize(const void *tile, int face);
 
+/**
+ * The picture of the shadow over one tile, worked out again where a shadow has moved over it.
+ *
+ * Nothing comes back for ground that keeps no shadows. What does is read the way a texture is,
+ * two hundred and fifty six places across, at the place a corner sits on its texture shifted
+ * down by however much is handed back.
+ */
+const unsigned char *groundTileShadow(const void *ground, void *tile, int x, int z, int *shift);
+
 /** Where one corner of the tile sits in its own square, and what colour it is. */
 void groundTilePlanCorner(const void *tile, int corner, int *across, int *along,
                           uint32_t *colour);

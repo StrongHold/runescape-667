@@ -1075,8 +1075,9 @@ public sealed interface Scene {
 
 
         /**
-         * The ground darkens itself where a shadow falls by building a picture of the shadow for
-         * each tile and reading it back as the tile is drawn. Nothing reads it back here yet.
+         * What is left is a shade out along a handful of the edges where one tile's picture of
+         * the shadow over it meets the next, which is the same small difference the other
+         * textured patches have.
          */
         @Override
         public boolean written() {

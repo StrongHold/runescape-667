@@ -39,6 +39,17 @@ typedef struct {
 
     /** Whether the tile was handed over as one that casts a shadow of its own. */
     int shadowed;
+
+    /**
+     * Where this tile's picture of the shadow over it sits in the run the ground keeps, and how
+     * far a place on its texture is shifted down to reach a place in that picture.
+     *
+     * A tile is given somewhere to keep it the first time it is drawn with the sun kept out of
+     * anywhere over it, and keeps the same place afterwards. Nought means it has not been given
+     * one, because the first place given out is never nought.
+     */
+    int shadowAt;
+    int shadowShift;
 } Tile;
 
 /** A light the client has put in the world, which brightens the tiles around it. */
@@ -83,6 +94,19 @@ typedef struct {
 
     /** Which tiles have had a shadow move over them since their picture was last worked out. */
     unsigned char *reshade;
+
+    /**
+     * A picture of the shadow over every tile that has been drawn, laid out as a texture is: two
+     * hundred and fifty six across, so that a place in it is reached the same way a texel is.
+     *
+     * Tiles are laid side by side across a band as tall as one tile is wide in places. A band
+     * that cannot fit another tile is left as it is and the next tile starts a new one, which is
+     * why a tile keeps where it was put rather than where it would go now.
+     */
+    unsigned char *shadowTexture;
+    size_t shadowTextureRoom;
+    int shadowNext;
+    int shadowBand;
 
     /**
      * The way the ground faces at every corner of the grid, four floats each, and how much of
@@ -164,6 +188,7 @@ static void groundFree(Ground *ground) {
     free(ground->heights);
     free(ground->lights);
     free(ground->shade);
+    free(ground->shadowTexture);
     free(ground->reshade);
     free(ground->normals);
     free(ground->corners);
@@ -735,6 +760,17 @@ static void reshadeTiles(Ground *ground, int left, int top, int right, int botto
 enum { PLACES_PER_TILE_SHIFT = 4 };
 
 /**
+ * How much of the light one place of the shadow map takes away, out of the whole of it.
+ *
+ * Five places decide a place of the picture, so a place nothing stands over keeps the whole of
+ * the light and one everything stands over keeps a hundred and eighty five parts of it.
+ */
+enum { SHADOW_PER_PLACE = 9 };
+
+/** How far a place on a texture is held, which is what a place in the picture is reached from. */
+enum { TEXTURE_PLACE_SHIFT = 7 };
+
+/**
  * Adds a shadow to the ground beneath it, or takes it away again.
  *
  * The shadow is a run of places counting how much of the sun each one is kept out of, and the
@@ -926,6 +962,128 @@ int groundHeightBetween(const void *handle, int x, int z) {
  * Which texture a face of the tile wears, or nothing where it wears none. The client gives one
  * texture per face and it is kept beside each of the face's three corners.
  */
+/**
+ * How wide a picture of the shadow over one tile is, in places.
+ *
+ * It is how many places of the shadow map fall across one tile, which is the tile's own width
+ * shifted down by however finely the client asked for shadows to be drawn.
+ */
+static int shadowPlacesAcross(const Ground *ground) {
+    return ground->tileSize >> shadowShift();
+}
+
+/** How wide the run the pictures are kept in is, which is what a place in one is reached by. */
+enum { SHADOW_TEXTURE_ACROSS = 256 };
+
+/**
+ * The first place in a band given out to a tile.
+ *
+ * Nothing is kept in the places before it. A tile that has been given nowhere reads as nought,
+ * and nought has to mean nowhere rather than the start of the first band.
+ */
+enum { SHADOW_FIRST = 4 };
+
+/**
+ * Finds this tile somewhere to keep its picture of the shadow over it.
+ *
+ * Tiles are laid side by side across a band as tall as a tile is wide. When what is left of a
+ * band is narrower than a tile the band is abandoned where it is, and the next tile asking opens
+ * a new one.
+ */
+static int shadowRoomFor(Ground *ground, int across) {
+    if (ground->shadowTexture == NULL || ground->shadowNext == 0) {
+        size_t band = (size_t) across * SHADOW_TEXTURE_ACROSS;
+        size_t wanted = ground->shadowBand + band;
+        unsigned char *grown = realloc(ground->shadowTexture, wanted);
+
+        if (grown == NULL) {
+            return 0;
+        }
+
+        memset(grown + ground->shadowBand, 0, band);
+        ground->shadowTexture = grown;
+        ground->shadowTextureRoom = wanted;
+        ground->shadowNext = SHADOW_FIRST;
+    }
+
+    int at = ground->shadowBand + ground->shadowNext;
+    ground->shadowNext += across;
+
+    if (ground->shadowNext - 1 >= SHADOW_TEXTURE_ACROSS - across) {
+        ground->shadowBand = (int) ground->shadowTextureRoom;
+        ground->shadowNext = 0;
+    }
+
+    return at;
+}
+
+/**
+ * Works out the picture of the shadow over one tile, if a shadow has moved over it since the last
+ * time it was worked out.
+ *
+ * Each place of the picture counts how many of the five places of the shadow map around it, being
+ * the place itself and the four beside it, anything is standing over. The count is turned into
+ * how much of the light gets through: none at all leaves the light whole, and each one takes a
+ * ninth of a tenth of it away.
+ */
+const unsigned char *groundTileShadow(const void *held, void *at, int x, int z, int *shift) {
+    Ground *ground = (Ground *) held;
+    Tile *tile = at;
+
+    *shift = 0;
+
+    if (ground == NULL || tile == NULL || ground->shade == NULL || ground->reshade == NULL) {
+        return NULL;
+    }
+
+    int across = shadowPlacesAcross(ground);
+    if (across <= 0) {
+        return NULL;
+    }
+
+    *shift = TEXTURE_PLACE_SHIFT - shiftOf(across);
+
+    size_t which = (size_t) x * (size_t) ground->sizeZ + (size_t) z;
+    if (!ground->reshade[which]) {
+        return tile->shadowAt == 0 ? NULL : ground->shadowTexture + tile->shadowAt;
+    }
+
+    ground->reshade[which] = 0;
+
+    if (tile->shadowAt == 0) {
+        tile->shadowAt = shadowRoomFor(ground, across);
+
+        if (tile->shadowAt == 0) {
+            return NULL;
+        }
+    }
+
+    tile->shadowShift = *shift;
+
+    /* One place in and one place down, which is the margin the shadow map is given. */
+    int from = (z * ground->shadeAcross + x) * across + ground->shadeAcross + 1;
+    int into = tile->shadowAt;
+
+    for (int down = 0; down < across; down++) {
+        for (int column = 0; column < across; column++) {
+            int over = ground->shade[from] != 0;
+            over += ground->shade[from - 1] != 0;
+            over += ground->shade[from + 1] != 0;
+            over += ground->shade[from - ground->shadeAcross] != 0;
+            over += ground->shade[from + ground->shadeAcross] != 0;
+
+            ground->shadowTexture[into] = (unsigned char) ~(over * SHADOW_PER_PLACE);
+            from++;
+            into++;
+        }
+
+        from += ground->shadeAcross - across;
+        into += SHADOW_TEXTURE_ACROSS - across;
+    }
+
+    return ground->shadowTexture + tile->shadowAt;
+}
+
 int groundTileFaceTexture(const void *at, int face) {
     const Tile *tile = at;
     if (tile->texture == NULL || face * 3 >= tile->corners) {
