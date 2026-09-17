@@ -114,24 +114,36 @@ hardware one.
 
 ## How a frame reaches the screen
 
-The client draws into a drawable of its own: a borderless window that is never shown, with the
-client's context attached to its view. On each swap the finished frame is copied into a buffer the
-layer shows, and the layer shows that copy whenever the screen next asks for it. So the client
-never waits on the screen and the screen never reads a frame half drawn.
+The client draws into a view inside the window it is shown in, and showing a frame is that view's
+buffers being swapped. Nothing is copied anywhere and `swapBuffers` is one line.
 
-That the client needs a drawable at all is the hard-won part. It draws to the default framebuffer,
-and a framebuffer object of this library's own was once given to it in place of a window, on the
-reasoning that a context drawing into one needs no drawable. Needing none and having none are not
-the same to OpenGL. A context with nothing attached can be put on a renderer that a windowed one
-would not have been, and on a machine driving screens the built-in one is not among, everything it
-draws is slow. A bisect put a stutter nobody could explain at exactly the commit that made that
-change, and nowhere else.
+The view is found rather than asked for. A modern JDK hands out a layer where an older one handed
+out a view, so there is no view to be had by asking: the JDK names the window's own layer, the
+window whose layer that is holds the view the canvas sits in, and one of ours goes inside it. The
+shim does the same thing to keep the shipped binding working, which is where it was learnt.
 
-The drawable is sized to what is being drawn for. The first sizing is waited for, so that the first
-frames are not drawn into a window of sixteen pixels. Every later one is handed to the main thread
-and not waited for, because a resize arrives while the client holds the AWT tree lock and the main
-thread wants that same lock to finish it. Waiting there is a deadlock, and it is why the window was
-taken away rather than mended.
+That this is the arrangement was arrived at the long way round, and the long way round is worth
+writing down because it looks like the obvious thing to have done first.
+
+What was built instead drew into something of this library's own and copied the result to the
+screen. First a layer that Core Animation drew on its own terms. Then, when a context was found to
+manage without a drawable at all as long as it draws into a framebuffer object, that. Both work.
+Both stutter on a machine driving screens the built-in one is not among, badly enough that the
+client cannot be used, while the software toolkit on the same machine is smooth.
+
+A bisect put the start of it at a commit where this library did not change at all. At the commit
+before it the client was not using this binding: only `toolkit.surface.library` was set, so what
+was loaded was the shipped jaggl with its JavaVM import pointed at the shim. `toolkit.jaggl.library`
+arrives four commits later. So what the bisect found was the point where the client stopped using
+the shipped binding and started using this one, and the shipped one had been the smooth one all
+along. It draws into a view.
+
+The cost of drawing into a view is that giving a context one, and sizing one, are main thread work,
+and the client draws from the thread it ticks on. Both are waited for. Waiting on the main thread
+from the drawing thread can deadlock, because the client may hold the AWT tree lock that the main
+thread wants in order to finish a resize; if that is ever seen, this is where it will be. Not
+waiting was tried and leaves the client drawing into a view that is not yet the right size or not
+yet on screen.
 
 ## Faults in the original
 
