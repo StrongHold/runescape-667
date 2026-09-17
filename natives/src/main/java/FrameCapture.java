@@ -287,7 +287,7 @@ public final class FrameCapture {
      * would have used.
      */
     private static Model roundPointModel(Toolkit toolkit) throws Exception {
-        var mesh = CacheMesh.mostPlaced(ROUND_A_POINT);
+        var mesh = CacheMesh.numbered(CacheMesh.ROUND_A_POINT);
         if (mesh.isEmpty()) {
             System.out.println("no model in the cache places a texture round a point");
             return null;

@@ -1,5 +1,7 @@
 import com.jagex.graphics.Mesh;
 
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.TreeMap;
 
 /**
@@ -17,6 +19,11 @@ public final class CacheModel {
     }
 
     public static void main(String[] args) throws Exception {
+        if (args.length > 1 && args[0].equals("keep")) {
+            CacheMesh.keep(Path.of(args[1]));
+            return;
+        }
+
         if (args.length > 0 && args[0].equals("scanned")) {
             CacheMesh.sayWhichAreScanned();
             return;
@@ -55,7 +62,7 @@ public final class CacheModel {
         var shared = new TreeMap<String, Integer>();
         for (var face = 0; face < mesh.faceCount; face++) {
             var corners = new int[] {mesh.faceA[face], mesh.faceB[face], mesh.faceC[face]};
-            java.util.Arrays.sort(corners);
+            Arrays.sort(corners);
             shared.merge(corners[0] + "," + corners[1] + "," + corners[2], 1, Integer::sum);
         }
 

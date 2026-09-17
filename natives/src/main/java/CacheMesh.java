@@ -8,6 +8,8 @@ import com.jagex.js5.Js5Archive;
 import com.jagex.js5.js5;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -74,6 +76,12 @@ public final class CacheMesh {
     public static final int UNTEXTURED = 122;
     public static final int UNTEXTURED_BESIDE = 336;
 
+    /**
+     * The model with more faces placed round a point than any other, which is the only way of
+     * placing a texture that no model built here can ask for.
+     */
+    public static final int ROUND_A_POINT = 3105;
+
     private final FileSystem_Client store;
 
     private CacheMesh(FileSystem_Client store) {
@@ -85,12 +93,7 @@ public final class CacheMesh {
      * none, because a mesh built here carries no texture space for a texture to sit in.
      */
     public static Optional<Mesh> anyTextured() throws Exception {
-        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
-        if (!new File(cache, "main_file_cache.dat2").isFile()) {
-            return Optional.empty();
-        }
-
-        return at(cache).read(TEXTURED);
+        return numbered(TEXTURED);
     }
 
     /**
@@ -102,19 +105,12 @@ public final class CacheMesh {
      * the client itself drew reaches far more of it than one built by hand.
      */
     public static Mesh anyUntextured() throws Exception {
-        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
-        if (!new File(cache, "main_file_cache.dat2").isFile()) {
-            System.out.println("no cache at " + cache + ", using the mesh built here");
-            return FlatMesh.INSTANCE.build();
-        }
-
-        var found = at(cache).read(UNTEXTURED);
+        var found = numbered(UNTEXTURED);
         if (found.isEmpty()) {
+            System.out.println("no model " + UNTEXTURED + " to be had, using the mesh built here");
             return FlatMesh.INSTANCE.build();
         }
 
-        System.out.println("model from the cache: " + found.get().faceCount + " faces, "
-            + found.get().vertexCount + " vertices");
         return found.get();
     }
 
@@ -148,15 +144,9 @@ public final class CacheMesh {
      * leaves the rest standing still.
      */
     public static Mesh twoUntexturedJoined() throws Exception {
-        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
-        if (!new File(cache, "main_file_cache.dat2").isFile()) {
-            return FlatMesh.INSTANCE.build();
-        }
-
-        var held = at(cache);
         var found = new ArrayList<Mesh>();
-        held.read(UNTEXTURED).ifPresent(found::add);
-        held.read(UNTEXTURED_BESIDE).ifPresent(found::add);
+        numbered(UNTEXTURED).ifPresent(found::add);
+        numbered(UNTEXTURED_BESIDE).ifPresent(found::add);
 
         if (found.size() < 2) {
             return FlatMesh.INSTANCE.build();
@@ -267,6 +257,7 @@ public final class CacheMesh {
             if (placed > most) {
                 most = placed;
                 best = mesh;
+                lastPlaced = group;
             }
         }
 
@@ -294,7 +285,46 @@ public final class CacheMesh {
      * A model the client draws wrongly is named by its group and nothing else, so a scene that
      * has to draw the same thing the client drew asks for it by that number.
      */
+    /**
+     * The models the scenes are drawn with, kept beside the source rather than taken from the
+     * game's cache.
+     *
+     * A cache is a quarter of a gigabyte, belongs to whoever ran the client, and changes when the
+     * game does. The scenes want seven models and ten kilobytes of it, so those are kept here
+     * instead: a scene then draws the same model on any machine, and a cache brought up to date
+     * cannot move a number recorded against a scene without anyone noticing.
+     *
+     * What is kept is exactly what the cache holds for the group, packed the way the cache packs
+     * it, so it is read back through the same decoder and nothing else has to know where it came
+     * from.
+     */
+    private static final String KEPT = "models";
+
+    /**
+     * Where the kept models are, looked for beside the working directory and then beside the
+     * natives, so that it is found whether a task runs from the natives or from the root.
+     */
+    private static Optional<Path> keptModel(int group) {
+        for (var root : new String[] {KEPT, "natives/" + KEPT}) {
+            var held = Path.of(root, group + ".dat");
+            if (Files.isRegularFile(held)) {
+                return Optional.of(held);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * One model, from what is kept beside the source where it is there and from the cache where
+     * it is not.
+     */
     public static Optional<Mesh> numbered(int group) throws Exception {
+        var kept = keptModel(group);
+        if (kept.isPresent()) {
+            return Optional.of(new Mesh(js5.decodeContainer(Files.readAllBytes(kept.get()))));
+        }
+
         var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
         if (!new File(cache, "main_file_cache.dat2").isFile()) {
             return Optional.empty();
@@ -302,6 +332,41 @@ public final class CacheMesh {
 
         return at(cache).read(group);
     }
+
+    /**
+     * Writes the models the scenes are drawn with beside the source, so that they need the cache
+     * once rather than every time.
+     */
+    public static void keep(Path into) throws Exception {
+        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
+        if (!new File(cache, "main_file_cache.dat2").isFile()) {
+            System.out.println("no cache at " + cache + ", so there is nothing to keep");
+            return;
+        }
+
+        var held = at(cache);
+        Files.createDirectories(into);
+
+        for (var group : DRAWN_WITH) {
+            var packed = held.packed(group);
+            if (packed.isEmpty()) {
+                System.out.println("group " + group + " is not in the cache");
+                continue;
+            }
+
+            var file = into.resolve(group + ".dat");
+            Files.write(file, packed.get());
+            System.out.println("kept group " + group + " as " + file + ", "
+                + packed.get().length + " bytes");
+        }
+    }
+
+    /** Every model any scene or probe is drawn with. */
+    private static final int[] DRAWN_WITH = {
+        TEXTURED, UNTEXTURED, UNTEXTURED_BESIDE, ROUND_A_POINT, BLACK_BACKED, STAIRS,
+        DOUBLED_FACES, ROCK
+    };
+
 
     /**
      * What one model in the cache asks for, named by its group.
@@ -430,6 +495,12 @@ public final class CacheMesh {
         var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
         var held = at(cache);
 
+        for (var way = 0; way < WAYS_A_TEXTURE_IS_PLACED; way++) {
+            if (mostPlaced(way).isPresent()) {
+                System.out.println("most faces placed way " + way + ": group " + lastPlaced);
+            }
+        }
+
         held.firstTexturedWithFaces(ENOUGH_FACES).ifPresent(mesh ->
             System.out.println("a textured model with " + ENOUGH_FACES + " faces or more is"
                 + " group " + held.lastRead));
@@ -443,8 +514,14 @@ public final class CacheMesh {
     /** How many faces a model must have before a scene finds it worth drawing. */
     private static final int ENOUGH_FACES = 200;
 
-    /** The group the last search read, so that a search can say what it found and not only what. */
+    /** The group the last search read, so that a search can say where it found what it found. */
     private int lastRead = -1;
+
+    /** How many ways the client can ask for a texture to be placed on a face. */
+    private static final int WAYS_A_TEXTURE_IS_PLACED = 4;
+
+    /** The group the last search for a way of placing a texture settled on. */
+    private static int lastPlaced = -1;
 
     /**
      * The groups of the first few untextured models with at least this many faces.
@@ -528,6 +605,15 @@ public final class CacheMesh {
         }
 
         return at(cache).read(group).orElse(null);
+    }
+
+    private Optional<byte[]> packed(int group) {
+        try {
+            var held = store.read(group);
+            return held == null ? Optional.empty() : Optional.of(held);
+        } catch (Exception ignored) {
+            return Optional.empty();
+        }
     }
 
     private Optional<Mesh> read(int group) {

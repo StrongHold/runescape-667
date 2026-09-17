@@ -916,6 +916,13 @@ val listTerrain by tasks.registering(JavaExec::class) {
     args((providers.gradleProperty("tile").getOrElse("3175 3495 0")).split(" "))
 }
 
+val keepModels by tasks.registering(JavaExec::class) {
+    description = "Writes the models the scenes are drawn with beside the source."
+    mainClass = "CacheModel"
+    classpath = sourceSets["main"].runtimeClasspath
+    args("keep", layout.projectDirectory.dir("models").asFile.absolutePath)
+}
+
 val describeModel by tasks.registering(JavaExec::class) {
     description = "Says what one model out of the cache is made of."
     mainClass = "CacheModel"
