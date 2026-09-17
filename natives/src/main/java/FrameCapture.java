@@ -144,9 +144,10 @@ public final class FrameCapture {
             HandGround.buildOverlaid(toolkit),
             HandGround.buildShadowed(toolkit, shadowOf(toolkit)),
             HandGround.buildBlended(toolkit),
-            namedModel(toolkit, CacheMesh.STAIRS),
+            namedModel(toolkit, CacheMesh.STAIRS, false, EVERY_FUNCTION),
             toolkit.createModel(PriorityMesh.INSTANCE.build(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
-            toolkit.createModel(BillboardMesh.INSTANCE.build(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST));
+            toolkit.createModel(BillboardMesh.INSTANCE.build(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
+            CacheMesh.numbered(CacheMesh.STAIRS).orElse(null));
 
         var manifest = new ArrayList<String>();
 
@@ -312,10 +313,30 @@ public final class FrameCapture {
      * lands is what the picture shows.
      */
     private static Model rockModel(Toolkit toolkit) throws Exception {
-        return namedModel(toolkit, CacheMesh.ROCK);
+        return namedModel(toolkit, CacheMesh.ROCK, true);
     }
 
+    /**
+     * A model out of the cache, wearing whatever it says it wears.
+     *
+     * Putting one texture on every face says where the texture lands but nothing about which
+     * texture a face asked for, and which one a face asks for decides how it is drawn: whether it
+     * is seen through, whether it is left off where it is bare, and whether the player is allowed
+     * to turn it off at all.
+     */
     private static Model namedModel(Toolkit toolkit, int group) throws Exception {
+        return namedModel(toolkit, group, false);
+    }
+
+    /** Everything a model may be asked to do, so that a scene may turn one about. */
+    private static final int EVERY_FUNCTION = 0xFFFF;
+
+    private static Model namedModel(Toolkit toolkit, int group, boolean forced) throws Exception {
+        return namedModel(toolkit, group, forced, FUNCTIONS);
+    }
+
+    private static Model namedModel(Toolkit toolkit, int group, boolean forced, int functions)
+            throws Exception {
         var mesh = CacheMesh.numbered(group);
         if (mesh.isEmpty()) {
             System.out.println("model " + group + " is not in the cache");
@@ -323,8 +344,10 @@ public final class FrameCapture {
         }
 
         var held = mesh.get();
-        for (var face = 0; face < held.faceCount; face++) {
-            held.faceTexture[face] = FORCED_TEXTURE;
+        if (forced) {
+            for (var face = 0; face < held.faceCount; face++) {
+                held.faceTexture[face] = FORCED_TEXTURE;
+            }
         }
 
         return toolkit.createModel(held, FUNCTIONS, FEATURES, AMBIENT, CONTRAST);

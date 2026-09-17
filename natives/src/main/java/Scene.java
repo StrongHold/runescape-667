@@ -86,7 +86,8 @@ public sealed interface Scene {
         new BlendedGround(),
         new Stairs(),
         new Priorities(),
-        new Billboards()
+        new Billboards(),
+        new OnTheGround()
     );
 
     /**
@@ -98,7 +99,7 @@ public sealed interface Scene {
                  Model faded, Model plain, Ground floor, Ground cut, Ground smooth,
                  Model roundPoint, Model rock, Model seenThrough, Ground overlaid,
                  Ground shadowed, Ground blended, Model stairs, Model priorities,
-                 Model billboards) {
+                 Model billboards, Mesh located) {
         /* empty */
     }
 
@@ -231,13 +232,23 @@ public sealed interface Scene {
      */
     record Stairs() implements Scene {
 
+        /** The turn the map puts this one down at, out of the sixteen thousand of a whole one. */
+        private static final int PUT_DOWN_AT = 8192;
+
+        /** Everything a model may be asked to do, so that turning it is allowed. */
+        private static final int EVERY_FUNCTION = 0xFFFF;
+
+        private static final int FEATURES = 64;
+        private static final int AMBIENT = 64;
+        private static final int CONTRAST = 768;
+
         private static final int LEAN = 0x400;
 
 
         /**
-         * What is left is fifty two pixels along the edges of the faces that are drawn through
-         * what is behind them, which is the two toolkits ordering those faces among themselves
-         * differently. Leaving them until the solid faces are drawn took six hundred to fifty two.
+         * Wearing the textures it names, this model is drawn exactly as the shipped toolkit draws
+         * it. Turned the way the map puts it down, two hundred and forty five pixels are a single
+         * shade out, which is the turn itself and not the drawing.
          */
         @Override
         public boolean written() {
@@ -253,11 +264,23 @@ public sealed interface Scene {
             toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
             toolkit.f(NEAR, Integer.MAX_VALUE);
 
+            /*
+             * One copy stands as the model was built and one is turned the way the map puts it
+             * down, because turning a model winds its faces the other way round and which way a
+             * face is wound decides whether it is drawn at all.
+             */
             for (var step = 0; step < 2; step++) {
+                var model = toolkit.createModel(props.located(), EVERY_FUNCTION, FEATURES,
+                    AMBIENT, CONTRAST);
+
+                if (step == 1) {
+                    model.k(PUT_DOWN_AT);
+                }
+
                 props.matrix().makeRotationZ(0);
                 props.matrix().rotateAxisX(step == 0 ? 0 : LEAN);
                 props.matrix().translate((step * 2 - 1) * SPREAD / 4, 0, DEPTH / 2);
-                props.stairs().render(props.matrix(), null, 1);
+                model.render(props.matrix(), null, 1);
             }
         }
     }
@@ -360,6 +383,73 @@ public sealed interface Scene {
             props.matrix().makeRotationZ(0);
             props.matrix().translate(0, 0, DEPTH);
             props.billboards().render(props.matrix(), null, 1);
+        }
+    }
+
+    /**
+     * A model bent to fit the ground it stands on.
+     *
+     * A model is built standing on a flat floor and the world is not flat, so the client names one
+     * of five ways of fitting it and the toolkit bends it before it is drawn. Every piece of
+     * scenery in the world goes through that and nothing here had ever asked for it.
+     *
+     * Each of the five is asked for in turn, over a patch of ground that rises and falls, so that
+     * a model left where it was built stands out from one that followed the ground.
+     */
+    record OnTheGround() implements Scene {
+
+        /** Everything a model may be asked to do, so that every way of fitting it is allowed. */
+        private static final int FUNCTIONS = 0xFFFF;
+
+        private static final int FEATURES = 64;
+        private static final int AMBIENT = 64;
+        private static final int CONTRAST = 768;
+
+        /** How far the client says to lean or skew a model that is fitted rather than stood. */
+        private static final int SKEW = 300;
+
+        private static final int WAYS = 5;
+
+        /**
+         * The way of fitting a model to the ground that leans it towards the floor.
+         *
+         * The toolkit this stands in for walks off the end of something working this one out and
+         * takes the whole program with it, so it is left out rather than drawn. Every other way is
+         * asked for.
+         */
+        private static final int LEANS_AND_FALLS_OVER = 2;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            if (props.located() == null) {
+                return;
+            }
+
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            for (var way = 1; way <= WAYS; way++) {
+                if (way == LEANS_AND_FALLS_OVER) {
+                    continue;
+                }
+
+                var model = toolkit.createModel(props.located(), FUNCTIONS, FEATURES, AMBIENT,
+                    CONTRAST);
+
+                /*
+                 * The place on the ground is given in the world's own units, so it is put in the
+                 * middle of a tile rather than on a corner, where every way of fitting reads the
+                 * same height.
+                 */
+                var across = (way % HandGround.TILES) * HandGround.TILE + HandGround.TILE / 2;
+                var along = (way * 2 % HandGround.TILES) * HandGround.TILE + HandGround.TILE / 2;
+
+                model.p(way, SKEW, props.ground(), null, across, 0, along);
+
+                props.matrix().makeRotationZ(0);
+                props.matrix().translate((way - 3) * SPREAD / 2, 0, DEPTH);
+                model.render(props.matrix(), null, 1);
+            }
         }
     }
 

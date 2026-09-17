@@ -61,7 +61,11 @@ public final class CacheLocType {
         type.decode(packet);
         type.postDecode();
 
-        System.out.println("location " + id + " is called " + type.name);
+        System.out.println("location " + id + " is called " + type.name
+            + ", hillchange " + type.hillchange + ", hillskew " + type.hillskew
+            + ", width " + type.width + ", length " + type.length
+            + ", mirror " + type.mirror
+            + ", ambient " + type.ambient + ", contrast " + type.contrast);
 
         if (type.models == null) {
             System.out.println("  it names no models of its own");
