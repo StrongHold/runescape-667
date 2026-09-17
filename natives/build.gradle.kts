@@ -331,17 +331,6 @@ val generateOpenGlBinding by tasks.registering {
         "glGenProgramARB",
         "glProgramRawARB",
         "glShaderSourceRawARB",
-        // The client's default framebuffer is one of ours, so these are answered, not passed on.
-        "glBindFramebufferEXT",
-        "glDrawBuffer",
-        "glReadBuffer",
-        // And these take a picture out of it, which needs the piece read brought down to one
-        // sample a pixel first, so each says which piece it is about to read.
-        "glReadPixelsi",
-        "glReadPixelsub",
-        "glCopyTexImage2D",
-        "glCopyTexSubImage2D",
-        "glBlitFramebufferEXT",
     )
 
     doLast {
@@ -564,7 +553,6 @@ val verifyOpenGlSamples by tasks.registering(JavaExec::class) {
     setExecutable(x64JavaExecutable)
     jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
     environment("JAWTSHIM_WAIT_FOR_VIEW", "1")
-    environment("JAGGL_SAMPLES", "1")
     args(openGlLibrary.get().asFile.absolutePath)
     inputs.file(openGlLibrary)
 }

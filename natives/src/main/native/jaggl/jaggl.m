@@ -52,9 +52,16 @@
 #include <jawt_md.h>
 
 /* The client renders here, off screen, and the layer shows what lands in it. */
-@interface JagGLLayer : CAOpenGLLayer
+@interface JagGLLayer : CAOpenGLLayer {
+    @private
+    GLuint framebuffer;
+    GLuint colour;
+    GLint width;
+    GLint height;
+    NSLock *lock;
+}
 
-- (void)present;
+- (void)blit;
 
 @end
 
@@ -76,6 +83,20 @@ static CGLPixelFormatObj pixelFormat;
 
 /* The context Core Animation draws the layer with, and the context the client draws frames with. */
 static CGLContextObj layerContext;
+
+/*
+ * Somewhere for the client's own drawing to land.
+ *
+ * The client draws to the default framebuffer, so the context it draws with needs a real drawable
+ * of its own. It is never shown: what reaches the screen is a copy of it taken on each swap.
+ *
+ * A framebuffer object was tried in its place and is the whole of why this stuttered. A context
+ * with no drawable at all is not the same to OpenGL as one with a drawable it never shows, and on
+ * a machine driving screens the built-in one is not among, it is a great deal slower.
+ */
+static NSWindow *unseenWindow;
+static NSView *unseenView;
+static NSOpenGLContext *unseenContext;
 static CGLContextObj clientContext;
 
 /*
@@ -91,45 +112,12 @@ static CGLContextObj clientContext;
  * this one's colour attachment. Everything else about its drawing is unchanged, and the layer
  * shows whatever lands here.
  */
-static GLuint defaultFramebuffer;
-static GLuint defaultColour;
-static GLuint defaultDepth;
-
-/*
- * Where the client draws when it asks for more than one sample a pixel, and how many.
- *
- * The plain framebuffer above is what the layer shows and what anything reads, and it keeps that
- * job whatever the client asks for. Where the client asks for one sample a pixel it also draws
- * there and this is unused. Where it asks for more it draws here instead, and what it drew is
- * brought down into the plain one before anything shows or reads it.
- *
- * It is this way round on purpose. The layer draws in a context of its own, framebuffers are not
- * shared between contexts, and the plain one is the only framebuffer the layer has ever touched.
- * Handing it a second one to read is refused there, which is a black screen and was twice.
- */
-static GLint wantedSamples;
-static GLuint drawFramebuffer;
-static GLuint drawColour;
-static GLuint drawDepth;
 static GLint offscreenWidth;
 static GLint offscreenHeight;
-static BOOL defaultBound;
 static uint64_t shownFrames;
 
-/** Set when the client finishes a frame, cleared when the screen takes one. */
-static _Atomic bool frameWaiting;
 
 
-
-/* What reading the picture back cost, which stops the card dead each time it is asked. */
-static uint64_t reads;
-static uint64_t readMicroseconds;
-
-/* How evenly the screen took them, which is the last thing a count of them cannot say. */
-static uint64_t lastShown;
-static uint64_t shownGap;
-static uint64_t shownGapLeast;
-static uint64_t shownGapMost;
 
 static Surface *currentSurface;
 
@@ -233,71 +221,14 @@ static void reportTiming(uint64_t spentSwapping) {
         return;
     }
 
-    JAGGLLOG("%llu frames every %llu us, %llu handing over; shown %llu, one every %llu us, "
-             "quickest %llu slowest %llu; %llu reads of the picture costing %llu us",
-             frames, betweenSwaps / frames, swapping / frames, shownFrames,
-             shownFrames > 1 ? shownGap / (shownFrames - 1) : 0, shownGapLeast, shownGapMost,
-             reads, readMicroseconds);
+    JAGGLLOG("%llu frames every %llu us, %llu of that handing over; the layer showed %llu",
+             frames, betweenSwaps / frames, swapping / frames, shownFrames);
 
     frames = 0;
     swapping = 0;
     betweenSwaps = 0;
     shownFrames = 0;
-    shownGap = 0;
-    shownGapLeast = 0;
-    shownGapMost = 0;
-    reads = 0;
-    readMicroseconds = 0;
     lastReport = now;
-}
-
-/**
- * Whether the client's own buffer may be drawn with more than one sample a pixel.
- *
- * Off unless asked for. Everything behind it has been written and checked as far as a harness can
- * check it, and twice it has left the client with nothing on screen, so it waits on a run of the
- * client rather than on another harness.
- */
-static BOOL askedForSamples(void) {
-    static BOOL cached;
-    static dispatch_once_t once;
-    dispatch_once(&once, ^{
-        cached = getenv("JAGGL_SAMPLES") != NULL;
-    });
-    return cached;
-}
-
-/**
- * Throws away whatever OpenGL is already unhappy about.
- *
- * What comes back from asking is the oldest complaint outstanding, not the newest, so anything
- * left lying about by the client is answered in place of the step being watched. Every check of a
- * step here has to start from nothing or it reports another's fault as its own, which is how the
- * showing of a frame came to be blamed for a whole picture that arrived intact.
- */
-static void forget(void) {
-    if (!verbose()) {
-        return;
-    }
-
-    for (int left = 0; left < 32 && glGetError() != GL_NO_ERROR; left++) {
-        /* empty, the point is the asking */
-    }
-}
-
-/**
- * Reports what OpenGL made of the step just taken, which is only the step just taken where the
- * complaints outstanding were thrown away before it.
- */
-static void complain(const char *what) {
-    if (!verbose()) {
-        return;
-    }
-
-    GLenum trouble = glGetError();
-    if (trouble != GL_NO_ERROR) {
-        JAGGLLOG("%s failed with 0x%x", what, trouble);
-    }
 }
 
 @implementation JagGLLayer
@@ -305,21 +236,10 @@ static void complain(const char *what) {
 - (instancetype)init {
     self = [super init];
     if (self != nil) {
-
-        /*
-         * Core Animation asks this layer for a frame at the rate the screen refreshes, rather than
-         * being told to take one at the rate the client finishes them. Those are not the same rate
-         * and never will be, and telling it loses frames: two told between one refresh and the next
-         * become one shown, and the other is never seen. Asked instead, it takes the newest whole
-         * frame there is every time it refreshes and none is lost.
-         *
-         * This is only safe because the client draws into a buffer of its own. Asked for a frame at
-         * any moment, what this layer reads is the last one finished rather than the one being
-         * painted.
-         */
-        self.asynchronous = YES;
+        self.asynchronous = NO;
         self.opaque = YES;
         self.needsDisplayOnBoundsChange = YES;
+        lock = [[NSLock alloc] init];
     }
     return self;
 }
@@ -339,30 +259,63 @@ static void complain(const char *what) {
  * smooth.
  */
 /*
- * Says that a frame is finished, and returns.
+ * Copies the frame the client has just finished into the buffer the layer shows.
  *
- * It waited for the screen to take it once, to hold the client to the rate the screen refreshes
- * at. That cost a quarter of every frame and did worse than cost it. The client is not the only
- * thread that finishes a frame: the loading screen has one of its own, and it holds a lock the
- * game thread needs while it draws. Two threads waiting on one screen take each other's turns,
- * one waits the whole hundred milliseconds it is allowed, and the game thread waits behind the
- * lock for as long as that lasts.
+ * This runs on the client's thread with the client's context current, which is why the buffer is
+ * one both contexts share rather than a drawable handed over. The client goes straight on to the
+ * next frame afterwards, and the layer shows the copy whenever the screen next asks for it, so
+ * neither waits on the other and a frame half drawn is never shown.
+ *
+ * The buffer is made here rather than up front, because until a frame is finished there is nothing
+ * to say how large it should be.
  */
-- (void)present {
+- (void)blit {
+    CGSize size = self.bounds.size;
+    GLint wanted = (GLint) size.width;
+    GLint tall = (GLint) size.height;
+    if (wanted <= 0 || tall <= 0) {
+        return;
+    }
+
+    [lock lock];
+
+    if (framebuffer == 0 || wanted != width || tall != height) {
+        if (framebuffer != 0) {
+            glDeleteRenderbuffersEXT(1, &colour);
+            glDeleteFramebuffersEXT(1, &framebuffer);
+        }
+
+        glGenFramebuffersEXT(1, &framebuffer);
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, framebuffer);
+        glGenRenderbuffersEXT(1, &colour);
+        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, colour);
+        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_RGBA8, wanted, tall);
+        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
+                                     GL_RENDERBUFFER_EXT, colour);
+
+        width = wanted;
+        height = tall;
+        JAGGLLOG("the buffer shown is %dx%d", width, height);
+    }
+
+    glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, 0);
+    glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, framebuffer);
+    glBlitFramebufferEXT(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
     glFlush();
-    atomic_store(&frameWaiting, true);
+
+    [lock unlock];
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self setNeedsDisplay];
+    });
 }
 
-/*
- * Answered at every refresh of the screen. Yes only where a frame has been finished since the last
- * one was shown, so a screen that refreshes faster than the client draws does not show the same
- * frame twice over, and one that refreshes slower shows the newest rather than the oldest.
- */
 - (BOOL)canDrawInCGLContext:(CGLContextObj)context
                 pixelFormat:(CGLPixelFormatObj)format
                forLayerTime:(CFTimeInterval)layerTime
                 displayTime:(const CVTimeStamp *)displayTime {
-    return defaultFramebuffer != 0 && atomic_load(&frameWaiting);
+    return framebuffer != 0;
 }
 
 - (void)drawInCGLContext:(CGLContextObj)context
@@ -376,36 +329,18 @@ static void complain(const char *what) {
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    /* Read straight from what the client drew. See -present for what that risks. */
-    if (defaultFramebuffer != 0) {
+    [lock lock];
+    if (framebuffer != 0) {
         CGSize size = self.bounds.size;
-        forget();
-        glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, defaultFramebuffer);
-        glBlitFramebufferEXT(0, 0, offscreenWidth, offscreenHeight,
+        glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, framebuffer);
+        glBlitFramebufferEXT(0, 0, width, height,
                              0, 0, (GLint) size.width, (GLint) size.height,
                              GL_COLOR_BUFFER_BIT, GL_NEAREST);
-        complain("showing the frame");
         glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, 0);
     }
+    [lock unlock];
 
-    atomic_store(&frameWaiting, false);
     shownFrames++;
-
-    if (timing()) {
-        uint64_t now = nowInMicroseconds();
-        if (lastShown != 0) {
-            uint64_t gap = now - lastShown;
-            shownGap += gap;
-            if (shownGapLeast == 0 || gap < shownGapLeast) {
-                shownGapLeast = gap;
-            }
-            if (gap > shownGapMost) {
-                shownGapMost = gap;
-            }
-        }
-        lastShown = now;
-    }
-
     [super drawInCGLContext:context pixelFormat:format forLayerTime:layerTime displayTime:displayTime];
 }
 
@@ -489,246 +424,46 @@ static BOOL attach(JNIEnv *env, jobject canvas, Surface *surface) {
  * Sizes the drawable the client draws into. It is never shown, so its only job is to be as large as
  * the surface being drawn for.
  */
-/**
- * Hangs a buffer on the renderbuffer that is bound, carrying as many samples a pixel as the client
- * asked for.
- */
-static void drawnStorage(GLenum format, GLint width, GLint height) {
-    if (wantedSamples > 0) {
-        glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, wantedSamples, format, width, height);
-    } else {
-        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, format, width, height);
-    }
-}
-
-/**
- * The framebuffer the client's own drawing goes to, which is never the one being shown while there
- * is one to draw into.
- */
-static GLuint whereTheClientDraws(void) {
-    return drawFramebuffer != 0 ? drawFramebuffer : defaultFramebuffer;
-}
-
 static BOOL resizeOffscreen(GLint width, GLint height) {
     if (width <= 0 || height <= 0) {
         return NO;
     }
 
-    if (defaultFramebuffer != 0 && width == offscreenWidth && height == offscreenHeight) {
+    if (width == offscreenWidth && height == offscreenHeight) {
         return YES;
     }
 
-    if (defaultFramebuffer != 0) {
-        glDeleteRenderbuffersEXT(1, &defaultDepth);
-        glDeleteRenderbuffersEXT(1, &defaultColour);
-        glDeleteFramebuffersEXT(1, &defaultFramebuffer);
-    }
-
-    if (drawFramebuffer != 0) {
-        glDeleteRenderbuffersEXT(1, &drawDepth);
-        glDeleteRenderbuffersEXT(1, &drawColour);
-        glDeleteFramebuffersEXT(1, &drawFramebuffer);
-        drawFramebuffer = 0;
-        drawColour = 0;
-        drawDepth = 0;
-    }
-
-    glGenFramebuffersEXT(1, &defaultFramebuffer);
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, defaultFramebuffer);
-
-    glGenRenderbuffersEXT(1, &defaultColour);
-    glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, defaultColour);
-    glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_RGBA8, width, height);
-    glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, defaultColour);
-
-    glGenRenderbuffersEXT(1, &defaultDepth);
-    glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, defaultDepth);
-    glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH24_STENCIL8_EXT, width, height);
-    glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, defaultDepth);
-    glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, defaultDepth);
-
-    GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-    if (status != GL_FRAMEBUFFER_COMPLETE_EXT) {
-        JAGGLLOG("the default framebuffer is not complete at %dx%d, status 0x%x", width, height, status);
-        return NO;
-    }
-
-    glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
-    glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
-
-    glGenFramebuffersEXT(1, &drawFramebuffer);
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, drawFramebuffer);
-
-    glGenRenderbuffersEXT(1, &drawColour);
-    glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, drawColour);
-    drawnStorage(GL_RGBA8, width, height);
-    glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
-                                 GL_RENDERBUFFER_EXT, drawColour);
-
-    glGenRenderbuffersEXT(1, &drawDepth);
-    glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, drawDepth);
-    drawnStorage(GL_DEPTH24_STENCIL8_EXT, width, height);
-    glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,
-                                 GL_RENDERBUFFER_EXT, drawDepth);
-    glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT,
-                                 GL_RENDERBUFFER_EXT, drawDepth);
-
-    forget();
-    GLenum drawn = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-    JAGGLLOG("shown buffer %u, drawn buffer %u at %d samples, status 0x%x",
-             defaultFramebuffer, drawFramebuffer, wantedSamples, drawn);
-    complain("making the buffer the client draws into");
-
-    if (drawn != GL_FRAMEBUFFER_COMPLETE_EXT) {
-        JAGGLLOG("no buffer of %d samples to draw into", wantedSamples);
-        glDeleteRenderbuffersEXT(1, &drawDepth);
-        glDeleteRenderbuffersEXT(1, &drawColour);
-        glDeleteFramebuffersEXT(1, &drawFramebuffer);
-        drawFramebuffer = 0;
-        drawColour = 0;
-        drawDepth = 0;
-    }
-
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, whereTheClientDraws());
-    glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
-    glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
-
-    defaultBound = YES;
+    BOOL first = offscreenWidth == 0;
     offscreenWidth = width;
     offscreenHeight = height;
-    JAGGLLOG("drawable %dx%d", width, height);
-    return YES;
-}
 
-/**
- * Brings a piece of what the client drew down into the plain buffer, where it can be read.
- *
- * Nothing may be read out of a buffer of many samples a pixel, so where the client has been drawing
- * into one the piece wanted is brought down first. Only the piece, never the whole picture: the
- * client reads its buffer back one row at a time, and bringing the whole down for each row would
- * cost the picture over for every row of it.
- *
- * Where the client draws into the plain buffer already there is nothing to do, because that is the
- * buffer everything reads.
- */
-static void bringDown(const char *who, GLint x, GLint y, GLint width, GLint height) {
-    if (drawFramebuffer == 0 || !defaultBound || wantedSamples <= 0) {
-        return;
-    }
+    void (^size)(void) = ^{
+        if (unseenWindow == nil) {
+            return;
+        }
+
+        NSRect frame = NSMakeRect(0, 0, width, height);
+        unseenView.frame = frame;
+        [unseenWindow setFrame:[unseenWindow frameRectForContentRect:frame] display:NO];
+        [unseenContext update];
+    };
 
     /*
-     * Held to what the buffers actually cover. A piece reaching past the edge is not refused by a
-     * blit, but a piece that is wholly outside leaves nothing to copy and asking for it is how one
-     * of these came to be refused.
+     * The first sizing is waited for and the rest are not.
+     *
+     * Waiting on a later one is the deadlock: a resize reaches this while the client holds the AWT
+     * tree lock, and the main thread wants that same lock to finish the resize. The first comes
+     * while the client is still building its toolkit and holds nothing, and waiting for it is what
+     * keeps the first frames from being drawn into a drawable of sixteen pixels.
      */
-    GLint left = x < 0 ? 0 : x;
-    GLint bottom = y < 0 ? 0 : y;
-    GLint right = x + width > offscreenWidth ? offscreenWidth : x + width;
-    GLint top = y + height > offscreenHeight ? offscreenHeight : y + height;
-
-    if (right <= left || top <= bottom) {
-        return;
+    if (first && ![NSThread isMainThread]) {
+        dispatch_sync(dispatch_get_main_queue(), size);
+    } else {
+        dispatch_async(dispatch_get_main_queue(), size);
     }
 
-    forget();
-
-    glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, drawFramebuffer);
-    glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, defaultFramebuffer);
-    glBlitFramebufferEXT(left, bottom, right, top, left, bottom, right, top,
-                         GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
-    if (verbose()) {
-        GLenum trouble = glGetError();
-        if (trouble != GL_NO_ERROR) {
-            JAGGLLOG("%s: bringing %d,%d to %d,%d down failed with 0x%x, drawable %dx%d",
-                     who, left, bottom, right, top, trouble, offscreenWidth, offscreenHeight);
-        }
-    }
-
-    glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, defaultFramebuffer);
-    glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, drawFramebuffer);
-}
-
-/**
- * Puts the read back where the client left it, which is wherever it draws.
- */
-static void doneReading(void) {
-    if (drawFramebuffer != 0 && defaultBound) {
-        glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, drawFramebuffer);
-    }
-}
-
-/*
- * The natives that take a picture out of whatever is bound to read. Each is written by hand rather
- * than passed straight on, because each has to say which piece it is about to read so that the
- * piece can be brought down to one sample a pixel first.
- */
-JNIEXPORT void JNICALL Java_jaggl_OpenGL_glReadPixelsi(JNIEnv *env, jclass owner, jint x, jint y,
-                                                        jint width, jint height, jint format,
-                                                        jint type, jintArray pixels, jint offset) {
-    uint64_t began = timing() ? nowInMicroseconds() : 0;
-    bringDown("reading pixels", x, y, width, height);
-    jint *address = pixels == NULL ? NULL : (*env)->GetPrimitiveArrayCritical(env, pixels, NULL);
-    glReadPixels(x, y, width, height, (GLenum) format, (GLenum) type,
-                 address == NULL ? NULL : (void *) (address + offset));
-    if (address != NULL) {
-        (*env)->ReleasePrimitiveArrayCritical(env, pixels, address, 0);
-    }
-    doneReading();
-
-    if (timing()) {
-        reads++;
-        readMicroseconds += nowInMicroseconds() - began;
-    }
-}
-
-JNIEXPORT void JNICALL Java_jaggl_OpenGL_glReadPixelsub(JNIEnv *env, jclass owner, jint x, jint y,
-                                                         jint width, jint height, jint format,
-                                                         jint type, jbyteArray pixels, jint offset) {
-    bringDown("reading pixels as bytes", x, y, width, height);
-    jbyte *address = pixels == NULL ? NULL : (*env)->GetPrimitiveArrayCritical(env, pixels, NULL);
-    glReadPixels(x, y, width, height, (GLenum) format, (GLenum) type,
-                 address == NULL ? NULL : (void *) (address + offset));
-    if (address != NULL) {
-        (*env)->ReleasePrimitiveArrayCritical(env, pixels, address, 0);
-    }
-    doneReading();
-}
-
-JNIEXPORT void JNICALL Java_jaggl_OpenGL_glCopyTexImage2D(JNIEnv *env, jclass owner, jint target,
-                                                            jint level, jint format, jint x, jint y,
-                                                            jint width, jint height, jint border) {
-    bringDown("copying into a texture", x, y, width, height);
-    glCopyTexImage2D((GLenum) target, level, (GLenum) format, x, y, width, height, border);
-    doneReading();
-}
-
-JNIEXPORT void JNICALL Java_jaggl_OpenGL_glCopyTexSubImage2D(JNIEnv *env, jclass owner, jint target,
-                                                               jint level, jint intoX, jint intoY,
-                                                               jint x, jint y, jint width,
-                                                               jint height) {
-    bringDown("copying into part of a texture", x, y, width, height);
-    glCopyTexSubImage2D((GLenum) target, level, intoX, intoY, x, y, width, height);
-    doneReading();
-}
-
-/**
- * The client's own blit. Where it reads the client's buffer the piece it reads is brought down
- * first, unless it is asking for the whole of it unscaled, which is a resolve already.
- */
-JNIEXPORT void JNICALL Java_jaggl_OpenGL_glBlitFramebufferEXT(JNIEnv *env, jclass owner,
-                                                               jint fromX0, jint fromY0,
-                                                               jint fromX1, jint fromY1,
-                                                               jint toX0, jint toY0, jint toX1,
-                                                               jint toY1, jint mask, jint filter) {
-    GLint left = fromX0 < fromX1 ? fromX0 : fromX1;
-    GLint bottom = fromY0 < fromY1 ? fromY0 : fromY1;
-    bringDown("the client's own blit", left, bottom,
-              fromX1 > fromX0 ? fromX1 - fromX0 : fromX0 - fromX1,
-              fromY1 > fromY0 ? fromY1 - fromY0 : fromY0 - fromY1);
-    glBlitFramebufferEXT(fromX0, fromY0, fromX1, fromY1, toX0, toY0, toX1, toY1,
-                         (GLbitfield) mask, (GLenum) filter);
-    doneReading();
+    JAGGLLOG("drawable %dx%d", width, height);
+    return YES;
 }
 
 JNIEXPORT jlong JNICALL Java_jaggl_OpenGL_prepareSurface(JNIEnv *env, jclass owner, jobject canvas);
@@ -749,27 +484,23 @@ JNIEXPORT jlong JNICALL Java_jaggl_OpenGL_init(JNIEnv *env, jclass owner, jobjec
         attributes[n++] = kCGLPFAStencilSize;
         attributes[n++] = (CGLPixelFormatAttribute) stencil;
     }
+    /*
+     * The samples the client asks for are asked of the format, which is where they belong now that
+     * the client draws into a drawable of its own rather than into a framebuffer object, and is
+     * how the shipped library asks for them.
+     */
+    if (samples > 0) {
+        attributes[n++] = kCGLPFAMultisample;
+        attributes[n++] = kCGLPFASampleBuffers;
+        attributes[n++] = (CGLPixelFormatAttribute) 1;
+        attributes[n++] = kCGLPFASamples;
+        attributes[n++] = (CGLPixelFormatAttribute) samples;
+    }
+
     attributes[n] = (CGLPixelFormatAttribute) 0;
 
-    /*
-     * The samples the client asks for are not asked of the format. The format decides what the
-     * window's own drawable carries, and the client never draws into that: it draws into a buffer
-     * of this library's, and the samples belong on the buffers hung there instead.
-     *
-     * Asking for them here as well is worse than useless. The layer shows a frame by blitting into
-     * the window's drawable, that blit scales where the layer is not the size the client drew at,
-     * and a blit that scales is refused where either side carries more than one sample a pixel. It
-     * was asked for here once and every frame came back as an invalid framebuffer operation.
-     */
 
-    /*
-     * Drawing with more than one sample a pixel is not switched on yet. It works as far as anything
-     * here can be made to check it, and it put the client's screen out twice, both times in the
-     * showing of a frame rather than the drawing of one, which nothing here drives. Until a run of
-     * the client says otherwise it is off, and JAGGL_SAMPLES asks for it.
-     */
-    wantedSamples = askedForSamples() ? samples : 0;
-    JAGGLLOG("asked for %d samples a pixel, taking %d", samples, wantedSamples);
+    JAGGLLOG("asked for %d samples a pixel", samples);
 
     GLint formats = 0;
     if (CGLChoosePixelFormat(attributes, &pixelFormat, &formats) != kCGLNoError || pixelFormat == NULL) {
@@ -786,6 +517,24 @@ JNIEXPORT jlong JNICALL Java_jaggl_OpenGL_init(JNIEnv *env, jclass owner, jobjec
         JAGGLLOG("no context for the client");
         return 0;
     }
+
+    /*
+     * The drawable the client's own frames land in. Made once, and waited for, because everything
+     * after this wants it already there. The waiting that could not be borne was on each resize,
+     * which is handed over and not waited for.
+     */
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        unseenWindow = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 16, 16)
+                                                   styleMask:NSWindowStyleMaskBorderless
+                                                     backing:NSBackingStoreBuffered
+                                                       defer:NO];
+        unseenView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 16, 16)];
+        unseenView.wantsBestResolutionOpenGLSurface = NO;
+        unseenWindow.contentView = unseenView;
+
+        unseenContext = [[NSOpenGLContext alloc] initWithCGLContextObj:clientContext];
+        unseenContext.view = unseenView;
+    });
 
     JAGGLLOG("context ready");
 
@@ -863,41 +612,11 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_releaseSurface(JNIEnv *env, jclass owne
     free(surface);
 }
 
-/**
- * Copies the finished frame into the buffer the layer shows.
- *
- * The client draws into one buffer and the layer shows another, and a frame crosses from one to
- * the other here and nowhere else. Before this the client drew straight into the buffer being
- * shown, so Core Animation could read a frame that was still being painted, and what reached the
- * screen stuttered however many frames were finished.
- *
- * The copy is made before the layer is told there is anything to show, and showing flushes, so
- * the frame the layer reads is a whole one.
- */
-static void copyForShowing(void) {
-    if (drawFramebuffer == 0 || offscreenWidth <= 0 || offscreenHeight <= 0) {
-        return;
-    }
-
-    forget();
-
-    glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, drawFramebuffer);
-    glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, defaultFramebuffer);
-    glBlitFramebufferEXT(0, 0, offscreenWidth, offscreenHeight,
-                         0, 0, offscreenWidth, offscreenHeight,
-                         GL_COLOR_BUFFER_BIT, GL_NEAREST);
-    complain("copying the finished frame across");
-
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, whereTheClientDraws());
-}
-
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_swapBuffers(JNIEnv *env, jclass owner) {
     uint64_t began = timing() ? nowInMicroseconds() : 0;
 
-    copyForShowing();
-
     if (currentSurface != NULL) {
-        [(__bridge JagGLLayer *) currentSurface->layer present];
+        [(__bridge JagGLLayer *) currentSurface->layer blit];
     }
 
     reportTiming(timing() ? nowInMicroseconds() - began : 0);
@@ -919,6 +638,11 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_detachPeer(JNIEnv *env, jclass owner) {
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_release(JNIEnv *env, jclass owner) {
     CGLSetCurrentContext(NULL);
 
+    unseenContext = nil;
+    unseenView = nil;
+    [unseenWindow close];
+    unseenWindow = nil;
+
     if (clientContext != NULL) {
         CGLDestroyContext(clientContext);
         clientContext = NULL;
@@ -932,10 +656,6 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_release(JNIEnv *env, jclass owner) {
         pixelFormat = NULL;
     }
 
-    defaultFramebuffer = 0;
-    drawFramebuffer = 0;
-    defaultColour = 0;
-    defaultDepth = 0;
     offscreenWidth = 0;
     offscreenHeight = 0;
 }
@@ -1063,31 +783,3 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_glGetInfoLogARB(JNIEnv *env, jclass own
     }
 }
 
-/*
- * The client's default framebuffer is one of ours, so the three natives that name it are answered
- * rather than passed through.
- */
-JNIEXPORT void JNICALL Java_jaggl_OpenGL_glBindFramebufferEXT(JNIEnv *env, jclass owner,
-                                                              jint target, jint framebuffer) {
-    GLuint wanted = framebuffer == 0 ? whereTheClientDraws() : (GLuint) framebuffer;
-    glBindFramebufferEXT((GLenum) target, wanted);
-
-    if (target == GL_FRAMEBUFFER_EXT || target == GL_DRAW_FRAMEBUFFER_EXT) {
-        defaultBound = framebuffer == 0;
-    }
-}
-
-static GLenum attachmentFor(jint buffer) {
-    if (buffer == GL_BACK || buffer == GL_FRONT || buffer == GL_FRONT_AND_BACK || buffer == GL_NONE) {
-        return GL_COLOR_ATTACHMENT0_EXT;
-    }
-    return (GLenum) buffer;
-}
-
-JNIEXPORT void JNICALL Java_jaggl_OpenGL_glDrawBuffer(JNIEnv *env, jclass owner, jint buffer) {
-    glDrawBuffer(defaultBound ? attachmentFor(buffer) : (GLenum) buffer);
-}
-
-JNIEXPORT void JNICALL Java_jaggl_OpenGL_glReadBuffer(JNIEnv *env, jclass owner, jint buffer) {
-    glReadBuffer(defaultBound ? attachmentFor(buffer) : (GLenum) buffer);
-}

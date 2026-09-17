@@ -90,52 +90,48 @@ not.
 Matching the shipped binding here would mean writing an attribute list that discards its own
 request. It is not done, and nothing about it is accidental.
 
-## Antialiasing, which is written but not switched on
+## Antialiasing
 
-The client asks for none, two samples a pixel, or four. It gets none, and the code that would give
-it what it asked for is here behind `JAGGL_SAMPLES`, off unless asked for.
-
-Two things had to be solved and both are done. The samples reached nothing because the client is
-given a framebuffer of this library's own rather than the one the window carries, and how finely a
-pixel is drawn is settled by the buffers hung on the framebuffer that is bound rather than by the
-format the context was made with, so the buffers now carry the samples. Nothing may then be read
-out of such a buffer, and the client reads its own picture back, so every native that takes a
-picture out of the framebuffer says which piece it is about to read and that piece is brought down
-to one sample in a plain buffer beside it first. Those are the two `glReadPixels`, both `glCopyTex`
-calls and the client's own `glBlitFramebuffer`. Only the piece read is brought down, never the
-whole picture, because the client reads its buffer back a row at a time.
+The client asks for none, two samples a pixel, or four, and gets what it asks for. The samples are
+asked of the pixel format, which is how the shipped library asks for them, and they reach the
+client because the client draws into a drawable of its own.
 
     ./gradlew :natives:verifyOpenGlSamples
 
 draws at each of the three counts, checks the buffer carries what was asked for, reads the picture
-back and checks what came back. It passes.
-
-It is off all the same, because it has been switched on twice and left the client with a black
-screen both times, and neither failure is anything this check can reach. What no harness here
-drives is the showing of a frame: the layer draws in a context of its own while both buffers are
-made in the client's, and whether a buffer made in one is known in the other is a question only the
-client asks. Reporting is in place for exactly that, and says whether each buffer is known where
-the frame is shown and what OpenGL made of each step.
-
-To find out:
-
-    JAGGL_SAMPLES=1 JAGGL_VERBOSE=1 ./gradlew client:run --args="..."
-
-Both are forwarded from the shell by the client's own build, because the build daemon outlives the
-shell that starts it.
-
-The lesson is worth keeping whatever the answer turns out to be. The first check written for this
-asked the buffer how many samples it had and never asked whether anything drew, so it answered four
-over a black screen. The second asked whether anything drew and never showed a frame, so it passed
-over a black screen too.
+back and checks what came back. Both halves matter: a check that asks only how many samples a
+buffer has answers four while the screen stays black, which is how a broken version of this went in
+once and had to be taken out again.
 
 The shipped library answers two samples when asked for none, two for two and four for four. Asking
 it for none and being given two is the fault below: it sends the count as an attribute and a count
-of none ends the list it is in.
+of none ends the list it is in. This one gives none when none is asked for, so antialiasing can be
+turned off here and cannot be there.
 
 None of this touches the software toolkit. The client never hands it the setting, and
 `AntialiasingMode.validate` forces the setting to zero whenever the toolkit in use is not a
 hardware one.
+
+## How a frame reaches the screen
+
+The client draws into a drawable of its own: a borderless window that is never shown, with the
+client's context attached to its view. On each swap the finished frame is copied into a buffer the
+layer shows, and the layer shows that copy whenever the screen next asks for it. So the client
+never waits on the screen and the screen never reads a frame half drawn.
+
+That the client needs a drawable at all is the hard-won part. It draws to the default framebuffer,
+and a framebuffer object of this library's own was once given to it in place of a window, on the
+reasoning that a context drawing into one needs no drawable. Needing none and having none are not
+the same to OpenGL. A context with nothing attached can be put on a renderer that a windowed one
+would not have been, and on a machine driving screens the built-in one is not among, everything it
+draws is slow. A bisect put a stutter nobody could explain at exactly the commit that made that
+change, and nowhere else.
+
+The drawable is sized to what is being drawn for. The first sizing is waited for, so that the first
+frames are not drawn into a window of sixteen pixels. Every later one is handed to the main thread
+and not waited for, because a resize arrives while the client holds the AWT tree lock and the main
+thread wants that same lock to finish it. Waiting there is a deadlock, and it is why the window was
+taken away rather than mended.
 
 ## Faults in the original
 
