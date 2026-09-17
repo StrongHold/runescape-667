@@ -88,7 +88,7 @@ public final class CacheLocType {
      * The sizes of the files are written after them rather than before, each as how much longer
      * it is than the one before, and how many times over that is written is the very last byte.
      */
-    private static byte[] fileFrom(byte[] data, Js5Index index, int group, int wanted) {
+    static byte[] fileFrom(byte[] data, Js5Index index, int group, int wanted) {
         var count = index.fileCounts[group];
         var ids = index.fileIds[group];
 
@@ -140,7 +140,7 @@ public final class CacheLocType {
         return null;
     }
 
-    private static FileSystem_Client store(File cache, int archive) throws Exception {
+    static FileSystem_Client store(File cache, int archive) throws Exception {
         var data = new FileOnDisk(new File(cache, "main_file_cache.dat2"), "r", Long.MAX_VALUE);
         var index = new FileOnDisk(
             new File(cache, "main_file_cache.idx" + archive), "r", Long.MAX_VALUE);
@@ -149,7 +149,7 @@ public final class CacheLocType {
             new BufferedFile(data, 5200, 0), new BufferedFile(index, 6000, 0), 1 << 22);
     }
 
-    private static Js5Index readIndex(File cache, int archive) throws Exception {
+    static Js5Index readIndex(File cache, int archive) throws Exception {
         var data = new FileOnDisk(new File(cache, "main_file_cache.dat2"), "r", Long.MAX_VALUE);
         var master = new FileOnDisk(
             new File(cache, "main_file_cache.idx255"), "r", Long.MAX_VALUE);

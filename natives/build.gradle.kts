@@ -882,6 +882,13 @@ val verifyModels = registerProbe("models", "ModelProbe", "model answers")
  * Lists what the map says stands on one tile, so that a place the client draws wrongly can be
  * turned into the models standing there.
  */
+val listTerrain by tasks.registering(JavaExec::class) {
+    description = "Says what the map is made of on one tile."
+    mainClass = "CacheTerrain"
+    classpath = sourceSets["main"].runtimeClasspath
+    args((providers.gradleProperty("tile").getOrElse("3175 3495 0")).split(" "))
+}
+
 val listLocType by tasks.registering(JavaExec::class) {
     description = "Lists the models one kind of location is built from."
     mainClass = "CacheLocType"

@@ -70,6 +70,17 @@ public final class HandGround {
     private static final int TEXTURED_BESIDE = 4;
 
     /**
+     * A texture for each column of the patch, so that every blend mode is worn by a tile whose
+     * corners all name the same one.
+     *
+     * A texture names one of three blend modes, and two of them say something about an alpha the
+     * texture carries: four says the texture is not there where a texel is empty, and eight says
+     * how much of it shows is in the texture. The ground pays no attention to either, and a patch
+     * wearing only a texture whose blend mode says nothing would never have shown that.
+     */
+    private static final int[] WEARING = {TEXTURED_WITH, TEXTURED_BESIDE, 8};
+
+    /**
      * A texture that says it carries on round in neither direction, which a model would hold at
      * its edge. The ground carries every texture round whatever the texture says.
      */
@@ -270,7 +281,7 @@ public final class HandGround {
              * from.
              */
             textures[slot] = x == TILES / 2 ? -1
-                : !blended ? TEXTURED_WITH
+                : !blended ? WEARING[x % WEARING.length]
                 : x == TILES / 4 ? TEXTURED_ROUND
                 : (x + z + SLOT_ACROSS[slot] / TILE + SLOT_ALONG[slot] / TILE) % 2 == 0
                     ? TEXTURED_WITH : TEXTURED_BESIDE;

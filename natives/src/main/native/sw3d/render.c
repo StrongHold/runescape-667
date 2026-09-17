@@ -1557,7 +1557,6 @@ static void layTextureOnTile(const void *tile, int face, int tileSize,
         return;
     }
 
-    const TextureMetrics *metrics = textureMetrics(texture);
     texels = texturePixels(texture);
 
     /*
@@ -1566,8 +1565,13 @@ static void layTextureOnTile(const void *tile, int face, int tileSize,
      * is what a tile naming a size smaller than itself means.
      */
     texelsRepeat = 1;
-    texelsBlend = metrics->alphaBlendMode == SEEN_THROUGH_ITSELF;
-    texelsSkipEmpty = metrics->alphaBlendMode == EMPTY_WHERE_NOT_THERE;
+
+    /*
+     * The ground pays no attention to what a texture says about its own alpha. A face of it is
+     * never drawn through the texture place by place, and never leaves a pixel alone where the
+     * texture is not there: whatever the texture says, the ground covers what it covers. Only a
+     * model reads either of those.
+     */
     shadowTexels = shadow;
 
     /*
