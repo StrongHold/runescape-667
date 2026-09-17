@@ -1581,10 +1581,15 @@ public sealed interface Scene {
          * what is left is the half covered four times over, where about a hundred and eighty
          * pixels read the texel next to the right one and the rest are a shade out from rounding.
          *
-         * It is not the size the texture is laid at. Running a whole width for every cover, or a
-         * whole width less a texel, or either of those only where the texture repeats, all come
-         * out further off than leaving it alone. What is left is how far along the texture each
-         * pixel of a span is reckoned to be, which tells only where the steps are steep.
+         * It is not the size the texture is laid at: a whole width for every cover, a whole width
+         * less a texel, and either of those only where the texture repeats, all come out further
+         * off than leaving it alone. Nor is it how the distance is divided out. Holding one
+         * division across a group of four pixels rather than dividing at each of them is further
+         * off, and so is dividing exactly rather than by the rough reciprocal the machine offers,
+         * so the shipped toolkit divides at every pixel and takes the rough answer.
+         *
+         * What is left is how far along the texture each pixel of a span is reckoned to be, which
+         * tells only where the steps are steep.
          */
         @Override
         public boolean written() {
