@@ -920,16 +920,20 @@ static void planPicked(int named, int laid, int worn, const TextureMetrics *metr
         return;
     }
 
-    enum { KEPT = 16 };
-    static int seen[KEPT][4];
+    enum { KEPT = 40 };
+    static int seen[KEPT];
     static int count;
     static int overflowed;
 
     int comes = metrics == NULL ? -1 : (int) metrics->averageColour;
 
+    /*
+     * One line for each texture rather than for each set of colours. The ground's own colour
+     * changes from corner to corner and would otherwise fill this up long before the textures
+     * worth seeing came round.
+     */
     for (int at = 0; at < count; at++) {
-        if (seen[at][0] == named && seen[at][1] == laid
-            && seen[at][2] == worn && seen[at][3] == comes) {
+        if (seen[at] == worn) {
             return;
         }
     }
@@ -942,19 +946,17 @@ static void planPicked(int named, int laid, int worn, const TextureMetrics *metr
         return;
     }
 
-    seen[count][0] = named;
-    seen[count][1] = laid;
-    seen[count][2] = worn;
-    seen[count][3] = comes;
+    seen[count] = worn;
     count++;
 
-    fprintf(stderr, "sw3d plan: ground %04x, laid over %s, texture %d comes to %s%s,"
+    fprintf(stderr, "sw3d plan: texture %d comes to %04x%s, ground %04x, laid over %04x,"
             " stands for %04x\n",
-            (unsigned) named & 0xFFFF,
-            laid == -1 ? "nothing" : "a colour",
             worn,
-            comes < 0 ? "nothing" : "a colour",
-            metrics == NULL ? "" : (metrics->disableable ? " and may go" : " and may not go"),
+            (unsigned) comes & 0xFFFF,
+            metrics == NULL ? " (nothing known of it)"
+                : (metrics->disableable ? " and may go" : " and may not go"),
+            (unsigned) named & 0xFFFF,
+            (unsigned) laid & 0xFFFF,
             (unsigned) stands & 0xFFFF);
 }
 
