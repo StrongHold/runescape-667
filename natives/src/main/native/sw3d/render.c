@@ -1854,6 +1854,46 @@ static void sizesSeen(int tileSize, int wide, float laidAt) {
             tileSize, wide, (double) laidAt);
 }
 
+/**
+ * Says once for each texture the ground asks for and cannot have, when the client is started with
+ * SW3D_GROUND_BARE set.
+ *
+ * A face whose texture the toolkit cannot hand over is drawn in the flat colour of its corners,
+ * which for ground that is mostly its texture comes out as a wash of nothing. Nought here means a
+ * face the client named no texture for at all, which is ordinary.
+ */
+static void groundTextureMissing(int wears) {
+    static int listening = -1;
+    if (listening == -1) {
+        listening = getenv("SW3D_GROUND_BARE") != NULL;
+    }
+
+    if (!listening) {
+        return;
+    }
+
+    enum { KEPT = 24 };
+    static int seen[KEPT];
+    static int count;
+
+    for (int at = 0; at < count; at++) {
+        if (seen[at] == wears) {
+            return;
+        }
+    }
+
+    if (count < KEPT) {
+        seen[count] = wears;
+        count++;
+    }
+
+    if (wears == -1) {
+        fprintf(stderr, "sw3d ground: a face wearing no texture\n");
+    } else {
+        fprintf(stderr, "sw3d ground: no texture to hand over for %d\n", wears);
+    }
+}
+
 static void layTextureOnTile(const void *tile, int face, int tileSize, int x, int z,
                              const unsigned char *shadow, Corner *walked) {
     texels = NULL;
@@ -1869,11 +1909,13 @@ static void layTextureOnTile(const void *tile, int face, int tileSize, int x, in
 
     int wears = groundTileFaceTexture(tile, face);
     if (wears == -1) {
+        groundTextureMissing(-1);
         return;
     }
 
     const Texture *texture = textureFor(wears);
     if (texture == NULL) {
+        groundTextureMissing(wears);
         return;
     }
 
