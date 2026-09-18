@@ -286,7 +286,7 @@ public final class HandGround {
      * a number the toolkit has never read.
      */
     private static final int WATER_COLOUR = number("SW3D_WATER_COLOUR", 0x122B3D);
-    private static final int WATER_REACHES = 512;
+    private static final int WATER_REACHES = number("SW3D_WATER_REACHES", 512);
     private static final int WATER_BIAS = 127;
 
     /**

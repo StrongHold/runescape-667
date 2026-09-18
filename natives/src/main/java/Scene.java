@@ -1590,7 +1590,9 @@ public sealed interface Scene {
              * water, which is what the client does and is the whole of what was missing here.
              * Nothing about the water a tile carries is read outside that.
              */
-            toolkit.ra(SURFACE, SEEN_THROUGH, REACH, BIAS);
+            if (THROUGH_THE_EYE) {
+                toolkit.ra(SURFACE, SEEN_THROUGH, REACH, BIAS);
+            }
 
             var model = toolkit.createModel(props.located(), EVERY_FUNCTION, FEATURES,
                 AMBIENT, CONTRAST);
@@ -1608,11 +1610,17 @@ public sealed interface Scene {
             props.watered().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
                 HandGround.TILES, visible, false, 0);
 
-            toolkit.pa();
+            if (THROUGH_THE_EYE) {
+                toolkit.pa();
+            }
         }
 
         /** How far from the eye the thing standing in the water is put. */
         private static final int STANDS_AT = 900;
+
+        /** Whether the eye is told it is looking through water while the patch is drawn. */
+        private static final boolean THROUGH_THE_EYE =
+            !"0".equals(System.getenv("SW3D_WATER_EYE"));
 
         /** What the client tells the toolkit about the water the eye is looking through. */
         private static final int SURFACE = -1;

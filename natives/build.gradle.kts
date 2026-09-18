@@ -103,7 +103,9 @@ val sceneSettings = mapOf(
     "SW3D_GROUND_FEATURES" to "0",
     "SW3D_GROUND_COLOUR" to "-1",
     "SW3D_GROUND_FLAT" to "0",
-    "SW3D_WATER_COLOUR" to ""
+    "SW3D_WATER_COLOUR" to "",
+    "SW3D_WATER_REACHES" to "",
+    "SW3D_WATER_EYE" to "1"
 )
 
 val captureFrames by tasks.registering(JavaExec::class) {
