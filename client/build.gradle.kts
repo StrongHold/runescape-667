@@ -20,11 +20,25 @@ dependencies {
 val clientHeap = providers.gradleProperty("clientHeap").getOrElse("256m")
 val clientGcLog = providers.gradleProperty("clientGcLog").isPresent
 
+/**
+ * Whether the window is painted through Metal, which is what this platform does by itself.
+ *
+ * The Java renderer puts a frame on the screen by drawing one image onto the window and nothing
+ * else, so whatever the platform does with that image is the whole of whether a picture appears.
+ * `-PclientNoMetal` asks for the older pipeline instead, which is the way to tell a fault in the
+ * client from a fault under it.
+ */
+val clientNoMetal = providers.gradleProperty("clientNoMetal").isPresent
+
 application {
     mainClass = "Application"
     applicationDefaultJvmArgs = buildList {
         add("-Xmx$clientHeap")
         add("-Dsun.java2d.noddraw=true")
+        if (clientNoMetal) {
+            add("-Dsun.java2d.metal=false")
+            add("-Dsun.java2d.opengl=true")
+        }
         if (clientGcLog) {
             add("-Xlog:gc")
         }
