@@ -580,6 +580,24 @@ JNIEXPORT void JNICALL Java_oa_d(JNIEnv *env, jobject self, jint time) {
  * The water fades towards this colour, and the fade is worked out in the same scale the rest of
  * the shading is, so the channels are lifted here once rather than at every pixel.
  */
+/**
+ * What the water fades everything towards, which is a red nothing in the world is, when the
+ * client is started with SW3D_WATER_RED set.
+ *
+ * Everything drawn while the eye is told it is looking through water then goes red by however far
+ * it has faded, and nothing else in the picture moves. That says which part of the picture the
+ * pass through water drew and how far each part of it faded, and both are otherwise guesswork
+ * from the outside.
+ */
+static uint32_t wateredRed(uint32_t colour) {
+    static int listening = -1;
+    if (listening == -1) {
+        listening = getenv("SW3D_WATER_RED") != NULL;
+    }
+
+    return listening ? 0xFF0000u : colour;
+}
+
 static void towardsColour(uint32_t colour, float *into) {
     for (int channel = 0; channel < 4; channel++) {
         into[channel] = (float) (((colour >> (channel * 8)) & 0xff) << 8);
@@ -646,7 +664,7 @@ JNIEXPORT void JNICALL Java_oa_ra(JNIEnv *env, jobject self, jint surface, jint 
     water.under = 1;
     water.surface = (float) surface;
     water.perDepth = -1.0F / (float) depth;
-    towardsColour((uint32_t) colour, water.towards);
+    towardsColour(wateredRed((uint32_t) colour), water.towards);
 }
 
 /**
@@ -662,7 +680,7 @@ JNIEXPORT void JNICALL Java_oa_EA(JNIEnv *env, jobject self, jint surface, jint 
 
     water.surface = (float) surface;
     water.perDepth = -1.0F / (float) depth;
-    towardsColour((uint32_t) colour, water.towards);
+    towardsColour(wateredRed((uint32_t) colour), water.towards);
 }
 
 /**

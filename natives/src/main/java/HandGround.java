@@ -280,14 +280,21 @@ public final class HandGround {
         return ground;
     }
 
-    /** What the client hands over for the colour of the water over a tile, and how deep it goes. */
-    private static final int WATER_COLOUR = number("SW3D_WATER_COLOUR", 0x3A5F8A);
-    private static final int WATER_REACHES = 128 * 8;
+    /**
+     * What the client hands a tile over carrying for the water on it, read off the running client
+     * at a dock rather than made up: a colour, how far down the water lets anything be seen, and
+     * a number the toolkit has never read.
+     */
+    private static final int WATER_COLOUR = number("SW3D_WATER_COLOUR", 0x122B3D);
+    private static final int WATER_REACHES = 512;
+    private static final int WATER_BIAS = 127;
 
-    /** A number the toolkit has never read, handed over as the client hands it over. */
-    private static final int WATER_BIAS = 20;
-
-    /** How deep the water is at the near edge of the patch, which is where it is deepest. */
+    /**
+     * How deep the water is at the near edge of the patch, which is where it is deepest.
+     *
+     * It runs past the depth the water lets anything be seen to, so the patch holds water at
+     * every depth from none to more than the colour reaches.
+     */
     private static final int DEEPEST = 700;
 
     /**

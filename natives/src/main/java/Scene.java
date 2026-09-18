@@ -1228,24 +1228,44 @@ public sealed interface Scene {
     record Underwater() implements Scene {
 
         /**
-         * Two hundred and seventy of the scene's pixels are still a shade out, each by one part
-         * of one channel. How far a corner has faded and which faces are dropped are both right;
-         * what is not yet known is how the toolkit this replaces carries the fade across a face.
+         * Twelve of the scene's pixels are a shade out. How far a corner has faded, which faces
+         * are dropped, and what becomes of a face with one corner in the light and another past
+         * it are all right; what is left is how the fade is carried across a face.
          */
         @Override
         public boolean written() {
             return false;
         }
 
-        /** Where the surface sits, and how far below it the last of the light reaches. */
-        private static final int SURFACE = 40;
-        private static final int REACH = 260;
-
-        /** What the water fades everything towards, and a number the toolkit has never read. */
-        private static final int WATER = 0x20507A;
-        private static final int BIAS = 0;
+        /**
+         * Where the surface sits, how far below it the last of the light reaches, what the water
+         * fades everything towards, and a number the toolkit has never read.
+         *
+         * These are what the client asks for, read off it at a dock. The reach is the one that
+         * matters: forty is short enough that a model standing in the water has faces with one
+         * corner inside the light and another past it, which is the case the whole of the fade
+         * turns on. A reach made up here was six times as long, and every face of the model was
+         * wholly inside it or wholly past it.
+         */
+        private static final int SURFACE = -1;
+        private static final int REACH = 40;
+        private static final int WATER = 0x182838;
+        private static final int BIAS = 127;
 
         private static final int ASIDE = 130;
+
+        /**
+         * How many copies of the model stand in the water, and how far apart they sit up and
+         * down.
+         *
+         * The client stands things in water that are far taller than the water lets anything be
+         * seen through: a pillar holding up a dock runs from well above the surface to the bed.
+         * A face of one has a corner in the light and a corner past it, and what becomes of such
+         * a face is the whole question. One model standing wholly inside the light or wholly past
+         * it never asks it, which is all this scene used to hold.
+         */
+        private static final int STANDING = 5;
+        private static final int APART = 26;
 
         @Override
         public void draw(Toolkit toolkit, Props props) {
@@ -1253,9 +1273,13 @@ public sealed interface Scene {
             toolkit.f(NEAR, Integer.MAX_VALUE);
 
             toolkit.ra(SURFACE, WATER, REACH, BIAS);
-            props.matrix().makeRotationZ(0);
-            props.matrix().applyTranslation(-ASIDE, 0, DEPTH);
-            props.model().render(props.matrix(), null, 1);
+
+            for (var step = 0; step < STANDING; step++) {
+                props.matrix().makeRotationZ(0);
+                props.matrix().applyTranslation(
+                    (step - STANDING / 2) * ASIDE / 2, (step - STANDING / 2) * APART, DEPTH);
+                props.model().render(props.matrix(), null, 1);
+            }
 
             toolkit.pa();
             props.matrix().makeRotationZ(0);
