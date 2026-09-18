@@ -868,6 +868,45 @@ static void wateredDepthsSeen(int colour, const int16_t *depth, int corners) {
  * not what says so: the colour is never asked about, only used, and the client gives it to whole
  * stretches of ground that the water only reaches part of.
  */
+/** How many parts a packed colour carries, which is a byte each for red, green and blue. */
+enum { COLOUR_PARTS = 3 };
+
+/** How much of the water over a tile stands over one of its corners, out of the whole. */
+static float cornerUnder(const Tile *tile, int corner) {
+    if (tile == NULL || !tile->watered || tile->depth == NULL || corner >= tile->corners
+        || tile->waterReaches <= 0) {
+        return 0.0f;
+    }
+
+    float under = (float) tile->depth[corner] / (float) (tile->waterReaches / 2);
+    if (under < 0.0f) {
+        return 0.0f;
+    }
+
+    return under > 1.0f ? 1.0f : under;
+}
+
+/**
+ * Carries one colour towards the colour of the water over it: nothing where no water stands over
+ * it, and nothing but the water where the whole of it does.
+ */
+static uint32_t carriedUnderWater(uint32_t colour, uint32_t water, float under) {
+    if (under <= 0.0f) {
+        return colour;
+    }
+
+    uint32_t carried = 0;
+    for (int part = 0; part < COLOUR_PARTS; part++) {
+        int shift = part * 8;
+        float held = (float) ((colour >> shift) & 0xFF);
+        float towards = (float) ((water >> shift) & 0xFF);
+
+        carried |= (uint32_t) (held + (towards - held) * under) << shift;
+    }
+
+    return carried;
+}
+
 static int anyDepth(const int16_t *depth, int corners) {
     if (depth == NULL) {
         return 0;
@@ -1022,6 +1061,14 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
                  */
                 tile->plan[corner] = litCorner(ground, stands, tile->light[corner],
                         x, z, tile->across[corner], tile->along[corner], worn, 1);
+
+                /*
+                 * The map is drawn from straight above and through whatever stands between, so
+                 * ground under water is drawn on it through the water as well. Without that the
+                 * map shows the bright bed of a harbour where the harbour should be.
+                 */
+                tile->plan[corner] = carriedUnderWater(tile->plan[corner],
+                        (uint32_t) tile->waterColour, cornerUnder(tile, corner));
             }
         }
     }
@@ -1478,18 +1525,7 @@ int groundTileWaterColour(const void *at) {
  * ever uses half of it, so a corner as deep as the reach is well past showing anything.
  */
 float groundTileCornerUnder(const void *at, int corner) {
-    const Tile *tile = at;
-    if (tile == NULL || !tile->watered || tile->depth == NULL || corner >= tile->corners
-        || tile->waterReaches <= 0) {
-        return 0.0f;
-    }
-
-    float under = (float) tile->depth[corner] / (float) (tile->waterReaches / 2);
-    if (under < 0.0f) {
-        return 0.0f;
-    }
-
-    return under > 1.0f ? 1.0f : under;
+    return cornerUnder(at, corner);
 }
 
 int groundTileFaceTexture(const void *at, int face) {
