@@ -327,6 +327,9 @@ int groundTileWatered(const void *tile);
 
 /** The colour the client gave the water on a tile, whether or not the water reaches it. */
 int groundTileWaterColour(const void *tile);
+
+/** How much of the water stands over a corner, out of the whole. */
+float groundTileCornerUnder(const void *tile, int corner);
 int groundTileFaceHollow(const void *tile, int face);
 int groundTileFaceBare(const void *tile, int face);
 int groundTilePlanColour(const void *tile, int corner, uint32_t *colour);

@@ -1544,15 +1544,20 @@ public sealed interface Scene {
         private static final int CONTRAST = 768;
 
         /**
-         * Twenty two thousand of its pixels are out, which is every one the patch covers.
-         *
-         * The toolkit draws a patch with water on it by fogging it by height towards the water's
-         * colour, and has no fog by height at all: what fading towards water it has is worked out
-         * per corner of a model and nowhere else. So the whole of the water is missing.
+         * Twenty one thousand of its pixels are out, and almost none of that is the water.
          *
          * What turns a tile into water is the DEPTH the client gives the water on it, not the
          * colour. The colour is never tested, only used, and what it is used for is the colour
-         * the fog carries everything towards.
+         * everything under the water is carried towards. How far it is carried was measured off
+         * the shipped toolkit on a patch laid flat at one depth: a place half as far down as the
+         * client says the water reaches is carried the whole way, and everything shallower in
+         * proportion. That is drawn now, a corner at a time and carried across a face.
+         *
+         * What is left is not the water. Give this patch one grid of heights instead of two and
+         * turn the water off, and it comes out exactly as the shipped toolkit draws it; give it
+         * two and turn the water off, and twenty thousand pixels are out. So nearly all of what
+         * is left is the second grid, which the ground takes and does nothing with beyond the
+         * water. It is the next thing to find, and it is not a water fault.
          */
         @Override
         public boolean written() {

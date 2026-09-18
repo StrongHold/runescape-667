@@ -267,8 +267,8 @@ public final class HandGround {
      * about the run between.
      */
     public static Ground buildWatered(Toolkit toolkit) {
-        var ground = toolkit.createGround(TILES, TILES, seabedHeights(), waterHeights(),
-            GROUND_FLAGS, FEATURE_FLAGS);
+        var ground = toolkit.createGround(TILES, TILES, seabedHeights(),
+            ONE_GRID ? seabedHeights() : waterHeights(), GROUND_FLAGS, FEATURE_FLAGS);
 
         for (var x = 0; x < TILES; x++) {
             for (var z = 0; z < TILES; z++) {
@@ -315,7 +315,9 @@ public final class HandGround {
         var heights = new int[TILES + 1][TILES + 1];
         for (var x = 0; x <= TILES; x++) {
             for (var z = 0; z <= TILES; z++) {
-                heights[x][z] = BELOW_THE_SURFACE + x * 12 + (z % 3) * 20;
+                heights[x][z] = ONE_DEPTH > 0
+                    ? BELOW_THE_SURFACE
+                    : BELOW_THE_SURFACE + x * 12 + (z % 3) * 20;
             }
         }
         return heights;
@@ -352,8 +354,24 @@ public final class HandGround {
      * every tile water and it draws the patch every time.
      */
     private static int depthAt(int along) {
+        if (ONE_DEPTH > 0) {
+            return ONE_DEPTH;
+        }
+
         return SHALLOWEST + DEEPEST * along / TILES;
     }
+
+    /**
+     * One depth for every corner of the patch, asked for while what the water does to a colour is
+     * being measured.
+     *
+     * A patch that runs from shallow to deep and rises and falls as it goes says what the water
+     * does only tangled up with where the ground is. Flat, and at one depth, it says it plainly.
+     */
+    private static final int ONE_DEPTH = number("SW3D_WATER_DEPTH", 0);
+
+    /** Whether the patch is given one grid of heights twice, as every other patch here is. */
+    private static final boolean ONE_GRID = number("SW3D_WATER_ONE_GRID", 0) != 0;
 
     /** How deep the water is at the far edge of the patch, which is where it is shallowest. */
     private static final int SHALLOWEST = 16;

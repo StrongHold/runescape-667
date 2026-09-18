@@ -57,6 +57,12 @@ typedef struct {
     /** How deep the water over the corner is, or nothing where the tile is not underwater. */
     int16_t *depth;
 
+    /**
+     * How far each corner stands under the water over the grid, worked out from the two grids of
+     * heights the ground was given rather than from the depths the client hands the tile.
+     */
+    int16_t *under;
+
     /** Whether the tile was handed over as one that casts a shadow of its own. */
     int shadowed;
 
@@ -67,6 +73,15 @@ typedef struct {
      */
     int watered;
     int waterColour;
+
+    /**
+     * How far down the water over this tile lets anything be seen.
+     *
+     * A corner as deep as this shows nothing of the ground under it and is drawn in the water's
+     * own colour; one at the surface shows the ground whole. It is also what says whether the
+     * tile carries water at all, because the client gives it nothing where there is none.
+     */
+    int waterReaches;
 
     /**
      * Where this tile's picture of the shadow over it sits in the run the ground keeps, and how
@@ -101,6 +116,16 @@ typedef struct {
 
     /** The height of every corner of the grid, one more each way than there are tiles. */
     int *heights;
+
+    /**
+     * Where the water over the grid lies, one height for every corner of it.
+     *
+     * The client hands the ground two grids: where the ground itself is, and where the water over
+     * it is. How far a place stands under the water is the one taken from the other, and that is
+     * what decides how much of the water's colour it takes on. Where there is no water anywhere,
+     * the client hands the same grid twice and the two come to nothing everywhere.
+     */
+    int *waterHeights;
 
     Tile **tiles;
 
@@ -162,11 +187,15 @@ static int heightAt(const Ground *ground, int x, int z) {
     return ground->heights[(size_t) x * (size_t) (ground->sizeZ + 1) + (size_t) z];
 }
 
+static int waterHeightAt(const Ground *ground, int x, int z) {
+    return ground->waterHeights[(size_t) x * (size_t) (ground->sizeZ + 1) + (size_t) z];
+}
+
 /**
  * How high the ground is between the corners of a tile, which is where a corner the client put
  * inside a tile sits.
  */
-static int averageHeight(const Ground *ground, int across, int along) {
+static int averageOf(const Ground *ground, int across, int along, int water) {
     int x = across >> ground->tileShift;
     int z = along >> ground->tileShift;
 
@@ -177,12 +206,31 @@ static int averageHeight(const Ground *ground, int across, int along) {
     int intoX = (ground->tileSize - 1) & across;
     int intoZ = (ground->tileSize - 1) & along;
 
-    int near = (intoX * heightAt(ground, x + 1, z)
-        + (ground->tileSize - intoX) * heightAt(ground, x, z)) >> ground->tileShift;
-    int far = (heightAt(ground, x, z + 1) * (ground->tileSize - intoX)
-        + intoX * heightAt(ground, x + 1, z + 1)) >> ground->tileShift;
+    int nearLeft = water ? waterHeightAt(ground, x, z) : heightAt(ground, x, z);
+    int nearRight = water ? waterHeightAt(ground, x + 1, z) : heightAt(ground, x + 1, z);
+    int farLeft = water ? waterHeightAt(ground, x, z + 1) : heightAt(ground, x, z + 1);
+    int farRight = water ? waterHeightAt(ground, x + 1, z + 1) : heightAt(ground, x + 1, z + 1);
+
+    int near = (intoX * nearRight + (ground->tileSize - intoX) * nearLeft) >> ground->tileShift;
+    int far = (farLeft * (ground->tileSize - intoX) + intoX * farRight) >> ground->tileShift;
 
     return ((ground->tileSize - intoZ) * near + intoZ * far) >> ground->tileShift;
+}
+
+static int averageHeight(const Ground *ground, int across, int along) {
+    return averageOf(ground, across, along, 0);
+}
+
+/**
+ * How far a place on the grid stands under the water over it, which is nothing where the client
+ * gave the ground no water.
+ */
+static int underTheWater(const Ground *ground, int across, int along) {
+    if (ground->waterHeights == NULL) {
+        return 0;
+    }
+
+    return averageOf(ground, across, along, 0) - averageOf(ground, across, along, 1);
 }
 
 static void tileFree(Tile *tile) {
@@ -201,6 +249,7 @@ static void tileFree(Tile *tile) {
     free(tile->bare);
     free(tile->plan);
     free(tile->depth);
+    free(tile->under);
     free(tile);
 }
 
@@ -217,6 +266,7 @@ static void groundFree(Ground *ground) {
     }
 
     free(ground->heights);
+    free(ground->waterHeights);
     free(ground->lights);
     free(ground->shade);
     free(ground->shadowTexture);
@@ -316,7 +366,6 @@ JNIEXPORT void JNICALL Java_t_ga(JNIEnv *env, jobject self, jobject toolkit, job
                                   jint groundFlags, jint featureFlags) {
     (void) toolkit;
     (void) pool;
-    (void) levels;
 
     groundFree(groundOf(env, self));
     setNativeId(env, self, 0);
@@ -337,6 +386,7 @@ JNIEXPORT void JNICALL Java_t_ga(JNIEnv *env, jobject self, jobject toolkit, job
     ground->groundFlags = groundFlags;
     ground->featureFlags = featureFlags;
     ground->heights = flattenHeights(env, heights, sizeX, sizeZ);
+    ground->waterHeights = levels == NULL ? NULL : flattenHeights(env, levels, sizeX, sizeZ);
     ground->tiles = calloc((size_t) sizeX * (size_t) sizeZ, sizeof(Tile *));
 
     if (ground->heights == NULL || ground->tiles == NULL) {
@@ -829,9 +879,10 @@ static void wateredDepthsSeen(int colour, const int16_t *depth, int corners) {
 /**
  * Whether any corner of a tile stands under any depth of water at all.
  *
- * A tile is water to the toolkit when it has been given a colour for the water on it and one of
- * its corners has some water over it. A colour on its own is not enough: the client gives the
- * colour to whole stretches of ground that the water only reaches part of.
+ * A tile is water to the toolkit when it has been told how far down its water lets anything be
+ * seen and one of its corners has some water over it. The colour the client gives the water is
+ * not what says so: the colour is never asked about, only used, and the client gives it to whole
+ * stretches of ground that the water only reaches part of.
  */
 static int anyDepth(const int16_t *depth, int corners) {
     if (depth == NULL) {
@@ -861,7 +912,6 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
                                  jboolean shadowed) {
     wateredTileSeen(waterColour, waterDepth, waterBias, depth != NULL);
 
-    (void) waterDepth;
     (void) waterBias;
 
     handing.handed++;
@@ -899,8 +949,10 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
     tile->texture = shortsFrom(env, texture, corners);
     tile->size = shortsFrom(env, size, corners);
     tile->depth = shortsFrom(env, depth, corners);
+    tile->under = calloc((size_t) corners, sizeof(int16_t));
     tile->waterColour = waterColour;
-    tile->watered = waterColour != 0 && anyDepth(tile->depth, corners);
+    tile->waterReaches = waterDepth;
+    tile->watered = waterDepth != 0 && anyDepth(tile->depth, corners);
     wateredDepthsSeen(waterColour, tile->depth, corners);
     tile->up = calloc((size_t) corners, sizeof(int16_t));
     tile->colour = calloc((size_t) corners, sizeof(uint32_t));
@@ -941,6 +993,7 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
             }
 
             tile->up[corner] = (int16_t) (averageHeight(ground, worldX, worldZ) + levels[corner]);
+            tile->under[corner] = (int16_t) underTheWater(ground, worldX, worldZ);
             tile->light[corner] = (unsigned char) shadeInside(ground, x, z,
                 tile->across[corner], tile->along[corner]);
             /*
@@ -1433,6 +1486,28 @@ int groundTileWatered(const void *at) {
 int groundTileWaterColour(const void *at) {
     const Tile *tile = at;
     return tile == NULL ? 0 : tile->waterColour;
+}
+
+/**
+ * How much of the water stands over one corner of a tile, out of the whole.
+ *
+ * Nothing at the surface, and the whole of the water once the corner is half as far down as the
+ * client says the water reaches. The client counts the reach the long way and the toolkit only
+ * ever uses half of it, so a corner as deep as the reach is well past showing anything.
+ */
+float groundTileCornerUnder(const void *at, int corner) {
+    const Tile *tile = at;
+    if (tile == NULL || !tile->watered || tile->under == NULL || corner >= tile->corners
+        || tile->waterReaches <= 0) {
+        return 0.0f;
+    }
+
+    float under = (float) tile->under[corner] / (float) (tile->waterReaches / 2);
+    if (under < 0.0f) {
+        return 0.0f;
+    }
+
+    return under > 1.0f ? 1.0f : under;
 }
 
 int groundTileFaceTexture(const void *at, int face) {

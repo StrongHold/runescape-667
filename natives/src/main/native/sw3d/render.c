@@ -218,6 +218,14 @@ typedef struct {
      * of the whole. What is left over is how much of the third it carries.
      */
     uint16_t mix[MIXED];
+
+    /**
+     * How much of the water over the tile stands over this corner, out of the whole.
+     *
+     * It is carried down the sides and across a row like anything else a corner holds, because
+     * water thickens across a face rather than covering the whole of it alike.
+     */
+    float under;
 } Corner;
 
 /** One side of a triangle, either where it has reached or how far it moves in a row. */
@@ -229,6 +237,7 @@ typedef struct {
     float v;
     float w;
     int16_t mix[MIXED];
+    float under;
 } Side;
 
 static uint16_t fadedPart(uint16_t held, float fade, int part);
@@ -250,6 +259,9 @@ static Corner cornerAt(const Projected *point, uint32_t colour) {
     Corner corner;
     corner.mix[0] = 0;
     corner.mix[1] = 0;
+
+    /* Nothing but the ground stands under water, and the ground says so for itself. */
+    corner.under = 0.0f;
     corner.x = point->x;
     corner.y = point->y;
     corner.depth = point->depth;
@@ -346,6 +358,7 @@ static Side sideBetween(const Corner *from, const Corner *to, int rows) {
     side.u = (to->u - from->u) * over;
     side.v = (to->v - from->v) * over;
     side.w = (to->w - from->w) * over;
+    side.under = (to->under - from->under) * over;
 
     for (int part = 0; part < CHANNELS; part++) {
         side.colour[part] = narrow(((float) to->colour[part] - (float) from->colour[part]) * over);
@@ -365,6 +378,7 @@ static Side sideAt(const Corner *corner) {
     side.u = corner->u;
     side.v = corner->v;
     side.w = corner->w;
+    side.under = corner->under;
 
     for (int part = 0; part < CHANNELS; part++) {
         side.colour[part] = (int16_t) corner->colour[part];
@@ -384,6 +398,7 @@ static void carry(Side *side, const Side *step, int rows) {
     side->u += (float) rows * step->u;
     side->v += (float) rows * step->v;
     side->w += (float) rows * step->w;
+    side->under += (float) rows * step->under;
 
     for (int part = 0; part < CHANNELS; part++) {
         side->colour[part] = (int16_t) (side->colour[part] + (int16_t) rows * step->colour[part]);
@@ -400,6 +415,7 @@ static void advance(Side *side, const Side *step) {
     side->u += step->u;
     side->v += step->v;
     side->w += step->w;
+    side->under += step->under;
 
     for (int part = 0; part < CHANNELS; part++) {
         side->colour[part] = (int16_t) (side->colour[part] + step->colour[part]);
@@ -729,6 +745,37 @@ static uint32_t laidOver(uint32_t there, const uint16_t *colour) {
     return packed;
 }
 
+/** The colour of the water over the tile being drawn, or nothing where the tile has none. */
+static uint32_t waterOverTile;
+
+/**
+ * Carries a pixel of a textured face towards the colour of the water standing over it.
+ */
+static uint32_t laidUnderWaterOver(uint32_t colour, float under) {
+    uint32_t carried = 0;
+    for (int part = 0; part < CHANNELS; part++) {
+        int shift = part * 8;
+        float held = (float) ((colour >> shift) & 0xFF);
+        float towards = (float) ((waterOverTile >> shift) & 0xFF);
+
+        carried |= (uint32_t) (held + (towards - held) * under) << shift;
+    }
+
+    return carried;
+}
+
+/**
+ * The same, for a face with no texture, whose light is kept with eight places after the point.
+ */
+static void laidUnderWater(uint16_t *seen, float under) {
+    for (int part = 0; part < CHANNELS; part++) {
+        float held = (float) seen[part];
+        float towards = (float) (((waterOverTile >> (part * 8)) & 0xFF) << 8);
+
+        seen[part] = (uint16_t) (held + (towards - held) * under);
+    }
+}
+
 static void fillSpan(int y, const Side *left, const Side *right) {
     int from = (int) lrintf(left->x);
     int to = (int) lrintf(right->x);
@@ -755,6 +802,9 @@ static void fillSpan(int y, const Side *left, const Side *right) {
     float uStep = (right->u - left->u) * over;
     float vStep = (right->v - left->v) * over;
     float wStep = (right->w - left->w) * over;
+
+    float underStep = (right->under - left->under) * over;
+    float under = left->under + (float) skipped * underStep;
 
     /*
      * A texture is read four pixels at a time, and the four are worked out from where the group of
@@ -856,7 +906,16 @@ static void fillSpan(int y, const Side *left, const Side *right) {
                 if (redly) {
                     row[x] = painted;
                 } else if (texels == NULL) {
-                    row[x] = laidOver(row[x], reached);
+                    uint16_t seen[CHANNELS];
+                    for (int part = 0; part < CHANNELS; part++) {
+                        seen[part] = reached[part];
+                    }
+
+                    if (under > 0.0f) {
+                        laidUnderWater(seen, under);
+                    }
+
+                    row[x] = laidOver(row[x], seen);
                 } else {
                     /*
                      * A texel is shaded by the light the span has reached rather than replacing
@@ -866,6 +925,10 @@ static void fillSpan(int y, const Side *left, const Side *right) {
                     uint32_t written = 0;
                     for (int part = 0; part < CHANNELS; part++) {
                         written |= (worn[part] * reached[part] >> 16) << (part * 8);
+                    }
+
+                    if (under > 0.0f) {
+                        written = laidUnderWaterOver(written, under);
                     }
 
                     if (redly) {
@@ -887,6 +950,7 @@ static void fillSpan(int y, const Side *left, const Side *right) {
         }
 
         depth += depthStep;
+        under += underStep;
 
         if (x - group == 3) {
             group += 4;
@@ -1985,9 +2049,23 @@ void renderGroundTile(const void *ground, int x, int z) {
         return;
     }
 
+    /*
+     * The colour of the water over this tile, and how much of it stands over each corner. The
+     * water goes on last, over whatever the face came to, and thickens across a face rather than
+     * covering the whole of it alike, so it is carried a corner at a time like the light is.
+     */
+    waterOverTile = (uint32_t) groundTileWaterColour(tile);
+
+    float *under = calloc((size_t) corners, sizeof(float));
+    if (under == NULL) {
+        free(shade);
+        return;
+    }
+
     for (int corner = 0; corner < corners; corner++) {
         int where[3];
         groundTileCorner(ground, tile, corner, tileSize, x, z, where, &shade[corner]);
+        under[corner] = groundTileCornerUnder(tile, corner);
 
         float point[ROWS];
         for (int lane = 0; lane < ROWS; lane++) {
@@ -2055,6 +2133,10 @@ void renderGroundTile(const void *ground, int x, int z) {
             cornerAt(c, shade[face * 3 + 2])
         };
 
+        for (int corner = 0; corner < 3; corner++) {
+            walked[corner].under = under[face * 3 + corner];
+        }
+
         layTextureOnTile(tile, face, tileSize, x, z, shadow, walked);
         fillTriangle(walked[0], walked[1], walked[2]);
     }
@@ -2065,6 +2147,8 @@ void renderGroundTile(const void *ground, int x, int z) {
     blended[0] = NULL;
     shadowTexels = NULL;
     tileRedly = 0;
+    waterOverTile = 0;
+    free(under);
     free(shade);
 }
 
