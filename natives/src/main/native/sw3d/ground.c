@@ -1109,10 +1109,15 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
                 /*
                  * What a corner stands for on the map. The colour the client lays over the face
                  * comes first, because that is the one it picks the ground out by. Failing that,
-                 * a corner on ground wearing a texture the player cannot turn off stands for that
-                 * texture's own colour, because a tile on the map is a handful of pixels across
-                 * and a texture drawn that small says nothing. Failing both, it stands for the
-                 * colour of the ground it is on.
+                 * a corner on ground wearing a texture stands for that texture's own colour,
+                 * because a tile on the map is a handful of pixels across and a texture drawn
+                 * that small says nothing. Failing both, it stands for the colour of the ground
+                 * it is on.
+                 *
+                 * What matters about the texture is whether it is there, not whether the player
+                 * is allowed to turn it off. Nearly every texture the client lays on open ground
+                 * may be turned off, water's among them, and a corner wearing one stands for it
+                 * while it is on.
                  */
                 int worn = tile->texture == NULL ? -1 : tile->texture[corner];
                 const TextureMetrics *metrics = worn == -1 ? NULL : textureMetricsFor(worn);
@@ -1121,7 +1126,7 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
 
                 if (laid != NO_COLOUR) {
                     stands = laid & 0xFFFF;
-                } else if (metrics != NULL && !metrics->disableable) {
+                } else if (metrics != NULL && !wearsNothing(ground, worn)) {
                     stands = metrics->averageColour;
                 }
 
