@@ -111,7 +111,8 @@ val sceneSettings = mapOf(
     "SW3D_WATER_ONE_GRID" to "",
     "SW3D_WATER_DEEPEST" to "",
     "SW3D_WATER_FLAT" to "",
-    "SW3D_WATER_SHALLOWEST" to ""
+    "SW3D_WATER_SHALLOWEST" to "",
+    "SW3D_GROUND_TEXTURES_ON" to ""
 )
 
 val captureFrames by tasks.registering(JavaExec::class) {
@@ -502,7 +503,8 @@ val patchOpenGlBinding by tasks.registering(Exec::class) {
 
     executable = "sh"
     args("-c", listOf(
-        "lipo -thin x86_64 '$source' -output '$target'",
+        // The cache holds these either as a fat library or as the x64 slice on its own.
+        "lipo -thin x86_64 '$source' -output '$target' 2>/dev/null || cp '$source' '$target'",
         "install_name_tool -change '$javaVm' '$shimName' '$target'",
         "codesign -f -s - '$target'",
     ).joinToString(" && "))
@@ -655,7 +657,8 @@ val patchMemoryLibrary by tasks.registering(Exec::class) {
 
     executable = "sh"
     args("-c", listOf(
-        "lipo -thin x86_64 '$source' -output '$target'",
+        // The cache holds these either as a fat library or as the x64 slice on its own.
+        "lipo -thin x86_64 '$source' -output '$target' 2>/dev/null || cp '$source' '$target'",
         "install_name_tool -change '$javaVm' '$shimName' '$target'",
         "codesign -f -s - '$target'",
     ).joinToString(" && "))

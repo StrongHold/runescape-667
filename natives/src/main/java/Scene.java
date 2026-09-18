@@ -1961,10 +1961,18 @@ public sealed interface Scene {
          *
          * The shipped toolkit draws nothing at all there: the pixels come back the colour the
          * picture was cleared to, and the corners of those tiles have colours of their own that
-         * it never uses. We draw them in the colour of the ground under the texture. Which of the
-         * things a corner stands for the map is choosing, and why a texture that is not there
-         * stops the face being drawn rather than falling back to the ground, is what this scene
-         * is here to settle.
+         * it never uses. We draw them in the colour of the ground under the texture.
+         *
+         * It is not that the texture is missing, because the toolkit has it and skipping the face
+         * where it has not makes no difference. It is not that the player has turned it off,
+         * because SW3D_GROUND_TEXTURES_ON builds the same patch with them on and the shipped
+         * toolkit still draws nothing. And standing such a corner for the texture's colour
+         * whether or not the player may turn it off is worse, taking the scene to fourteen
+         * hundred, so the one thing the map does read is whether the player may turn it off.
+         *
+         * Which leaves: the shipped toolkit draws no map at all for a face wearing a texture the
+         * player is allowed to turn off, and draws one for a face wearing a texture they are not.
+         * Why is what this scene is here to settle.
          */
         @Override
         public boolean written() {

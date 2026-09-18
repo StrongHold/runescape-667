@@ -2995,6 +2995,7 @@ static void renderTilePlan(const void *ground, const void *tile, float across, f
             continue;
         }
 
+
         fillTriangle(
             planCorner(tile, face * 3, across, down, width, size),
             planCorner(tile, face * 3 + 1, across, down, width, size),

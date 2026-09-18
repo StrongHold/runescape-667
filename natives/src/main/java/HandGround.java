@@ -57,8 +57,19 @@ public final class HandGround {
      * wearing the same texture at another size, and a tile wearing none.
      */
     public static Ground buildTextured(Toolkit toolkit) {
-        return build(toolkit, TEXTURED_WITH, TILE, FEATURE_FLAGS | TEXTURES_TURNED_OFF);
+        return build(toolkit, TEXTURED_WITH, TILE,
+            TEXTURES_ON ? FEATURE_FLAGS : FEATURE_FLAGS | TEXTURES_TURNED_OFF);
     }
+
+    /**
+     * Whether the patch is built as the client builds it for a player who has left textures on.
+     *
+     * The ground the client lays for such a player is nearly all of the ground anyone sees, and
+     * what a corner of it stands for on the map is the texture's own colour rather than the
+     * colour of the ground under it. Built with them off, which is what this patch has always
+     * been, the texture is not there to be asked about and that choice is never made.
+     */
+    private static final boolean TEXTURES_ON = number("SW3D_GROUND_TEXTURES_ON", 0) != 0;
 
     /**
      * The texture a textured patch wears on its near half, which the player is not allowed to
