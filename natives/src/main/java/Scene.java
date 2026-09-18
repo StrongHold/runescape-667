@@ -1906,11 +1906,20 @@ public sealed interface Scene {
 
         /**
          * Two hundred and seven of its pixels are a shade out, and sixteen more are drawn by the
-         * shipped toolkit and not by this one.
+         * shipped toolkit and not by this one. They are the one column of the patch wearing no
+         * texture and the one row whose corners have no colour of their own, and nothing else:
+         * everywhere else the two agree to the pixel.
          *
-         * Part of it is the one row where the client laid no colour over the face and gave the
-         * corners none of their own either. The shipped toolkit draws such a corner in a faint
-         * grey that follows the light on it, and this draws it black.
+         * Over both of them the shipped toolkit draws the same narrow band of dark greys, from
+         * four to nineteen, following the light across the patch and taking no colour from the
+         * ground or from what was laid over it. The near half of the patch carries a red over
+         * every face and the far half carries none, and both halves come out the same band, so
+         * whatever the map is given there it is not the colour the client handed over.
+         *
+         * A corner of a patch the client laid a colour over is the one case where the map is not
+         * drawn in a colour the ground has. Standing such a corner for black and lighting it is
+         * worse, taking the scene to two hundred and twenty four, so it is not simply the colour
+         * of nothing carried through the light either.
          */
         @Override
         public boolean written() {
