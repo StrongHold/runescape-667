@@ -110,7 +110,8 @@ val sceneSettings = mapOf(
     "SW3D_WATER_DEPTH" to "",
     "SW3D_WATER_ONE_GRID" to "",
     "SW3D_WATER_DEEPEST" to "",
-    "SW3D_WATER_FLAT" to ""
+    "SW3D_WATER_FLAT" to "",
+    "SW3D_WATER_SHALLOWEST" to ""
 )
 
 val captureFrames by tasks.registering(JavaExec::class) {

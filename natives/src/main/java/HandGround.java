@@ -384,7 +384,7 @@ public final class HandGround {
     private static final boolean FLAT_BED = number("SW3D_WATER_FLAT", 0) != 0;
 
     /** How deep the water is at the far edge of the patch, which is where it is shallowest. */
-    private static final int SHALLOWEST = 16;
+    private static final int SHALLOWEST = number("SW3D_WATER_SHALLOWEST", 16);
 
     private static void addWateredTile(Ground ground, int x, int z) {
         var offsetX = new int[] {0, TILE, TILE, 0};
