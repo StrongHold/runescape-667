@@ -702,6 +702,28 @@ static uint32_t shadedColour(int packed, int shade) {
     return colourOf((packed & ~(LIGHTNESS_WHOLE - 1)) | shadedLightness(packed, shade));
 }
 
+/**
+ * A colour held between the two ends a lit corner is kept within.
+ */
+static int heldLightness(int lightness) {
+    if (lightness < LIGHTNESS_LEAST) {
+        return LIGHTNESS_LEAST;
+    }
+
+    return lightness > LIGHTNESS_MOST ? LIGHTNESS_MOST : lightness;
+}
+
+/**
+ * Whether the map is drawn the way the client's own renderer draws it, keeping each colour's hue
+ * and taking only how strongly the sun reaches a corner.
+ *
+ * Kept only to measure against. The shipped toolkit draws the map in the colour the ground is
+ * drawn in, and that is what is drawn.
+ */
+static int planTheOldWay(void) {
+    return switchedOff("SW3D_PLAN_OLD");
+}
+
 static uint32_t litCorner(const Ground *ground, int packed, int shade, int x, int z,
                           int across, int along, int texture, int wearsIts) {
     int reaching = GROUND_LIGHTNESS - shade;
@@ -748,6 +770,13 @@ static uint32_t litCorner(const Ground *ground, int packed, int shade, int x, in
     float reach = towards > 0.0f ? light->intensity : light->reverseIntensity;
     int strength = (int) ((globalAmbient() + reach * towards) * LIGHT_WHOLE);
     unsigned char sunColour[CHANNELS_LIT] = {light->red, light->green, light->blue};
+
+    if (!wearsIts && planTheOldWay()) {
+        int level = heldLightness((int) ((globalAmbient() + towards) * GROUND_LIGHT_WHOLE));
+        int lightness = ((packed & (LIGHTNESS_WHOLE - 1)) * (level - shade)) >> LIGHTNESS_SHIFT;
+
+        return colourOf((packed & ~(LIGHTNESS_WHOLE - 1)) | heldLightness(lightness));
+    }
 
     uint32_t lit = 0;
     for (int part = 0; part < CHANNELS_LIT; part++) {
@@ -1060,7 +1089,8 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
                  * what the corner stands for differs, and that is settled above.
                  */
                 tile->plan[corner] = litCorner(ground, stands, tile->light[corner],
-                        x, z, tile->across[corner], tile->along[corner], worn, 1);
+                        x, z, tile->across[corner], tile->along[corner], worn,
+                        !planTheOldWay());
 
                 /*
                  * The map is drawn from straight above and through whatever stands between, so
