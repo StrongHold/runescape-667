@@ -266,7 +266,22 @@ public final class HandGround {
      * much shows through water is what the depth decides and a patch at one depth says nothing
      * about the run between.
      */
+    /**
+     * Whether the watered patch is built at all.
+     *
+     * Handing the shipped toolkit a patch with water on it wedges it: the capture stops partway
+     * and never comes back, and the library has been seen to give up outright on the same path
+     * when it was made to take it. Nothing here is worth a harness that cannot run, so the patch
+     * is left unbuilt until what it is that wedges the toolkit is known, and SW3D_WATER_PATCH
+     * asks for it back.
+     */
+    private static final boolean WATER_PATCH = number("SW3D_WATER_PATCH", 0) != 0;
+
     public static Ground buildWatered(Toolkit toolkit) {
+        if (!WATER_PATCH) {
+            return build(toolkit, TEXTURE, 0);
+        }
+
         var ground = toolkit.createGround(TILES, TILES, seabedHeights(), waterHeights(),
             GROUND_FLAGS, FEATURE_FLAGS);
 

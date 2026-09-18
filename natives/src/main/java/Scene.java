@@ -1568,8 +1568,15 @@ public sealed interface Scene {
          * Putting the patch under the surface the eye is given, so that the water covers it, does
          * not do it either. Nor does every combination of the ground's flags and features.
          *
+         * None of which may mean very much, because handing the shipped toolkit a patch with
+         * water on it is not safe. It wedges partway through a run and never comes back, and made
+         * to take the same path by hand it gives up outright. So a patch that came out the same
+         * either way may have been a toolkit quietly failing rather than a toolkit agreeing, and
+         * every nought counted here is worth only as much as that. The patch is therefore left
+         * unbuilt unless SW3D_WATER_PATCH asks for it.
+         *
          * So the next thing to find is what makes the shipped toolkit take a patch through those
-         * routines, and this scene is where it goes once it is found.
+         * routines safely, and this scene is where it goes once it is found.
          */
         @Override
         public void draw(Toolkit toolkit, Props props) {
