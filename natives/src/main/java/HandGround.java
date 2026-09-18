@@ -267,7 +267,7 @@ public final class HandGround {
      * about the run between.
      */
     public static Ground buildWatered(Toolkit toolkit) {
-        var ground = toolkit.createGround(TILES, TILES, heights(), waterHeights(),
+        var ground = toolkit.createGround(TILES, TILES, seabedHeights(), waterHeights(),
             GROUND_FLAGS, FEATURE_FLAGS);
 
         for (var x = 0; x < TILES; x++) {
@@ -304,9 +304,34 @@ public final class HandGround {
      * the water over it is. Every other patch here is given the same grid twice, which is what
      * the client hands over where there is no water.
      */
+    /**
+     * Where the ground under the water is, which is below the surface the eye is given.
+     *
+     * The client counts height downwards, so a place the water covers stands at a height greater
+     * than the surface does. Every other patch here stands above nought and so above any surface
+     * the client asks for, which leaves it dry however much water is laid over it.
+     */
+    private static int[][] seabedHeights() {
+        var heights = new int[TILES + 1][TILES + 1];
+        for (var x = 0; x <= TILES; x++) {
+            for (var z = 0; z <= TILES; z++) {
+                heights[x][z] = BELOW_THE_SURFACE + x * 12 + (z % 3) * 20;
+            }
+        }
+        return heights;
+    }
+
+    /**
+     * How far under the surface the near edge of the watered patch lies.
+     *
+     * It runs past the depth the eye's water lets anything be seen to, so the patch holds ground
+     * at every depth from just under the surface to past the last of the light.
+     */
+    private static final int BELOW_THE_SURFACE = 8;
+
     private static int[][] waterHeights() {
-        var ground = heights();
-        var surface = heights();
+        var ground = seabedHeights();
+        var surface = seabedHeights();
 
         for (var x = 0; x <= TILES; x++) {
             for (var z = 0; z <= TILES; z++) {

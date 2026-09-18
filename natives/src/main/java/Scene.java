@@ -1565,6 +1565,9 @@ public sealed interface Scene {
          * has never had any: what fading towards water there is, is worked out per corner of a
          * model and nowhere else.
          *
+         * Putting the patch under the surface the eye is given, so that the water covers it, does
+         * not do it either. Nor does every combination of the ground's flags and features.
+         *
          * So the next thing to find is what makes the shipped toolkit take a patch through those
          * routines, and this scene is where it goes once it is found.
          */
