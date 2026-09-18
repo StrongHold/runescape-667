@@ -1905,10 +1905,12 @@ public sealed interface Scene {
     record OverlaidPlan() implements Scene {
 
         /**
-         * A hundred and sixty of its pixels are a shade out, all of them in the one row where the
-         * client laid no colour over the face and gave the corners none of their own either. The
-         * shipped toolkit draws such a corner in a faint grey that follows the light on it, and
-         * this draws it black. Every corner the client gave either colour to is drawn right.
+         * Two hundred and seven of its pixels are a shade out, and sixteen more are drawn by the
+         * shipped toolkit and not by this one.
+         *
+         * Part of it is the one row where the client laid no colour over the face and gave the
+         * corners none of their own either. The shipped toolkit draws such a corner in a faint
+         * grey that follows the light on it, and this draws it black.
          */
         @Override
         public boolean written() {
@@ -1952,32 +1954,11 @@ public sealed interface Scene {
      * on: it stands for the texture's own colour, because a tile on the map is a handful of
      * pixels across and a texture drawn that small says nothing. Most of what the client lays
      * wears a texture, and water wears one everywhere.
+     *
+     * Such a corner takes no light and no water either. Half of this patch wears a texture the
+     * player has turned off, and that half is drawn the way the rest of the map is.
      */
     record TexturedPlan() implements Scene {
-
-        /**
-         * Seven hundred and twenty of its sixteen hundred pixels are out, and all of them are the
-         * half of the patch wearing a texture the player has turned off.
-         *
-         * The shipped toolkit draws nothing at all there: the pixels come back the colour the
-         * picture was cleared to, and the corners of those tiles have colours of their own that
-         * it never uses. We draw them in the colour of the ground under the texture.
-         *
-         * It is not that the texture is missing, because the toolkit has it and skipping the face
-         * where it has not makes no difference. It is not that the player has turned it off,
-         * because SW3D_GROUND_TEXTURES_ON builds the same patch with them on and the shipped
-         * toolkit still draws nothing. And standing such a corner for the texture's colour
-         * whether or not the player may turn it off is worse, taking the scene to fourteen
-         * hundred, so the one thing the map does read is whether the player may turn it off.
-         *
-         * Which leaves: the shipped toolkit draws no map at all for a face wearing a texture the
-         * player is allowed to turn off, and draws one for a face wearing a texture they are not.
-         * Why is what this scene is here to settle.
-         */
-        @Override
-        public boolean written() {
-            return false;
-        }
 
         @Override
         public void draw(Toolkit toolkit, Props props) {

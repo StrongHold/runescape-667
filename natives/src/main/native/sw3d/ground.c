@@ -1165,43 +1165,42 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
 
             if (tile->plan != NULL) {
                 /*
-                 * What a corner stands for on the map. The colour the client lays over the face
-                 * comes first, because that is the one it picks the ground out by. Failing that,
-                 * a corner on ground wearing a texture the player cannot turn off stands for that
-                 * texture's own colour, because a tile on the map is a handful of pixels across
-                 * and a texture drawn that small says nothing. Failing both, it stands for the
-                 * colour of the ground it is on.
+                 * What a corner stands for on the map.
+                 *
+                 * A face wearing a texture the player cannot turn off stands for that texture's
+                 * own colour and nothing else: a tile on the map is a handful of pixels across
+                 * and a texture drawn that small says nothing, so the texture is worth more than
+                 * anything laid over it. Such a corner takes no light and no water either. It is
+                 * the same colour wherever the face lies and whatever time of day it is, which is
+                 * what makes a map of one colour per texture readable at all.
+                 *
+                 * A corner wearing anything else stands for the colour the client laid over the
+                 * face, and failing that for the colour of the ground it is on, and either way it
+                 * is drawn the way the world is: lit, and carried through whatever water covers
+                 * it.
+                 *
+                 * The texture is the face's own rather than the corner's, because a face is what
+                 * wears one.
                  */
-                int worn = tile->texture == NULL ? -1 : tile->texture[corner];
+                int worn = tile->texture == NULL ? -1 : tile->texture[corner - corner % 3];
                 const TextureMetrics *metrics = worn == -1 ? NULL : textureMetricsFor(worn);
                 int laid = overlays == NULL ? NO_COLOUR : overlays[corner];
-                int stands = named;
 
-                if (laid != NO_COLOUR) {
-                    stands = laid & 0xFFFF;
-                } else if (metrics != NULL && !metrics->disableable) {
-                    stands = metrics->averageColour;
+                if (metrics != NULL && !metrics->disableable) {
+                    planPicked(named, laid, worn, metrics, metrics->averageColour);
+                    tile->plan[corner] = colourOf(metrics->averageColour);
+                } else {
+                    int stands = laid == NO_COLOUR ? named : laid & 0xFFFF;
+                    planPicked(named, laid, worn, metrics, stands);
+
+                    tile->plan[corner] = litCorner(ground, stands, tile->light[corner],
+                            x, z, tile->across[corner], tile->along[corner],
+                            tile->texture == NULL ? -1 : tile->texture[corner],
+                            !planTheOldWay());
+
+                    tile->plan[corner] = carriedUnderWater(tile->plan[corner],
+                            (uint32_t) tile->waterColour, cornerUnder(tile, corner));
                 }
-
-                planPicked(named, laid, worn, metrics, stands);
-
-                /*
-                 * The map is drawn in the colour the ground is drawn in as the world is seen:
-                 * carried through what the texture over the corner does to its colour, and
-                 * through the colour the sun shines in, and held at both ends the same way. Only
-                 * what the corner stands for differs, and that is settled above.
-                 */
-                tile->plan[corner] = litCorner(ground, stands, tile->light[corner],
-                        x, z, tile->across[corner], tile->along[corner], worn,
-                        !planTheOldWay());
-
-                /*
-                 * The map is drawn from straight above and through whatever stands between, so
-                 * ground under water is drawn on it through the water as well. Without that the
-                 * map shows the bright bed of a harbour where the harbour should be.
-                 */
-                tile->plan[corner] = carriedUnderWater(tile->plan[corner],
-                        (uint32_t) tile->waterColour, cornerUnder(tile, corner));
             }
         }
     }
