@@ -1,6 +1,8 @@
 import com.jagex.game.runetek6.client.GameShell;
 import com.jagex.graphics.Toolkit;
 
+import java.awt.Component;
+import java.awt.Graphics;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
@@ -141,7 +143,32 @@ public final class StallReport {
             + (canvas.isDisplayable() ? " displayable" : " NOT displayable")
             + (canvas.isShowing() ? " showing" : " NOT showing")
             + (canvas.isValid() ? " valid" : " NOT valid")
-            + " parent " + (canvas.getParent() == null ? "none" : canvas.getParent().getClass().getName());
+            + ", " + graphicsState(canvas)
+            + ", parent " + (canvas.getParent() == null ? "none" : canvas.getParent().getClass().getName());
+    }
+
+    /**
+     * Whether the canvas will hand out something to draw on.
+     *
+     * This is the one question that decides whether a frame can reach the screen at all, and the
+     * renderer that asks it throws the answer away: it catches the failure, asks for a repaint,
+     * and tries again next frame. Asking it here is the only way to see the answer.
+     */
+    private static String graphicsState(Component canvas) {
+        Graphics graphics = null;
+        try {
+            graphics = canvas.getGraphics();
+            if (graphics == null) {
+                return "gives no graphics";
+            }
+            return "gives graphics, clip " + graphics.getClipBounds();
+        } catch (RuntimeException refused) {
+            return "refuses graphics: " + refused;
+        } finally {
+            if (graphics != null) {
+                graphics.dispose();
+            }
+        }
     }
 
     private static void sayWhoAsked() {
