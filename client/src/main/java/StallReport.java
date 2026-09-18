@@ -1,3 +1,4 @@
+import com.jagex.game.runetek6.client.GameShell;
 import com.jagex.graphics.Toolkit;
 
 import java.lang.management.ManagementFactory;
@@ -101,7 +102,7 @@ public final class StallReport {
             var now = renderer();
             if (!now.equals(before)) {
                 var changed = !before.isEmpty();
-                System.out.println("client: drawing with " + now);
+                System.out.println("client: drawing with " + now + ", " + canvasState());
                 before = now;
                 if (changed) {
                     sayWhoAsked();
@@ -120,9 +121,33 @@ public final class StallReport {
     /**
      * Prints what the threads that draw are in the middle of, which is where the swap came from.
      */
+    /**
+     * What the game is drawing into.
+     *
+     * The Java renderer puts a frame on the screen by asking the canvas for a graphics of its own,
+     * which a canvas that has not been given anything to draw on cannot answer. Every other
+     * renderer here goes straight to the surface underneath and never asks. So a canvas that is
+     * not displayable is invisible to one renderer and harmless to the rest, and the game swaps
+     * its canvas every time it changes renderer.
+     */
+    private static String canvasState() {
+        var canvas = GameShell.canvas;
+        if (canvas == null) {
+            return "no canvas";
+        }
+
+        var size = canvas.getSize();
+        return "canvas " + size.width + "x" + size.height
+            + (canvas.isDisplayable() ? " displayable" : " NOT displayable")
+            + (canvas.isShowing() ? " showing" : " NOT showing")
+            + (canvas.isValid() ? " valid" : " NOT valid")
+            + " parent " + (canvas.getParent() == null ? "none" : canvas.getParent().getClass().getName());
+    }
+
     private static void sayWhoAsked() {
         var threads = ManagementFactory.getThreadMXBean();
-        var report = new StringBuilder("client: the renderer changed here\n");
+        var report = new StringBuilder("client: the renderer changed here\n")
+            .append("    ").append(canvasState()).append('\n');
 
         for (var info : threads.dumpAllThreads(false, false)) {
             var stack = info.getStackTrace();
