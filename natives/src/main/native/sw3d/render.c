@@ -128,8 +128,13 @@ static int wateredThroughout(void) {
 
 static const float NEARLY_WHOLLY = 0.99f;
 
-/** What every pixel drawn through water is painted, while the client is asked for it. */
-enum { WHOLLY_RED = 0xFF0000 };
+/**
+ * What a pixel is painted while the client is asked to show where its water is: red for anything
+ * drawn in the pass through water, green for a tile the client gave water to.
+ *
+ * Two colours rather than one, because the whole question is which of the two is on top.
+ */
+enum { WHOLLY_RED = 0xFF0000, WHOLLY_GREEN = 0x00FF00 };
 
 /** Whether the tile being drawn is one the client gave water to and is to be painted red. */
 static int tileRedly;
@@ -789,6 +794,7 @@ static void fillSpan(int y, const Side *left, const Side *right) {
     float *held = raster.depths + start;
 
     int redly = tileRedly || (wateredThroughout() && underwater()->under);
+    uint32_t painted = tileRedly ? WHOLLY_GREEN : WHOLLY_RED;
 
     for (int x = from; x < to; x++) {
         if (!distanceDecides || depth <= held[x]) {
@@ -848,7 +854,7 @@ static void fillSpan(int y, const Side *left, const Side *right) {
                 }
 
                 if (redly) {
-                    row[x] = WHOLLY_RED;
+                    row[x] = painted;
                 } else if (texels == NULL) {
                     row[x] = laidOver(row[x], reached);
                 } else {
@@ -863,7 +869,7 @@ static void fillSpan(int y, const Side *left, const Side *right) {
                     }
 
                     if (redly) {
-                        row[x] = WHOLLY_RED;
+                        row[x] = painted;
                     } else if (texelsBlend) {
                         row[x] = seenThrough(row[x], written);
                     } else {
@@ -1480,6 +1486,8 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
     int lights = modelNeedsNormals(model) ? pointLightCount() : 0;
     bringLightsIn(matrixRows(matrix), lights, nearby);
 
+    tileRedly = 0;
+
     if (raster.pixels == NULL || raster.depths == NULL) {
         return;
     }
@@ -2056,6 +2064,7 @@ void renderGroundTile(const void *ground, int x, int z) {
     texelsSkipEmpty = 0;
     blended[0] = NULL;
     shadowTexels = NULL;
+    tileRedly = 0;
     free(shade);
 }
 
