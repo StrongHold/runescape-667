@@ -80,6 +80,7 @@ public final class Application implements AppletStub {
     }
 
     private void start() {
+        StallReport.watchTheRenderer();
         StallReport.watchIfAsked();
         StallReport.watchForFreezesIfAsked();
         installKeys();

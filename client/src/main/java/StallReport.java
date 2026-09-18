@@ -66,6 +66,44 @@ public final class StallReport {
     }
 
     /**
+     * Says which renderer is drawing, and says so again every time it changes.
+     *
+     * The client puts itself back on the Java renderer whenever anything goes wrong while it is
+     * building a toolkit or drawing a frame, and one of the paths that does it says nothing at
+     * all: the failure is caught, the renderer is swapped, and the client carries on. From
+     * outside, a client that has quietly dropped onto the Java renderer looks like a client whose
+     * own renderer has become slow, and every reading taken afterwards is taken from the wrong
+     * one.
+     *
+     * This is on always. It prints once at the start and once per change, and a renderer that
+     * changes often is the thing worth knowing about anyway.
+     */
+    public static void watchTheRenderer() {
+        var watcher = new Thread(StallReport::followTheRenderer, "renderer watch");
+        watcher.setDaemon(true);
+        watcher.start();
+    }
+
+    private static void followTheRenderer() {
+        var before = "";
+
+        while (true) {
+            var now = renderer();
+            if (!now.equals(before)) {
+                System.out.println("client: drawing with " + now);
+                before = now;
+            }
+
+            try {
+                TimeUnit.MILLISECONDS.sleep(LOOK_EVERY_MILLISECONDS);
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+        }
+    }
+
+    /**
      * Starts taking samples if the property asks for it, and does nothing otherwise.
      */
     public static void watchForFreezesIfAsked() {

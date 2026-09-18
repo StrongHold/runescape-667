@@ -159,6 +159,25 @@ val verifyToolkitLifetime by tasks.registering(JavaExec::class) {
     args(patchedToolkit.get().asFile.absolutePath)
 }
 
+/**
+ * The same check against our own toolkit.
+ *
+ * Choosing a graphics profile, changing the antialiasing, or anything else that asks the client
+ * for a toolkit builds a new one and discards the one before it. The client swallows a failure
+ * there without a word and comes up on the Java renderer instead, so a toolkit that cannot be
+ * built a second time looks like the renderer being slow rather than like a fault.
+ */
+val verifyOwnToolkitLifetime by tasks.registering(JavaExec::class) {
+    description = "Builds and discards our software toolkits to prove a second one can be made."
+    dependsOn(compileSoftwareToolkit, ":unpackX64Jdk")
+    mainClass = "ToolkitLifetime"
+    classpath = sourceSets["main"].runtimeClasspath
+    setExecutable(rootProject.layout.projectDirectory.file(".gradle/jdk-x64/unpacked/Home/bin/java").asFile.absolutePath)
+    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+    systemProperty("toolkit.surface.library", shimLibrary.get().asFile.absolutePath)
+    args(toolkitLibrary.get().asFile.absolutePath)
+}
+
 val toolkitClasses = listOf("a", "ba", "h", "i", "j", "ja", "n", "na", "oa", "p", "t", "wa", "xa", "ya")
 
 val skeletonSource = layout.buildDirectory.file("generated/sw3d-skeleton.c")
