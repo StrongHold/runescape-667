@@ -295,7 +295,7 @@ public final class HandGround {
      * It runs past the depth the water lets anything be seen to, so the patch holds water at
      * every depth from none to more than the colour reaches.
      */
-    private static final int DEEPEST = 700;
+    private static final int DEEPEST = number("SW3D_WATER_DEEPEST", 700);
 
     /**
      * Where the surface of the water sits over every corner of the grid.
@@ -315,7 +315,7 @@ public final class HandGround {
         var heights = new int[TILES + 1][TILES + 1];
         for (var x = 0; x <= TILES; x++) {
             for (var z = 0; z <= TILES; z++) {
-                heights[x][z] = ONE_DEPTH > 0
+                heights[x][z] = ONE_DEPTH > 0 || FLAT_BED
                     ? BELOW_THE_SURFACE
                     : BELOW_THE_SURFACE + x * 12 + (z % 3) * 20;
             }
@@ -372,6 +372,9 @@ public final class HandGround {
 
     /** Whether the patch is given one grid of heights twice, as every other patch here is. */
     private static final boolean ONE_GRID = number("SW3D_WATER_ONE_GRID", 0) != 0;
+
+    /** Whether the ground under the water is laid flat, while the water over it still deepens. */
+    private static final boolean FLAT_BED = number("SW3D_WATER_FLAT", 0) != 0;
 
     /** How deep the water is at the far edge of the patch, which is where it is shallowest. */
     private static final int SHALLOWEST = 16;

@@ -1553,11 +1553,17 @@ public sealed interface Scene {
          * client says the water reaches is carried the whole way, and everything shallower in
          * proportion. That is drawn now, a corner at a time and carried across a face.
          *
-         * What is left is not the water. Give this patch one grid of heights instead of two and
-         * turn the water off, and it comes out exactly as the shipped toolkit draws it; give it
-         * two and turn the water off, and twenty thousand pixels are out. So nearly all of what
-         * is left is the second grid, which the ground takes and does nothing with beyond the
-         * water. It is the next thing to find, and it is not a water fault.
+         * The second grid of heights the ground is given is what a corner is lit by: which way it
+         * faces comes from that grid and not from the one the ground is drawn at. Turn the water
+         * off and the patch now comes out exactly as the shipped toolkit draws it, where before
+         * twenty thousand pixels were out.
+         *
+         * What is left is the water on a patch whose depth changes across it. Laid flat at one
+         * depth the two toolkits agree to a pixel, and at the depth where the water is whole they
+         * agree exactly; let the depth change from corner to corner and the worst pixel goes to
+         * eleven, growing with how fast the depth changes. It is not the clamping, it is not the
+         * lie of the ground, and it is not that the toolkit takes the water four pixels at a time
+         * or lays it on the light rather than on the colour. All four were tried.
          */
         @Override
         public boolean written() {

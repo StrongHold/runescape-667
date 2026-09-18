@@ -57,11 +57,6 @@ typedef struct {
     /** How deep the water over the corner is, or nothing where the tile is not underwater. */
     int16_t *depth;
 
-    /**
-     * How far each corner stands under the water over the grid, worked out from the two grids of
-     * heights the ground was given rather than from the depths the client hands the tile.
-     */
-    int16_t *under;
 
     /** Whether the tile was handed over as one that casts a shadow of its own. */
     int shadowed;
@@ -118,12 +113,13 @@ typedef struct {
     int *heights;
 
     /**
-     * Where the water over the grid lies, one height for every corner of it.
+     * The second grid of heights the client hands the ground, which is where the water over it
+     * lies.
      *
-     * The client hands the ground two grids: where the ground itself is, and where the water over
-     * it is. How far a place stands under the water is the one taken from the other, and that is
-     * what decides how much of the water's colour it takes on. Where there is no water anywhere,
-     * the client hands the same grid twice and the two come to nothing everywhere.
+     * The ground is drawn where the first grid puts it, but it is lit as though it lay where the
+     * second does: which way a corner faces is worked out from this grid and not from the other.
+     * Where there is no water the client hands the same grid twice and the two are the same
+     * thing, which is why nothing else here had ever noticed the difference.
      */
     int *waterHeights;
 
@@ -221,17 +217,6 @@ static int averageHeight(const Ground *ground, int across, int along) {
     return averageOf(ground, across, along, 0);
 }
 
-/**
- * How far a place on the grid stands under the water over it, which is nothing where the client
- * gave the ground no water.
- */
-static int underTheWater(const Ground *ground, int across, int along) {
-    if (ground->waterHeights == NULL) {
-        return 0;
-    }
-
-    return averageOf(ground, across, along, 0) - averageOf(ground, across, along, 1);
-}
 
 static void tileFree(Tile *tile) {
     if (tile == NULL) {
@@ -249,7 +234,6 @@ static void tileFree(Tile *tile) {
     free(tile->bare);
     free(tile->plan);
     free(tile->depth);
-    free(tile->under);
     free(tile);
 }
 
@@ -949,7 +933,6 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
     tile->texture = shortsFrom(env, texture, corners);
     tile->size = shortsFrom(env, size, corners);
     tile->depth = shortsFrom(env, depth, corners);
-    tile->under = calloc((size_t) corners, sizeof(int16_t));
     tile->waterColour = waterColour;
     tile->waterReaches = waterDepth;
     tile->watered = waterDepth != 0 && anyDepth(tile->depth, corners);
@@ -993,7 +976,6 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
             }
 
             tile->up[corner] = (int16_t) (averageHeight(ground, worldX, worldZ) + levels[corner]);
-            tile->under[corner] = (int16_t) underTheWater(ground, worldX, worldZ);
             tile->light[corner] = (unsigned char) shadeInside(ground, x, z,
                 tile->across[corner], tile->along[corner]);
             /*
@@ -1497,12 +1479,12 @@ int groundTileWaterColour(const void *at) {
  */
 float groundTileCornerUnder(const void *at, int corner) {
     const Tile *tile = at;
-    if (tile == NULL || !tile->watered || tile->under == NULL || corner >= tile->corners
+    if (tile == NULL || !tile->watered || tile->depth == NULL || corner >= tile->corners
         || tile->waterReaches <= 0) {
         return 0.0f;
     }
 
-    float under = (float) tile->under[corner] / (float) (tile->waterReaches / 2);
+    float under = (float) tile->depth[corner] / (float) (tile->waterReaches / 2);
     if (under < 0.0f) {
         return 0.0f;
     }
@@ -1645,8 +1627,12 @@ static void measureCorners(Ground *ground) {
                 continue;
             }
 
-            int stepX = heightAt(ground, x + 1, z) - heightAt(ground, x - 1, z);
-            int stepZ = heightAt(ground, x, z + 1) - heightAt(ground, x, z - 1);
+            int stepX = ground->waterHeights == NULL
+                ? heightAt(ground, x + 1, z) - heightAt(ground, x - 1, z)
+                : waterHeightAt(ground, x + 1, z) - waterHeightAt(ground, x - 1, z);
+            int stepZ = ground->waterHeights == NULL
+                ? heightAt(ground, x, z + 1) - heightAt(ground, x, z - 1)
+                : waterHeightAt(ground, x, z + 1) - waterHeightAt(ground, x, z - 1);
 
             float length = sqrtf((float) (stepX * stepX)
                 + (float) (UPRIGHT_PER_STEP * UPRIGHT_PER_STEP)
