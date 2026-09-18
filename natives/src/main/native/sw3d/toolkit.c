@@ -692,6 +692,8 @@ JNIEXPORT void JNICALL Java_oa_pa(JNIEnv *env, jobject self) {
     (void) self;
 
     waterAsked("drew triangles through water", (int) throughWaterFilled(), 0, 0, 0);
+    waterAsked("drew tiles given water", (int) wateredTilesPainted(), 0, 0, 0);
+    wateredTilesReset();
 
     fog.colour = fogColourAbove;
     water.under = 0;

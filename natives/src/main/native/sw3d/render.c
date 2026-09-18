@@ -131,6 +131,19 @@ static const float NEARLY_WHOLLY = 0.99f;
 /** What every pixel drawn through water is painted, while the client is asked for it. */
 enum { WHOLLY_RED = 0xFF0000 };
 
+/** Whether the tile being drawn is one the client gave water to and is to be painted red. */
+static int tileRedly;
+
+static long paintedTiles;
+
+long wateredTilesPainted(void) {
+    return paintedTiles;
+}
+
+void wateredTilesReset(void) {
+    paintedTiles = 0;
+}
+
 static float fadeAt(const float *place, float x, float y, float z) {
     const Underwater *water = underwater();
     if (!water->under) {
@@ -775,7 +788,7 @@ static void fillSpan(int y, const Side *left, const Side *right) {
     uint32_t *row = raster.pixels + start;
     float *held = raster.depths + start;
 
-    int redly = wateredThroughout() && underwater()->under;
+    int redly = tileRedly || (wateredThroughout() && underwater()->under);
 
     for (int x = from; x < to; x++) {
         if (!distanceDecides || depth <= held[x]) {
@@ -1924,21 +1937,19 @@ void renderGroundTile(const void *ground, int x, int z) {
     tallied(NULL);
 
     /*
-     * A tile with water on it is left undrawn while the client is asked for it, so that what the
-     * pass through water put down under it is left to be seen. It says whether a tile with water
-     * on it is what covers over that pass.
+     * A tile the client gave water to is painted red while the client is asked for it, so that
+     * where those tiles are drawn can be seen. Leaving them undrawn says nothing: whatever the
+     * pass through water put down is already there, in very nearly the colour the tile would have
+     * been, so a tile left out and a tile drawn look the same.
+     *
+     * Two ways of asking, so that a tile the water reaches can be told from one merely near
+     * enough to be given the colour.
      */
-    if (groundTileWatered(tile) && switchedOff("SW3D_WATER_SKIP")) {
-        return;
-    }
+    tileRedly = (groundTileWatered(tile) && switchedOff("SW3D_WATER_TILES"))
+        || (groundTileWaterColour(tile) != 0 && switchedOff("SW3D_WATER_TILES_ANY"));
 
-    /*
-     * The looser of the two: every tile the client gave a colour for water to, whether or not any
-     * corner of it has water over it. It brackets the other one, so that a tile left drawn can be
-     * told from a tile the colour never reached.
-     */
-    if (groundTileWaterColour(tile) != 0 && switchedOff("SW3D_WATER_SKIP_ANY")) {
-        return;
+    if (tileRedly) {
+        paintedTiles++;
     }
 
     if (tile == NULL || camera == NULL || raster.pixels == NULL || raster.depths == NULL) {

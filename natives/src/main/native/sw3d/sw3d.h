@@ -257,6 +257,11 @@ long throughWaterFilled(void);
 
 void throughWaterReset(void);
 
+/** How many tiles the client gave water to have been drawn since the count was last cleared. */
+long wateredTilesPainted(void);
+
+void wateredTilesReset(void);
+
 /**
  * Fills a circle, keeping whatever is already nearer than the distance given.
  */
