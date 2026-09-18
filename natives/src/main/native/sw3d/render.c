@@ -128,6 +128,9 @@ static int wateredThroughout(void) {
 
 static const float NEARLY_WHOLLY = 0.99f;
 
+/** What every pixel drawn through water is painted, while the client is asked for it. */
+enum { WHOLLY_RED = 0xFF0000 };
+
 static float fadeAt(const float *place, float x, float y, float z) {
     const Underwater *water = underwater();
     if (!water->under) {
@@ -772,6 +775,8 @@ static void fillSpan(int y, const Side *left, const Side *right) {
     uint32_t *row = raster.pixels + start;
     float *held = raster.depths + start;
 
+    int redly = wateredThroughout() && underwater()->under;
+
     for (int x = from; x < to; x++) {
         if (!distanceDecides || depth <= held[x]) {
             int lane = x - group;
@@ -829,7 +834,9 @@ static void fillSpan(int y, const Side *left, const Side *right) {
                     }
                 }
 
-                if (texels == NULL) {
+                if (redly) {
+                    row[x] = WHOLLY_RED;
+                } else if (texels == NULL) {
                     row[x] = laidOver(row[x], reached);
                 } else {
                     /*
@@ -842,7 +849,9 @@ static void fillSpan(int y, const Side *left, const Side *right) {
                         written |= (worn[part] * reached[part] >> 16) << (part * 8);
                     }
 
-                    if (texelsBlend) {
+                    if (redly) {
+                        row[x] = WHOLLY_RED;
+                    } else if (texelsBlend) {
                         row[x] = seenThrough(row[x], written);
                     } else {
                         uint16_t lifted[CHANNELS] = {
