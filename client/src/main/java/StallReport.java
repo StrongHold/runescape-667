@@ -104,7 +104,7 @@ public final class StallReport {
             var now = renderer();
             if (!now.equals(before)) {
                 var changed = !before.isEmpty();
-                System.out.println("client: drawing with " + now + ", " + canvasState());
+                System.out.println("client: drawing with " + now + ", " + canvasState() + surfaceSize());
                 before = now;
                 if (changed) {
                     sayWhoAsked();
@@ -174,7 +174,7 @@ public final class StallReport {
     private static void sayWhoAsked() {
         var threads = ManagementFactory.getThreadMXBean();
         var report = new StringBuilder("client: the renderer changed here\n")
-            .append("    ").append(canvasState()).append('\n');
+            .append("    ").append(canvasState()).append(surfaceSize()).append('\n');
 
         for (var info : threads.dumpAllThreads(false, false)) {
             var stack = info.getStackTrace();
@@ -329,6 +329,24 @@ public final class StallReport {
         }
 
         System.out.println(report);
+    }
+
+    /**
+     * The size the Java renderer thinks it is drawing at.
+     *
+     * It puts a frame on the screen by clipping to a rectangle of that size and drawing one image
+     * inside it. A size of nothing clips everything away: no pixels reach the window, no exception
+     * is thrown, and it goes on doing that once a frame forever. The size is taken from the canvas
+     * at the moment the renderer is given one, and the game gives it a canvas that has only just
+     * been added to the window.
+     */
+    private static String surfaceSize() {
+        if (!(Toolkit.active instanceof JavaToolkit java)) {
+            return "";
+        }
+
+        return ", drawing at " + java.canvasWidth + "x" + java.canvasHeight
+            + " into " + java.surfaceWidth + "x" + java.surfaceHeight;
     }
 
     private static String renderer() {
