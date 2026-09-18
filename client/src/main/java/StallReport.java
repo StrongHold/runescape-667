@@ -84,23 +84,63 @@ public final class StallReport {
         watcher.start();
     }
 
+    /**
+     * How often the renderer is looked at.
+     *
+     * Often enough to still be inside the change when it is noticed. Swapping the renderer
+     * rebuilds every font and sprite the client holds, which takes long enough to catch, and
+     * catching it is the whole point: the swap says nothing about who asked for it, and who asked
+     * for it is the fault.
+     */
+    private static final long WATCH_EVERY_MILLISECONDS = 1L;
+
     private static void followTheRenderer() {
         var before = "";
 
         while (true) {
             var now = renderer();
             if (!now.equals(before)) {
+                var changed = !before.isEmpty();
                 System.out.println("client: drawing with " + now);
                 before = now;
+                if (changed) {
+                    sayWhoAsked();
+                }
             }
 
             try {
-                TimeUnit.MILLISECONDS.sleep(LOOK_EVERY_MILLISECONDS);
+                TimeUnit.MILLISECONDS.sleep(WATCH_EVERY_MILLISECONDS);
             } catch (InterruptedException interrupted) {
                 Thread.currentThread().interrupt();
                 return;
             }
         }
+    }
+
+    /**
+     * Prints what the threads that draw are in the middle of, which is where the swap came from.
+     */
+    private static void sayWhoAsked() {
+        var threads = ManagementFactory.getThreadMXBean();
+        var report = new StringBuilder("client: the renderer changed here\n");
+
+        for (var info : threads.dumpAllThreads(false, false)) {
+            var stack = info.getStackTrace();
+            if (uninteresting(info.getThreadName()) || stack.length == 0) {
+                continue;
+            }
+            if (info.getThreadState() == Thread.State.WAITING
+                || info.getThreadState() == Thread.State.TIMED_WAITING) {
+                continue;
+            }
+
+            report.append(info.getThreadName()).append('\n');
+            Arrays.stream(stack)
+                .limit(WORTH_SAYING * 2)
+                .forEach(frame -> report.append("    ").append(frame).append('\n'));
+        }
+
+        System.out.println(report);
     }
 
     /**
@@ -258,7 +298,8 @@ public final class StallReport {
             || name.startsWith("Notification Thread")
             || name.startsWith("Common-Cleaner")
             || name.equals("stall report")
-            || name.equals("freeze report");
+            || name.equals("freeze report")
+            || name.equals("renderer watch");
     }
 
     private StallReport() {
