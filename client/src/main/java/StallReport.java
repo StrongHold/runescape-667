@@ -1,3 +1,4 @@
+import com.jagex.core.constants.MainLogicStep;
 import com.jagex.game.runetek6.client.GameShell;
 import com.jagex.graphics.Toolkit;
 
@@ -97,10 +98,30 @@ public final class StallReport {
      */
     private static final long WATCH_EVERY_MILLISECONDS = 1L;
 
+    /**
+     * What the client thinks it is in the middle of.
+     *
+     * A frame only reaches the window while the client is past loading. Every loading step draws
+     * as usual and then puts nothing on the screen, on purpose, so a client left in one draws
+     * forever behind whatever was shown last. Changing renderer runs the loading machinery, so
+     * where it leaves this is worth watching.
+     */
+    private static String step() {
+        return "step " + MainLogicManager.step
+            + (MainLogicStep.isLoading(MainLogicManager.step) ? " (loading, nothing is flipped)" : "");
+    }
+
     private static void followTheRenderer() {
         var before = "";
+        var stepBefore = "";
 
         while (true) {
+            var nowStep = step();
+            if (!nowStep.equals(stepBefore)) {
+                System.out.println("client: " + nowStep);
+                stepBefore = nowStep;
+            }
+
             var now = renderer();
             if (!now.equals(before)) {
                 var changed = !before.isEmpty();
