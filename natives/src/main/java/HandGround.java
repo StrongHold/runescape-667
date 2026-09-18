@@ -266,22 +266,7 @@ public final class HandGround {
      * much shows through water is what the depth decides and a patch at one depth says nothing
      * about the run between.
      */
-    /**
-     * Whether the watered patch is built at all.
-     *
-     * Handing the shipped toolkit a patch with water on it wedges it: the capture stops partway
-     * and never comes back, and the library has been seen to give up outright on the same path
-     * when it was made to take it. Nothing here is worth a harness that cannot run, so the patch
-     * is left unbuilt until what it is that wedges the toolkit is known, and SW3D_WATER_PATCH
-     * asks for it back.
-     */
-    private static final boolean WATER_PATCH = number("SW3D_WATER_PATCH", 0) != 0;
-
     public static Ground buildWatered(Toolkit toolkit) {
-        if (!WATER_PATCH) {
-            return build(toolkit, TEXTURE, 0);
-        }
-
         var ground = toolkit.createGround(TILES, TILES, seabedHeights(), waterHeights(),
             GROUND_FLAGS, FEATURE_FLAGS);
 
@@ -357,10 +342,21 @@ public final class HandGround {
         return surface;
     }
 
-    /** How deep the water is at one row of the grid, which is nothing across the far half. */
+    /**
+     * How deep the water is at one row of the grid.
+     *
+     * Every row has some water over it, and that is not a detail. The staging a tile is built
+     * through is shared between tiles rather than made afresh for each, so a patch where some
+     * tiles carry water and some carry none leaves the dry ones holding what was staged for a wet
+     * one. Such a patch stops the toolkit partway through a run and it never comes back. Give
+     * every tile water and it draws the patch every time.
+     */
     private static int depthAt(int along) {
-        return along <= TILES / 2 ? 0 : DEEPEST * (along - TILES / 2) / (TILES - TILES / 2);
+        return SHALLOWEST + DEEPEST * along / TILES;
     }
+
+    /** How deep the water is at the far edge of the patch, which is where it is shallowest. */
+    private static final int SHALLOWEST = 16;
 
     private static void addWateredTile(Ground ground, int x, int z) {
         var offsetX = new int[] {0, TILE, TILE, 0};

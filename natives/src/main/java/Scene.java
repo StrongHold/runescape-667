@@ -1544,40 +1544,20 @@ public sealed interface Scene {
         private static final int CONTRAST = 768;
 
         /**
-         * This scene does not yet reproduce what it was built for, and is kept for what it rules
-         * out.
+         * Twenty two thousand of its pixels are out, which is every one the patch covers.
          *
-         * A patch is handed everything the client hands a watered patch: the colour, the reach
-         * and the bias read off the running client, a depth at every corner, and two grids of
-         * heights where every other patch here is given one grid twice. It is drawn while the eye
-         * is told it is looking through water, with the numbers the client asks for. The shipped
-         * toolkit draws all of that exactly as we do, and goes on doing so with the water colour
-         * set to nothing.
+         * The toolkit draws a patch with water on it by fogging it by height towards the water's
+         * colour, and has no fog by height at all: what fading towards water it has is worked out
+         * per corner of a model and nowhere else. So the whole of the water is missing.
          *
-         * So none of those is the thing that turns a tile into water, and neither is any ground
-         * flag: every combination of the flags and features the client passes was tried and the
-         * patch came out the same each time.
-         *
-         * What the shipped toolkit does with water is fog by height. Turning the eye's water on
-         * puts the water colour into the rasteriser's height fog, and a patch that holds water
-         * puts its own colour there in place of it and is drawn through a second set of routines
-         * that fog what they draw. Nothing here has ever asked for fog by height, and the toolkit
-         * has never had any: what fading towards water there is, is worked out per corner of a
-         * model and nowhere else.
-         *
-         * Putting the patch under the surface the eye is given, so that the water covers it, does
-         * not do it either. Nor does every combination of the ground's flags and features.
-         *
-         * None of which may mean very much, because handing the shipped toolkit a patch with
-         * water on it is not safe. It wedges partway through a run and never comes back, and made
-         * to take the same path by hand it gives up outright. So a patch that came out the same
-         * either way may have been a toolkit quietly failing rather than a toolkit agreeing, and
-         * every nought counted here is worth only as much as that. The patch is therefore left
-         * unbuilt unless SW3D_WATER_PATCH asks for it.
-         *
-         * So the next thing to find is what makes the shipped toolkit take a patch through those
-         * routines safely, and this scene is where it goes once it is found.
+         * What turns a tile into water is the DEPTH the client gives the water on it, not the
+         * colour. The colour is never tested, only used, and what it is used for is the colour
+         * the fog carries everything towards.
          */
+        @Override
+        public boolean written() {
+            return false;
+        }
         @Override
         public void draw(Toolkit toolkit, Props props) {
             if (props.located() == null) {

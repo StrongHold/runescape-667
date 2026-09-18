@@ -19,3 +19,4 @@ SeenThrough = 0, 0, 21
 Stairs = 0, 0, 245
 TexturedGround = 0, 0, 2691
 Underwater = 0, 0, 12
+Watered = 0, 0, 22274
