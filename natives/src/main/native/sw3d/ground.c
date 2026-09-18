@@ -62,9 +62,11 @@ typedef struct {
 
     /**
      * Whether the client handed this tile over with water on it, which it does by giving it a
-     * colour for the water and a depth at one or more of its corners.
+     * colour for the water and a depth at one or more of its corners, and the colour it gave
+     * whether or not any corner had a depth.
      */
     int watered;
+    int waterColour;
 
     /**
      * Where this tile's picture of the shadow over it sits in the run the ground keeps, and how
@@ -814,6 +816,46 @@ static void wateredTileSeen(int colour, int reaches, int bias, int carriesDepths
 }
 
 /**
+ * Says what depths a tile given a colour for the water on it was actually handed, when the client
+ * is started with SW3D_WATER set.
+ *
+ * A colour says the client meant water somewhere near, and only the depths say whether the water
+ * reaches this tile. What they run between is the thing to know and cannot be guessed.
+ */
+static void wateredDepthsSeen(int colour, const int16_t *depth, int corners) {
+    static int listening = -1;
+    if (listening == -1) {
+        listening = getenv("SW3D_WATER") != NULL;
+    }
+
+    if (!listening || colour == 0 || depth == NULL) {
+        return;
+    }
+
+    static int least = 0x7FFFFFFF;
+    static int most = -0x7FFFFFFF;
+    static int said;
+
+    int moved = 0;
+    for (int corner = 0; corner < corners; corner++) {
+        if (depth[corner] < least) {
+            least = depth[corner];
+            moved = 1;
+        }
+        if (depth[corner] > most) {
+            most = depth[corner];
+            moved = 1;
+        }
+    }
+
+    enum { SAY_AT_MOST = 12 };
+    if (moved && said < SAY_AT_MOST) {
+        said++;
+        fprintf(stderr, "sw3d water: depths on a watered tile run %d to %d\n", least, most);
+    }
+}
+
+/**
  * Whether any corner of a tile stands under any depth of water at all.
  *
  * A tile is water to the toolkit when it has been given a colour for the water on it and one of
@@ -886,7 +928,9 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
     tile->texture = shortsFrom(env, texture, corners);
     tile->size = shortsFrom(env, size, corners);
     tile->depth = shortsFrom(env, depth, corners);
+    tile->waterColour = waterColour;
     tile->watered = waterColour != 0 && anyDepth(tile->depth, corners);
+    wateredDepthsSeen(waterColour, tile->depth, corners);
     tile->up = calloc((size_t) corners, sizeof(int16_t));
     tile->colour = calloc((size_t) corners, sizeof(uint32_t));
     tile->light = calloc((size_t) corners, 1);
@@ -1412,6 +1456,11 @@ const unsigned char *groundTileShadow(const void *held, void *at, int x, int z, 
 int groundTileWatered(const void *at) {
     const Tile *tile = at;
     return tile != NULL && tile->watered;
+}
+
+int groundTileWaterColour(const void *at) {
+    const Tile *tile = at;
+    return tile == NULL ? 0 : tile->waterColour;
 }
 
 int groundTileFaceTexture(const void *at, int face) {

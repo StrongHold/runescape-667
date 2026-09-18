@@ -1932,6 +1932,15 @@ void renderGroundTile(const void *ground, int x, int z) {
         return;
     }
 
+    /*
+     * The looser of the two: every tile the client gave a colour for water to, whether or not any
+     * corner of it has water over it. It brackets the other one, so that a tile left drawn can be
+     * told from a tile the colour never reached.
+     */
+    if (groundTileWaterColour(tile) != 0 && switchedOff("SW3D_WATER_SKIP_ANY")) {
+        return;
+    }
+
     if (tile == NULL || camera == NULL || raster.pixels == NULL || raster.depths == NULL) {
         tally.missing++;
         return;
