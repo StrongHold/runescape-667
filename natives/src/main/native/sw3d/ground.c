@@ -668,19 +668,8 @@ static uint32_t shadedColour(int packed, int shade) {
     return colourOf((packed & ~(LIGHTNESS_WHOLE - 1)) | shadedLightness(packed, shade));
 }
 
-/**
- * A colour held between the two ends a lit corner is kept within.
- */
-static int heldLightness(int lightness) {
-    if (lightness < LIGHTNESS_LEAST) {
-        return LIGHTNESS_LEAST;
-    }
-
-    return lightness > LIGHTNESS_MOST ? LIGHTNESS_MOST : lightness;
-}
-
 static uint32_t litCorner(const Ground *ground, int packed, int shade, int x, int z,
-                          int across, int along, int texture, int wearsIts, int forTheMap) {
+                          int across, int along, int texture, int wearsIts) {
     int reaching = GROUND_LIGHTNESS - shade;
     uint32_t colour = shadedColour(packed, shade);
 
@@ -709,10 +698,6 @@ static uint32_t litCorner(const Ground *ground, int packed, int shade, int x, in
      * not one differs between the two this is built for.
      */
     if (normal == NULL || normal[3] == 0.0f) {
-        if (forTheMap) {
-            return colourOf((packed & ~(LIGHTNESS_WHOLE - 1)) | LIGHTNESS_LEAST);
-        }
-
         return ((uint32_t) CHANNEL_LEAST << 16)
             | ((uint32_t) CHANNEL_LEAST << 8)
             | (uint32_t) CHANNEL_LEAST;
@@ -729,20 +714,6 @@ static uint32_t litCorner(const Ground *ground, int packed, int shade, int x, in
     float reach = towards > 0.0f ? light->intensity : light->reverseIntensity;
     int strength = (int) ((globalAmbient() + reach * towards) * LIGHT_WHOLE);
     unsigned char sunColour[CHANNELS_LIT] = {light->red, light->green, light->blue};
-
-    /*
-     * The map takes how strongly the sun reaches the corner but not the colour the sun shines in,
-     * and takes it as a lightness rather than as something each channel is multiplied by. A
-     * colour carried through the sun's own colour and held at both ends comes back tinted towards
-     * that colour and with what set one kind of ground apart from another squeezed out of it,
-     * which leaves a map drawn in one colour.
-     */
-    if (forTheMap) {
-        int level = heldLightness((int) ((globalAmbient() + towards) * GROUND_LIGHT_WHOLE));
-        int lightness = ((packed & (LIGHTNESS_WHOLE - 1)) * (level - shade)) >> LIGHTNESS_SHIFT;
-
-        return colourOf((packed & ~(LIGHTNESS_WHOLE - 1)) | heldLightness(lightness));
-    }
 
     uint32_t lit = 0;
     for (int part = 0; part < CHANNELS_LIT; part++) {
@@ -986,7 +957,7 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
 
             tile->colour[corner] = litCorner(ground, named, tile->light[corner],
                     x, z, tile->across[corner], tile->along[corner],
-                    tile->texture == NULL ? -1 : tile->texture[corner], 1, 0);
+                    tile->texture == NULL ? -1 : tile->texture[corner], 1);
 
             if (tile->plan != NULL) {
                 /*
@@ -1009,12 +980,13 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
                 }
 
                 /*
-                 * The map carries the light on the corner but not what the texture over it does
-                 * to its colour. A texture carries every colour towards the same grey, and a map
-                 * drawn that way comes out in one colour however many kinds of ground it covers.
+                 * The map is drawn in the colour the ground is drawn in as the world is seen:
+                 * carried through what the texture over the corner does to its colour, and
+                 * through the colour the sun shines in, and held at both ends the same way. Only
+                 * what the corner stands for differs, and that is settled above.
                  */
                 tile->plan[corner] = litCorner(ground, stands, tile->light[corner],
-                        x, z, tile->across[corner], tile->along[corner], worn, 0, 1);
+                        x, z, tile->across[corner], tile->along[corner], worn, 1);
             }
         }
     }
