@@ -1547,17 +1547,26 @@ public sealed interface Scene {
          * This scene does not yet reproduce what it was built for, and is kept for what it rules
          * out.
          *
-         * The toolkit takes three numbers for the water on a tile and drops all three, and takes
-         * two grids of heights where the client hands over one for the ground and one for the
-         * water over it, and drops the second. So a tile with water on it ought to come out
-         * differently here, and it does not: the shipped toolkit draws this patch exactly as we
-         * do, and goes on doing so with the water colour set to nothing. Handing a tile water is
-         * therefore not by itself what makes water.
+         * A patch is handed everything the client hands a watered patch: the colour, the reach
+         * and the bias read off the running client, a depth at every corner, and two grids of
+         * heights where every other patch here is given one grid twice. It is drawn while the eye
+         * is told it is looking through water, with the numbers the client asks for. The shipped
+         * toolkit draws all of that exactly as we do, and goes on doing so with the water colour
+         * set to nothing.
          *
-         * What the client does instead is draw two whole worlds. It swaps in the ground below the
-         * water and everything standing in it, draws that with the eye told it is looking through
-         * water, swaps back, and draws the world above. The water on a tile is read somewhere in
-         * that, and this scene draws one world.
+         * So none of those is the thing that turns a tile into water, and neither is any ground
+         * flag: every combination of the flags and features the client passes was tried and the
+         * patch came out the same each time.
+         *
+         * What the shipped toolkit does with water is fog by height. Turning the eye's water on
+         * puts the water colour into the rasteriser's height fog, and a patch that holds water
+         * puts its own colour there in place of it and is drawn through a second set of routines
+         * that fog what they draw. Nothing here has ever asked for fog by height, and the toolkit
+         * has never had any: what fading towards water there is, is worked out per corner of a
+         * model and nowhere else.
+         *
+         * So the next thing to find is what makes the shipped toolkit take a patch through those
+         * routines, and this scene is where it goes once it is found.
          */
         @Override
         public void draw(Toolkit toolkit, Props props) {
@@ -1574,9 +1583,12 @@ public sealed interface Scene {
             toolkit.setCamera(camera);
 
             /*
-             * What stands in the water is drawn first and the ground over it, which is the order
-             * that lets water cover what is under it or be seen through.
+             * The ground with water on it is drawn while the eye is told it is looking through
+             * water, which is what the client does and is the whole of what was missing here.
+             * Nothing about the water a tile carries is read outside that.
              */
+            toolkit.ra(SURFACE, SEEN_THROUGH, REACH, BIAS);
+
             var model = toolkit.createModel(props.located(), EVERY_FUNCTION, FEATURES,
                 AMBIENT, CONTRAST);
             props.matrix().makeRotationZ(0);
@@ -1592,10 +1604,18 @@ public sealed interface Scene {
 
             props.watered().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
                 HandGround.TILES, visible, false, 0);
+
+            toolkit.pa();
         }
 
         /** How far from the eye the thing standing in the water is put. */
         private static final int STANDS_AT = 900;
+
+        /** What the client tells the toolkit about the water the eye is looking through. */
+        private static final int SURFACE = -1;
+        private static final int SEEN_THROUGH = 0x182838;
+        private static final int REACH = 40;
+        private static final int BIAS = 127;
     }
 
     /**
