@@ -134,7 +134,13 @@ static const float NEARLY_WHOLLY = 0.99f;
  *
  * Two colours rather than one, because the whole question is which of the two is on top.
  */
-enum { WHOLLY_RED = 0xFF0000, WHOLLY_GREEN = 0x00FF00 };
+enum { WHOLLY_RED = 0xFF0000, WHOLLY_GREEN = 0x00FF00, WHOLLY_PINK = 0xFF00FF };
+
+/**
+ * Whether the face being drawn asked for a texture the toolkit could not hand over, and is being
+ * painted so that it cannot be missed.
+ */
+static int faceBare;
 
 /** Whether the tile being drawn is one the client gave water to and is to be painted red. */
 static int tileRedly;
@@ -843,8 +849,8 @@ static void fillSpan(int y, const Side *left, const Side *right) {
     uint32_t *row = raster.pixels + start;
     float *held = raster.depths + start;
 
-    int redly = tileRedly || (wateredThroughout() && underwater()->under);
-    uint32_t painted = tileRedly ? WHOLLY_GREEN : WHOLLY_RED;
+    int redly = faceBare || tileRedly || (wateredThroughout() && underwater()->under);
+    uint32_t painted = faceBare ? WHOLLY_PINK : (tileRedly ? WHOLLY_GREEN : WHOLLY_RED);
 
     for (int x = from; x < to; x++) {
         if (!distanceDecides || depth <= held[x]) {
@@ -1907,6 +1913,8 @@ static void layTextureOnTile(const void *tile, int face, int tileSize, int x, in
      */
     shadowTexels = NULL;
 
+    faceBare = 0;
+
     int wears = groundTileFaceTexture(tile, face);
     if (wears == -1) {
         groundTextureMissing(-1);
@@ -1916,6 +1924,7 @@ static void layTextureOnTile(const void *tile, int face, int tileSize, int x, in
     const Texture *texture = textureFor(wears);
     if (texture == NULL) {
         groundTextureMissing(wears);
+        faceBare = switchedOff("SW3D_GROUND_BARE");
         return;
     }
 
@@ -2189,6 +2198,7 @@ void renderGroundTile(const void *ground, int x, int z) {
     blended[0] = NULL;
     shadowTexels = NULL;
     tileRedly = 0;
+    faceBare = 0;
     waterOverTile = 0;
     free(under);
     free(shade);
