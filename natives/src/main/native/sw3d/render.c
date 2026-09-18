@@ -1913,7 +1913,11 @@ static void layTextureOnTile(const void *tile, int face, int tileSize, int x, in
      */
     shadowTexels = NULL;
 
-    faceBare = 0;
+    /*
+     * Every face of the ground painted, so that what the ground draws can be told apart from what
+     * something else draws. Anything left unpainted in the picture was not drawn by the ground.
+     */
+    faceBare = switchedOff("SW3D_GROUND_PAINT");
 
     int wears = groundTileFaceTexture(tile, face);
     if (wears == -1) {
