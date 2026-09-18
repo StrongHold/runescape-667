@@ -6,6 +6,7 @@
  */
 
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -15,9 +16,10 @@ Raster raster;
 
 /**
  * How many parts of the renderer may be switched off at once, which is as many as there are names
- * below.
+ * anywhere in the toolkit with room to spare. A name asked for beyond this is answered by reading
+ * the environment again every time it is asked, and some of them are asked once a pixel.
  */
-enum { SWITCHES = 8 };
+enum { SWITCHES = 24 };
 
 int switchedOff(const char *name) {
     static const char *asked[SWITCHES];
@@ -32,6 +34,16 @@ int switchedOff(const char *name) {
 
     const char *said = getenv(name);
     int off = said != NULL && said[0] != '\0' && strcmp(said, "0") != 0;
+
+    /*
+     * Each switch that is on says so the first time it is asked about. A switch reaches the client
+     * through the shell that starts the build, the build daemon and the process the daemon starts,
+     * and any of the three can drop it on the way. Without this, a run made to answer a question
+     * about a switched renderer can measure the unswitched one and look like an answer.
+     */
+    if (off) {
+        fprintf(stderr, "sw3d: %s is on\n", name);
+    }
 
     if (known < SWITCHES) {
         asked[known] = name;

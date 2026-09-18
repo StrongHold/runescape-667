@@ -35,28 +35,35 @@ application {
 
 /**
  * Switches that change what the renderers do, so that what draws a given pixel can be found by
- * elimination. Each is forwarded from the shell that starts the build rather than inherited,
- * because the build daemon outlives the shell and keeps the environment it started with.
+ * elimination.
  *
- * The first five take a layer of the software renderer out of the picture. The last two belong to
- * the OpenGL binding: one asks it to say what it is doing, and the other to say where a frame's
- * time went.
+ * Every variable whose name starts with one of the prefixes below is forwarded to the client,
+ * rather than a fixed list of them. A switch written into the renderer and left out of a list here
+ * is a switch that does nothing, and a run that quietly measures the unswitched renderer is worse
+ * than no run at all.
+ *
+ * They are forwarded rather than inherited because the build daemon outlives the shell that
+ * started it and keeps the environment it was started with. `-Pswitch=NAME,NAME` says the same
+ * thing through the build itself, for a daemon that cannot be persuaded to see the shell.
  */
-val rendererSwitches = listOf(
-    "SW3D_NO_GROUND",
-    "SW3D_NO_MODELS",
-    "SW3D_NO_GROUND_SHADOW",
-    "SW3D_GROUND_UNTEXTURED",
-    "SW3D_GROUND_TALLY",
-    "JAGGL_VERBOSE",
-    "JAGGL_TIMING",
-)
+val switchPrefixes = listOf("SW3D_", "JAGGL_")
+
+val switchesFromShell = switchPrefixes.map { providers.environmentVariablesPrefixedBy(it) }
+
+val switchesAsked = providers.gradleProperty("switch").map { said ->
+    said.split(",").map(String::trim).filter(String::isNotEmpty)
+}.getOrElse(emptyList())
 
 tasks.named<JavaExec>("run") {
-    for (name in rendererSwitches) {
-        val said = providers.environmentVariable(name)
-        if (said.isPresent) {
-            environment(name, said.get())
+    for (found in switchesFromShell) {
+        for ((name, said) in found.get()) {
+            if (said != null) {
+                environment(name, said)
+            }
         }
+    }
+
+    for (name in switchesAsked) {
+        environment(name, "1")
     }
 }
