@@ -897,6 +897,45 @@ static void wateredDepthsSeen(int colour, const int16_t *depth, int corners) {
  * not what says so: the colour is never asked about, only used, and the client gives it to whole
  * stretches of ground that the water only reaches part of.
  */
+/**
+ * Says once for each texture the ground wears what the map has to go on, when the client is
+ * started with SW3D_GROUND_BARE set: the colour the whole texture comes to, and whether the
+ * player is allowed to turn it off.
+ */
+static void textureOnTheMap(int worn, const TextureMetrics *metrics) {
+    static int listening = -1;
+    if (listening == -1) {
+        listening = switchedOff("SW3D_GROUND_BARE");
+    }
+
+    if (!listening || worn == -1) {
+        return;
+    }
+
+    enum { KEPT = 24 };
+    static int seen[KEPT];
+    static int count;
+
+    for (int at = 0; at < count; at++) {
+        if (seen[at] == worn) {
+            return;
+        }
+    }
+
+    if (count < KEPT) {
+        seen[count] = worn;
+        count++;
+    }
+
+    if (metrics == NULL) {
+        fprintf(stderr, "sw3d ground: texture %d has nothing to say about itself\n", worn);
+    } else {
+        fprintf(stderr, "sw3d ground: texture %d comes to %04x, %s\n", worn,
+                metrics->averageColour,
+                metrics->disableable ? "may be turned off" : "may not be turned off");
+    }
+}
+
 /** How many parts a packed colour carries, which is a byte each for red, green and blue. */
 enum { COLOUR_PARTS = 3 };
 
@@ -1061,6 +1100,10 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
             tile->colour[corner] = litCorner(ground, named, tile->light[corner],
                     x, z, tile->across[corner], tile->along[corner],
                     tile->texture == NULL ? -1 : tile->texture[corner], 1);
+
+            textureOnTheMap(tile->texture == NULL ? -1 : tile->texture[corner],
+                    tile->texture == NULL || tile->texture[corner] == -1
+                        ? NULL : textureMetricsFor(tile->texture[corner]));
 
             if (tile->plan != NULL) {
                 /*
