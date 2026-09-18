@@ -2964,6 +2964,45 @@ enum { PLAN_SHIFT = 8, PLAN_WHOLE = 1 << PLAN_SHIFT };
 /**
  * What one corner of a tile looks like from straight above.
  */
+/**
+ * Says once for each texture what the map is actually drawn in, when the client is started with
+ * SW3D_PLAN_PICK set.
+ *
+ * What a corner was chosen to stand for is one thing; what comes out the far end of the lighting
+ * and reaches the picture is another, and only the second is what anyone sees.
+ */
+static void planDrawn(const void *tile, int corner, uint32_t colour, int kept) {
+    static int listening = -1;
+    if (listening == -1) {
+        listening = switchedOff("SW3D_PLAN_PICK");
+    }
+
+    if (!listening) {
+        return;
+    }
+
+    enum { KEPT = 40 };
+    static int seen[KEPT];
+    static int count;
+
+    int worn = groundTileFaceTexture(tile, corner / 3);
+    for (int at = 0; at < count; at++) {
+        if (seen[at] == worn) {
+            return;
+        }
+    }
+
+    if (count >= KEPT) {
+        return;
+    }
+
+    seen[count] = worn;
+    count++;
+
+    fprintf(stderr, "sw3d plan: texture %d is drawn on the map as %06x, and the tile %s\n",
+            worn, colour & 0xFFFFFF, kept ? "kept a colour for it" : "kept none");
+}
+
 static Corner planCorner(const void *tile, int corner, float across, float down, float width,
                          int size) {
     int alongX;
@@ -2971,7 +3010,8 @@ static Corner planCorner(const void *tile, int corner, float across, float down,
     uint32_t colour;
     groundTilePlanCorner(tile, corner, &alongX, &alongZ, &colour);
 
-    groundTilePlanColour(tile, corner, &colour);
+    int kept = groundTilePlanColour(tile, corner, &colour);
+    planDrawn(tile, corner, colour, kept);
 
     float x = across + (float) alongX * width / (float) size;
     float y = down - (float) alongZ * width / (float) size;
