@@ -657,6 +657,7 @@ JNIEXPORT void JNICALL Java_oa_ra(JNIEnv *env, jobject self, jint surface, jint 
     (void) bias;
 
     waterAsked("through water", surface, colour, depth, bias);
+    throughWaterReset();
 
     fogColourAbove = fog.colour;
     fog.colour = (uint32_t) colour;
@@ -689,6 +690,8 @@ JNIEXPORT void JNICALL Java_oa_EA(JNIEnv *env, jobject self, jint surface, jint 
 JNIEXPORT void JNICALL Java_oa_pa(JNIEnv *env, jobject self) {
     (void) env;
     (void) self;
+
+    waterAsked("drew triangles through water", (int) throughWaterFilled(), 0, 0, 0);
 
     fog.colour = fogColourAbove;
     water.under = 0;

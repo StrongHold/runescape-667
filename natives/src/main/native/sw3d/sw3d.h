@@ -248,6 +248,16 @@ typedef struct {
 const Underwater *underwater(void);
 
 /**
+ * How many triangles have been filled since the eye was last told it is looking through water.
+ *
+ * Kept only so that the pass the client draws through water can be counted from the client
+ * itself, where the harness cannot reach.
+ */
+long throughWaterFilled(void);
+
+void throughWaterReset(void);
+
+/**
  * Fills a circle, keeping whatever is already nearer than the distance given.
  */
 void fillCircle(int x, int y, float depth, int radius, uint32_t colour, int mode);

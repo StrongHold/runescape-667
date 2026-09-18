@@ -109,10 +109,33 @@ typedef struct {
  * place it stands at. A point at the surface has none of the water in it and one as deep as the
  * water reaches has nothing else, and everything between is a straight run from one to the other.
  */
+/**
+ * Whether everything drawn through water is to be faded almost the whole way whatever its depth,
+ * which the client is asked for with SW3D_WATER_RED.
+ *
+ * Fading by depth only shows what is deep, so what is drawn through water and not deep cannot be
+ * told apart from what is not drawn at all. Almost the whole way rather than the whole way,
+ * because a face faded the whole way is dropped.
+ */
+static int wateredThroughout(void) {
+    static int listening = -1;
+    if (listening == -1) {
+        listening = getenv("SW3D_WATER_RED") != NULL;
+    }
+
+    return listening;
+}
+
+static const float NEARLY_WHOLLY = 0.99f;
+
 static float fadeAt(const float *place, float x, float y, float z) {
     const Underwater *water = underwater();
     if (!water->under) {
         return 0.0f;
+    }
+
+    if (wateredThroughout()) {
+        return NEARLY_WHOLLY;
     }
 
     float height = -(x * place[1] + y * place[5] + z * place[9] + place[13]);
@@ -877,7 +900,21 @@ static void fillHalf(int row, int rows, Side *left, Side *right, const Side *lef
  * is on the left is settled once for each half by which of them moves further to the right in a
  * row, rather than by comparing where they are on every row.
  */
+static long filledThroughWater;
+
+long throughWaterFilled(void) {
+    return filledThroughWater;
+}
+
+void throughWaterReset(void) {
+    filledThroughWater = 0;
+}
+
 static void fillTriangle(Corner a, Corner b, Corner c) {
+    if (underwater()->under) {
+        filledThroughWater++;
+    }
+
     const Corner *top;
     const Corner *middle;
     const Corner *bottom;
