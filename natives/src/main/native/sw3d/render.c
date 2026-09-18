@@ -3013,6 +3013,15 @@ static Corner planCorner(const void *tile, int corner, float across, float down,
     int kept = groundTilePlanColour(tile, corner, &colour);
     planDrawn(tile, corner, colour, kept);
 
+    /*
+     * Every corner the map draws painted, so that what the map draws can be told from what it
+     * leaves alone. Anything not painted was never drawn, and what shows there is whatever the
+     * map was cleared to.
+     */
+    if (switchedOff("SW3D_PLAN_PAINT")) {
+        colour = 0xFF00FF;
+    }
+
     float x = across + (float) alongX * width / (float) size;
     float y = down - (float) alongZ * width / (float) size;
 
