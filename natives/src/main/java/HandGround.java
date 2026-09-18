@@ -267,8 +267,8 @@ public final class HandGround {
      * about the run between.
      */
     public static Ground buildWatered(Toolkit toolkit) {
-        var ground = toolkit.createGround(TILES, TILES, seabedHeights(),
-            ONE_GRID ? seabedHeights() : waterHeights(), GROUND_FLAGS, FEATURE_FLAGS);
+        var ground = toolkit.createGround(TILES, TILES, surfaceHeights(),
+            ONE_GRID ? surfaceHeights() : seabedHeights(), GROUND_FLAGS, FEATURE_FLAGS);
 
         for (var x = 0; x < TILES; x++) {
             for (var z = 0; z < TILES; z++) {
@@ -305,13 +305,13 @@ public final class HandGround {
      * the client hands over where there is no water.
      */
     /**
-     * Where the ground under the water is, which is below the surface the eye is given.
+     * Where the ground the water lies on is, which is the grid the patch is drawn at.
      *
      * The client counts height downwards, so a place the water covers stands at a height greater
      * than the surface does. Every other patch here stands above nought and so above any surface
      * the client asks for, which leaves it dry however much water is laid over it.
      */
-    private static int[][] seabedHeights() {
+    private static int[][] surfaceHeights() {
         var heights = new int[TILES + 1][TILES + 1];
         for (var x = 0; x <= TILES; x++) {
             for (var z = 0; z <= TILES; z++) {
@@ -331,17 +331,24 @@ public final class HandGround {
      */
     private static final int BELOW_THE_SURFACE = 8;
 
-    private static int[][] waterHeights() {
-        var ground = seabedHeights();
-        var surface = seabedHeights();
+    /**
+     * The second grid of heights, which is where the ground under the water is.
+     *
+     * The client hands the ground the terrain it is drawing first and the bed under the water
+     * second, and the bed is the deeper of the two: a height is counted downwards, so further
+     * down is a greater number. A patch built here the other way round says nothing about the
+     * ground the client lays.
+     */
+    private static int[][] seabedHeights() {
+        var bed = surfaceHeights();
 
         for (var x = 0; x <= TILES; x++) {
             for (var z = 0; z <= TILES; z++) {
-                surface[x][z] = ground[x][z] - depthAt(z);
+                bed[x][z] += depthAt(z);
             }
         }
 
-        return surface;
+        return bed;
     }
 
     /**
