@@ -90,6 +90,7 @@ public sealed interface Scene {
         new ShadowedGround(),
         new ShadowedRepeat(),
         new Watered(),
+        new WateredPillar(),
         new BlendedGround(),
         new Stairs(),
         new Priorities(),
@@ -1672,6 +1673,87 @@ public sealed interface Scene {
 
             props.blended().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
                 HandGround.TILES, visible, false, 0);
+        }
+    }
+
+    /**
+     * A patch of water with something standing through the surface of it.
+     *
+     * This is the dock. A pillar holding one up runs from well above the water to the bed, and
+     * what the client asks for there is the two things every other scene here asks for one at a
+     * time: a patch the client gave water to, and a model drawn while the eye is told it is
+     * looking through water.
+     *
+     * Neither on its own asks what happens where they meet. The patch is drawn at the grid the
+     * ground stands on, and anything standing on the bed is under that grid, so whether a pillar
+     * shows through the water at all turns on what the water over the ground does to what is
+     * behind it. Nothing else here covers that.
+     */
+    record WateredPillar() implements Scene {
+
+        /** What the client hands over for the water at a dock. */
+        private static final int SURFACE = -1;
+        private static final int SEEN_THROUGH = 0x182838;
+        private static final int REACH = 40;
+        private static final int BIAS = 127;
+
+        /**
+         * How many pillars stand in the water, how far apart they are put across the patch, and
+         * how far each one is raised above the one before it.
+         *
+         * They are spread up and down as well as sideways, because a height is counted downwards
+         * and the surface sits barely above nought: one standing at the bed is under the whole of
+         * the water and one standing well above the surface is under none of it. The middle of
+         * them straddles the surface, which is what a pillar holding up a dock does.
+         */
+        private static final int STANDING = 5;
+        private static final int RAISED = 220;
+
+        /**
+         * The pillars are drawn before the water and the water is drawn over them, which is the
+         * order the client draws them in.
+         *
+         * Every pixel of them lands where the shipped toolkit puts it, the one standing through
+         * the surface among them, and the only pixels out are the twenty thousand the watered
+         * patch is out by on its own. So a model standing in water is not what the toolkit does
+         * differently, and a dock whose pillars stop at the water is not this.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            var camera = toolkit.createMatrix();
+            camera.createCamera(HandGround.TILES * HandGround.TILE / 2, Terrain.UP,
+                -Terrain.BACK, TURN / 8, 0, 0);
+            toolkit.setCamera(camera);
+
+            toolkit.ra(SURFACE, SEEN_THROUGH, REACH, BIAS);
+
+            for (var step = 0; step < STANDING; step++) {
+                props.matrix().makeRotationZ(0);
+                props.matrix().translate(HandGround.TILES * HandGround.TILE / 2,
+                    (step - STANDING / 2) * RAISED,
+                    step * HandGround.TILES * HandGround.TILE / (STANDING - 1));
+                props.model().render(props.matrix(), null, 1);
+            }
+
+            var visible = new boolean[HandGround.TILES * 2][HandGround.TILES * 2];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            props.watered().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
+                HandGround.TILES, visible, false, 0);
+
+            toolkit.pa();
         }
     }
 

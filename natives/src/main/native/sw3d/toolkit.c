@@ -625,7 +625,7 @@ static void towardsColour(uint32_t colour, float *into) {
 static void waterAsked(const char *what, int first, int second, int third, int fourth) {
     static int listening = -1;
     if (listening == -1) {
-        listening = getenv("SW3D_WATER") != NULL;
+        listening = switchedOff("SW3D_WATER");
     }
 
     if (!listening) {
