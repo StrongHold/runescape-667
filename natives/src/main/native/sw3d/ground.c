@@ -61,6 +61,12 @@ typedef struct {
     int shadowed;
 
     /**
+     * Whether the client handed this tile over with water on it, which it does by giving it a
+     * colour for the water and a depth at one or more of its corners.
+     */
+    int watered;
+
+    /**
      * Where this tile's picture of the shadow over it sits in the run the ground keeps, and how
      * far a place on its texture is shifted down to reach a place in that picture.
      *
@@ -808,6 +814,27 @@ static void wateredTileSeen(int colour, int reaches, int bias, int carriesDepths
 }
 
 /**
+ * Whether any corner of a tile stands under any depth of water at all.
+ *
+ * A tile is water to the toolkit when it has been given a colour for the water on it and one of
+ * its corners has some water over it. A colour on its own is not enough: the client gives the
+ * colour to whole stretches of ground that the water only reaches part of.
+ */
+static int anyDepth(const int16_t *depth, int corners) {
+    if (depth == NULL) {
+        return 0;
+    }
+
+    for (int corner = 0; corner < corners; corner++) {
+        if (depth[corner] > 0) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+/**
  * Builds one tile out of the corners the client hands over.
  *
  * Every corner arrives three to a face, already spread out of the indexed list the client keeps,
@@ -821,7 +848,6 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
                                  jboolean shadowed) {
     wateredTileSeen(waterColour, waterDepth, waterBias, depth != NULL);
 
-    (void) waterColour;
     (void) waterDepth;
     (void) waterBias;
 
@@ -860,6 +886,7 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
     tile->texture = shortsFrom(env, texture, corners);
     tile->size = shortsFrom(env, size, corners);
     tile->depth = shortsFrom(env, depth, corners);
+    tile->watered = waterColour != 0 && anyDepth(tile->depth, corners);
     tile->up = calloc((size_t) corners, sizeof(int16_t));
     tile->colour = calloc((size_t) corners, sizeof(uint32_t));
     tile->light = calloc((size_t) corners, 1);
@@ -1380,6 +1407,11 @@ const unsigned char *groundTileShadow(const void *held, void *at, int x, int z, 
     }
 
     return ground->shadowTexture + tile->shadowAt;
+}
+
+int groundTileWatered(const void *at) {
+    const Tile *tile = at;
+    return tile != NULL && tile->watered;
 }
 
 int groundTileFaceTexture(const void *at, int face) {

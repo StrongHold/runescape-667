@@ -1923,6 +1923,15 @@ void renderGroundTile(const void *ground, int x, int z) {
     tally.asked++;
     tallied(NULL);
 
+    /*
+     * A tile with water on it is left undrawn while the client is asked for it, so that what the
+     * pass through water put down under it is left to be seen. It says whether a tile with water
+     * on it is what covers over that pass.
+     */
+    if (groundTileWatered(tile) && switchedOff("SW3D_WATER_SKIP")) {
+        return;
+    }
+
     if (tile == NULL || camera == NULL || raster.pixels == NULL || raster.depths == NULL) {
         tally.missing++;
         return;
