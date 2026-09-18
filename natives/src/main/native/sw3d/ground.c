@@ -902,6 +902,62 @@ static void wateredDepthsSeen(int colour, const int16_t *depth, int corners) {
  * started with SW3D_GROUND_BARE set: the colour the whole texture comes to, and whether the
  * player is allowed to turn it off.
  */
+/**
+ * Says once for each set of them what the three things a corner could stand for on the map are,
+ * and which of them it was given, when the client is started with SW3D_PLAN_PICK set.
+ *
+ * A corner can stand for the colour laid over its face, for the colour its texture comes to, or
+ * for the colour of the ground it is on. Which of the three it is given is the whole of what the
+ * map draws, and reading it off the client is the only way to know which one it should be.
+ */
+static void planPicked(int named, int laid, int worn, const TextureMetrics *metrics, int stands) {
+    static int listening = -1;
+    if (listening == -1) {
+        listening = switchedOff("SW3D_PLAN_PICK");
+    }
+
+    if (!listening) {
+        return;
+    }
+
+    enum { KEPT = 16 };
+    static int seen[KEPT][4];
+    static int count;
+    static int overflowed;
+
+    int comes = metrics == NULL ? -1 : (int) metrics->averageColour;
+
+    for (int at = 0; at < count; at++) {
+        if (seen[at][0] == named && seen[at][1] == laid
+            && seen[at][2] == worn && seen[at][3] == comes) {
+            return;
+        }
+    }
+
+    if (count >= KEPT) {
+        if (!overflowed) {
+            overflowed = 1;
+            fprintf(stderr, "sw3d plan: and more besides\n");
+        }
+        return;
+    }
+
+    seen[count][0] = named;
+    seen[count][1] = laid;
+    seen[count][2] = worn;
+    seen[count][3] = comes;
+    count++;
+
+    fprintf(stderr, "sw3d plan: ground %04x, laid over %s, texture %d comes to %s%s,"
+            " stands for %04x\n",
+            (unsigned) named & 0xFFFF,
+            laid == -1 ? "nothing" : "a colour",
+            worn,
+            comes < 0 ? "nothing" : "a colour",
+            metrics == NULL ? "" : (metrics->disableable ? " and may go" : " and may not go"),
+            (unsigned) stands & 0xFFFF);
+}
+
 static void textureOnTheMap(int worn, const TextureMetrics *metrics) {
     static int listening = -1;
     if (listening == -1) {
@@ -1124,6 +1180,8 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
                 } else if (metrics != NULL && !metrics->disableable) {
                     stands = metrics->averageColour;
                 }
+
+                planPicked(named, laid, worn, metrics, stands);
 
                 /*
                  * The map is drawn in the colour the ground is drawn in as the world is seen:
