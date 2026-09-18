@@ -145,14 +145,18 @@ static int faceBare;
 /** Whether the tile being drawn is one the client gave water to and is to be painted red. */
 static int tileRedly;
 
-static long paintedTiles;
+/** How many tiles the client gave water to have been drawn. */
+static long wateredTiles;
+
+/** Whether a tile of the ground is being drawn, rather than anything standing on it. */
+static int drawingTile;
 
 long wateredTilesPainted(void) {
-    return paintedTiles;
+    return wateredTiles;
 }
 
 void wateredTilesReset(void) {
-    paintedTiles = 0;
+    wateredTiles = 0;
 }
 
 static float fadeAt(const float *place, float x, float y, float z) {
@@ -999,18 +1003,35 @@ static void fillHalf(int row, int rows, Side *left, Side *right, const Side *lef
  * row, rather than by comparing where they are on every row.
  */
 static long filledThroughWater;
+static long filledThroughWaterStanding;
 
 long throughWaterFilled(void) {
     return filledThroughWater;
 }
 
+/**
+ * How many of them belonged to something standing on the ground rather than to the ground itself.
+ *
+ * A dock's pillars are drawn through the water like everything else in that pass, so a count of
+ * nothing here says the client never handed them over and a count of something says it did and
+ * they were covered afterwards. The two want different answers, and nothing else tells them
+ * apart.
+ */
+long throughWaterFilledStanding(void) {
+    return filledThroughWaterStanding;
+}
+
 void throughWaterReset(void) {
     filledThroughWater = 0;
+    filledThroughWaterStanding = 0;
 }
 
 static void fillTriangle(Corner a, Corner b, Corner c) {
     if (underwater()->under) {
         filledThroughWater++;
+        if (!drawingTile) {
+            filledThroughWaterStanding++;
+        }
     }
 
     const Corner *top;
@@ -2075,8 +2096,8 @@ void renderGroundTile(const void *ground, int x, int z) {
     tileRedly = (groundTileWatered(tile) && switchedOff("SW3D_WATER_TILES"))
         || (groundTileWaterColour(tile) != 0 && switchedOff("SW3D_WATER_TILES_ANY"));
 
-    if (tileRedly) {
-        paintedTiles++;
+    if (groundTileWatered(tile)) {
+        wateredTiles++;
     }
 
     if (tile == NULL || camera == NULL || raster.pixels == NULL || raster.depths == NULL) {
@@ -2154,6 +2175,8 @@ void renderGroundTile(const void *ground, int x, int z) {
         }
     }
 
+    drawingTile = 1;
+
     for (int face = 0; face * 3 + 2 < corners; face++) {
         const Projected *a = &projected[face * 3];
         const Projected *b = &projected[face * 3 + 1];
@@ -2204,6 +2227,7 @@ void renderGroundTile(const void *ground, int x, int z) {
     tileRedly = 0;
     faceBare = 0;
     waterOverTile = 0;
+    drawingTile = 0;
     free(under);
     free(shade);
 }

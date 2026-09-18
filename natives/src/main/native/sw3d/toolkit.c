@@ -621,38 +621,70 @@ static void towardsColour(uint32_t colour, float *into) {
  *
  * What the client asks for is the only thing that says which of the numbers it hands over the
  * toolkit has to read, and the harness can only ask for what somebody thought to ask for.
+ *
+ * Each different thing is said once and then not again. A run of the client draws fifty frames a
+ * second and every one of them asks the same questions, so a line said once for each answer
+ * rather than once for each frame is the difference between a reading and a wall of text. When
+ * there is no room left to remember an answer, one line says so and the rest are dropped.
  */
-static void waterAsked(const char *what, int first, int second, int third, int fourth) {
+enum { WATER_KEPT = 16 };
+
+static int waterSaid(const char *what, int first, int second, int third, int fourth) {
     static int listening = -1;
     if (listening == -1) {
         listening = switchedOff("SW3D_WATER");
     }
 
     if (!listening) {
-        return;
+        return 0;
     }
 
-    enum { KEPT = 8 };
-    static int seen[KEPT][4];
+    static struct { const char *what; int numbers[4]; } seen[WATER_KEPT];
     static int count;
+    static int overflowed;
 
     for (int at = 0; at < count; at++) {
-        if (seen[at][0] == first && seen[at][1] == second
-            && seen[at][2] == third && seen[at][3] == fourth) {
-            return;
+        if (seen[at].what == what && seen[at].numbers[0] == first
+            && seen[at].numbers[1] == second && seen[at].numbers[2] == third
+            && seen[at].numbers[3] == fourth) {
+            return 0;
         }
     }
 
-    if (count < KEPT) {
-        seen[count][0] = first;
-        seen[count][1] = second;
-        seen[count][2] = third;
-        seen[count][3] = fourth;
-        count++;
+    if (count >= WATER_KEPT) {
+        if (!overflowed) {
+            overflowed = 1;
+            fprintf(stderr, "sw3d water: and more besides\n");
+        }
+        return 0;
     }
 
-    fprintf(stderr, "sw3d water: %s %d, colour %06x, %d, %d\n",
-            what, first, (unsigned) second & 0xFFFFFF, third, fourth);
+    seen[count].what = what;
+    seen[count].numbers[0] = first;
+    seen[count].numbers[1] = second;
+    seen[count].numbers[2] = third;
+    seen[count].numbers[3] = fourth;
+    count++;
+    return 1;
+}
+
+static void waterAsked(const char *what, int first, int second, int third, int fourth) {
+    if (waterSaid(what, first, second, third, fourth)) {
+        fprintf(stderr, "sw3d water: %s %d, colour %06x, %d, %d\n",
+                what, first, (unsigned) second & 0xFFFFFF, third, fourth);
+    }
+}
+
+/**
+ * Says how much of a frame the water touched: how many tiles the client gave water to, how many
+ * triangles were drawn while the eye was told it was looking through water, and how many of those
+ * belonged to something standing on the ground rather than to the ground itself.
+ */
+static void waterCounted(const char *what, int tiles, int triangles, int standing) {
+    if (waterSaid(what, tiles, triangles, standing, 0)) {
+        fprintf(stderr, "sw3d water: %s: %d tiles given water, %d triangles through water,"
+                " %d of them standing on it\n", what, tiles, triangles, standing);
+    }
 }
 
 /**
@@ -703,8 +735,8 @@ JNIEXPORT void JNICALL Java_oa_pa(JNIEnv *env, jobject self) {
     (void) env;
     (void) self;
 
-    waterAsked("drew triangles through water", (int) throughWaterFilled(), 0, 0, 0);
-    waterAsked("drew tiles given water", (int) wateredTilesPainted(), 0, 0, 0);
+    waterCounted("a frame", (int) wateredTilesPainted(), (int) throughWaterFilled(),
+            (int) throughWaterFilledStanding());
     wateredTilesReset();
 
     fog.colour = fogColourAbove;
