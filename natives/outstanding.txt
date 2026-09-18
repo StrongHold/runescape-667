@@ -17,6 +17,7 @@ HollowPlan = 0, 0, 1600
 OverlaidPlan = 16, 0, 1499
 SeenThrough = 0, 0, 21
 Stairs = 0, 0, 245
+TexturedPlan = 0, 0, 720
 TexturedGround = 0, 0, 2691
 Underwater = 0, 0, 12
 Watered = 0, 0, 20896

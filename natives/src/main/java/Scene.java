@@ -70,6 +70,7 @@ public sealed interface Scene {
         new TexturedParticles(),
         new Terrain(),
         new Plan(),
+        new TexturedPlan(),
         new OverTheGround(),
         new UnderTheGround(),
         new Underwater(),
@@ -1939,6 +1940,47 @@ public sealed interface Scene {
             }
 
             props.ground().drawMinimap(0, 0, HandGround.TILES, HandGround.TILES, visible);
+        }
+    }
+
+    /**
+     * The map of a patch whose tiles wear a texture.
+     *
+     * Every other map here is drawn over ground the client gave a colour and nothing else, which
+     * is the one kind of ground the map does not have to think about. A corner wearing a texture
+     * the player may not turn off does not stand on the map for the colour of the ground it is
+     * on: it stands for the texture's own colour, because a tile on the map is a handful of
+     * pixels across and a texture drawn that small says nothing. Most of what the client lays
+     * wears a texture, and water wears one everywhere.
+     */
+    record TexturedPlan() implements Scene {
+
+        /**
+         * Seven hundred and twenty of its sixteen hundred pixels are out, and all of them are the
+         * half of the patch wearing a texture the player has turned off.
+         *
+         * The shipped toolkit draws nothing at all there: the pixels come back the colour the
+         * picture was cleared to, and the corners of those tiles have colours of their own that
+         * it never uses. We draw them in the colour of the ground under the texture. Which of the
+         * things a corner stands for the map is choosing, and why a texture that is not there
+         * stops the face being drawn rather than falling back to the ground, is what this scene
+         * is here to settle.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            var visible = new boolean[HandGround.TILES][HandGround.TILES];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            props.floor().drawMinimap(0, 0, HandGround.TILES, HandGround.TILES, visible);
         }
     }
 
