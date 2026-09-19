@@ -185,6 +185,7 @@ static int depthWriteAsked;
 static Fog fog;
 
 static void fogFromHere(void);
+static void fogSaid(void);
 
 static Underwater water;
 
@@ -540,6 +541,47 @@ JNIEXPORT void JNICALL Java_oa_b(JNIEnv *env, jobject self, jint x, jint y, jint
  * before a corner's depth can be weighed against it. A fade that is complete at the far edge of
  * the world begins at the far edge, which leaves nothing before it and fades nothing.
  */
+/**
+ * Says what the distance fade has been worked out to be, whenever any of it moves.
+ *
+ * A fade that begins beyond the far edge of the world runs backwards: what is near is taken wholly
+ * to the fog's colour and what is far is left alone. Nothing on the screen says which way round it
+ * is, so the numbers are printed rather than guessed at.
+ */
+static void fogSaid(void) {
+    static int listening = -1;
+    if (listening == -1) {
+        listening = getenv("SW3D_FOG_TALLY") != NULL;
+    }
+
+    if (!listening) {
+        return;
+    }
+
+    static uint32_t saidColour;
+    static float saidRange;
+    static float saidNear;
+    static float saidFar;
+    static int said;
+
+    if (said && saidColour == fog.colour && saidRange == fog.range && saidNear == view.near
+        && saidFar == view.far) {
+        return;
+    }
+
+    saidColour = fog.colour;
+    saidRange = fog.range;
+    saidNear = view.near;
+    saidFar = view.far;
+    said = 1;
+
+    fprintf(stderr, "sw3d fog: towards %08x, complete at %.1f, near %.1f far %.1f,"
+            " begins at depth %.6f, over the rest %.4f\n",
+            fog.colour, (double) fog.range, (double) view.near, (double) view.far,
+            (double) fog.from, (double) fog.overRest);
+    fflush(stderr);
+}
+
 static void fogFromHere(void) {
     float begins = view.far - fog.range;
     float between = (view.far - view.near) * begins;
@@ -551,6 +593,7 @@ static void fogFromHere(void) {
     float rest = 1.0f - fog.from;
     fog.overRest = rest == 0.0f ? 0.0f : 1.0f / rest;
 
+    fogSaid();
 }
 
 JNIEXPORT void JNICALL Java_oa_L(JNIEnv *env, jobject self, jint colour, jint range, jint offset) {

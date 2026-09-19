@@ -2196,7 +2196,11 @@ static struct {
 
     /** How far off the furthest face that reached the picture was. */
     float laidFurthest;
-} tally = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0e30f, -1.0e30f, -1.0e30f};
+
+    /** How much of the distance's colour the least and the most faded corner were taken to. */
+    float fadedLeast;
+    float fadedMost;
+} tally = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0e30f, -1.0e30f, -1.0e30f, 2.0f, -1.0f};
 
 /**
  * The ground the running count belongs to.
@@ -2222,18 +2226,21 @@ static void tallied(const char *what) {
         fprintf(stderr, "sw3d ground %p: %d asked, %d not held, %d faces, %d off (%d too near,"
                 " %d too far), %d turned away, %d hollow, %d drawn, %d off the picture,"
                 " %d behind what was there; away %.1f..%.1f, furthest laid %.1f,"
-                " near %.1f far %.1f\n",
+                " faded %.3f..%.3f, near %.1f far %.1f\n",
                 tallying,
                 tally.asked, tally.missing, tally.faces, tally.behindTheEye, tally.tooNear,
                 tally.tooFar, tally.turnedAway, tally.hollow, tally.drawn, tally.offPicture,
                 tally.behind,
                 (double) tally.nearest, (double) tally.farthest, (double) tally.laidFurthest,
+                (double) tally.fadedLeast, (double) tally.fadedMost,
                 (double) view->near, (double) view->far);
         fflush(stderr);
         tally = (typeof(tally)) {0};
         tally.nearest = 1.0e30f;
         tally.farthest = -1.0e30f;
         tally.laidFurthest = -1.0e30f;
+        tally.fadedLeast = 2.0f;
+        tally.fadedMost = -1.0f;
         return;
     }
 
@@ -2371,6 +2378,14 @@ void renderGroundTile(const void *ground, int x, int z) {
 
         Projected *landed = &projected[corner];
         landed->depth = signedAs(point[2] / away, point[2]);
+
+        float faded = fadedByDistance(landed->depth);
+        if (faded < tally.fadedLeast) {
+            tally.fadedLeast = faded;
+        }
+        if (faded > tally.fadedMost) {
+            tally.fadedMost = faded;
+        }
 
         /*
          * A corner further off than the far edge of the world is still drawn. The toolkit this
