@@ -1906,12 +1906,12 @@ public sealed interface Scene {
             }
 
             /*
-             * A light picture under the water rather than the dark one every other scene is drawn
-             * over. The client draws a sky behind the world and never clears what is under the
-             * horizon, so water with no bed under it is drawn over something far lighter than a
-             * cleared picture, and how much of it shows decides how much that matters.
+             * The picture cleared the way the client clears it, to the colour it clears to and
+             * through the same call. What is left under the horizon is what water with no bed
+             * under it is drawn through, and the client's colour is far lighter than the one
+             * every other scene here is drawn over.
              */
-            toolkit.fillRect(0, 0, WIDTH, HEIGHT, UNDER_THE_HORIZON);
+            toolkit.GA(UNDER_THE_HORIZON);
 
             toolkit.ra(SURFACE, SEEN_THROUGH, REACH, BIAS);
             props.halfBed().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
@@ -1922,14 +1922,17 @@ public sealed interface Scene {
                 HandGround.TILES, visible, false, 0);
         }
 
-        /** What the client hands over for the water at a dock. */
+        /** What the client hands over for the water at a dock, read off the running client. */
         private static final int SURFACE = -1;
         private static final int SEEN_THROUGH = 0x182838;
         private static final int REACH = 40;
         private static final int BIAS = 127;
 
-        /** What the sky leaves behind the world, which is lighter than anything drawn over it. */
-        private static final int UNDER_THE_HORIZON = 0xFFCFCEC3;
+        /**
+         * What the client clears the picture to before it draws the world, read off the running
+         * client. It carries nothing in its top byte, which is how the client asks for it.
+         */
+        private static final int UNDER_THE_HORIZON = 0x00C8C0A8;
     }
 
     /**
