@@ -149,6 +149,19 @@ static int tileRedly;
 static long wateredTiles;
 
 /**
+ * How many were handed depths and no water to go with them.
+ *
+ * The client hands some tiles a depth for every corner and a water colour of nothing, reaching
+ * nothing. Those are drawn dry, because there is nothing to carry them towards, and a harbour
+ * made of them is drawn in the colour of its own bed.
+ */
+static long driedTiles;
+
+long wateredTilesDried(void) {
+    return driedTiles;
+}
+
+/**
  * How much water the corners of those tiles actually carried, out of the whole.
  *
  * A tile the client gives water to and a tile whose water reaches it are not the same thing, and
@@ -182,6 +195,7 @@ long wateredTilesPainted(void) {
 
 void wateredTilesReset(void) {
     wateredTiles = 0;
+    driedTiles = 0;
     leastUnder = 2.0f;
     mostUnder = -1.0f;
 }
@@ -2125,6 +2139,8 @@ void renderGroundTile(const void *ground, int x, int z) {
 
     if (groundTileWatered(tile)) {
         wateredTiles++;
+    } else if (groundTileCarriesDepths(tile)) {
+        driedTiles++;
     }
 
     if (tile == NULL || camera == NULL || raster.pixels == NULL || raster.depths == NULL) {

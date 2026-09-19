@@ -1660,6 +1660,12 @@ float groundTileCornerUnder(const void *at, int corner) {
     return cornerUnder(at, corner);
 }
 
+/** Whether the client handed this tile a depth for its corners, whatever else it handed with it. */
+int groundTileCarriesDepths(const void *at) {
+    const Tile *tile = at;
+    return tile != NULL && tile->depth != NULL && anyDepth(tile->depth, tile->corners);
+}
+
 int groundTileFaceTexture(const void *at, int face) {
     const Tile *tile = at;
     if (tile->texture == NULL || face * 3 >= tile->corners) {

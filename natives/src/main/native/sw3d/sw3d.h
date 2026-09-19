@@ -259,6 +259,10 @@ long throughWaterFilledStanding(void);
 
 int wateredHundredths(int most);
 
+long wateredTilesDried(void);
+
+int groundTileCarriesDepths(const void *tile);
+
 void throughWaterReset(void);
 
 /** How many tiles the client gave water to have been drawn since the count was last cleared. */
