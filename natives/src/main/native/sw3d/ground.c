@@ -437,6 +437,29 @@ JNIEXPORT void JNICALL Java_t_YA(JNIEnv *env, jobject self) {
         fprintf(stderr, "sw3d finished a ground %p %dx%d: %d tiles held\n", (void *) ground,
                 ground->sizeX, ground->sizeZ, held);
 
+        /*
+         * Where the tiles a ground holds lie, a row of the grid to a row of text. A ground with
+         * holes in it draws nothing where they are, and no count of how many it holds says
+         * whether they fall where the water is or where the land is.
+         */
+        enum { ROWS_SHOWN = 26 };
+        int step = ground->sizeX / ROWS_SHOWN;
+        if (step < 1) {
+            step = 1;
+        }
+
+        for (int x = 0; x < ground->sizeX; x += step) {
+            char row[128];
+            int at = 0;
+
+            for (int z = 0; z < ground->sizeZ && at < (int) sizeof(row) - 1; z += step) {
+                row[at++] = ground->tiles[(size_t) x * (size_t) ground->sizeZ + (size_t) z] == NULL
+                    ? '.' : '#';
+            }
+
+            row[at] = '\0';
+            fprintf(stderr, "sw3d held %3d %s\n", x, row);
+        }
     }
 
     handed("");

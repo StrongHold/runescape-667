@@ -900,9 +900,20 @@ static void fillSpan(int y, const Side *left, const Side *right) {
 
     int16_t waterStep[CHANNELS];
     uint16_t water[CHANNELS];
+
+    /*
+     * A side carries the water it reached as a signed sixteenth, because it is stepped by adding
+     * a signed amount to it. What it holds is not signed: water brighter than half a colour reads
+     * back below nothing, and a run whose two ends fall either side of that is walked with a step
+     * out by a whole turn of the count. The two are read back as what they are before either is
+     * taken from the other.
+     */
     for (int part = 0; part < CHANNELS; part++) {
-        waterStep[part] = (int16_t) (((int) right->water[part] - (int) left->water[part]) * over);
-        water[part] = (uint16_t) (left->water[part] + skipped * waterStep[part]);
+        int to = (uint16_t) right->water[part];
+        int from = (uint16_t) left->water[part];
+
+        waterStep[part] = (int16_t) ((float) (to - from) * over);
+        water[part] = (uint16_t) (from + skipped * waterStep[part]);
     }
 
     /*
