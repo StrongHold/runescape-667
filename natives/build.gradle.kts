@@ -1054,17 +1054,16 @@ val ownFrames = layout.buildDirectory.dir("own-frames")
  * Renders the fixed scene through our own toolkit and leaves the frames beside the ones the
  * shipped toolkit produced, so the two can be compared.
  *
- * This runs on the same x86_64 virtual machine the shipped toolkit needs, so that both sides are
- * compared running the same instructions. The rasteriser divides by the processor's approximate
- * reciprocal rather than by a true division, and how close that approximation is belongs to the
- * instruction set, so a comparison across two of them would be measuring the processor.
+ * This runs on whatever machine it is asked on, unlike the shipped toolkit, which has only ever
+ * been built for x86_64. The rasteriser reads its approximations from a table rather than asking
+ * the processor for them, so the picture is the same on either architecture and a comparison
+ * across the two measures the toolkit rather than the processor.
  */
 val captureOwnFrames by tasks.registering(JavaExec::class) {
     description = "Renders the fixed scene through our own software toolkit."
-    dependsOn(compileSoftwareToolkit, ":unpackX64Jdk")
+    dependsOn(compileSoftwareToolkit)
     mainClass = "FrameCapture"
     classpath = sourceSets["main"].runtimeClasspath
-    setExecutable(rootProject.layout.projectDirectory.file(".gradle/jdk-x64/unpacked/Home/bin/java").asFile.absolutePath)
     jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
     val directory = ownFrames.get().asFile
 
