@@ -43,6 +43,12 @@ public final class StallReport {
 
     private static final String FREEZES = "client.freezes";
 
+    /**
+     * Asks for the stack of whatever was running when the renderer changed, which is a wall of
+     * text and wanted only while something is being chased.
+     */
+    private static final String WHO_ASKED = "client.renderer";
+
     /** How often every thread is looked at, which bounds how short a freeze can be seen. */
     private static final long LOOK_EVERY_MILLISECONDS = 20L;
 
@@ -127,7 +133,7 @@ public final class StallReport {
                 var changed = !before.isEmpty();
                 System.out.println("client: drawing with " + now + ", " + canvasState() + surfaceSize());
                 before = now;
-                if (changed) {
+                if (changed && System.getProperty(WHO_ASKED) != null) {
                     sayWhoAsked();
                 }
             }

@@ -150,6 +150,10 @@ subprojects {
                 providers.systemProperty("client.freezes").orNull?.let {
                     systemProperty("client.freezes", it)
                 }
+
+                providers.systemProperty("client.renderer").orNull?.let {
+                    systemProperty("client.renderer", it)
+                }
             }
         }
     }
