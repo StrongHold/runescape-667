@@ -145,6 +145,15 @@ static int faceBare;
 /** Whether the tile being drawn is one the client gave water to and is to be painted red. */
 static int tileRedly;
 
+/**
+ * Whether the ground being drawn belongs to the pass the eye is out of the water for.
+ *
+ * The client keeps two grounds and draws one in each pass. Which of them a given patch of the
+ * picture came from cannot be told by looking at it, and it decides everything about what the
+ * water over it should do, so SW3D_ABOVE_TILES paints whatever the second pass draws.
+ */
+static int tileAbove;
+
 /** How many tiles the client gave water to have been drawn. */
 static long wateredTiles;
 
@@ -894,8 +903,10 @@ static void fillSpan(int y, const Side *left, const Side *right) {
     uint32_t *row = raster.pixels + start;
     float *held = raster.depths + start;
 
-    int redly = faceBare || tileRedly || (wateredThroughout() && underwater()->under);
-    uint32_t painted = faceBare ? WHOLLY_PINK : (tileRedly ? WHOLLY_GREEN : WHOLLY_RED);
+    int redly = faceBare || tileRedly || tileAbove
+        || (wateredThroughout() && underwater()->under);
+    uint32_t painted = tileAbove ? WHOLLY_PINK
+        : (faceBare ? WHOLLY_PINK : (tileRedly ? WHOLLY_GREEN : WHOLLY_RED));
 
     for (int x = from; x < to; x++) {
         if (!distanceDecides || depth <= held[x]) {
@@ -2137,6 +2148,8 @@ void renderGroundTile(const void *ground, int x, int z) {
     tileRedly = (groundTileWatered(tile) && switchedOff("SW3D_WATER_TILES"))
         || (groundTileWaterColour(tile) != 0 && switchedOff("SW3D_WATER_TILES_ANY"));
 
+    tileAbove = !underwater()->under && switchedOff("SW3D_ABOVE_TILES");
+
     if (groundTileWatered(tile)) {
         wateredTiles++;
     } else if (groundTileCarriesDepths(tile)) {
@@ -2279,6 +2292,7 @@ void renderGroundTile(const void *ground, int x, int z) {
     blended[0] = NULL;
     shadowTexels = NULL;
     tileRedly = 0;
+    tileAbove = 0;
     faceBare = 0;
     waterOverTile = 0;
     drawingTile = 0;
