@@ -178,6 +178,21 @@ val verifyOwnToolkitLifetime by tasks.registering(JavaExec::class) {
     args(toolkitLibrary.get().asFile.absolutePath)
 }
 
+/**
+ * What becomes of the window when the client stops drawing with one toolkit and starts with
+ * another, which is what opening the world map does.
+ */
+val verifyCanvasHandover by tasks.registering(JavaExec::class) {
+    description = "Hands the window from our software toolkit to the Java one and reads the screen."
+    dependsOn(compileSoftwareToolkit, ":unpackX64Jdk")
+    mainClass = "CanvasHandover"
+    classpath = sourceSets["main"].runtimeClasspath
+    setExecutable(rootProject.layout.projectDirectory.file(".gradle/jdk-x64/unpacked/Home/bin/java").asFile.absolutePath)
+    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+    systemProperty("toolkit.surface.library", shimLibrary.get().asFile.absolutePath)
+    args(toolkitLibrary.get().asFile.absolutePath)
+}
+
 val toolkitClasses = listOf("a", "ba", "h", "i", "j", "ja", "n", "na", "oa", "p", "t", "wa", "xa", "ya")
 
 val skeletonSource = layout.buildDirectory.file("generated/sw3d-skeleton.c")

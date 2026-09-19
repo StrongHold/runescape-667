@@ -272,6 +272,27 @@ void surfacePresent(Surface *surface, int x, int y) {
     }
 }
 
+/**
+ * Runs a block where AppKit will accept it, which is the main thread and nowhere else.
+ */
+static void onTheMainThread(void (^work)(void)) {
+    if ([NSThread isMainThread]) {
+        work();
+    } else {
+        dispatch_sync(dispatch_get_main_queue(), work);
+    }
+}
+
+/**
+ * Takes the layer back off the canvas as well as letting go of it.
+ *
+ * A canvas on this platform is not a window of its own: every one of them is drawn inside the one
+ * the window owns, and the layer handed over for a canvas is hung in that window's tree rather
+ * than in anything belonging to the canvas. Throwing the canvas away therefore leaves the layer
+ * where it is, still showing the last frame drawn through it and still in front of everything
+ * drawn afterwards. The client throws its canvas away and builds another every time it changes
+ * renderer, so a layer left behind hides every frame the next renderer draws, for good.
+ */
 void surfaceFree(Surface *surface) {
     if (surface == NULL) {
         return;
@@ -279,7 +300,12 @@ void surfaceFree(Surface *surface) {
 
     CALayer *layer = (__bridge_transfer CALayer *) surface->layer;
     surface->layer = NULL;
-    (void) layer;
+
+    if (layer != nil) {
+        onTheMainThread(^{
+            [layer removeFromSuperlayer];
+        });
+    }
 
     freeBitmap(surface);
     free(surface);
