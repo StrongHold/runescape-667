@@ -166,8 +166,21 @@ static long wateredTiles;
  */
 static long driedTiles;
 
+/**
+ * How many tiles carrying water were drawn once the eye was out of it.
+ *
+ * The client keeps two grounds and both are built from the same heights, so both can carry the
+ * water. If the one drawn above the water carries it as well, then whether its water is laid on
+ * it is the difference between a surface you can see the bed through and one you cannot.
+ */
+static long wateredAbove;
+
 long wateredTilesDried(void) {
     return driedTiles;
+}
+
+long wateredTilesAbove(void) {
+    return wateredAbove;
 }
 
 /**
@@ -205,6 +218,7 @@ long wateredTilesPainted(void) {
 void wateredTilesReset(void) {
     wateredTiles = 0;
     driedTiles = 0;
+    wateredAbove = 0;
     leastUnder = 2.0f;
     mostUnder = -1.0f;
 }
@@ -2152,10 +2166,14 @@ void renderGroundTile(const void *ground, int x, int z) {
 
     tileAbove = !underwater()->under && switchedOff("SW3D_ABOVE_TILES");
 
-    if (groundTileWatered(tile)) {
+    if (!groundTileWatered(tile)) {
+        if (groundTileCarriesDepths(tile)) {
+            driedTiles++;
+        }
+    } else if (underwater()->under) {
         wateredTiles++;
-    } else if (groundTileCarriesDepths(tile)) {
-        driedTiles++;
+    } else {
+        wateredAbove++;
     }
 
     if (tile == NULL || camera == NULL || raster.pixels == NULL || raster.depths == NULL) {

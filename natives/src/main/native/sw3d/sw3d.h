@@ -261,6 +261,8 @@ int wateredHundredths(int most);
 
 long wateredTilesDried(void);
 
+long wateredTilesAbove(void);
+
 int groundTileCarriesDepths(const void *tile);
 
 void throughWaterReset(void);

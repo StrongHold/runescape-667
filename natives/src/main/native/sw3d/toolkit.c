@@ -687,8 +687,9 @@ static void waterCounted(const char *what, int tiles, int triangles, int standin
     if (waterSaid(what, tiles, triangles, standing, least * 1000 + most)) {
         fprintf(stderr, "sw3d water: %s: %d tiles given water, %d triangles through water,"
                 " %d of them standing on it, corners carried %d to %d hundredths of it,"
-                " %d tiles had depths and no water\n",
-                what, tiles, triangles, standing, least, most, (int) wateredTilesDried());
+                " %d tiles had depths and no water, %d carried water above it\n",
+                what, tiles, triangles, standing, least, most, (int) wateredTilesDried(),
+                (int) wateredTilesAbove());
     }
 }
 
