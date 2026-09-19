@@ -30,9 +30,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Hosted runners are a mix of processor makes, and which one a job lands on is not chosen.
-        # Asking on several images samples more of that mix than asking on one.
-        runner: [ubuntu-latest, ubuntu-24.04, ubuntu-22.04, macos-13]
+        # Hosted runners are a mix of processor makes, and which one a job lands on is not
+        # chosen. Asking on several images samples more of that mix than asking on one. These are
+        # all x86_64, because the question is about an x86 instruction.
+        runner: [ubuntu-latest, ubuntu-24.04, ubuntu-22.04]
 
     steps:
       - uses: actions/checkout@v4
