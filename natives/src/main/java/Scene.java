@@ -108,6 +108,7 @@ public sealed interface Scene {
         new OverlaidWaterDock(),
         new GroundPastTheEdge(),
         new GlaringWater(),
+        new GroundBeyondTheEdge(),
         new BlendedGround(),
         new Stairs(),
         new Priorities(),
@@ -2073,6 +2074,53 @@ public sealed interface Scene {
         private static final int SEEN_THROUGH = 0x182838;
         private static final int REACH = 40;
         private static final int BIAS = 127;
+    }
+
+    /**
+     * The plain patch with the far edge of the world in front of the whole of it.
+     *
+     * A face reaching past that edge is drawn with a depth past the far end of what the buffer
+     * holds, and the buffer starts at that far end, so a face lying wholly past the edge is at
+     * every pixel further off than what is already there. The patch beside this one straddles the
+     * edge and keeps most of its pixels nearer than it, which hides what becomes of one that does
+     * not.
+     */
+    record GroundBeyondTheEdge() implements Scene {
+
+        /**
+         * Neither toolkit draws a pixel of it. A face lying wholly past the far edge is further
+         * off at every pixel than the far end the buffer starts at, so both leave it alone, and
+         * the patch that straddles the edge keeps the pixels it has because they are nearer than
+         * that end rather than because the edge is ignored.
+         */
+        @Override
+        public boolean drawsNothing() {
+            return true;
+        }
+
+        /** A far edge that stands in front of the whole patch. */
+        private static final int IN_FRONT_OF_IT_ALL = 2000;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, IN_FRONT_OF_IT_ALL);
+
+            var camera = toolkit.createMatrix();
+            camera.createCamera(HandGround.TILES * HandGround.TILE / 2, Terrain.UP,
+                -Terrain.BACK, TURN / 8, 0, 0);
+            toolkit.setCamera(camera);
+
+            var visible = new boolean[HandGround.TILES * 2][HandGround.TILES * 2];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            props.ground().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
+                HandGround.TILES, visible, false, 0);
+        }
     }
 
     /**
