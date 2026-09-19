@@ -2175,9 +2175,13 @@ void renderGroundTile(const void *ground, int x, int z) {
      */
     /*
      * The water a tile carries is laid on it only while the eye is told it is looking through
-     * water. The client draws everything under the water in one pass and everything above it in
-     * another, and the same tile drawn in the second pass carries none of its water: what a tile
-     * holds is how deep the water over it is, not that it is always seen through it.
+     * water.
+     *
+     * The client keeps two grounds and draws one in each pass: the bed the water lies on while
+     * the eye is under it, and the floor above it once the eye is out again. Both are handed over
+     * carrying how deep the water is, because they were built from the same heights, and only the
+     * one drawn under the water is meant to be seen through any of it. Laying it on both puts
+     * water over the floor as well, which is a harbour drawn twice and the second time wrongly.
      */
     waterOverTile = underwater()->under ? (uint32_t) groundTileWaterColour(tile) : 0;
 
