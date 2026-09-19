@@ -843,9 +843,46 @@ JNIEXPORT void JNICALL Java_oa_xa(JNIEnv *env, jobject self, jfloat globalAmbien
  * Fills the whole back buffer. The client passes a colour with no alpha in it, and the surface
  * ignores the top byte, so it is written straight through.
  */
+/**
+ * Says once for each colour the client clears the picture to, when it is started with SW3D_WATER
+ * set.
+ *
+ * The client only clears the picture when it has no sky to draw behind the world. What it leaves
+ * under the horizon is what water with no bed under it is drawn through, so which of the two the
+ * client is doing decides what that water is drawn over.
+ */
+static void clearedTo(uint32_t colour) {
+    static int listening = -1;
+    if (listening == -1) {
+        listening = switchedOff("SW3D_WATER");
+    }
+
+    enum { KINDS = 8 };
+    static uint32_t seen[KINDS];
+    static int count;
+
+    if (!listening) {
+        return;
+    }
+
+    for (int at = 0; at < count; at++) {
+        if (seen[at] == colour) {
+            return;
+        }
+    }
+
+    if (count < KINDS) {
+        seen[count++] = colour;
+    }
+
+    fprintf(stderr, "sw3d water: the client cleared the picture to %08x\n", colour);
+}
+
 JNIEXPORT void JNICALL Java_oa_GA(JNIEnv *env, jobject self, jint colour) {
     (void) env;
     (void) self;
+
+    clearedTo((uint32_t) colour);
 
     if (raster.pixels == NULL) {
         return;
