@@ -1546,26 +1546,23 @@ public sealed interface Scene {
         private static final int CONTRAST = 768;
 
         /**
-         * Twenty one thousand of its pixels are out, and almost none of that is the water.
+         * Eleven thousand of its pixels are a single count out and none is out by more than that.
          *
          * What turns a tile into water is the DEPTH the client gives the water on it, not the
          * colour. The colour is never tested, only used, and what it is used for is the colour
          * everything under the water is carried towards. How far it is carried was measured off
          * the shipped toolkit on a patch laid flat at one depth: a place half as far down as the
          * client says the water reaches is carried the whole way, and everything shallower in
-         * proportion. That is drawn now, a corner at a time and carried across a face.
+         * proportion.
          *
          * The second grid of heights the ground is given is what a corner is lit by: which way it
          * faces comes from that grid and not from the one the ground is drawn at. Turn the water
-         * off and the patch now comes out exactly as the shipped toolkit draws it, where before
-         * twenty thousand pixels were out.
+         * off and the patch comes out exactly as the shipped toolkit draws it.
          *
-         * What is left is the water on a patch whose depth changes across it. Laid flat at one
-         * depth the two toolkits agree to a pixel, and at the depth where the water is whole they
-         * agree exactly; let the depth change from corner to corner and the worst pixel goes to
-         * eleven, growing with how fast the depth changes. It is not the clamping, it is not the
-         * lie of the ground, and it is not that the toolkit takes the water four pixels at a time
-         * or lays it on the light rather than on the colour. All four were tried.
+         * What is left is the last count of the rounding. The water is carried as a colour of its
+         * own rather than as an amount to mix in, a corner at a time and added where a pixel is
+         * written, which is what took the worst pixel from twelve to one and kept it there however
+         * fast the depth changes across a face.
          */
         @Override
         public boolean written() {
