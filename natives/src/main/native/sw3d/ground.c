@@ -434,7 +434,7 @@ JNIEXPORT void JNICALL Java_t_YA(JNIEnv *env, jobject self) {
             }
         }
 
-        fprintf(stderr, "sw3d finished a ground %dx%d: %d tiles held\n",
+        fprintf(stderr, "sw3d finished a ground %p %dx%d: %d tiles held\n", (void *) ground,
                 ground->sizeX, ground->sizeZ, held);
 
     }
