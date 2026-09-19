@@ -91,6 +91,7 @@ public sealed interface Scene {
         new ShadowedRepeat(),
         new Watered(),
         new WateredPillar(),
+        new WateredDock(),
         new BlendedGround(),
         new Stairs(),
         new Priorities(),
@@ -98,8 +99,7 @@ public sealed interface Scene {
         new DoubledFaces(),
         new OnTheGround(),
         new BlackBacked(),
-        new NearAndFar(),
-        new WateredDock()
+        new NearAndFar()
     );
 
     /**
@@ -1648,18 +1648,12 @@ public sealed interface Scene {
          * ignored.
          */
         /**
-         * It is drawn last of all, because the scene after it comes out differently for having
-         * been drawn after this one. Which of the two toolkits carries something out of it is not
-         * yet known.
+         * Eleven thousand of its pixels are out and the worst is a hundred and ninety four,
+         * of its pixels are out and the worst is six, which is what the watered patch under it is
+         * out by on its own.
          *
-         * Sixty one thousand of its pixels are out and the worst is a hundred and ninety four,
-         * and the second ground is what does it: draw the bed and what stands in it and stop
-         * there, and the worst pixel is six. Lay the surface over them and the two toolkits part
-         * company across the whole patch, the shipped one showing what stands in the water where
-         * this one shows what is behind it.
-         *
-         * That is the dock, and it is the only scene here that can ask it. Every other one draws
-         * a single patch.
+         * It is the only scene here with two grounds, and the only one that can ask what becomes
+         * of what stands between them. Every other one draws a single patch.
          */
         @Override
         public boolean written() {
@@ -1789,18 +1783,12 @@ public sealed interface Scene {
         private static final int SUNK = 180;
 
         /**
-         * It is drawn last of all, because the scene after it comes out differently for having
-         * been drawn after this one. Which of the two toolkits carries something out of it is not
-         * yet known.
+         * Eleven thousand of its pixels are out and the worst is a hundred and ninety four,
+         * of its pixels are out and the worst is six, which is what the watered patch under it is
+         * out by on its own.
          *
-         * Sixty one thousand of its pixels are out and the worst is a hundred and ninety four,
-         * and the second ground is what does it: draw the bed and what stands in it and stop
-         * there, and the worst pixel is six. Lay the surface over them and the two toolkits part
-         * company across the whole patch, the shipped one showing what stands in the water where
-         * this one shows what is behind it.
-         *
-         * That is the dock, and it is the only scene here that can ask it. Every other one draws
-         * a single patch.
+         * It is the only scene here with two grounds, and the only one that can ask what becomes
+         * of what stands between them. Every other one draws a single patch.
          */
         @Override
         public boolean written() {
@@ -1925,18 +1913,12 @@ public sealed interface Scene {
          * next thing to read, and the only thing left that the blend is made of.
          */
         /**
-         * It is drawn last of all, because the scene after it comes out differently for having
-         * been drawn after this one. Which of the two toolkits carries something out of it is not
-         * yet known.
+         * Eleven thousand of its pixels are out and the worst is a hundred and ninety four,
+         * of its pixels are out and the worst is six, which is what the watered patch under it is
+         * out by on its own.
          *
-         * Sixty one thousand of its pixels are out and the worst is a hundred and ninety four,
-         * and the second ground is what does it: draw the bed and what stands in it and stop
-         * there, and the worst pixel is six. Lay the surface over them and the two toolkits part
-         * company across the whole patch, the shipped one showing what stands in the water where
-         * this one shows what is behind it.
-         *
-         * That is the dock, and it is the only scene here that can ask it. Every other one draws
-         * a single patch.
+         * It is the only scene here with two grounds, and the only one that can ask what becomes
+         * of what stands between them. Every other one draws a single patch.
          */
         @Override
         public boolean written() {
@@ -2001,18 +1983,12 @@ public sealed interface Scene {
          * colour being mixed wrongly, and it happens where a step lands nearest a boundary.
          */
         /**
-         * It is drawn last of all, because the scene after it comes out differently for having
-         * been drawn after this one. Which of the two toolkits carries something out of it is not
-         * yet known.
+         * Eleven thousand of its pixels are out and the worst is a hundred and ninety four,
+         * of its pixels are out and the worst is six, which is what the watered patch under it is
+         * out by on its own.
          *
-         * Sixty one thousand of its pixels are out and the worst is a hundred and ninety four,
-         * and the second ground is what does it: draw the bed and what stands in it and stop
-         * there, and the worst pixel is six. Lay the surface over them and the two toolkits part
-         * company across the whole patch, the shipped one showing what stands in the water where
-         * this one shows what is behind it.
-         *
-         * That is the dock, and it is the only scene here that can ask it. Every other one draws
-         * a single patch.
+         * It is the only scene here with two grounds, and the only one that can ask what becomes
+         * of what stands between them. Every other one draws a single patch.
          */
         @Override
         public boolean written() {

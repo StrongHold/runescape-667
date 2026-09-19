@@ -2265,6 +2265,20 @@ void renderGroundTile(const void *ground, int x, int z) {
         Projected *landed = &projected[corner];
         landed->depth = signedAs(point[2] / away, point[2]);
         landed->visible = away >= view->near && away <= view->far;
+        landed->away = away;
+
+        /*
+         * The ground carries no fade of its own. Whatever water stands over it is the tile's and
+         * is laid on a corner where the corner is built, so the fade a point is projected with is
+         * nothing.
+         *
+         * Saying so is the point. The places a point lands in are shared between everything drawn,
+         * and a model drawn while the eye is under water leaves a fade in every one of them. A
+         * ground drawn afterwards that never sets its own is then faded by however deep the last
+         * thing drawn happened to be standing, which is a dock's floor coming out dark because
+         * its pillars go down to the bed.
+         */
+        landed->fade = 0.0f;
 
         if (landed->visible) {
             landed->x = point[0] / away + acrossFromClip;
