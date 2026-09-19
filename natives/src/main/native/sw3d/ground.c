@@ -874,14 +874,27 @@ static void wateredTileHandedOver(int waterColour, const int *colours, const int
     static int said;
     enum { SAY_AT_MOST = 4 };
 
-    if (!listening || waterColour == 0 || said >= SAY_AT_MOST || corners < 3
-        || colours == NULL) {
+    static int saidDry;
+
+    if (!listening || corners < 3 || colours == NULL) {
         return;
     }
 
-    said++;
-    fprintf(stderr, "sw3d water: a watered tile is handed colours %08x %08x %08x,"
+    if (waterColour == 0) {
+        if (saidDry >= SAY_AT_MOST) {
+            return;
+        }
+        saidDry++;
+    } else {
+        if (said >= SAY_AT_MOST) {
+            return;
+        }
+        said++;
+    }
+
+    fprintf(stderr, "sw3d water: a %s tile is handed colours %08x %08x %08x,"
             " laid over %08x %08x %08x, wearing %d\n",
+            waterColour == 0 ? "dry" : "watered",
             (unsigned) colours[0], (unsigned) colours[1], (unsigned) colours[2],
             (unsigned) (overlays == NULL ? 0 : overlays[0]),
             (unsigned) (overlays == NULL ? 0 : overlays[1]),
