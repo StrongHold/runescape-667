@@ -169,6 +169,12 @@ static int faceSeenThrough;
  */
 static int tileBeneath;
 
+/**
+ * Whether the face being drawn is one wound away from the eye, which is never drawn at all unless
+ * it is being painted to say where such faces lie.
+ */
+static int faceTurned;
+
 /** How many tiles the client gave water to have been drawn. */
 static long wateredTiles;
 
@@ -953,12 +959,13 @@ static void fillSpan(int y, const Side *left, const Side *right) {
     uint32_t *row = raster.pixels + start;
     float *held = raster.depths + start;
 
-    int redly = faceBare || tileRedly || tileAbove || faceSeenThrough || tileBeneath
+    int redly = faceBare || tileRedly || tileAbove || faceSeenThrough || tileBeneath || faceTurned
         || (wateredThroughout() && underwater()->under);
-    uint32_t painted = tileBeneath ? WHOLLY_RED
+    uint32_t painted = faceTurned ? WHOLLY_GREEN
+        : (tileBeneath ? WHOLLY_RED
         : (faceSeenThrough ? WHOLLY_GREEN
         : (tileAbove ? WHOLLY_PINK
-        : (faceBare ? WHOLLY_PINK : (tileRedly ? WHOLLY_GREEN : WHOLLY_RED))));
+        : (faceBare ? WHOLLY_PINK : (tileRedly ? WHOLLY_GREEN : WHOLLY_RED)))));
 
     for (int x = from; x < to; x++) {
         if (!distanceDecides || depth <= held[x]) {
@@ -2394,9 +2401,19 @@ void renderGroundTile(const void *ground, int x, int z) {
             continue;
         }
 
+        /*
+         * A face wound away from the eye is not drawn. Painted, it says whether a stretch of
+         * ground that came out bare was thrown away for facing the wrong way or was never held.
+         */
+        faceTurned = 0;
         if (!facesTheEye(a, b, c)) {
             tally.turnedAway++;
-            continue;
+
+            if (!switchedOff("SW3D_TURNED_PAINT")) {
+                continue;
+            }
+
+            faceTurned = 1;
         }
 
         tally.drawn++;
@@ -2432,6 +2449,7 @@ void renderGroundTile(const void *ground, int x, int z) {
     tileRedly = 0;
     tileAbove = 0;
     tileBeneath = 0;
+    faceTurned = 0;
     faceBare = 0;
     faceShows = WHOLLY_SOLID;
     faceSeenThrough = 0;
