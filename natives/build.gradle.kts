@@ -1108,6 +1108,56 @@ val verifyToolkit by tasks.registering(JavaExec::class) {
     inputs.file(layout.projectDirectory.file("outstanding.txt"))
 }
 
+val goldenFrames = layout.projectDirectory.dir("goldens")
+
+/**
+ * Keeps what the shipped toolkit drew, one frame per scene, so that a machine without the shipped
+ * library can still check our toolkit.
+ *
+ * The shipped library comes out of the game's cache and is not ours to publish, so it reaches no
+ * machine but one that has already run the client. Run this when a scene is added or when a change
+ * to the harness moves what the shipped toolkit draws, and read the change as pictures.
+ */
+val updateGoldens by tasks.registering(JavaExec::class) {
+    description = "Keeps one frame per scene from the shipped toolkit."
+    dependsOn(captureFrames)
+    mainClass = "GoldenFrames"
+    classpath = sourceSets["main"].runtimeClasspath
+    args(
+        "--frames", layout.buildDirectory.dir("frames").get().asFile.absolutePath,
+        "--into", goldenFrames.asFile.absolutePath,
+    )
+}
+
+/**
+ * Checks our toolkit against the frames kept in the repository rather than against the shipped
+ * library.
+ *
+ * This is what runs where the shipped library cannot, which is everywhere but a developer's own
+ * machine. It measures the same thing verifyToolkit does and holds the same record, so a scene
+ * that is allowed to be a certain distance out is allowed the same distance here.
+ */
+val verifyGoldens by tasks.registering(JavaExec::class) {
+    description = "Checks our toolkit against the frames kept in the repository."
+    dependsOn(captureOwnFrames)
+    mainClass = "FrameCheck"
+    classpath = sourceSets["main"].runtimeClasspath
+    args(
+        "--goldens", goldenFrames.asFile.absolutePath,
+        "--ours", ownFrames.get().asFile.absolutePath,
+        "--marks", layout.buildDirectory.dir("golden-differences").get().asFile.absolutePath,
+        "--outstanding", layout.projectDirectory.file("outstanding.txt").asFile.absolutePath,
+    )
+    inputs.dir(goldenFrames)
+    inputs.file(layout.projectDirectory.file("outstanding.txt"))
+
+    /*
+     * Keeping the frames clears the directory before it writes, so a run that asks for both has to
+     * do them in that order or this reads a directory that is halfway written.
+     */
+    mustRunAfter(updateGoldens)
+}
+
 /**
  * Registers a probe that asks both toolkits the same questions and compares the answers.
  *

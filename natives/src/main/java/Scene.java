@@ -2280,11 +2280,6 @@ public sealed interface Scene {
         private static final int FAR = 4000;
 
         @Override
-        public boolean written() {
-            return false;
-        }
-
-        @Override
         public void draw(Toolkit toolkit, Props props) {
             toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
             toolkit.f(NEAR, FAR);

@@ -38,25 +38,73 @@ public final class FrameCheck {
     /** What an undrawn pixel is, which is what the harness clears a frame to. */
     private static final int BLANK = Scene.CLEAR_COLOUR;
 
-    private record Frames(String label, Path directory, List<String> scenes) {
+    /**
+     * A set of frames to read a scene's picture out of, however that set is laid out.
+     */
+    private sealed interface Frames {
 
-        static Frames at(String label, Path directory) throws IOException {
+        String label();
+
+        List<String> scenes();
+
+        Path frame(int index);
+    }
+
+    /**
+     * Frames as a toolkit just drew them, numbered in the order they were drawn.
+     *
+     * Every scene is drawn more than once, so the same scene appears under several numbers and the
+     * scene list says which is which.
+     */
+    private record Captured(String label, Path directory, List<String> scenes) implements Frames {
+
+        static Captured at(String label, Path directory) throws IOException {
             var scenes = Files.readAllLines(directory.resolve("scenes.txt"));
             if (scenes.isEmpty()) {
                 throw new IllegalStateException("No scenes were drawn into " + directory + ".");
             }
-            return new Frames(label, directory, scenes);
+            return new Captured(label, directory, scenes);
         }
 
-        Path frame(int index) {
+        @Override
+        public Path frame(int index) {
             return directory.resolve(String.format("frame-%04d.png", index));
         }
     }
 
+    /**
+     * Frames kept in the repository, one per scene, under the scene's own name.
+     *
+     * These are read by people as well as by this, so a change to one has to say in the file name
+     * which scene changed. The scene list is borrowed from the frames being checked, because a
+     * kept frame is only ever looked up by the scene that is being drawn against it.
+     */
+    private record Golden(String label, Path directory, List<String> scenes) implements Frames {
+
+        @Override
+        public Path frame(int index) {
+            return directory.resolve(named(scenes.get(index)) + ".png");
+        }
+    }
+
+    /**
+     * A scene's name without what is said about it, which is what its kept frame is filed under.
+     *
+     * A scene carries notes such as "(outstanding)" beside its name, and those say how the scene
+     * is judged rather than which scene it is.
+     */
+    private static String named(String scene) {
+        var said = scene.indexOf(" (");
+        return said < 0 ? scene : scene.substring(0, said);
+    }
+
     public static final class Args implements Helpable {
 
-        @Parameter(names = "--shipped", description = "The frames the shipped toolkit drew", required = true)
+        @Parameter(names = "--shipped", description = "The frames the shipped toolkit just drew")
         private Path shipped;
+
+        @Parameter(names = "--goldens", description = "The frames kept in the repository, one per scene")
+        private Path goldens;
 
         @Parameter(names = "--ours", description = "The frames our toolkit drew", required = true)
         private Path ours;
@@ -76,6 +124,31 @@ public final class FrameCheck {
         }
     }
 
+    /**
+     * What our frames are judged against.
+     *
+     * Either the shipped toolkit drawing the same scenes beside us, which needs the shipped
+     * library and so only happens where that library is, or the frames kept in the repository,
+     * which is what every other machine has.
+     */
+    private static Frames against(Args args, Captured ours) throws IOException {
+        if (args.shipped != null && args.goldens != null) {
+            throw new IllegalStateException("Judge against the shipped toolkit or against the kept"
+                + " frames, not both.");
+        }
+
+        if (args.goldens != null) {
+            return new Golden("the kept frames", args.goldens, ours.scenes());
+        }
+
+        if (args.shipped == null) {
+            throw new IllegalStateException("Name what to judge against, with --shipped or"
+                + " --goldens.");
+        }
+
+        return Captured.at("the shipped toolkit", args.shipped);
+    }
+
     public static void main(String[] arguments) {
         var args = new Args();
 
@@ -84,8 +157,8 @@ public final class FrameCheck {
         }
 
         try {
-            var shipped = Frames.at("the shipped toolkit", args.shipped);
-            var ours = Frames.at("our toolkit", args.ours);
+            var ours = Captured.at("our toolkit", args.ours);
+            var shipped = against(args, ours);
             var marks = args.marks;
             Files.createDirectories(marks);
             var allowed = Allowance.read(args.outstanding);
@@ -99,7 +172,7 @@ public final class FrameCheck {
             report.addAll(checkOutstandingHeldGround(shipped, ours, allowed));
 
             if (report.isEmpty()) {
-                System.out.println(shipped.scenes().size() + " frames identical to the shipped toolkit");
+                System.out.println(summary(shipped, ours));
             } else {
                 report.add("Marked images are in " + marks + ".");
                 report.forEach(System.out::println);
@@ -443,6 +516,33 @@ public final class FrameCheck {
     /**
      * A scene the capture marked as belonging to a native that is not written yet.
      */
+    /**
+     * What passing means, which is not that every scene matched.
+     *
+     * A scene in the record of unfinished ones is not compared, only held to the distance it was
+     * last at, so saying that every frame matched would be wrong by exactly those scenes.
+     */
+    private static String summary(Frames against, Frames ours) {
+        var matched = new ArrayList<String>();
+        var held = new ArrayList<String>();
+
+        for (var scene : ours.scenes()) {
+            var into = outstanding(scene) ? held : matched;
+            if (!into.contains(scene)) {
+                into.add(scene);
+            }
+        }
+
+        var said = matched.size() + " of " + (matched.size() + held.size())
+            + " scenes identical to " + against.label();
+
+        if (held.isEmpty()) {
+            return said;
+        }
+
+        return said + ", and " + held.size() + " held at the distance the record allows";
+    }
+
     private static boolean outstanding(String scene) {
         return scene.endsWith("(outstanding)");
     }

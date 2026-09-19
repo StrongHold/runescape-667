@@ -1,0 +1,43 @@
+# Draws every scene through our own software toolkit and checks each one against the frame kept
+# in the repository.
+#
+# The shipped library comes out of the game's cache and is not ours to publish, so it reaches no
+# machine but one that has already run the client. What it drew is kept under natives/goldens
+# instead, and this checks our toolkit against that.
+#
+# Our toolkit reads its approximations from a table rather than asking the processor, so the
+# pictures it draws are the same on every machine and on both architectures. That is what makes a
+# frame drawn on one machine worth keeping for another to check against.
+name: Software toolkit
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  frames:
+    name: Frames
+    # macOS because the drawing surface the toolkit hands its pixels to is written against this
+    # platform, and arm64 because the toolkit no longer needs the x86_64 machine it once did.
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Draw them and check them
+        run: ./gradlew :natives:verifyGoldens --no-daemon
+
+      - name: Keep what differed
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frame-differences
+          path: |
+            natives/build/golden-differences
+            natives/build/own-frames

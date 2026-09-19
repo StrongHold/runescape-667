@@ -24,7 +24,6 @@ OverlaidWaterDock = 0, 0, 137
 SeenThrough = 0, 0, 21
 SeenThroughDock = 0, 0, 137
 Stairs = 0, 0, 245
-SurfaceHorizon = 0, 0, 0
 TexturedGround = 0, 0, 2691
 Underwater = 0, 0, 12
 WaterOverNoBed = 0, 0, 43
