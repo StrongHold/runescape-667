@@ -2005,7 +2005,21 @@ public sealed interface Scene {
 
             props.ground().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
                 HandGround.TILES, visible, false, 0);
+
+            /*
+             * A model at each of five places along the patch, so that what becomes of one
+             * standing past the far edge is drawn beside what becomes of the ground there.
+             */
+            for (var step = 0; step < STANDING; step++) {
+                props.matrix().makeRotationZ(0);
+                props.matrix().translate(HandGround.TILES * HandGround.TILE / 2, 0,
+                    step * HandGround.TILES * HandGround.TILE / (STANDING - 1));
+                props.model().render(props.matrix(), null, 1);
+            }
         }
+
+        /** How many places along the patch a model is put. */
+        private static final int STANDING = 5;
     }
 
     /**
