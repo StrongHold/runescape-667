@@ -278,11 +278,28 @@ public final class HandGround {
      * about the run between.
      */
     public static Ground buildWatered(Toolkit toolkit) {
+        return buildWatered(toolkit, TILES);
+    }
+
+    /**
+     * The bed with water on it, laid under only the near half of the patch.
+     *
+     * The client hands the bed and the surface over the same tiles, but it only ever built a bed
+     * where there was one to build, so the water can reach further than the bed under it. Water
+     * over no bed at all is drawn through to whatever the sky left behind rather than to the bed,
+     * which is a different picture from water over a bed and has to be drawn the same way by
+     * both.
+     */
+    public static Ground buildWateredHalf(Toolkit toolkit) {
+        return buildWatered(toolkit, TILES / 2);
+    }
+
+    private static Ground buildWatered(Toolkit toolkit, int along) {
         var ground = toolkit.createGround(TILES, TILES, surfaceHeights(),
             ONE_GRID ? surfaceHeights() : seabedHeights(), GROUND_FLAGS, FEATURE_FLAGS);
 
         for (var x = 0; x < TILES; x++) {
-            for (var z = 0; z < TILES; z++) {
+            for (var z = 0; z < along; z++) {
                 addWateredTile(ground, x, z);
             }
         }

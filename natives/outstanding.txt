@@ -20,5 +20,6 @@ SeenThroughDock = 0, 0, 11727
 Stairs = 0, 0, 245
 TexturedGround = 0, 0, 2691
 Underwater = 0, 0, 12
+WaterOverNoBed = 0, 0, 11633
 Watered = 0, 0, 11633
 WateredDock = 0, 0, 11727

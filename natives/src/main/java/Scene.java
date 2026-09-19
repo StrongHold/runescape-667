@@ -104,6 +104,7 @@ public sealed interface Scene {
         new WateredDock(),
         new SeenThroughDock(),
         new FoggedDock(),
+        new WaterOverNoBed(),
         new BlendedGround(),
         new Stairs(),
         new Priorities(),
@@ -124,7 +125,8 @@ public sealed interface Scene {
                  Model roundPoint, Model rock, Model seenThrough, Ground overlaid, Ground hollow,
                  Ground shadowed, Ground blended, Model stairs, Model priorities,
                  Model billboards, Mesh located, Mesh blackBacked, Model doubled,
-                 Ground shadowedRepeat, Ground watered, Ground surface, Ground waterSurface) {
+                 Ground shadowedRepeat, Ground watered, Ground surface, Ground waterSurface,
+                 Ground halfBed) {
         /* empty */
     }
 
@@ -1864,6 +1866,59 @@ public sealed interface Scene {
         public void draw(Toolkit toolkit, Props props) {
             new WateredDock().drawInto(toolkit, props, props.waterSurface(), Integer.MAX_VALUE);
         }
+    }
+
+    /**
+     * The see-through dock with the bed laid under only the near half of it.
+     *
+     * The water reaches further than the bed under it, so the far half is drawn through to
+     * whatever was on the picture before anything was drawn at all. Every other scene here draws
+     * water over a bed from edge to edge, so what becomes of water with nothing under it had
+     * never been drawn.
+     */
+    record WaterOverNoBed() implements Scene {
+
+        /**
+         * Eleven thousand of its pixels are out and every one of them by a single shade, which is
+         * what the watered patch is out by on its own. The half with no bed under it is exact, so
+         * water over nothing is drawn the same way by both.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            var camera = toolkit.createMatrix();
+            camera.createCamera(HandGround.TILES * HandGround.TILE / 2, Terrain.UP,
+                -Terrain.BACK, TURN / 8, 0, 0);
+            toolkit.setCamera(camera);
+
+            var visible = new boolean[HandGround.TILES * 2][HandGround.TILES * 2];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            toolkit.ra(SURFACE, SEEN_THROUGH, REACH, BIAS);
+            props.halfBed().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
+                HandGround.TILES, visible, true, 0);
+            toolkit.pa();
+
+            props.waterSurface().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
+                HandGround.TILES, visible, false, 0);
+        }
+
+        /** What the client hands over for the water at a dock. */
+        private static final int SURFACE = -1;
+        private static final int SEEN_THROUGH = 0x182838;
+        private static final int REACH = 40;
+        private static final int BIAS = 127;
     }
 
     /**
