@@ -650,6 +650,27 @@ static int shadeInside(const Ground *ground, int x, int z, int across, int along
 }
 
 /**
+ * One corner's share of the way to another.
+ *
+ * A corner standing on the edge of its tile is that edge's corner and not a share of anything, so
+ * it is taken whole rather than worked out. The two are the same number in arithmetic and not
+ * always the same float: a distance added back onto where it was measured from lands a step away
+ * from where it was measured to, often enough to change a colour. Every corner a cut puts into a
+ * tile stands on one of its edges, so this is the common case rather than the corner one.
+ */
+static float sharedBetween(float from, float to, int part, int whole) {
+    if (part <= 0) {
+        return from;
+    }
+
+    if (part >= whole) {
+        return to;
+    }
+
+    return from + (to - from) * ((float) part / (float) whole);
+}
+
+/**
  * Which way the ground faces at a point inside a tile, shared out from the four corners around it.
  *
  * The toolkit hands the four over as a ring rather than as two rows: the corner the tile starts
@@ -672,13 +693,10 @@ static void facingInside(const Ground *ground, int x, int z, int across, int alo
         return;
     }
 
-    float partAcross = (float) across / (float) ground->tileSize;
-    float partAlong = (float) along / (float) ground->tileSize;
-
     for (int lane = 0; lane < NORMAL_PARTS; lane++) {
-        float nearer = near[lane] + (far[lane] - near[lane]) * partAcross;
-        float further = nearAlong[lane] + (farAlong[lane] - nearAlong[lane]) * partAcross;
-        into[lane] = nearer + (further - nearer) * partAlong;
+        float nearer = sharedBetween(near[lane], far[lane], across, ground->tileSize);
+        float further = sharedBetween(nearAlong[lane], farAlong[lane], across, ground->tileSize);
+        into[lane] = sharedBetween(nearer, further, along, ground->tileSize);
     }
 }
 
