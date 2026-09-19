@@ -708,6 +708,13 @@ JNIEXPORT void JNICALL Java_oa_ra(JNIEnv *env, jobject self, jint surface, jint 
     waterAsked("through water", surface, colour, depth, bias);
     throughWaterReset();
 
+    /*
+     * The counts are of the pass through water and of nothing else. The client draws the ground
+     * twice, once for what is under the water and once for what is above it, and a count that ran
+     * from one pass to the next reported half of each.
+     */
+    wateredTilesReset();
+
     fogColourAbove = fog.colour;
     fog.colour = (uint32_t) colour;
 
