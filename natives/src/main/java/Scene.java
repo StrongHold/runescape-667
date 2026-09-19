@@ -107,6 +107,7 @@ public sealed interface Scene {
         new WaterOverNoBed(),
         new OverlaidWaterDock(),
         new GroundPastTheEdge(),
+        new GlaringWater(),
         new BlendedGround(),
         new Stairs(),
         new Priorities(),
@@ -128,7 +129,7 @@ public sealed interface Scene {
                  Ground shadowed, Ground blended, Model stairs, Model priorities,
                  Model billboards, Mesh located, Mesh blackBacked, Model doubled,
                  Ground shadowedRepeat, Ground watered, Ground surface, Ground waterSurface,
-                 Ground halfBed, Ground overlaidWaterSurface) {
+                 Ground halfBed, Ground overlaidWaterSurface, Ground glaringWater) {
         /* empty */
     }
 
@@ -2020,6 +2021,58 @@ public sealed interface Scene {
 
         /** How many places along the patch a model is put. */
         private static final int STANDING = 5;
+    }
+
+    /**
+     * The watered patch with water of the brightest colour there is.
+     *
+     * A corner carries what the light left it and what the water put on it, and the two are added
+     * where the face is filled. Water this bright pushes that sum past a whole colour, and what a
+     * face does with a sum that will not fit is drawn nowhere else here: a sum that is carried
+     * round rather than held at the top comes out in colours neither the light nor the water
+     * holds.
+     */
+    record GlaringWater() implements Scene {
+
+        /**
+         * Eighteen thousand of its pixels are out and none by more than three, and every one of
+         * them is out the same way: this comes back one higher than the shipped toolkit does. The
+         * light and the water are added at a finer grain here than there, and the plainer patch
+         * is out by one for the same reason where its water is dimmer.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            var camera = toolkit.createMatrix();
+            camera.createCamera(HandGround.TILES * HandGround.TILE / 2, Terrain.UP,
+                -Terrain.BACK, TURN / 8, 0, 0);
+            toolkit.setCamera(camera);
+
+            var visible = new boolean[HandGround.TILES * 2][HandGround.TILES * 2];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            toolkit.ra(SURFACE, SEEN_THROUGH, REACH, BIAS);
+            props.glaringWater().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
+                HandGround.TILES, visible, true, 0);
+            toolkit.pa();
+        }
+
+        /** What the client tells the toolkit about the water the eye is looking through. */
+        private static final int SURFACE = -1;
+        private static final int SEEN_THROUGH = 0x182838;
+        private static final int REACH = 40;
+        private static final int BIAS = 127;
     }
 
     /**

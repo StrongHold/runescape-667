@@ -278,7 +278,7 @@ public final class HandGround {
      * about the run between.
      */
     public static Ground buildWatered(Toolkit toolkit) {
-        return buildWatered(toolkit, TILES);
+        return buildWatered(toolkit, TILES, WATER_COLOUR);
     }
 
     /**
@@ -291,16 +291,16 @@ public final class HandGround {
      * both.
      */
     public static Ground buildWateredHalf(Toolkit toolkit) {
-        return buildWatered(toolkit, TILES / 2);
+        return buildWatered(toolkit, TILES / 2, WATER_COLOUR);
     }
 
-    private static Ground buildWatered(Toolkit toolkit, int along) {
+    private static Ground buildWatered(Toolkit toolkit, int along, int waterColour) {
         var ground = toolkit.createGround(TILES, TILES, surfaceHeights(),
             ONE_GRID ? surfaceHeights() : seabedHeights(), GROUND_FLAGS, FEATURE_FLAGS);
 
         for (var x = 0; x < TILES; x++) {
             for (var z = 0; z < along; z++) {
-                addWateredTile(ground, x, z);
+                addWateredTile(ground, x, z, waterColour);
             }
         }
 
@@ -520,7 +520,7 @@ public final class HandGround {
     /** How deep the water is at the far edge of the patch, which is where it is shallowest. */
     private static final int SHALLOWEST = number("SW3D_WATER_SHALLOWEST", 16);
 
-    private static void addWateredTile(Ground ground, int x, int z) {
+    private static void addWateredTile(Ground ground, int x, int z, int waterColour) {
         var offsetX = new int[] {0, TILE, TILE, 0};
         var offsetY = new int[] {0, 0, TILE, TILE};
         var faceA = new int[] {0, 0};
@@ -545,8 +545,22 @@ public final class HandGround {
         var sizes = new int[] {TILE, TILE};
 
         ground.addTile(x, z, offsetX, null, offsetY, depths, faceA, faceB, faceC,
-            colours, colours.clone(), textures, sizes, WATER_COLOUR, WATER_REACHES, WATER_BIAS);
+            colours, colours.clone(), textures, sizes, waterColour, WATER_REACHES, WATER_BIAS);
     }
+
+    /**
+     * The watered patch with water of the brightest colour there is.
+     *
+     * A corner carries what the light left it and what the water put on it, and the two are added
+     * where the face is filled. Water this bright is what pushes the sum of them past a whole
+     * colour, and what a face does with a sum that will not fit is drawn nowhere else here.
+     */
+    public static Ground buildGlaringWater(Toolkit toolkit) {
+        return buildWatered(toolkit, TILES, GLARING);
+    }
+
+    /** Water so bright that what the light leaves and what the water adds cannot both fit. */
+    private static final int GLARING = 0xFFFFFF;
 
     /**
      * The same patch with something standing on it throwing a shadow across the middle.
