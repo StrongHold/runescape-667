@@ -34,10 +34,16 @@ public final class GlSamples {
     private static final int UNSIGNED_BYTE = 0x1401;
     private static final int COLOUR_BUFFER = 0x4000;
 
-    public static void main(String[] args) {
+    public static void main(String[] arguments) {
+        var args = new LibraryArgs();
+
+        if (!CommandLine.parsed("verifyOpenGlSamples", args, arguments)) {
+            return;
+        }
+
         try {
             Watchdog.arm("The OpenGL sample check", 120);
-            LibraryManager.putLibrary(new File(args[0]), "jaggl");
+            LibraryManager.putLibrary(args.library(), "jaggl");
             LibraryManager.loadNative(GlSamples.class, "jaggl");
 
             var canvas = new Canvas();

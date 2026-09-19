@@ -19,10 +19,16 @@ public final class MemoryHeap {
     private static final int CAPACITY = 4096;
     private static final int BLOCK = 1024;
 
-    public static void main(String[] args) {
+    public static void main(String[] arguments) {
+        var args = new LibraryArgs();
+
+        if (!CommandLine.parsed("verifyMemoryLibrary", args, arguments)) {
+            return;
+        }
+
         try {
             Watchdog.arm("The memory heap check", 120);
-            LibraryManager.putLibrary(new File(args[0]), "jaclib");
+            LibraryManager.putLibrary(args.library(), "jaclib");
             LibraryManager.loadNative(MemoryHeap.class, "jaclib");
 
             checkEndianness();

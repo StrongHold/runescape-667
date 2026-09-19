@@ -41,10 +41,16 @@ public final class MatrixProbe {
         new int[] {-32768, 1, -1}
     );
 
-    public static void main(String[] args) {
+    public static void main(String[] arguments) {
+        var args = new ProbeArgs();
+
+        if (!CommandLine.parsed("matrixProbe", args, arguments)) {
+            return;
+        }
+
         try {
             Watchdog.arm("The matrix probe", 120);
-            LibraryManager.putLibrary(new File(args[0]), "sw3d");
+            LibraryManager.putLibrary(args.library(), "sw3d");
 
             var toolkit = oa.create(null, new StubTextureSource(), 512, 384);
             var lines = new ArrayList<String>();
@@ -58,7 +64,7 @@ public final class MatrixProbe {
             cameras(toolkit, lines);
             composition(toolkit, lines);
 
-            Files.write(Path.of(args[1]), lines);
+            Files.write(args.answers(), lines);
             System.out.println("recorded " + lines.size() + " matrix answers");
             System.exit(0);
         } catch (Throwable failure) {

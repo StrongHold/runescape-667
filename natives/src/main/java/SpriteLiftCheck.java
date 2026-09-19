@@ -11,9 +11,15 @@ import rs2.client.loading.library.LibraryManager;
  * is that the one step and the two steps agree with each other.
  */
 public final class SpriteLiftCheck {
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] arguments) throws Exception {
+        var args = new LibraryArgs();
+
+        if (!CommandLine.parsed("verifySpriteLift", args, arguments)) {
+            return;
+        }
+
         Watchdog.arm("The sprite lift check", 60);
-        LibraryManager.putLibrary(new File(args[0]), "sw3d");
+        LibraryManager.putLibrary(args.library(), "sw3d");
 
         var canvas = new Canvas();
         canvas.setSize(512, 384);

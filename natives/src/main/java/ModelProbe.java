@@ -61,10 +61,16 @@ public final class ModelProbe {
      */
     private static final int[] ANGLES = {0, 1, 0x1000, 0x2000, 0x3000, 0x0400, 0x2ABC, 0x3FFF};
 
-    public static void main(String[] args) {
+    public static void main(String[] arguments) {
+        var args = new ProbeArgs();
+
+        if (!CommandLine.parsed("modelProbe", args, arguments)) {
+            return;
+        }
+
         try {
             Watchdog.arm("The model probe", 120);
-            LibraryManager.putLibrary(new File(args[0]), "sw3d");
+            LibraryManager.putLibrary(args.library(), "sw3d");
 
             /*
              * A canvas, because the cylinder a model may be clicked on is only worked out on the
@@ -117,7 +123,7 @@ public final class ModelProbe {
             particles(toolkit, lines);
             spareVertices(toolkit, lines);
 
-            Files.write(Path.of(args[1]), lines);
+            Files.write(args.answers(), lines);
             System.out.println("recorded " + lines.size() + " model answers");
             System.exit(0);
         } catch (Throwable failure) {

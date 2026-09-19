@@ -1,4 +1,4 @@
-import com.jagex.graphics.Mesh;
+import com.beust.jcommander.Parameter;
 
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -14,22 +14,46 @@ import java.util.TreeMap;
  */
 public final class CacheModel {
 
-    private CacheModel() {
-        /* empty */
+    /** The model described when none is named, which is the one the scenes are built around. */
+    private static final int A_MODEL_WORTH_LOOKING_AT = 32421;
+
+    public static final class Args implements Helpable {
+
+        @Parameter(names = "--model", description = "Which model to describe")
+        private int model = A_MODEL_WORTH_LOOKING_AT;
+
+        @Parameter(names = "--keep", description = "Write the models the scenes are drawn with under this directory instead")
+        private Path keep;
+
+        @Parameter(names = "--scanned", description = "Say which models have been looked at instead")
+        private boolean scanned;
+
+        @Parameter(names = "--help", help = true, description = "Print this message")
+        private boolean help;
+
+        @Override
+        public boolean help() {
+            return help;
+        }
     }
 
-    public static void main(String[] args) throws Exception {
-        if (args.length > 1 && args[0].equals("keep")) {
-            CacheMesh.keep(Path.of(args[1]));
+    public static void main(String[] arguments) throws Exception {
+        var args = new Args();
+
+        if (!CommandLine.parsed("describeModel", args, arguments)) {
             return;
         }
 
-        if (args.length > 0 && args[0].equals("scanned")) {
+        if (args.keep != null) {
+            CacheMesh.keep(args.keep);
+        } else if (args.scanned) {
             CacheMesh.sayWhichAreScanned();
-            return;
+        } else {
+            describe(args.model);
         }
+    }
 
-        var group = Integer.parseInt(args.length > 0 ? args[0] : "32421");
+    private static void describe(int group) throws Exception {
         var mesh = CacheMesh.group(group);
 
         if (mesh == null) {
@@ -76,5 +100,9 @@ public final class CacheModel {
         System.out.println("  " + doubled + " faces stand on the same three corners as another");
         System.out.println("  billboards: "
             + (mesh.billboards == null ? 0 : mesh.billboards.length));
+    }
+
+    private CacheModel() {
+        /* empty */
     }
 }

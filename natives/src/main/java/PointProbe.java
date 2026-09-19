@@ -65,10 +65,16 @@ public final class PointProbe {
         new int[] {100, 500}
     );
 
-    public static void main(String[] args) {
+    public static void main(String[] arguments) {
+        var args = new ProbeArgs();
+
+        if (!CommandLine.parsed("pointProbe", args, arguments)) {
+            return;
+        }
+
         try {
             Watchdog.arm("The point probe", 120);
-            LibraryManager.putLibrary(new File(args[0]), "sw3d");
+            LibraryManager.putLibrary(args.library(), "sw3d");
 
             /*
              * A canvas, because what may be drawn on is the whole buffer only once there is a
@@ -93,7 +99,7 @@ public final class PointProbe {
             laidFlat(toolkit, lines);
             lines(toolkit, lines);
 
-            Files.write(Path.of(args[1]), lines);
+            Files.write(args.answers(), lines);
             System.out.println("recorded " + lines.size() + " projection answers");
             System.exit(0);
         } catch (Throwable failure) {

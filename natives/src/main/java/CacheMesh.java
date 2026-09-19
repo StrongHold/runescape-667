@@ -160,7 +160,7 @@ public final class CacheMesh {
      * writing can be told from the ways that are never used.
      */
     public static void surveyMappingTypes() throws Exception {
-        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
+        var cache = Cache.standard();
         if (!new File(cache, "main_file_cache.dat2").isFile()) {
             return;
         }
@@ -205,7 +205,7 @@ public final class CacheMesh {
      * named way, so that a way can be given a picture of its own to be judged against.
      */
     public static Optional<Mesh> anyPlaced(int way, int faces, int most) throws Exception {
-        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
+        var cache = Cache.standard();
         if (!new File(cache, "main_file_cache.dat2").isFile()) {
             return Optional.empty();
         }
@@ -237,7 +237,7 @@ public final class CacheMesh {
      * The most is the one that has something to show.
      */
     public static Optional<Mesh> mostPlaced(int way) throws Exception {
-        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
+        var cache = Cache.standard();
         if (!new File(cache, "main_file_cache.dat2").isFile()) {
             return Optional.empty();
         }
@@ -325,7 +325,7 @@ public final class CacheMesh {
             return Optional.of(new Mesh(js5.decodeContainer(Files.readAllBytes(kept.get()))));
         }
 
-        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
+        var cache = Cache.standard();
         if (!new File(cache, "main_file_cache.dat2").isFile()) {
             return Optional.empty();
         }
@@ -338,7 +338,7 @@ public final class CacheMesh {
      * once rather than every time.
      */
     public static void keep(Path into) throws Exception {
-        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
+        var cache = Cache.standard();
         if (!new File(cache, "main_file_cache.dat2").isFile()) {
             System.out.println("no cache at " + cache + ", so there is nothing to keep");
             return;
@@ -375,7 +375,7 @@ public final class CacheMesh {
      * toolkit to do, so a scene can be pointed at the same thing the client was.
      */
     public static void report(int group) throws Exception {
-        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
+        var cache = Cache.standard();
         if (!new File(cache, "main_file_cache.dat2").isFile()) {
             return;
         }
@@ -492,7 +492,7 @@ public final class CacheMesh {
      * name can be worked out again if a cache brought up to date ever makes them wrong.
      */
     public static void sayWhichAreScanned() throws Exception {
-        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
+        var cache = Cache.standard();
         var held = at(cache);
 
         for (var way = 0; way < WAYS_A_TEXTURE_IS_PLACED; way++) {
@@ -599,7 +599,7 @@ public final class CacheMesh {
      * One model out of the cache by the group it is kept in, or nothing where the cache has none.
      */
     public static Mesh group(int group) throws Exception {
-        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
+        var cache = Cache.standard();
         if (!new File(cache, "main_file_cache.dat2").isFile()) {
             return null;
         }

@@ -19,10 +19,16 @@ public final class ToolkitSkeleton {
     private static final int WIDTH = 512;
     private static final int HEIGHT = 384;
 
-    public static void main(String[] args) {
+    public static void main(String[] arguments) {
+        var args = new LibraryArgs();
+
+        if (!CommandLine.parsed("verifyToolkitSkeleton", args, arguments)) {
+            return;
+        }
+
         try {
             Watchdog.arm("The skeleton check", 120);
-            build(args[0]);
+            build(args.library());
             System.out.println("the toolkit built against the skeleton on " + System.getProperty("os.arch"));
             System.exit(0);
         } catch (Throwable failure) {
@@ -31,14 +37,14 @@ public final class ToolkitSkeleton {
         }
     }
 
-    private static void build(String library) throws Exception {
+    private static void build(File library) throws Exception {
         if (!System.getProperty("os.arch").equals("aarch64")) {
             throw new IllegalStateException(
                 "The skeleton is built for arm64, so this has to run on an arm64 machine, not "
                     + System.getProperty("os.arch") + ".");
         }
 
-        LibraryManager.putLibrary(new File(library), "sw3d");
+        LibraryManager.putLibrary(library, "sw3d");
 
         Frame frame = new Frame("toolkit skeleton");
         Canvas canvas = new Canvas();

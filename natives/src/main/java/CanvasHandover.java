@@ -46,10 +46,16 @@ public final class CanvasHandover {
     private static Applet applet;
     private static Canvas canvas;
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] arguments) throws Exception {
+        var args = new LibraryArgs();
+
+        if (!CommandLine.parsed("verifyCanvasHandover", args, arguments)) {
+            return;
+        }
+
         Watchdog.arm("The canvas handover check", 120);
         SoftwareToolkitLifetime.retainAll();
-        LibraryManager.putLibrary(new File(args[0]), "sw3d");
+        LibraryManager.putLibrary(args.library(), "sw3d");
 
         Frame frame = new Frame("canvas handover");
         applet = new Applet();

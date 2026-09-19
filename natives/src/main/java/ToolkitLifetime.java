@@ -24,10 +24,16 @@ public final class ToolkitLifetime {
     private static final int HEIGHT = 384;
     private static final int ROUNDS = 6;
 
-    public static void main(String[] args) {
+    public static void main(String[] arguments) {
+        var args = new LibraryArgs();
+
+        if (!CommandLine.parsed("verifyToolkitLifetime", args, arguments)) {
+            return;
+        }
+
         try {
             Watchdog.arm("The toolkit lifetime check", 120);
-            run(args[0]);
+            run(args.library());
             System.out.println("built and discarded " + ROUNDS + " toolkits");
             System.exit(0);
         } catch (Throwable failure) {
@@ -36,9 +42,9 @@ public final class ToolkitLifetime {
         }
     }
 
-    private static void run(String library) throws Exception {
+    private static void run(File library) throws Exception {
         SoftwareToolkitLifetime.retainAll();
-        LibraryManager.putLibrary(new File(library), "sw3d");
+        LibraryManager.putLibrary(library, "sw3d");
 
         Frame frame = new Frame("toolkit lifetime");
         Canvas canvas = new Canvas();

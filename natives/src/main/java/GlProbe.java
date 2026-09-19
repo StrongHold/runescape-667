@@ -107,18 +107,34 @@ public final class GlProbe {
 
     private static final int TEXTURE_SIZE = 4;
 
-    public static void main(String[] args) {
+    /**
+     * Where the context the answers were given under is written.
+     *
+     * An OpenGL answer means nothing without the context it came from, and the two are read back
+     * separately, so the context goes in its own file beside the answers rather than among them.
+     */
+    private static Path beside(Path answers) {
+        return Path.of(answers.toString().replace(".txt", "-context.txt"));
+    }
+
+    public static void main(String[] arguments) {
+        var args = new ProbeArgs();
+
+        if (!CommandLine.parsed("glProbe", args, arguments)) {
+            return;
+        }
+
         try {
             Watchdog.arm("The OpenGL binding probe", 120);
-            LibraryManager.putLibrary(new File(args[0]), "jaggl");
+            LibraryManager.putLibrary(args.library(), "jaggl");
             LibraryManager.loadNative(GlProbe.class, "jaggl");
 
             var answers = new ArrayList<String>();
             var context = new ArrayList<String>();
             probe(answers, context);
 
-            Files.write(Path.of(args[1]), answers);
-            Files.write(Path.of(args[1].replace(".txt", "-context.txt")), context);
+            Files.write(args.answers(), answers);
+            Files.write(beside(args.answers()), context);
             System.out.println("the binding carried " + answers.size() + " answers back unchanged");
             System.exit(0);
         } catch (Throwable failure) {

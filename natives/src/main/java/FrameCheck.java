@@ -1,4 +1,5 @@
-import javax.imageio.ImageIO;
+import com.beust.jcommander.Parameter;
+
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -8,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+
+import javax.imageio.ImageIO;
 
 /**
  * Checks the frames both toolkits drew from the same scenes.
@@ -50,13 +53,42 @@ public final class FrameCheck {
         }
     }
 
-    public static void main(String[] args) {
+    public static final class Args implements Helpable {
+
+        @Parameter(names = "--shipped", description = "The frames the shipped toolkit drew", required = true)
+        private Path shipped;
+
+        @Parameter(names = "--ours", description = "The frames our toolkit drew", required = true)
+        private Path ours;
+
+        @Parameter(names = "--marks", description = "The directory to write marked differences into", required = true)
+        private Path marks;
+
+        @Parameter(names = "--outstanding", description = "How far each unfinished scene is allowed to be", required = true)
+        private Path outstanding;
+
+        @Parameter(names = "--help", help = true, description = "Print this message")
+        private boolean help;
+
+        @Override
+        public boolean help() {
+            return help;
+        }
+    }
+
+    public static void main(String[] arguments) {
+        var args = new Args();
+
+        if (!CommandLine.parsed("verifyToolkit", args, arguments)) {
+            return;
+        }
+
         try {
-            var shipped = Frames.at("the shipped toolkit", Path.of(args[0]));
-            var ours = Frames.at("our toolkit", Path.of(args[1]));
-            var marks = Path.of(args[2]);
+            var shipped = Frames.at("the shipped toolkit", args.shipped);
+            var ours = Frames.at("our toolkit", args.ours);
+            var marks = args.marks;
             Files.createDirectories(marks);
-            var allowed = Allowance.read(Path.of(args[3]));
+            var allowed = Allowance.read(args.outstanding);
 
             var report = new ArrayList<String>();
             report.addAll(checkRepeatsAgree(shipped, marks));

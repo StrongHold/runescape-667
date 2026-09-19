@@ -1,3 +1,5 @@
+import com.beust.jcommander.Parameter;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -21,11 +23,37 @@ public final class AnswerCheck {
 
     private static final int SAMPLES = 8;
 
-    public static void main(String[] args) {
+    public static final class Args implements Helpable {
+
+        @Parameter(names = "--shipped", description = "The answers the shipped library gave", required = true)
+        private Path shipped;
+
+        @Parameter(names = "--ours", description = "The answers our library gave", required = true)
+        private Path ours;
+
+        @Parameter(names = "--what", description = "What the two libraries were asked about", required = true)
+        private String what;
+
+        @Parameter(names = "--help", help = true, description = "Print this message")
+        private boolean help;
+
+        @Override
+        public boolean help() {
+            return help;
+        }
+    }
+
+    public static void main(String[] arguments) {
+        var args = new Args();
+
+        if (!CommandLine.parsed("verifyAnswers", args, arguments)) {
+            return;
+        }
+
         try {
-            var shipped = Files.readAllLines(Path.of(args[0]));
-            var ours = Files.readAllLines(Path.of(args[1]));
-            var what = args[2];
+            var shipped = Files.readAllLines(args.shipped);
+            var ours = Files.readAllLines(args.ours);
+            var what = args.what;
 
             if (shipped.isEmpty()) {
                 throw new IllegalStateException("The shipped library answered nothing.");

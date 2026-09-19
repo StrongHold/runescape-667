@@ -1,3 +1,4 @@
+import com.beust.jcommander.Parameter;
 import com.jagex.core.io.BufferedFile;
 import com.jagex.core.io.FileOnDisk;
 import com.jagex.core.io.Packet;
@@ -24,13 +25,42 @@ public final class CacheLocations {
 
     private static final int TILES_ACROSS_A_SQUARE = 64;
 
-    public static void main(String[] args) throws Exception {
-        var x = Integer.parseInt(args[0]);
-        var z = Integer.parseInt(args[1]);
-        var level = args.length > 2 ? Integer.parseInt(args[2]) : 0;
-        var around = args.length > 3 ? Integer.parseInt(args[3]) : 0;
+    public static final class Args implements Helpable {
 
-        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
+        @Parameter(names = "--x", description = "The tile's position from west to east", required = true)
+        private int x;
+
+        @Parameter(names = "--z", description = "The tile's position from south to north", required = true)
+        private int z;
+
+        @Parameter(names = "--level", description = "Which floor of the world the tile is on")
+        private int level;
+
+        @Parameter(names = "--around", description = "How many tiles either side of it to list as well")
+        private int around;
+
+        @Parameter(names = "--help", help = true, description = "Print this message")
+        private boolean help;
+
+        @Override
+        public boolean help() {
+            return help;
+        }
+    }
+
+    public static void main(String[] arguments) throws Exception {
+        var args = new Args();
+
+        if (!CommandLine.parsed("listLocations", args, arguments)) {
+            return;
+        }
+
+        var x = args.x;
+        var z = args.z;
+        var level = args.level;
+        var around = args.around;
+
+        var cache = Cache.standard();
         var name = "l" + (x / TILES_ACROSS_A_SQUARE) + "_" + (z / TILES_ACROSS_A_SQUARE);
         var index = readIndex(cache, Js5Archive.MAPS);
         var group = index.groupNameTable.find(StringTools.intHashCp1252(name));

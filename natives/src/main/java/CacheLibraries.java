@@ -1,12 +1,9 @@
-import com.jagex.core.io.BufferedFile;
-import com.jagex.core.io.FileOnDisk;
-import com.jagex.core.io.Packet;
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParametersDelegate;
 import com.jagex.core.stringtools.general.StringTools;
-import com.jagex.js5.FileSystem_Client;
 import com.jagex.js5.Js5Archive;
 import com.jagex.js5.Js5Index;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,9 +38,28 @@ public final class CacheLibraries {
         /* empty */
     }
 
-    public static void main(String[] args) throws Exception {
-        File cache = new File(args[0]);
-        Js5Index index = readIndex(cache, Js5Archive.DLLS);
+    public static final class Args implements Helpable {
+
+        @ParametersDelegate
+        private final CacheArgs where = new CacheArgs();
+
+        @Parameter(names = "--help", help = true, description = "Print this message")
+        private boolean help;
+
+        @Override
+        public boolean help() {
+            return help;
+        }
+    }
+
+    public static void main(String[] arguments) throws Exception {
+        Args args = new Args();
+
+        if (!CommandLine.parsed("listCacheLibraries", args, arguments)) {
+            return;
+        }
+
+        Js5Index index = Cache.index(args.where.cache(), Js5Archive.DLLS);
 
         int named = 0;
         for (Platform platform : PLATFORMS) {
@@ -58,28 +74,6 @@ public final class CacheLibraries {
 
         System.out.println();
         System.out.println("named " + named + " of " + index.groupCount + " groups");
-    }
-
-    /**
-     * Reads one archive's index out of the cache, which the master index holds under the archive's
-     * own number.
-     */
-    private static Js5Index readIndex(File cache, int archive) throws Exception {
-        FileOnDisk data = new FileOnDisk(new File(cache, "main_file_cache.dat2"), "r", Long.MAX_VALUE);
-        FileOnDisk master = new FileOnDisk(new File(cache, "main_file_cache.idx255"), "r", Long.MAX_VALUE);
-
-        FileSystem_Client store = new FileSystem_Client(
-            255,
-            new BufferedFile(data, 5200, 0),
-            new BufferedFile(master, 6000, 0),
-            500000
-        );
-
-        byte[] packed = store.read(archive);
-        if (packed == null) {
-            throw new IllegalStateException("The cache holds no index for archive " + archive + ".");
-        }
-        return new Js5Index(packed, Packet.getcrc(packed.length, packed), null);
     }
 
     private static List<String> librariesFor(Js5Index index, Platform platform) {

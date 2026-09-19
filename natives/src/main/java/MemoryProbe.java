@@ -35,10 +35,16 @@ public final class MemoryProbe {
      */
     private static final int FORCES_COMPACTION = 1024;
 
-    public static void main(String[] args) {
+    public static void main(String[] arguments) {
+        var args = new ProbeArgs();
+
+        if (!CommandLine.parsed("memoryProbe", args, arguments)) {
+            return;
+        }
+
         try {
             Watchdog.arm("The memory library probe", 120);
-            LibraryManager.putLibrary(new File(args[0]), "jaclib");
+            LibraryManager.putLibrary(args.library(), "jaclib");
             LibraryManager.loadNative(MemoryProbe.class, "jaclib");
 
             var answers = new ArrayList<String>();
@@ -48,7 +54,7 @@ public final class MemoryProbe {
             askBuffer(answers);
             askRefusals(answers);
 
-            Files.write(Path.of(args[1]), answers);
+            Files.write(args.answers(), answers);
             System.out.println("the memory library answered " + answers.size() + " times");
             System.exit(0);
         } catch (Throwable failure) {

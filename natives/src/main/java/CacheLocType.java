@@ -1,3 +1,4 @@
+import com.beust.jcommander.Parameter;
 import com.jagex.core.io.BufferedFile;
 import com.jagex.game.runetek6.config.loctype.LocType;
 import com.jagex.game.runetek6.config.loctype.LocTypeList;
@@ -25,9 +26,29 @@ public final class CacheLocType {
     /** How many things the player may be offered to do with a location. */
     private static final int OPS = 5;
 
-    public static void main(String[] args) throws Exception {
-        var id = Integer.parseInt(args[0]);
-        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
+    public static final class Args implements Helpable {
+
+        @Parameter(names = "--loc", description = "Which kind of location to list", required = true)
+        private int loc;
+
+        @Parameter(names = "--help", help = true, description = "Print this message")
+        private boolean help;
+
+        @Override
+        public boolean help() {
+            return help;
+        }
+    }
+
+    public static void main(String[] arguments) throws Exception {
+        var args = new Args();
+
+        if (!CommandLine.parsed("listLocType", args, arguments)) {
+            return;
+        }
+
+        var id = args.loc;
+        var cache = Cache.standard();
         var index = readIndex(cache, Js5Archive.CONFIG_LOC);
 
         var group = id / PER_GROUP;

@@ -1,3 +1,4 @@
+import com.beust.jcommander.Parameter;
 import com.jagex.core.io.BufferedFile;
 import com.jagex.game.runetek6.config.flutype.FloorUnderlayType;
 import com.jagex.core.io.FileOnDisk;
@@ -24,12 +25,38 @@ public final class CacheTerrain {
     /** How many levels a square of the map holds. */
     private static final int LEVELS = 4;
 
-    public static void main(String[] args) throws Exception {
-        var wantX = Integer.parseInt(args[0]);
-        var wantZ = Integer.parseInt(args[1]);
-        var wantLevel = args.length > 2 ? Integer.parseInt(args[2]) : 0;
+    public static final class Args implements Helpable {
 
-        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
+        @Parameter(names = "--x", description = "The tile's position from west to east", required = true)
+        private int x;
+
+        @Parameter(names = "--z", description = "The tile's position from south to north", required = true)
+        private int z;
+
+        @Parameter(names = "--level", description = "Which floor of the world the tile is on")
+        private int level;
+
+        @Parameter(names = "--help", help = true, description = "Print this message")
+        private boolean help;
+
+        @Override
+        public boolean help() {
+            return help;
+        }
+    }
+
+    public static void main(String[] arguments) throws Exception {
+        var args = new Args();
+
+        if (!CommandLine.parsed("listTerrain", args, arguments)) {
+            return;
+        }
+
+        var wantX = args.x;
+        var wantZ = args.z;
+        var wantLevel = args.level;
+
+        var cache = Cache.standard();
         var name = "m" + (wantX / TILES_ACROSS_A_SQUARE) + "_" + (wantZ / TILES_ACROSS_A_SQUARE);
         var index = readIndex(cache, Js5Archive.MAPS);
         var group = index.groupNameTable.find(StringTools.intHashCp1252(name));
@@ -135,7 +162,7 @@ public final class CacheTerrain {
     }
 
     private static byte[] configFile(int group, int id) throws Exception {
-        var cache = new File(System.getProperty("user.home"), ".jagex_cache_32/runescape");
+        var cache = Cache.standard();
         var index = CacheLocType.readIndex(cache, Js5Archive.CONFIG);
         var packed = CacheLocType.store(cache, Js5Archive.CONFIG).read(group);
 

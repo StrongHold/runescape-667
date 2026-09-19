@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     implementation(project(":runescape"))
+    implementation(libs.jcommander)
 }
 
 /**
@@ -136,7 +137,7 @@ val captureFrames by tasks.registering(JavaExec::class) {
         environment(name, held)
         inputs.property(name, held)
     }
-    args(patchedToolkit.get().asFile.absolutePath)
+    args("--library", patchedToolkit.get().asFile.absolutePath)
 
     /*
      * The scenes are part of what this draws, so a change to them has to draw them again. Without
@@ -166,7 +167,7 @@ val verifyToolkitLifetime by tasks.registering(JavaExec::class) {
     setExecutable(rootProject.layout.projectDirectory.file(".gradle/jdk-x64/unpacked/Home/bin/java").asFile.absolutePath)
     jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
     systemProperty("toolkit.surface.library", shimLibrary.get().asFile.absolutePath)
-    args(patchedToolkit.get().asFile.absolutePath)
+    args("--library", patchedToolkit.get().asFile.absolutePath)
 }
 
 /**
@@ -185,7 +186,7 @@ val verifyOwnToolkitLifetime by tasks.registering(JavaExec::class) {
     setExecutable(rootProject.layout.projectDirectory.file(".gradle/jdk-x64/unpacked/Home/bin/java").asFile.absolutePath)
     jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
     systemProperty("toolkit.surface.library", shimLibrary.get().asFile.absolutePath)
-    args(toolkitLibrary.get().asFile.absolutePath)
+    args("--library", toolkitLibrary.get().asFile.absolutePath)
 }
 
 /**
@@ -200,7 +201,7 @@ val verifyCanvasHandover by tasks.registering(JavaExec::class) {
     setExecutable(rootProject.layout.projectDirectory.file(".gradle/jdk-x64/unpacked/Home/bin/java").asFile.absolutePath)
     jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
     systemProperty("toolkit.surface.library", shimLibrary.get().asFile.absolutePath)
-    args(toolkitLibrary.get().asFile.absolutePath)
+    args("--library", toolkitLibrary.get().asFile.absolutePath)
 }
 
 val toolkitClasses = listOf("a", "ba", "h", "i", "j", "ja", "n", "na", "oa", "p", "t", "wa", "xa", "ya")
@@ -323,7 +324,7 @@ val verifyToolkitSkeleton by tasks.registering(JavaExec::class) {
     mainClass = "ToolkitSkeleton"
     classpath = sourceSets["main"].runtimeClasspath
     jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
-    args(skeletonLibrary.get().asFile.absolutePath)
+    args("--library", skeletonLibrary.get().asFile.absolutePath)
 }
 
 val openGlSource = layout.buildDirectory.file("generated/jaggl-opengl.c")
@@ -587,7 +588,7 @@ fun registerBindingCapture(name: String, library: Provider<RegularFile>, answers
         setExecutable(x64JavaExecutable)
         jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
         environment("JAWTSHIM_WAIT_FOR_VIEW", "1")
-        args(library.get().asFile.absolutePath, written.absolutePath)
+        args("--library", library.get().asFile.absolutePath, "--answers", written.absolutePath)
         inputs.file(library)
         outputs.file(answers)
         doFirst { written.parentFile.mkdirs() }
@@ -612,7 +613,7 @@ val verifyOpenGlSamples by tasks.registering(JavaExec::class) {
     setExecutable(x64JavaExecutable)
     jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
     environment("JAWTSHIM_WAIT_FOR_VIEW", "1")
-    args(openGlLibrary.get().asFile.absolutePath)
+    args("--library", openGlLibrary.get().asFile.absolutePath)
     inputs.file(openGlLibrary)
 }
 
@@ -626,9 +627,9 @@ val verifyOpenGlBinding by tasks.registering(JavaExec::class) {
     mainClass = "AnswerCheck"
     classpath = sourceSets["main"].runtimeClasspath
     args(
-        bindingAnswers.get().asFile.absolutePath,
-        ownBindingAnswers.get().asFile.absolutePath,
-        "OpenGL binding answers",
+        "--shipped", bindingAnswers.get().asFile.absolutePath,
+        "--ours", ownBindingAnswers.get().asFile.absolutePath,
+        "--what", "OpenGL binding answers",
     )
 }
 
@@ -678,7 +679,7 @@ val verifyMemoryLibrary by tasks.registering(JavaExec::class) {
     mainClass = "MemoryHeap"
     classpath = sourceSets["main"].runtimeClasspath
     jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
-    args(memoryLibrary.get().asFile.absolutePath)
+    args("--library", memoryLibrary.get().asFile.absolutePath)
 }
 
 /**
@@ -730,7 +731,7 @@ val captureMemory by tasks.registering(JavaExec::class) {
     classpath = sourceSets["main"].runtimeClasspath
     setExecutable(x64JavaExecutable)
     jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
-    args(patchedMemoryLibrary.get().asFile.absolutePath, written.absolutePath)
+    args("--library", patchedMemoryLibrary.get().asFile.absolutePath, "--answers", written.absolutePath)
     outputs.file(memoryAnswers)
     doFirst { written.parentFile.mkdirs() }
 }
@@ -745,7 +746,7 @@ val captureOwnMemory by tasks.registering(JavaExec::class) {
     classpath = sourceSets["main"].runtimeClasspath
     setExecutable(x64JavaExecutable)
     jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
-    args(memoryLibrary.get().asFile.absolutePath, written.absolutePath)
+    args("--library", memoryLibrary.get().asFile.absolutePath, "--answers", written.absolutePath)
     inputs.file(memoryLibrary)
     inputs.files(sourceSets["main"].runtimeClasspath)
     outputs.file(ownMemoryAnswers)
@@ -762,9 +763,9 @@ val verifyMemoryAnswers by tasks.registering(JavaExec::class) {
     mainClass = "AnswerCheck"
     classpath = sourceSets["main"].runtimeClasspath
     args(
-        memoryAnswers.get().asFile.absolutePath,
-        ownMemoryAnswers.get().asFile.absolutePath,
-        "memory library answers",
+        "--shipped", memoryAnswers.get().asFile.absolutePath,
+        "--ours", ownMemoryAnswers.get().asFile.absolutePath,
+        "--what", "memory library answers",
     )
 }
 
@@ -814,17 +815,27 @@ val verifyMiscLibrary by tasks.registering(JavaExec::class) {
     mainClass = "Jagmisc"
     classpath = sourceSets["main"].runtimeClasspath
     jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
-    args(miscLibrary.get().asFile.absolutePath)
+    args("--library", miscLibrary.get().asFile.absolutePath)
 }
-
-val cacheDirectory = providers.gradleProperty("cache")
-    .orElse(providers.systemProperty("user.home").map { "$it/.jagex_cache_32/runescape" })
 
 val listCacheLibraries by tasks.registering(JavaExec::class) {
     description = "Lists the native libraries the cache holds, for every platform."
     mainClass = "CacheLibraries"
     classpath = sourceSets["main"].runtimeClasspath
-    args(cacheDirectory.get())
+}
+
+/**
+ * Writes one of the cache's native libraries out, so that a toolkit built for another platform can
+ * be looked at here.
+ *
+ * The name is one of the ones listCacheLibraries prints, and the file is written under the build
+ * directory rather than beside the cache, because it is a copy taken for a look rather than one
+ * the client is meant to load.
+ */
+val extractCacheLibrary by tasks.registering(JavaExec::class) {
+    description = "Writes one named native library out of the cache."
+    mainClass = "CacheLibrary"
+    classpath = sourceSets["main"].runtimeClasspath
 }
 
 val toolkitTrace = layout.buildDirectory.file("generated/sw3d-trace.txt")
@@ -842,7 +853,7 @@ val traceToolkit by tasks.registering(JavaExec::class) {
     mainClass = "FrameCapture"
     classpath = sourceSets["main"].runtimeClasspath
     jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
-    args(skeletonLibrary.get().asFile.absolutePath)
+    args("--library", skeletonLibrary.get().asFile.absolutePath)
     environment("SW3D_SKELETON_VERBOSE", "1")
     environment("JAWTSHIM_DUMP", layout.buildDirectory.dir("trace-frames").get().asFile.absolutePath)
     isIgnoreExitValue = true
@@ -1057,7 +1068,7 @@ val captureOwnFrames by tasks.registering(JavaExec::class) {
     jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
     val directory = ownFrames.get().asFile
 
-    args(toolkitLibrary.get().asFile.absolutePath)
+    args("--library", toolkitLibrary.get().asFile.absolutePath)
     environment("SW3D_DUMP", directory.absolutePath)
     environment("SW3D_VERBOSE", providers.environmentVariable("SW3D_VERBOSE").getOrElse(""))
     sceneSettings.forEach { (name, fallback) ->
@@ -1089,10 +1100,10 @@ val verifyToolkit by tasks.registering(JavaExec::class) {
     mainClass = "FrameCheck"
     classpath = sourceSets["main"].runtimeClasspath
     args(
-        layout.buildDirectory.dir("frames").get().asFile.absolutePath,
-        ownFrames.get().asFile.absolutePath,
-        layout.buildDirectory.dir("frame-differences").get().asFile.absolutePath,
-        layout.projectDirectory.file("outstanding.txt").asFile.absolutePath,
+        "--shipped", layout.buildDirectory.dir("frames").get().asFile.absolutePath,
+        "--ours", ownFrames.get().asFile.absolutePath,
+        "--marks", layout.buildDirectory.dir("frame-differences").get().asFile.absolutePath,
+        "--outstanding", layout.projectDirectory.file("outstanding.txt").asFile.absolutePath,
     )
     inputs.file(layout.projectDirectory.file("outstanding.txt"))
 }
@@ -1122,7 +1133,8 @@ fun registerProbe(name: String, probe: String, what: String): TaskProvider<JavaE
         classpath = sourceSets["main"].runtimeClasspath
         setExecutable(x64Java)
         jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
-        args(patchedToolkit.get().asFile.absolutePath, shippedAnswers.get().asFile.absolutePath)
+        args("--library", patchedToolkit.get().asFile.absolutePath,
+            "--answers", shippedAnswers.get().asFile.absolutePath)
         outputs.file(shippedAnswers)
         doFirst { shippedAnswers.get().asFile.parentFile.mkdirs() }
     }
@@ -1135,7 +1147,8 @@ fun registerProbe(name: String, probe: String, what: String): TaskProvider<JavaE
         classpath = sourceSets["main"].runtimeClasspath
         setExecutable(x64Java)
         jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
-        args(toolkitLibrary.get().asFile.absolutePath, ownAnswers.get().asFile.absolutePath)
+        args("--library", toolkitLibrary.get().asFile.absolutePath,
+            "--answers", ownAnswers.get().asFile.absolutePath)
         inputs.file(toolkitLibrary)
         inputs.files(sourceSets["main"].runtimeClasspath)
         outputs.file(ownAnswers)
@@ -1147,7 +1160,11 @@ fun registerProbe(name: String, probe: String, what: String): TaskProvider<JavaE
         dependsOn(captureShipped, captureOurs)
         mainClass = "AnswerCheck"
         classpath = sourceSets["main"].runtimeClasspath
-        args(shippedAnswers.get().asFile.absolutePath, ownAnswers.get().asFile.absolutePath, what)
+        args(
+            "--shipped", shippedAnswers.get().asFile.absolutePath,
+            "--ours", ownAnswers.get().asFile.absolutePath,
+            "--what", what,
+        )
     }
 }
 
@@ -1163,7 +1180,7 @@ val verifySpriteLift by tasks.registering(JavaExec::class) {
     classpath = sourceSets["main"].runtimeClasspath
     setExecutable(rootProject.layout.projectDirectory.file(".gradle/jdk-x64/unpacked/Home/bin/java").asFile.absolutePath)
     jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
-    args(toolkitLibrary.get().asFile.absolutePath)
+    args("--library", toolkitLibrary.get().asFile.absolutePath)
 }
 
 val verifyMatrices = registerProbe("matrices", "MatrixProbe", "matrix answers")
@@ -1207,35 +1224,31 @@ val listTerrain by tasks.registering(JavaExec::class) {
     description = "Says what the map is made of on one tile."
     mainClass = "CacheTerrain"
     classpath = sourceSets["main"].runtimeClasspath
-    args((providers.gradleProperty("tile").getOrElse("3175 3495 0")).split(" "))
 }
 
 val keepModels by tasks.registering(JavaExec::class) {
     description = "Writes the models the scenes are drawn with beside the source."
     mainClass = "CacheModel"
     classpath = sourceSets["main"].runtimeClasspath
-    args("keep", layout.projectDirectory.dir("models").asFile.absolutePath)
+    args("--keep", layout.projectDirectory.dir("models").asFile.absolutePath)
 }
 
 val describeModel by tasks.registering(JavaExec::class) {
     description = "Says what one model out of the cache is made of."
     mainClass = "CacheModel"
     classpath = sourceSets["main"].runtimeClasspath
-    args(providers.gradleProperty("model").getOrElse("32421"))
 }
 
 val listLocType by tasks.registering(JavaExec::class) {
     description = "Lists the models one kind of location is built from."
     mainClass = "CacheLocType"
     classpath = sourceSets["main"].runtimeClasspath
-    args(providers.gradleProperty("loc").getOrElse("29592"))
 }
 
 val listLocations by tasks.registering(JavaExec::class) {
     description = "Lists the locations standing on one tile of the world."
     mainClass = "CacheLocations"
     classpath = sourceSets["main"].runtimeClasspath
-    args((providers.gradleProperty("tile").getOrElse("3084 3452 0")).split(" "))
     environment("SW3D_LOCATION_KEYS",
         providers.environmentVariable("SW3D_LOCATION_KEYS").getOrElse(""))
 }

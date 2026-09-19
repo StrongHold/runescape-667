@@ -50,10 +50,16 @@ public final class FrameCapture {
      * The window keeps the virtual machine alive after this method returns, so every path out of
      * here ends in an explicit exit. Without that a failure hangs instead of reporting.
      */
-    public static void main(String[] args) {
+    public static void main(String[] arguments) {
+        var args = new LibraryArgs();
+
+        if (!CommandLine.parsed("captureFrames", args, arguments)) {
+            return;
+        }
+
         try {
             Watchdog.arm("The frame capture", 120);
-            capture(args[0]);
+            capture(args.library());
             System.out.println("drew " + Scene.ALL.size() + " scenes, " + REPEATS + " times each");
             System.exit(0);
         } catch (Throwable failure) {
@@ -62,8 +68,8 @@ public final class FrameCapture {
         }
     }
 
-    private static void capture(String library) throws Exception {
-        LibraryManager.putLibrary(new File(library), "sw3d");
+    private static void capture(File library) throws Exception {
+        LibraryManager.putLibrary(library, "sw3d");
 
         var canvas = new Canvas();
         canvas.setSize(Scene.WIDTH, Scene.HEIGHT);
