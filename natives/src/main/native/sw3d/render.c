@@ -2173,7 +2173,13 @@ void renderGroundTile(const void *ground, int x, int z) {
      * water goes on last, over whatever the face came to, and thickens across a face rather than
      * covering the whole of it alike, so it is carried a corner at a time like the light is.
      */
-    waterOverTile = (uint32_t) groundTileWaterColour(tile);
+    /*
+     * The water a tile carries is laid on it only while the eye is told it is looking through
+     * water. The client draws everything under the water in one pass and everything above it in
+     * another, and the same tile drawn in the second pass carries none of its water: what a tile
+     * holds is how deep the water over it is, not that it is always seen through it.
+     */
+    waterOverTile = underwater()->under ? (uint32_t) groundTileWaterColour(tile) : 0;
 
     float *under = calloc((size_t) corners, sizeof(float));
     if (under == NULL) {
@@ -2184,7 +2190,7 @@ void renderGroundTile(const void *ground, int x, int z) {
     for (int corner = 0; corner < corners; corner++) {
         int where[3];
         groundTileCorner(ground, tile, corner, tileSize, x, z, where, &shade[corner]);
-        under[corner] = groundTileCornerUnder(tile, corner);
+        under[corner] = underwater()->under ? groundTileCornerUnder(tile, corner) : 0.0f;
         underSeen(under[corner]);
 
         float point[ROWS];

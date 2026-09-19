@@ -1684,10 +1684,12 @@ public sealed interface Scene {
      * time: a patch the client gave water to, and a model drawn while the eye is told it is
      * looking through water.
      *
-     * Neither on its own asks what happens where they meet. The patch is drawn at the grid the
-     * ground stands on, and anything standing on the bed is under that grid, so whether a pillar
-     * shows through the water at all turns on what the water over the ground does to what is
-     * behind it. Nothing else here covers that.
+     * Neither on its own asks what happens where they meet, and neither asks what becomes of a
+     * tile drawn once the eye has stopped looking through water. The client draws everything under
+     * the water in one pass and everything above it in the next, and the same tiles are handed
+     * over in both. What a tile holds is how deep the water over it is, not that it is always seen
+     * through it, so the pass it is drawn in decides whether any of that water is laid on it at
+     * all.
      */
     record WateredPillar() implements Scene {
 
@@ -1708,20 +1710,6 @@ public sealed interface Scene {
          */
         private static final int STANDING = 5;
         private static final int RAISED = 220;
-
-        /**
-         * The pillars are drawn before the water and the water is drawn over them, which is the
-         * order the client draws them in.
-         *
-         * Every pixel of them lands where the shipped toolkit puts it, the one standing through
-         * the surface among them, and the only pixels out are the twenty thousand the watered
-         * patch is out by on its own. So a model standing in water is not what the toolkit does
-         * differently, and a dock whose pillars stop at the water is not this.
-         */
-        @Override
-        public boolean written() {
-            return false;
-        }
 
         @Override
         public void draw(Toolkit toolkit, Props props) {
@@ -1750,10 +1738,15 @@ public sealed interface Scene {
                 }
             }
 
+            /*
+             * The eye stops looking through water before the ground is drawn, which is the order
+             * the client draws them in: everything under the water goes down in one pass and the
+             * ground it lies on in the next.
+             */
+            toolkit.pa();
+
             props.watered().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
                 HandGround.TILES, visible, false, 0);
-
-            toolkit.pa();
         }
     }
 
