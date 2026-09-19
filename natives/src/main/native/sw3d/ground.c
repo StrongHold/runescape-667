@@ -1185,6 +1185,15 @@ static void textureOnTheMap(int worn, const TextureMetrics *metrics) {
 enum { COLOUR_PARTS = 3 };
 
 /** How much of the water over a tile stands over one of its corners, out of the whole. */
+/**
+ * How much of the water is carried in a corner's own colour, which is one byte of it.
+ *
+ * The amount is kept beside the colour rather than worked out again where the corner is drawn,
+ * so it is only ever as fine as a byte and a corner a shade deeper than its neighbour is carried
+ * no further until it is a whole part of two hundred and fifty five deeper.
+ */
+enum { WHOLE_OF_THE_WATER = 255 };
+
 static float cornerUnder(const Tile *tile, int corner) {
     if (tile == NULL || !tile->watered || tile->depth == NULL || corner >= tile->corners
         || tile->waterReaches <= 0) {
@@ -1196,7 +1205,11 @@ static float cornerUnder(const Tile *tile, int corner) {
         return 0.0f;
     }
 
-    return under > 1.0f ? 1.0f : under;
+    if (under > 1.0f) {
+        under = 1.0f;
+    }
+
+    return (float) (int) (under * (float) WHOLE_OF_THE_WATER) / (float) WHOLE_OF_THE_WATER;
 }
 
 /**
