@@ -189,8 +189,15 @@ static void fogFromHere(void);
 static Underwater water;
 
 /**
- * The fog colour from before the water went in, which going back up puts back.
+ * The colour the client last asked the distance to fade towards, and the one from before the
+ * water went in, which coming back up puts back.
+ *
+ * The toolkit keeps a colour of its own and the rasteriser keeps the one it is drawing with, and
+ * going under water changes only the first. The rasteriser reads the toolkit's colour when the
+ * client sets a fade or moves the edges of the world, and at no other time, so everything drawn
+ * under water is faded towards whatever the fade was set to above it.
  */
+static uint32_t fogColourAsked;
 static uint32_t fogColourAbove;
 
 static Pool *modelPool;
@@ -356,6 +363,7 @@ JNIEXPORT void JNICALL Java_oa_f(JNIEnv *env, jobject self, jint near, jint far)
 
     view.near = (float) near;
     view.far = (float) far;
+    fog.colour = fogColourAsked;
     fogFromHere();
 }
 
@@ -550,7 +558,8 @@ JNIEXPORT void JNICALL Java_oa_L(JNIEnv *env, jobject self, jint colour, jint ra
     (void) self;
     (void) offset;
 
-    fog.colour = (uint32_t) colour;
+    fogColourAsked = (uint32_t) colour;
+    fog.colour = fogColourAsked;
     fog.range = range < 0 ? 0.0f : (float) range;
     fogFromHere();
 }
@@ -717,8 +726,8 @@ JNIEXPORT void JNICALL Java_oa_ra(JNIEnv *env, jobject self, jint surface, jint 
      */
     wateredTilesReset();
 
-    fogColourAbove = fog.colour;
-    fog.colour = (uint32_t) colour;
+    fogColourAbove = fogColourAsked;
+    fogColourAsked = (uint32_t) colour;
 
     water.under = 1;
     water.surface = (float) surface;
@@ -735,7 +744,7 @@ JNIEXPORT void JNICALL Java_oa_EA(JNIEnv *env, jobject self, jint surface, jint 
     (void) self;
     (void) bias;
 
-    fog.colour = (uint32_t) colour;
+    fogColourAsked = (uint32_t) colour;
 
     water.surface = (float) surface;
     water.perDepth = -1.0F / (float) depth;
@@ -753,7 +762,7 @@ JNIEXPORT void JNICALL Java_oa_pa(JNIEnv *env, jobject self) {
             (int) throughWaterFilledStanding());
     wateredTilesReset();
 
-    fog.colour = fogColourAbove;
+    fogColourAsked = fogColourAbove;
     water.under = 0;
 }
 

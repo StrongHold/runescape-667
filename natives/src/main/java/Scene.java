@@ -1887,9 +1887,9 @@ public sealed interface Scene {
         private static final int FAR = 6000;
 
         /**
-         * Twenty one thousand of its pixels are out, all of them in the nearest band of the
-         * patch, where this comes out a shade darker than the shipped toolkit does. Everything
-         * further off than that band is exact.
+         * Twenty thousand of its pixels are out by no more than the watered patch under it is out
+         * by on its own, at the same pixel and by the same amount, so nothing the fade adds is
+         * out at all.
          */
         @Override
         public boolean written() {
