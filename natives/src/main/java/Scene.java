@@ -2431,14 +2431,6 @@ public sealed interface Scene {
          * the blend is made with, which say how far into its tile a corner stands. Those are the
          * next thing to read, and the only thing left that the blend is made of.
          */
-        /**
-         * Eleven thousand of its pixels are out and the worst is a hundred and ninety four,
-         * of its pixels are out and the worst is six, which is what the watered patch under it is
-         * out by on its own.
-         *
-         * It is the only scene here with two grounds, and the only one that can ask what becomes
-         * of what stands between them. Every other one draws a single patch.
-         */
         @Override
         public boolean written() {
             return false;
@@ -2500,14 +2492,6 @@ public sealed interface Scene {
          * right while the red and blue are out in both directions. Green being the channel a
          * grass texture varies least in, that is a texel being chosen wrongly rather than a
          * colour being mixed wrongly, and it happens where a step lands nearest a boundary.
-         */
-        /**
-         * Eleven thousand of its pixels are out and the worst is a hundred and ninety four,
-         * of its pixels are out and the worst is six, which is what the watered patch under it is
-         * out by on its own.
-         *
-         * It is the only scene here with two grounds, and the only one that can ask what becomes
-         * of what stands between them. Every other one draws a single patch.
          */
         @Override
         public boolean written() {
