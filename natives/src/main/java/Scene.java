@@ -2400,41 +2400,14 @@ public sealed interface Scene {
     record CutGround() implements Scene {
 
         /**
-         * How the shade between two corners is rounded was the larger part of this and is now
-         * right, which took it from fifteen thousand pixels to twelve.
+         * A patch of ground whose tiles are cut up, so that a corner of a face is not a corner of
+         * the grid.
          *
-         * What is left is the sun and nothing else. Draw this scene with the sun turned all the
-         * way down and it matches the shipped toolkit to the pixel, so the colour a corner starts
-         * in, the share it takes of the corners around it and the way it is mixed across a face
-         * are all right, and only how much sun reaches it is not.
-         *
-         * How much reaches it is worked out from a direction, and a corner cut into the middle of
-         * a tile has no direction of its own, so one is blended from the four around it. Four
-         * directions of length one do not blend into a direction of length one, and this divides
-         * by the length each of them had rather than by the length the blend has. That leaves the
-         * sun reaching such a corner less strongly than it should, which is why every wrong pixel
-         * here is brighter rather than darker: a corner facing away from the sun is darkened by
-         * how far it faces away, and one blended short is not darkened far enough.
-         *
-         * How the blend is done is settled, and it is what is written here. The shipped toolkit
-         * mixes the three parts of a direction across and then along, and writes a plain one into
-         * the fourth part rather than mixing that too, and then divides the sun by the fourth
-         * part. Three other ways were measured first and each is worse: dividing by the length the
-         * blend has takes this from twelve thousand to twenty three and puts Terrain and
-         * HollowGround out, keeping each direction as measured with its own length beside it comes
-         * to nineteen thousand, and not blending at all comes to thirty two thousand and puts
-         * every ground scene out.
-         *
-         * So the blending matches, and the lighting either side of it matches, and the directions
-         * going into it match, because a corner of the grid takes one of them whole and every
-         * scene made of those is right to the pixel. What is left to differ is the two fractions
-         * the blend is made with, which say how far into its tile a corner stands. Those are the
-         * next thing to read, and the only thing left that the blend is made of.
+         * The client cuts a tile wherever one kind of ground meets another, and a corner it puts
+         * inside a tile takes its share of the four corners around it. Every other patch here has
+         * its corners on the grid, so nothing else asks how the ground faces at a place between
+         * them, or how strongly the sun reaches such a place.
          */
-        @Override
-        public boolean written() {
-            return false;
-        }
 
         @Override
         public void draw(Toolkit toolkit, Props props) {

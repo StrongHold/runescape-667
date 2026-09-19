@@ -693,11 +693,37 @@ static void facingInside(const Ground *ground, int x, int z, int across, int alo
         return;
     }
 
-    for (int lane = 0; lane < NORMAL_PARTS; lane++) {
-        float nearer = sharedBetween(near[lane], far[lane], across, ground->tileSize);
-        float further = sharedBetween(nearAlong[lane], farAlong[lane], across, ground->tileSize);
-        into[lane] = sharedBetween(nearer, further, along, ground->tileSize);
+    /*
+     * A corner standing on a corner of its tile is that corner of the grid, whole. It keeps the
+     * length it was measured with, which for a corner on the rim of the grid is no length at all,
+     * and a corner with no length takes no sun.
+     */
+    int side = ground->tileSize;
+    if ((across <= 0 || across >= side) && (along <= 0 || along >= side)) {
+        const float *whole = along <= 0
+            ? (across <= 0 ? near : far)
+            : (across <= 0 ? nearAlong : farAlong);
+
+        for (int lane = 0; lane < NORMAL_PARTS; lane++) {
+            into[lane] = whole[lane];
+        }
+        return;
     }
+
+    /*
+     * Anywhere else the length is not shared out with the direction. A plain one is written in
+     * and the sun divided by that, so a direction blended from four of length one is left shorter
+     * than one and is meant to be. Sharing the length out instead would divide by less than one
+     * wherever a corner of the grid has none, and leave the sun reaching such a place too
+     * strongly.
+     */
+    for (int lane = 0; lane < NORMAL_PARTS - 1; lane++) {
+        float nearer = sharedBetween(near[lane], far[lane], across, side);
+        float further = sharedBetween(nearAlong[lane], farAlong[lane], across, side);
+        into[lane] = sharedBetween(nearer, further, along, side);
+    }
+
+    into[NORMAL_PARTS - 1] = 1.0f;
 }
 
 /**
@@ -1218,16 +1244,33 @@ static float cornerUnder(const Tile *tile, int corner) {
         return 0.0f;
     }
 
-    float under = (float) tile->depth[corner] / (float) (tile->waterReaches / 2);
-    if (under < 0.0f) {
+    int deep = tile->depth[corner];
+    if (deep <= 0) {
         return 0.0f;
     }
 
-    if (under > 1.0f) {
-        under = 1.0f;
+    if (deep > WHOLE_OF_THE_WATER) {
+        deep = WHOLE_OF_THE_WATER;
     }
 
-    return (float) (int) (under * (float) WHOLE_OF_THE_WATER) / (float) WHOLE_OF_THE_WATER;
+    /*
+     * Taken as a count out of the whole rather than as a fraction, because that is the width the
+     * answer is carried at and a fraction worked out first is rounded twice. The depth is doubled
+     * into the count in one go, so how deep the water reaches is divided by whole rather than
+     * halved first and the odd half kept.
+     */
+    int under = (int) ((float) (deep * (WHOLE_OF_THE_WATER * 2))
+        / (float) tile->waterReaches);
+
+    /*
+     * The last two counts before the whole are the whole. A corner all but covered is covered,
+     * and the shipped toolkit rounds it up rather than leaving it a count short.
+     */
+    if (under >= WHOLE_OF_THE_WATER - 1) {
+        under = WHOLE_OF_THE_WATER;
+    }
+
+    return (float) under / (float) WHOLE_OF_THE_WATER;
 }
 
 /**
