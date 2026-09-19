@@ -1854,6 +1854,19 @@ float groundTileCornerUnder(const void *at, int corner) {
     return cornerUnder(at, corner);
 }
 
+/**
+ * How deep the water over one corner of a tile is, as the client handed it over, and minus one
+ * where the client gave the tile no depths at all.
+ */
+int groundTileCornerDepth(const void *at, int corner) {
+    const Tile *tile = at;
+    if (tile == NULL || tile->depth == NULL || corner >= tile->corners) {
+        return -1;
+    }
+
+    return (uint16_t) tile->depth[corner];
+}
+
 /** Whether the client handed this tile a depth for its corners, whatever else it handed with it. */
 int groundTileCarriesDepths(const void *at) {
     const Tile *tile = at;

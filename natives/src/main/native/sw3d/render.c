@@ -2249,6 +2249,54 @@ static void tallied(const char *what) {
     }
 }
 
+/** How far before the far edge of the world the bed starts coming up to meet the water. */
+static const float LIFT_BEGINS_BEFORE_THE_EDGE = 2048.0f;
+
+/** Over what distance the bed comes the whole way up, once it has started. */
+static const float LIFT_REACHES_OVER = 1048.0f;
+
+/** Where a corner is left standing once the water over it has been taken away. */
+static const float LIFT_LEAVES_IT_AT = 10.0f;
+
+/**
+ * How far a corner of the bed is lifted towards the surface of the water standing over it.
+ *
+ * A bed drawn while the eye is under water comes up to meet the surface as it nears the far edge
+ * of the world. Without it the water is as deep at the edge as it is underfoot and then stops
+ * against the wall where the ground is cut off, which is a sea that ends rather than one that
+ * runs out of sight. How far off a corner is decides the whole of the lift, so a corner within
+ * reach of the edge is drawn shallower than the one beside it and the water shallows away.
+ *
+ * How far off the corner is comes from where it stands before it is lifted, so that lifting it
+ * does not move the edge the lift is measured against.
+ */
+static float liftedTowardsTheSurface(const Transform *onto, const float *stands, const void *tile,
+                                     int corner) {
+    if (!underwater()->under) {
+        return 0.0f;
+    }
+
+    int deep = groundTileCornerDepth(tile, corner);
+    if (deep < 0) {
+        return 0.0f;
+    }
+
+    float away = stands[0] * onto->row[0][3] + stands[1] * onto->row[1][3]
+        + stands[2] * onto->row[2][3] + onto->row[3][3];
+
+    const Projection *view = projection();
+    float reached = (away - (view->far - LIFT_BEGINS_BEFORE_THE_EDGE)) / LIFT_REACHES_OVER;
+
+    if (reached > 1.0f) {
+        reached = 1.0f;
+    }
+    if (!(reached > 0.0f)) {
+        return 0.0f;
+    }
+
+    return reached * (LIFT_LEAVES_IT_AT - (float) deep);
+}
+
 void renderGroundTile(const void *ground, int x, int z) {
     int corners = 0;
     const void *tile = groundTile(ground, x, z, &corners);
@@ -2354,11 +2402,14 @@ void renderGroundTile(const void *ground, int x, int z) {
         under[corner] = underwater()->under ? groundTileCornerUnder(tile, corner) : 0.0f;
         underSeen(under[corner]);
 
+        float stands[3] = {(float) where[0], (float) where[1], (float) where[2]};
+        stands[1] += liftedTowardsTheSurface(&onto, stands, tile, corner);
+
         float point[ROWS];
         for (int lane = 0; lane < ROWS; lane++) {
-            point[lane] = (float) where[0] * onto.row[0][lane]
-                + (float) where[1] * onto.row[1][lane]
-                + (float) where[2] * onto.row[2][lane] + onto.row[3][lane];
+            point[lane] = stands[0] * onto.row[0][lane]
+                + stands[1] * onto.row[1][lane]
+                + stands[2] * onto.row[2][lane] + onto.row[3][lane];
         }
 
         float away = point[3];

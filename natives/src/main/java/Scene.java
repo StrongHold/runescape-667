@@ -104,6 +104,11 @@ public sealed interface Scene {
         new WateredDock(),
         new SeenThroughDock(),
         new FoggedDock(),
+        new FoggedHorizon(),
+        new WateredHorizon(),
+        new BedHorizon(),
+        new SurfaceHorizon(),
+        new BareHorizon(),
         new WaterOverNoBed(),
         new OverlaidWaterDock(),
         new GroundPastTheEdge(),
@@ -2157,6 +2162,197 @@ public sealed interface Scene {
         public void draw(Toolkit toolkit, Props props) {
             toolkit.L(FADES_TOWARDS, FADE_COMPLETE_AT, 0);
             new WateredDock().drawInto(toolkit, props, props.waterSurface(), FAR);
+        }
+    }
+
+    /**
+     * The see-through dock with the distance fading everything towards a colour over the last
+     * stretch of the world rather than over half of it.
+     *
+     * The client asks for a fade that is complete a thousand units before the far edge of a world
+     * fourteen thousand units deep, so the whole of the fade happens in the last few hundredths
+     * of the depth, against the edge the ground is cut off at. Every other fade here runs over
+     * half the world and reaches its colour long before anything is cut away, which asks nothing
+     * about what happens where the two meet.
+     */
+    record FoggedHorizon() implements Scene {
+
+        /** What the distance fades everything towards, and how far away the fade is complete. */
+        private static final int FADES_TOWARDS = 0xC8C0A8;
+        private static final int FADE_COMPLETE_AT = 280;
+
+        /**
+         * The far edge of the world, which cuts through the patch rather than standing beyond it,
+         * so that the fade and the cut fall in the same stretch of ground.
+         */
+        private static final int FAR = 4000;
+
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.L(FADES_TOWARDS, FADE_COMPLETE_AT, 0);
+            new WateredDock().drawInto(toolkit, props, props.waterSurface(), FAR);
+        }
+    }
+
+    /**
+     * The see-through dock with the far edge of the world cut through the patch and no fade at all.
+     *
+     * The dock at the horizon changes two things at once: where the world is cut off and how the
+     * distance fades. This changes only the first, so whichever of the two is wrong can be told
+     * from the other.
+     */
+    record WateredHorizon() implements Scene {
+
+        /** A far edge that cuts through the patch rather than standing beyond it. */
+        private static final int FAR = 4000;
+
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            new WateredDock().drawInto(toolkit, props, props.waterSurface(), FAR);
+        }
+    }
+
+    /**
+     * The bed of the dock alone, with the far edge of the world cut through it.
+     *
+     * The dock is two patches, a bed drawn while the eye is under water and a surface laid over
+     * it. Drawing one without the other says which of the two is what a far edge cutting through
+     * the patch is drawn wrongly on.
+     */
+    record BedHorizon() implements Scene {
+
+        private static final int SURFACE = -1;
+        private static final int SEEN_THROUGH = 0x182838;
+        private static final int REACH = 40;
+        private static final int BIAS = 127;
+
+        /** A far edge that cuts through the patch rather than standing beyond it. */
+        private static final int FAR = 4000;
+
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, FAR);
+
+            var camera = toolkit.createMatrix();
+            camera.createCamera(HandGround.TILES * HandGround.TILE / 2, Terrain.UP,
+                -Terrain.BACK, TURN / 8, 0, 0);
+            toolkit.setCamera(camera);
+
+            var visible = new boolean[HandGround.TILES * 2][HandGround.TILES * 2];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            toolkit.ra(SURFACE, SEEN_THROUGH, REACH, BIAS);
+            props.watered().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
+                HandGround.TILES, visible, true, 0);
+            toolkit.pa();
+        }
+    }
+
+    /**
+     * The surface of the dock alone, with the far edge of the world cut through it.
+     *
+     * Nothing is laid under it, so what it is drawn over is the cleared picture and what it comes
+     * to is its own.
+     */
+    record SurfaceHorizon() implements Scene {
+
+        /** A far edge that cuts through the patch rather than standing beyond it. */
+        private static final int FAR = 4000;
+
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, FAR);
+
+            var camera = toolkit.createMatrix();
+            camera.createCamera(HandGround.TILES * HandGround.TILE / 2, Terrain.UP,
+                -Terrain.BACK, TURN / 8, 0, 0);
+            toolkit.setCamera(camera);
+
+            var visible = new boolean[HandGround.TILES * 2][HandGround.TILES * 2];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            props.waterSurface().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
+                HandGround.TILES, visible, false, 0);
+        }
+    }
+
+    /**
+     * A bare patch of ground under the same fade as the dock at the horizon.
+     *
+     * The dock carries water, and water is added to a corner after the distance has had its say.
+     * This one carries none, so a fade against the far edge that comes out wrong here is wrong
+     * for the ground itself rather than for what the water does to it.
+     */
+    record BareHorizon() implements Scene {
+
+        /** What the distance fades everything towards, and how far away the fade is complete. */
+        private static final int FADES_TOWARDS = 0xC8C0A8;
+        private static final int FADE_COMPLETE_AT = 280;
+
+        /** A far edge that cuts through the patch rather than standing beyond it. */
+        private static final int FAR = 4000;
+
+        /**
+         * Three thousand of its pixels are a single count out and none is out by more than that.
+         * A fade worked out over a few hundredths of the depth leaves the count of a corner's
+         * colour resting a step either side of where the shipped toolkit leaves it, which is the
+         * rounding every other patch here is out by and no more of it.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.L(FADES_TOWARDS, FADE_COMPLETE_AT, 0);
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, FAR);
+
+            var camera = toolkit.createMatrix();
+            camera.createCamera(HandGround.TILES * HandGround.TILE / 2, Terrain.UP,
+                -Terrain.BACK, TURN / 8, 0, 0);
+            toolkit.setCamera(camera);
+
+            var visible = new boolean[HandGround.TILES * 2][HandGround.TILES * 2];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            props.ground().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
+                HandGround.TILES, visible, false, 0);
         }
     }
 
