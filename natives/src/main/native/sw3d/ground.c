@@ -874,23 +874,34 @@ static void wateredTileHandedOver(int waterColour, const int *colours, const int
     static int said;
     enum { SAY_AT_MOST = 4 };
 
-    static int saidDry;
+    enum { KINDS = 10 };
+    static int seen[KINDS];
+    static int count;
 
     if (!listening || corners < 3 || colours == NULL) {
         return;
     }
 
-    if (waterColour == 0) {
-        if (saidDry >= SAY_AT_MOST) {
+    /*
+     * One line for each texture the ground wears rather than for the first few tiles, because the
+     * first few are all the same piece of ground and say nothing about how one kind of tile
+     * differs from another.
+     */
+    int worn = texture == NULL ? -1 : (int) texture[0];
+    for (int at = 0; at < count; at++) {
+        if (seen[at] == worn) {
             return;
         }
-        saidDry++;
-    } else {
-        if (said >= SAY_AT_MOST) {
-            return;
-        }
-        said++;
     }
+
+    if (count >= KINDS) {
+        return;
+    }
+
+    seen[count] = worn;
+    count++;
+    (void) said;
+    (void) SAY_AT_MOST;
 
     fprintf(stderr, "sw3d water: a %s tile is handed colours %08x %08x %08x,"
             " laid over %08x %08x %08x, wearing %d\n",
