@@ -106,6 +106,7 @@ public sealed interface Scene {
         new FoggedDock(),
         new WaterOverNoBed(),
         new OverlaidWaterDock(),
+        new GroundPastTheEdge(),
         new BlendedGround(),
         new Stairs(),
         new Priorities(),
@@ -1960,6 +1961,50 @@ public sealed interface Scene {
         public void draw(Toolkit toolkit, Props props) {
             new WateredDock().drawInto(toolkit, props, props.overlaidWaterSurface(),
                 Integer.MAX_VALUE);
+        }
+    }
+
+    /**
+     * The plain patch with the far edge of the world cutting through the middle of it.
+     *
+     * The client puts the far edge well inside the ground it draws, and the ground it lays under
+     * water lies below the ground over it, so the two cross that edge at different places. What
+     * becomes of a face reaching past it decides whether the bed under a stretch of water is
+     * drawn at all where the water over it still is.
+     */
+    record GroundPastTheEdge() implements Scene {
+
+        /**
+         * Six pixels along the very edge of the patch, where a face whose corners lie past the
+         * far edge of the world lands a pixel one way or the other between the two toolkits.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        /** A far edge that cuts through the patch rather than standing beyond it. */
+        private static final int CUTS_THROUGH = 4000;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, CUTS_THROUGH);
+
+            var camera = toolkit.createMatrix();
+            camera.createCamera(HandGround.TILES * HandGround.TILE / 2, Terrain.UP,
+                -Terrain.BACK, TURN / 8, 0, 0);
+            toolkit.setCamera(camera);
+
+            var visible = new boolean[HandGround.TILES * 2][HandGround.TILES * 2];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            props.ground().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
+                HandGround.TILES, visible, false, 0);
         }
     }
 

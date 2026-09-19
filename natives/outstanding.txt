@@ -13,6 +13,7 @@ BlackBacked = 0, 0, 155
 BlendedGround = 0, 0, 3189
 CutGround = 0, 0, 12369
 FoggedDock = 0, 0, 11052
+GroundPastTheEdge = 1, 5, 0
 HollowPlan = 0, 0, 54
 OverlaidPlan = 16, 0, 207
 OverlaidWaterDock = 0, 0, 11727

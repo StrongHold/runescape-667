@@ -2306,7 +2306,15 @@ void renderGroundTile(const void *ground, int x, int z) {
 
         Projected *landed = &projected[corner];
         landed->depth = signedAs(point[2] / away, point[2]);
-        landed->visible = away >= view->near && away <= view->far;
+
+        /*
+         * A corner further off than the far edge of the world is still drawn. The toolkit this
+         * replaces throws a face away for falling outside the picture and for nothing else, and
+         * the client puts the far edge well inside the ground it draws: the bed under a stretch
+         * of water lies below the ground over it and reaches past that edge first, so dropping
+         * what reaches past it leaves water with nothing behind it.
+         */
+        landed->visible = away >= view->near;
         landed->away = away;
 
         /*
