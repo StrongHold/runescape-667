@@ -681,9 +681,13 @@ static void waterAsked(const char *what, int first, int second, int third, int f
  * belonged to something standing on the ground rather than to the ground itself.
  */
 static void waterCounted(const char *what, int tiles, int triangles, int standing) {
-    if (waterSaid(what, tiles, triangles, standing, 0)) {
+    int least = wateredHundredths(0);
+    int most = wateredHundredths(1);
+
+    if (waterSaid(what, tiles, triangles, standing, least * 1000 + most)) {
         fprintf(stderr, "sw3d water: %s: %d tiles given water, %d triangles through water,"
-                " %d of them standing on it\n", what, tiles, triangles, standing);
+                " %d of them standing on it, corners carried %d to %d hundredths of it\n",
+                what, tiles, triangles, standing, least, most);
     }
 }
 

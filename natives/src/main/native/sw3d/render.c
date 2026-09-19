@@ -148,6 +148,31 @@ static int tileRedly;
 /** How many tiles the client gave water to have been drawn. */
 static long wateredTiles;
 
+/**
+ * How much water the corners of those tiles actually carried, out of the whole.
+ *
+ * A tile the client gives water to and a tile whose water reaches it are not the same thing, and
+ * the difference is invisible from outside: a corner carrying none of it is drawn exactly as a
+ * corner with no water over it at all. These say whether the water the client handed over ever
+ * reached a pixel.
+ */
+static float leastUnder = 2.0f;
+static float mostUnder = -1.0f;
+
+static void underSeen(float under) {
+    if (under < leastUnder) {
+        leastUnder = under;
+    }
+    if (under > mostUnder) {
+        mostUnder = under;
+    }
+}
+
+int wateredHundredths(int most) {
+    float found = most ? mostUnder : leastUnder;
+    return found < 0.0f || found > 1.0f ? -1 : (int) (found * 100.0f + 0.5f);
+}
+
 /** Whether a tile of the ground is being drawn, rather than anything standing on it. */
 static int drawingTile;
 
@@ -157,6 +182,8 @@ long wateredTilesPainted(void) {
 
 void wateredTilesReset(void) {
     wateredTiles = 0;
+    leastUnder = 2.0f;
+    mostUnder = -1.0f;
 }
 
 static float fadeAt(const float *place, float x, float y, float z) {
@@ -2142,6 +2169,7 @@ void renderGroundTile(const void *ground, int x, int z) {
         int where[3];
         groundTileCorner(ground, tile, corner, tileSize, x, z, where, &shade[corner]);
         under[corner] = groundTileCornerUnder(tile, corner);
+        underSeen(under[corner]);
 
         float point[ROWS];
         for (int lane = 0; lane < ROWS; lane++) {

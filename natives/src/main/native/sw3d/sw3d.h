@@ -257,6 +257,8 @@ long throughWaterFilled(void);
 
 long throughWaterFilledStanding(void);
 
+int wateredHundredths(int most);
+
 void throughWaterReset(void);
 
 /** How many tiles the client gave water to have been drawn since the count was last cleared. */
