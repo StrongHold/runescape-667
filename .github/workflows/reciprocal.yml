@@ -1,0 +1,102 @@
+# Asks several processors what their approximate reciprocal answers, and compares each answer
+# with the one the frames in this repository were drawn with.
+#
+# The oracle the software toolkit is written against is a set of pictures, and those pictures were
+# drawn on an arm64 Mac running an x86_64 virtual machine under Rosetta. The instruction the
+# rasteriser divides by is only specified to within an error bound, so Rosetta is free to answer
+# differently from real hardware, and two makes of real hardware are free to disagree with each
+# other. If they do disagree, no hosted runner can redraw those pictures, and the pictures cannot
+# be checked anywhere but on the machine that drew them.
+#
+# Run this by hand from the Actions tab. It reports rather than fails, because a disagreement here
+# is a fact to design around and not a fault to fix.
+name: Approximate reciprocal
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ask:
+    name: ${{ matrix.runner }}
+    runs-on: ${{ matrix.runner }}
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        # Hosted runners are a mix of processor makes, and which one a job lands on is not chosen.
+        # Asking on several images samples more of that mix than asking on one.
+        runner: [ubuntu-latest, ubuntu-24.04, ubuntu-22.04, macos-13]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Say which processor answered
+        run: |
+          uname -m
+          if [ -r /proc/cpuinfo ]; then
+            grep -m1 'model name' /proc/cpuinfo
+            grep -m1 'vendor_id' /proc/cpuinfo
+          else
+            sysctl -n machdep.cpu.brand_string
+          fi
+
+      - name: Ask it
+        run: |
+          cc -O2 -o reciprocal natives/src/main/native/reciprocal/reciprocal.c -lm
+          ./reciprocal > answered.txt
+          wc -l answered.txt
+
+      - name: Compare with what the frames were drawn with
+        run: |
+          python3 - <<'PY'
+          drawn = open("natives/src/main/native/reciprocal/rosetta-x86_64.txt").read().split("\n")
+          here = open("answered.txt").read().split("\n")
+
+          if len(drawn) != len(here):
+              raise SystemExit("different number of answers: %d against %d" % (len(drawn), len(here)))
+
+          # Each line is the input and three answers, all as the bits of a float. Comparing the
+          # bits as whole numbers gives how many representable floats apart two answers are, which
+          # is the only useful measure of how far apart two approximations of the same thing are.
+          names = ["rcpss", "rcpps", "rsqrtss"]
+          worst = [0, 0, 0]
+          differing = [0, 0, 0]
+          examples = []
+
+          for line_drawn, line_here in zip(drawn, here):
+              if not line_drawn:
+                  continue
+              was = line_drawn.split()
+              now = line_here.split()
+              for answer in range(3):
+                  left = int(was[answer + 1], 16)
+                  right = int(now[answer + 1], 16)
+                  if left != right:
+                      differing[answer] += 1
+                      apart = abs(left - right)
+                      if apart > worst[answer]:
+                          worst[answer] = apart
+                      if len(examples) < 5:
+                          examples.append("  %s of %s: drawn with %s, answered %s"
+                                          % (names[answer], was[0], was[answer + 1], now[answer + 1]))
+
+          total = sum(differing)
+          print()
+          if total == 0:
+              print("Every answer is identical to the one the frames were drawn with.")
+          else:
+              print("%d of %d answers differ from the ones the frames were drawn with."
+                    % (total, 3 * (len(drawn) - 1)))
+              for answer in range(3):
+                  print("  %-8s %6d differ, worst %d floats apart"
+                        % (names[answer], differing[answer], worst[answer]))
+              print()
+              print("First few:")
+              for example in examples:
+                  print(example)
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: answers-${{ matrix.runner }}
+          path: answered.txt
