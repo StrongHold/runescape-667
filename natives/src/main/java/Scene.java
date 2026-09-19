@@ -1905,6 +1905,14 @@ public sealed interface Scene {
                 }
             }
 
+            /*
+             * A light picture under the water rather than the dark one every other scene is drawn
+             * over. The client draws a sky behind the world and never clears what is under the
+             * horizon, so water with no bed under it is drawn over something far lighter than a
+             * cleared picture, and how much of it shows decides how much that matters.
+             */
+            toolkit.fillRect(0, 0, WIDTH, HEIGHT, UNDER_THE_HORIZON);
+
             toolkit.ra(SURFACE, SEEN_THROUGH, REACH, BIAS);
             props.halfBed().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
                 HandGround.TILES, visible, true, 0);
@@ -1919,6 +1927,9 @@ public sealed interface Scene {
         private static final int SEEN_THROUGH = 0x182838;
         private static final int REACH = 40;
         private static final int BIAS = 127;
+
+        /** What the sky leaves behind the world, which is lighter than anything drawn over it. */
+        private static final int UNDER_THE_HORIZON = 0xFFCFCEC3;
     }
 
     /**
