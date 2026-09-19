@@ -1710,8 +1710,13 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
         landed->depth = signedAs(point[2] / away, point[2]);
         landed->fade = fadeAt(place, x, y, z);
 
-        /* A picture taken from no particular place has nothing behind it and nothing beyond. */
-        landed->visible = smaller >= 0 || (away >= view->near && away <= view->far);
+        /*
+         * A picture taken from no particular place has nothing behind it, and a point further off
+         * than the far edge of the world is drawn like any other. The toolkit this replaces keeps
+         * no edge for how far off a thing may be, and a model reaching past that edge is dropped
+         * a face at a time, which takes a bite out of anything big enough to straddle it.
+         */
+        landed->visible = smaller >= 0 || away >= view->near;
 
         if (landed->visible) {
             landed->x = point[0] / away + acrossFromClip;
