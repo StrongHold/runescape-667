@@ -370,13 +370,14 @@ static Corner cornerAt(const Projected *point, uint32_t colour) {
      * after the point the light is.
      */
     float away = fadedByDistance(point->depth);
+
     if (away > 0.0f) {
         uint32_t fogColour = distanceFog()->colour;
 
         for (int part = 0; part < CHANNELS; part++) {
             float towards = (float) ((fogColour >> (part * 8) & 0xFF) << 8);
-            corner.colour[part] =
-                (uint16_t) ((float) corner.colour[part] * (1.0f - away) + towards * away);
+            corner.colour[part] = (uint16_t) ((float) corner.colour[part] * (1.0f - away));
+            corner.water[part] = (uint16_t) ((float) corner.water[part] + towards * away);
         }
     }
 
@@ -2336,7 +2337,8 @@ void renderGroundTile(const void *ground, int x, int z) {
                 uint32_t towards = (waterOverTile >> (part * 8)) & 0xFF;
                 walked[corner].colour[part] =
                     (uint16_t) ((float) walked[corner].colour[part] * (1.0f - wet));
-                walked[corner].water[part] = (uint16_t) ((float) (towards << 8) * wet);
+                walked[corner].water[part] = (uint16_t) ((float) walked[corner].water[part]
+                    + (float) (towards << 8) * wet);
             }
         }
 

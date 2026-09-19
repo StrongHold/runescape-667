@@ -24,6 +24,16 @@ public sealed interface Scene {
     int HEIGHT = 384;
     int CLEAR_COLOUR = 0x202080;
 
+    /**
+     * What the distance fades everything towards before a scene asks for anything else, and the
+     * range that says it fades nothing.
+     *
+     * The client sets both before it draws, and a toolkit left to its own fade answers from a
+     * state neither of these was ever told about, so every scene is handed the same one.
+     */
+    int RESTING_FOG_COLOUR = 0x9BB2CC;
+    int NO_FADE = -1;
+
     /** The toolkit turns through this many steps of a circle. */
     int TURN = 16384;
 
@@ -93,6 +103,7 @@ public sealed interface Scene {
         new WateredPillar(),
         new WateredDock(),
         new SeenThroughDock(),
+        new FoggedDock(),
         new BlendedGround(),
         new Stairs(),
         new Priorities(),
@@ -1790,12 +1801,12 @@ public sealed interface Scene {
 
         @Override
         public void draw(Toolkit toolkit, Props props) {
-            drawInto(toolkit, props, props.surface());
+            drawInto(toolkit, props, props.surface(), Integer.MAX_VALUE);
         }
 
-        void drawInto(Toolkit toolkit, Props props, Ground surface) {
+        void drawInto(Toolkit toolkit, Props props, Ground surface, int far) {
             toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
-            toolkit.f(NEAR, Integer.MAX_VALUE);
+            toolkit.f(NEAR, far);
 
             var camera = toolkit.createMatrix();
             camera.createCamera(HandGround.TILES * HandGround.TILE / 2, Terrain.UP,
@@ -1851,7 +1862,44 @@ public sealed interface Scene {
 
         @Override
         public void draw(Toolkit toolkit, Props props) {
-            new WateredDock().drawInto(toolkit, props, props.waterSurface());
+            new WateredDock().drawInto(toolkit, props, props.waterSurface(), Integer.MAX_VALUE);
+        }
+    }
+
+    /**
+     * The see-through dock with the distance fading everything towards a colour.
+     *
+     * Nothing else here asks the toolkit for a fade at all, so what a face drawn through what is
+     * behind it comes to once the distance has had its say had never been drawn. The fade and the
+     * drawing through are worked out in an order, and one order darkens the water and the other
+     * does not.
+     */
+    record FoggedDock() implements Scene {
+
+        /** What the distance fades everything towards, and how far away the fade is complete. */
+        private static final int FADES_TOWARDS = 0xBCAE8E;
+        private static final int FADE_COMPLETE_AT = 3000;
+
+        /**
+         * The far edge of the world, which stands beyond both the patch and the fade, so that the
+         * fade is complete well before anything is cut off.
+         */
+        private static final int FAR = 6000;
+
+        /**
+         * Twenty one thousand of its pixels are out, all of them in the nearest band of the
+         * patch, where this comes out a shade darker than the shipped toolkit does. Everything
+         * further off than that band is exact.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.L(FADES_TOWARDS, FADE_COMPLETE_AT, 0);
+            new WateredDock().drawInto(toolkit, props, props.waterSurface(), FAR);
         }
     }
 
@@ -2429,16 +2477,6 @@ public sealed interface Scene {
             {30, 120, 100, 40, 900}
         };
 
-
-        /**
-         * What is left is sixty two pixels where the two toolkits carry a corner the last step
-         * towards the colour of the distance a shade differently. This is the only scene that
-         * stands anything far enough away for the fade to reach it.
-         */
-        @Override
-        public boolean written() {
-            return false;
-        }
 
         @Override
         public void draw(Toolkit toolkit, Props props) {

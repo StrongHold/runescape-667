@@ -542,6 +542,7 @@ static void fogFromHere(void) {
 
     float rest = 1.0f - fog.from;
     fog.overRest = rest == 0.0f ? 0.0f : 1.0f / rest;
+
 }
 
 JNIEXPORT void JNICALL Java_oa_L(JNIEnv *env, jobject self, jint colour, jint range, jint offset) {

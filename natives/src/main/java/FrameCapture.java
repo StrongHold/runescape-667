@@ -184,6 +184,7 @@ public final class FrameCapture {
          * afterwards, so that a scene is drawn the same whatever was drawn before it.
          */
         toolkit.setCamera(camera);
+        toolkit.L(Scene.RESTING_FOG_COLOUR, Scene.NO_FADE, 0);
         scene.draw(toolkit, props);
         toolkit.flip(0, 0);
         Thread.sleep(60);
