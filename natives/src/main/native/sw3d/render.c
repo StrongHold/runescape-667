@@ -2166,6 +2166,16 @@ void renderGroundTile(const void *ground, int x, int z) {
 
     tileAbove = !underwater()->under && switchedOff("SW3D_ABOVE_TILES");
 
+    /*
+     * The ground drawn once the eye is out of the water left out altogether, so that what the pass
+     * before it drew can be seen on its own. The bed and everything standing on it go down in that
+     * pass and the ground above covers them, and whether covering them is right is not a question
+     * the picture answers while both are drawn.
+     */
+    if (!underwater()->under && switchedOff("SW3D_NO_ABOVE_GROUND")) {
+        return;
+    }
+
     if (!groundTileWatered(tile)) {
         if (groundTileCarriesDepths(tile)) {
             driedTiles++;
