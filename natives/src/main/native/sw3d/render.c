@@ -2460,7 +2460,19 @@ void renderGroundTile(const void *ground, int x, int z) {
         }
 
         layTextureOnTile(ground, tile, face, tileSize, x, z, shadow, walked);
+
+        /*
+         * The ground laid down without asking how far away anything already there is, so that a
+         * stretch of it that came out bare can be told from one that lost every pixel to what was
+         * drawn before it.
+         */
+        int decided = distanceDecides;
+        if (switchedOff("SW3D_NO_GROUND_DEPTH")) {
+            distanceDecides = 0;
+        }
+
         fillTriangle(walked[0], walked[1], walked[2]);
+        distanceDecides = decided;
 
         if (pixelsLaid != laidBefore) {
             tally.drawn++;
