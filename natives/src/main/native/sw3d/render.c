@@ -160,6 +160,15 @@ static int tileAbove;
  */
 static int faceSeenThrough;
 
+/**
+ * Whether the tile being drawn is the bed under the water rather than the floor over it, painted
+ * so that where the bed reaches can be read off the picture.
+ *
+ * Water drawn over no bed at all is drawn through to whatever the sky left behind, which comes
+ * out far lighter than water over a bed and cannot be told from it by looking at the water.
+ */
+static int tileBeneath;
+
 /** How many tiles the client gave water to have been drawn. */
 static long wateredTiles;
 
@@ -933,11 +942,12 @@ static void fillSpan(int y, const Side *left, const Side *right) {
     uint32_t *row = raster.pixels + start;
     float *held = raster.depths + start;
 
-    int redly = faceBare || tileRedly || tileAbove || faceSeenThrough
+    int redly = faceBare || tileRedly || tileAbove || faceSeenThrough || tileBeneath
         || (wateredThroughout() && underwater()->under);
-    uint32_t painted = faceSeenThrough ? WHOLLY_GREEN
+    uint32_t painted = tileBeneath ? WHOLLY_RED
+        : (faceSeenThrough ? WHOLLY_GREEN
         : (tileAbove ? WHOLLY_PINK
-        : (faceBare ? WHOLLY_PINK : (tileRedly ? WHOLLY_GREEN : WHOLLY_RED)));
+        : (faceBare ? WHOLLY_PINK : (tileRedly ? WHOLLY_GREEN : WHOLLY_RED))));
 
     for (int x = from; x < to; x++) {
         if (!distanceDecides || depth <= held[x]) {
@@ -2256,6 +2266,8 @@ void renderGroundTile(const void *ground, int x, int z) {
      * one drawn under the water is meant to be seen through any of it. Laying it on both puts
      * water over the floor as well, which is a harbour drawn twice and the second time wrongly.
      */
+    tileBeneath = underwater()->under && switchedOff("SW3D_BED_PAINT");
+
     waterOverTile = underwater()->under ? (uint32_t) groundTileWaterColour(tile) : 0;
 
     float *under = calloc((size_t) corners, sizeof(float));
@@ -2376,6 +2388,7 @@ void renderGroundTile(const void *ground, int x, int z) {
     shadowTexels = NULL;
     tileRedly = 0;
     tileAbove = 0;
+    tileBeneath = 0;
     faceBare = 0;
     faceShows = WHOLLY_SOLID;
     faceSeenThrough = 0;
