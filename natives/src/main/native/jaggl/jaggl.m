@@ -433,6 +433,7 @@ JNIEXPORT jlong JNICALL Java_jaggl_OpenGL_prepareSurface(JNIEnv *env, jclass own
         return 0;
     }
 
+    JAGGLLOG("surface %p prepared, view %p", (void *) surface, surface->view);
     return (jlong) (intptr_t) surface;
 }
 
@@ -494,6 +495,9 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_releaseSurface(JNIEnv *env, jclass owne
         }
         [view removeFromSuperview];
     });
+
+    JAGGLLOG("surface %p released, view %p taken off the window", (void *) surface,
+            (__bridge void *) view);
 
     (*env)->DeleteGlobalRef(env, surface->canvas);
     free(surface);
