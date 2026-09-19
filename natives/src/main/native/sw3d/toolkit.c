@@ -878,6 +878,14 @@ static void clearedTo(uint32_t colour) {
     fprintf(stderr, "sw3d water: the client cleared the picture to %08x\n", colour);
 }
 
+/**
+ * Clears the picture to one colour.
+ *
+ * The clear is a rectangle over the whole picture laid down solid, and is cut to what may be
+ * drawn on like any other. The client narrows that to the part of the window the world is drawn
+ * in before it clears, so a clear that paid no attention to it painted over everything else the
+ * client had already put on the window.
+ */
 JNIEXPORT void JNICALL Java_oa_GA(JNIEnv *env, jobject self, jint colour) {
     (void) env;
     (void) self;
@@ -888,12 +896,7 @@ JNIEXPORT void JNICALL Java_oa_GA(JNIEnv *env, jobject self, jint colour) {
         return;
     }
 
-    size_t count = (size_t) raster.width * (size_t) raster.height;
-    uint32_t value = (uint32_t) colour;
-
-    for (size_t i = 0; i < count; i++) {
-        raster.pixels[i] = value;
-    }
+    fillRect(0, 0, raster.width, raster.height, (uint32_t) colour, BLEND_OPAQUE);
 }
 
 static PointLight lights[POINT_LIGHTS];

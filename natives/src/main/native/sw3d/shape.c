@@ -68,6 +68,10 @@ JNIEXPORT void JNICALL Java_oa_aa(JNIEnv *env, jobject self, jint x, jint y, jin
     (void) env;
     (void) self;
 
+    fillRect(x, y, width, height, (uint32_t) colour, mode);
+}
+
+void fillRect(int x, int y, int width, int height, uint32_t colour, int mode) {
     if (raster.clipLeft > x) {
         width -= raster.clipLeft - x;
         x = raster.clipLeft;
@@ -84,7 +88,7 @@ JNIEXPORT void JNICALL Java_oa_aa(JNIEnv *env, jobject self, jint x, jint y, jin
     }
 
     for (int row = 0; row < height; row++) {
-        horizontal(x, y + row, width, (uint32_t) colour, mode);
+        horizontal(x, y + row, width, colour, mode);
     }
 }
 

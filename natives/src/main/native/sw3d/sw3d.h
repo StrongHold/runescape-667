@@ -157,6 +157,11 @@ enum { OPAQUE = 0xFF000000u };
 uint32_t blend(uint32_t destination, uint32_t colour, int mode);
 
 /**
+ * Fills a rectangle, cut to what may be drawn on.
+ */
+void fillRect(int x, int y, int width, int height, uint32_t colour, int mode);
+
+/**
  * The colour a packed hue, saturation and lightness stands for.
  */
 uint32_t colourOf(int packed);
