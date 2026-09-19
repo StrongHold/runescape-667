@@ -175,6 +175,13 @@ static int tileBeneath;
  */
 static int faceTurned;
 
+/**
+ * How many pixels the filler has laid down, which is what says whether a face counted as drawn
+ * reached the picture at all. A face can pass every test put to it and still leave nothing
+ * behind, because every pixel of it was further off than what was already there.
+ */
+static long pixelsLaid;
+
 /** How many tiles the client gave water to have been drawn. */
 static long wateredTiles;
 
@@ -969,6 +976,7 @@ static void fillSpan(int y, const Side *left, const Side *right) {
 
     for (int x = from; x < to; x++) {
         if (!distanceDecides || depth <= held[x]) {
+            pixelsLaid++;
             int lane = x - group;
             float u = uBase + (float) lane * uStep;
             float v = vBase + (float) lane * vStep;
@@ -2171,10 +2179,11 @@ static struct {
     int turnedAway;
     int hollow;
     int drawn;
+    int blank;
 
     float nearest;
     float farthest;
-} tally = {0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0e30f, -1.0e30f};
+} tally = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0e30f, -1.0e30f};
 
 /**
  * The ground the running count belongs to.
@@ -2198,11 +2207,12 @@ static void tallied(const char *what) {
     if (what != NULL) {
         const Projection *view = projection();
         fprintf(stderr, "sw3d ground %p: %d asked, %d not held, %d faces, %d off (%d too near,"
-                " %d too far), %d turned away, %d hollow, %d drawn; away %.1f..%.1f,"
+                " %d too far), %d turned away, %d hollow, %d drawn, %d left nothing;"
+                " away %.1f..%.1f,"
                 " near %.1f far %.1f\n",
                 tallying,
                 tally.asked, tally.missing, tally.faces, tally.behindTheEye, tally.tooNear,
-                tally.tooFar, tally.turnedAway, tally.hollow, tally.drawn,
+                tally.tooFar, tally.turnedAway, tally.hollow, tally.drawn, tally.blank,
                 (double) tally.nearest, (double) tally.farthest,
                 (double) view->near, (double) view->far);
         fflush(stderr);
@@ -2416,7 +2426,7 @@ void renderGroundTile(const void *ground, int x, int z) {
             faceTurned = 1;
         }
 
-        tally.drawn++;
+        long laidBefore = pixelsLaid;
 
         Corner walked[3] = {
             cornerAt(a, shade[face * 3]),
@@ -2439,6 +2449,12 @@ void renderGroundTile(const void *ground, int x, int z) {
 
         layTextureOnTile(ground, tile, face, tileSize, x, z, shadow, walked);
         fillTriangle(walked[0], walked[1], walked[2]);
+
+        if (pixelsLaid == laidBefore) {
+            tally.blank++;
+        } else {
+            tally.drawn++;
+        }
     }
 
     texels = NULL;
