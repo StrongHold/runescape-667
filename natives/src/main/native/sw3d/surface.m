@@ -56,7 +56,7 @@ static const int BYTES_PER_PIXEL = 4;
 
 __attribute__((format(printf, 1, 2)))
 static void trace(const char *format, ...) {
-    if (getenv("SW3D_VERBOSE") == NULL) {
+    if (!switchedOff("SW3D_VERBOSE")) {
         return;
     }
 
@@ -301,9 +301,13 @@ void surfaceFree(Surface *surface) {
     CALayer *layer = (__bridge_transfer CALayer *) surface->layer;
     surface->layer = NULL;
 
+    trace("surface freed, layer=%p", (__bridge void *) layer);
+
     if (layer != nil) {
         onTheMainThread(^{
             [layer removeFromSuperlayer];
+            trace("layer taken off the canvas, superlayer now %p",
+                    (__bridge void *) layer.superlayer);
         });
     }
 
