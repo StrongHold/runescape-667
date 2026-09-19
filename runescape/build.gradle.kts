@@ -32,7 +32,7 @@ tasks.run.configure {
 /**
  * The jar this source was recovered from, unpacked so that single classes can be read out of it.
  */
-val unpackOriginal by tasks.registering(Copy::class) {
+val unpackOriginal = tasks.register<Copy>("unpackOriginal") {
     description = "Unpacks the jar this source was recovered from."
     from(zipTree(layout.projectDirectory.file("../lib/runescape.jar")))
     into(layout.buildDirectory.dir("original"))
@@ -49,7 +49,7 @@ val unpackOriginal by tasks.registering(Copy::class) {
  * Pass `-Pfidelity=Terrain,Rasterizer` to check named classes. The default is every class whose
  * original is still in the jar, which takes a while.
  */
-val verifyFidelity by tasks.registering(Exec::class) {
+val verifyFidelity = tasks.register<Exec>("verifyFidelity") {
     description = "Checks what the recompiled classes compute against the original jar."
     dependsOn(tasks.compileJava, unpackOriginal)
 

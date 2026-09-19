@@ -18,7 +18,7 @@ val x64JavaExecutable = jdkHome.file("bin/java").asFile.absolutePath
 val shimSource = layout.projectDirectory.file("src/main/native/jawtshim/jawtshim.m")
 val shimLibrary = layout.buildDirectory.file("natives/libjawtshim.dylib")
 
-val compileJawtShim by tasks.registering(Exec::class) {
+val compileJawtShim = tasks.register<Exec>("compileJawtShim") {
     description = "Builds the drawing surface the software toolkit gets instead of JavaVM.framework."
     dependsOn(":unpackX64Jdk")
     inputs.file(shimSource)
@@ -65,7 +65,7 @@ val shippedToolkit = providers.gradleProperty("sw3dLibrary")
     .orElse(providers.systemProperty("user.home").map { "$it/.jagex_cache_32/runescape/libsw3d.dylib" })
 val patchedToolkit = layout.buildDirectory.file("natives/libsw3d-patched.dylib")
 
-val patchToolkit by tasks.registering(Exec::class) {
+val patchToolkit = tasks.register<Exec>("patchToolkit") {
     description = "Copies the shipped software toolkit and points its JAWT import at the shim."
     dependsOn(compileJawtShim)
     outputs.file(patchedToolkit)
@@ -122,7 +122,7 @@ val sceneSettings = mapOf(
     "SW3D_NO_ABOVE_GROUND" to ""
 )
 
-val captureFrames by tasks.registering(JavaExec::class) {
+val captureFrames = tasks.register<JavaExec>("captureFrames") {
     description = "Renders a fixed scene through the software toolkit and writes each frame as a PNG."
     dependsOn(patchToolkit)
     mainClass = "FrameCapture"
@@ -159,7 +159,7 @@ val captureFrames by tasks.registering(JavaExec::class) {
  * onto whatever context it is handed, so anything the surface fails to reset accumulates and shows
  * up as the picture changing between frames of an unchanging scene.
  */
-val verifyToolkitLifetime by tasks.registering(JavaExec::class) {
+val verifyToolkitLifetime = tasks.register<JavaExec>("verifyToolkitLifetime") {
     description = "Builds and discards software toolkits to prove none is torn down by the collector."
     dependsOn(patchToolkit)
     mainClass = "ToolkitLifetime"
@@ -178,7 +178,7 @@ val verifyToolkitLifetime by tasks.registering(JavaExec::class) {
  * there without a word and comes up on the Java renderer instead, so a toolkit that cannot be
  * built a second time looks like the renderer being slow rather than like a fault.
  */
-val verifyOwnToolkitLifetime by tasks.registering(JavaExec::class) {
+val verifyOwnToolkitLifetime = tasks.register<JavaExec>("verifyOwnToolkitLifetime") {
     description = "Builds and discards our software toolkits to prove a second one can be made."
     dependsOn(compileSoftwareToolkit, ":unpackX64Jdk")
     mainClass = "ToolkitLifetime"
@@ -193,7 +193,7 @@ val verifyOwnToolkitLifetime by tasks.registering(JavaExec::class) {
  * What becomes of the window when the client stops drawing with one toolkit and starts with
  * another, which is what opening the world map does.
  */
-val verifyCanvasHandover by tasks.registering(JavaExec::class) {
+val verifyCanvasHandover = tasks.register<JavaExec>("verifyCanvasHandover") {
     description = "Hands the window from our software toolkit to the Java one and reads the screen."
     dependsOn(compileSoftwareToolkit, ":unpackX64Jdk")
     mainClass = "CanvasHandover"
@@ -214,7 +214,7 @@ val skeletonSource = layout.buildDirectory.file("generated/sw3d-skeleton.c")
  * The point is the surface rather than the behaviour. A skeleton that loads and resolves every
  * call proves the contract is complete and gives each real implementation somewhere to land.
  */
-val generateToolkitSkeleton by tasks.registering {
+val generateToolkitSkeleton = tasks.register("generateToolkitSkeleton") {
     description = "Writes a do-nothing implementation of every native the toolkit declares."
     dependsOn(":runescape:compileJava")
 
@@ -285,7 +285,7 @@ val skeletonLibrary = layout.buildDirectory.file("natives/libsw3d-skeleton.dylib
  * produces is drawn yet, so its value is that it loads and that every call the client makes
  * resolves.
  */
-val compileToolkitSkeleton by tasks.registering(Exec::class) {
+val compileToolkitSkeleton = tasks.register<Exec>("compileToolkitSkeleton") {
     description = "Builds the arm64 skeleton of the software toolkit."
     dependsOn(generateToolkitSkeleton, ":unpackX64Jdk")
     inputs.file(skeletonSource)
@@ -318,7 +318,7 @@ val compileToolkitSkeleton by tasks.registering(Exec::class) {
  * Runs on the machine's own architecture rather than the translated one, because the skeleton is
  * the arm64 implementation and the point is that it needs no translation.
  */
-val verifyToolkitSkeleton by tasks.registering(JavaExec::class) {
+val verifyToolkitSkeleton = tasks.register<JavaExec>("verifyToolkitSkeleton") {
     description = "Builds the software toolkit against the arm64 skeleton."
     dependsOn(compileToolkitSkeleton)
     mainClass = "ToolkitSkeleton"
@@ -338,7 +338,7 @@ val openGlReport = layout.buildDirectory.file("generated/jaggl-outstanding.txt")
  * the client build emits. What remains is the handful that marshals arrays or strings and the
  * platform calls that own the context, and those are written by hand.
  */
-val generateOpenGlBinding by tasks.registering {
+val generateOpenGlBinding = tasks.register("generateOpenGlBinding") {
     description = "Writes the mechanical part of the OpenGL binding from the client's JNI headers."
     dependsOn(":runescape:compileJava")
 
@@ -497,7 +497,7 @@ val openGlLibrary = layout.buildDirectory.file("natives/libjaggl.dylib")
  * The mechanical half is generated from the client's JNI headers and the platform half, which
  * owns the context and the layer that presents it, is written by hand beside it.
  */
-val compileOpenGlBinding by tasks.registering(Exec::class) {
+val compileOpenGlBinding = tasks.register<Exec>("compileOpenGlBinding") {
     description = "Builds the OpenGL binding."
     dependsOn(generateOpenGlBinding, ":unpackX64Jdk")
     inputs.file(openGlSource)
@@ -540,7 +540,7 @@ val shippedOpenGlBinding = providers.gradleProperty("jagglLibrary")
     .orElse(providers.systemProperty("user.home").map { "$it/.jagex_cache_32/runescape/libjaggl.dylib" })
 val patchedOpenGlBinding = layout.buildDirectory.file("natives/libjaggl-patched.dylib")
 
-val patchOpenGlBinding by tasks.registering(Exec::class) {
+val patchOpenGlBinding = tasks.register<Exec>("patchOpenGlBinding") {
     description = "Copies the shipped OpenGL binding and points its JNI import at the shim."
     dependsOn(compileJawtShim)
     outputs.file(patchedOpenGlBinding)
@@ -604,7 +604,7 @@ val captureOwnBinding = registerBindingCapture(
  * and cannot: the shipped one gives two where none are asked for. What is held here is that this
  * one draws with as many as it was asked for and can still be read back afterwards.
  */
-val verifyOpenGlSamples by tasks.registering(JavaExec::class) {
+val verifyOpenGlSamples = tasks.register<JavaExec>("verifyOpenGlSamples") {
     description = "Draws through the OpenGL binding at each sample count and reads the picture back."
     dependsOn(compileOpenGlBinding, ":unpackX64Jdk")
 
@@ -621,7 +621,7 @@ val verifyOpenGlSamples by tasks.registering(JavaExec::class) {
  * What a binding carries is held to being identical. What sort of context it built is not, and is
  * reported instead: the two do not build the same one, and `jaggl/README.md` says why.
  */
-val verifyOpenGlBinding by tasks.registering(JavaExec::class) {
+val verifyOpenGlBinding = tasks.register<JavaExec>("verifyOpenGlBinding") {
     description = "Checks our OpenGL binding against the shipped one, answer for answer."
     dependsOn(captureBinding, captureOwnBinding)
     mainClass = "AnswerCheck"
@@ -642,7 +642,7 @@ val memoryLibrary = layout.buildDirectory.file("natives/libjaclib.dylib")
  * The client's own JNI headers are on the include path and the source includes them, so a
  * signature that does not match the Java declaration fails the compile rather than the client.
  */
-val compileMemoryLibrary by tasks.registering(Exec::class) {
+val compileMemoryLibrary = tasks.register<Exec>("compileMemoryLibrary") {
     description = "Builds the native memory library the hardware toolkits allocate from."
     dependsOn(":unpackX64Jdk", ":runescape:compileJava")
 
@@ -673,7 +673,7 @@ val compileMemoryLibrary by tasks.registering(Exec::class) {
     }
 }
 
-val verifyMemoryLibrary by tasks.registering(JavaExec::class) {
+val verifyMemoryLibrary = tasks.register<JavaExec>("verifyMemoryLibrary") {
     description = "Allocates from the native memory library and forces it to compact."
     dependsOn(compileMemoryLibrary)
     mainClass = "MemoryHeap"
@@ -694,7 +694,7 @@ val shippedMemoryLibrary = providers.gradleProperty("jaclibLibrary")
     .orElse(providers.systemProperty("user.home").map { "$it/.jagex_cache_32/runescape/libjaclib.dylib" })
 val patchedMemoryLibrary = layout.buildDirectory.file("natives/libjaclib-patched.dylib")
 
-val patchMemoryLibrary by tasks.registering(Exec::class) {
+val patchMemoryLibrary = tasks.register<Exec>("patchMemoryLibrary") {
     description = "Copies the shipped memory library and points its JNI import at the shim."
     dependsOn(compileJawtShim)
     outputs.file(patchedMemoryLibrary)
@@ -721,7 +721,7 @@ val patchMemoryLibrary by tasks.registering(Exec::class) {
 val memoryAnswers = layout.buildDirectory.file("answers/memory-shipped.txt")
 val ownMemoryAnswers = layout.buildDirectory.file("answers/memory-ours.txt")
 
-val captureMemory by tasks.registering(JavaExec::class) {
+val captureMemory = tasks.register<JavaExec>("captureMemory") {
     description = "Records what the shipped memory library answers."
     dependsOn(patchMemoryLibrary)
 
@@ -736,7 +736,7 @@ val captureMemory by tasks.registering(JavaExec::class) {
     doFirst { written.parentFile.mkdirs() }
 }
 
-val captureOwnMemory by tasks.registering(JavaExec::class) {
+val captureOwnMemory = tasks.register<JavaExec>("captureOwnMemory") {
     description = "Records what our memory library answers."
     dependsOn(compileMemoryLibrary, ":unpackX64Jdk")
 
@@ -757,7 +757,7 @@ val captureOwnMemory by tasks.registering(JavaExec::class) {
  * Both are driven through the x86_64 virtual machine, because the shipped library has no slice
  * for anything else and the two have to be asked the same questions on the same machine.
  */
-val verifyMemoryAnswers by tasks.registering(JavaExec::class) {
+val verifyMemoryAnswers = tasks.register<JavaExec>("verifyMemoryAnswers") {
     description = "Checks our memory library against the shipped one, answer for answer."
     dependsOn(captureMemory, captureOwnMemory)
     mainClass = "AnswerCheck"
@@ -772,7 +772,7 @@ val verifyMemoryAnswers by tasks.registering(JavaExec::class) {
 val miscSource = layout.projectDirectory.file("src/main/native/jagmisc/jagmisc.c")
 val miscLibrary = layout.buildDirectory.file("natives/libjagmisc.dylib")
 
-val compileMiscLibrary by tasks.registering(Exec::class) {
+val compileMiscLibrary = tasks.register<Exec>("compileMiscLibrary") {
     description = "Builds the clock, the memory sizes and the ping the client asks jagmisc for."
     dependsOn(":unpackX64Jdk", ":runescape:compileJava")
 
@@ -809,7 +809,7 @@ val compileMiscLibrary by tasks.registering(Exec::class) {
  * library here to measure against. Each answer is held against a second way of asking the machine
  * the same question instead.
  */
-val verifyMiscLibrary by tasks.registering(JavaExec::class) {
+val verifyMiscLibrary = tasks.register<JavaExec>("verifyMiscLibrary") {
     description = "Holds the clock, the memory sizes and the ping against what the machine says."
     dependsOn(compileMiscLibrary)
     mainClass = "Jagmisc"
@@ -818,7 +818,7 @@ val verifyMiscLibrary by tasks.registering(JavaExec::class) {
     args("--library", miscLibrary.get().asFile.absolutePath)
 }
 
-val listCacheLibraries by tasks.registering(JavaExec::class) {
+val listCacheLibraries = tasks.register<JavaExec>("listCacheLibraries") {
     description = "Lists the native libraries the cache holds, for every platform."
     mainClass = "CacheLibraries"
     classpath = sourceSets["main"].runtimeClasspath
@@ -832,7 +832,7 @@ val listCacheLibraries by tasks.registering(JavaExec::class) {
  * directory rather than beside the cache, because it is a copy taken for a look rather than one
  * the client is meant to load.
  */
-val extractCacheLibrary by tasks.registering(JavaExec::class) {
+val extractCacheLibrary = tasks.register<JavaExec>("extractCacheLibrary") {
     description = "Writes one named native library out of the cache."
     mainClass = "CacheLibrary"
     classpath = sourceSets["main"].runtimeClasspath
@@ -847,7 +847,7 @@ val toolkitTrace = layout.buildDirectory.file("generated/sw3d-trace.txt")
  * fail. What it leaves behind is the order the client asks for things in, which is the order they
  * are worth implementing in.
  */
-val traceToolkit by tasks.registering(JavaExec::class) {
+val traceToolkit = tasks.register<JavaExec>("traceToolkit") {
     description = "Records the natives a frame reaches, in the order the client asks for them."
     dependsOn(compileToolkitSkeleton)
     mainClass = "FrameCapture"
@@ -892,7 +892,7 @@ val toolkitOutstanding = layout.buildDirectory.file("generated/sw3d-outstanding.
  * Which natives are written is read from the sources rather than listed here, so the two cannot
  * drift apart.
  */
-val generateToolkitStubs by tasks.registering {
+val generateToolkitStubs = tasks.register("generateToolkitStubs") {
     description = "Stubs every toolkit native that is not written yet, and lists what is left."
     dependsOn(":runescape:compileJava")
 
@@ -990,7 +990,7 @@ val toolkitLibrary = layout.buildDirectory.file("natives/libsw3d.dylib")
  * The sources are listed when the task runs rather than when it is configured, so that adding a
  * file to the directory rebuilds rather than being silently left out of the link.
  */
-val compileSoftwareToolkit by tasks.registering(Exec::class) {
+val compileSoftwareToolkit = tasks.register<Exec>("compileSoftwareToolkit") {
     description = "Builds the software toolkit."
     dependsOn(generateToolkitStubs, ":unpackX64Jdk")
 
@@ -1059,7 +1059,7 @@ val ownFrames = layout.buildDirectory.dir("own-frames")
  * the processor for them, so the picture is the same on either architecture and a comparison
  * across the two measures the toolkit rather than the processor.
  */
-val captureOwnFrames by tasks.registering(JavaExec::class) {
+val captureOwnFrames = tasks.register<JavaExec>("captureOwnFrames") {
     description = "Renders the fixed scene through our own software toolkit."
     dependsOn(compileSoftwareToolkit)
     mainClass = "FrameCapture"
@@ -1093,7 +1093,7 @@ val captureOwnFrames by tasks.registering(JavaExec::class) {
  * itself is state left behind, and a scene that disagrees with the other side is a difference in
  * the rasteriser and nothing else.
  */
-val verifyToolkit by tasks.registering(JavaExec::class) {
+val verifyToolkit = tasks.register<JavaExec>("verifyToolkit") {
     description = "Checks our toolkit against the shipped one, scene by scene and pixel by pixel."
     dependsOn(captureFrames, captureOwnFrames)
     mainClass = "FrameCheck"
@@ -1117,7 +1117,7 @@ val goldenFrames = layout.projectDirectory.dir("goldens")
  * machine but one that has already run the client. Run this when a scene is added or when a change
  * to the harness moves what the shipped toolkit draws, and read the change as pictures.
  */
-val updateGoldens by tasks.registering(JavaExec::class) {
+val updateGoldens = tasks.register<JavaExec>("updateGoldens") {
     description = "Keeps one frame per scene from the shipped toolkit."
     dependsOn(captureFrames)
     mainClass = "GoldenFrames"
@@ -1136,7 +1136,7 @@ val updateGoldens by tasks.registering(JavaExec::class) {
  * machine. It measures the same thing verifyToolkit does and holds the same record, so a scene
  * that is allowed to be a certain distance out is allowed the same distance here.
  */
-val verifyGoldens by tasks.registering(JavaExec::class) {
+val verifyGoldens = tasks.register<JavaExec>("verifyGoldens") {
     description = "Checks our toolkit against the frames kept in the repository."
     dependsOn(captureOwnFrames)
     mainClass = "FrameCheck"
@@ -1222,7 +1222,7 @@ fun registerProbe(name: String, probe: String, what: String): TaskProvider<JavaE
  * find, so it cannot be driven and there is no answer to compare against. What can be checked
  * is that it agrees with the two written natives that do the same thing in two steps.
  */
-val verifySpriteLift by tasks.registering(JavaExec::class) {
+val verifySpriteLift = tasks.register<JavaExec>("verifySpriteLift") {
     description = "Checks a sprite lifted straight out of the buffer against the same in two steps."
     dependsOn(compileSoftwareToolkit, ":unpackX64Jdk")
     mainClass = "SpriteLiftCheck"
@@ -1246,7 +1246,7 @@ val verifyModels = registerProbe("models", "ModelProbe", "model answers")
  * built against the window server, and it needs the x86_64 virtual machine that library was built
  * for.
  */
-val verifyNatives by tasks.registering {
+val verifyNatives = tasks.register("verifyNatives") {
     group = "verification"
     description = "Runs every check the toolkit is held to against the shipped library."
     dependsOn(
@@ -1269,32 +1269,32 @@ val verifyNatives by tasks.registering {
  * Lists what the map says stands on one tile, so that a place the client draws wrongly can be
  * turned into the models standing there.
  */
-val listTerrain by tasks.registering(JavaExec::class) {
+val listTerrain = tasks.register<JavaExec>("listTerrain") {
     description = "Says what the map is made of on one tile."
     mainClass = "CacheTerrain"
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-val keepModels by tasks.registering(JavaExec::class) {
+val keepModels = tasks.register<JavaExec>("keepModels") {
     description = "Writes the models the scenes are drawn with beside the source."
     mainClass = "CacheModel"
     classpath = sourceSets["main"].runtimeClasspath
     args("--keep", layout.projectDirectory.dir("models").asFile.absolutePath)
 }
 
-val describeModel by tasks.registering(JavaExec::class) {
+val describeModel = tasks.register<JavaExec>("describeModel") {
     description = "Says what one model out of the cache is made of."
     mainClass = "CacheModel"
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-val listLocType by tasks.registering(JavaExec::class) {
+val listLocType = tasks.register<JavaExec>("listLocType") {
     description = "Lists the models one kind of location is built from."
     mainClass = "CacheLocType"
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-val listLocations by tasks.registering(JavaExec::class) {
+val listLocations = tasks.register<JavaExec>("listLocations") {
     description = "Lists the locations standing on one tile of the world."
     mainClass = "CacheLocations"
     classpath = sourceSets["main"].runtimeClasspath

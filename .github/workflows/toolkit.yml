@@ -30,8 +30,10 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+      # Deprecations fail the build rather than printing, so that a warning is dealt with when it
+      # appears rather than after a Gradle upgrade has turned it into a broken build.
       - name: Draw them and check them
-        run: ./gradlew :natives:verifyGoldens --no-daemon
+        run: ./gradlew :natives:verifyGoldens --no-daemon --warning-mode fail
 
       - name: Keep what differed
         if: failure()

@@ -57,14 +57,14 @@ abstract class DownloadVerified : DefaultTask() {
     }
 }
 
-val downloadX64Jdk by tasks.registering(DownloadVerified::class) {
+val downloadX64Jdk = tasks.register<DownloadVerified>("downloadX64Jdk") {
     description = "Downloads the x86_64 JDK the macOS software toolkit needs."
     url = x64JdkUrl
     sha256 = x64JdkSha256
     target = x64JdkDir.file(x64JdkUrl.substringAfterLast('/'))
 }
 
-val unpackX64Jdk by tasks.registering(Exec::class) {
+val unpackX64Jdk = tasks.register<Exec>("unpackX64Jdk") {
     description = "Unpacks the x86_64 JDK into .gradle/jdk-x64/unpacked."
     val archive = downloadX64Jdk.flatMap(DownloadVerified::target)
     val into = x64JdkDir.dir("unpacked")
