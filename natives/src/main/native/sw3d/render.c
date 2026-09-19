@@ -2193,7 +2193,10 @@ static struct {
 
     float nearest;
     float farthest;
-} tally = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0e30f, -1.0e30f};
+
+    /** How far off the furthest face that reached the picture was. */
+    float laidFurthest;
+} tally = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0e30f, -1.0e30f, -1.0e30f};
 
 /**
  * The ground the running count belongs to.
@@ -2218,18 +2221,19 @@ static void tallied(const char *what) {
         const Projection *view = projection();
         fprintf(stderr, "sw3d ground %p: %d asked, %d not held, %d faces, %d off (%d too near,"
                 " %d too far), %d turned away, %d hollow, %d drawn, %d off the picture,"
-                " %d behind what was there; away %.1f..%.1f,"
+                " %d behind what was there; away %.1f..%.1f, furthest laid %.1f,"
                 " near %.1f far %.1f\n",
                 tallying,
                 tally.asked, tally.missing, tally.faces, tally.behindTheEye, tally.tooNear,
                 tally.tooFar, tally.turnedAway, tally.hollow, tally.drawn, tally.offPicture,
                 tally.behind,
-                (double) tally.nearest, (double) tally.farthest,
+                (double) tally.nearest, (double) tally.farthest, (double) tally.laidFurthest,
                 (double) view->near, (double) view->far);
         fflush(stderr);
         tally = (typeof(tally)) {0};
         tally.nearest = 1.0e30f;
         tally.farthest = -1.0e30f;
+        tally.laidFurthest = -1.0e30f;
         return;
     }
 
@@ -2476,6 +2480,14 @@ void renderGroundTile(const void *ground, int x, int z) {
 
         if (pixelsLaid != laidBefore) {
             tally.drawn++;
+
+            float reached = a->away > b->away ? a->away : b->away;
+            if (c->away > reached) {
+                reached = c->away;
+            }
+            if (reached > tally.laidFurthest) {
+                tally.laidFurthest = reached;
+            }
         } else if (pixelsTried == triedBefore) {
             tally.offPicture++;
         } else {
