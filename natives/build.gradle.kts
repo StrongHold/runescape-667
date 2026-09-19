@@ -137,6 +137,14 @@ val captureFrames by tasks.registering(JavaExec::class) {
         inputs.property(name, held)
     }
     args(patchedToolkit.get().asFile.absolutePath)
+
+    /*
+     * The scenes are part of what this draws, so a change to them has to draw them again. Without
+     * this the shipped side stays as it was while ours is drawn afresh, and the two are then
+     * compared across a change neither of them made.
+     */
+    inputs.files(sourceSets["main"].runtimeClasspath)
+    inputs.file(patchedToolkit)
     outputs.dir(frames)
 
     doFirst {

@@ -154,7 +154,8 @@ public final class FrameCapture {
             toolkit.createModel(DoubledMesh.INSTANCE.build(), FUNCTIONS, FEATURES,
                 AMBIENT, CONTRAST),
             HandGround.buildShadowedRepeat(toolkit, shadow),
-            HandGround.buildWatered(toolkit));
+            HandGround.buildWatered(toolkit),
+            HandGround.buildSurface(toolkit));
 
         var manifest = new ArrayList<String>();
 

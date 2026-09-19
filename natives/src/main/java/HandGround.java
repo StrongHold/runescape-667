@@ -292,6 +292,61 @@ public final class HandGround {
     }
 
     /**
+     * How far above the bed the surface of the water is laid.
+     *
+     * The client keeps the bed and the surface as two grounds and draws one in each pass: the bed
+     * far below with the water on it, and the surface above with none. A height is counted
+     * downwards, so the surface stands at a smaller number than the bed does.
+     */
+    private static final int ABOVE_THE_BED = 8 - number("SW3D_WATER_DEEPEST", 700);
+
+    /**
+     * The surface of the water, which is the ground the client draws once the eye is out of it.
+     *
+     * It carries no water of its own. It is a plain textured patch laid flat over the bed, and
+     * everything between the two is drawn before it and then covered by it.
+     */
+    public static Ground buildSurface(Toolkit toolkit) {
+        var heights = new int[TILES + 1][TILES + 1];
+        for (var x = 0; x <= TILES; x++) {
+            for (var z = 0; z <= TILES; z++) {
+                heights[x][z] = ABOVE_THE_BED;
+            }
+        }
+
+        var ground = toolkit.createGround(TILES, TILES, heights, heights,
+            GROUND_FLAGS, FEATURE_FLAGS);
+
+        for (var x = 0; x < TILES; x++) {
+            for (var z = 0; z < TILES; z++) {
+                addSurfaceTile(ground, x, z);
+            }
+        }
+
+        ground.YA();
+        return ground;
+    }
+
+    private static void addSurfaceTile(Ground ground, int x, int z) {
+        var offsetX = new int[] {0, TILE, TILE, 0};
+        var offsetY = new int[] {0, 0, TILE, TILE};
+        var faceA = new int[] {0, 0};
+        var faceB = new int[] {2, 3};
+        var faceC = new int[] {1, 2};
+
+        var colours = new int[FLAT_FACES];
+        for (var face = 0; face < FLAT_FACES; face++) {
+            colours[face] = hslOf(x, z, face);
+        }
+
+        var textures = new int[] {TEXTURED_WITH, TEXTURED_WITH};
+        var sizes = new int[] {TILE, TILE};
+
+        ground.addTile(x, z, offsetX, null, offsetY, null, faceA, faceB, faceC,
+            colours, colours.clone(), textures, sizes, 0, 0, 0);
+    }
+
+    /**
      * What the client hands a tile over carrying for the water on it, read off the running client
      * at a dock rather than made up: a colour, how far down the water lets anything be seen, and
      * a number the toolkit has never read.

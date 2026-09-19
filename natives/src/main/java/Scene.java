@@ -98,7 +98,8 @@ public sealed interface Scene {
         new DoubledFaces(),
         new OnTheGround(),
         new BlackBacked(),
-        new NearAndFar()
+        new NearAndFar(),
+        new WateredDock()
     );
 
     /**
@@ -111,7 +112,7 @@ public sealed interface Scene {
                  Model roundPoint, Model rock, Model seenThrough, Ground overlaid, Ground hollow,
                  Ground shadowed, Ground blended, Model stairs, Model priorities,
                  Model billboards, Mesh located, Mesh blackBacked, Model doubled,
-                 Ground shadowedRepeat, Ground watered) {
+                 Ground shadowedRepeat, Ground watered, Ground surface) {
         /* empty */
     }
 
@@ -1646,6 +1647,20 @@ public sealed interface Scene {
          * is further off still, so it is not that the sizes are read and it is not that they are
          * ignored.
          */
+        /**
+         * It is drawn last of all, because the scene after it comes out differently for having
+         * been drawn after this one. Which of the two toolkits carries something out of it is not
+         * yet known.
+         *
+         * Sixty one thousand of its pixels are out and the worst is a hundred and ninety four,
+         * and the second ground is what does it: draw the bed and what stands in it and stop
+         * there, and the worst pixel is six. Lay the surface over them and the two toolkits part
+         * company across the whole patch, the shipped one showing what stands in the water where
+         * this one shows what is behind it.
+         *
+         * That is the dock, and it is the only scene here that can ask it. Every other one draws
+         * a single patch.
+         */
         @Override
         public boolean written() {
             return false;
@@ -1748,6 +1763,88 @@ public sealed interface Scene {
     }
 
     /**
+     * The dock, built the way the client builds one.
+     *
+     * The client keeps two grounds over water and draws one in each pass: the bed with the water
+     * on it while the eye is under it, and the surface above with none once the eye is out. What
+     * stands in the water goes down with the bed, in the pass before the surface is drawn, and the
+     * surface is then laid over the lot of it.
+     *
+     * Nothing else here has two grounds. Every other scene draws one patch, so none of them can
+     * ask the question a dock asks: whether what was drawn under the surface can still be seen
+     * once the surface is down.
+     */
+    record WateredDock() implements Scene {
+
+        /** What the client hands over for the water at a dock. */
+        private static final int SURFACE = -1;
+        private static final int SEEN_THROUGH = 0x182838;
+        private static final int REACH = 40;
+        private static final int BIAS = 127;
+
+        /** How many things stand in the water, and how far apart they are put along the patch. */
+        private static final int STANDING = 4;
+
+        /** How far below the surface of the water the deepest of them reaches. */
+        private static final int SUNK = 180;
+
+        /**
+         * It is drawn last of all, because the scene after it comes out differently for having
+         * been drawn after this one. Which of the two toolkits carries something out of it is not
+         * yet known.
+         *
+         * Sixty one thousand of its pixels are out and the worst is a hundred and ninety four,
+         * and the second ground is what does it: draw the bed and what stands in it and stop
+         * there, and the worst pixel is six. Lay the surface over them and the two toolkits part
+         * company across the whole patch, the shipped one showing what stands in the water where
+         * this one shows what is behind it.
+         *
+         * That is the dock, and it is the only scene here that can ask it. Every other one draws
+         * a single patch.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            var camera = toolkit.createMatrix();
+            camera.createCamera(HandGround.TILES * HandGround.TILE / 2, Terrain.UP,
+                -Terrain.BACK, TURN / 8, 0, 0);
+            toolkit.setCamera(camera);
+
+            var visible = new boolean[HandGround.TILES * 2][HandGround.TILES * 2];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            toolkit.ra(SURFACE, SEEN_THROUGH, REACH, BIAS);
+
+            props.watered().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
+                HandGround.TILES, visible, true, 0);
+
+            for (var step = 0; step < STANDING; step++) {
+                props.matrix().makeRotationZ(0);
+                props.matrix().translate(HandGround.TILES * HandGround.TILE / 2,
+                    SUNK * step,
+                    step * HandGround.TILES * HandGround.TILE / (STANDING - 1));
+                props.model().render(props.matrix(), null, 1);
+            }
+
+            toolkit.pa();
+
+            props.surface().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
+                HandGround.TILES, visible, false, 0);
+        }
+    }
+
+    /**
      * A patch of ground whose tiles are cut into four about a corner in the middle of each.
      *
      * The client cuts a tile up wherever one kind of ground meets another, and a corner of a face
@@ -1827,6 +1924,20 @@ public sealed interface Scene {
          * the blend is made with, which say how far into its tile a corner stands. Those are the
          * next thing to read, and the only thing left that the blend is made of.
          */
+        /**
+         * It is drawn last of all, because the scene after it comes out differently for having
+         * been drawn after this one. Which of the two toolkits carries something out of it is not
+         * yet known.
+         *
+         * Sixty one thousand of its pixels are out and the worst is a hundred and ninety four,
+         * and the second ground is what does it: draw the bed and what stands in it and stop
+         * there, and the worst pixel is six. Lay the surface over them and the two toolkits part
+         * company across the whole patch, the shipped one showing what stands in the water where
+         * this one shows what is behind it.
+         *
+         * That is the dock, and it is the only scene here that can ask it. Every other one draws
+         * a single patch.
+         */
         @Override
         public boolean written() {
             return false;
@@ -1888,6 +1999,20 @@ public sealed interface Scene {
          * right while the red and blue are out in both directions. Green being the channel a
          * grass texture varies least in, that is a texel being chosen wrongly rather than a
          * colour being mixed wrongly, and it happens where a step lands nearest a boundary.
+         */
+        /**
+         * It is drawn last of all, because the scene after it comes out differently for having
+         * been drawn after this one. Which of the two toolkits carries something out of it is not
+         * yet known.
+         *
+         * Sixty one thousand of its pixels are out and the worst is a hundred and ninety four,
+         * and the second ground is what does it: draw the bed and what stands in it and stop
+         * there, and the worst pixel is six. Lay the surface over them and the two toolkits part
+         * company across the whole patch, the shipped one showing what stands in the water where
+         * this one shows what is behind it.
+         *
+         * That is the dock, and it is the only scene here that can ask it. Every other one draws
+         * a single patch.
          */
         @Override
         public boolean written() {
