@@ -25,6 +25,9 @@
 /** A colour has a blue, a green, a red and an alpha part, in the order they sit in a pixel. */
 enum { CHANNELS = 4, ALPHA = 3 };
 
+/** How many pixels of a span the toolkit walks at once. */
+enum { GROUP = 4 };
+
 /**
  * The blend mode a texture names when it carries an alpha of its own, rather than leaving how
  * much of a face shows to the face.
@@ -931,6 +934,24 @@ static void fillSpan(int y, const Side *left, const Side *right) {
     float vBase = left->v + (float) skipped * vStep - (float) (from - group) * vStep;
     float wBase = left->w + (float) skipped * wStep - (float) (from - group) * wStep;
 
+    /*
+     * Where each of the four pixels of a group stands, kept one for each rather than worked out
+     * from where the group begins. The toolkit walks four at a time and carries all four along
+     * together, so the place a pixel is reckoned to be is its own place moved on by four steps as
+     * many times as there have been groups, not the group's place with its own offset added back
+     * on at the end. The two are the same sum in a different order, and a place on a texture is
+     * cut to a whole number, so the order decides which texel a pixel near an edge reads.
+     */
+    float uLane[GROUP];
+    float vLane[GROUP];
+    float wLane[GROUP];
+
+    for (int lane = 0; lane < GROUP; lane++) {
+        uLane[lane] = uBase + (float) lane * uStep;
+        vLane[lane] = vBase + (float) lane * vStep;
+        wLane[lane] = wBase + (float) lane * wStep;
+    }
+
     uint16_t colour[CHANNELS];
     int16_t colourStep[CHANNELS];
 
@@ -970,9 +991,9 @@ static void fillSpan(int y, const Side *left, const Side *right) {
         if (!distanceDecides || depth <= held[x]) {
             pixelsLaid++;
             int lane = x - group;
-            float u = uBase + (float) lane * uStep;
-            float v = vBase + (float) lane * vStep;
-            float w = wBase + (float) lane * wStep;
+            float u = uLane[lane];
+            float v = vLane[lane];
+            float w = wLane[lane];
 
             uint32_t worn[CHANNELS];
             int covers = 1;
@@ -1078,11 +1099,13 @@ static void fillSpan(int y, const Side *left, const Side *right) {
             water[part] = (uint16_t) (water[part] + waterStep[part]);
         }
 
-        if (x - group == 3) {
-            group += 4;
-            uBase += 4.0f * uStep;
-            vBase += 4.0f * vStep;
-            wBase += 4.0f * wStep;
+        if (x - group == GROUP - 1) {
+            group += GROUP;
+            for (int lane = 0; lane < GROUP; lane++) {
+                uLane[lane] += (float) GROUP * uStep;
+                vLane[lane] += (float) GROUP * vStep;
+                wLane[lane] += (float) GROUP * wStep;
+            }
         }
         for (int part = 0; part < CHANNELS; part++) {
             colour[part] = (uint16_t) (colour[part] + colourStep[part]);
