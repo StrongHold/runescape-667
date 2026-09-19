@@ -11,9 +11,6 @@
 
 #include <math.h>
 
-#if defined(__SSE__) || defined(_M_X64)
-#include <xmmintrin.h>
-#endif
 
 #include "sw3d.h"
 
@@ -226,19 +223,7 @@ uint32_t sunlitColour(uint32_t unlit, const Normal *normal, float strength) {
  * about twelve bits, so the answer differs from a true one often enough to decide a colour.
  */
 static float reciprocalRoot(float value) {
-#if defined(__SSE__) || defined(_M_X64)
-    return _mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(value)));
-#else
-    return 1.0f / sqrtf(value);
-#endif
-}
-
-static float approximateReciprocal(float value) {
-#if defined(__SSE__) || defined(_M_X64)
-    return _mm_cvtss_f32(_mm_rcp_ss(_mm_set_ss(value)));
-#else
-    return 1.0f / value;
-#endif
+    return approximateInverseRoot(value);
 }
 
 /** The four bytes of a colour, in the order they sit in a pixel. */

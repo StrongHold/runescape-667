@@ -17,9 +17,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if defined(__SSE__) || defined(_M_X64)
-#include <xmmintrin.h>
-#endif
 
 #include <stdio.h>
 
@@ -54,11 +51,7 @@ enum { WHOLE_SHARE = 0xFFFF };
  * matter and has to be the same approximation.
  */
 static float reciprocal(float value) {
-#if defined(__SSE__) || defined(_M_X64)
-    return _mm_cvtss_f32(_mm_rcp_ss(_mm_set_ss(value)));
-#else
-    return 1.0f / value;
-#endif
+    return approximateReciprocal(value);
 }
 
 
@@ -3220,11 +3213,7 @@ enum { PARTICLE_BLEND = BLEND_ALPHA };
  * side of where an exact divide would put it often enough to matter.
  */
 static float roughReciprocal(float value) {
-#if defined(__SSE__) || defined(_M_X64)
-    return _mm_cvtss_f32(_mm_rcp_ss(_mm_set_ss(value)));
-#else
-    return 1.0f / value;
-#endif
+    return approximateReciprocal(value);
 }
 
 /** A float cut to a whole number the way the processor does it, to the nearest and ties to even. */

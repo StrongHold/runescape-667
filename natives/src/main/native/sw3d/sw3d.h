@@ -16,9 +16,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#if defined(__SSE__) || defined(_M_X64)
-#include <xmmintrin.h>
-#endif
+#include "reciprocal.h"
 
 /** The smallest number of rows or pixels a side is allowed to be divided by. */
 static const float LEAST = 1.0e-6f;
@@ -32,11 +30,7 @@ static const float LEAST = 1.0e-6f;
  * are walked by the same rasteriser the picture is, so they are divided the same way.
  */
 static inline float reciprocalOfFour(float value) {
-#if defined(__SSE__) || defined(_M_X64)
-    return _mm_cvtss_f32(_mm_rcp_ps(_mm_set1_ps(value)));
-#else
-    return 1.0f / value;
-#endif
+    return approximateReciprocal(value);
 }
 
 typedef struct Surface Surface;
