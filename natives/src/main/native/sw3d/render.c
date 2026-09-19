@@ -362,8 +362,6 @@ typedef struct {
     int16_t water[CHANNELS];
 } Side;
 
-static uint16_t fadedPart(uint16_t held, float fade, int part);
-
 /**
  * How much of the distance's own colour a corner this deep has taken on, where one is all of it.
  *
@@ -406,26 +404,27 @@ static Corner cornerAt(const Projected *point, uint32_t colour) {
      * The water is put on here rather than at every pixel. A corner is faded and the fade is then
      * carried across the face the same way the light is, which is what the toolkit this replaces
      * comes to, and it costs one pass over three corners instead of one over every pixel.
-     */
-    for (int part = 0; part < CHANNELS - 1; part++) {
-        corner.colour[part] = fadedPart(corner.colour[part], point->fade, part);
-    }
-
-    /*
-     * The distance takes a corner towards its own colour, which is held in the same eight places
-     * after the point the light is.
+     *
+     * The distance takes the corner towards its own colour on top of that, and the two are worked
+     * out at the width the light is kept at and cut to a colour once. Cutting after each of them
+     * in turn leaves the corner resting a count either side of where the shipped toolkit leaves
+     * it.
      */
     float away = fadedByDistance(point->depth);
+    corner.faded = away;
 
-    if (away > 0.0f) {
-        uint32_t fogColour = distanceFog()->colour;
-        corner.faded = away;
+    uint32_t fogColour = distanceFog()->colour;
+    const Underwater *water = underwater();
 
-        for (int part = 0; part < CHANNELS; part++) {
-            float towards = (float) ((fogColour >> (part * 8) & 0xFF) << 8);
-            corner.colour[part] = (uint16_t) ((float) corner.colour[part] * (1.0f - away));
-            corner.water[part] = (uint16_t) ((float) corner.water[part] + towards * away);
+    for (int part = 0; part < CHANNELS; part++) {
+        float standing = (float) corner.colour[part];
+
+        if (part < CHANNELS - 1 && point->fade > 0.0f) {
+            standing += (water->towards[part] - standing) * point->fade;
         }
+
+        corner.colour[part] = (uint16_t) (standing * (1.0f - away));
+        corner.water[part] = (uint16_t) ((float) ((fogColour >> (part * 8) & 0xFF) << 8) * away);
     }
 
     corner.u = 0.0f;
@@ -811,15 +810,6 @@ static void mixedTexel(const uint16_t *share, float u, float v, float w, uint32_
  * after the point the light is carried in, because cutting first and fading afterwards loses the
  * places that decide which way the answer rounds.
  */
-static uint16_t fadedPart(uint16_t held, float fade, int part) {
-    if (fade <= 0.0f) {
-        return held;
-    }
-
-    const Underwater *water = underwater();
-    return (uint16_t) ((float) held + (water->towards[part] - (float) held) * fade);
-}
-
 /**
  * Puts one pixel of a face over what is already there.
  *
@@ -2249,6 +2239,70 @@ static void tallied(const char *what) {
     }
 }
 
+/** What a corner's top byte is laid down at, kept at the width the light is. */
+enum { LEFT_WHOLLY_STANDING = 0xFF00 };
+
+/**
+ * A corner of a face of the ground, with the water standing over it and the distance both put on.
+ *
+ * The two are worked out at the width the light is kept at and the corner is cut to a colour once,
+ * at the end. Cutting it after each of them in turn leaves it resting a count either side of where
+ * the shipped toolkit leaves it over most of a watered patch.
+ *
+ * A face that wears nothing and stands in no shadow comes to a single colour, so the water and the
+ * distance are laid into it. A face that wears either cannot: a texture is laid over the light and
+ * a shadow darkens it, and neither is the water's to darken or the distance's, so those two are
+ * kept beside the colour and added once the pixel has been written.
+ */
+static Corner groundCornerAt(const Projected *point, uint32_t colour, float wet,
+                             uint32_t waterColour, int alone) {
+    Corner corner;
+    corner.mix[0] = 0;
+    corner.mix[1] = 0;
+    corner.x = point->x;
+    corner.y = point->y;
+    corner.depth = point->depth;
+    corner.u = 0.0f;
+    corner.v = 0.0f;
+    corner.w = 0.0f;
+
+    float away = fadedByDistance(point->depth);
+    corner.faded = away;
+
+    uint32_t fogColour = distanceFog()->colour;
+    float left = 1.0f - away;
+
+    for (int part = 0; part < CHANNELS; part++) {
+        float lit = (float) ((colour >> (part * 8) & 0xFF) << 8);
+        float fog = (float) ((fogColour >> (part * 8) & 0xFF) << 8);
+
+        /*
+         * The colour a face is laid down solid with carries nothing in its top byte, and the
+         * window pays no attention to that byte, but a surface the client later draws as a sprite
+         * does. Nothing of the water is put in it, which is what the toolkit this replaces comes
+         * to, and only the distance takes it anywhere.
+         */
+        if (part == CHANNELS - 1) {
+            corner.colour[part] = (uint16_t) ((float) LEFT_WHOLLY_STANDING * left);
+            corner.water[part] = (uint16_t) (fog * away);
+            continue;
+        }
+
+        float water = (float) ((waterColour >> (part * 8) & 0xFF) << 8);
+
+        if (alone) {
+            corner.colour[part] = (uint16_t) ((lit * (1.0f - wet) + water * wet) * left
+                + fog * away);
+            corner.water[part] = 0;
+        } else {
+            corner.colour[part] = (uint16_t) (lit * (1.0f - wet) * left);
+            corner.water[part] = (uint16_t) (fog * away + water * wet * left);
+        }
+    }
+
+    return corner;
+}
+
 /** How far before the far edge of the world the bed starts coming up to meet the water. */
 static const float LIFT_BEGINS_BEFORE_THE_EDGE = 2048.0f;
 
@@ -2510,24 +2564,13 @@ void renderGroundTile(const void *ground, int x, int z) {
         long laidBefore = pixelsLaid;
         long triedBefore = pixelsTried;
 
+        int alone = groundTileFaceTexture(tile, face) == -1 && shadow == NULL;
+
         Corner walked[3] = {
-            cornerAt(a, shade[face * 3]),
-            cornerAt(b, shade[face * 3 + 1]),
-            cornerAt(c, shade[face * 3 + 2])
+            groundCornerAt(a, shade[face * 3], under[face * 3], waterOverTile, alone),
+            groundCornerAt(b, shade[face * 3 + 1], under[face * 3 + 1], waterOverTile, alone),
+            groundCornerAt(c, shade[face * 3 + 2], under[face * 3 + 2], waterOverTile, alone)
         };
-
-        for (int corner = 0; corner < 3; corner++) {
-            float wet = under[face * 3 + corner];
-            float left = 1.0f - walked[corner].faded;
-
-            for (int part = 0; part < CHANNELS - 1; part++) {
-                uint32_t towards = (waterOverTile >> (part * 8)) & 0xFF;
-                walked[corner].colour[part] =
-                    (uint16_t) ((float) walked[corner].colour[part] * (1.0f - wet));
-                walked[corner].water[part] = (uint16_t) ((float) walked[corner].water[part]
-                    + (float) (towards << 8) * wet * left);
-            }
-        }
 
         layTextureOnTile(ground, tile, face, tileSize, x, z, shadow, walked);
 

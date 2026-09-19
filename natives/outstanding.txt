@@ -9,12 +9,12 @@
 # then out of date: bring it down, so that the ground it gained cannot be given back.
 #
 # scene = pixels only the shipped toolkit drew, pixels only we drew, pixels shaded differently
-BareHorizon = 1, 5, 3224
+BareHorizon = 1, 5, 21
 BedHorizon = 0, 0, 116
 BlackBacked = 0, 0, 155
 BlendedGround = 0, 0, 3189
 CutGround = 0, 0, 12369
-FoggedDock = 0, 0, 319
+FoggedDock = 0, 0, 166
 FoggedHorizon = 0, 0, 1167
 GlaringWater = 0, 0, 27
 GroundPastTheEdge = 1, 5, 0
