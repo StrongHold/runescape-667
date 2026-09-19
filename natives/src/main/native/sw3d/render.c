@@ -154,6 +154,12 @@ static int tileRedly;
  */
 static int tileAbove;
 
+/**
+ * Whether the face being drawn is one the water lets the player see through, painted so that the
+ * faces that are and the faces that are not can be told apart in the picture.
+ */
+static int faceSeenThrough;
+
 /** How many tiles the client gave water to have been drawn. */
 static long wateredTiles;
 
@@ -915,10 +921,11 @@ static void fillSpan(int y, const Side *left, const Side *right) {
     uint32_t *row = raster.pixels + start;
     float *held = raster.depths + start;
 
-    int redly = faceBare || tileRedly || tileAbove
+    int redly = faceBare || tileRedly || tileAbove || faceSeenThrough
         || (wateredThroughout() && underwater()->under);
-    uint32_t painted = tileAbove ? WHOLLY_PINK
-        : (faceBare ? WHOLLY_PINK : (tileRedly ? WHOLLY_GREEN : WHOLLY_RED));
+    uint32_t painted = faceSeenThrough ? WHOLLY_GREEN
+        : (tileAbove ? WHOLLY_PINK
+        : (faceBare ? WHOLLY_PINK : (tileRedly ? WHOLLY_GREEN : WHOLLY_RED)));
 
     for (int x = from; x < to; x++) {
         if (!distanceDecides || depth <= held[x]) {
@@ -1997,6 +2004,7 @@ static void layTextureOnTile(const void *ground, const void *tile, int face, int
     texelsSkipEmpty = 0;
     blended[0] = NULL;
     faceShows = WHOLLY_SOLID;
+    faceSeenThrough = 0;
 
     /*
      * Where the shadow over a tile is read is where the tile sits on its texture, so a bare face
@@ -2029,6 +2037,7 @@ static void layTextureOnTile(const void *ground, const void *tile, int face, int
      * either, which is what the alpha it carries already says.
      */
     faceShows = groundDrawsThrough(ground, wears);
+    faceSeenThrough = faceShows != 0 && switchedOff("SW3D_WATER_PAINT");
 
     if (switchedOff("SW3D_GROUND_UNTEXTURED")) {
         return;
@@ -2355,6 +2364,7 @@ void renderGroundTile(const void *ground, int x, int z) {
     tileAbove = 0;
     faceBare = 0;
     faceShows = WHOLLY_SOLID;
+    faceSeenThrough = 0;
     waterOverTile = 0;
     drawingTile = 0;
     free(under);
