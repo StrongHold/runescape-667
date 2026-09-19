@@ -259,6 +259,33 @@ static void onMainThreadAndWait(void (^work)(void)) {
  * A modern JDK hands out a layer rather than a view, so the view has to be found by the layer: the
  * window whose own layer is the one named is the window the canvas is in.
  */
+/**
+ * Every view this binding has put on a window and not taken off again.
+ *
+ * A view is a subview of the window rather than of the canvas, because a canvas on this platform
+ * is not a window of its own. Throwing the canvas away therefore leaves the view where it is,
+ * still showing the last frame drawn into it and still in front of everything drawn afterwards.
+ *
+ * The client releases a surface for each canvas it still holds and then releases the binding, and
+ * the two do not always agree about which canvases those are: a canvas dropped from its table on
+ * a resize is never released, and its view outlives every renderer that follows. So the views are
+ * kept here as well, and whatever is left when the binding goes is taken off the window.
+ */
+static NSMutableArray<NSView *> *attachedViews;
+
+static void rememberView(NSView *view) {
+    if (attachedViews == nil) {
+        attachedViews = [NSMutableArray array];
+    }
+    if (![attachedViews containsObject:view]) {
+        [attachedViews addObject:view];
+    }
+}
+
+static void forgetView(NSView *view) {
+    [attachedViews removeObject:view];
+}
+
 static NSView *windowView(id<JAWT_SurfaceLayers> layers) {
     __block NSView *found = nil;
     CALayer *windowLayer = layers.windowLayer;
@@ -335,6 +362,7 @@ static BOOL attach(JNIEnv *env, jobject canvas, Surface *surface) {
                          */
                         ours.wantsBestResolutionOpenGLSurface = NO;
                         [host addSubview:ours];
+                        rememberView(ours);
                         surface->view = (__bridge_retained void *) ours;
                     } else {
                         ours.frame = frame;
@@ -494,6 +522,7 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_releaseSurface(JNIEnv *env, jclass owne
             [drawingContext clearDrawable];
         }
         [view removeFromSuperview];
+        forgetView(view);
     });
 
     JAGGLLOG("surface %p released, view %p taken off the window", (void *) surface,
@@ -534,6 +563,14 @@ JNIEXPORT void JNICALL Java_jaggl_OpenGL_detachPeer(JNIEnv *env, jclass owner) {
 
 JNIEXPORT void JNICALL Java_jaggl_OpenGL_release(JNIEnv *env, jclass owner) {
     CGLSetCurrentContext(NULL);
+
+    onMainThreadAndWait(^{
+        for (NSView *view in attachedViews) {
+            JAGGLLOG("view %p was still on the window", (__bridge void *) view);
+            [view removeFromSuperview];
+        }
+        [attachedViews removeAllObjects];
+    });
 
     drawingContext = nil;
 
