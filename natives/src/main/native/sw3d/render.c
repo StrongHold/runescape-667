@@ -309,6 +309,16 @@ typedef struct {
      * part company, and the faster it changes the further apart they go.
      */
     uint16_t water[CHANNELS];
+
+    /**
+     * How much of the corner the distance took, which the water over a tile is left the rest of.
+     *
+     * The distance fades what a face comes to, water and all, so what the water puts on a corner
+     * is put on before the distance has its say and is left only what the distance did not take.
+     * Adding the two as though each had the whole of the corner carries a corner that is both
+     * deep and far past a whole colour, and what is written wraps.
+     */
+    float faded;
 } Corner;
 
 /** One side of a triangle, either where it has reached or how far it moves in a row. */
@@ -347,6 +357,7 @@ static Corner cornerAt(const Projected *point, uint32_t colour) {
     for (int part = 0; part < CHANNELS; part++) {
         corner.water[part] = 0;
     }
+    corner.faded = 0.0f;
     corner.x = point->x;
     corner.y = point->y;
     corner.depth = point->depth;
@@ -379,6 +390,7 @@ static Corner cornerAt(const Projected *point, uint32_t colour) {
 
     if (away > 0.0f) {
         uint32_t fogColour = distanceFog()->colour;
+        corner.faded = away;
 
         for (int part = 0; part < CHANNELS; part++) {
             float towards = (float) ((fogColour >> (part * 8) & 0xFF) << 8);
@@ -2342,12 +2354,14 @@ void renderGroundTile(const void *ground, int x, int z) {
 
         for (int corner = 0; corner < 3; corner++) {
             float wet = under[face * 3 + corner];
+            float left = 1.0f - walked[corner].faded;
+
             for (int part = 0; part < CHANNELS - 1; part++) {
                 uint32_t towards = (waterOverTile >> (part * 8)) & 0xFF;
                 walked[corner].colour[part] =
                     (uint16_t) ((float) walked[corner].colour[part] * (1.0f - wet));
                 walked[corner].water[part] = (uint16_t) ((float) walked[corner].water[part]
-                    + (float) (towards << 8) * wet);
+                    + (float) (towards << 8) * wet * left);
             }
         }
 

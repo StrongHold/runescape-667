@@ -1887,9 +1887,9 @@ public sealed interface Scene {
         private static final int FAR = 6000;
 
         /**
-         * Twenty thousand of its pixels are out by no more than the watered patch under it is out
-         * by on its own, at the same pixel and by the same amount, so nothing the fade adds is
-         * out at all.
+         * Eleven thousand of its pixels are out, fewer than the two docks with no fade on them,
+         * and the worst is out by the same amount at the same pixel. Nothing the fade adds is out
+         * at all.
          */
         @Override
         public boolean written() {
