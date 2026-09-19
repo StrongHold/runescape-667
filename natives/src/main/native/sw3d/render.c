@@ -2254,10 +2254,13 @@ void renderGroundTile(const void *ground, int x, int z) {
         tally.faces++;
 
         /*
-         * A face the client gave no colour and no texture is where the floor opens onto the one
-         * below. Nothing of it is drawn, so what is under the floor shows through.
+         * A face the client gave no colour to is where the floor opens onto the one below, and
+         * nothing of it is drawn whatever it wears. Open water is floor with nothing on it: the
+         * client hands the surface over as a face with no colour and the water's own texture, and
+         * what is under it is the bed and everything standing on it, drawn in the pass before.
+         * Drawing the face covers all of that over.
          */
-        if (groundTileFaceHollow(tile, face) && groundTileFaceTexture(tile, face) == -1) {
+        if (groundTileFaceHollow(tile, face)) {
             tally.hollow++;
             continue;
         }
