@@ -889,6 +889,45 @@ static void wateredTileHandedOver(int waterColour, const int *colours, const int
             texture == NULL ? -1 : (int) texture[0]);
 }
 
+/**
+ * Says once for each ground where it is drawn and where its second grid of heights is.
+ *
+ * The client keeps two grounds over water, the bed and the floor above it, and hands each of them
+ * two grids of heights. Which grid a ground is drawn at decides what can be seen in front of what,
+ * and from outside the two grounds are indistinguishable.
+ */
+static void groundHeightsSeen(const Ground *ground, int x, int z, int drawnAt, int secondAt) {
+    static int listening = -1;
+    if (listening == -1) {
+        listening = switchedOff("SW3D_WATER");
+    }
+
+    enum { KEPT = 4 };
+    static const void *seen[KEPT];
+    static int count;
+
+    if (!listening) {
+        return;
+    }
+
+    for (int at = 0; at < count; at++) {
+        if (seen[at] == ground) {
+            return;
+        }
+    }
+
+    if (count >= KEPT) {
+        return;
+    }
+
+    seen[count] = ground;
+    count++;
+
+    fprintf(stderr, "sw3d water: a ground %p at %d,%d is drawn at height %d,"
+            " its second grid says %d, %d tiles across\n",
+            (const void *) ground, x, z, drawnAt, secondAt, ground->sizeX);
+}
+
 static void wateredDepthsSeen(int colour, const int16_t *depth, int corners) {
     static int listening = -1;
     if (listening == -1) {
@@ -1176,6 +1215,11 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
             }
 
             tile->up[corner] = (int16_t) (averageHeight(ground, worldX, worldZ) + levels[corner]);
+
+            if (corner == 0) {
+                groundHeightsSeen(ground, x, z, tile->up[0],
+                        ground->waterHeights == NULL ? -99999 : heightAt(ground, x, z));
+            }
             tile->light[corner] = (unsigned char) shadeInside(ground, x, z,
                 tile->across[corner], tile->along[corner]);
             /*
