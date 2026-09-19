@@ -856,6 +856,39 @@ static void wateredTileSeen(int colour, int reaches, int bias, int carriesDepths
  * A colour says the client meant water somewhere near, and only the depths say whether the water
  * reaches this tile. What they run between is the thing to know and cannot be guessed.
  */
+/**
+ * Says once what the client hands over for a tile it gave water to, whole rather than masked.
+ *
+ * A corner's colour is read as sixteen bits and the rest thrown away, because that is all a
+ * colour is. Anything else the client puts in the top of one goes unseen, and the surface of
+ * water covers everything drawn under it, so whether it carries something that says to draw it
+ * through is worth knowing.
+ */
+static void wateredTileHandedOver(int waterColour, const int *colours, const int *overlays,
+                                  const int16_t *texture, int corners) {
+    static int listening = -1;
+    if (listening == -1) {
+        listening = switchedOff("SW3D_WATER");
+    }
+
+    static int said;
+    enum { SAY_AT_MOST = 4 };
+
+    if (!listening || waterColour == 0 || said >= SAY_AT_MOST || corners < 3
+        || colours == NULL) {
+        return;
+    }
+
+    said++;
+    fprintf(stderr, "sw3d water: a watered tile is handed colours %08x %08x %08x,"
+            " laid over %08x %08x %08x, wearing %d\n",
+            (unsigned) colours[0], (unsigned) colours[1], (unsigned) colours[2],
+            (unsigned) (overlays == NULL ? 0 : overlays[0]),
+            (unsigned) (overlays == NULL ? 0 : overlays[1]),
+            (unsigned) (overlays == NULL ? 0 : overlays[2]),
+            texture == NULL ? -1 : (int) texture[0]);
+}
+
 static void wateredDepthsSeen(int colour, const int16_t *depth, int corners) {
     static int listening = -1;
     if (listening == -1) {
@@ -1131,6 +1164,8 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
         if (colour != NULL) {
             (*env)->GetIntArrayRegion(env, colour, 0, corners, (jint *) colours);
         }
+
+        wateredTileHandedOver(waterColour, colours, overlays, tile->texture, corners);
 
         for (int corner = 0; corner < corners; corner++) {
             int worldX = (x << ground->tileShift) + tile->across[corner];
