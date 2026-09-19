@@ -12,8 +12,14 @@
 # is a fact to design around and not a fault to fix.
 name: Approximate reciprocal
 
+# A workflow_dispatch button only appears once the workflow is on the default branch, and this
+# one is being asked from a side branch, so pushing the question is what asks it.
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/reciprocal.yml'
+      - 'natives/src/main/native/reciprocal/**'
 
 jobs:
   ask:
