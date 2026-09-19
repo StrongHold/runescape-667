@@ -332,6 +332,14 @@ int groundTileFaces(const void *tile);
 /** Which texture a face of the tile wears, or nothing where it wears none. */
 int groundTileFaceTexture(const void *tile, int face);
 
+/**
+ * How much of a face of this ground wearing this texture shows, or nothing where it is solid.
+ *
+ * Only the ground drawn above the water is ever seen through, and only where it wears one of the
+ * textures that stand for water.
+ */
+int groundDrawsThrough(const void *ground, int texture);
+
 /** Whether the client handed a tile over with water on it. */
 int groundTileWatered(const void *tile);
 

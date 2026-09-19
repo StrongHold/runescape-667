@@ -733,11 +733,13 @@ static uint32_t litCorner(const Ground *ground, int packed, int shade, int x, in
      * A tile wearing a texture is not lit from its own colour alone. The texture says how far that
      * colour is carried towards a grey made from the lightness the tile ended up with, and then
      * how much to brighten what is left, which is the same thing a texture does to a face of a
-     * model. One effect leaves the colour where it is.
+     * model. One effect leaves the colour where it is, and leaves only that: such a tile is still
+     * brightened by however much the texture asks for.
      */
     const TextureMetrics *worn = texture == -1 || !wearsIts ? NULL : textureMetricsFor(texture);
-    if (worn != NULL && worn->effectType != LEAVES_THE_COLOUR_BE) {
-        colour = texturedUnlitColour(colour, reaching, worn->alpha, worn->aByte57);
+    if (worn != NULL) {
+        int towardsGrey = worn->effectType == LEAVES_THE_COLOUR_BE ? 0 : worn->alpha;
+        colour = texturedUnlitColour(colour, reaching, towardsGrey, worn->aByte57);
     }
 
     float facing[NORMAL_PARTS];
@@ -793,6 +795,72 @@ static uint32_t litCorner(const Ground *ground, int packed, int shade, int x, in
     }
 
     return lit;
+}
+
+/**
+ * Whether a ground carries water the player can see through.
+ *
+ * The client turns this on for the ground above the water and never for the bed beneath it, and
+ * only when the player has asked for the better water.
+ */
+enum { WATER_SEEN_THROUGH = 0x8 };
+
+/** The effects a texture names that stand for water, of which there are three. */
+enum { WATER_STILL = 4, WATER_MOVING = 8, WATER_DEEP = 9 };
+
+/** How much of a face of the ground drawn through shows, out of two hundred and fifty five. */
+enum { WATER_SHOWS = 0x9B };
+
+/**
+ * Says once for each texture the ground is asked about what it was told and what it answered,
+ * when it is started with SW3D_WATER set.
+ */
+static void drawnThroughSaid(const Ground *ground, int texture, int effect, int shows) {
+    static int listening = -1;
+    if (listening == -1) {
+        listening = switchedOff("SW3D_WATER");
+    }
+
+    enum { KINDS = 16 };
+    static int seen[KINDS];
+    static int count;
+
+    if (!listening) {
+        return;
+    }
+
+    for (int at = 0; at < count; at++) {
+        if (seen[at] == texture) {
+            return;
+        }
+    }
+
+    if (count < KINDS) {
+        seen[count++] = texture;
+    }
+
+    fprintf(stderr, "sw3d water: texture %d effect %d on a ground of %#x shows %d\n",
+            texture, effect, (unsigned) ground->featureFlags, shows);
+}
+
+int groundDrawsThrough(const void *held, int texture) {
+    const Ground *ground = held;
+
+    if (ground == NULL || texture == -1) {
+        return 0;
+    }
+
+    const TextureMetrics *metrics = textureMetricsFor(texture);
+    int effect = metrics == NULL ? -1 : (int) metrics->effectType;
+
+    int shows = 0;
+    if ((ground->featureFlags & WATER_SEEN_THROUGH) != 0
+        && (effect == WATER_STILL || effect == WATER_MOVING || effect == WATER_DEEP)) {
+        shows = WATER_SHOWS;
+    }
+
+    drawnThroughSaid(ground, texture, effect, shows);
+    return shows;
 }
 
 /**

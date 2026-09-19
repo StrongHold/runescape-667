@@ -92,6 +92,7 @@ public sealed interface Scene {
         new Watered(),
         new WateredPillar(),
         new WateredDock(),
+        new SeenThroughDock(),
         new BlendedGround(),
         new Stairs(),
         new Priorities(),
@@ -112,7 +113,7 @@ public sealed interface Scene {
                  Model roundPoint, Model rock, Model seenThrough, Ground overlaid, Ground hollow,
                  Ground shadowed, Ground blended, Model stairs, Model priorities,
                  Model billboards, Mesh located, Mesh blackBacked, Model doubled,
-                 Ground shadowedRepeat, Ground watered, Ground surface) {
+                 Ground shadowedRepeat, Ground watered, Ground surface, Ground waterSurface) {
         /* empty */
     }
 
@@ -1647,14 +1648,6 @@ public sealed interface Scene {
          * is further off still, so it is not that the sizes are read and it is not that they are
          * ignored.
          */
-        /**
-         * Eleven thousand of its pixels are out and the worst is a hundred and ninety four,
-         * of its pixels are out and the worst is six, which is what the watered patch under it is
-         * out by on its own.
-         *
-         * It is the only scene here with two grounds, and the only one that can ask what becomes
-         * of what stands between them. Every other one draws a single patch.
-         */
         @Override
         public boolean written() {
             return false;
@@ -1787,8 +1780,8 @@ public sealed interface Scene {
          * of its pixels are out and the worst is six, which is what the watered patch under it is
          * out by on its own.
          *
-         * It is the only scene here with two grounds, and the only one that can ask what becomes
-         * of what stands between them. Every other one draws a single patch.
+         * It is one of two scenes here with two grounds, and one of the two that can ask what
+         * becomes of what stands between them. Every other one draws a single patch.
          */
         @Override
         public boolean written() {
@@ -1797,6 +1790,10 @@ public sealed interface Scene {
 
         @Override
         public void draw(Toolkit toolkit, Props props) {
+            drawInto(toolkit, props, props.surface());
+        }
+
+        void drawInto(Toolkit toolkit, Props props, Ground surface) {
             toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
             toolkit.f(NEAR, Integer.MAX_VALUE);
 
@@ -1827,8 +1824,34 @@ public sealed interface Scene {
 
             toolkit.pa();
 
-            props.surface().renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
+            surface.renderTiles(HandGround.TILES / 2, HandGround.TILES / 2,
                 HandGround.TILES, visible, false, 0);
+        }
+    }
+
+    /**
+     * The dock again, with the surface over it built for a player who has asked for the better
+     * water.
+     *
+     * Such a surface is seen through wherever it wears a texture that stands for water, so what
+     * stands in the water is still there once the surface is down. The dock beside it is built
+     * the other way and covers everything under it, and the two together say what the better
+     * water is worth.
+     */
+    record SeenThroughDock() implements Scene {
+
+        /**
+         * The same eleven thousand pixels the dock beside it is out by, which is what the watered
+         * patch under both of them is out by on its own. Nothing the surface adds is out at all.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            new WateredDock().drawInto(toolkit, props, props.waterSurface());
         }
     }
 

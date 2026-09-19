@@ -1989,12 +1989,13 @@ static void groundTextureMissing(int wears) {
     }
 }
 
-static void layTextureOnTile(const void *tile, int face, int tileSize, int x, int z,
-                             const unsigned char *shadow, Corner *walked) {
+static void layTextureOnTile(const void *ground, const void *tile, int face, int tileSize,
+                             int x, int z, const unsigned char *shadow, Corner *walked) {
     texels = NULL;
     texelsBlend = 0;
     texelsSkipEmpty = 0;
     blended[0] = NULL;
+    faceShows = WHOLLY_SOLID;
 
     /*
      * Where the shadow over a tile is read is where the tile sits on its texture, so a bare face
@@ -2020,6 +2021,13 @@ static void layTextureOnTile(const void *tile, int face, int tileSize, int x, in
         faceBare = switchedOff("SW3D_GROUND_BARE");
         return;
     }
+
+    /*
+     * A face of the ground standing for water is drawn through rather than over, so that what
+     * lies beneath the water is still seen. Such a face records nothing about how far away it is
+     * either, which is what the alpha it carries already says.
+     */
+    faceShows = groundDrawsThrough(ground, wears);
 
     if (switchedOff("SW3D_GROUND_UNTEXTURED")) {
         return;
@@ -2332,7 +2340,7 @@ void renderGroundTile(const void *ground, int x, int z) {
             }
         }
 
-        layTextureOnTile(tile, face, tileSize, x, z, shadow, walked);
+        layTextureOnTile(ground, tile, face, tileSize, x, z, shadow, walked);
         fillTriangle(walked[0], walked[1], walked[2]);
     }
 
@@ -2344,6 +2352,7 @@ void renderGroundTile(const void *ground, int x, int z) {
     tileRedly = 0;
     tileAbove = 0;
     faceBare = 0;
+    faceShows = WHOLLY_SOLID;
     waterOverTile = 0;
     drawingTile = 0;
     free(under);

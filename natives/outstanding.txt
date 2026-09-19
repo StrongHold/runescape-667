@@ -16,6 +16,7 @@ DepthShifted = 0, 0, 62
 HollowPlan = 0, 0, 54
 OverlaidPlan = 16, 0, 207
 SeenThrough = 0, 0, 21
+SeenThroughDock = 0, 0, 11727
 Stairs = 0, 0, 245
 TexturedGround = 0, 0, 2691
 Underwater = 0, 0, 12

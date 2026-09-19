@@ -307,6 +307,27 @@ public final class HandGround {
      * everything between the two is drawn before it and then covered by it.
      */
     public static Ground buildSurface(Toolkit toolkit) {
+        return buildSurface(toolkit, FEATURE_FLAGS, TEXTURED_WITH);
+    }
+
+    /**
+     * What the client asks the ground for when the player has asked for the better water.
+     *
+     * Only the ground above the water is ever built with it, and a face of such a ground wearing
+     * a texture that stands for water is seen through rather than drawn over.
+     */
+    public static final int WATER_SEEN_THROUGH = 0x8;
+
+    /**
+     * The surface of the water again, built the way the client builds it for a player who has
+     * asked for the better water, and wearing a texture that stands for water.
+     */
+    public static Ground buildWaterSurface(Toolkit toolkit) {
+        return buildSurface(toolkit, FEATURE_FLAGS | WATER_SEEN_THROUGH,
+            HandTextureSource.WATER_STILL);
+    }
+
+    private static Ground buildSurface(Toolkit toolkit, int featureFlags, int texture) {
         var heights = new int[TILES + 1][TILES + 1];
         for (var x = 0; x <= TILES; x++) {
             for (var z = 0; z <= TILES; z++) {
@@ -315,11 +336,11 @@ public final class HandGround {
         }
 
         var ground = toolkit.createGround(TILES, TILES, heights, heights,
-            GROUND_FLAGS, FEATURE_FLAGS);
+            GROUND_FLAGS, featureFlags);
 
         for (var x = 0; x < TILES; x++) {
             for (var z = 0; z < TILES; z++) {
-                addSurfaceTile(ground, x, z);
+                addSurfaceTile(ground, x, z, texture);
             }
         }
 
@@ -327,7 +348,7 @@ public final class HandGround {
         return ground;
     }
 
-    private static void addSurfaceTile(Ground ground, int x, int z) {
+    private static void addSurfaceTile(Ground ground, int x, int z, int texture) {
         var offsetX = new int[] {0, TILE, TILE, 0};
         var offsetY = new int[] {0, 0, TILE, TILE};
         var faceA = new int[] {0, 0};
@@ -339,7 +360,7 @@ public final class HandGround {
             colours[face] = hslOf(x, z, face);
         }
 
-        var textures = new int[] {TEXTURED_WITH, TEXTURED_WITH};
+        var textures = new int[] {texture, texture};
         var sizes = new int[] {TILE, TILE};
 
         ground.addTile(x, z, offsetX, null, offsetY, null, faceA, faceB, faceC,

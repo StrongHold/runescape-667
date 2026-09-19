@@ -46,31 +46,76 @@ public final class HandTextureSource implements TextureSource {
             return null;
         }
 
+        var plain = plainOf(id);
+
         var metrics = new TextureMetrics();
         metrics.aShort37 = (short) SIZE;
-        metrics.alphaBlendMode = id % 3;
-        metrics.effectType = (byte) (id & 3);
-        metrics.effectParam1 = (byte) (id & 7);
-        metrics.effectParam2 = id * 17;
-        metrics.small = (id & 8) != 0;
-        metrics.alpha = (byte) (id == 3 ? 200 : 96);
-        metrics.aByte57 = (byte) (id == 3 ? 7 : 24);
-        metrics.speedU = (byte) (id == 1 ? 3 : 0);
-        metrics.speedV = (byte) (id == 2 ? 5 : 0);
+        metrics.alphaBlendMode = plain % 3;
+        metrics.effectType = (byte) effectOf(id);
+        metrics.effectParam1 = (byte) (plain & 7);
+        metrics.effectParam2 = plain * 17;
+        metrics.small = (plain & 8) != 0;
+        metrics.alpha = (byte) (plain == 3 ? 200 : 96);
+        metrics.aByte57 = (byte) (plain == 3 ? 7 : 24);
+        metrics.speedU = (byte) (plain == 1 ? 3 : 0);
+        metrics.speedV = (byte) (plain == 2 ? 5 : 0);
         /*
          * Whether the player is allowed to turn this texture off. Every other one may be, so that
          * a scene can ask for either kind by the number it names.
          */
-        metrics.disableable = (id & 1) != 0;
+        metrics.disableable = (plain & 1) != 0;
         metrics.aBoolean234 = false;
-        metrics.aBoolean239 = (id & 64) != 0;
-        metrics.aBoolean236 = (id & 1) != 0;
-        metrics.aBoolean235 = (id & 2) != 0;
-        metrics.aByte53 = (byte) (id & 15);
-        metrics.aBoolean237 = (id & 4) != 0;
-        metrics.aBoolean238 = (id & 128) != 0;
-        metrics.colorOp = id;
+        metrics.aBoolean239 = (plain & 64) != 0;
+        metrics.aBoolean236 = (plain & 1) != 0;
+        metrics.aBoolean235 = (plain & 2) != 0;
+        metrics.aByte53 = (byte) (plain & 15);
+        metrics.aBoolean237 = (plain & 4) != 0;
+        metrics.aBoolean238 = (plain & 128) != 0;
+        metrics.colorOp = plain;
         return metrics;
+    }
+
+    /**
+     * The numbers whose textures stand for water, one for each of the three effects the client
+     * counts as water. A face of the ground above the water wearing one of them is seen through.
+     *
+     * Each is the plain texture below in every way but the effect it names, and shows the same
+     * picture, so a scene laying one of them differs from a scene laying the plain one in the
+     * effect alone.
+     */
+    public static final int WATER_STILL = 240;
+    public static final int WATER_MOVING = 242;
+    public static final int WATER_DEEP = 244;
+
+    /** The texture the three that stand for water are copied from. */
+    private static final int WATER_COPIES = 6;
+
+    /**
+     * The number a texture takes everything but its effect from, which for one that stands for
+     * water is the plain texture it copies.
+     */
+    private static int plainOf(int id) {
+        if (id == WATER_STILL || id == WATER_MOVING || id == WATER_DEEP) {
+            return WATER_COPIES;
+        } else {
+            return id;
+        }
+    }
+
+    /**
+     * What a texture does to the colour of whatever wears it, which for three of them is stand
+     * for water.
+     */
+    private static int effectOf(int id) {
+        if (id == WATER_STILL) {
+            return 4;
+        } else if (id == WATER_MOVING) {
+            return 8;
+        } else if (id == WATER_DEEP) {
+            return 9;
+        } else {
+            return id & 3;
+        }
     }
 
     /**
@@ -83,7 +128,7 @@ public final class HandTextureSource implements TextureSource {
 
         for (var down = 0; down < SIZE; down++) {
             for (var across = 0; across < SIZE; across++) {
-                pixels[down * SIZE + across] = texel(id, across, down);
+                pixels[down * SIZE + across] = texel(plainOf(id), across, down);
             }
         }
 

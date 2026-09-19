@@ -155,7 +155,8 @@ public final class FrameCapture {
                 AMBIENT, CONTRAST),
             HandGround.buildShadowedRepeat(toolkit, shadow),
             HandGround.buildWatered(toolkit),
-            HandGround.buildSurface(toolkit));
+            HandGround.buildSurface(toolkit),
+            HandGround.buildWaterSurface(toolkit));
 
         var manifest = new ArrayList<String>();
 
