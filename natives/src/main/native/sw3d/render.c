@@ -2158,6 +2158,15 @@ static struct {
     float farthest;
 } tally = {0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0e30f, -1.0e30f};
 
+/**
+ * The ground the running count belongs to.
+ *
+ * The client draws several grounds in a pass and one of them may hold no tiles at all, so a count
+ * taken over the lot of them says nothing about which ground is losing faces or why. The count is
+ * reported and started again whenever the ground being drawn changes.
+ */
+static const void *tallying;
+
 static void tallied(const char *what) {
     static int listening = -1;
     if (listening == -1) {
@@ -2170,9 +2179,10 @@ static void tallied(const char *what) {
 
     if (what != NULL) {
         const Projection *view = projection();
-        fprintf(stderr, "sw3d ground: %d asked, %d not held, %d faces, %d off (%d too near,"
+        fprintf(stderr, "sw3d ground %p: %d asked, %d not held, %d faces, %d off (%d too near,"
                 " %d too far), %d turned away, %d hollow, %d drawn; away %.1f..%.1f,"
                 " near %.1f far %.1f\n",
+                tallying,
                 tally.asked, tally.missing, tally.faces, tally.behindTheEye, tally.tooNear,
                 tally.tooFar, tally.turnedAway, tally.hollow, tally.drawn,
                 (double) tally.nearest, (double) tally.farthest,
@@ -2193,6 +2203,13 @@ void renderGroundTile(const void *ground, int x, int z) {
     int corners = 0;
     const void *tile = groundTile(ground, x, z, &corners);
     const void *camera = cameraMatrix();
+
+    if (ground != tallying) {
+        if (tallying != NULL && tally.asked > 0) {
+            tallied("");
+        }
+        tallying = ground;
+    }
 
     tally.asked++;
     tallied(NULL);
