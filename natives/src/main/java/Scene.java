@@ -105,6 +105,7 @@ public sealed interface Scene {
         new SeenThroughDock(),
         new FoggedDock(),
         new WaterOverNoBed(),
+        new OverlaidWaterDock(),
         new BlendedGround(),
         new Stairs(),
         new Priorities(),
@@ -126,7 +127,7 @@ public sealed interface Scene {
                  Ground shadowed, Ground blended, Model stairs, Model priorities,
                  Model billboards, Mesh located, Mesh blackBacked, Model doubled,
                  Ground shadowedRepeat, Ground watered, Ground surface, Ground waterSurface,
-                 Ground halfBed) {
+                 Ground halfBed, Ground overlaidWaterSurface) {
         /* empty */
     }
 
@@ -1933,6 +1934,33 @@ public sealed interface Scene {
          * client. It carries nothing in its top byte, which is how the client asks for it.
          */
         private static final int UNDER_THE_HORIZON = 0x00C8C0A8;
+    }
+
+    /**
+     * The dock with a surface whose tiles carry an overlaid colour and no colour of their own.
+     *
+     * The client lays the ground that way wherever one kind of ground meets another, which is
+     * most of the ground it lays at all. A tile with nothing but an overlaid colour wears no
+     * texture, and a face with no texture is never seen through however much water the ground
+     * carries, so this says whether the water the player is allowed to see through is decided by
+     * the texture a face ends up wearing rather than by the one the client handed over.
+     */
+    record OverlaidWaterDock() implements Scene {
+
+        /**
+         * The same eleven thousand pixels the dock beside it is out by, which is what the watered
+         * patch under it is out by on its own. Nothing the overlaid surface adds is out at all.
+         */
+        @Override
+        public boolean written() {
+            return false;
+        }
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            new WateredDock().drawInto(toolkit, props, props.overlaidWaterSurface(),
+                Integer.MAX_VALUE);
+        }
     }
 
     /**

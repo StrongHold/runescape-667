@@ -2338,10 +2338,12 @@ void renderGroundTile(const void *ground, int x, int z) {
         tally.faces++;
 
         /*
-         * A face the client gave no colour and no texture is where the floor opens onto the one
-         * below. Nothing of it is drawn, so what is under the floor shows through.
+         * A face the client gave no colour of its own is where the floor opens onto the one
+         * below. Nothing of it is drawn, so what is under the floor shows through, and that holds
+         * whatever else the client handed it: a face with a texture to wear and a colour laid
+         * over it is still a hole where a colour of its own would have been.
          */
-        if (groundTileFaceHollow(tile, face) && groundTileFaceTexture(tile, face) == -1) {
+        if (groundTileFaceHollow(tile, face)) {
             tally.hollow++;
             continue;
         }

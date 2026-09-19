@@ -344,7 +344,29 @@ public final class HandGround {
             HandTextureSource.WATER_STILL);
     }
 
+    /**
+     * The surface of the water again, with every tile carrying an overlaid colour and no colour of
+     * its own.
+     *
+     * The client lays the ground that way wherever one kind of ground meets another, and a tile
+     * with nothing but an overlaid colour wears no texture at all. A ground face with no texture
+     * is never seen through however much water the ground carries, so the same patch built the
+     * other way is drawn over rather than through.
+     */
+    public static Ground buildOverlaidWaterSurface(Toolkit toolkit) {
+        return buildSurface(toolkit, FEATURE_FLAGS | WATER_SEEN_THROUGH,
+            HandTextureSource.WATER_STILL, ONLY_OVERLAID);
+    }
+
+    /** Whether a tile is given an overlaid colour in place of a colour of its own. */
+    private static final boolean ONLY_OVERLAID = true;
+
     private static Ground buildSurface(Toolkit toolkit, int featureFlags, int texture) {
+        return buildSurface(toolkit, featureFlags, texture, !ONLY_OVERLAID);
+    }
+
+    private static Ground buildSurface(Toolkit toolkit, int featureFlags, int texture,
+                                       boolean onlyOverlaid) {
         var heights = new int[TILES + 1][TILES + 1];
         for (var x = 0; x <= TILES; x++) {
             for (var z = 0; z <= TILES; z++) {
@@ -357,7 +379,7 @@ public final class HandGround {
 
         for (var x = 0; x < TILES; x++) {
             for (var z = 0; z < TILES; z++) {
-                addSurfaceTile(ground, x, z, texture);
+                addSurfaceTile(ground, x, z, texture, onlyOverlaid);
             }
         }
 
@@ -365,7 +387,8 @@ public final class HandGround {
         return ground;
     }
 
-    private static void addSurfaceTile(Ground ground, int x, int z, int texture) {
+    private static void addSurfaceTile(Ground ground, int x, int z, int texture,
+                                       boolean onlyOverlaid) {
         var offsetX = new int[] {0, TILE, TILE, 0};
         var offsetY = new int[] {0, 0, TILE, TILE};
         var faceA = new int[] {0, 0};
@@ -380,8 +403,15 @@ public final class HandGround {
         var textures = new int[] {texture, texture};
         var sizes = new int[] {TILE, TILE};
 
+        var overlaid = colours.clone();
+        if (onlyOverlaid) {
+            for (var face = 0; face < FLAT_FACES; face++) {
+                colours[face] = NO_COLOUR;
+            }
+        }
+
         ground.addTile(x, z, offsetX, null, offsetY, null, faceA, faceB, faceC,
-            colours, colours.clone(), textures, sizes, 0, 0, 0);
+            colours, overlaid, textures, sizes, 0, 0, 0);
     }
 
     /**

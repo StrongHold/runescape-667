@@ -157,7 +157,8 @@ public final class FrameCapture {
             HandGround.buildWatered(toolkit),
             HandGround.buildSurface(toolkit),
             HandGround.buildWaterSurface(toolkit),
-            HandGround.buildWateredHalf(toolkit));
+            HandGround.buildWateredHalf(toolkit),
+            HandGround.buildOverlaidWaterSurface(toolkit));
 
         var manifest = new ArrayList<String>();
 

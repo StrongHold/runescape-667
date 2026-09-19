@@ -15,6 +15,7 @@ CutGround = 0, 0, 12369
 FoggedDock = 0, 0, 11052
 HollowPlan = 0, 0, 54
 OverlaidPlan = 16, 0, 207
+OverlaidWaterDock = 0, 0, 11727
 SeenThrough = 0, 0, 21
 SeenThroughDock = 0, 0, 11727
 Stairs = 0, 0, 245
