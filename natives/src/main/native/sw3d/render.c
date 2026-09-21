@@ -898,7 +898,6 @@ static void fillSpan(int y, const Side *left, const Side *right) {
     }
 
     float depthStep = (right->depth - left->depth) * over;
-    float depth = left->depth + (float) skipped * depthStep;
 
     float uStep = (right->u - left->u) * over;
     float vStep = (right->v - left->v) * over;
@@ -930,6 +929,8 @@ static void fillSpan(int y, const Side *left, const Side *right) {
      * angle turns that into the wrong texel.
      */
     int group = from & ~3;
+    float depthBase = left->depth + (float) skipped * depthStep
+        - (float) (from - group) * depthStep;
     float uBase = left->u + (float) skipped * uStep - (float) (from - group) * uStep;
     float vBase = left->v + (float) skipped * vStep - (float) (from - group) * vStep;
     float wBase = left->w + (float) skipped * wStep - (float) (from - group) * wStep;
@@ -945,11 +946,13 @@ static void fillSpan(int y, const Side *left, const Side *right) {
     float uLane[GROUP];
     float vLane[GROUP];
     float wLane[GROUP];
+    float depthLane[GROUP];
 
     for (int lane = 0; lane < GROUP; lane++) {
         uLane[lane] = uBase + (float) lane * uStep;
         vLane[lane] = vBase + (float) lane * vStep;
         wLane[lane] = wBase + (float) lane * wStep;
+        depthLane[lane] = depthBase + (float) lane * depthStep;
     }
 
     uint16_t colour[CHANNELS];
@@ -988,9 +991,11 @@ static void fillSpan(int y, const Side *left, const Side *right) {
     for (int x = from; x < to; x++) {
         pixelsTried++;
 
+        int lane = x - group;
+        float depth = depthLane[lane];
+
         if (!distanceDecides || depth <= held[x]) {
             pixelsLaid++;
-            int lane = x - group;
             float u = uLane[lane];
             float v = vLane[lane];
             float w = wLane[lane];
@@ -1094,7 +1099,6 @@ static void fillSpan(int y, const Side *left, const Side *right) {
             }
         }
 
-        depth += depthStep;
         for (int part = 0; part < CHANNELS; part++) {
             water[part] = (uint16_t) (water[part] + waterStep[part]);
         }
@@ -1105,6 +1109,7 @@ static void fillSpan(int y, const Side *left, const Side *right) {
                 uLane[lane] += (float) GROUP * uStep;
                 vLane[lane] += (float) GROUP * vStep;
                 wLane[lane] += (float) GROUP * wStep;
+                depthLane[lane] += (float) GROUP * depthStep;
             }
         }
         for (int part = 0; part < CHANNELS; part++) {

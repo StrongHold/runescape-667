@@ -1981,15 +1981,6 @@ public sealed interface Scene {
      */
     record GroundPastTheEdge() implements Scene {
 
-        /**
-         * Six pixels along the very edge of the patch, where a face whose corners lie past the
-         * far edge of the world lands a pixel one way or the other between the two toolkits.
-         */
-        @Override
-        public boolean written() {
-            return false;
-        }
-
         /** A far edge that cuts through the patch rather than standing beyond it. */
         private static final int CUTS_THROUGH = 4000;
 
