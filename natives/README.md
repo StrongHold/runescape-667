@@ -62,10 +62,23 @@ Whatever cannot be shown this way does not go in, however sure the reasoning. Th
 in `sw3d/render.c` on `Java_a_Z` marking a change that was written, checked against the client's
 own renderer, and then taken out again because no picture could judge it.
 
-This cannot run on CI yet. It measures against the shipped binaries, which belong to whoever ran
-the client rather than to this repository, and the renderer needs macOS and an x86_64 virtual
-machine. The game data the checks need is small enough to keep: `natives/models` holds the eight
-models the scenes are drawn with. The binaries are the part still to solve.
+That check needs the shipped binaries, which belong to whoever ran the client rather than to this
+repository, so it only runs where the client has been run. What the shipped toolkit drew is kept
+instead, one frame per scene under `natives/goldens`, filed under the scene's own name so that a
+change to one says in the file name which scene changed.
+
+    ./gradlew :natives:updateGoldens     # here, where the shipped toolkit is
+    ./gradlew :natives:verifyGoldens     # anywhere, and on CI
+
+Both checks hold the same record, so a scene allowed to be a certain distance out is allowed the
+same distance either way. The game data the checks need is small enough to keep as well:
+`natives/models` holds the eight models the scenes are drawn with.
+
+The renderer used to need an x86_64 virtual machine, because it divided by the processor's
+approximate reciprocal and no two processors answer that alike. It now reads those answers from a
+table it carries, so it draws the same picture on either architecture and the kept frames are
+worth keeping. It still needs macOS, because the surface it hands its pixels to is written against
+this platform and nothing else.
 
 `natives/outstanding.txt` records how far out each unfinished scene is allowed to be. A scene that
 grows past its line fails the build. Without it an unfinished scene could drift from a few pixels
