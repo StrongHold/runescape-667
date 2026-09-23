@@ -166,8 +166,8 @@ Name a routine by its family and its template parameters, as the disassembly pri
 families are `span` (`RenderHLine`), `body` (`HLineIterationBody`), `half` (`RenderHalfTriangle`)
 and `triangle` (`RenderTriangle`). A textured span does its per-pixel work in a `body` routine, so
 watch the body to compare pixels. An untextured span does its per-pixel work inline, so watch the
-`span` to compare runs. Watch at least one `body` routine in every run, because the tool uses the
-body's pixels to find where the shipped colour buffer starts. List the routines of the shipped
+`span` to compare runs. The tool finds where the shipped colour buffer starts from the pixels of a
+`body` when one is watched, and from runs that agree on their depth and count when none is. List the routines of the shipped
 library with `nm` and `c++filt`.
 
 `-Pignore` removes a value that a face does not use, for example the shares of a face that is not

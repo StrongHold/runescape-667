@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -185,6 +186,18 @@ public final class TraceCheck {
     record Place(int distance, int across, int down) {
     }
 
+    /**
+     * A run's depth, depth step and count, to the bit, which is what ties a shipped run to one of
+     * ours when there are no pixels to tie them by.
+     */
+    record RunKey(int depth, int depthStep, int count) {
+
+        static RunKey of(Run run) {
+            return new RunKey(Float.floatToIntBits(run.depth()),
+                Float.floatToIntBits(run.depthStep()), run.count());
+        }
+    }
+
     record Position(int x, int y) {
 
         static Position parse(String written) {
@@ -307,48 +320,31 @@ public final class TraceCheck {
             .filter(line -> line.startsWith("W "))
             .map(TraceCheck::call)
             .toList();
-        var ours = ownPixels(Trace.linesOf(args.ours, args.scene, 0));
+        var ownLines = Trace.linesOf(args.ours, args.scene, 0);
+        var ours = ownPixels(ownLines);
+        var ownRuns = ownRuns(ownLines);
         var lanes = calls.stream()
             .filter(call -> families.get(call.slot()) == ShippedRoutine.Family.BODY)
             .flatMap(call -> lanesOf(call).stream())
             .toList();
+        var spans = calls.stream()
+            .filter(call -> families.get(call.slot()) == ShippedRoutine.Family.SPAN)
+            .toList();
 
         System.out.println(args.scene + ", drawn once by each toolkit");
-        System.out.println("  our trace holds " + ours.size() + " textured pixels, and the shipped "
-            + "trace " + lanes.size() + " drawn pixels from the body of a span");
+        System.out.println("  our trace holds " + ours.size() + " textured pixels and "
+            + ownRuns.size() + " runs, and the shipped trace " + lanes.size()
+            + " drawn pixels from the body of a span and " + spans.size() + " runs");
 
-        if (lanes.isEmpty() || ours.isEmpty()) {
+        var start = lanes.isEmpty() || ours.isEmpty()
+            ? startFromRuns(ownRuns, spans)
+            : startFromPixels(ours, lanes);
+
+        if (start.isEmpty()) {
             System.out.println("  there is nothing to line up");
         } else {
-            var start = bufferStart(ours, lanes);
-            var shipped = placed(lanes, start);
-            var both = shipped.keySet().stream().filter(ours::containsKey).count();
-            System.out.printf("  lined up with the colour buffer starting at 0x%x: %d pixels "
-                + "traced on both sides%n", start, both);
-
-            var different = differingPixels(args.shippedFrames, args.ownFrames);
-            report("on the " + different.size() + " pixels the two frames differ at",
-                different, ours, shipped, compared);
-            report("on every pixel the shipped toolkit traced", shipped.keySet(), ours, shipped,
-                compared);
-
-            var ownRuns = ownRuns(Trace.linesOf(args.ours, args.scene, 0));
-            var shippedRuns = calls.stream()
-                .filter(call -> families.get(call.slot()) == ShippedRoutine.Family.SPAN)
-                .map(call -> runOf(call, start))
-                .toList();
-            if (!shippedRuns.isEmpty()) {
-                reportRuns(different, ownRuns, shippedRuns);
-            }
-
-            for (var written : args.at) {
-                var position = Position.parse(written);
-                System.out.println("  at " + position);
-                System.out.println("    ours     " + ours.get(position));
-                System.out.println("    shipped  " + shipped.get(position));
-                System.out.println("    our run      " + drawnIn(ownRuns, position));
-                System.out.println("    shipped run  " + drawnIn(shippedRuns, position));
-            }
+            System.out.printf("  lined up with the colour buffer starting at 0x%x%n", start.get());
+            compareAt(args, compared, start.get(), ours, lanes, ownRuns, spans);
         }
 
         dump(calls, families, args.dumped);
@@ -398,6 +394,34 @@ public final class TraceCheck {
                 .map(field -> field.name().toLowerCase())
                 .collect(Collectors.joining(", "));
             return differing.isEmpty() ? "nothing traced" : differing;
+        }
+    }
+
+    private static void compareAt(Args args, List<Field> compared, long start,
+                                  Map<Position, Pixel> ours, List<Lane> lanes, List<Run> ownRuns,
+                                  List<Call> spans) throws IOException {
+        var shipped = placed(lanes, start);
+        var different = differingPixels(args.shippedFrames, args.ownFrames);
+
+        if (!lanes.isEmpty()) {
+            report("on the " + different.size() + " pixels the two frames differ at",
+                different, ours, shipped, compared);
+            report("on every pixel the shipped toolkit traced", shipped.keySet(), ours, shipped,
+                compared);
+        }
+
+        var shippedRuns = spans.stream().map(call -> runOf(call, start)).toList();
+        if (!shippedRuns.isEmpty()) {
+            reportRuns(different, ownRuns, shippedRuns);
+        }
+
+        for (var written : args.at) {
+            var position = Position.parse(written);
+            System.out.println("  at " + position);
+            System.out.println("    ours     " + ours.get(position));
+            System.out.println("    shipped  " + shipped.get(position));
+            System.out.println("    our run      " + drawnIn(ownRuns, position));
+            System.out.println("    shipped run  " + drawnIn(shippedRuns, position));
         }
     }
 
@@ -552,7 +576,7 @@ public final class TraceCheck {
      * Where the shipped toolkit's colour buffer starts, taken as the start most pixels agree on
      * once each shipped pixel is matched to ours by its distance and place.
      */
-    private static long bufferStart(Map<Position, Pixel> ours, List<Lane> lanes) {
+    private static Optional<Long> startFromPixels(Map<Position, Pixel> ours, List<Lane> lanes) {
         var byPlace = new HashMap<Place, List<Position>>();
         for (var pixel : ours.values()) {
             byPlace.computeIfAbsent(pixel.place(), ignored -> new ArrayList<>())
@@ -567,11 +591,38 @@ public final class TraceCheck {
             }
         }
 
+        return mostVoted(votes);
+    }
+
+    /**
+     * Where the shipped toolkit's colour buffer starts, found from runs rather than pixels, for a
+     * scene that draws nothing a body routine is called for. A run is matched to one of ours by
+     * how far away it starts, how far each step moves that, and how many pixels it covers.
+     */
+    private static Optional<Long> startFromRuns(List<Run> ours, List<Call> spans) {
+        var byStart = new HashMap<RunKey, List<Run>>();
+        for (var run : ours) {
+            byStart.computeIfAbsent(RunKey.of(run), ignored -> new ArrayList<>()).add(run);
+        }
+
+        var votes = new HashMap<Long, Integer>();
+        for (var call : spans) {
+            var line = call.first();
+            var key = new RunKey(Float.floatToIntBits(line.getFloat(RUN_DEPTH)),
+                Float.floatToIntBits(line.getFloat(RUN_DEPTH_STEP)), line.getInt(RUN_COUNT));
+            for (var run : byStart.getOrDefault(key, List.of())) {
+                var offset = (long) (run.y() * Scene.WIDTH + run.x()) * PIXEL_BYTES;
+                votes.merge(line.getLong(RUN_ADDRESS) - offset, 1, Integer::sum);
+            }
+        }
+
+        return mostVoted(votes);
+    }
+
+    private static Optional<Long> mostVoted(Map<Long, Integer> votes) {
         return votes.entrySet().stream()
             .max(Map.Entry.comparingByValue())
-            .map(Map.Entry::getKey)
-            .orElseThrow(() -> new IllegalStateException(
-                "Not one shipped pixel has the distance and place of one of ours."));
+            .map(Map.Entry::getKey);
     }
 
     private static Map<Position, Pixel> placed(List<Lane> lanes, long start) {
