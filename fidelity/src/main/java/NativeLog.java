@@ -44,6 +44,34 @@ public final class NativeLog {
         }
 
         Runtime.getRuntime().addShutdownHook(new Thread(NativeLog::close));
+
+        var flusher = new Thread(NativeLog::flushEverySecond, "native trace flusher");
+        flusher.setDaemon(true);
+        flusher.start();
+    }
+
+    /**
+     * Writes out what is held every second, so that a client that is stopped rather than closed
+     * still leaves its record behind.
+     */
+    private static void flushEverySecond() {
+        var running = true;
+        while (running) {
+            try {
+                Thread.sleep(1000);
+                flush();
+            } catch (InterruptedException stopped) {
+                running = false;
+            }
+        }
+    }
+
+    private static synchronized void flush() {
+        try {
+            out.flush();
+        } catch (IOException failure) {
+            throw new UncheckedIOException(failure);
+        }
     }
 
     public static synchronized void record(String method, Object[] arguments, Object answer) {
@@ -68,9 +96,6 @@ public final class NativeLog {
 
         try {
             out.write(line.toString());
-            if (count % 1000 == 0) {
-                out.flush();
-            }
         } catch (IOException failure) {
             throw new UncheckedIOException(failure);
         }
