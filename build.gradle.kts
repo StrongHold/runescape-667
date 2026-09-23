@@ -89,7 +89,8 @@ subprojects {
         if (nativeTrace.isPresent) {
             tasks.withType<JavaExec>().configureEach {
                 dependsOn(":fidelity:nativeTraceAgent")
-                jvmArgs("-javaagent:${nativeTraceAgent.asFile.absolutePath}=${File(nativeTrace.get()).absolutePath}")
+                val agent = "-javaagent:${nativeTraceAgent.asFile.absolutePath}=${File(nativeTrace.get()).absolutePath}"
+                jvmArgumentProviders.add(CommandLineArgumentProvider { listOf(agent) })
             }
         }
 
