@@ -51,7 +51,7 @@ public final class FrameCapture {
      * here ends in an explicit exit. Without that a failure hangs instead of reporting.
      */
     public static void main(String[] arguments) {
-        var args = new LibraryArgs();
+        var args = new CaptureArgs();
 
         if (!CommandLine.parsed("captureFrames", args, arguments)) {
             return;
@@ -59,8 +59,9 @@ public final class FrameCapture {
 
         try {
             Watchdog.arm("The frame capture", 120);
-            capture(args.library());
-            System.out.println("drew " + Scene.ALL.size() + " scenes, " + REPEATS + " times each");
+            var scenes = scenesNamed(args.scenes());
+            capture(args.library(), scenes);
+            System.out.println("drew " + scenes.size() + " scenes, " + REPEATS + " times each");
             System.exit(0);
         } catch (Throwable failure) {
             failure.printStackTrace();
@@ -68,7 +69,7 @@ public final class FrameCapture {
         }
     }
 
-    private static void capture(File library) throws Exception {
+    private static void capture(File library, List<Scene> scenes) throws Exception {
         LibraryManager.putLibrary(library, "sw3d");
 
         var canvas = new Canvas();
@@ -169,8 +170,9 @@ public final class FrameCapture {
 
         var manifest = new ArrayList<String>();
 
-        for (var scene : Scene.ALL) {
+        for (var scene : scenes) {
             for (var repeat = 0; repeat < REPEATS; repeat++) {
+                Trace.markScene(scene.title(), repeat);
                 drawOnce(toolkit, scene, props, camera);
                 manifest.add(scene.title()
                     + (scene.written() ? "" : " (outstanding)")
@@ -456,6 +458,25 @@ public final class FrameCapture {
         }
 
         return mesh;
+    }
+
+    /**
+     * The scenes with the given titles, in the order they are drawn, or every scene when none is
+     * named.
+     */
+    private static List<Scene> scenesNamed(List<String> titles) {
+        var scenes = titles.isEmpty()
+            ? Scene.ALL
+            : Scene.ALL.stream().filter(scene -> titles.contains(scene.title())).toList();
+
+        var missing = titles.stream()
+            .filter(title -> scenes.stream().noneMatch(scene -> scene.title().equals(title)))
+            .toList();
+        if (!missing.isEmpty()) {
+            throw new IllegalArgumentException("No scene is called " + missing + ".");
+        }
+
+        return scenes;
     }
 
     /**

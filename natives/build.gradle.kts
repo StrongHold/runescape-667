@@ -1085,6 +1085,166 @@ val captureOwnFrames = tasks.register<JavaExec>("captureOwnFrames") {
     }
 }
 
+val watchSource = layout.projectDirectory.file("src/main/native/watch/watch.c")
+val watchLibrary = layout.buildDirectory.file("natives/libwatch.dylib")
+val watchDirectory = layout.buildDirectory.dir("watch")
+val watchRoutines = watchDirectory.map { it.file("routines.txt") }
+val shippedTrace = watchDirectory.map { it.file("shipped.txt") }
+val ownTrace = watchDirectory.map { it.file("own.txt") }
+val shippedWatchFrames = watchDirectory.map { it.dir("shipped-frames") }
+val ownWatchFrames = watchDirectory.map { it.dir("own-frames") }
+
+/**
+ * The one scene a trace is taken of, from -Pscene. A trace of every scene at once would be too
+ * large to be any use, so there is no default.
+ */
+val tracedScene = providers.gradleProperty("scene")
+
+/**
+ * Builds the watcher, which is inserted into the virtual machine that drives the shipped toolkit.
+ *
+ * It is built for x86_64 alone, because it only ever sits beside the shipped toolkit and that has
+ * no other slice.
+ */
+val compileWatcher = tasks.register<Exec>("compileWatcher") {
+    description = "Builds the library that watches the shipped toolkit call its own routines."
+    inputs.file(watchSource)
+    outputs.file(watchLibrary)
+    executable = "clang"
+    args(
+        "-arch", "x86_64",
+        "-dynamiclib",
+        "-O1",
+        "-Wall",
+        "-Werror",
+        "-o", watchLibrary.get().asFile.absolutePath,
+        watchSource.asFile.absolutePath,
+    )
+    val outputDirectory = watchLibrary.get().asFile.parentFile
+    doFirst {
+        outputDirectory.mkdirs()
+    }
+}
+
+/**
+ * Draws one scene through the shipped toolkit with some of its routines watched, and keeps what
+ * each call was handed. Name the scene with -Pscene and the routines with -Pwatch, several of them
+ * apart by semicolons:
+ *
+ *     ./gradlew :natives:compareTraces -Pscene=FoggedHorizon -Pwatch='body:2,0,0,0,1,3,0,0'
+ */
+val watchShipped = tasks.register<JavaExec>("watchShipped") {
+    description = "Draws one scene through the shipped toolkit and traces the routines named."
+    dependsOn(patchToolkit, compileWatcher)
+    mainClass = "WatchShipped"
+    classpath = sourceSets["main"].runtimeClasspath
+    setExecutable(x64JavaExecutable)
+    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+
+    val scene = tracedScene
+    val routines = providers.gradleProperty("watch")
+    val library = patchedToolkit.get().asFile.absolutePath
+    val trace = shippedTrace.get().asFile
+    val frames = shippedWatchFrames.get().asFile
+    val list = watchRoutines.get().asFile
+
+    environment("JAWTSHIM_DUMP", frames.absolutePath)
+    environment("DYLD_INSERT_LIBRARIES", watchLibrary.get().asFile.absolutePath)
+    environment("SW3D_TRACE", trace.absolutePath)
+    environment("SW3D_WATCH_ROUTINES", list.absolutePath)
+    sceneSettings.forEach { (name, fallback) ->
+        environment(name, providers.environmentVariable(name).getOrElse(fallback))
+    }
+
+    argumentProviders.add(CommandLineArgumentProvider {
+        val named = scene.orNull ?: throw GradleException("Name the scene with -Pscene.")
+        val watched = routines.orNull ?: throw GradleException("Name the routines with -Pwatch.")
+        listOf(
+            "--library", library,
+            "--routines", list.absolutePath,
+            "--scene", named,
+        ) + watched.split(";").filter { it.isNotBlank() }.flatMap { listOf("--watch", it.trim()) }
+    })
+
+    outputs.upToDateWhen { false }
+    doFirst {
+        frames.deleteRecursively()
+        frames.mkdirs()
+        trace.delete()
+        list.delete()
+    }
+}
+
+/**
+ * Draws the same scene through our toolkit with its trace switched on.
+ */
+val traceOwn = tasks.register<JavaExec>("traceOwn") {
+    description = "Draws one scene through our toolkit and traces every textured pixel."
+    dependsOn(compileSoftwareToolkit)
+    mainClass = "FrameCapture"
+    classpath = sourceSets["main"].runtimeClasspath
+    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+
+    val scene = tracedScene
+    val library = toolkitLibrary.get().asFile.absolutePath
+    val trace = ownTrace.get().asFile
+    val frames = ownWatchFrames.get().asFile
+
+    environment("SW3D_DUMP", frames.absolutePath)
+    environment("SW3D_TRACE", trace.absolutePath)
+    sceneSettings.forEach { (name, fallback) ->
+        environment(name, providers.environmentVariable(name).getOrElse(fallback))
+    }
+
+    argumentProviders.add(CommandLineArgumentProvider {
+        val named = scene.orNull ?: throw GradleException("Name the scene with -Pscene.")
+        listOf("--library", library, "--scene", named)
+    })
+
+    outputs.upToDateWhen { false }
+    doFirst {
+        frames.deleteRecursively()
+        frames.mkdirs()
+        trace.delete()
+    }
+}
+
+/**
+ * Lines the two traces up pixel by pixel and says which value differs where the pictures do.
+ *
+ * -Pat prints pixels in full, as x,y apart by semicolons. -Pignore leaves values out of the
+ * comparison, for a face that does not use them. -Pdump prints the first calls to every watched
+ * routine that is not the body of a span.
+ */
+tasks.register<JavaExec>("compareTraces") {
+    description = "Says which value differs first between the two toolkits, pixel by pixel."
+    dependsOn(watchShipped, traceOwn)
+    mainClass = "TraceCheck"
+    classpath = sourceSets["main"].runtimeClasspath
+
+    val scene = tracedScene
+    val at = providers.gradleProperty("at")
+    val ignored = providers.gradleProperty("ignore")
+    val dumped = providers.gradleProperty("dump")
+    val traced = listOf(
+        "--shipped", shippedTrace.get().asFile.absolutePath,
+        "--ours", ownTrace.get().asFile.absolutePath,
+        "--routines", watchRoutines.get().asFile.absolutePath,
+        "--shipped-frames", shippedWatchFrames.get().asFile.absolutePath,
+        "--own-frames", ownWatchFrames.get().asFile.absolutePath,
+    )
+
+    argumentProviders.add(CommandLineArgumentProvider {
+        val named = scene.orNull ?: throw GradleException("Name the scene with -Pscene.")
+        listOf("--scene", named) + traced + listOf(
+            "--dump", dumped.getOrElse("0"),
+        ) + (at.orNull?.split(";")?.flatMap { listOf("--at", it.trim()) } ?: emptyList()) +
+            (ignored.orNull?.split(",")?.flatMap { listOf("--ignore", it.trim()) } ?: emptyList())
+    })
+
+    outputs.upToDateWhen { false }
+}
+
 /**
  * Checks both toolkits against the scenes and against each other.
  *

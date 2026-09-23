@@ -824,6 +824,65 @@ static uint32_t texelAt(float u, float v, float w) {
 }
 
 /**
+ * Where the trace this toolkit writes goes, when it was started with SW3D_TRACE naming a file.
+ *
+ * The trace holds what the rasteriser worked with at every textured pixel, the same things the
+ * shipped toolkit's span works with, so that the two can be lined up pixel by pixel and the first
+ * value that differs found. The harness writes into the same file between scenes.
+ */
+static FILE *traceFile(void) {
+    static int opened;
+    static FILE *trace;
+
+    if (!opened) {
+        const char *named = getenv("SW3D_TRACE");
+        trace = named == NULL || named[0] == '\0' ? NULL : fopen(named, "a");
+        opened = 1;
+    }
+    return trace;
+}
+
+/**
+ * Writes down one textured pixel: where it is, how far away, where on its texture it reads, the
+ * light and the water it reached, and the shares of a blended face.
+ *
+ * Every float is written with nine significant digits, which is enough to read it back as exactly
+ * the same float.
+ */
+static void tracePixel(FILE *trace, int x, int y, float w, float u, float v,
+                       const uint16_t *light, const uint16_t *water, const uint16_t *mix) {
+    fprintf(trace, "P %d %d %.9g %.9g %.9g %u %u %u %u %u %u %u %u %u %u\n", x, y, (double) w,
+        (double) u, (double) v, light[0], light[1], light[2], light[3], water[0], water[1],
+        water[2], water[3], mix[0], mix[1]);
+    fflush(trace);
+}
+
+/**
+ * Writes down one run of a row: where it starts, how many pixels it covers, how far away its first
+ * pixel is and how far each step moves that, and the light and the water it starts with and steps
+ * by. These are what the shipped toolkit hands the routine that walks a run.
+ */
+static void traceRow(FILE *trace, int x, int y, int count, float depth, float depthStep,
+                     const uint16_t *light, const int16_t *lightStep, const uint16_t *water,
+                     const int16_t *waterStep) {
+    fprintf(trace, "R %d %d %d %.9g %.9g", x, y, count, (double) depth, (double) depthStep);
+    for (int part = 0; part < CHANNELS; part++) {
+        fprintf(trace, " %u", light[part]);
+    }
+    for (int part = 0; part < CHANNELS; part++) {
+        fprintf(trace, " %d", lightStep[part]);
+    }
+    for (int part = 0; part < CHANNELS; part++) {
+        fprintf(trace, " %u", water[part]);
+    }
+    for (int part = 0; part < CHANNELS; part++) {
+        fprintf(trace, " %d", waterStep[part]);
+    }
+    fprintf(trace, "\n");
+    fflush(trace);
+}
+
+/**
  * One texel of a face blended from three textures.
  *
  * Every one of the three is read at the same place, and the shares the corners carry are what
@@ -1034,6 +1093,13 @@ static void fillSpan(int y, const Side *left, const Side *right) {
     uint32_t *row = raster.pixels + start;
     float *held = raster.depths + start;
 
+    FILE *trace = traceFile();
+    if (trace != NULL) {
+        traceRow(trace, from + raster.clipLeft, y + raster.clipTop, to - from,
+            left->depth + (float) skipped * depthStep, depthStep, colour, colourStep, water,
+            waterStep);
+    }
+
     int redly = faceBare || tileRedly || tileAbove || faceSeenThrough || tileBeneath || faceTurned
         || (wateredThroughout() && underwater()->under);
     uint32_t painted = faceTurned ? WHOLLY_GREEN
@@ -1126,6 +1192,11 @@ static void fillSpan(int y, const Side *left, const Side *right) {
                     uint32_t written = 0;
                     for (int part = 0; part < CHANNELS; part++) {
                         written |= (worn[part] * reached[part] >> 16) << (part * 8);
+                    }
+
+                    if (trace != NULL) {
+                        tracePixel(trace, x + raster.clipLeft, y + raster.clipTop, w, u, v,
+                            reached, water, mix);
                     }
 
                     for (int part = 0; part < CHANNELS - 1; part++) {

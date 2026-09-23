@@ -90,8 +90,79 @@ Each library has a README of its own saying what it replaces, how far along it i
 differs from the shipped binary on purpose, and what is known to be wrong with the original. See
 `sw3d/README.md`, `jaggl/README.md`, `jaclib/README.md` and `jagmisc/README.md`.
 
-`jawtshim` is not one of the six and is not on its way out. It lets the shipped toolkits obtain a
-drawing surface on a current JDK, which they cannot do by themselves, so without it neither could
-be driven and nothing could be compared against them. The client never loads it. It lives as long
-as the checks do, which is as long as the shipped binaries are the specification. See
-`jawtshim/README.md`.
+## Libraries and tools
+
+This subproject holds two kinds of code. The libraries replace what the client loads. The tools
+drive the libraries and the shipped binaries, and compare the two. The client never loads a tool.
+
+All of it is in one subproject for now. Each library will get a subproject of its own later, and
+the tools will then move apart from them.
+
+### The libraries
+
+The build turns these into the libraries the client loads, in place of the shipped binaries.
+
+| directory | replaces |
+|---|---|
+| `src/main/native/sw3d` | the software renderer |
+| `src/main/native/jaggl` | the OpenGL binding |
+| `src/main/native/jaclib` | the memory the client manages itself |
+| `src/main/native/jagmisc` | the clock, the size of memory and the ping |
+
+### The native tools
+
+These are C because each one must sit inside a process beside a shipped binary, or must ask the
+processor a question that Java cannot ask.
+
+| directory | what it does |
+|---|---|
+| `src/main/native/jawtshim` | gives the shipped toolkits a drawing surface on a current JDK. They cannot get one by themselves, so nothing could drive them without it. See `jawtshim/README.md`. |
+| `src/main/native/watch` | watches the shipped software toolkit call its own routines, and writes down what each call gets. See "Watching the shipped toolkit" below. |
+| `src/main/native/reciprocal` | reads the answers this processor gives for its approximate reciprocals into the table that `sw3d` carries. Run it by hand only when the table must be made again. |
+
+These live as long as the checks do. The checks live as long as the shipped binaries are the
+specification.
+
+### The Java tools
+
+Everything under `src/main/java` is a tool, and a Gradle task runs each one.
+
+| files | what they do |
+|---|---|
+| `FrameCapture`, `Scene`, `Hand*`, `*Mesh`, `GradientSprite`, `IndexedGlyph` | draw the scenes through a software toolkit and keep the frames |
+| `FrameCheck`, `GoldenFrames` | compare the frames of the two toolkits, and keep the shipped frames under `goldens` |
+| `*Probe`, `AnswerCheck` | ask a library a fixed set of questions, and compare the answers of two libraries |
+| `GlSamples`, `MemoryHeap`, `Jagmisc`, `ToolkitLifetime`, `ToolkitSkeleton`, `CanvasHandover`, `SpriteLiftCheck` | check one behaviour of one library |
+| `Cache*` | read the libraries, models and terrain out of the game cache |
+| `WatchShipped`, `ShippedRoutine`, `Trace`, `TraceCheck` | watch the shipped toolkit and line what it did up against ours |
+| `CommandLine`, `Helpable`, `*Args`, `Whole`, `Watchdog` | read the arguments of a tool, and stop a tool that hangs |
+
+## Watching the shipped toolkit
+
+A difference in a frame says where the two toolkits disagree, but not why. To find out why, watch
+the shipped toolkit draw the same scene and compare the values it works with to ours.
+
+    ./gradlew :natives:compareTraces -Pscene=FoggedHorizon \
+        -Pwatch='body:2,0,0,0,1,3,0,0;span:1,0,0,0,1,0,0,0,1' -Pignore=shares -Pat='258,309'
+
+The task does three things:
+
+1. It draws the scene through the shipped toolkit with the watcher inserted. The watcher records
+   each call to the routines that `-Pwatch` names.
+2. It draws the scene through our toolkit with its trace switched on. The trace records every
+   textured pixel and every run of a row.
+3. It lines the two traces up and prints which value differs, first on the pixels where the two
+   frames differ, then on every pixel.
+
+Name a routine by its family and its template parameters, as the disassembly prints them. The
+families are `span` (`RenderHLine`), `body` (`HLineIterationBody`), `half` (`RenderHalfTriangle`)
+and `triangle` (`RenderTriangle`). A textured span does its per-pixel work in a `body` routine, so
+watch the body to compare pixels. An untextured span does its per-pixel work inline, so watch the
+`span` to compare runs. Watch at least one `body` routine in every run, because the tool uses the
+body's pixels to find where the shipped colour buffer starts. List the routines of the shipped
+library with `nm` and `c++filt`.
+
+`-Pignore` removes a value that a face does not use, for example the shares of a face that is not
+blended. `-Pat` prints pixels in full. `-Pdump` prints the first calls to each watched routine that
+is not a `body`, as raw words. Use it to learn where a routine keeps a value before the tool reads
+that value by name.
