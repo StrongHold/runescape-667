@@ -1455,19 +1455,26 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
                  * the same colour wherever the face lies and whatever time of day it is, which is
                  * what makes a map of one colour per texture readable at all.
                  *
+                 * A face with no colour at any of its corners shows no texture on the map at all,
+                 * whatever it wears.
+                 *
                  * A corner wearing anything else stands for the colour the client laid over the
-                 * face, and failing that for the colour of the ground it is on, and either way it
-                 * is drawn the way the world is: lit, and carried through whatever water covers
-                 * it.
+                 * face (see standsOnTheMap), lit and carried through whatever water covers it.
+                 * It is lit as though it wore nothing: what a texture does to the colour of the
+                 * world is not done to the map.
                  *
                  * The texture is the face's own rather than the corner's, because a face is what
                  * wears one.
                  */
-                int worn = tile->texture == NULL ? -1 : tile->texture[corner - corner % 3];
+                int first = corner - corner % 3;
+                int worn = tile->texture == NULL ? -1 : tile->texture[first];
                 const TextureMetrics *metrics = worn == -1 ? NULL : textureMetricsFor(worn);
                 int laid = overlays == NULL ? NO_COLOUR : overlays[corner];
 
-                if (metrics != NULL && !metrics->disableable) {
+                int uncoloured = colours[first] == NO_COLOUR && colours[first + 1] == NO_COLOUR
+                    && colours[first + 2] == NO_COLOUR;
+
+                if (metrics != NULL && !metrics->disableable && !uncoloured) {
                     planPicked(named, laid, worn, metrics, metrics->averageColour);
                     tile->plan[corner] = colourOf(metrics->averageColour);
                 } else {
@@ -1477,7 +1484,7 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
                     tile->plan[corner] = litCorner(ground, stands, tile->light[corner],
                             x, z, tile->across[corner], tile->along[corner],
                             tile->texture == NULL ? -1 : tile->texture[corner],
-                            !planTheOldWay());
+                            0);
 
                     tile->plan[corner] = carriedUnderWater(tile->plan[corner],
                             (uint32_t) tile->waterColour, cornerUnder(tile, corner));

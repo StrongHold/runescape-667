@@ -2340,22 +2340,6 @@ public sealed interface Scene {
      */
     record OverlaidPlan() implements Scene {
 
-        /**
-         * A hundred and forty four of its pixels are out, all of them on the one row whose corners
-         * have no colour of their own. Every other face, the one column wearing no texture among
-         * them, is drawn exactly.
-         *
-         * Those corners wear textures the harness gives no colour on the map, and nothing is laid
-         * over them. The shipped toolkit draws them in the lit grey that a corner with nothing laid
-         * over it comes to, not in the texture's colour. Skipping the texture for such a face is
-         * further off, two hundred and twelve, so it is not simply that a face with no colour
-         * never shows its texture on the map.
-         */
-        @Override
-        public boolean written() {
-            return false;
-        }
-
         @Override
         public void draw(Toolkit toolkit, Props props) {
             var visible = new boolean[HandGround.TILES][HandGround.TILES];
