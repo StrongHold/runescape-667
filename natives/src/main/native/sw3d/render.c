@@ -354,7 +354,14 @@ typedef struct {
     float u;
     float v;
     float w;
-    int16_t mix[MIXED];
+
+    /**
+     * The shares are carried down a side as floats, not as whole numbers the way the light is,
+     * because that is how the toolkit carries them. A step cut to a whole number is up to half a
+     * part short on every row, and down a tall face the whole row comes out a shade off.
+     */
+    float mix[MIXED];
+
     int16_t water[CHANNELS];
 } Side;
 
@@ -489,7 +496,7 @@ static Side sideBetween(const Corner *from, const Corner *to, int rows) {
     }
 
     for (int part = 0; part < MIXED; part++) {
-        side.mix[part] = narrow(((float) to->mix[part] - (float) from->mix[part]) * over);
+        side.mix[part] = ((float) to->mix[part] - (float) from->mix[part]) * over;
     }
 
     return side;
@@ -511,7 +518,7 @@ static Side sideAt(const Corner *corner) {
     }
 
     for (int part = 0; part < MIXED; part++) {
-        side.mix[part] = (int16_t) corner->mix[part];
+        side.mix[part] = (float) corner->mix[part];
     }
 
     return side;
@@ -533,7 +540,7 @@ static void carry(Side *side, const Side *step, int rows) {
     }
 
     for (int part = 0; part < MIXED; part++) {
-        side->mix[part] = (int16_t) (side->mix[part] + (int16_t) rows * step->mix[part]);
+        side->mix[part] += (float) rows * step->mix[part];
     }
 }
 
@@ -552,7 +559,7 @@ static void advance(Side *side, const Side *step) {
     }
 
     for (int part = 0; part < MIXED; part++) {
-        side->mix[part] = (int16_t) (side->mix[part] + step->mix[part]);
+        side->mix[part] += step->mix[part];
     }
 }
 
@@ -633,10 +640,6 @@ static int tileCarried;
 enum { TEXTURE_PER_TILE = 128 };
 
 /**
- * Works out what the place on a tile has to be brought to, to reach the place on one of the
- * textures the tile wears.
- */
-/**
  * Lays a texture on what is drawn as it stands, which is what a model asks for.
  *
  * A model carries where each corner of a face sits on its texture already, so there is nothing to
@@ -651,14 +654,22 @@ static void layTexturePlain(void) {
     }
 }
 
-static void layTextureAt(int which, int tileSize, int wide, int x, int z) {
+/**
+ * Works out what the place on a tile has to be brought to, to reach the place on one of the
+ * textures the tile wears.
+ *
+ * Where the tile stands is kept whole for a face that carries it into its corners, and for every
+ * face blended from three textures. A blended face adds it to each texture's place a pixel at a
+ * time, the whole widths and all, and a float that large keeps fewer of the place's low bits.
+ */
+static void layTextureAt(int which, int tileSize, int wide, int x, int z, int whole) {
     float laidAt = wide <= 0 || tileSize <= 0 ? 1.0f : (float) tileSize / (float) wide;
     float across = (float) (x * TEXTURE_PER_TILE) * laidAt;
     float down = (float) (z * TEXTURE_PER_TILE) * laidAt;
 
     blendedWider[which] = laidAt;
 
-    if (tileCarried) {
+    if (whole) {
         blendedFromAcross[which] = across;
         blendedFromDown[which] = down;
     } else {
@@ -997,9 +1008,8 @@ static void fillSpan(int y, const Side *left, const Side *right) {
     int16_t mixStep[MIXED];
 
     for (int part = 0; part < MIXED; part++) {
-        float each = ((float) (uint16_t) right->mix[part]
-                      - (float) (uint16_t) left->mix[part]) * over;
-        mix[part] = hold((float) (uint16_t) left->mix[part] + (float) skipped * each);
+        float each = (right->mix[part] - left->mix[part]) * over;
+        mix[part] = hold(left->mix[part] + (float) skipped * each);
         mixStep[part] = narrow(each);
     }
 
@@ -2010,7 +2020,7 @@ static int blendTextures(const void *tile, int face, int tileSize, int x, int z,
 
         int own = groundTileCornerSize(tile, face * 3 + corner);
         blended[corner] = texturePixels(texture);
-        layTextureAt(corner, tileSize, own <= 0 ? tileSize : own, x, z);
+        layTextureAt(corner, tileSize, own <= 0 ? tileSize : own, x, z, 1);
         walked[corner].mix[0] = corner == 0 ? WHOLE_SHARE : 0;
         walked[corner].mix[1] = corner == 1 ? WHOLE_SHARE : 0;
     }
@@ -2173,7 +2183,7 @@ static void layTextureOnTile(const void *ground, const void *tile, int face, int
     int blends = !cornersAgree(tile, face);
     tileCarried = !blends && wide != tileSize && shadow == NULL;
 
-    layTextureAt(0, tileSize, wide, x, z);
+    layTextureAt(0, tileSize, wide, x, z, tileCarried);
     sizesSeen(tileSize, wide, blendedWider[0]);
 
     if (blends) {

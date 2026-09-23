@@ -1659,23 +1659,6 @@ public sealed interface Scene {
      */
     record BlendedGround() implements Scene {
 
-
-        /**
-         * Two thousand eight hundred of its pixels are a shade out, and none by more than two.
-         * The faces wearing a single texture draw exactly, so what is left is on the faces
-         * blended from three. The shipped toolkit carries only the place on the tile across such
-         * a face, never where the tile stands, and lays each of the three textures on it a pixel
-         * at a time.
-         *
-         * Laying all three at the size the face names rather than at the size each corner names
-         * is further off still, so it is not that the sizes are read and it is not that they are
-         * ignored.
-         */
-        @Override
-        public boolean written() {
-            return false;
-        }
-
         @Override
         public void draw(Toolkit toolkit, Props props) {
             toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
