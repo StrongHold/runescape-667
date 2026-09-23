@@ -14,6 +14,7 @@ dependencies {
     implementation(libs.asm.tree)
     implementation(libs.asm.analysis)
     implementation(libs.asm.util)
+    implementation(libs.asm.commons)
 }
 
 val runescape = project(":runescape")
@@ -45,5 +46,42 @@ tasks.register<JavaExec>("verifyExpressions") {
         val wide = if (every) listOf("--every") else emptyList()
         val written = if (whole) listOf("--whole") else emptyList()
         listOf("--recompiled", recompiled, "--original", original) + chosen + wide + written
+    })
+}
+
+/**
+ * The agent that writes down every call a client makes into the native software toolkit, with
+ * ASM packed inside it, so that it can be handed to any client with -javaagent.
+ *
+ * The jar the client came from and the recompiled client can both be run with it, and the two
+ * records compared. See NativeTrace.
+ */
+tasks.register<Jar>("nativeTraceAgent") {
+    description = "Builds the agent that records calls into the native software toolkit."
+    archiveFileName = "native-trace.jar"
+    from(sourceSets["main"].output)
+    from(configurations["runtimeClasspath"].filter { it.name.startsWith("asm") }.map { zipTree(it) }) {
+        exclude("module-info.class", "META-INF/**")
+    }
+    manifest {
+        attributes(
+            "Premain-Class" to "NativeTrace",
+            "Can-Set-Native-Method-Prefix" to "true",
+        )
+    }
+}
+
+/**
+ * Sets the records two clients wrote with the agent side by side. Pass -Pjar=<file> for the jar's
+ * client and -Pours=<file> for the recompiled one.
+ */
+tasks.register<JavaExec>("diffNativeTraces") {
+    description = "Compares what two clients handed the native software toolkit."
+    mainClass = "NativeTraceDiff"
+    classpath = sourceSets["main"].runtimeClasspath
+    val jar = providers.gradleProperty("jar")
+    val ours = providers.gradleProperty("ours")
+    argumentProviders.add(CommandLineArgumentProvider {
+        listOf("--jar", File(jar.get()).absolutePath, "--ours", File(ours.get()).absolutePath)
     })
 }
