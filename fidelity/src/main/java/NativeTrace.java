@@ -25,33 +25,49 @@ import java.util.Set;
  * the renamed one, and hands the arguments and the answer to {@link NativeLog}.
  *
  * Started with {@code -javaagent:native-trace.jar=<file>}. The record is written to that file.
+ * Only the ground and the camera's matrix are watched unless other classes are named, as
+ * {@code -javaagent:native-trace.jar=<file>,classes=t:ja:oa}.
  */
 public final class NativeTrace {
 
     private static final String PREFIX = "$traced$";
 
     /**
-     * The classes the software toolkit binds to, the ground and the camera's matrix among them.
+     * The classes watched unless others are named: the ground and the camera's matrix.
+     *
+     * The other classes the software toolkit binds to draw models and sprites, many times a
+     * frame, and writing every one of those down slows the client until it cannot be played.
      */
-    private static final Set<String> WATCHED = Set.of("a", "h", "i", "j", "ja", "n", "oa", "t", "wa", "xa");
+    private static final String GROUND_AND_CAMERA = "t:ja";
 
     public static void premain(String argument, Instrumentation instrumentation) {
         if (!instrumentation.isNativeMethodPrefixSupported()) {
             throw new IllegalStateException("This virtual machine cannot rename native methods.");
         }
 
-        NativeLog.open(argument);
-        var transformer = new Wrapper();
+        var parts = argument == null ? new String[]{""} : argument.split(",", 2);
+        var classes = parts.length > 1 && parts[1].startsWith("classes=")
+            ? parts[1].substring("classes=".length())
+            : GROUND_AND_CAMERA;
+
+        NativeLog.open(parts[0]);
+        var transformer = new Wrapper(Set.of(classes.split(":")));
         instrumentation.addTransformer(transformer);
         instrumentation.setNativeMethodPrefix(transformer, PREFIX);
     }
 
     private static final class Wrapper implements ClassFileTransformer {
 
+        private final Set<String> watched;
+
+        Wrapper(Set<String> watched) {
+            this.watched = Set.copyOf(watched);
+        }
+
         @Override
         public byte[] transform(ClassLoader loader, String name, Class<?> redefined,
                                 ProtectionDomain domain, byte[] bytes) {
-            if (name == null || !WATCHED.contains(name)) {
+            if (name == null || !watched.contains(name)) {
                 return null;
             }
 
