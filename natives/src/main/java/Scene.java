@@ -1254,16 +1254,6 @@ public sealed interface Scene {
     record Underwater() implements Scene {
 
         /**
-         * Twelve of the scene's pixels are a shade out. How far a corner has faded, which faces
-         * are dropped, and what becomes of a face with one corner in the light and another past
-         * it are all right; what is left is how the fade is carried across a face.
-         */
-        @Override
-        public boolean written() {
-            return false;
-        }
-
-        /**
          * Where the surface sits, how far below it the last of the light reaches, what the water
          * fades everything towards, and a number the toolkit has never read.
          *
@@ -1569,29 +1559,6 @@ public sealed interface Scene {
         private static final int AMBIENT = 64;
         private static final int CONTRAST = 768;
 
-        /**
-         * Eleven thousand of its pixels are a single count out and none is out by more than that.
-         *
-         * What turns a tile into water is the DEPTH the client gives the water on it, not the
-         * colour. The colour is never tested, only used, and what it is used for is the colour
-         * everything under the water is carried towards. How far it is carried was measured off
-         * the shipped toolkit on a patch laid flat at one depth: a place half as far down as the
-         * client says the water reaches is carried the whole way, and everything shallower in
-         * proportion.
-         *
-         * The second grid of heights the ground is given is what a corner is lit by: which way it
-         * faces comes from that grid and not from the one the ground is drawn at. Turn the water
-         * off and the patch comes out exactly as the shipped toolkit draws it.
-         *
-         * What is left is the last count of the rounding. The water is carried as a colour of its
-         * own rather than as an amount to mix in, a corner at a time and added where a pixel is
-         * written, which is what took the worst pixel from twelve to one and kept it there however
-         * fast the depth changes across a face.
-         */
-        @Override
-        public boolean written() {
-            return false;
-        }
         @Override
         public void draw(Toolkit toolkit, Props props) {
             if (props.located() == null) {
@@ -1871,16 +1838,6 @@ public sealed interface Scene {
      */
     record WaterOverNoBed() implements Scene {
 
-        /**
-         * Eleven thousand of its pixels are out and every one of them by a single shade, which is
-         * what the watered patch is out by on its own. The half with no bed under it is exact, so
-         * water over nothing is drawn the same way by both.
-         */
-        @Override
-        public boolean written() {
-            return false;
-        }
-
         @Override
         public void draw(Toolkit toolkit, Props props) {
             toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
@@ -2014,17 +1971,6 @@ public sealed interface Scene {
      * holds.
      */
     record GlaringWater() implements Scene {
-
-        /**
-         * Eighteen thousand of its pixels are out and none by more than three, and every one of
-         * them is out the same way: this comes back one higher than the shipped toolkit does. The
-         * light and the water are added at a finer grain here than there, and the plainer patch
-         * is out by one for the same reason where its water is dimmer.
-         */
-        @Override
-        public boolean written() {
-            return false;
-        }
 
         @Override
         public void draw(Toolkit toolkit, Props props) {
@@ -2215,11 +2161,6 @@ public sealed interface Scene {
         private static final int FAR = 4000;
 
         @Override
-        public boolean written() {
-            return false;
-        }
-
-        @Override
         public void draw(Toolkit toolkit, Props props) {
             toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
             toolkit.f(NEAR, FAR);
@@ -2291,17 +2232,6 @@ public sealed interface Scene {
 
         /** A far edge that cuts through the patch rather than standing beyond it. */
         private static final int FAR = 4000;
-
-        /**
-         * Three thousand of its pixels are a single count out and none is out by more than that.
-         * A fade worked out over a few hundredths of the depth leaves the count of a corner's
-         * colour resting a step either side of where the shipped toolkit leaves it, which is the
-         * rounding every other patch here is out by and no more of it.
-         */
-        @Override
-        public boolean written() {
-            return false;
-        }
 
         @Override
         public void draw(Toolkit toolkit, Props props) {

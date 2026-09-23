@@ -336,6 +336,18 @@ typedef struct {
     uint16_t water[CHANNELS];
 
     /**
+     * The water and the distance's colour in this corner before they were cut to a whole number.
+     *
+     * The toolkit starts a side from the cut number, but works out how far the side moves in a
+     * row from this one. Stepping from the cut number leaves the step a count short now and then,
+     * and a whole row of the face comes out a shade off.
+     */
+    float waterWhole[CHANNELS];
+
+    /** The light in this corner before it was cut to a whole number, stepped from the same way. */
+    float colourWhole[CHANNELS];
+
+    /**
      * How much of the corner the distance took, which the water over a tile is left the rest of.
      *
      * The distance fades what a face comes to, water and all, so what the water puts on a corner
@@ -386,6 +398,7 @@ static Corner cornerAt(const Projected *point, uint32_t colour) {
     /* Nothing but the ground carries water of its own; a model is faded where it is projected. */
     for (int part = 0; part < CHANNELS; part++) {
         corner.water[part] = 0;
+        corner.waterWhole[part] = 0.0f;
     }
     corner.faded = 0.0f;
     corner.x = point->x;
@@ -426,8 +439,10 @@ static Corner cornerAt(const Projected *point, uint32_t colour) {
             standing += (water->towards[part] - standing) * point->fade;
         }
 
-        corner.colour[part] = (uint16_t) (standing * (1.0f - away));
-        corner.water[part] = (uint16_t) ((float) ((fogColour >> (part * 8) & 0xFF) << 8) * away);
+        corner.colourWhole[part] = standing * (1.0f - away);
+        corner.colour[part] = (uint16_t) corner.colourWhole[part];
+        corner.waterWhole[part] = (float) ((fogColour >> (part * 8) & 0xFF) << 8) * away;
+        corner.water[part] = (uint16_t) corner.waterWhole[part];
     }
 
     corner.u = 0.0f;
@@ -488,11 +503,11 @@ static Side sideBetween(const Corner *from, const Corner *to, int rows) {
     side.v = (to->v - from->v) * over;
     side.w = (to->w - from->w) * over;
     for (int part = 0; part < CHANNELS; part++) {
-        side.water[part] = (int16_t) (((int) to->water[part] - (int) from->water[part]) * over);
+        side.water[part] = (int16_t) ((to->waterWhole[part] - from->waterWhole[part]) * over);
     }
 
     for (int part = 0; part < CHANNELS; part++) {
-        side.colour[part] = narrow(((float) to->colour[part] - (float) from->colour[part]) * over);
+        side.colour[part] = narrow((to->colourWhole[part] - from->colourWhole[part]) * over);
     }
 
     for (int part = 0; part < MIXED; part++) {
@@ -956,8 +971,9 @@ static void fillSpan(int y, const Side *left, const Side *right) {
         int to = (uint16_t) right->water[part];
         int from = (uint16_t) left->water[part];
 
-        waterStep[part] = (int16_t) ((float) (to - from) * over);
-        water[part] = (uint16_t) (from + skipped * waterStep[part]);
+        float each = (float) (to - from) * over;
+        waterStep[part] = narrow(each);
+        water[part] = hold((float) from + (float) skipped * each);
     }
 
     /*
@@ -2352,20 +2368,25 @@ static Corner groundCornerAt(const Projected *point, uint32_t colour, float wet,
          * to, and only the distance takes it anywhere.
          */
         if (part == CHANNELS - 1) {
-            corner.colour[part] = (uint16_t) ((float) LEFT_WHOLLY_STANDING * left);
-            corner.water[part] = (uint16_t) (fog * away);
+            corner.colourWhole[part] = (float) LEFT_WHOLLY_STANDING * left;
+            corner.colour[part] = (uint16_t) corner.colourWhole[part];
+            corner.waterWhole[part] = fog * away;
+            corner.water[part] = (uint16_t) corner.waterWhole[part];
             continue;
         }
 
         float water = (float) ((waterColour >> (part * 8) & 0xFF) << 8);
 
         if (alone) {
-            corner.colour[part] = (uint16_t) ((lit * (1.0f - wet) + water * wet) * left
-                + fog * away);
+            corner.colourWhole[part] = (lit * (1.0f - wet) + water * wet) * left + fog * away;
+            corner.colour[part] = (uint16_t) corner.colourWhole[part];
+            corner.waterWhole[part] = 0.0f;
             corner.water[part] = 0;
         } else {
-            corner.colour[part] = (uint16_t) (lit * (1.0f - wet) * left);
-            corner.water[part] = (uint16_t) (fog * away + water * wet * left);
+            corner.colourWhole[part] = lit * (1.0f - wet) * left;
+            corner.colour[part] = (uint16_t) corner.colourWhole[part];
+            corner.waterWhole[part] = fog * away + water * wet * left;
+            corner.water[part] = (uint16_t) corner.waterWhole[part];
         }
     }
 
