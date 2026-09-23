@@ -2,8 +2,12 @@
 openrs2 = "0.1.0-SNAPSHOT"
 bouncycastle = "1.86"
 jcommander = "2.0"
+asm = "9.7.1"
 
 [libraries]
 openrs2-deob-annotations = { module = "org.openrs2:openrs2-deob-annotations", version.ref = "openrs2" }
 bouncycastle-bcpkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncycastle" }
 jcommander = { module = "org.jcommander:jcommander", version.ref = "jcommander" }
+asm-tree = { module = "org.ow2.asm:asm-tree", version.ref = "asm" }
+asm-analysis = { module = "org.ow2.asm:asm-analysis", version.ref = "asm" }
+asm-util = { module = "org.ow2.asm:asm-util", version.ref = "asm" }

@@ -22,6 +22,7 @@ include(
     "cache",
     "cli",
     "client",
+    "fidelity",
     "loader",
     "natives",
     "runescape",
