@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Sets two records written by {@link NativeTrace} side by side, method by method.
+ * Sets two records written by the agent in src/agent side by side, method by method.
  *
  * The calls that build the ground are made in the same order by both clients, one tile after
  * another, so the calls of each method are compared in the order they were made. The first calls

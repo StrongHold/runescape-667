@@ -79,7 +79,8 @@ val unpackX64Jdk = tasks.register<Exec>("unpackX64Jdk") {
 
 /**
  * Pass -PnativeTrace=<file> to any task that runs Java, the client included, to write down every
- * call it makes into the native software toolkit. See fidelity/src/main/java/NativeTrace.java.
+ * call it makes into the native software toolkit. Settings for the agent follow the file after a
+ * comma. See fidelity/src/agent/java/NativeTrace.java.
  */
 val nativeTrace = providers.gradleProperty("nativeTrace")
 val nativeTraceAgent = layout.projectDirectory.file("fidelity/build/libs/native-trace.jar")
@@ -89,7 +90,9 @@ subprojects {
         if (nativeTrace.isPresent) {
             tasks.withType<JavaExec>().configureEach {
                 dependsOn(":fidelity:nativeTraceAgent")
-                val agent = "-javaagent:${nativeTraceAgent.asFile.absolutePath}=${File(nativeTrace.get()).absolutePath}"
+                val file = nativeTrace.get().substringBefore(',')
+                val settings = nativeTrace.get().removePrefix(file)
+                val agent = "-javaagent:${nativeTraceAgent.asFile.absolutePath}=${File(file).absolutePath}$settings"
                 jvmArgumentProviders.add(CommandLineArgumentProvider { listOf(agent) })
             }
         }

@@ -4,12 +4,14 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.commons.AdviceAdapter;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -27,6 +29,11 @@ import java.util.Set;
  * Started with {@code -javaagent:native-trace.jar=<file>}. The record is written to that file.
  * Only the ground and the camera's matrix are watched unless other classes are named, as
  * {@code -javaagent:native-trace.jar=<file>,classes=t:ja:oa}.
+ *
+ * A method written in Java can be watched as well, by its class, name and descriptor, as
+ * {@code ,methods=lb.a(FFFFFFFFFI)V;Rasterizer.renderFlatTriangleRgb(FFFFFFFFFI)V}. Its arguments
+ * are written down as it is entered. This is how the toolkit written in Java is compared, since it
+ * makes no native calls at all, and the jar and the recompiled client name its methods differently.
  */
 public final class NativeTrace {
 
@@ -45,13 +52,19 @@ public final class NativeTrace {
             throw new IllegalStateException("This virtual machine cannot rename native methods.");
         }
 
-        var parts = argument == null ? new String[]{""} : argument.split(",", 2);
-        var classes = parts.length > 1 && parts[1].startsWith("classes=")
-            ? parts[1].substring("classes=".length())
-            : GROUND_AND_CAMERA;
+        var settings = argument == null ? new String[]{""} : argument.split(",");
+        var classes = GROUND_AND_CAMERA;
+        var methods = new HashSet<String>();
+        for (var at = 1; at < settings.length; at++) {
+            if (settings[at].startsWith("classes=")) {
+                classes = settings[at].substring("classes=".length());
+            } else if (settings[at].startsWith("methods=")) {
+                methods.addAll(Set.of(settings[at].substring("methods=".length()).split(";")));
+            }
+        }
 
-        NativeLog.open(parts[0]);
-        var transformer = new Wrapper(Set.of(classes.split(":")));
+        NativeLog.open(settings[0]);
+        var transformer = new Wrapper(Set.of(classes.split(":")), methods);
         instrumentation.addTransformer(transformer);
         instrumentation.setNativeMethodPrefix(transformer, PREFIX);
     }
@@ -59,22 +72,35 @@ public final class NativeTrace {
     private static final class Wrapper implements ClassFileTransformer {
 
         private final Set<String> watched;
+        private final Set<String> methods;
+        private final Set<String> owners = new HashSet<>();
 
-        Wrapper(Set<String> watched) {
+        Wrapper(Set<String> watched, Set<String> methods) {
             this.watched = Set.copyOf(watched);
+            this.methods = Set.copyOf(methods);
+            for (var method : methods) {
+                owners.add(method.substring(0, method.indexOf('.')));
+            }
         }
 
         @Override
         public byte[] transform(ClassLoader loader, String name, Class<?> redefined,
                                 ProtectionDomain domain, byte[] bytes) {
-            if (name == null || !watched.contains(name)) {
+            if (name == null || !(watched.contains(name) || owners.contains(name))) {
                 return null;
             }
 
-            var reader = new ClassReader(bytes);
-            var writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
-            reader.accept(new Renaming(writer, name), 0);
-            return writer.toByteArray();
+            try {
+                var reader = new ClassReader(bytes);
+                var writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
+                reader.accept(new Renaming(writer, name, watched.contains(name), methods), ClassReader.EXPAND_FRAMES);
+                return writer.toByteArray();
+            } catch (RuntimeException failure) {
+                // The virtual machine drops what a transformer throws without a word, which
+                // would leave a class quietly unwatched.
+                failure.printStackTrace();
+                throw failure;
+            }
         }
     }
 
@@ -84,16 +110,24 @@ public final class NativeTrace {
     private static final class Renaming extends ClassVisitor {
 
         private final String owner;
+        private final boolean natives;
+        private final Set<String> methods;
 
-        Renaming(ClassVisitor next, String owner) {
+        Renaming(ClassVisitor next, String owner, boolean natives, Set<String> methods) {
             super(Opcodes.ASM9, next);
             this.owner = owner;
+            this.natives = natives;
+            this.methods = methods;
         }
 
         @Override
         public MethodVisitor visitMethod(int access, String name, String descriptor, String signature,
                                          String[] exceptions) {
-            if ((access & Opcodes.ACC_NATIVE) == 0) {
+            var named = owner + "." + name + descriptor;
+            if (methods.contains(named)) {
+                var next = super.visitMethod(access, name, descriptor, signature, exceptions);
+                return new Entering(next, access, name, descriptor, owner + "." + name);
+            } else if (!natives || (access & Opcodes.ACC_NATIVE) == 0) {
                 return super.visitMethod(access, name, descriptor, signature, exceptions);
             } else {
                 var renamed = (access & ~Opcodes.ACC_PUBLIC & ~Opcodes.ACC_PROTECTED) | Opcodes.ACC_PRIVATE;
@@ -155,6 +189,27 @@ public final class NativeTrace {
                 }
                 return types;
             }
+        }
+    }
+
+    /**
+     * Writes a Java method's arguments down as it is entered.
+     */
+    private static final class Entering extends AdviceAdapter {
+
+        private final String named;
+
+        Entering(MethodVisitor next, int access, String name, String descriptor, String named) {
+            super(Opcodes.ASM9, next, access, name, descriptor);
+            this.named = named;
+        }
+
+        @Override
+        protected void onMethodEnter() {
+            push(named);
+            loadArgArray();
+            visitInsn(Opcodes.ACONST_NULL);
+            invokeStatic(Type.getType(NativeLog.class), Method.getMethod("void record(String, Object[], Object)"));
         }
     }
 

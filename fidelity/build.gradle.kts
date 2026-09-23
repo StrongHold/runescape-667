@@ -9,7 +9,19 @@ plugins {
  * that is meant to change what any method computes, and the tools here are how that is checked.
  * They read class files, never source, so what they compare is what the virtual machine runs.
  */
+/**
+ * The agent is handed to clients that run on Java 11 as well as 21, since the jar the client came
+ * from needs Pack200, which Java 14 removed. It is built on its own for that reason.
+ */
+val agent = sourceSets.create("agent")
+
+tasks.named<JavaCompile>("compileAgentJava") {
+    options.release = 11
+}
+
 dependencies {
+    "agentImplementation"(libs.asm.tree)
+    "agentImplementation"(libs.asm.commons)
     implementation(project(":cli"))
     implementation(libs.asm.tree)
     implementation(libs.asm.analysis)
@@ -59,14 +71,17 @@ tasks.register<JavaExec>("verifyExpressions") {
 tasks.register<Jar>("nativeTraceAgent") {
     description = "Builds the agent that records calls into the native software toolkit."
     archiveFileName = "native-trace.jar"
-    from(sourceSets["main"].output)
-    from(configurations["runtimeClasspath"].filter { it.name.startsWith("asm") }.map { zipTree(it) }) {
+    from(agent.output)
+    from(configurations["agentRuntimeClasspath"].filter { it.name.startsWith("asm") }.map { zipTree(it) }) {
         exclude("module-info.class", "META-INF/**")
     }
     manifest {
         attributes(
             "Premain-Class" to "NativeTrace",
             "Can-Set-Native-Method-Prefix" to "true",
+            // The jar's classes may be loaded by a class loader that cannot see the application's
+            // classes, so the record is kept where every class loader can reach it.
+            "Boot-Class-Path" to "native-trace.jar",
         )
     }
 }

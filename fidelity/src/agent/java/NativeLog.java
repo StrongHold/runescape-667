@@ -102,25 +102,26 @@ public final class NativeLog {
     }
 
     private static void write(StringBuilder line, Object value) {
-        switch (value) {
-            case null -> line.append("null");
-            case Float number -> line.append(number).append('#')
-                .append(Integer.toHexString(Float.floatToRawIntBits(number)));
-            case Double number -> line.append(number).append('#')
-                .append(Long.toHexString(Double.doubleToRawLongBits(number)));
-            case Long number when number > Integer.MAX_VALUE || number < Integer.MIN_VALUE ->
-                line.append("handle");
-            case Number number -> line.append(number);
-            case Boolean flag -> line.append(flag);
-            case Character letter -> line.append((int) letter);
-            case String text -> line.append('"').append(text).append('"');
-            default -> {
-                if (value.getClass().isArray()) {
-                    array(line, value);
-                } else {
-                    line.append(value.getClass().getName());
-                }
-            }
+        if (value == null) {
+            line.append("null");
+        } else if (value instanceof Float) {
+            var number = (Float) value;
+            line.append(number).append('#').append(Integer.toHexString(Float.floatToRawIntBits(number)));
+        } else if (value instanceof Double) {
+            var number = (Double) value;
+            line.append(number).append('#').append(Long.toHexString(Double.doubleToRawLongBits(number)));
+        } else if (value instanceof Long && ((Long) value > Integer.MAX_VALUE || (Long) value < Integer.MIN_VALUE)) {
+            line.append("handle");
+        } else if (value instanceof Number || value instanceof Boolean) {
+            line.append(value);
+        } else if (value instanceof Character) {
+            line.append((int) (Character) value);
+        } else if (value instanceof String) {
+            line.append('"').append(value).append('"');
+        } else if (value.getClass().isArray()) {
+            array(line, value);
+        } else {
+            line.append(value.getClass().getName());
         }
     }
 
