@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  */
 public final class WatchShipped {
 
-    private static final class Args implements Helpable {
+    private static final class Args implements Arguments {
 
         @ParametersDelegate
         private final CaptureArgs capture = new CaptureArgs();
@@ -48,12 +48,14 @@ public final class WatchShipped {
     }
 
     public static void main(String[] arguments) throws Exception {
-        var args = new Args();
+        var parsed = CommandLine.parse("watchShipped", new Args(), arguments);
 
-        if (!CommandLine.parsed("watchShipped", args, arguments)) {
-            return;
+        if (parsed.isPresent()) {
+            run(parsed.get());
         }
+    }
 
+    private static void run(Args args) throws Exception  {
         var routines = args.routines.stream().map(ShippedRoutine::parse).toList();
         Files.writeString(args.list, routines.stream()
             .map(ShippedRoutine::watchLine)

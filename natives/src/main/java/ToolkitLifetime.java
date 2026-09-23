@@ -25,15 +25,17 @@ public final class ToolkitLifetime {
     private static final int ROUNDS = 6;
 
     public static void main(String[] arguments) {
-        var args = new LibraryArgs();
+        var parsed = CommandLine.parse("verifyToolkitLifetime", new LibraryArgs(), arguments);
 
-        if (!CommandLine.parsed("verifyToolkitLifetime", args, arguments)) {
-            return;
+        if (parsed.isPresent()) {
+            run(parsed.get());
         }
+    }
 
+    private static void run(LibraryArgs args) {
         try {
             Watchdog.arm("The toolkit lifetime check", 120);
-            run(args.library());
+            buildAndDiscard(args.library());
             System.out.println("built and discarded " + ROUNDS + " toolkits");
             System.exit(0);
         } catch (Throwable failure) {
@@ -42,7 +44,7 @@ public final class ToolkitLifetime {
         }
     }
 
-    private static void run(File library) throws Exception {
+    private static void buildAndDiscard(File library) throws Exception {
         SoftwareToolkitLifetime.retainAll();
         LibraryManager.putLibrary(library, "sw3d");
 

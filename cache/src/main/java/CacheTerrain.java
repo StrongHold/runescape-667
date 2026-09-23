@@ -25,7 +25,7 @@ public final class CacheTerrain {
     /** How many levels a square of the map holds. */
     private static final int LEVELS = 4;
 
-    public static final class Args implements Helpable {
+    public static final class Args implements Arguments {
 
         @Parameter(names = "--x", description = "The tile's position from west to east", required = true)
         private int x;
@@ -46,12 +46,14 @@ public final class CacheTerrain {
     }
 
     public static void main(String[] arguments) throws Exception {
-        var args = new Args();
+        var parsed = CommandLine.parse("listTerrain", new Args(), arguments);
 
-        if (!CommandLine.parsed("listTerrain", args, arguments)) {
-            return;
+        if (parsed.isPresent()) {
+            run(parsed.get());
         }
+    }
 
+    private static void run(Args args) throws Exception  {
         var wantX = args.x;
         var wantZ = args.z;
         var wantLevel = args.level;

@@ -118,12 +118,14 @@ public final class GlProbe {
     }
 
     public static void main(String[] arguments) {
-        var args = new ProbeArgs();
+        var parsed = CommandLine.parse("glProbe", new ProbeArgs(), arguments);
 
-        if (!CommandLine.parsed("glProbe", args, arguments)) {
-            return;
+        if (parsed.isPresent()) {
+            run(parsed.get());
         }
+    }
 
+    private static void run(ProbeArgs args) {
         try {
             Watchdog.arm("The OpenGL binding probe", 120);
             LibraryManager.putLibrary(args.library(), "jaggl");

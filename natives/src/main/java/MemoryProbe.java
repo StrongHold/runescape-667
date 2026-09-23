@@ -36,12 +36,14 @@ public final class MemoryProbe {
     private static final int FORCES_COMPACTION = 1024;
 
     public static void main(String[] arguments) {
-        var args = new ProbeArgs();
+        var parsed = CommandLine.parse("memoryProbe", new ProbeArgs(), arguments);
 
-        if (!CommandLine.parsed("memoryProbe", args, arguments)) {
-            return;
+        if (parsed.isPresent()) {
+            run(parsed.get());
         }
+    }
 
+    private static void run(ProbeArgs args) {
         try {
             Watchdog.arm("The memory library probe", 120);
             LibraryManager.putLibrary(args.library(), "jaclib");

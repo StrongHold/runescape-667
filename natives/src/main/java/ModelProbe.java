@@ -62,12 +62,14 @@ public final class ModelProbe {
     private static final int[] ANGLES = {0, 1, 0x1000, 0x2000, 0x3000, 0x0400, 0x2ABC, 0x3FFF};
 
     public static void main(String[] arguments) {
-        var args = new ProbeArgs();
+        var parsed = CommandLine.parse("modelProbe", new ProbeArgs(), arguments);
 
-        if (!CommandLine.parsed("modelProbe", args, arguments)) {
-            return;
+        if (parsed.isPresent()) {
+            run(parsed.get());
         }
+    }
 
+    private static void run(ProbeArgs args) {
         try {
             Watchdog.arm("The model probe", 120);
             LibraryManager.putLibrary(args.library(), "sw3d");

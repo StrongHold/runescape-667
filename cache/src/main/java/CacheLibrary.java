@@ -17,7 +17,7 @@ import java.nio.file.Files;
  */
 public final class CacheLibrary {
 
-    public static final class Args implements Helpable {
+    public static final class Args implements Arguments {
 
         @ParametersDelegate
         private final CacheArgs where = new CacheArgs();
@@ -45,10 +45,10 @@ public final class CacheLibrary {
     }
 
     public static void main(String[] arguments) throws Exception {
-        var args = new Args();
+        var parsed = CommandLine.parse("extractCacheLibrary", new Args(), arguments);
 
-        if (CommandLine.parsed("extractCacheLibrary", args, arguments)) {
-            write(args);
+        if (parsed.isPresent()) {
+            write(parsed.get());
         }
     }
 

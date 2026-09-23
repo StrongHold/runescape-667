@@ -143,7 +143,7 @@ Two subprojects beside this one hold what these tools share with others:
   own that print what the cache holds, such as `:cache:listCacheLibraries` and
   `:cache:describeModel`. `:natives:keepModels` copies the models the scenes use out of the
   cache into `natives/models`, and `SceneModel` names them.
-- `cli` holds `CommandLine`, `Helpable` and `Whole`, which every tool uses to read its arguments.
+- `cli` holds `CommandLine`, `Arguments` and `Whole`, which every tool uses to read its arguments.
 
 ## Watching the shipped toolkit
 

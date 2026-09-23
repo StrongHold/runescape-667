@@ -34,12 +34,14 @@ public final class Jagmisc {
     private static final byte[] UNREACHABLE = {(byte) 192, 0, 2, 1};
 
     public static void main(String[] arguments) {
-        var args = new LibraryArgs();
+        var parsed = CommandLine.parse("verifyMiscLibrary", new LibraryArgs(), arguments);
 
-        if (!CommandLine.parsed("verifyMiscLibrary", args, arguments)) {
-            return;
+        if (parsed.isPresent()) {
+            run(parsed.get());
         }
+    }
 
+    private static void run(LibraryArgs args) {
         try {
             Watchdog.arm("The jagmisc check", 120);
             LibraryManager.putLibrary(args.library(), "jagmisc");

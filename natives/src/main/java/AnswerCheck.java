@@ -23,7 +23,7 @@ public final class AnswerCheck {
 
     private static final int SAMPLES = 8;
 
-    public static final class Args implements Helpable {
+    public static final class Args implements Arguments {
 
         @Parameter(names = "--shipped", description = "The answers the shipped library gave", required = true)
         private Path shipped;
@@ -44,12 +44,14 @@ public final class AnswerCheck {
     }
 
     public static void main(String[] arguments) {
-        var args = new Args();
+        var parsed = CommandLine.parse("verifyAnswers", new Args(), arguments);
 
-        if (!CommandLine.parsed("verifyAnswers", args, arguments)) {
-            return;
+        if (parsed.isPresent()) {
+            run(parsed.get());
         }
+    }
 
+    private static void run(Args args) {
         try {
             var shipped = Files.readAllLines(args.shipped);
             var ours = Files.readAllLines(args.ours);

@@ -20,12 +20,14 @@ public final class ToolkitSkeleton {
     private static final int HEIGHT = 384;
 
     public static void main(String[] arguments) {
-        var args = new LibraryArgs();
+        var parsed = CommandLine.parse("verifyToolkitSkeleton", new LibraryArgs(), arguments);
 
-        if (!CommandLine.parsed("verifyToolkitSkeleton", args, arguments)) {
-            return;
+        if (parsed.isPresent()) {
+            run(parsed.get());
         }
+    }
 
+    private static void run(LibraryArgs args) {
         try {
             Watchdog.arm("The skeleton check", 120);
             build(args.library());

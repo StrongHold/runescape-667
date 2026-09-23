@@ -35,12 +35,14 @@ public final class GlSamples {
     private static final int COLOUR_BUFFER = 0x4000;
 
     public static void main(String[] arguments) {
-        var args = new LibraryArgs();
+        var parsed = CommandLine.parse("verifyOpenGlSamples", new LibraryArgs(), arguments);
 
-        if (!CommandLine.parsed("verifyOpenGlSamples", args, arguments)) {
-            return;
+        if (parsed.isPresent()) {
+            run(parsed.get());
         }
+    }
 
+    private static void run(LibraryArgs args) {
         try {
             Watchdog.arm("The OpenGL sample check", 120);
             LibraryManager.putLibrary(args.library(), "jaggl");

@@ -10,7 +10,7 @@ import java.nio.file.Path;
  */
 public final class KeepModels {
 
-    private static final class Args implements Helpable {
+    private static final class Args implements Arguments {
 
         @Parameter(
             names = "--into",
@@ -29,10 +29,10 @@ public final class KeepModels {
     }
 
     public static void main(String[] arguments) throws Exception {
-        var args = new Args();
+        var parsed = CommandLine.parse("keepModels", new Args(), arguments);
 
-        if (CommandLine.parsed("keepModels", args, arguments)) {
-            SceneModel.keep(args.into);
+        if (parsed.isPresent()) {
+            SceneModel.keep(parsed.get().into);
         }
     }
 

@@ -16,7 +16,7 @@ public final class CacheModel {
     /** The model described when none is named, which is the one the scenes are built around. */
     private static final int A_MODEL_WORTH_LOOKING_AT = 32421;
 
-    public static final class Args implements Helpable {
+    public static final class Args implements Arguments {
 
         @Parameter(names = "--model", description = "Which model to describe")
         private int model = A_MODEL_WORTH_LOOKING_AT;
@@ -34,12 +34,14 @@ public final class CacheModel {
     }
 
     public static void main(String[] arguments) throws Exception {
-        var args = new Args();
+        var parsed = CommandLine.parse("describeModel", new Args(), arguments);
 
-        if (!CommandLine.parsed("describeModel", args, arguments)) {
-            return;
+        if (parsed.isPresent()) {
+            run(parsed.get());
         }
+    }
 
+    private static void run(Args args) throws Exception  {
         if (args.scanned) {
             CacheMesh.sayWhichAreScanned();
         } else {

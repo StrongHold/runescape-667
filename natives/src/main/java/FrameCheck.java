@@ -98,7 +98,7 @@ public final class FrameCheck {
         return said < 0 ? scene : scene.substring(0, said);
     }
 
-    public static final class Args implements Helpable {
+    public static final class Args implements Arguments {
 
         @Parameter(names = "--shipped", description = "The frames the shipped toolkit just drew")
         private Path shipped;
@@ -150,12 +150,14 @@ public final class FrameCheck {
     }
 
     public static void main(String[] arguments) {
-        var args = new Args();
+        var parsed = CommandLine.parse("verifyToolkit", new Args(), arguments);
 
-        if (!CommandLine.parsed("verifyToolkit", args, arguments)) {
-            return;
+        if (parsed.isPresent()) {
+            run(parsed.get());
         }
+    }
 
+    private static void run(Args args) {
         try {
             var ours = Captured.at("our toolkit", args.ours);
             var shipped = against(args, ours);

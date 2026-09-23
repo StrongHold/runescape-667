@@ -20,12 +20,14 @@ public final class MemoryHeap {
     private static final int BLOCK = 1024;
 
     public static void main(String[] arguments) {
-        var args = new LibraryArgs();
+        var parsed = CommandLine.parse("verifyMemoryLibrary", new LibraryArgs(), arguments);
 
-        if (!CommandLine.parsed("verifyMemoryLibrary", args, arguments)) {
-            return;
+        if (parsed.isPresent()) {
+            run(parsed.get());
         }
+    }
 
+    private static void run(LibraryArgs args) {
         try {
             Watchdog.arm("The memory heap check", 120);
             LibraryManager.putLibrary(args.library(), "jaclib");

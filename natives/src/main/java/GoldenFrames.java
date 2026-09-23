@@ -17,7 +17,7 @@ import java.util.List;
  */
 public final class GoldenFrames {
 
-    public static final class Args implements Helpable {
+    public static final class Args implements Arguments {
 
         @Parameter(names = "--frames", description = "The frames the shipped toolkit drew", required = true)
         private Path frames;
@@ -35,10 +35,10 @@ public final class GoldenFrames {
     }
 
     public static void main(String[] arguments) throws Exception {
-        var args = new Args();
+        var parsed = CommandLine.parse("updateGoldens", new Args(), arguments);
 
-        if (CommandLine.parsed("updateGoldens", args, arguments)) {
-            keep(args);
+        if (parsed.isPresent()) {
+            keep(parsed.get());
         }
     }
 

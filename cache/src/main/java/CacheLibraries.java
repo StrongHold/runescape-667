@@ -38,7 +38,7 @@ public final class CacheLibraries {
         /* empty */
     }
 
-    public static final class Args implements Helpable {
+    public static final class Args implements Arguments {
 
         @ParametersDelegate
         private final CacheArgs where = new CacheArgs();
@@ -53,12 +53,14 @@ public final class CacheLibraries {
     }
 
     public static void main(String[] arguments) throws Exception {
-        Args args = new Args();
+        var parsed = CommandLine.parse("listCacheLibraries", new Args(), arguments);
 
-        if (!CommandLine.parsed("listCacheLibraries", args, arguments)) {
-            return;
+        if (parsed.isPresent()) {
+            run(parsed.get());
         }
+    }
 
+    private static void run(Args args) throws Exception  {
         Js5Index index = Cache.index(args.where.cache(), Js5Archive.DLLS);
 
         int named = 0;

@@ -9,7 +9,7 @@ import java.io.File;
  * the shipped library or ours. It is always named rather than found, so that a run says on the
  * command line which of the two it was.
  */
-public final class LibraryArgs implements Helpable {
+public final class LibraryArgs implements Arguments {
 
     @Parameter(
         names = "--library",

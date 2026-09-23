@@ -66,12 +66,14 @@ public final class PointProbe {
     );
 
     public static void main(String[] arguments) {
-        var args = new ProbeArgs();
+        var parsed = CommandLine.parse("pointProbe", new ProbeArgs(), arguments);
 
-        if (!CommandLine.parsed("pointProbe", args, arguments)) {
-            return;
+        if (parsed.isPresent()) {
+            run(parsed.get());
         }
+    }
 
+    private static void run(ProbeArgs args) {
         try {
             Watchdog.arm("The point probe", 120);
             LibraryManager.putLibrary(args.library(), "sw3d");

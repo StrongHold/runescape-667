@@ -42,12 +42,14 @@ public final class MatrixProbe {
     );
 
     public static void main(String[] arguments) {
-        var args = new ProbeArgs();
+        var parsed = CommandLine.parse("matrixProbe", new ProbeArgs(), arguments);
 
-        if (!CommandLine.parsed("matrixProbe", args, arguments)) {
-            return;
+        if (parsed.isPresent()) {
+            run(parsed.get());
         }
+    }
 
+    private static void run(ProbeArgs args) {
         try {
             Watchdog.arm("The matrix probe", 120);
             LibraryManager.putLibrary(args.library(), "sw3d");

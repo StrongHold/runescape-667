@@ -46,17 +46,19 @@ public final class FrameCapture {
     private static final int AMBIENT = number("SW3D_AMBIENT", 64);
     private static final int CONTRAST = 768;
 
+    public static void main(String[] arguments) {
+        var parsed = CommandLine.parse("captureFrames", new CaptureArgs(), arguments);
+
+        if (parsed.isPresent()) {
+            run(parsed.get());
+        }
+    }
+
     /**
      * The window keeps the virtual machine alive after this method returns, so every path out of
      * here ends in an explicit exit. Without that a failure hangs instead of reporting.
      */
-    public static void main(String[] arguments) {
-        var args = new CaptureArgs();
-
-        if (!CommandLine.parsed("captureFrames", args, arguments)) {
-            return;
-        }
-
+    private static void run(CaptureArgs args) {
         try {
             Watchdog.arm("The frame capture", 120);
             var scenes = scenesNamed(args.scenes());

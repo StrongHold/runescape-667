@@ -25,7 +25,7 @@ public final class CacheLocations {
 
     private static final int TILES_ACROSS_A_SQUARE = 64;
 
-    public static final class Args implements Helpable {
+    public static final class Args implements Arguments {
 
         @Parameter(names = "--x", description = "The tile's position from west to east", required = true)
         private int x;
@@ -49,12 +49,14 @@ public final class CacheLocations {
     }
 
     public static void main(String[] arguments) throws Exception {
-        var args = new Args();
+        var parsed = CommandLine.parse("listLocations", new Args(), arguments);
 
-        if (!CommandLine.parsed("listLocations", args, arguments)) {
-            return;
+        if (parsed.isPresent()) {
+            run(parsed.get());
         }
+    }
 
+    private static void run(Args args) throws Exception  {
         var x = args.x;
         var z = args.z;
         var level = args.level;

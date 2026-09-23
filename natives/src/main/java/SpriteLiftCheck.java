@@ -12,12 +12,14 @@ import rs2.client.loading.library.LibraryManager;
  */
 public final class SpriteLiftCheck {
     public static void main(String[] arguments) throws Exception {
-        var args = new LibraryArgs();
+        var parsed = CommandLine.parse("verifySpriteLift", new LibraryArgs(), arguments);
 
-        if (!CommandLine.parsed("verifySpriteLift", args, arguments)) {
-            return;
+        if (parsed.isPresent()) {
+            run(parsed.get());
         }
+    }
 
+    private static void run(LibraryArgs args) throws Exception  {
         Watchdog.arm("The sprite lift check", 60);
         LibraryManager.putLibrary(args.library(), "sw3d");
 

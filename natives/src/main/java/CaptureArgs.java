@@ -11,7 +11,7 @@ import java.util.List;
  * the frames come out numbered from nought for that scene alone, and the trace holds nothing any
  * other scene put there.
  */
-public final class CaptureArgs implements Helpable {
+public final class CaptureArgs implements Arguments {
 
     @ParametersDelegate
     private final LibraryArgs driving = new LibraryArgs();

@@ -72,7 +72,7 @@ public final class TraceCheck {
 
     private static final int EXAMPLES = 8;
 
-    private static final class Args implements Helpable {
+    private static final class Args implements Arguments {
 
         @Parameter(
             names = "--scene",
@@ -286,12 +286,14 @@ public final class TraceCheck {
     }
 
     public static void main(String[] arguments) throws IOException {
-        var args = new Args();
+        var parsed = CommandLine.parse("compareTraces", new Args(), arguments);
 
-        if (!CommandLine.parsed("compareTraces", args, arguments)) {
-            return;
+        if (parsed.isPresent()) {
+            run(parsed.get());
         }
+    }
 
+    private static void run(Args args) throws IOException  {
         var ignored = args.ignored.stream().map(Field::named).collect(Collectors.toSet());
         var compared = Arrays.stream(Field.values())
             .filter(field -> !ignored.contains(field))

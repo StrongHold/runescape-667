@@ -47,12 +47,14 @@ public final class CanvasHandover {
     private static Canvas canvas;
 
     public static void main(String[] arguments) throws Exception {
-        var args = new LibraryArgs();
+        var parsed = CommandLine.parse("verifyCanvasHandover", new LibraryArgs(), arguments);
 
-        if (!CommandLine.parsed("verifyCanvasHandover", args, arguments)) {
-            return;
+        if (parsed.isPresent()) {
+            run(parsed.get());
         }
+    }
 
+    private static void run(LibraryArgs args) throws Exception  {
         Watchdog.arm("The canvas handover check", 120);
         SoftwareToolkitLifetime.retainAll();
         LibraryManager.putLibrary(args.library(), "sw3d");

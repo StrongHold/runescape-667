@@ -26,7 +26,7 @@ public final class CacheLocType {
     /** How many things the player may be offered to do with a location. */
     private static final int OPS = 5;
 
-    public static final class Args implements Helpable {
+    public static final class Args implements Arguments {
 
         @Parameter(names = "--loc", description = "Which kind of location to list", required = true)
         private int loc;
@@ -41,12 +41,14 @@ public final class CacheLocType {
     }
 
     public static void main(String[] arguments) throws Exception {
-        var args = new Args();
+        var parsed = CommandLine.parse("listLocType", new Args(), arguments);
 
-        if (!CommandLine.parsed("listLocType", args, arguments)) {
-            return;
+        if (parsed.isPresent()) {
+            run(parsed.get());
         }
+    }
 
+    private static void run(Args args) throws Exception  {
         var id = args.loc;
         var cache = Cache.standard();
         var index = readIndex(cache, Js5Archive.CONFIG_LOC);

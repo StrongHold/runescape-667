@@ -11,7 +11,7 @@ import java.nio.file.Path;
  * same probe is run twice, once against each library, and the two files are then compared, so the
  * answers have to be written somewhere the comparison can find them rather than printed.
  */
-public final class ProbeArgs implements Helpable {
+public final class ProbeArgs implements Arguments {
 
     @ParametersDelegate
     private final LibraryArgs driving = new LibraryArgs();
