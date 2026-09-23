@@ -55,36 +55,7 @@ jobs:
           wc -l answered.h
 
       - name: Compare with the answers the toolkit carries
-        run: |
-          python3 - <<'PY'
-          import re
-
-          def tables(path):
-              held = {}
-              for name, body in re.findall(r"const uint32_t (\w+)\[\d+\] = \{(.*?)\};",
-                                           open(path).read(), re.S):
-                  held[name] = [int(w, 16) for w in re.findall(r"0x([0-9a-f]{8})", body)]
-              return held
-
-          carried = tables("natives/src/main/native/sw3d/reciprocal-answers.h")
-          answered = tables("answered.h")
-
-          print()
-          total = 0
-          for name in sorted(carried):
-              a, b = carried[name], answered[name]
-              differ = [i for i, (x, y) in enumerate(zip(a, b)) if x != y]
-              total += len(differ)
-              worst = max((abs(a[i] - b[i]) for i in differ), default=0)
-              print("%-20s %5d of %5d entries differ, worst %d floats apart"
-                    % (name, len(differ), len(a), worst))
-
-          if total == 0:
-              print("\nThis processor answers exactly what the toolkit carries.")
-          else:
-              print("\nThis processor answers differently. The toolkit carries a table for this"
-                    " reason, so its pictures are the same here anyway.")
-          PY
+        run: ./capture --compare
 
       - uses: actions/upload-artifact@v4
         with:
