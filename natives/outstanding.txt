@@ -10,13 +10,7 @@
 #
 # scene = pixels only the shipped toolkit drew, pixels only we drew, pixels shaded differently
 BlackBacked = 0, 0, 155
-FoggedDock = 0, 0, 96
-FoggedHorizon = 0, 0, 94
 HollowPlan = 0, 0, 54
 OverlaidPlan = 16, 0, 207
-OverlaidWaterDock = 0, 0, 94
 SeenThrough = 0, 0, 21
-SeenThroughDock = 0, 0, 94
 Stairs = 0, 0, 245
-WateredDock = 0, 0, 94
-WateredHorizon = 0, 0, 94

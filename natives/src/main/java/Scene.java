@@ -1748,19 +1748,6 @@ public sealed interface Scene {
         /** How far below the surface of the water the deepest of them reaches. */
         private static final int SUNK = 180;
 
-        /**
-         * Eleven thousand of its pixels are out and the worst is a hundred and ninety four,
-         * of its pixels are out and the worst is six, which is what the watered patch under it is
-         * out by on its own.
-         *
-         * It is one of two scenes here with two grounds, and one of the two that can ask what
-         * becomes of what stands between them. Every other one draws a single patch.
-         */
-        @Override
-        public boolean written() {
-            return false;
-        }
-
         @Override
         public void draw(Toolkit toolkit, Props props) {
             drawInto(toolkit, props, props.surface(), Integer.MAX_VALUE);
@@ -1812,15 +1799,6 @@ public sealed interface Scene {
      * water is worth.
      */
     record SeenThroughDock() implements Scene {
-
-        /**
-         * The same eleven thousand pixels the dock beside it is out by, which is what the watered
-         * patch under both of them is out by on its own. Nothing the surface adds is out at all.
-         */
-        @Override
-        public boolean written() {
-            return false;
-        }
 
         @Override
         public void draw(Toolkit toolkit, Props props) {
@@ -1895,15 +1873,6 @@ public sealed interface Scene {
      * the texture a face ends up wearing rather than by the one the client handed over.
      */
     record OverlaidWaterDock() implements Scene {
-
-        /**
-         * The same eleven thousand pixels the dock beside it is out by, which is what the watered
-         * patch under it is out by on its own. Nothing the overlaid surface adds is out at all.
-         */
-        @Override
-        public boolean written() {
-            return false;
-        }
 
         @Override
         public void draw(Toolkit toolkit, Props props) {
@@ -2069,16 +2038,6 @@ public sealed interface Scene {
          */
         private static final int FAR = 6000;
 
-        /**
-         * Eleven thousand of its pixels are out, fewer than the two docks with no fade on them,
-         * and the worst is out by the same amount at the same pixel. Nothing the fade adds is out
-         * at all.
-         */
-        @Override
-        public boolean written() {
-            return false;
-        }
-
         @Override
         public void draw(Toolkit toolkit, Props props) {
             toolkit.L(FADES_TOWARDS, FADE_COMPLETE_AT, 0);
@@ -2109,11 +2068,6 @@ public sealed interface Scene {
         private static final int FAR = 4000;
 
         @Override
-        public boolean written() {
-            return false;
-        }
-
-        @Override
         public void draw(Toolkit toolkit, Props props) {
             toolkit.L(FADES_TOWARDS, FADE_COMPLETE_AT, 0);
             new WateredDock().drawInto(toolkit, props, props.waterSurface(), FAR);
@@ -2131,11 +2085,6 @@ public sealed interface Scene {
 
         /** A far edge that cuts through the patch rather than standing beyond it. */
         private static final int FAR = 4000;
-
-        @Override
-        public boolean written() {
-            return false;
-        }
 
         @Override
         public void draw(Toolkit toolkit, Props props) {

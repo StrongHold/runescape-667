@@ -247,6 +247,16 @@ typedef struct {
 const Underwater *underwater(void);
 
 /**
+ * Takes the colour of the water over a tile being drawn while the eye is under water as the colour
+ * everything is carried towards from then on.
+ *
+ * The toolkit does this for each tile it draws in that pass and never puts the colour back, so a
+ * model drawn after the ground is carried towards the water over the last tile drawn, not towards
+ * the colour the client asked for when it went under. That is how it behaves and it is kept.
+ */
+void underwaterTileDrawn(uint32_t colour);
+
+/**
  * How many triangles have been filled since the eye was last told it is looking through water.
  *
  * Kept only so that the pass the client draws through water can be counted from the client

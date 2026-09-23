@@ -813,6 +813,10 @@ const Underwater *underwater(void) {
     return &water;
 }
 
+void underwaterTileDrawn(uint32_t colour) {
+    towardsColour(wateredRed(colour), water.towards);
+}
+
 /**
  * Draws a piece of ground. The toolkit this replaces does nothing here, and the client draws its
  * ground through the ground natives instead.

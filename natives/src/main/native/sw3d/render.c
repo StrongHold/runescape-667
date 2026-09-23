@@ -390,7 +390,16 @@ static float fadedByDistance(float depth) {
     return taken < 0.0f ? 0.0f : (taken > 1.0f ? 1.0f : taken);
 }
 
-static Corner cornerAt(const Projected *point, uint32_t colour) {
+/**
+ * One corner of a model's face, lit and then carried towards the water and the distance.
+ *
+ * The water takes a share of the light and puts its own colour in the place of that share, and
+ * the distance does the same with what is left. The toolkit keeps what the corner has left of its
+ * own light apart from what the water and the distance put in, and a face that wears nothing adds
+ * the two into one colour. A face that wears a texture cannot, because the texture is laid over
+ * the light alone, so the two are kept beside each other and added once the pixel is written.
+ */
+static Corner cornerAt(const Projected *point, uint32_t colour, int alone) {
     Corner corner;
     corner.mix[0] = 0;
     corner.mix[1] = 0;
@@ -433,15 +442,19 @@ static Corner cornerAt(const Projected *point, uint32_t colour) {
     const Underwater *water = underwater();
 
     for (int part = 0; part < CHANNELS; part++) {
-        float standing = (float) corner.colour[part];
+        float lit = (float) corner.colour[part];
+        float fog = (float) ((fogColour >> (part * 8) & 0xFF) << 8);
+        float kept = lit * (1.0f - point->fade) * (1.0f - away);
+        float carried = point->fade * water->towards[part] * (1.0f - away) + away * fog;
 
-        if (part < CHANNELS - 1 && point->fade > 0.0f) {
-            standing += (water->towards[part] - standing) * point->fade;
+        if (alone) {
+            corner.colourWhole[part] = kept + carried;
+            corner.waterWhole[part] = 0.0f;
+        } else {
+            corner.colourWhole[part] = kept;
+            corner.waterWhole[part] = carried;
         }
-
-        corner.colourWhole[part] = standing * (1.0f - away);
         corner.colour[part] = (uint16_t) corner.colourWhole[part];
-        corner.waterWhole[part] = (float) ((fogColour >> (part * 8) & 0xFF) << 8) * away;
         corner.water[part] = (uint16_t) corner.waterWhole[part];
     }
 
@@ -1973,15 +1986,15 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
                 }
             }
 
-            Corner walked[3] = {
-                cornerAt(a, colours[0]),
-                cornerAt(b, colours[1]),
-                cornerAt(c, colours[2])
-            };
-
             const Texture *texture = faceTexture == NULL || faceTexture[face] == -1
                 ? NULL
                 : textureFor((unsigned short) faceTexture[face]);
+
+            Corner walked[3] = {
+                cornerAt(a, colours[0], texture == NULL),
+                cornerAt(b, colours[1], texture == NULL),
+                cornerAt(c, colours[2], texture == NULL)
+            };
 
 
             /*
@@ -2604,6 +2617,9 @@ void renderGroundTile(const void *ground, int x, int z) {
     tileBeneath = underwater()->under && switchedOff("SW3D_BED_PAINT");
 
     waterOverTile = underwater()->under ? (uint32_t) groundTileWaterColour(tile) : 0;
+    if (underwater()->under) {
+        underwaterTileDrawn(waterOverTile);
+    }
 
     float *under = calloc((size_t) corners, sizeof(float));
     if (under == NULL) {
@@ -3229,9 +3245,10 @@ static Corner flatCorner(int x, int y, uint32_t colour) {
     landed.x = (float) x;
     landed.y = (float) y;
     landed.depth = 0.0f;
+    landed.fade = 0.0f;
     landed.visible = 1;
 
-    return cornerAt(&landed, colour);
+    return cornerAt(&landed, colour, 1);
 }
 
 /**
