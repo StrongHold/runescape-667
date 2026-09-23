@@ -184,10 +184,10 @@ public final class Rasterizer {
                 if (yC > (float) this.height) {
                     yC = (float) this.height;
                 }
-                zA = zA + local186 - local186 * xA;
-                local310 = (float) (colourA & 0xFF0000) + local206 - local206 * xA;
-                local321 = (float) (colourA & 0xFF00) + local226 - local226 * xA;
-                local332 = (float) (colourA & 0xFF) + local246 - local246 * xA;
+                zA = zA - local186 * xA + local186;
+                local310 = (float) (colourA & 0xFF0000) - local206 * xA + local206;
+                local321 = (float) (colourA & 0xFF00) - local226 * xA + local226;
+                local332 = (float) (colourA & 0xFF) - local246 * xA + local246;
                 if (yB < yC) {
                     xC = xA;
                     if (yA < 0.0F) {
@@ -326,10 +326,10 @@ public final class Rasterizer {
                 if (yA > (float) this.height) {
                     yA = (float) this.height;
                 }
-                zB = zB + local186 - local186 * xB;
-                local310 = (float) (colourB & 0xFF0000) + local206 - local206 * xB;
-                local321 = (float) (colourB & 0xFF00) + local226 - local226 * xB;
-                local332 = (float) (colourB & 0xFF) + local246 - local246 * xB;
+                zB = zB - local186 * xB + local186;
+                local310 = (float) (colourB & 0xFF0000) - local206 * xB + local206;
+                local321 = (float) (colourB & 0xFF00) - local226 * xB + local226;
+                local332 = (float) (colourB & 0xFF) - local246 * xB + local246;
                 if (yC < yA) {
                     xA = xB;
                     if (yB < 0.0F) {
@@ -467,10 +467,10 @@ public final class Rasterizer {
             if (yB > (float) this.height) {
                 yB = (float) this.height;
             }
-            zC = zC + local186 - local186 * xC;
-            local310 = (float) (colourC & 0xFF0000) + local206 - local206 * xC;
-            local321 = (float) (colourC & 0xFF00) + local226 - local226 * xC;
-            local332 = (float) (colourC & 0xFF) + local246 - local246 * xC;
+            zC = zC - local186 * xC + local186;
+            local310 = (float) (colourC & 0xFF0000) - local206 * xC + local206;
+            local321 = (float) (colourC & 0xFF00) - local226 * xC + local226;
+            local332 = (float) (colourC & 0xFF) - local246 * xC + local246;
             if (yA < yB) {
                 xB = xC;
                 if (yC < 0.0F) {
@@ -669,10 +669,10 @@ public final class Rasterizer {
                 if (yC > (float) this.height) {
                     yC = (float) this.height;
                 }
-                zA = zA + local186 - local186 * xA;
-                local310 = (float) (colourA & 0xFF0000) + local206 - local206 * xA;
-                local321 = (float) (colourA & 0xFF00) + local226 - local226 * xA;
-                local332 = (float) (colourA & 0xFF) + local246 - local246 * xA;
+                zA = zA - local186 * xA + local186;
+                local310 = (float) (colourA & 0xFF0000) - local206 * xA + local206;
+                local321 = (float) (colourA & 0xFF00) - local226 * xA + local226;
+                local332 = (float) (colourA & 0xFF) - local246 * xA + local246;
                 if (yB < yC) {
                     xC = xA;
                     if (yA < 0.0F) {
@@ -811,10 +811,10 @@ public final class Rasterizer {
                 if (yA > (float) this.height) {
                     yA = (float) this.height;
                 }
-                zB = zB + local186 - local186 * xB;
-                local310 = (float) (colourB & 0xFF0000) + local206 - local206 * xB;
-                local321 = (float) (colourB & 0xFF00) + local226 - local226 * xB;
-                local332 = (float) (colourB & 0xFF) + local246 - local246 * xB;
+                zB = zB - local186 * xB + local186;
+                local310 = (float) (colourB & 0xFF0000) - local206 * xB + local206;
+                local321 = (float) (colourB & 0xFF00) - local226 * xB + local226;
+                local332 = (float) (colourB & 0xFF) - local246 * xB + local246;
                 if (yC < yA) {
                     xA = xB;
                     if (yB < 0.0F) {
@@ -952,10 +952,10 @@ public final class Rasterizer {
             if (yB > (float) this.height) {
                 yB = (float) this.height;
             }
-            zC = zC + local186 - local186 * xC;
-            local310 = (float) (colourC & 0xFF0000) + local206 - local206 * xC;
-            local321 = (float) (colourC & 0xFF00) + local226 - local226 * xC;
-            local332 = (float) (colourC & 0xFF) + local246 - local246 * xC;
+            zC = zC - local186 * xC + local186;
+            local310 = (float) (colourC & 0xFF0000) - local206 * xC + local206;
+            local321 = (float) (colourC & 0xFF00) - local226 * xC + local226;
+            local332 = (float) (colourC & 0xFF) - local246 * xC + local246;
             if (yA < yB) {
                 xB = xC;
                 if (yC < 0.0F) {
@@ -1128,7 +1128,7 @@ public final class Rasterizer {
                 if (yC > (float) this.height) {
                     yC = (float) this.height;
                 }
-                zA = zA + local131 - local131 * xA;
+                zA = zA - local131 * xA + local131;
                 if (yB < yC) {
                     xC = xA;
                     if (yA < 0.0F) {
@@ -1237,7 +1237,7 @@ public final class Rasterizer {
                 if (yA > (float) this.height) {
                     yA = (float) this.height;
                 }
-                zB = zB + local131 - local131 * xB;
+                zB = zB - local131 * xB + local131;
                 if (yC < yA) {
                     xA = xB;
                     if (yB < 0.0F) {
@@ -1345,7 +1345,7 @@ public final class Rasterizer {
             if (yB > (float) this.height) {
                 yB = (float) this.height;
             }
-            zC = zC + local131 - local131 * xC;
+            zC = zC - local131 * xC + local131;
             if (yA < yB) {
                 xB = xC;
                 if (yC < 0.0F) {
@@ -2971,7 +2971,7 @@ public final class Rasterizer {
                 @Pc(256) int local256 = (int) (local167 * (float) this.textureSize3 * this.textureScale3) & this.textureMask3;
                 @Pc(269) int local269 = (int) (local171 * (float) this.textureSize3 * this.textureScale3) & this.textureMask3;
                 @Pc(279) int local279 = this.texels3[local269 * this.textureSize3 + local256];
-                @Pc(285) float local285 = 1.0F - weightLeft - weight2Left;
+                @Pc(285) float local285 = 1.0F - (weightLeft + weight2Left);
                 @Pc(319) int local319 = ((int) (weightLeft * (float) (local207 >> 16 & 0xFF)) | 0xFF00) << 16 | (int) (weightLeft * (float) (local207 >> 8 & 0xFF)) << 8 | (int) (weightLeft * (float) (local207 & 0xFF));
                 @Pc(353) int local353 = ((int) (weight2Left * (float) (local243 >> 16 & 0xFF)) | 0xFF00) << 16 | (int) (weight2Left * (float) (local243 >> 8 & 0xFF)) << 8 | (int) (weight2Left * (float) (local243 & 0xFF));
                 @Pc(387) int local387 = ((int) (local285 * (float) (local279 >> 16 & 0xFF)) | 0xFF00) << 16 | (int) (local285 * (float) (local279 >> 8 & 0xFF)) << 8 | (int) (local285 * (float) (local279 & 0xFF));
@@ -4584,8 +4584,8 @@ public final class Rasterizer {
                 if (yC > (float) this.height) {
                     yC = (float) this.height;
                 }
-                hslA = hslA + local143 - local143 * xA;
-                zA = zA + local163 - local163 * xA;
+                hslA = hslA - local143 * xA + local143;
+                zA = zA - local163 * xA + local163;
                 if (yB < yC) {
                     xC = xA;
                     if (yA < 0.0F) {
@@ -4704,8 +4704,8 @@ public final class Rasterizer {
                 if (yA > (float) this.height) {
                     yA = (float) this.height;
                 }
-                hslB = hslB + local143 - local143 * xB;
-                zB = zB + local163 - local163 * xB;
+                hslB = hslB - local143 * xB + local143;
+                zB = zB - local163 * xB + local163;
                 if (yC < yA) {
                     xA = xB;
                     if (yB < 0.0F) {
@@ -4823,8 +4823,8 @@ public final class Rasterizer {
             if (yB > (float) this.height) {
                 yB = (float) this.height;
             }
-            hslC = hslC + local143 - local143 * xC;
-            zC = zC + local163 - local163 * xC;
+            hslC = hslC - local143 * xC + local143;
+            zC = zC - local163 * xC + local163;
             if (yA < yB) {
                 xB = xC;
                 if (yC < 0.0F) {
@@ -7105,8 +7105,8 @@ public final class Rasterizer {
                 if (yC > (float) this.height) {
                     yC = (float) this.height;
                 }
-                hslA = hslA + local143 - local143 * xA;
-                zA = zA + local163 - local163 * xA;
+                hslA = hslA - local143 * xA + local143;
+                zA = zA - local163 * xA + local163;
                 if (yB < yC) {
                     xC = xA;
                     if (yA < 0.0F) {
@@ -7225,8 +7225,8 @@ public final class Rasterizer {
                 if (yA > (float) this.height) {
                     yA = (float) this.height;
                 }
-                hslB = hslB + local143 - local143 * xB;
-                zB = zB + local163 - local163 * xB;
+                hslB = hslB - local143 * xB + local143;
+                zB = zB - local163 * xB + local163;
                 if (yC < yA) {
                     xA = xB;
                     if (yB < 0.0F) {
@@ -7344,8 +7344,8 @@ public final class Rasterizer {
             if (yB > (float) this.height) {
                 yB = (float) this.height;
             }
-            hslC = hslC + local143 - local143 * xC;
-            zC = zC + local163 - local163 * xC;
+            hslC = hslC - local143 * xC + local143;
+            zC = zC - local163 * xC + local163;
             if (yA < yB) {
                 xB = xC;
                 if (yC < 0.0F) {
@@ -7785,7 +7785,7 @@ public final class Rasterizer {
                 if (yC > (float) this.height) {
                     yC = (float) this.height;
                 }
-                zA = zA + local131 - local131 * xA;
+                zA = zA - local131 * xA + local131;
                 if (yB < yC) {
                     xC = xA;
                     if (yA < 0.0F) {
@@ -7894,7 +7894,7 @@ public final class Rasterizer {
                 if (yA > (float) this.height) {
                     yA = (float) this.height;
                 }
-                zB = zB + local131 - local131 * xB;
+                zB = zB - local131 * xB + local131;
                 if (yC < yA) {
                     xA = xB;
                     if (yB < 0.0F) {
@@ -8002,7 +8002,7 @@ public final class Rasterizer {
             if (yB > (float) this.height) {
                 yB = (float) this.height;
             }
-            zC = zC + local131 - local131 * xC;
+            zC = zC - local131 * xC + local131;
             if (yA < yB) {
                 xB = xC;
                 if (yC < 0.0F) {

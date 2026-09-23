@@ -1814,15 +1814,15 @@ public final class JavaModel extends Model {
                 if (local13.next != null) {
                     local15 = local13.next;
                 }
-                local15.anInt8518 = (int) (local2.tx + local2.e1_1 * (float) this.vertexX[local13.anInt8514] + local2.e1_2 * (float) this.vertexY[local13.anInt8514] + local2.e1_3 * (float) this.vertexZ[local13.anInt8514]);
-                local15.anInt8502 = (int) (local2.ty + local2.e2_1 * (float) this.vertexX[local13.anInt8514] + local2.e2_2 * (float) this.vertexY[local13.anInt8514] + local2.e2_3 * (float) this.vertexZ[local13.anInt8514]);
-                local15.anInt8504 = (int) (local2.tz + local2.e3_1 * (float) this.vertexX[local13.anInt8514] + local2.e3_2 * (float) this.vertexY[local13.anInt8514] + local2.e3_3 * (float) this.vertexZ[local13.anInt8514]);
-                local15.anInt8516 = (int) (local2.tx + local2.e1_1 * (float) this.vertexX[local13.anInt8508] + local2.e1_2 * (float) this.vertexY[local13.anInt8508] + local2.e1_3 * (float) this.vertexZ[local13.anInt8508]);
-                local15.anInt8507 = (int) (local2.ty + local2.e2_1 * (float) this.vertexX[local13.anInt8508] + local2.e2_2 * (float) this.vertexY[local13.anInt8508] + local2.e2_3 * (float) this.vertexZ[local13.anInt8508]);
-                local15.anInt8509 = (int) (local2.tz + local2.e3_1 * (float) this.vertexX[local13.anInt8508] + local2.e3_2 * (float) this.vertexY[local13.anInt8508] + local2.e3_3 * (float) this.vertexZ[local13.anInt8508]);
-                local15.anInt8512 = (int) (local2.tx + local2.e1_1 * (float) this.vertexX[local13.anInt8505] + local2.e1_2 * (float) this.vertexY[local13.anInt8505] + local2.e1_3 * (float) this.vertexZ[local13.anInt8505]);
-                local15.anInt8503 = (int) (local2.ty + local2.e2_1 * (float) this.vertexX[local13.anInt8505] + local2.e2_2 * (float) this.vertexY[local13.anInt8505] + local2.e2_3 * (float) this.vertexZ[local13.anInt8505]);
-                local15.anInt8520 = (int) (local2.tz + local2.e3_1 * (float) this.vertexX[local13.anInt8505] + local2.e3_2 * (float) this.vertexY[local13.anInt8505] + local2.e3_3 * (float) this.vertexZ[local13.anInt8505]);
+                local15.anInt8518 = (int) (local2.tx + (local2.e1_1 * (float) this.vertexX[local13.anInt8514] + local2.e1_2 * (float) this.vertexY[local13.anInt8514] + local2.e1_3 * (float) this.vertexZ[local13.anInt8514]));
+                local15.anInt8502 = (int) (local2.ty + (local2.e2_1 * (float) this.vertexX[local13.anInt8514] + local2.e2_2 * (float) this.vertexY[local13.anInt8514] + local2.e2_3 * (float) this.vertexZ[local13.anInt8514]));
+                local15.anInt8504 = (int) (local2.tz + (local2.e3_1 * (float) this.vertexX[local13.anInt8514] + local2.e3_2 * (float) this.vertexY[local13.anInt8514] + local2.e3_3 * (float) this.vertexZ[local13.anInt8514]));
+                local15.anInt8516 = (int) (local2.tx + (local2.e1_1 * (float) this.vertexX[local13.anInt8508] + local2.e1_2 * (float) this.vertexY[local13.anInt8508] + local2.e1_3 * (float) this.vertexZ[local13.anInt8508]));
+                local15.anInt8507 = (int) (local2.ty + (local2.e2_1 * (float) this.vertexX[local13.anInt8508] + local2.e2_2 * (float) this.vertexY[local13.anInt8508] + local2.e2_3 * (float) this.vertexZ[local13.anInt8508]));
+                local15.anInt8509 = (int) (local2.tz + (local2.e3_1 * (float) this.vertexX[local13.anInt8508] + local2.e3_2 * (float) this.vertexY[local13.anInt8508] + local2.e3_3 * (float) this.vertexZ[local13.anInt8508]));
+                local15.anInt8512 = (int) (local2.tx + (local2.e1_1 * (float) this.vertexX[local13.anInt8505] + local2.e1_2 * (float) this.vertexY[local13.anInt8505] + local2.e1_3 * (float) this.vertexZ[local13.anInt8505]));
+                local15.anInt8503 = (int) (local2.ty + (local2.e2_1 * (float) this.vertexX[local13.anInt8505] + local2.e2_2 * (float) this.vertexY[local13.anInt8505] + local2.e2_3 * (float) this.vertexZ[local13.anInt8505]));
+                local15.anInt8520 = (int) (local2.tz + (local2.e3_1 * (float) this.vertexX[local13.anInt8505] + local2.e3_2 * (float) this.vertexY[local13.anInt8505] + local2.e3_3 * (float) this.vertexZ[local13.anInt8505]));
             }
         }
         if (this.effectors == null) {
@@ -1839,9 +1839,9 @@ public final class JavaModel extends Model {
             } else {
                 local355.matrix.apply(local2);
             }
-            local357.x = (int) (local2.tx + local2.e1_1 * (float) this.vertexX[local355.vertex] + local2.e1_2 * (float) this.vertexY[local355.vertex] + local2.e1_3 * (float) this.vertexZ[local355.vertex]);
-            local357.y = (int) (local2.ty + local2.e2_1 * (float) this.vertexX[local355.vertex] + local2.e2_2 * (float) this.vertexY[local355.vertex] + local2.e2_3 * (float) this.vertexZ[local355.vertex]);
-            local357.z = (int) (local2.tz + local2.e3_1 * (float) this.vertexX[local355.vertex] + local2.e3_2 * (float) this.vertexY[local355.vertex] + local2.e3_3 * (float) this.vertexZ[local355.vertex]);
+            local357.x = (int) (local2.tx + (local2.e1_1 * (float) this.vertexX[local355.vertex] + local2.e1_2 * (float) this.vertexY[local355.vertex] + local2.e1_3 * (float) this.vertexZ[local355.vertex]));
+            local357.y = (int) (local2.ty + (local2.e2_1 * (float) this.vertexX[local355.vertex] + local2.e2_2 * (float) this.vertexY[local355.vertex] + local2.e2_3 * (float) this.vertexZ[local355.vertex]));
+            local357.z = (int) (local2.tz + (local2.e3_1 * (float) this.vertexX[local355.vertex] + local2.e3_2 * (float) this.vertexY[local355.vertex] + local2.e3_3 * (float) this.vertexZ[local355.vertex]));
         }
     }
 
@@ -2662,9 +2662,9 @@ public final class JavaModel extends Model {
     public boolean pick(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) Matrix matrix, @OriginalArg(3) boolean quick, @OriginalArg(4) int sizeShift, @OriginalArg(5) int orthoDepth) {
         this.modelMatrix = (JavaMatrix) matrix;
         @Pc(7) JavaMatrix local7 = this.toolkit.camera;
-        @Pc(31) float local31 = local7.tx + local7.e1_1 * this.modelMatrix.tx + local7.e1_2 * this.modelMatrix.ty + local7.e1_3 * this.modelMatrix.tz;
-        @Pc(55) float local55 = local7.ty + local7.e2_1 * this.modelMatrix.tx + local7.e2_2 * this.modelMatrix.ty + local7.e2_3 * this.modelMatrix.tz;
-        @Pc(79) float local79 = local7.tz + local7.e3_1 * this.modelMatrix.tx + local7.e3_2 * this.modelMatrix.ty + local7.e3_3 * this.modelMatrix.tz;
+        @Pc(31) float local31 = local7.tx + (local7.e1_1 * this.modelMatrix.tx + local7.e1_2 * this.modelMatrix.ty + local7.e1_3 * this.modelMatrix.tz);
+        @Pc(55) float local55 = local7.ty + (local7.e2_1 * this.modelMatrix.tx + local7.e2_2 * this.modelMatrix.ty + local7.e2_3 * this.modelMatrix.tz);
+        @Pc(79) float local79 = local7.tz + (local7.e3_1 * this.modelMatrix.tx + local7.e3_2 * this.modelMatrix.ty + local7.e3_3 * this.modelMatrix.tz);
         @Pc(100) float local100 = local7.e1_1 * this.modelMatrix.e1_1 + local7.e1_2 * this.modelMatrix.e2_1 + local7.e1_3 * this.modelMatrix.e3_1;
         @Pc(121) float local121 = local7.e1_1 * this.modelMatrix.e1_2 + local7.e1_2 * this.modelMatrix.e2_2 + local7.e1_3 * this.modelMatrix.e3_2;
         @Pc(142) float local142 = local7.e1_1 * this.modelMatrix.e1_3 + local7.e1_2 * this.modelMatrix.e2_3 + local7.e1_3 * this.modelMatrix.e3_3;
@@ -2735,9 +2735,9 @@ public final class JavaModel extends Model {
             local507 = this.boundsCornerX[local501];
             local512 = this.boundsCornerY[local501];
             local517 = this.boundsCornerZ[local501];
-            local534 = local31 + local100 * (float) local507 + local121 * (float) local512 + local142 * (float) local517;
-            local551 = local55 + local163 * (float) local507 + local184 * (float) local512 + local205 * (float) local517;
-            local568 = local79 + local226 * (float) local507 + local247 * (float) local512 + local268 * (float) local517;
+            local534 = local31 + (local100 * (float) local507 + local121 * (float) local512 + local142 * (float) local517);
+            local551 = local55 + (local163 * (float) local507 + local184 * (float) local512 + local205 * (float) local517);
+            local568 = local79 + (local226 * (float) local507 + local247 * (float) local512 + local268 * (float) local517);
             if (local568 >= (float) this.toolkit.zNear) {
                 if (orthoDepth > 0) {
                     local568 = (float) orthoDepth;
@@ -2767,9 +2767,9 @@ public final class JavaModel extends Model {
                 local507 = this.vertexX[local592];
                 local512 = this.vertexY[local592];
                 local517 = this.vertexZ[local592];
-                local534 = local31 + local100 * (float) local507 + local121 * (float) local512 + local142 * (float) local517;
-                local551 = local55 + local163 * (float) local507 + local184 * (float) local512 + local205 * (float) local517;
-                local568 = local79 + local226 * (float) local507 + local247 * (float) local512 + local268 * (float) local517;
+                local534 = local31 + (local100 * (float) local507 + local121 * (float) local512 + local142 * (float) local517);
+                local551 = local55 + (local163 * (float) local507 + local184 * (float) local512 + local205 * (float) local517);
+                local568 = local79 + (local226 * (float) local507 + local247 * (float) local512 + local268 * (float) local517);
                 if (local568 >= (float) this.toolkit.zNear) {
                     if (orthoDepth > 0) {
                         local568 = (float) orthoDepth;
@@ -4005,7 +4005,7 @@ public final class JavaModel extends Model {
                     this.cameraZ[local756] = (int) local823;
                 }
                 if (this.threadResource.water) {
-                    this.worldY[local756] = (int) (this.modelMatrix.ty + this.modelMatrix.e2_1 * (float) local762 + this.modelMatrix.e2_2 * (float) local767 + this.modelMatrix.e2_3 * (float) local772);
+                    this.worldY[local756] = (int) (this.modelMatrix.ty + (this.modelMatrix.e2_1 * (float) local762 + this.modelMatrix.e2_2 * (float) local767 + this.modelMatrix.e2_3 * (float) local772));
                 }
             }
             if (this.billboardFaces != null) {
@@ -4018,8 +4018,8 @@ public final class JavaModel extends Model {
                     local762 = (this.vertexX[local959] + this.vertexX[local965] + this.vertexX[local971]) / 3;
                     local767 = (this.vertexY[local959] + this.vertexY[local965] + this.vertexY[local971]) / 3;
                     local772 = (this.vertexZ[local959] + this.vertexZ[local965] + this.vertexZ[local971]) / 3;
-                    local789 = (float) local953.anInt6222 + local225 + local506 * (float) local762 + local252 * (float) local767 + local515 * (float) local772;
-                    local806 = (float) local953.anInt6229 + local375 + local509 * (float) local762 + local402 * (float) local767 + local518 * (float) local772;
+                    local789 = local225 + local506 * (float) local762 + local252 * (float) local767 + local515 * (float) local772 + (float) local953.anInt6222;
+                    local806 = local375 + local509 * (float) local762 + local402 * (float) local767 + local518 * (float) local772 + (float) local953.anInt6229;
                     local823 = local118 + local512 * (float) local762 + local145 * (float) local767 + local521 * (float) local772;
                     if (local823 > (float) this.toolkit.zNear) {
                         local953.anInt6221 = this.toolkit.projectionCenterX + (int) (local789 * (float) local743 / local823);
@@ -4049,7 +4049,7 @@ public final class JavaModel extends Model {
                     this.cameraZ[local756] = orthoDepth;
                 }
                 if (this.threadResource.water) {
-                    this.worldY[local756] = (int) (this.modelMatrix.ty + this.modelMatrix.e2_1 * (float) local762 + this.modelMatrix.e2_2 * (float) local767 + this.modelMatrix.e2_3 * (float) local772);
+                    this.worldY[local756] = (int) (this.modelMatrix.ty + (this.modelMatrix.e2_1 * (float) local762 + this.modelMatrix.e2_2 * (float) local767 + this.modelMatrix.e2_3 * (float) local772));
                 }
             }
             if (this.billboardFaces != null) {

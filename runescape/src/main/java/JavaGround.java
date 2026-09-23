@@ -171,7 +171,7 @@ public final class JavaGround extends Ground {
                 local37 = local6.verticesX[local26] + (x << super.tileSizeShift);
                 local42 = local6.verticesY[local26];
                 local52 = local6.verticesZ[local26] + (z << super.tileSizeShift);
-                local73 = this.cameraTz + this.cameraE3_1 * (float) local37 + this.cameraE3_2 * (float) local42 + this.cameraE3_3 * (float) local52;
+                local73 = this.cameraTz + (this.cameraE3_1 * (float) local37 + this.cameraE3_2 * (float) local42 + this.cameraE3_3 * (float) local52);
                 if (local73 <= (float) this.toolkit.zNear) {
                     return;
                 }
@@ -197,8 +197,8 @@ public final class JavaGround extends Ground {
                         }
                     }
                 }
-                local172 = this.cameraTx + this.cameraE1_1 * (float) local37 + this.cameraE1_2 * (float) local42 + this.cameraE1_3 * (float) local52;
-                local193 = this.cameraTy + this.cameraE2_1 * (float) local37 + this.cameraE2_2 * (float) local42 + this.cameraE2_3 * (float) local52;
+                local172 = this.cameraTx + (this.cameraE1_1 * (float) local37 + this.cameraE1_2 * (float) local42 + this.cameraE1_3 * (float) local52);
+                local193 = this.cameraTy + (this.cameraE2_1 * (float) local37 + this.cameraE2_2 * (float) local42 + this.cameraE2_3 * (float) local52);
                 screenX[local26] = rasterizer.minX + (int) (local172 * (float) this.toolkit.projectionScaleX / local73);
                 screenY[local26] = rasterizer.minY + (int) (local193 * (float) this.toolkit.projectionScaleY / local73);
                 depths[local26] = (int) local73;
@@ -208,7 +208,7 @@ public final class JavaGround extends Ground {
                 local37 = local6.verticesX[local26] + (x << super.tileSizeShift);
                 local42 = local6.verticesY[local26];
                 local52 = local6.verticesZ[local26] + (z << super.tileSizeShift);
-                local73 = this.cameraTz + this.cameraE3_1 * (float) local37 + this.cameraE3_2 * (float) local42 + this.cameraE3_3 * (float) local52;
+                local73 = this.cameraTz + (this.cameraE3_1 * (float) local37 + this.cameraE3_2 * (float) local42 + this.cameraE3_3 * (float) local52);
                 fogLevels[local26] = 0;
                 if (water) {
                     local95 = this.depthOverride - resource.fogPlane;
@@ -231,8 +231,8 @@ public final class JavaGround extends Ground {
                         }
                     }
                 }
-                local172 = this.cameraTx + this.cameraE1_1 * (float) local37 + this.cameraE1_2 * (float) local42 + this.cameraE1_3 * (float) local52;
-                local193 = this.cameraTy + this.cameraE2_1 * (float) local37 + this.cameraE2_2 * (float) local42 + this.cameraE2_3 * (float) local52;
+                local172 = this.cameraTx + (this.cameraE1_1 * (float) local37 + this.cameraE1_2 * (float) local42 + this.cameraE1_3 * (float) local52);
+                local193 = this.cameraTy + (this.cameraE2_1 * (float) local37 + this.cameraE2_2 * (float) local42 + this.cameraE2_3 * (float) local52);
                 screenX[local26] = rasterizer.minX + (int) (local172 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
                 screenY[local26] = rasterizer.minY + (int) (local193 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
                 depths[local26] = (int) local73;
@@ -1003,12 +1003,12 @@ public final class JavaGround extends Ground {
                         local50 = local2204.verticesX[local480] + (x << super.tileSizeShift);
                         local2253 = local2204.verticesY[local480];
                         local60 = local2204.verticesZ[local480] + (z << super.tileSizeShift);
-                        local2284 = this.cameraTz + this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local2253 + this.cameraE3_3 * (float) local60;
+                        local2284 = this.cameraTz + (this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local2253 + this.cameraE3_3 * (float) local60);
                         if (local2284 <= (float) this.toolkit.zNear) {
                             return;
                         }
-                        local2314 = this.cameraTx + this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local2253 + this.cameraE1_3 * (float) local60;
-                        local2335 = this.cameraTy + this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local2253 + this.cameraE2_3 * (float) local60;
+                        local2314 = this.cameraTx + (this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local2253 + this.cameraE1_3 * (float) local60);
+                        local2335 = this.cameraTy + (this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local2253 + this.cameraE2_3 * (float) local60);
                         screenX[local480] = rasterizer.minX + (int) (local2314 * (float) this.toolkit.projectionScaleX / local2284);
                         screenY[local480] = rasterizer.minY + (int) (local2335 * (float) this.toolkit.projectionScaleY / local2284);
                         depths[local480] = (int) local2284;
@@ -1018,9 +1018,9 @@ public final class JavaGround extends Ground {
                         local50 = local2204.verticesX[local480] + (x << super.tileSizeShift);
                         local2253 = local2204.verticesY[local480];
                         local60 = local2204.verticesZ[local480] + (z << super.tileSizeShift);
-                        local2284 = this.cameraTz + this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local2253 + this.cameraE3_3 * (float) local60;
-                        local2314 = this.cameraTx + this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local2253 + this.cameraE1_3 * (float) local60;
-                        local2335 = this.cameraTy + this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local2253 + this.cameraE2_3 * (float) local60;
+                        local2284 = this.cameraTz + (this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local2253 + this.cameraE3_3 * (float) local60);
+                        local2314 = this.cameraTx + (this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local2253 + this.cameraE1_3 * (float) local60);
+                        local2335 = this.cameraTy + (this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local2253 + this.cameraE2_3 * (float) local60);
                         screenX[local480] = rasterizer.minX + (int) (local2314 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
                         screenY[local480] = rasterizer.minY + (int) (local2335 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
                         depths[local480] = (int) local2284;
@@ -1146,121 +1146,121 @@ public final class JavaGround extends Ground {
                 @Pc(795) int local795 = super.tileHeights[x + 1][z + 1];
                 @Pc(804) int local804 = super.tileHeights[x][z + 1];
                 if (this.depthOverride == -1) {
-                    local99 = this.cameraTz + this.cameraE3_1 * (float) local45 + this.cameraE3_2 * (float) local72 + this.cameraE3_3 * (float) local55;
+                    local99 = this.cameraTz + (this.cameraE3_1 * (float) local45 + this.cameraE3_2 * (float) local72 + this.cameraE3_3 * (float) local55);
                     if (local99 <= (float) this.toolkit.zNear) {
                         return;
                     }
-                    local125 = this.cameraTz + this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local784 + this.cameraE3_3 * (float) local55;
+                    local125 = this.cameraTz + (this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local784 + this.cameraE3_3 * (float) local55);
                     if (local125 <= (float) this.toolkit.zNear) {
                         return;
                     }
-                    local151 = this.cameraTz + this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local795 + this.cameraE3_3 * (float) local60;
+                    local151 = this.cameraTz + (this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local795 + this.cameraE3_3 * (float) local60);
                     if (local151 <= (float) this.toolkit.zNear) {
                         return;
                     }
-                    local177 = this.cameraTz + this.cameraE3_1 * (float) local45 + this.cameraE3_2 * (float) local804 + this.cameraE3_3 * (float) local60;
+                    local177 = this.cameraTz + (this.cameraE3_1 * (float) local45 + this.cameraE3_2 * (float) local804 + this.cameraE3_3 * (float) local60);
                     if (local177 <= (float) this.toolkit.zNear) {
                         return;
                     }
-                    local287 = this.cameraTx + this.cameraE1_1 * (float) local45 + this.cameraE1_2 * (float) local72 + this.cameraE1_3 * (float) local55;
+                    local287 = this.cameraTx + (this.cameraE1_1 * (float) local45 + this.cameraE1_2 * (float) local72 + this.cameraE1_3 * (float) local55);
                     local300 = rasterizer.minX + (int) (local287 * (float) this.toolkit.projectionScaleX / local99);
-                    local317 = this.cameraTy + this.cameraE2_1 * (float) local45 + this.cameraE2_2 * (float) local72 + this.cameraE2_3 * (float) local55;
+                    local317 = this.cameraTy + (this.cameraE2_1 * (float) local45 + this.cameraE2_2 * (float) local72 + this.cameraE2_3 * (float) local55);
                     local330 = rasterizer.minY + (int) (local317 * (float) this.toolkit.projectionScaleY / local99);
-                    local347 = this.cameraTx + this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local784 + this.cameraE1_3 * (float) local55;
+                    local347 = this.cameraTx + (this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local784 + this.cameraE1_3 * (float) local55);
                     local360 = rasterizer.minX + (int) (local347 * (float) this.toolkit.projectionScaleX / local125);
-                    local377 = this.cameraTy + this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local784 + this.cameraE2_3 * (float) local55;
+                    local377 = this.cameraTy + (this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local784 + this.cameraE2_3 * (float) local55);
                     local390 = rasterizer.minY + (int) (local377 * (float) this.toolkit.projectionScaleY / local125);
-                    local407 = this.cameraTx + this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local795 + this.cameraE1_3 * (float) local60;
+                    local407 = this.cameraTx + (this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local795 + this.cameraE1_3 * (float) local60);
                     local420 = rasterizer.minX + (int) (local407 * (float) this.toolkit.projectionScaleX / local151);
-                    local437 = this.cameraTy + this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local795 + this.cameraE2_3 * (float) local60;
+                    local437 = this.cameraTy + (this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local795 + this.cameraE2_3 * (float) local60);
                     local450 = rasterizer.minY + (int) (local437 * (float) this.toolkit.projectionScaleY / local151);
-                    local467 = this.cameraTx + this.cameraE1_1 * (float) local45 + this.cameraE1_2 * (float) local804 + this.cameraE1_3 * (float) local60;
+                    local467 = this.cameraTx + (this.cameraE1_1 * (float) local45 + this.cameraE1_2 * (float) local804 + this.cameraE1_3 * (float) local60);
                     local480 = rasterizer.minX + (int) (local467 * (float) this.toolkit.projectionScaleX / local177);
-                    local497 = this.cameraTy + this.cameraE2_1 * (float) local45 + this.cameraE2_2 * (float) local804 + this.cameraE2_3 * (float) local60;
+                    local497 = this.cameraTy + (this.cameraE2_1 * (float) local45 + this.cameraE2_2 * (float) local804 + this.cameraE2_3 * (float) local60);
                     local510 = rasterizer.minY + (int) (local497 * (float) this.toolkit.projectionScaleY / local177);
                 } else {
-                    local99 = this.cameraTz + this.cameraE3_1 * (float) local45 + this.cameraE3_2 * (float) local72 + this.cameraE3_3 * (float) local55;
-                    local125 = this.cameraTz + this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local784 + this.cameraE3_3 * (float) local55;
-                    local151 = this.cameraTz + this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local795 + this.cameraE3_3 * (float) local60;
-                    local177 = this.cameraTz + this.cameraE3_1 * (float) local45 + this.cameraE3_2 * (float) local804 + this.cameraE3_3 * (float) local60;
-                    local287 = this.cameraTx + this.cameraE1_1 * (float) local45 + this.cameraE1_2 * (float) local72 + this.cameraE1_3 * (float) local55;
+                    local99 = this.cameraTz + (this.cameraE3_1 * (float) local45 + this.cameraE3_2 * (float) local72 + this.cameraE3_3 * (float) local55);
+                    local125 = this.cameraTz + (this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local784 + this.cameraE3_3 * (float) local55);
+                    local151 = this.cameraTz + (this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local795 + this.cameraE3_3 * (float) local60);
+                    local177 = this.cameraTz + (this.cameraE3_1 * (float) local45 + this.cameraE3_2 * (float) local804 + this.cameraE3_3 * (float) local60);
+                    local287 = this.cameraTx + (this.cameraE1_1 * (float) local45 + this.cameraE1_2 * (float) local72 + this.cameraE1_3 * (float) local55);
                     local300 = rasterizer.minX + (int) (local287 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
-                    local317 = this.cameraTy + this.cameraE2_1 * (float) local45 + this.cameraE2_2 * (float) local72 + this.cameraE2_3 * (float) local55;
+                    local317 = this.cameraTy + (this.cameraE2_1 * (float) local45 + this.cameraE2_2 * (float) local72 + this.cameraE2_3 * (float) local55);
                     local330 = rasterizer.minY + (int) (local317 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
-                    local347 = this.cameraTx + this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local784 + this.cameraE1_3 * (float) local55;
+                    local347 = this.cameraTx + (this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local784 + this.cameraE1_3 * (float) local55);
                     local360 = rasterizer.minX + (int) (local347 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
-                    local377 = this.cameraTy + this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local784 + this.cameraE2_3 * (float) local55;
+                    local377 = this.cameraTy + (this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local784 + this.cameraE2_3 * (float) local55);
                     local390 = rasterizer.minY + (int) (local377 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
-                    local407 = this.cameraTx + this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local795 + this.cameraE1_3 * (float) local60;
+                    local407 = this.cameraTx + (this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local795 + this.cameraE1_3 * (float) local60);
                     local420 = rasterizer.minX + (int) (local407 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
-                    local437 = this.cameraTy + this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local795 + this.cameraE2_3 * (float) local60;
+                    local437 = this.cameraTy + (this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local795 + this.cameraE2_3 * (float) local60);
                     local450 = rasterizer.minY + (int) (local437 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
-                    local467 = this.cameraTx + this.cameraE1_1 * (float) local45 + this.cameraE1_2 * (float) local804 + this.cameraE1_3 * (float) local60;
+                    local467 = this.cameraTx + (this.cameraE1_1 * (float) local45 + this.cameraE1_2 * (float) local804 + this.cameraE1_3 * (float) local60);
                     local480 = rasterizer.minX + (int) (local467 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
-                    local497 = this.cameraTy + this.cameraE2_1 * (float) local45 + this.cameraE2_2 * (float) local804 + this.cameraE2_3 * (float) local60;
+                    local497 = this.cameraTy + (this.cameraE2_1 * (float) local45 + this.cameraE2_2 * (float) local804 + this.cameraE2_3 * (float) local60);
                     local510 = rasterizer.minY + (int) (local497 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
                 }
             } else {
                 local72 = super.tileHeights[x][z];
                 @Pc(78) float local78 = this.cameraE3_2 * (float) local72;
                 if (this.depthOverride == -1) {
-                    local99 = this.cameraTz + this.cameraE3_1 * (float) local45 + local78 + this.cameraE3_3 * (float) local55;
+                    local99 = this.cameraTz + (this.cameraE3_1 * (float) local45 + local78 + this.cameraE3_3 * (float) local55);
                     if (local99 <= (float) this.toolkit.zNear) {
                         return;
                     }
-                    local125 = this.cameraTz + this.cameraE3_1 * (float) local50 + local78 + this.cameraE3_3 * (float) local55;
+                    local125 = this.cameraTz + (this.cameraE3_1 * (float) local50 + local78 + this.cameraE3_3 * (float) local55);
                     if (local125 <= (float) this.toolkit.zNear) {
                         return;
                     }
-                    local151 = this.cameraTz + this.cameraE3_1 * (float) local50 + local78 + this.cameraE3_3 * (float) local60;
+                    local151 = this.cameraTz + (this.cameraE3_1 * (float) local50 + local78 + this.cameraE3_3 * (float) local60);
                     if (local151 <= (float) this.toolkit.zNear) {
                         return;
                     }
-                    local177 = this.cameraTz + this.cameraE3_1 * (float) local45 + local78 + this.cameraE3_3 * (float) local60;
+                    local177 = this.cameraTz + (this.cameraE3_1 * (float) local45 + local78 + this.cameraE3_3 * (float) local60);
                     if (local177 <= (float) this.toolkit.zNear) {
                         return;
                     }
                 } else {
-                    local99 = this.cameraTz + this.cameraE3_1 * (float) local45 + local78 + this.cameraE3_3 * (float) local55;
-                    local125 = this.cameraTz + this.cameraE3_1 * (float) local50 + local78 + this.cameraE3_3 * (float) local55;
-                    local151 = this.cameraTz + this.cameraE3_1 * (float) local50 + local78 + this.cameraE3_3 * (float) local60;
-                    local177 = this.cameraTz + this.cameraE3_1 * (float) local45 + local78 + this.cameraE3_3 * (float) local60;
+                    local99 = this.cameraTz + (this.cameraE3_1 * (float) local45 + local78 + this.cameraE3_3 * (float) local55);
+                    local125 = this.cameraTz + (this.cameraE3_1 * (float) local50 + local78 + this.cameraE3_3 * (float) local55);
+                    local151 = this.cameraTz + (this.cameraE3_1 * (float) local50 + local78 + this.cameraE3_3 * (float) local60);
+                    local177 = this.cameraTz + (this.cameraE3_1 * (float) local45 + local78 + this.cameraE3_3 * (float) local60);
                 }
                 @Pc(260) float local260 = this.cameraE1_2 * (float) local72;
                 @Pc(266) float local266 = this.cameraE2_2 * (float) local72;
                 if (this.depthOverride == -1) {
-                    local287 = this.cameraTx + this.cameraE1_1 * (float) local45 + local260 + this.cameraE1_3 * (float) local55;
+                    local287 = this.cameraTx + (this.cameraE1_1 * (float) local45 + local260 + this.cameraE1_3 * (float) local55);
                     local300 = rasterizer.minX + (int) (local287 * (float) this.toolkit.projectionScaleX / local99);
-                    local317 = this.cameraTy + this.cameraE2_1 * (float) local45 + local266 + this.cameraE2_3 * (float) local55;
+                    local317 = this.cameraTy + (this.cameraE2_1 * (float) local45 + local266 + this.cameraE2_3 * (float) local55);
                     local330 = rasterizer.minY + (int) (local317 * (float) this.toolkit.projectionScaleY / local99);
-                    local347 = this.cameraTx + this.cameraE1_1 * (float) local50 + local260 + this.cameraE1_3 * (float) local55;
+                    local347 = this.cameraTx + (this.cameraE1_1 * (float) local50 + local260 + this.cameraE1_3 * (float) local55);
                     local360 = rasterizer.minX + (int) (local347 * (float) this.toolkit.projectionScaleX / local125);
-                    local377 = this.cameraTy + this.cameraE2_1 * (float) local50 + local266 + this.cameraE2_3 * (float) local55;
+                    local377 = this.cameraTy + (this.cameraE2_1 * (float) local50 + local266 + this.cameraE2_3 * (float) local55);
                     local390 = rasterizer.minY + (int) (local377 * (float) this.toolkit.projectionScaleY / local125);
-                    local407 = this.cameraTx + this.cameraE1_1 * (float) local50 + local260 + this.cameraE1_3 * (float) local60;
+                    local407 = this.cameraTx + (this.cameraE1_1 * (float) local50 + local260 + this.cameraE1_3 * (float) local60);
                     local420 = rasterizer.minX + (int) (local407 * (float) this.toolkit.projectionScaleX / local151);
-                    local437 = this.cameraTy + this.cameraE2_1 * (float) local50 + local266 + this.cameraE2_3 * (float) local60;
+                    local437 = this.cameraTy + (this.cameraE2_1 * (float) local50 + local266 + this.cameraE2_3 * (float) local60);
                     local450 = rasterizer.minY + (int) (local437 * (float) this.toolkit.projectionScaleY / local151);
-                    local467 = this.cameraTx + this.cameraE1_1 * (float) local45 + local260 + this.cameraE1_3 * (float) local60;
+                    local467 = this.cameraTx + (this.cameraE1_1 * (float) local45 + local260 + this.cameraE1_3 * (float) local60);
                     local480 = rasterizer.minX + (int) (local467 * (float) this.toolkit.projectionScaleX / local177);
-                    local497 = this.cameraTy + this.cameraE2_1 * (float) local45 + local266 + this.cameraE2_3 * (float) local60;
+                    local497 = this.cameraTy + (this.cameraE2_1 * (float) local45 + local266 + this.cameraE2_3 * (float) local60);
                     local510 = rasterizer.minY + (int) (local497 * (float) this.toolkit.projectionScaleY / local177);
                 } else {
-                    local287 = this.cameraTx + this.cameraE1_1 * (float) local45 + local260 + this.cameraE1_3 * (float) local55;
+                    local287 = this.cameraTx + (this.cameraE1_1 * (float) local45 + local260 + this.cameraE1_3 * (float) local55);
                     local300 = rasterizer.minX + (int) (local287 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
-                    local317 = this.cameraTy + this.cameraE2_1 * (float) local45 + local266 + this.cameraE2_3 * (float) local55;
+                    local317 = this.cameraTy + (this.cameraE2_1 * (float) local45 + local266 + this.cameraE2_3 * (float) local55);
                     local330 = rasterizer.minY + (int) (local317 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
-                    local347 = this.cameraTx + this.cameraE1_1 * (float) local50 + local260 + this.cameraE1_3 * (float) local55;
+                    local347 = this.cameraTx + (this.cameraE1_1 * (float) local50 + local260 + this.cameraE1_3 * (float) local55);
                     local360 = rasterizer.minX + (int) (local347 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
-                    local377 = this.cameraTy + this.cameraE2_1 * (float) local50 + local266 + this.cameraE2_3 * (float) local55;
+                    local377 = this.cameraTy + (this.cameraE2_1 * (float) local50 + local266 + this.cameraE2_3 * (float) local55);
                     local390 = rasterizer.minY + (int) (local377 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
-                    local407 = this.cameraTx + this.cameraE1_1 * (float) local50 + local260 + this.cameraE1_3 * (float) local60;
+                    local407 = this.cameraTx + (this.cameraE1_1 * (float) local50 + local260 + this.cameraE1_3 * (float) local60);
                     local420 = rasterizer.minX + (int) (local407 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
-                    local437 = this.cameraTy + this.cameraE2_1 * (float) local50 + local266 + this.cameraE2_3 * (float) local60;
+                    local437 = this.cameraTy + (this.cameraE2_1 * (float) local50 + local266 + this.cameraE2_3 * (float) local60);
                     local450 = rasterizer.minY + (int) (local437 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
-                    local467 = this.cameraTx + this.cameraE1_1 * (float) local45 + local260 + this.cameraE1_3 * (float) local60;
+                    local467 = this.cameraTx + (this.cameraE1_1 * (float) local45 + local260 + this.cameraE1_3 * (float) local60);
                     local480 = rasterizer.minX + (int) (local467 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
-                    local497 = this.cameraTy + this.cameraE2_1 * (float) local45 + local266 + this.cameraE2_3 * (float) local60;
+                    local497 = this.cameraTy + (this.cameraE2_1 * (float) local45 + local266 + this.cameraE2_3 * (float) local60);
                     local510 = rasterizer.minY + (int) (local497 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
                 }
             }
@@ -1573,27 +1573,27 @@ public final class JavaGround extends Ground {
                     @Pc(90) float local90 = this.cameraE3_2 * (float) local84;
 
                     if (this.depthOverride == -1) {
-                        local111 = this.cameraTz + this.cameraE3_1 * (float) local45 + local90 + this.cameraE3_3 * (float) local55;
+                        local111 = this.cameraTz + (this.cameraE3_1 * (float) local45 + local90 + this.cameraE3_3 * (float) local55);
                         if (local111 <= (float) this.toolkit.zNear) {
                             return;
                         }
-                        local137 = this.cameraTz + this.cameraE3_1 * (float) local50 + local90 + this.cameraE3_3 * (float) local55;
+                        local137 = this.cameraTz + (this.cameraE3_1 * (float) local50 + local90 + this.cameraE3_3 * (float) local55);
                         if (local137 <= (float) this.toolkit.zNear) {
                             return;
                         }
-                        local163 = this.cameraTz + this.cameraE3_1 * (float) local50 + local90 + this.cameraE3_3 * (float) local60;
+                        local163 = this.cameraTz + (this.cameraE3_1 * (float) local50 + local90 + this.cameraE3_3 * (float) local60);
                         if (local163 <= (float) this.toolkit.zNear) {
                             return;
                         }
-                        local189 = this.cameraTz + this.cameraE3_1 * (float) local45 + local90 + this.cameraE3_3 * (float) local60;
+                        local189 = this.cameraTz + (this.cameraE3_1 * (float) local45 + local90 + this.cameraE3_3 * (float) local60);
                         if (local189 <= (float) this.toolkit.zNear) {
                             return;
                         }
                     } else {
-                        local111 = this.cameraTz + this.cameraE3_1 * (float) local45 + local90 + this.cameraE3_3 * (float) local55;
-                        local137 = this.cameraTz + this.cameraE3_1 * (float) local50 + local90 + this.cameraE3_3 * (float) local55;
-                        local163 = this.cameraTz + this.cameraE3_1 * (float) local50 + local90 + this.cameraE3_3 * (float) local60;
-                        local189 = this.cameraTz + this.cameraE3_1 * (float) local45 + local90 + this.cameraE3_3 * (float) local60;
+                        local111 = this.cameraTz + (this.cameraE3_1 * (float) local45 + local90 + this.cameraE3_3 * (float) local55);
+                        local137 = this.cameraTz + (this.cameraE3_1 * (float) local50 + local90 + this.cameraE3_3 * (float) local55);
+                        local163 = this.cameraTz + (this.cameraE3_1 * (float) local50 + local90 + this.cameraE3_3 * (float) local60);
+                        local189 = this.cameraTz + (this.cameraE3_1 * (float) local45 + local90 + this.cameraE3_3 * (float) local60);
                     }
 
                     if (resource.fogActive) {
@@ -1630,38 +1630,38 @@ public final class JavaGround extends Ground {
                     @Pc(339) float local339 = this.cameraE1_2 * (float) local84;
                     @Pc(345) float local345 = this.cameraE2_2 * (float) local84;
                     if (this.depthOverride == -1) {
-                        local366 = this.cameraTx + this.cameraE1_1 * (float) local45 + local339 + this.cameraE1_3 * (float) local55;
+                        local366 = this.cameraTx + (this.cameraE1_1 * (float) local45 + local339 + this.cameraE1_3 * (float) local55);
                         local379 = rasterizer.minX + (int) (local366 * (float) this.toolkit.projectionScaleX / local111);
-                        local396 = this.cameraTy + this.cameraE2_1 * (float) local45 + local345 + this.cameraE2_3 * (float) local55;
+                        local396 = this.cameraTy + (this.cameraE2_1 * (float) local45 + local345 + this.cameraE2_3 * (float) local55);
                         local409 = rasterizer.minY + (int) (local396 * (float) this.toolkit.projectionScaleY / local111);
-                        local426 = this.cameraTx + this.cameraE1_1 * (float) local50 + local339 + this.cameraE1_3 * (float) local55;
+                        local426 = this.cameraTx + (this.cameraE1_1 * (float) local50 + local339 + this.cameraE1_3 * (float) local55);
                         local439 = rasterizer.minX + (int) (local426 * (float) this.toolkit.projectionScaleX / local137);
-                        local456 = this.cameraTy + this.cameraE2_1 * (float) local50 + local345 + this.cameraE2_3 * (float) local55;
+                        local456 = this.cameraTy + (this.cameraE2_1 * (float) local50 + local345 + this.cameraE2_3 * (float) local55);
                         local469 = rasterizer.minY + (int) (local456 * (float) this.toolkit.projectionScaleY / local137);
-                        local486 = this.cameraTx + this.cameraE1_1 * (float) local50 + local339 + this.cameraE1_3 * (float) local60;
+                        local486 = this.cameraTx + (this.cameraE1_1 * (float) local50 + local339 + this.cameraE1_3 * (float) local60);
                         local499 = rasterizer.minX + (int) (local486 * (float) this.toolkit.projectionScaleX / local163);
-                        local516 = this.cameraTy + this.cameraE2_1 * (float) local50 + local345 + this.cameraE2_3 * (float) local60;
+                        local516 = this.cameraTy + (this.cameraE2_1 * (float) local50 + local345 + this.cameraE2_3 * (float) local60);
                         local529 = rasterizer.minY + (int) (local516 * (float) this.toolkit.projectionScaleY / local163);
-                        local546 = this.cameraTx + this.cameraE1_1 * (float) local45 + local339 + this.cameraE1_3 * (float) local60;
+                        local546 = this.cameraTx + (this.cameraE1_1 * (float) local45 + local339 + this.cameraE1_3 * (float) local60);
                         local559 = rasterizer.minX + (int) (local546 * (float) this.toolkit.projectionScaleX / local189);
-                        local576 = this.cameraTy + this.cameraE2_1 * (float) local45 + local345 + this.cameraE2_3 * (float) local60;
+                        local576 = this.cameraTy + (this.cameraE2_1 * (float) local45 + local345 + this.cameraE2_3 * (float) local60);
                         local589 = rasterizer.minY + (int) (local576 * (float) this.toolkit.projectionScaleY / local189);
                     } else {
-                        local366 = this.cameraTx + this.cameraE1_1 * (float) local45 + local339 + this.cameraE1_3 * (float) local55;
+                        local366 = this.cameraTx + (this.cameraE1_1 * (float) local45 + local339 + this.cameraE1_3 * (float) local55);
                         local379 = rasterizer.minX + (int) (local366 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
-                        local396 = this.cameraTy + this.cameraE2_1 * (float) local45 + local345 + this.cameraE2_3 * (float) local55;
+                        local396 = this.cameraTy + (this.cameraE2_1 * (float) local45 + local345 + this.cameraE2_3 * (float) local55);
                         local409 = rasterizer.minY + (int) (local396 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
-                        local426 = this.cameraTx + this.cameraE1_1 * (float) local50 + local339 + this.cameraE1_3 * (float) local55;
+                        local426 = this.cameraTx + (this.cameraE1_1 * (float) local50 + local339 + this.cameraE1_3 * (float) local55);
                         local439 = rasterizer.minX + (int) (local426 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
-                        local456 = this.cameraTy + this.cameraE2_1 * (float) local50 + local345 + this.cameraE2_3 * (float) local55;
+                        local456 = this.cameraTy + (this.cameraE2_1 * (float) local50 + local345 + this.cameraE2_3 * (float) local55);
                         local469 = rasterizer.minY + (int) (local456 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
-                        local486 = this.cameraTx + this.cameraE1_1 * (float) local50 + local339 + this.cameraE1_3 * (float) local60;
+                        local486 = this.cameraTx + (this.cameraE1_1 * (float) local50 + local339 + this.cameraE1_3 * (float) local60);
                         local499 = rasterizer.minX + (int) (local486 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
-                        local516 = this.cameraTy + this.cameraE2_1 * (float) local50 + local345 + this.cameraE2_3 * (float) local60;
+                        local516 = this.cameraTy + (this.cameraE2_1 * (float) local50 + local345 + this.cameraE2_3 * (float) local60);
                         local529 = rasterizer.minY + (int) (local516 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
-                        local546 = this.cameraTx + this.cameraE1_1 * (float) local45 + local339 + this.cameraE1_3 * (float) local60;
+                        local546 = this.cameraTx + (this.cameraE1_1 * (float) local45 + local339 + this.cameraE1_3 * (float) local60);
                         local559 = rasterizer.minX + (int) (local546 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
-                        local576 = this.cameraTy + this.cameraE2_1 * (float) local45 + local345 + this.cameraE2_3 * (float) local60;
+                        local576 = this.cameraTy + (this.cameraE2_1 * (float) local45 + local345 + this.cameraE2_3 * (float) local60);
                         local589 = rasterizer.minY + (int) (local576 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
                     }
                 } else {
@@ -1671,27 +1671,27 @@ public final class JavaGround extends Ground {
                     @Pc(883) int local883 = super.tileHeights[x][z + 1];
 
                     if (this.depthOverride == -1) {
-                        local111 = this.cameraTz + this.cameraE3_1 * (float) local45 + this.cameraE3_2 * (float) local84 + this.cameraE3_3 * (float) local55;
+                        local111 = this.cameraTz + (this.cameraE3_1 * (float) local45 + this.cameraE3_2 * (float) local84 + this.cameraE3_3 * (float) local55);
                         if (local111 <= (float) this.toolkit.zNear) {
                             return;
                         }
-                        local137 = this.cameraTz + this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local863 + this.cameraE3_3 * (float) local55;
+                        local137 = this.cameraTz + (this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local863 + this.cameraE3_3 * (float) local55);
                         if (local137 <= (float) this.toolkit.zNear) {
                             return;
                         }
-                        local163 = this.cameraTz + this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local874 + this.cameraE3_3 * (float) local60;
+                        local163 = this.cameraTz + (this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local874 + this.cameraE3_3 * (float) local60);
                         if (local163 <= (float) this.toolkit.zNear) {
                             return;
                         }
-                        local189 = this.cameraTz + this.cameraE3_1 * (float) local45 + this.cameraE3_2 * (float) local883 + this.cameraE3_3 * (float) local60;
+                        local189 = this.cameraTz + (this.cameraE3_1 * (float) local45 + this.cameraE3_2 * (float) local883 + this.cameraE3_3 * (float) local60);
                         if (local189 <= (float) this.toolkit.zNear) {
                             return;
                         }
                     } else {
-                        local111 = this.cameraTz + this.cameraE3_1 * (float) local45 + this.cameraE3_2 * (float) local84 + this.cameraE3_3 * (float) local55;
-                        local137 = this.cameraTz + this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local863 + this.cameraE3_3 * (float) local55;
-                        local163 = this.cameraTz + this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local874 + this.cameraE3_3 * (float) local60;
-                        local189 = this.cameraTz + this.cameraE3_1 * (float) local45 + this.cameraE3_2 * (float) local883 + this.cameraE3_3 * (float) local60;
+                        local111 = this.cameraTz + (this.cameraE3_1 * (float) local45 + this.cameraE3_2 * (float) local84 + this.cameraE3_3 * (float) local55);
+                        local137 = this.cameraTz + (this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local863 + this.cameraE3_3 * (float) local55);
+                        local163 = this.cameraTz + (this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local874 + this.cameraE3_3 * (float) local60);
+                        local189 = this.cameraTz + (this.cameraE3_1 * (float) local45 + this.cameraE3_2 * (float) local883 + this.cameraE3_3 * (float) local60);
                     }
 
                     if (water) {
@@ -1772,38 +1772,38 @@ public final class JavaGround extends Ground {
                     }
 
                     if (this.depthOverride == -1) {
-                        local366 = this.cameraTx + this.cameraE1_1 * (float) local45 + this.cameraE1_2 * (float) local84 + this.cameraE1_3 * (float) local55;
+                        local366 = this.cameraTx + (this.cameraE1_1 * (float) local45 + this.cameraE1_2 * (float) local84 + this.cameraE1_3 * (float) local55);
                         local379 = rasterizer.minX + (int) (local366 * (float) this.toolkit.projectionScaleX / local111);
-                        local396 = this.cameraTy + this.cameraE2_1 * (float) local45 + this.cameraE2_2 * (float) local84 + this.cameraE2_3 * (float) local55;
+                        local396 = this.cameraTy + (this.cameraE2_1 * (float) local45 + this.cameraE2_2 * (float) local84 + this.cameraE2_3 * (float) local55);
                         local409 = rasterizer.minY + (int) (local396 * (float) this.toolkit.projectionScaleY / local111);
-                        local426 = this.cameraTx + this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local863 + this.cameraE1_3 * (float) local55;
+                        local426 = this.cameraTx + (this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local863 + this.cameraE1_3 * (float) local55);
                         local439 = rasterizer.minX + (int) (local426 * (float) this.toolkit.projectionScaleX / local137);
-                        local456 = this.cameraTy + this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local863 + this.cameraE2_3 * (float) local55;
+                        local456 = this.cameraTy + (this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local863 + this.cameraE2_3 * (float) local55);
                         local469 = rasterizer.minY + (int) (local456 * (float) this.toolkit.projectionScaleY / local137);
-                        local486 = this.cameraTx + this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local874 + this.cameraE1_3 * (float) local60;
+                        local486 = this.cameraTx + (this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local874 + this.cameraE1_3 * (float) local60);
                         local499 = rasterizer.minX + (int) (local486 * (float) this.toolkit.projectionScaleX / local163);
-                        local516 = this.cameraTy + this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local874 + this.cameraE2_3 * (float) local60;
+                        local516 = this.cameraTy + (this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local874 + this.cameraE2_3 * (float) local60);
                         local529 = rasterizer.minY + (int) (local516 * (float) this.toolkit.projectionScaleY / local163);
-                        local546 = this.cameraTx + this.cameraE1_1 * (float) local45 + this.cameraE1_2 * (float) local883 + this.cameraE1_3 * (float) local60;
+                        local546 = this.cameraTx + (this.cameraE1_1 * (float) local45 + this.cameraE1_2 * (float) local883 + this.cameraE1_3 * (float) local60);
                         local559 = rasterizer.minX + (int) (local546 * (float) this.toolkit.projectionScaleX / local189);
-                        local576 = this.cameraTy + this.cameraE2_1 * (float) local45 + this.cameraE2_2 * (float) local883 + this.cameraE2_3 * (float) local60;
+                        local576 = this.cameraTy + (this.cameraE2_1 * (float) local45 + this.cameraE2_2 * (float) local883 + this.cameraE2_3 * (float) local60);
                         local589 = rasterizer.minY + (int) (local576 * (float) this.toolkit.projectionScaleY / local189);
                     } else {
-                        local366 = this.cameraTx + this.cameraE1_1 * (float) local45 + this.cameraE1_2 * (float) local84 + this.cameraE1_3 * (float) local55;
+                        local366 = this.cameraTx + (this.cameraE1_1 * (float) local45 + this.cameraE1_2 * (float) local84 + this.cameraE1_3 * (float) local55);
                         local379 = rasterizer.minX + (int) (local366 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
-                        local396 = this.cameraTy + this.cameraE2_1 * (float) local45 + this.cameraE2_2 * (float) local84 + this.cameraE2_3 * (float) local55;
+                        local396 = this.cameraTy + (this.cameraE2_1 * (float) local45 + this.cameraE2_2 * (float) local84 + this.cameraE2_3 * (float) local55);
                         local409 = rasterizer.minY + (int) (local396 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
-                        local426 = this.cameraTx + this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local863 + this.cameraE1_3 * (float) local55;
+                        local426 = this.cameraTx + (this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local863 + this.cameraE1_3 * (float) local55);
                         local439 = rasterizer.minX + (int) (local426 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
-                        local456 = this.cameraTy + this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local863 + this.cameraE2_3 * (float) local55;
+                        local456 = this.cameraTy + (this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local863 + this.cameraE2_3 * (float) local55);
                         local469 = rasterizer.minY + (int) (local456 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
-                        local486 = this.cameraTx + this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local874 + this.cameraE1_3 * (float) local60;
+                        local486 = this.cameraTx + (this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local874 + this.cameraE1_3 * (float) local60);
                         local499 = rasterizer.minX + (int) (local486 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
-                        local516 = this.cameraTy + this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local874 + this.cameraE2_3 * (float) local60;
+                        local516 = this.cameraTy + (this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local874 + this.cameraE2_3 * (float) local60);
                         local529 = rasterizer.minY + (int) (local516 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
-                        local546 = this.cameraTx + this.cameraE1_1 * (float) local45 + this.cameraE1_2 * (float) local883 + this.cameraE1_3 * (float) local60;
+                        local546 = this.cameraTx + (this.cameraE1_1 * (float) local45 + this.cameraE1_2 * (float) local883 + this.cameraE1_3 * (float) local60);
                         local559 = rasterizer.minX + (int) (local546 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
-                        local576 = this.cameraTy + this.cameraE2_1 * (float) local45 + this.cameraE2_2 * (float) local883 + this.cameraE2_3 * (float) local60;
+                        local576 = this.cameraTy + (this.cameraE2_1 * (float) local45 + this.cameraE2_2 * (float) local883 + this.cameraE2_3 * (float) local60);
                         local589 = rasterizer.minY + (int) (local576 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
                     }
                 }
@@ -2006,7 +2006,7 @@ public final class JavaGround extends Ground {
                         local50 = complexTile.verticesX[local559] + (x << super.tileSizeShift);
                         local55 = complexTile.verticesY[local559];
                         local60 = complexTile.verticesZ[local559] + (z << super.tileSizeShift);
-                        local3222 = this.cameraTz + this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local55 + this.cameraE3_3 * (float) local60;
+                        local3222 = this.cameraTz + (this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local55 + this.cameraE3_3 * (float) local60);
                         if (local3222 <= (float) this.toolkit.zNear) {
                             return;
                         }
@@ -2038,8 +2038,8 @@ public final class JavaGround extends Ground {
                             }
                         }
 
-                        local3321 = this.cameraTx + this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local55 + this.cameraE1_3 * (float) local60;
-                        local3342 = this.cameraTy + this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local55 + this.cameraE2_3 * (float) local60;
+                        local3321 = this.cameraTx + (this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local55 + this.cameraE1_3 * (float) local60);
+                        local3342 = this.cameraTy + (this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local55 + this.cameraE2_3 * (float) local60);
                         screenX[local559] = rasterizer.minX + (int) (local3321 * (float) this.toolkit.projectionScaleX / local3222);
                         screenY[local559] = rasterizer.minY + (int) (local3342 * (float) this.toolkit.projectionScaleY / local3222);
                         depths[local559] = (int) local3222;
@@ -2049,7 +2049,7 @@ public final class JavaGround extends Ground {
                         local50 = complexTile.verticesX[local559] + (x << super.tileSizeShift);
                         local55 = complexTile.verticesY[local559];
                         local60 = complexTile.verticesZ[local559] + (z << super.tileSizeShift);
-                        local3222 = this.cameraTz + this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local55 + this.cameraE3_3 * (float) local60;
+                        local3222 = this.cameraTz + (this.cameraE3_1 * (float) local50 + this.cameraE3_2 * (float) local55 + this.cameraE3_3 * (float) local60);
                         fogLevels[local559] = 0;
 
                         if (water) {
@@ -2074,8 +2074,8 @@ public final class JavaGround extends Ground {
                             }
                         }
 
-                        local3321 = this.cameraTx + this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local55 + this.cameraE1_3 * (float) local60;
-                        local3342 = this.cameraTy + this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local55 + this.cameraE2_3 * (float) local60;
+                        local3321 = this.cameraTx + (this.cameraE1_1 * (float) local50 + this.cameraE1_2 * (float) local55 + this.cameraE1_3 * (float) local60);
+                        local3342 = this.cameraTy + (this.cameraE2_1 * (float) local50 + this.cameraE2_2 * (float) local55 + this.cameraE2_3 * (float) local60);
                         screenX[local559] = rasterizer.minX + (int) (local3321 * (float) this.toolkit.projectionScaleX / (float) this.depthOverride);
                         screenY[local559] = rasterizer.minY + (int) (local3342 * (float) this.toolkit.projectionScaleY / (float) this.depthOverride);
                         depths[local559] = (int) local3222;

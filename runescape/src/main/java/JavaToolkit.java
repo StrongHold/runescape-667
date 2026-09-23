@@ -667,13 +667,13 @@ public final class JavaToolkit extends Toolkit {
             @Pc(19) int x = particle.x >> 12;
             @Pc(24) int y = particle.y >> 12;
             @Pc(29) int z = particle.z >> 12;
-            @Pc(54) float depth = this.camera.tz + (this.camera.e3_1 * (float) x) + (this.camera.e3_2 * (float) y) + (this.camera.e3_3 * (float) z);
+            @Pc(54) float depth = this.camera.tz + ((this.camera.e3_1 * (float) x) + (this.camera.e3_2 * (float) y) + (this.camera.e3_3 * (float) z));
             if (depth < (float) this.zNear || depth > (float) resource.fogPlane) {
                 continue;
             }
 
-            @Pc(106) int px = this.projectionCenterX + (int) (((float) this.projectionScaleX * (this.camera.tx + (this.camera.e1_1 * (float) x) + (this.camera.e1_2 * (float) y) + (this.camera.e1_3 * (float) z))) / (float) zoom);
-            @Pc(142) int py = this.projectionCenterY + (int) (((float) this.projectionScaleY * (this.camera.ty + (this.camera.e2_1 * (float) x) + (this.camera.e2_2 * (float) y) + (this.camera.e2_3 * (float) z))) / (float) zoom);
+            @Pc(106) int px = this.projectionCenterX + (int) (((float) this.projectionScaleX * (this.camera.tx + ((this.camera.e1_1 * (float) x) + (this.camera.e1_2 * (float) y) + (this.camera.e1_3 * (float) z)))) / (float) zoom);
+            @Pc(142) int py = this.projectionCenterY + (int) (((float) this.projectionScaleY * (this.camera.ty + ((this.camera.e2_1 * (float) x) + (this.camera.e2_2 * (float) y) + (this.camera.e2_3 * (float) z)))) / (float) zoom);
             if (px >= this.clipX1 && px <= this.clipX2 && py >= this.clipY1 && py <= this.clipY2) {
                 if (depth == 0.0F) {
                     depth = 1.0F;
@@ -1621,13 +1621,13 @@ public final class JavaToolkit extends Toolkit {
     @OriginalMember(owner = "client!iaa", name = "H", descriptor = "(III[I)V")
     @Override
     public void H(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int[] destination) {
-        @Pc(24) float depth = this.camera.tz + this.camera.e3_1 * (float) x + this.camera.e3_2 * (float) y + this.camera.e3_3 * (float) z;
+        @Pc(24) float depth = this.camera.tz + (this.camera.e3_1 * (float) x + this.camera.e3_2 * (float) y + this.camera.e3_3 * (float) z);
         if (depth == 0.0F) {
             destination[0] = destination[1] = destination[2] = -1;
             return;
         }
-        @Pc(74) int px = (int) ((float) this.projectionScaleX * (this.camera.tx + this.camera.e1_1 * (float) x + this.camera.e1_2 * (float) y + this.camera.e1_3 * (float) z) / depth);
-        @Pc(106) int py = (int) ((float) this.projectionScaleY * (this.camera.ty + this.camera.e2_1 * (float) x + this.camera.e2_2 * (float) y + this.camera.e2_3 * (float) z) / depth);
+        @Pc(74) int px = (int) ((float) this.projectionScaleX * (this.camera.tx + (this.camera.e1_1 * (float) x + this.camera.e1_2 * (float) y + this.camera.e1_3 * (float) z)) / depth);
+        @Pc(106) int py = (int) ((float) this.projectionScaleY * (this.camera.ty + (this.camera.e2_1 * (float) x + this.camera.e2_2 * (float) y + this.camera.e2_3 * (float) z)) / depth);
         destination[0] = px - this.viewX1;
         destination[1] = py - this.viewY1;
         destination[2] = (int) depth;
@@ -1907,13 +1907,13 @@ public final class JavaToolkit extends Toolkit {
     @OriginalMember(owner = "client!iaa", name = "da", descriptor = "(III[I)V")
     @Override
     public void da(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int[] destination) {
-        @Pc(24) float depth = this.camera.tz + this.camera.e3_1 * (float) x + this.camera.e3_2 * (float) y + this.camera.e3_3 * (float) z;
+        @Pc(24) float depth = this.camera.tz + (this.camera.e3_1 * (float) x + this.camera.e3_2 * (float) y + this.camera.e3_3 * (float) z);
         if (depth < (float) this.zNear || depth > (float) this.zFar) {
             destination[0] = destination[1] = destination[2] = -1;
             return;
         }
-        @Pc(84) int px = (int) ((float) this.projectionScaleX * (this.camera.tx + this.camera.e1_1 * (float) x + this.camera.e1_2 * (float) y + this.camera.e1_3 * (float) z) / depth);
-        @Pc(116) int py = (int) ((float) this.projectionScaleY * (this.camera.ty + this.camera.e2_1 * (float) x + this.camera.e2_2 * (float) y + this.camera.e2_3 * (float) z) / depth);
+        @Pc(84) int px = (int) ((float) this.projectionScaleX * (this.camera.tx + (this.camera.e1_1 * (float) x + this.camera.e1_2 * (float) y + this.camera.e1_3 * (float) z)) / depth);
+        @Pc(116) int py = (int) ((float) this.projectionScaleY * (this.camera.ty + (this.camera.e2_1 * (float) x + this.camera.e2_2 * (float) y + this.camera.e2_3 * (float) z)) / depth);
         if (px >= this.viewX1 && px <= this.viewX2 && py >= this.viewY1 && py <= this.viewY2) {
             destination[0] = px - this.viewX1;
             destination[1] = py - this.viewY1;
@@ -1926,13 +1926,13 @@ public final class JavaToolkit extends Toolkit {
     @OriginalMember(owner = "client!iaa", name = "HA", descriptor = "(IIII[I)V")
     @Override
     public void HA(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int zoom, @OriginalArg(4) int[] destination) {
-        @Pc(24) float depth = this.camera.tz + this.camera.e3_1 * (float) x + this.camera.e3_2 * (float) y + this.camera.e3_3 * (float) z;
+        @Pc(24) float depth = this.camera.tz + (this.camera.e3_1 * (float) x + this.camera.e3_2 * (float) y + this.camera.e3_3 * (float) z);
         if (depth < (float) this.zNear || depth > (float) this.zFar) {
             destination[0] = destination[1] = destination[2] = -1;
             return;
         }
-        @Pc(85) int px = (int) ((float) this.projectionScaleX * (this.camera.tx + this.camera.e1_1 * (float) x + this.camera.e1_2 * (float) y + this.camera.e1_3 * (float) z) / (float) zoom);
-        @Pc(118) int py = (int) ((float) this.projectionScaleY * (this.camera.ty + this.camera.e2_1 * (float) x + this.camera.e2_2 * (float) y + this.camera.e2_3 * (float) z) / (float) zoom);
+        @Pc(85) int px = (int) ((float) this.projectionScaleX * (this.camera.tx + (this.camera.e1_1 * (float) x + this.camera.e1_2 * (float) y + this.camera.e1_3 * (float) z)) / (float) zoom);
+        @Pc(118) int py = (int) ((float) this.projectionScaleY * (this.camera.ty + (this.camera.e2_1 * (float) x + this.camera.e2_2 * (float) y + this.camera.e2_3 * (float) z)) / (float) zoom);
         if (px >= this.viewX1 && px <= this.viewX2 && py >= this.viewY1 && py <= this.viewY2) {
             destination[0] = px - this.viewX1;
             destination[1] = py - this.viewY1;
@@ -3029,11 +3029,11 @@ public final class JavaToolkit extends Toolkit {
             @Pc(19) int x = particle.x >> 12;
             @Pc(24) int y = particle.y >> 12;
             @Pc(29) int z = particle.z >> 12;
-            @Pc(54) float depth = this.camera.tz + this.camera.e3_1 * (float) x + this.camera.e3_2 * (float) y + this.camera.e3_3 * (float) z;
+            @Pc(54) float depth = this.camera.tz + (this.camera.e3_1 * (float) x + this.camera.e3_2 * (float) y + this.camera.e3_3 * (float) z);
 
             if (!(depth < (float) this.zNear) && !(depth > (float) resource.fogPlane)) {
-                @Pc(105) int px = this.projectionCenterX + (int) ((float) this.projectionScaleX * (this.camera.tx + this.camera.e1_1 * (float) x + this.camera.e1_2 * (float) y + this.camera.e1_3 * (float) z) / depth);
-                @Pc(140) int pz = this.projectionCenterY + (int) ((float) this.projectionScaleY * (this.camera.ty + this.camera.e2_1 * (float) x + this.camera.e2_2 * (float) y + this.camera.e2_3 * (float) z) / depth);
+                @Pc(105) int px = this.projectionCenterX + (int) ((float) this.projectionScaleX * (this.camera.tx + (this.camera.e1_1 * (float) x + this.camera.e1_2 * (float) y + this.camera.e1_3 * (float) z)) / depth);
+                @Pc(140) int pz = this.projectionCenterY + (int) ((float) this.projectionScaleY * (this.camera.ty + (this.camera.e2_1 * (float) x + this.camera.e2_2 * (float) y + this.camera.e2_3 * (float) z)) / depth);
 
                 if (px >= this.clipX1 && px <= this.clipX2 && pz >= this.clipY1 && pz <= this.clipY2) {
                     if (depth == 0.0F) {

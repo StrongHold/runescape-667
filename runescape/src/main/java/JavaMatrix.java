@@ -62,9 +62,9 @@ public final class JavaMatrix extends Matrix {
         @Pc(11) float local11 = (float) destination[0] - this.tx;
         @Pc(19) float local19 = (float) destination[1] - this.ty;
         @Pc(27) float local27 = (float) destination[2] - this.tz;
-        destination[0] = (int) (this.e3_1 * local27 + this.e2_1 * local19 + local11 * this.e1_1);
-        destination[1] = (int) (local27 * this.e3_2 + this.e2_2 * local19 + this.e1_2 * local11);
-        destination[2] = (int) (this.e3_3 * local27 + local11 * this.e1_3 + this.e2_3 * local19);
+        destination[0] = (int) (this.e3_1 * local27 + (this.e2_1 * local19 + local11 * this.e1_1));
+        destination[1] = (int) (local27 * this.e3_2 + (this.e2_2 * local19 + this.e1_2 * local11));
+        destination[2] = (int) (this.e3_3 * local27 + (local11 * this.e1_3 + this.e2_3 * local19));
     }
 
     @OriginalMember(owner = "client!eaa", name = "e", descriptor = "(I)V")
@@ -94,8 +94,8 @@ public final class JavaMatrix extends Matrix {
         @Pc(17) int local17 = (int) ((float) y - this.ty);
         @Pc(24) int local24 = (int) ((float) x - this.tx);
         destination[2] = (int) (this.e1_3 * (float) local24 + (float) local17 * this.e2_3 + (float) local6 * this.e3_3);
-        destination[1] = (int) (this.e3_2 * (float) local6 + this.e1_2 * (float) local24 + this.e2_2 * (float) local17);
-        destination[0] = (int) ((float) local6 * this.e3_1 + this.e1_1 * (float) local24 + this.e2_1 * (float) local17);
+        destination[1] = (int) (this.e3_2 * (float) local6 + (this.e1_2 * (float) local24 + this.e2_2 * (float) local17));
+        destination[0] = (int) ((float) local6 * this.e3_1 + (this.e1_1 * (float) local24 + this.e2_1 * (float) local17));
     }
 
     @OriginalMember(owner = "client!eaa", name = "c", descriptor = "(I)V")
@@ -121,8 +121,8 @@ public final class JavaMatrix extends Matrix {
     @Override
     public void project(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int[] destination) {
         destination[0] = (int) (this.e1_2 * (float) y + this.e1_1 * (float) x + (float) z * this.e1_3 + this.tx);
-        destination[1] = (int) (this.e2_3 * (float) z + this.e2_1 * (float) x + (float) y * this.e2_2 + this.ty);
-        destination[2] = (int) ((float) z * this.e3_3 + (float) x * this.e3_1 + (float) y * this.e3_2 + this.tz);
+        destination[1] = (int) (this.e2_3 * (float) z + (this.e2_1 * (float) x + (float) y * this.e2_2) + this.ty);
+        destination[2] = (int) ((float) z * this.e3_3 + ((float) x * this.e3_1 + (float) y * this.e3_2) + this.tz);
     }
 
     @OriginalMember(owner = "client!eaa", name = "a", descriptor = "(IIIIII)V")
@@ -145,8 +145,8 @@ public final class JavaMatrix extends Matrix {
         this.e2_2 = local9 * local33;
         this.e2_1 = local39 * -local21 + local43 * local27;
         this.e1_1 = local21 * local33 + local47 * local27;
-        this.tz = -((float) z * this.e3_3) - (float) y * this.e3_2 + (float) -x * this.e3_1;
-        this.tx = -(this.e1_3 * (float) z) - this.e1_2 * (float) y + this.e1_1 * (float) -x;
+        this.tz = (float) -x * this.e3_1 - (float) y * this.e3_2 - (float) z * this.e3_3;
+        this.tx = this.e1_1 * (float) -x - this.e1_2 * (float) y - this.e1_3 * (float) z;
         this.ty = -((float) y * this.e2_2) + this.e2_1 * (float) -x - (float) z * this.e2_3;
     }
 
@@ -155,7 +155,7 @@ public final class JavaMatrix extends Matrix {
     public void projectDirection(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int[] destination) {
         destination[1] = (int) (this.e2_2 * (float) y + this.e2_1 * (float) x + (float) z * this.e2_3);
         destination[0] = (int) ((float) x * this.e1_1 + (float) y * this.e1_2 + this.e1_3 * (float) z);
-        destination[2] = (int) ((float) z * this.e3_3 + this.e3_2 * (float) y + (float) x * this.e3_1);
+        destination[2] = (int) ((float) z * this.e3_3 + (this.e3_2 * (float) y + (float) x * this.e3_1));
     }
 
     @OriginalMember(owner = "client!eaa", name = "b", descriptor = "()Lclient!tt;")
