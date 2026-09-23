@@ -100,10 +100,10 @@ public final class ModelProbe {
 
             if (!System.getenv("SW3D_SURVEY").isEmpty()) {
                 CacheMesh.surveyMappingTypes();
-                CacheMesh.report(CacheMesh.ROCK);
-                CacheMesh.report(CacheMesh.STAIRS);
+                CacheMesh.report(SceneModel.ROCK);
+                CacheMesh.report(SceneModel.STAIRS);
                 CacheMesh.report(26910);
-                CacheMesh.report(CacheMesh.BLACK_BACKED);
+                CacheMesh.report(SceneModel.BLACK_BACKED);
             }
 
             var lines = new ArrayList<String>();
@@ -137,7 +137,7 @@ public final class ModelProbe {
      */
     private static void refusals(Toolkit toolkit, List<String> lines) throws Exception {
         var model = toolkit.createModel(
-            CacheMesh.anyUntextured(), NO_FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
+            SceneModel.anyUntextured(), NO_FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
 
         lines.add("refused move " + refused(() -> model.H(1, 0, 0)));
         lines.add("refused size " + refused(() -> model.O(64, 128, 128)));
@@ -346,7 +346,7 @@ public final class ModelProbe {
 
     private static i joined(Toolkit toolkit) throws Exception {
         return (i) toolkit.createModel(
-            CacheMesh.twoUntexturedJoined(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
+            SceneModel.twoUntexturedJoined(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
     }
 
     /**
@@ -419,7 +419,7 @@ public final class ModelProbe {
         lines.add("metrics beyond the source " + held.c((short) HandTextureSource.COUNT));
         lines.add("texture beyond the source " + held.WA((short) HandTextureSource.COUNT));
 
-        var mesh = CacheMesh.anyTextured();
+        var mesh = SceneModel.anyTextured();
         if (mesh.isEmpty()) {
             lines.add("no textured model in the cache");
             return;
@@ -430,7 +430,7 @@ public final class ModelProbe {
          * while it builds it, so a model every face of which has been put on texture one says
          * whether a change made to the mesh reaches the toolkit at all.
          */
-        var forced = CacheMesh.anyTextured().get();
+        var forced = SceneModel.anyTextured().get();
         for (var face = 0; face < forced.faceCount; face++) {
             forced.faceTexture[face] = 1;
         }
@@ -566,8 +566,8 @@ public final class ModelProbe {
      * turned and moved, because the answer is worked out from where its vertices are now.
      */
     private static void particles(Toolkit toolkit, List<String> lines) throws Exception {
-        var model = (i) toolkit.createModel(CacheMesh.withParticles(
-            CacheMesh.anyUntextured()), FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
+        var model = (i) toolkit.createModel(SceneModel.withParticles(
+            SceneModel.anyUntextured()), FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
 
         var matrix = toolkit.createMatrix();
         var places = new int[PARTICLE_PLACES * 3];
@@ -610,7 +610,7 @@ public final class ModelProbe {
     }
 
     private static Model build(Toolkit toolkit) throws Exception {
-        return toolkit.createModel(CacheMesh.anyUntextured(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
+        return toolkit.createModel(SceneModel.anyUntextured(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
     }
 
     private ModelProbe() {

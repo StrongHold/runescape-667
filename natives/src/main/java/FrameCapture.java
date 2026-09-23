@@ -133,13 +133,13 @@ public final class FrameCapture {
 
         var props = new Scene.Props(
             gradient,
-            toolkit.createModel(CacheMesh.anyUntextured(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
+            toolkit.createModel(SceneModel.anyUntextured(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
             toolkit.createModel(fewFaces(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
             toolkit.createMatrix(),
             toolkit.createFont(HandFont.metrics(), HandFont.letters(), true),
             toolkit.createFont(HandFont.metrics(), HandFont.letters(), false),
             HandGround.build(toolkit),
-            CacheMesh.anyUntextured(),
+            SceneModel.anyUntextured(),
             texturedModel(toolkit, textured, FEATURES, FORCED_TEXTURE),
             toolkit.createModel(fadedMesh(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
             texturedModel(toolkit, textured, FEATURES | TEXTURES_OFF, TEXTURE_THAT_MAY_GO),
@@ -153,11 +153,11 @@ public final class FrameCapture {
             HandGround.buildHollow(toolkit),
             HandGround.buildShadowed(toolkit, shadow),
             HandGround.buildBlended(toolkit),
-            namedModel(toolkit, CacheMesh.STAIRS, false, EVERY_FUNCTION),
+            namedModel(toolkit, SceneModel.STAIRS, false, EVERY_FUNCTION),
             toolkit.createModel(PriorityMesh.INSTANCE.build(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
             toolkit.createModel(BillboardMesh.INSTANCE.build(), FUNCTIONS, FEATURES, AMBIENT, CONTRAST),
-            CacheMesh.numbered(CacheMesh.STAIRS).orElse(null),
-            CacheMesh.numbered(CacheMesh.BLACK_BACKED).orElse(null),
+            SceneModel.numbered(SceneModel.STAIRS).orElse(null),
+            SceneModel.numbered(SceneModel.BLACK_BACKED).orElse(null),
             toolkit.createModel(DoubledMesh.INSTANCE.build(), FUNCTIONS, FEATURES,
                 AMBIENT, CONTRAST),
             HandGround.buildShadowedRepeat(toolkit, shadow),
@@ -221,7 +221,7 @@ public final class FrameCapture {
      * faces say only that something is wrong. Two faces can be worked out by hand.
      */
     private static Mesh fewFaces() throws Exception {
-        var mesh = CacheMesh.anyUntextured();
+        var mesh = SceneModel.anyUntextured();
         mesh.faceCount = Math.min(mesh.faceCount, VISIBLE_FACES);
 
         /*
@@ -288,7 +288,7 @@ public final class FrameCapture {
      * scene handed nothing quietly draws nothing, which is a check that cannot fail.
      */
     private static Mesh texturedMesh() throws Exception {
-        var mesh = CacheMesh.anyTextured();
+        var mesh = SceneModel.anyTextured();
         if (mesh.isEmpty()) {
             System.out.println("no textured model in the cache");
             return null;
@@ -305,7 +305,7 @@ public final class FrameCapture {
      * would have used.
      */
     private static Model roundPointModel(Toolkit toolkit) throws Exception {
-        var mesh = CacheMesh.numbered(CacheMesh.ROUND_A_POINT);
+        var mesh = SceneModel.numbered(SceneModel.ROUND_A_POINT);
         if (mesh.isEmpty()) {
             System.out.println("no model in the cache places a texture round a point");
             return null;
@@ -334,7 +334,7 @@ public final class FrameCapture {
      * lands is what the picture shows.
      */
     private static Model rockModel(Toolkit toolkit) throws Exception {
-        return namedModel(toolkit, CacheMesh.ROCK, true);
+        return namedModel(toolkit, SceneModel.ROCK, true);
     }
 
     /**
@@ -358,7 +358,7 @@ public final class FrameCapture {
 
     private static Model namedModel(Toolkit toolkit, int group, boolean forced, int functions)
             throws Exception {
-        var mesh = CacheMesh.numbered(group);
+        var mesh = SceneModel.numbered(group);
         if (mesh.isEmpty()) {
             System.out.println("model " + group + " is not in the cache");
             return null;
@@ -384,7 +384,7 @@ public final class FrameCapture {
      * other scenes use was.
      */
     private static Shadow shadowOf(Toolkit toolkit) throws Exception {
-        var model = toolkit.createModel(CacheMesh.anyUntextured(),
+        var model = toolkit.createModel(SceneModel.anyUntextured(),
             FUNCTIONS | MAY_CAST_A_SHADOW, FEATURES, AMBIENT, CONTRAST);
         var shadow = model.ba(null);
 
@@ -450,7 +450,7 @@ public final class FrameCapture {
      * the other.
      */
     private static Mesh fadedMesh() throws Exception {
-        var mesh = CacheMesh.anyUntextured();
+        var mesh = SceneModel.anyUntextured();
         mesh.faceAlpha = new byte[mesh.faceCount];
 
         for (var face = 0; face < mesh.faceCount; face++) {

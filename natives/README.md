@@ -95,8 +95,9 @@ differs from the shipped binary on purpose, and what is known to be wrong with t
 This subproject holds two kinds of code. The libraries replace what the client loads. The tools
 drive the libraries and the shipped binaries, and compare the two. The client never loads a tool.
 
-All of it is in one subproject for now. Each library will get a subproject of its own later, and
-the tools will then move apart from them.
+The libraries and most of the tools are in this one subproject for now. Each library will get a
+subproject of its own later, and the tools will then move apart from them. The cache reader and
+the shared command line code have already moved out, into `cache` and `cli`.
 
 ### The libraries
 
@@ -129,13 +130,20 @@ Everything under `src/main/java` is a tool, and a Gradle task runs each one.
 
 | files | what they do |
 |---|---|
-| `FrameCapture`, `Scene`, `Hand*`, `*Mesh`, `GradientSprite`, `IndexedGlyph` | draw the scenes through a software toolkit and keep the frames |
+| `FrameCapture`, `Scene`, `SceneModel`, `KeepModels`, `Hand*`, `*Mesh`, `GradientSprite`, `IndexedGlyph` | draw the scenes through a software toolkit and keep the frames |
 | `FrameCheck`, `GoldenFrames` | compare the frames of the two toolkits, and keep the shipped frames under `goldens` |
 | `*Probe`, `AnswerCheck` | ask a library a fixed set of questions, and compare the answers of two libraries |
 | `GlSamples`, `MemoryHeap`, `Jagmisc`, `ToolkitLifetime`, `ToolkitSkeleton`, `CanvasHandover`, `SpriteLiftCheck` | check one behaviour of one library |
-| `Cache*` | read the libraries, models and terrain out of the game cache |
 | `WatchShipped`, `ShippedRoutine`, `Trace`, `TraceCheck` | watch the shipped toolkit and line what it did up against ours |
-| `CommandLine`, `Helpable`, `*Args`, `Whole`, `Watchdog` | read the arguments of a tool, and stop a tool that hangs |
+| `*Args`, `Watchdog` | read the arguments of a tool, and stop a tool that hangs |
+
+Two subprojects beside this one hold what these tools share with others:
+
+- `cache` reads the game's cache. The scenes are drawn with models it reads, and it has tools of its
+  own that print what the cache holds, such as `:cache:listCacheLibraries` and
+  `:cache:describeModel`. `:natives:keepModels` copies the models the scenes use out of the
+  cache into `natives/models`, and `SceneModel` names them.
+- `cli` holds `CommandLine`, `Helpable` and `Whole`, which every tool uses to read its arguments.
 
 ## Watching the shipped toolkit
 

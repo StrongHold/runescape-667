@@ -4,7 +4,7 @@ import com.beust.jcommander.ParameterException;
 /**
  * Reads a tool's arguments, and says whether it should go on to do its work.
  *
- * Every tool in this module is a main method run from a Gradle task, and each one wants the same
+ * Every tool in this build is a main method run from a Gradle task, and each one wants the same
  * three things: the arguments read into an object, a usage message when they are wrong or when
  * help is asked for, and a failing exit status when they are wrong. Doing that here leaves each
  * tool holding only what it is actually for.

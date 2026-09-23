@@ -1,6 +1,5 @@
 import com.beust.jcommander.Parameter;
 
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.TreeMap;
 
@@ -22,9 +21,6 @@ public final class CacheModel {
         @Parameter(names = "--model", description = "Which model to describe")
         private int model = A_MODEL_WORTH_LOOKING_AT;
 
-        @Parameter(names = "--keep", description = "Write the models the scenes are drawn with under this directory instead")
-        private Path keep;
-
         @Parameter(names = "--scanned", description = "Say which models have been looked at instead")
         private boolean scanned;
 
@@ -44,9 +40,7 @@ public final class CacheModel {
             return;
         }
 
-        if (args.keep != null) {
-            CacheMesh.keep(args.keep);
-        } else if (args.scanned) {
+        if (args.scanned) {
             CacheMesh.sayWhichAreScanned();
         } else {
             describe(args.model);

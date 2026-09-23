@@ -19,6 +19,8 @@ dependencyResolutionManagement {
 rootProject.name = "runescape-667"
 
 include(
+    "cache",
+    "cli",
     "client",
     "loader",
     "natives",
