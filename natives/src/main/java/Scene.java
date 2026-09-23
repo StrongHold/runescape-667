@@ -280,17 +280,6 @@ public sealed interface Scene {
 
         private static final int LEAN = 0x400;
 
-
-        /**
-         * Wearing the textures it names, this model is drawn exactly as the shipped toolkit draws
-         * it. Turned the way the map puts it down, two hundred and forty five pixels are a single
-         * shade out, which is the turn itself and not the drawing.
-         */
-        @Override
-        public boolean written() {
-            return false;
-        }
-
         @Override
         public void draw(Toolkit toolkit, Props props) {
             if (props.stairs() == null) {
@@ -340,18 +329,6 @@ public sealed interface Scene {
         private static final int CONTRAST = 768;
 
         private static final int LEAN = 0x400;
-
-
-
-        /**
-         * What is left is a hundred and fifty five pixels a few shades out along the edges of the
-         * faces this model gives an alpha to, which is the two toolkits carrying an alpha across
-         * a face a little differently.
-         */
-        @Override
-        public boolean written() {
-            return false;
-        }
 
         @Override
         public void draw(Toolkit toolkit, Props props) {

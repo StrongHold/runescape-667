@@ -617,6 +617,15 @@ static uint32_t throughTexture(const Model *model, int face, uint32_t unlit) {
 }
 
 /**
+ * How strongly the sun's side of a face is lit, divided by the model's contrast.
+ *
+ * A face shaded by the directions of its corners and a face shaded by one direction of its own are
+ * lit with different strengths, three quarters of a whole apart. That is how the toolkit does it.
+ */
+static const float SMOOTH_CONTRAST = 768.0f;
+static const float FLAT_CONTRAST = 512.0f;
+
+/**
  * Works out what colour each corner of each face takes, from where the vertices are now.
  *
  * A model that has no directions worked out for it gets them here, because everything that moves
@@ -641,7 +650,8 @@ static void lightModel(Model *model) {
         return;
     }
 
-    float strength = model->contrast == 0 ? 1.0f : 768.0f / (float) model->contrast;
+    float strength = model->contrast == 0 ? 1.0f : SMOOTH_CONTRAST / (float) model->contrast;
+    float flatStrength = model->contrast == 0 ? 1.0f : FLAT_CONTRAST / (float) model->contrast;
 
     for (int face = 0; face < model->faceCount; face++) {
         uint32_t unlit = unlitColour(model->faceColour[face] & 0xFFFF, model->ambient);
@@ -657,7 +667,7 @@ static void lightModel(Model *model) {
 
             model->shade[face * 3 + corner] = normal->magnitude == 0.0f
                 ? unlit
-                : sunlitColour(unlit, normal, strength);
+                : sunlitColour(unlit, normal, flat ? flatStrength : strength);
         }
     }
 }

@@ -9,7 +9,5 @@
 # then out of date: bring it down, so that the ground it gained cannot be given back.
 #
 # scene = pixels only the shipped toolkit drew, pixels only we drew, pixels shaded differently
-BlackBacked = 0, 0, 155
 OverlaidPlan = 0, 0, 144
 SeenThrough = 0, 0, 21
-Stairs = 0, 0, 245
