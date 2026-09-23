@@ -370,25 +370,19 @@ public sealed interface Scene {
      */
     record SeenThrough() implements Scene {
 
-        /**
-         * Twenty one of its pixels are wrong, in two runs of seven or ten on a single row each.
-         *
-         * Neither is about seeing through anything. On the row above and the row below, every
-         * pixel of both runs matches. On the row between them a face reaches one row further down
-         * here than it does in the shipped toolkit, and covers the face behind it that ought to
-         * show there. Two faces out of hundreds do it, so it is a corner landing within a hair of
-         * a row rather than a rule that is wrong: which row a face reaches is taken by throwing
-         * away the part of a corner's height after the point, and every other scene that matches
-         * to the pixel is matching on that.
-         */
-
         private static final int LEAN = 0x500;
 
-
         /**
-         * What is left is three short runs along the edges of the faces that say where they are
-         * not there by leaving a texel empty, which is the two toolkits deciding the edge of a
-         * span a pixel differently.
+         * What is left is twenty one pixels where a face reads its texture a hair past its last
+         * row. The run, its distance and its place on the texture agree with the shipped toolkit
+         * exactly, and both work the row out as a hundred and twenty eight.
+         *
+         * A texture that does not repeat is held to a byte, not to itself, so the shipped toolkit
+         * reads row nought of the pair of textures below it in its store, finds nothing there and
+         * draws nothing. This holds it to its own last row and draws. Reading on into the store
+         * the way the shipped toolkit does is far worse, six hundred and fifty four pixels drawn
+         * alone, because what lies in the store beyond a texture depends on every texture laid
+         * down before it, and the two stores are not laid out alike that far along.
          */
         @Override
         public boolean written() {
