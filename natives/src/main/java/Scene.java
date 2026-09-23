@@ -372,23 +372,6 @@ public sealed interface Scene {
 
         private static final int LEAN = 0x500;
 
-        /**
-         * What is left is twenty one pixels where a face reads its texture a hair past its last
-         * row. The run, its distance and its place on the texture agree with the shipped toolkit
-         * exactly, and both work the row out as a hundred and twenty eight.
-         *
-         * A texture that does not repeat is held to a byte, not to itself, so the shipped toolkit
-         * reads row nought of the pair of textures below it in its store, finds nothing there and
-         * draws nothing. This holds it to its own last row and draws. Reading on into the store
-         * the way the shipped toolkit does is far worse, six hundred and fifty four pixels drawn
-         * alone, because what lies in the store beyond a texture depends on every texture laid
-         * down before it, and the two stores are not laid out alike that far along.
-         */
-        @Override
-        public boolean written() {
-            return false;
-        }
-
         @Override
         public void draw(Toolkit toolkit, Props props) {
             if (props.seenThrough() == null) {

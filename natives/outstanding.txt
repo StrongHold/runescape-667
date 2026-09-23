@@ -9,4 +9,3 @@
 # then out of date: bring it down, so that the ground it gained cannot be given back.
 #
 # scene = pixels only the shipped toolkit drew, pixels only we drew, pixels shaded differently
-SeenThrough = 0, 0, 21

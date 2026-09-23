@@ -1809,6 +1809,24 @@ static void drawBillboard(const void *model, int which, const Transform *onto, c
 /** How many times over the faces of a model are walked, once for each way they are drawn. */
 enum { PASSES = 2 };
 
+/**
+ * How many runs each pass makes over the faces, once for those that wear a texture and once for
+ * those that do not.
+ */
+enum { SWEEPS = 2 };
+
+/**
+ * Which run of a pass a face is drawn in.
+ *
+ * The toolkit this replaces stores a model's faces in two runs when it builds it: first every
+ * face that wears a texture, then every face that does not, each in the order the client gave
+ * them. It then draws them in that order. Two faces that meet exactly are settled by which one is
+ * drawn second, so a bare face listed before a textured one it meets still covers it.
+ */
+static int sweepOf(const short *faceTexture, int face) {
+    return faceTexture == NULL || faceTexture[face] == -1 ? 1 : 0;
+}
+
 static void renderModel(void *model, const void *matrix, jint *cylinder, int smaller) {
     if (model == NULL || matrix == NULL || raster.pixels == NULL || raster.depths == NULL) {
         return;
@@ -1918,15 +1936,20 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
 
     /*
      * The faces are drawn in the order the model lists them, save that every face seen through
-     * its own texture is left until the rest have been drawn. Nothing else sorts them: what
-     * covers what is settled a pixel at a time by how far away each one is, and two faces that
-     * meet exactly are settled by which of them the model lists second. Sorting them further
-     * would change that answer wherever they meet, which on a model whose faces line up with an
-     * axis is a great many pixels.
+     * its own texture is left until the rest have been drawn, and that in each pass the faces
+     * wearing a texture go before the bare ones. Nothing else sorts them: what covers what is
+     * settled a pixel at a time by how far away each one is, and two faces that meet exactly are
+     * settled by which of them is drawn second. Sorting them further would change that answer
+     * wherever they meet, which on a model whose faces line up with an axis is a great many
+     * pixels.
      */
-    for (int pass = 0; pass < PASSES; pass++) {
+    for (int round = 0; round < PASSES * SWEEPS; round++) {
+        int pass = round / SWEEPS;
+        int sweep = round % SWEEPS;
+
         for (int face = 0; face < faces; face++) {
-            if (seenThroughFace(model, faceTexture, face) != pass) {
+            if (seenThroughFace(model, faceTexture, face) != pass
+                || sweepOf(faceTexture, face) != sweep) {
                 continue;
             }
 
