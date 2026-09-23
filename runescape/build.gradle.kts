@@ -57,10 +57,11 @@ val verifyFidelity = tasks.register<Exec>("verifyFidelity") {
     val classes = layout.buildDirectory.dir("classes/java/main")
     val originals = layout.buildDirectory.dir("original")
     val asked = providers.gradleProperty("fidelity").getOrElse("")
-    val script = rootProject.layout.projectDirectory.file("tools/fidelity.py")
+    val tool = rootProject.layout.projectDirectory.file("tools/Fidelity.java")
+    val launcher = javaToolchains.launcherFor(java.toolchain)
     val owner = Regex("""@OriginalClass\("[^!]+!([^"]+)"\)""")
 
-    executable = "python3"
+    inputs.file(tool)
 
     /*
      * The classes to check are worked out when the task runs rather than when it is configured,
@@ -93,6 +94,7 @@ val verifyFidelity = tasks.register<Exec>("verifyFidelity") {
         }
 
         require(triples.isNotEmpty()) { "No class in $sources matched a class in the original jar." }
-        setArgs(listOf(script.asFile.absolutePath, "--") + triples)
+        executable = launcher.get().executablePath.asFile.absolutePath
+        setArgs(listOf(tool.asFile.absolutePath, "--") + triples)
     }
 }
