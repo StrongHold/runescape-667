@@ -48,11 +48,6 @@ typedef struct {
      */
     unsigned char *hollow;
 
-    /**
-     * Whether the client gave the corner no colour of either kind, so that there is nothing to
-     * draw it in even on the map.
-     */
-    unsigned char *bare;
 
     /** How deep the water over the corner is, or nothing where the tile is not underwater. */
     int16_t *depth;
@@ -231,7 +226,6 @@ static void tileFree(Tile *tile) {
     free(tile->size);
     free(tile->light);
     free(tile->hollow);
-    free(tile->bare);
     free(tile->plan);
     free(tile->depth);
     free(tile);
@@ -579,6 +573,9 @@ enum { GROUND_LIGHTNESS = 74 };
 /** What the client hands over for a corner of the ground with no colour of its own. */
 enum { NO_COLOUR = -1 };
 
+/** What a corner with nothing laid over it stands for on the map. */
+enum { NOTHING_LAID = 0 };
+
 /** The colour such a corner is lit as instead, which carries no hue and no lightness at all. */
 enum { BLACK = 0 };
 
@@ -778,6 +775,25 @@ static int heldLightness(int lightness) {
     }
 
     return lightness > LIGHTNESS_MOST ? LIGHTNESS_MOST : lightness;
+}
+
+/**
+ * The colour a corner stands for on the map, before it is lit.
+ *
+ * A tile handed over with colours laid over its faces keeps a colour of its own for the map, made
+ * from what was laid over each corner. A corner with nothing laid over it is made from nothing at
+ * all, which the lightness floor turns into a near black grey, not from the ground's colour: that
+ * is how the toolkit does it and it is kept. A tile handed over with no colours laid over it keeps
+ * no colour for the map, and the map is drawn in the colour the ground is.
+ */
+static int standsOnTheMap(int overlaid, int laid, int named) {
+    if (!overlaid) {
+        return named;
+    } else if (laid == NO_COLOUR) {
+        return NOTHING_LAID;
+    } else {
+        return laid & 0xFFFF;
+    }
 }
 
 /**
@@ -1367,10 +1383,9 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
     tile->colour = calloc((size_t) corners, sizeof(uint32_t));
     tile->light = calloc((size_t) corners, 1);
     tile->hollow = calloc((size_t) corners, 1);
-    tile->bare = calloc((size_t) corners, 1);
 
     if (tile->across == NULL || tile->along == NULL || tile->up == NULL
-        || tile->colour == NULL || tile->light == NULL || tile->hollow == NULL || tile->bare == NULL) {
+        || tile->colour == NULL || tile->light == NULL || tile->hollow == NULL) {
         tileFree(tile);
         return;
     }
@@ -1418,8 +1433,6 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
              * lays a colour over such a corner for exactly that.
              */
             tile->hollow[corner] = colours[corner] == NO_COLOUR;
-            tile->bare[corner] = tile->hollow[corner]
-                    && (overlays == NULL || overlays[corner] == NO_COLOUR);
 
             int named = colours[corner] == NO_COLOUR ? BLACK : colours[corner] & 0xFFFF;
 
@@ -1458,7 +1471,7 @@ JNIEXPORT void JNICALL Java_t_U(JNIEnv *env, jobject self, jint x, jint z,
                     planPicked(named, laid, worn, metrics, metrics->averageColour);
                     tile->plan[corner] = colourOf(metrics->averageColour);
                 } else {
-                    int stands = laid == NO_COLOUR ? named : laid & 0xFFFF;
+                    int stands = standsOnTheMap(overlays != NULL, laid, named);
                     planPicked(named, laid, worn, metrics, stands);
 
                     tile->plan[corner] = litCorner(ground, stands, tile->light[corner],
@@ -1982,19 +1995,6 @@ int groundTileFaceHollow(const void *at, int face) {
     }
 
     return tile->hollow[face * 3] && tile->hollow[face * 3 + 1] && tile->hollow[face * 3 + 2];
-}
-
-/**
- * Whether the client gave every corner of a face no colour of either kind, so that the face has
- * nothing to be drawn in even on the map.
- */
-int groundTileFaceBare(const void *at, int face) {
-    const Tile *tile = at;
-    if (tile->bare == NULL || face * 3 + 2 >= tile->corners) {
-        return 0;
-    }
-
-    return tile->bare[face * 3] && tile->bare[face * 3 + 1] && tile->bare[face * 3 + 2];
 }
 
 /** The texture one corner of a tile names, which its neighbours in the same face may not share. */

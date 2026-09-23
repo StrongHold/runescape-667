@@ -2338,19 +2338,6 @@ public sealed interface Scene {
         /** A colour no tile of the patch is drawn in, so that a hole through it stands out. */
         private static final int UNDER_THE_FLOOR = 0xFFD08040;
 
-        /**
-         * Fifty four of its pixels are the hole itself, and they differ on purpose.
-         *
-         * The shipped toolkit paints a face the floor opens through in the colour a corner with
-         * no colour comes to, which is black. The client's own renderer draws no such face at
-         * all, and the world behind it is drawn expecting to be seen, so a stairwell drawn the
-         * shipped way is a black square with the steps behind it. This leaves the hole open.
-         */
-        @Override
-        public boolean written() {
-            return false;
-        }
-
         @Override
         public void draw(Toolkit toolkit, Props props) {
             toolkit.fillRect(0, 0, WIDTH, HEIGHT, UNDER_THE_FLOOR);
@@ -2377,21 +2364,15 @@ public sealed interface Scene {
     record OverlaidPlan() implements Scene {
 
         /**
-         * Two hundred and seven of its pixels are a shade out, and sixteen more are drawn by the
-         * shipped toolkit and not by this one. They are the one column of the patch wearing no
-         * texture and the one row whose corners have no colour of their own, and nothing else:
-         * everywhere else the two agree to the pixel.
+         * A hundred and forty four of its pixels are out, all of them on the one row whose corners
+         * have no colour of their own. Every other face, the one column wearing no texture among
+         * them, is drawn exactly.
          *
-         * Over both of them the shipped toolkit draws the same narrow band of dark greys, from
-         * four to nineteen, following the light across the patch and taking no colour from the
-         * ground or from what was laid over it. The near half of the patch carries a red over
-         * every face and the far half carries none, and both halves come out the same band, so
-         * whatever the map is given there it is not the colour the client handed over.
-         *
-         * A corner of a patch the client laid a colour over is the one case where the map is not
-         * drawn in a colour the ground has. Standing such a corner for black and lighting it is
-         * worse, taking the scene to two hundred and twenty four, so it is not simply the colour
-         * of nothing carried through the light either.
+         * Those corners wear textures the harness gives no colour on the map, and nothing is laid
+         * over them. The shipped toolkit draws them in the lit grey that a corner with nothing laid
+         * over it comes to, not in the texture's colour. Skipping the texture for such a face is
+         * further off, two hundred and twelve, so it is not simply that a face with no colour
+         * never shows its texture on the map.
          */
         @Override
         public boolean written() {

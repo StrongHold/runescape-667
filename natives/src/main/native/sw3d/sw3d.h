@@ -359,8 +359,6 @@ int groundTileWaterColour(const void *tile);
 float groundTileCornerUnder(const void *tile, int corner);
 int groundTileCornerDepth(const void *tile, int corner);
 int groundTileFaceHollow(const void *tile, int face);
-
-int groundTileFaceBare(const void *tile, int face);
 int groundTilePlanColour(const void *tile, int corner, uint32_t *colour);
 
 /** How much of the world one whole width of a face's texture covers. */

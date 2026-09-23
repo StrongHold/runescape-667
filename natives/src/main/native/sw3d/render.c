@@ -3623,17 +3623,12 @@ static void renderTilePlan(const void *ground, const void *tile, float across, f
                            float width) {
     int size = groundTileSize(ground);
 
+    /*
+     * Every face is drawn on the map, a face the floor opens through as well. Such a face has no
+     * colour of its own, and the map draws it in the near black grey that nothing lit comes to,
+     * which is how the toolkit does it.
+     */
     for (int face = 0; face < groundTileFaces(tile); face++) {
-        /*
-         * A face the floor opens through has nothing of its own to show on the map either, so
-         * whatever the map was drawn over stays where it is.
-         */
-        if (groundTileFaceBare(tile, face) && groundTileFaceTexture(tile, face) == -1) {
-            continue;
-        }
-
-
-
         fillTriangle(
             planCorner(tile, face * 3, across, down, width, size),
             planCorner(tile, face * 3 + 1, across, down, width, size),

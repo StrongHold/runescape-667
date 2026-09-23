@@ -10,7 +10,6 @@
 #
 # scene = pixels only the shipped toolkit drew, pixels only we drew, pixels shaded differently
 BlackBacked = 0, 0, 155
-HollowPlan = 0, 0, 54
-OverlaidPlan = 16, 0, 207
+OverlaidPlan = 0, 0, 144
 SeenThrough = 0, 0, 21
 Stairs = 0, 0, 245
