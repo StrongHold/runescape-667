@@ -616,6 +616,19 @@ static float blendedFromAcross[BLENDED];
 
 static float blendedFromDown[BLENDED];
 
+/**
+ * Whether where the tile stands is carried whole, as part of the place on the texture.
+ *
+ * The toolkit does this for one kind of face only: a face wearing one texture, laid at a size
+ * other than the tile's, with no shadow over it. It takes where the tile stands into the corner
+ * along with the place, multiplies the two by how far away the corner is, and divides that back
+ * out a pixel at a time. The division is the rough reciprocal, so the whole widths do not land
+ * back where they set off, and that decides the texel at a place near the edge of one. Every
+ * other face of the ground carries the place on the tile alone and adds where the tile stands
+ * afterwards.
+ */
+static int tileCarried;
+
 /** How wide one whole texture is counted as being when the ground lays a tile out on one. */
 enum { TEXTURE_PER_TILE = 128 };
 
@@ -630,6 +643,7 @@ enum { TEXTURE_PER_TILE = 128 };
  * bring the corners into and nothing to move them along by.
  */
 static void layTexturePlain(void) {
+    tileCarried = 0;
     for (int which = 0; which < BLENDED; which++) {
         blendedWider[which] = 1.0f;
         blendedFromAcross[which] = 0.0f;
@@ -639,15 +653,23 @@ static void layTexturePlain(void) {
 
 static void layTextureAt(int which, int tileSize, int wide, int x, int z) {
     float laidAt = wide <= 0 || tileSize <= 0 ? 1.0f : (float) tileSize / (float) wide;
+    float across = (float) (x * TEXTURE_PER_TILE) * laidAt;
+    float down = (float) (z * TEXTURE_PER_TILE) * laidAt;
 
-    /*
-     * Only what is left over past a whole texture moves a tile anywhere, because a texture on the
-     * ground carries on round itself. Taking the whole ones off keeps the number small, and keeps
-     * a tile that is moved a whole number of textures exactly where it was.
-     */
     blendedWider[which] = laidAt;
-    blendedFromAcross[which] = fmodf((float) (x * TEXTURE_PER_TILE) * laidAt, (float) TEXTURE_WIDE);
-    blendedFromDown[which] = fmodf((float) (z * TEXTURE_PER_TILE) * laidAt, (float) TEXTURE_WIDE);
+
+    if (tileCarried) {
+        blendedFromAcross[which] = across;
+        blendedFromDown[which] = down;
+    } else {
+        /*
+         * Only what is left over past a whole texture moves a tile anywhere, because a texture on
+         * the ground carries on round itself. Taking the whole ones off keeps the number small,
+         * and keeps a tile that is moved a whole number of textures exactly where it was.
+         */
+        blendedFromAcross[which] = fmodf(across, (float) TEXTURE_WIDE);
+        blendedFromDown[which] = fmodf(down, (float) TEXTURE_WIDE);
+    }
 }
 
 static int texelsRepeat;
@@ -761,12 +783,18 @@ static uint32_t texelFrom(const uint32_t *from, float u, float v, float w, int w
 
 static uint32_t texelAt(float u, float v, float w) {
     float away = reciprocalOfFour(w);
-    int across = onTheTexture(
-        (int) (u * away * blendedWider[0] + blendedFromAcross[0]), texelsRepeat);
-    int down = onTheTexture(
-        (int) (v * away * blendedWider[0] + blendedFromDown[0]), texelsRepeat);
+    int across;
+    int down;
 
-    return texels[(down << 8) | across];
+    if (tileCarried) {
+        across = (int) (u * away);
+        down = (int) (v * away);
+    } else {
+        across = (int) (u * away * blendedWider[0] + blendedFromAcross[0]);
+        down = (int) (v * away * blendedWider[0] + blendedFromDown[0]);
+    }
+
+    return texels[(onTheTexture(down, texelsRepeat) << 8) | onTheTexture(across, texelsRepeat)];
 }
 
 /**
@@ -2142,17 +2170,21 @@ static void layTextureOnTile(const void *ground, const void *tile, int face, int
         wide = tileSize;
     }
 
+    int blends = !cornersAgree(tile, face);
+    tileCarried = !blends && wide != tileSize && shadow == NULL;
+
     layTextureAt(0, tileSize, wide, x, z);
     sizesSeen(tileSize, wide, blendedWider[0]);
 
-    if (!cornersAgree(tile, face)) {
+    if (blends) {
         blendTextures(tile, face, tileSize, x, z, walked);
     }
 
     /*
      * The corners are put on the tile rather than on the texture. What each texture makes of that
      * is worked out once for the face and applied a pixel at a time, which is what keeps the
-     * number carried across the face small enough to stay exact.
+     * number carried across the face small enough to stay exact. A face that carries where its
+     * tile stands is the exception, and its corners are put on the texture instead.
      */
     float over = (float) TEXTURE_EDGE / (float) tileSize;
 
@@ -2162,7 +2194,13 @@ static void layTextureOnTile(const void *ground, const void *tile, int face, int
         uint32_t colour;
         groundTilePlanCorner(tile, face * 3 + corner, &across, &along, &colour);
 
-        walked[corner] = onTexture(walked[corner], (float) across * over, (float) along * over);
+        if (tileCarried) {
+            walked[corner] = onTexture(walked[corner],
+                (float) across * over * blendedWider[0] + blendedFromAcross[0],
+                (float) along * over * blendedWider[0] + blendedFromDown[0]);
+        } else {
+            walked[corner] = onTexture(walked[corner], (float) across * over, (float) along * over);
+        }
     }
 }
 

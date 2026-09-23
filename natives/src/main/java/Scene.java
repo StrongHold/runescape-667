@@ -1661,10 +1661,11 @@ public sealed interface Scene {
 
 
         /**
-         * Three thousand of its pixels are a shade out and all but a hundred and fifty of those
-         * are out by one. Give every corner a texture the size of a tile and the whole patch
-         * comes within two, so what is left is the same thing the textured patch is left with: a
-         * texture laid smaller than the tile it covers, read over and over across it.
+         * Two thousand eight hundred of its pixels are a shade out, and none by more than two.
+         * The faces wearing a single texture draw exactly, so what is left is on the faces
+         * blended from three. The shipped toolkit carries only the place on the tile across such
+         * a face, never where the tile stands, and lays each of the three textures on it a pixel
+         * at a time.
          *
          * Laying all three at the size the face names rather than at the size each corner names
          * is further off still, so it is not that the sizes are read and it is not that they are
@@ -2430,37 +2431,6 @@ public sealed interface Scene {
      * strip of bare tiles between them, so one picture shows all three.
      */
     record TexturedGround() implements Scene {
-
-        /**
-         * Every tile covered once by its texture is drawn exactly right: give both halves of the
-         * patch a texture the size of a tile and the picture matches to the pixel. The whole of
-         * what is left is the half covered four times over, where about a hundred and eighty
-         * pixels read the texel next to the right one and the rest are a shade out from rounding.
-         *
-         * It is not the size the texture is laid at: a whole width for every cover, a whole width
-         * less a texel, and either of those only where the texture repeats, all come out further
-         * off than leaving it alone. Nor is it how the distance is divided out. Holding one
-         * division across a group of four pixels rather than dividing at each of them is further
-         * off, and so is dividing exactly rather than by the rough reciprocal the machine offers,
-         * so the shipped toolkit divides at every pixel and takes the rough answer.
-         *
-         * Nor is it where along a span a pixel is reckoned to be, which was the last thing left
-         * to suspect. Stepping the reckoning one pixel on from the last, rather than working each
-         * one out from where the group of four it falls in begins, is further off here and puts
-         * two scenes out that match to the pixel now. So the toolkit works each one out afresh,
-         * as this does.
-         *
-         * What the wrong pixels look like, which is where to start next. They are scattered one
-         * at a time rather than gathered anywhere, four hundred of them read the texel beside the
-         * right one and the rest are a shade out, and in five of every six the green is exactly
-         * right while the red and blue are out in both directions. Green being the channel a
-         * grass texture varies least in, that is a texel being chosen wrongly rather than a
-         * colour being mixed wrongly, and it happens where a step lands nearest a boundary.
-         */
-        @Override
-        public boolean written() {
-            return false;
-        }
 
         @Override
         public void draw(Toolkit toolkit, Props props) {

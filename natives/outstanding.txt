@@ -12,7 +12,7 @@
 BareHorizon = 0, 0, 21
 BedHorizon = 0, 0, 116
 BlackBacked = 0, 0, 155
-BlendedGround = 0, 0, 3188
+BlendedGround = 0, 0, 2855
 FoggedDock = 0, 0, 166
 FoggedHorizon = 0, 0, 1167
 GlaringWater = 0, 0, 27
@@ -22,7 +22,6 @@ OverlaidWaterDock = 0, 0, 137
 SeenThrough = 0, 0, 21
 SeenThroughDock = 0, 0, 137
 Stairs = 0, 0, 245
-TexturedGround = 0, 0, 2691
 Underwater = 0, 0, 7
 WaterOverNoBed = 0, 0, 43
 Watered = 0, 0, 43
