@@ -1066,6 +1066,40 @@ val captureOwnFrames = tasks.register<JavaExec>("captureOwnFrames") {
     }
 }
 
+/**
+ * Draws the scenes through the toolkit written in Java, the one the client falls back to when it
+ * loads no natives at all.
+ *
+ * Nothing here is compared. The frames are there to be looked at, because a fault in the client
+ * that shows in the Java toolkit can be looked for without a server. Pass `-Pscene=<title>` to
+ * draw one scene.
+ */
+tasks.register<JavaExec>("captureJavaFrames") {
+    description = "Draws the scenes through the toolkit written in Java."
+    dependsOn(compileSoftwareToolkit)
+    mainClass = "FrameCapture"
+    classpath = sourceSets["main"].runtimeClasspath
+    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+    val directory = layout.buildDirectory.dir("java-frames").get().asFile
+    val scene = providers.gradleProperty("scene")
+    val library = toolkitLibrary.get().asFile.absolutePath
+
+    environment("SW3D_DUMP", directory.absolutePath)
+    sceneSettings.forEach { (name, fallback) ->
+        environment(name, providers.environmentVariable(name).getOrElse(fallback))
+    }
+    argumentProviders.add(CommandLineArgumentProvider {
+        val named = scene.orNull?.let { listOf("--scene", it) } ?: emptyList()
+        listOf("--library", library, "--toolkit", "JAVA") + named
+    })
+    outputs.upToDateWhen { false }
+
+    doFirst {
+        directory.deleteRecursively()
+        directory.mkdirs()
+    }
+}
+
 val watchSource = layout.projectDirectory.file("src/main/native/watch/watch.c")
 val watchLibrary = layout.buildDirectory.file("natives/libwatch.dylib")
 val watchDirectory = layout.buildDirectory.dir("watch")

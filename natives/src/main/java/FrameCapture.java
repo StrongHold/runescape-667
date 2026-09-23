@@ -62,7 +62,7 @@ public final class FrameCapture {
         try {
             Watchdog.arm("The frame capture", 120);
             var scenes = scenesNamed(args.scenes());
-            capture(args.library(), scenes);
+            capture(args.library(), args.toolkit(), scenes);
             System.out.println("drew " + scenes.size() + " scenes, " + REPEATS + " times each");
             System.exit(0);
         } catch (Throwable failure) {
@@ -71,7 +71,7 @@ public final class FrameCapture {
         }
     }
 
-    private static void capture(File library, List<Scene> scenes) throws Exception {
+    private static void capture(File library, CaptureToolkit kind, List<Scene> scenes) throws Exception {
         LibraryManager.putLibrary(library, "sw3d");
 
         var canvas = new Canvas();
@@ -83,7 +83,7 @@ public final class FrameCapture {
         window.setVisible(true);
         Thread.sleep(1000);
 
-        var toolkit = oa.create(canvas, new HandTextureSource(), Scene.WIDTH, Scene.HEIGHT);
+        var toolkit = toolkitOf(kind, canvas);
         var sprite = GradientSprite.INSTANCE;
         var gradient = toolkit.createSprite(
             sprite.width(), sprite.width(), sprite.height(), sprite.pixels());
@@ -175,7 +175,12 @@ public final class FrameCapture {
         for (var scene : scenes) {
             for (var repeat = 0; repeat < REPEATS; repeat++) {
                 Trace.markScene(scene.title(), repeat);
-                drawOnce(toolkit, scene, props, camera);
+                if (toolkit instanceof JavaToolkit java) {
+                    drawInJava(java, scene, props, camera);
+                    JavaFrames.write(java, manifest.size());
+                } else {
+                    drawOnce(toolkit, scene, props, camera);
+                }
                 manifest.add(scene.title()
                     + (scene.written() ? "" : " (outstanding)")
                     + (scene.drawsNothing() ? " (empty on purpose)" : ""));
@@ -185,6 +190,27 @@ public final class FrameCapture {
         toolkit.method7950();
         writeManifest(manifest);
         window.dispose();
+    }
+
+    private static Toolkit toolkitOf(CaptureToolkit kind, Canvas canvas) {
+        return switch (kind) {
+            case SW3D -> oa.create(canvas, new HandTextureSource(), Scene.WIDTH, Scene.HEIGHT);
+            case JAVA -> JavaToolkit.create(canvas, new HandTextureSource(), Scene.WIDTH, Scene.HEIGHT);
+        };
+    }
+
+    /**
+     * Draws a scene through the toolkit written in Java, which does not do everything the native
+     * one does. A scene it cannot draw is reported and left, so that it does not stop the scenes
+     * after it from being looked at.
+     */
+    private static void drawInJava(JavaToolkit toolkit, Scene scene, Scene.Props props, Matrix camera)
+            throws Exception {
+        try {
+            drawOnce(toolkit, scene, props, camera);
+        } catch (RuntimeException failure) {
+            System.out.println(scene.title() + " cannot be drawn in Java: " + failure);
+        }
     }
 
     private static void drawOnce(Toolkit toolkit, Scene scene, Scene.Props props,
