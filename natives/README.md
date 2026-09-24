@@ -131,7 +131,7 @@ Everything under `src/main/java` is a tool, and a Gradle task runs each one.
 | files | what they do |
 |---|---|
 | `FrameCapture`, `Scene`, `SceneModel`, `KeepModels`, `Hand*`, `*Mesh`, `GradientSprite`, `IndexedGlyph` | draw the scenes through a software toolkit and keep the frames |
-| `JavaFrames`, `CaptureToolkit` | draw the same scenes through the toolkit written in Java (`captureJavaFrames`, `-Pscene=<title>` for one scene), for a person to look at |
+| `JavaFrames`, `CaptureToolkit` | draw the same scenes through the toolkit written in Java (`captureJavaFrames`), for a person to look at |
 | `FrameCheck`, `GoldenFrames` | compare the frames of the two toolkits, and keep the shipped frames under `goldens` |
 | `*Probe`, `AnswerCheck` | ask a library a fixed set of questions, and compare the answers of two libraries |
 | `GlSamples`, `MemoryHeap`, `Jagmisc`, `ToolkitLifetime`, `ToolkitSkeleton`, `CanvasHandover`, `SpriteLiftCheck` | check one behaviour of one library |
