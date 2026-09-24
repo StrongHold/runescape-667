@@ -91,7 +91,7 @@ public final class TextureOpEmboss extends TextureOp {
     public void updateLightDirection(@OriginalArg(0) byte arg0) {
         @Pc(11) double cosElevation = Math.cos((float) this.elevation / 4096.0F);
         this.lightDirection[0] = (int) (cosElevation * Math.sin((float) this.azimuth / 4096.0F) * 4096.0D);
-        this.lightDirection[1] = (int) (cosElevation * 4096.0D * Math.cos((float) this.azimuth / 4096.0F));
+        this.lightDirection[1] = (int) (4096.0D * (cosElevation * Math.cos((float) this.azimuth / 4096.0F)));
         this.lightDirection[2] = (int) (Math.sin((float) this.elevation / 4096.0F) * 4096.0D);
         @Pc(76) int squareX = this.lightDirection[0] * this.lightDirection[0] >> 12;
         @Pc(88) int squareY = this.lightDirection[1] * this.lightDirection[1] >> 12;

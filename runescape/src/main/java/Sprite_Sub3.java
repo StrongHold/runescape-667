@@ -450,8 +450,8 @@ public final class Sprite_Sub3 extends Sprite {
             @Pc(163) float local163 = (float) this.anInt6612 * -local111;
             x = x + local129 + local117;
             op = op + local129 + local156;
-            height = local123 + local149 + height;
-            y = local123 + local135 + y;
+            height = local123 + (local149 + height);
+            y = local123 + (local135 + y);
             width = local142 + width + local117;
             colour = colour + local135 + local163;
         }

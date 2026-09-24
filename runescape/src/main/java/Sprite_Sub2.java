@@ -188,15 +188,15 @@ public final class Sprite_Sub2 extends Sprite {
             @Pc(84) float local84 = (float) this.anInt6037 * -local32;
             @Pc(91) float local91 = (float) this.anInt6040 * -local39;
             y1 = y1 + local84 + local58;
-            centerX = local52 + local64 + centerX;
+            centerX = local52 + (local64 + centerX);
             @Pc(110) float local110 = -local46 * (float) this.anInt6040;
-            x1 = local52 + local77 + x1;
-            x2 = local91 + x2 + local64;
+            x1 = local52 + (local77 + x1);
+            x2 = local91 + (x2 + local64);
             centerY = local70 + centerY + local58;
-            y2 = local110 + local70 + y2;
+            y2 = local110 + (local70 + y2);
         }
-        local14 = x2 + x1 - centerX;
-        local18 = y2 + y1 - centerY;
+        local14 = x2 + (x1 - centerX);
+        local18 = y2 - centerY + y1;
         this.aClass93_Sub2_Sub1_3.method9438(true);
         this.aClass19_Sub3_28.method7018();
         this.aClass19_Sub3_28.method7001(this.aClass93_Sub2_Sub1_3);
@@ -362,15 +362,15 @@ public final class Sprite_Sub2 extends Sprite {
             @Pc(74) float local74 = (float) this.anInt6037 * -local22;
             @Pc(81) float local81 = -local29 * (float) this.anInt6040;
             y = y + local60 + local48;
-            op = local81 + local54 + op;
-            height = local48 + height + local74;
+            op = local81 + (local54 + op);
+            height = local48 + (height + local74);
             x = local54 + x + local42;
             width = local67 + width + local42;
             @Pc(118) float local118 = -local36 * (float) this.anInt6040;
-            colour = local118 + local60 + colour;
+            colour = local118 + (local60 + colour);
         }
-        local6 = op + width - x;
-        local10 = colour + height - y;
+        local6 = op + (width - x);
+        local10 = colour - y + height;
         this.aClass93_Sub2_Sub1_3.method9438(true);
         this.aClass19_Sub3_28.method7018();
         this.aClass19_Sub3_28.method7001(this.aClass93_Sub2_Sub1_3);

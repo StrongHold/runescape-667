@@ -203,8 +203,8 @@ public abstract class JavaSprite extends Sprite {
             x2 += local73 + bottomX;
             y2 += local79 + bottomY;
         }
-        local34 = x2 + x1 - centerX;
-        local41 = y1 + y2 - centerY;
+        local34 = x2 + (x1 - centerX);
+        local41 = y1 + (y2 - centerY);
         if (centerX < x1) {
             local48 = centerX;
             local55 = x1;
