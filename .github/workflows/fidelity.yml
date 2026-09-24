@@ -1,0 +1,28 @@
+# Checks that the recompiled client computes what the jar it came from computed.
+#
+# The decompiler wrote some arithmetic in a way that computes something else: sums of floating point
+# numbers lost their brackets, and one double negation became a decrement. This compares every
+# method of the recompiled client with its original in the jar, as trees of arithmetic, and fails on
+# a difference that fidelity/expressions-outstanding.txt does not list as known to be harmless.
+name: Fidelity
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  expressions:
+    name: Expressions
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Compare the arithmetic with the jar
+        run: ./gradlew :fidelity:verifyExpressions --no-daemon --warning-mode fail

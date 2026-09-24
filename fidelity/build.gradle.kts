@@ -37,7 +37,9 @@ val originalClasses = runescape.layout.buildDirectory.dir("original")
  * Compares what each method computes, as trees of arithmetic, between the jar and the recompiled
  * classes.
  *
- * Pass `-Pclasses=Terrain,Rasterizer` to check named classes. The report says where the floating
+ * It fails when a method differs that `expressions-outstanding.txt` does not list, since that may be
+ * damage the decompiler did. Pass `-Pclasses=Terrain,Rasterizer` to check named classes. The report
+ * says where the floating
  * point arithmetic of the two sides parts. Pass `-Pwhole` to write out every tree that differs
  * instead, and `-Pevery` with it to include integer arithmetic.
  */
@@ -52,12 +54,15 @@ tasks.register<JavaExec>("verifyExpressions") {
     val whole = providers.gradleProperty("whole").isPresent
     val recompiled = recompiledClasses.get().asFile.absolutePath
     val original = originalClasses.get().asFile.absolutePath
+    val outstanding = layout.projectDirectory.file("expressions-outstanding.txt").asFile.absolutePath
+    inputs.file(outstanding)
 
     argumentProviders.add(CommandLineArgumentProvider {
         val chosen = named.split(',').filter { it.isNotBlank() }.flatMap { listOf("--class", it) }
         val wide = if (every) listOf("--every") else emptyList()
         val written = if (whole) listOf("--whole") else emptyList()
-        listOf("--recompiled", recompiled, "--original", original) + chosen + wide + written
+        listOf("--recompiled", recompiled, "--original", original, "--outstanding", outstanding) +
+            chosen + wide + written
     })
 }
 

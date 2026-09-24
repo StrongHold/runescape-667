@@ -25,8 +25,19 @@ The two sides are put into one form before they are compared:
   of each one are sorted, and the grouping stays as it was.
 - Negation is exact, so `a + -b` and `a - b` are the same tree, and so are `-a * b` and `-(a * b)`.
 - Comparisons that the decompiler turned round are turned back.
+- Integer arithmetic wraps round, so a subtraction is the addition of a negation, constants in a
+  sum are added up, and two negations cancel. A shift uses only the low bits of its distance, and a
+  shift of a masked value is written as a mask of the shifted value when the two are the same.
+- A floating point constant is exact to negate, so `x - 1.0F` and `x + -1.0F` are the same tree.
+- A call to a method of the jar that only applies one instruction to its two parameters is written
+  as that instruction. The obfuscator moved some ands into methods of their own.
+- A value that reaches a use by more than one path on one side, because the jar reused a local,
+  may stand for any value on the other side that rounds nothing.
 
 The report lists, for each method, the lowest floating point nodes at which the two sides part.
+The check fails when a method differs that `fidelity/expressions-outstanding.txt` does not list.
+Each line there names a method known to compute the same as the jar, and says why. CI runs the
+check on every push.
 Pass `-Pwhole` to write out every tree that differs instead, and `-Pevery` with it to include
 integer arithmetic.
 

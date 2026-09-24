@@ -54,6 +54,11 @@ public final class Symbolic extends Interpreter<Expression> {
         List<Expression> arguments(MethodInsnNode call, List<Expression> given);
 
         /**
+         * The one instruction the method a call names does, when that is all it does.
+         */
+        java.util.Optional<String> helperOperation(String member);
+
+        /**
          * The parameter at a position of the method, counted from nought without the receiver.
          */
         String parameter(int position);
@@ -233,8 +238,13 @@ public final class Symbolic extends Interpreter<Expression> {
      * What a call makes, named and with its arguments lined up the same way on both sides.
      */
     static Expression call(Side side, MethodInsnNode call, List<Expression> given) {
+        var member = side.member(call.owner, call.name, call.desc, false);
+        var helper = side.helperOperation(member);
+        if (helper.isPresent() && given.size() == 2) {
+            return Expression.of(helper.get(), given, 1);
+        }
         return Expression.of(
-            "call " + side.member(call.owner, call.name, call.desc, false),
+            "call " + member,
             side.arguments(call, given),
             Math.max(Type.getReturnType(call.desc).getSize(), 1));
     }

@@ -78,6 +78,11 @@ public final class Expression implements Value {
      * The value an operation makes from others, put into the one form.
      */
     public static Expression of(String operator, List<Expression> operands, int size) {
+        var whole = wholeForm(operator, operands, size);
+        if (whole != null) {
+            return whole;
+        }
+
         var signed = signless(operator, operands, size);
         if (signed != null) {
             return signed;
@@ -104,6 +109,176 @@ public final class Expression implements Value {
         var key = new Key(operator, formed.stream().map(Expression::id).toList(), size);
         return INTERNED.computeIfAbsent(key,
             ignored -> new Expression(INTERNED.size(), operator, List.copyOf(formed), size));
+    }
+
+    /**
+     * The same integer value in one form, or nothing when it is in that form already.
+     *
+     * Arithmetic on an int or a long wraps round, so it is exact in any order: a subtraction is
+     * the addition of a negation, a negation of a sum is the sum of the negations, two negations
+     * cancel, and the constants of a sum can be added up. A shift uses only the low five bits of
+     * its distance, or six for a long, and the obfuscator wrote many distances far past that.
+     * Floating point constants are exact to negate, so a subtraction of one is the addition of
+     * its negation. The decompiler and the obfuscator each wrote all of these either way round.
+     */
+    private static Expression wholeForm(String operator, List<Expression> operands, int size) {
+        return switch (operator) {
+            case "isub", "lsub" -> of(operator.charAt(0) + "add",
+                List.of(operands.get(0), of(operator.charAt(0) + "neg", List.of(operands.get(1)), size)), size);
+            case "ineg", "lneg" -> negated(operator, operands.get(0), size);
+            case "iadd", "ladd" -> foldedSum(operator, operands, size);
+            case "ishr", "iushr" -> {
+                var masked = maskedShift(operator, operands, size);
+                yield masked != null ? masked : shifted(operator, operands, size, 31);
+            }
+            case "ishl" -> shifted(operator, operands, size, 31);
+            case "lshl", "lshr", "lushr" -> shifted(operator, operands, size, 63);
+            case "fsub", "dsub" -> constantOf(operands.get(1)) == null ? null
+                : of(operator.charAt(0) + "add", List.of(operands.get(0), constant(operands.get(1), -constantOf(operands.get(1)))), size);
+            default -> null;
+        };
+    }
+
+    private static Expression negated(String operator, Expression operand, int size) {
+        var kind = operator.charAt(0);
+        var value = wholeOf(operand);
+        if (value != null) {
+            return whole(kind, kind == 'i' ? (long) -(int) (long) value : -value);
+        } else if (operand.operator.equals(operator)) {
+            return operand.operands.get(0);
+        } else if (operand.operator.equals(kind + "add")) {
+            var parts = new ArrayList<Expression>();
+            for (var part : operand.operands) {
+                parts.add(of(operator, List.of(part), size));
+            }
+            return of(kind + "add", parts, size);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * A sum with its operands flattened and its constants added into one, or nothing when there
+     * is nothing to fold.
+     */
+    private static Expression foldedSum(String operator, List<Expression> operands, int size) {
+        var kind = operator.charAt(0);
+        var flat = new ArrayList<Expression>();
+        for (var operand : operands) {
+            if (operand.operator.equals(operator)) {
+                flat.addAll(operand.operands);
+            } else {
+                flat.add(operand);
+            }
+        }
+
+        long constant = 0;
+        var constants = 0;
+        var rest = new ArrayList<Expression>();
+        for (var operand : flat) {
+            var value = wholeOf(operand);
+            if (value == null) {
+                rest.add(operand);
+            } else {
+                constant += value;
+                constants++;
+            }
+        }
+        if (kind == 'i') {
+            constant = (int) constant;
+        }
+
+        if (constants == 0 || (constants == 1 && constant != 0)) {
+            return null;
+        } else if (constant != 0) {
+            rest.add(whole(kind, constant));
+        }
+
+        if (rest.isEmpty()) {
+            return whole(kind, 0);
+        } else if (rest.size() == 1) {
+            return rest.get(0);
+        } else {
+            return of(operator, rest, size);
+        }
+    }
+
+    /**
+     * A shift of a masked value written as a mask of the shifted value, when the two are the same.
+     *
+     * The obfuscator writes {@code (x & m) >> 16} with a mask whose low bits are noise, where the
+     * source says {@code (x >> 16) & 255}. With a mask that has no sign bit the masked value is
+     * never negative, so shifting it and then masking by the shifted mask gives the same bits.
+     */
+    private static Expression maskedShift(String operator, List<Expression> operands, int size) {
+        var distance = wholeOf(operands.get(1));
+        var value = operands.get(0);
+        if (distance == null || !value.operator.equals("iand") || value.operands.size() != 2) {
+            return null;
+        }
+
+        Long mask = null;
+        Expression masked = null;
+        for (var operand : value.operands) {
+            var constant = wholeOf(operand);
+            if (constant != null && mask == null) {
+                mask = constant;
+            } else {
+                masked = operand;
+            }
+        }
+        if (mask == null || masked == null || mask < 0) {
+            return null;
+        }
+
+        var shift = (int) (distance & 31);
+        var shifted = of(operator, List.of(masked, whole('i', shift)), size);
+        return of("iand", List.of(shifted, whole('i', (int) mask.longValue() >>> shift)), size);
+    }
+
+    private static Expression shifted(String operator, List<Expression> operands, int size, int bits) {
+        var distance = wholeOf(operands.get(1));
+        if (distance == null || (distance & bits) == distance) {
+            return null;
+        } else {
+            return of(operator, List.of(operands.get(0), whole('i', distance & bits)), size);
+        }
+    }
+
+    private static Long wholeOf(Expression value) {
+        if (value.operator.startsWith("int ") || value.operator.startsWith("long ")) {
+            try {
+                return Long.parseLong(value.operator.substring(value.operator.indexOf(' ') + 1));
+            } catch (NumberFormatException ignored) {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    private static Expression whole(char kind, long value) {
+        return kind == 'i' ? leaf("int " + (int) value, 1) : leaf("long " + value, 2);
+    }
+
+    private static Double constantOf(Expression value) {
+        if (value.operator.startsWith("float ") || value.operator.startsWith("double ")) {
+            try {
+                return Double.parseDouble(value.operator.substring(value.operator.indexOf(' ') + 1));
+            } catch (NumberFormatException ignored) {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    private static Expression constant(Expression like, double value) {
+        if (like.operator.startsWith("float ")) {
+            return leaf("float " + (float) value, 1);
+        } else {
+            return leaf("double " + value, 2);
+        }
     }
 
     /**
@@ -162,6 +337,61 @@ public final class Expression implements Value {
             return of(negate, List.of(product), size);
         } else {
             return product;
+        }
+    }
+
+    /**
+     * Whether this value and another could be the same value, taking a value that arrived by more
+     * than one path, on either side, to stand for any value at all.
+     *
+     * The jar reuses a local where the source has a new one, or computes a value before a branch
+     * that the source computes inside it, and the value then reaches its use by more than one path
+     * on one side only. What it is made from is the same, so it is not a difference.
+     *
+     * Such a value may stand only for one that rounds nothing, such as a parameter, a field, a
+     * constant or integer arithmetic. A loop carries a floating point value round by more than
+     * one path, and letting it stand for any sum would hide the very regrouping this looks for.
+     */
+    public boolean couldBe(Expression other) {
+        if (this == other) {
+            return true;
+        } else if (operator.equals("merged")) {
+            return !other.floating;
+        } else if (other.operator.equals("merged")) {
+            return !floating;
+        } else if (!operator.equals(other.operator) || operands.size() != other.operands.size()) {
+            return false;
+        } else if (EXACT.contains(operator) || COMMUTATIVE.contains(operator)) {
+            return pairUp(operands, new ArrayList<>(other.operands));
+        } else {
+            for (var at = 0; at < operands.size(); at++) {
+                if (!operands.get(at).couldBe(other.operands.get(at))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+    /**
+     * Whether each of one set of operands could be one of the other set, each used once.
+     */
+    private static boolean pairUp(List<Expression> left, List<Expression> right) {
+        if (left.isEmpty()) {
+            return true;
+        } else {
+            var first = left.get(0);
+            var remaining = left.subList(1, left.size());
+            for (var at = 0; at < right.size(); at++) {
+                if (first.couldBe(right.get(at))) {
+                    var rest = new ArrayList<>(right);
+                    rest.remove(at);
+                    if (pairUp(remaining, rest)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 

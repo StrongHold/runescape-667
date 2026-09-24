@@ -67,6 +67,10 @@ public final class ExpressionCheck {
             description = "Write out every tree that differs, rather than where the two sides part")
         private boolean whole;
 
+        @Parameter(names = "--outstanding",
+            description = "The methods known to compute the same as the jar although they are reported")
+        private File outstanding;
+
         @Parameter(names = "--help", help = true, description = "Print this message")
         private boolean help;
 
@@ -76,7 +80,7 @@ public final class ExpressionCheck {
         }
     }
 
-    private record Difference(String method, List<String> lost, List<String> gained) {
+    private record Difference(String key, String method, List<String> lost, List<String> gained) {
         /* empty */
     }
 
@@ -94,6 +98,9 @@ public final class ExpressionCheck {
         var compared = 0;
         var unmatched = 0;
         var differing = 0;
+        var known = known(args.outstanding);
+        var unknown = new ArrayList<String>();
+        var stillDiffering = new HashSet<String>();
 
         for (var name : names.stream().sorted().toList()) {
             var node = naming.recompiledClass(name)
@@ -116,7 +123,12 @@ public final class ExpressionCheck {
                 differing += differences.size();
                 System.out.println(name + ":");
                 for (var difference : differences) {
-                    System.out.println("    " + difference.method());
+                    stillDiffering.add(difference.key());
+                    var listed = known.contains(difference.key());
+                    if (!listed) {
+                        unknown.add(difference.key());
+                    }
+                    System.out.println("    " + difference.method() + (listed ? " (known)" : ""));
                     for (var line : difference.lost()) {
                         System.out.println("      - " + line);
                     }
@@ -129,6 +141,43 @@ public final class ExpressionCheck {
 
         System.out.println(compared + " methods compared, " + differing + " compute something different, "
             + unmatched + " could not be matched to the jar");
+
+        if (args.outstanding != null && args.classes.isEmpty()) {
+            for (var key : known) {
+                if (!stillDiffering.contains(key)) {
+                    System.out.println("No longer reported, so the line can be removed: " + key);
+                }
+            }
+        }
+
+        if (args.outstanding != null && !unknown.isEmpty()) {
+            System.out.println(unknown.size() + " reported that the record does not list:");
+            for (var key : unknown) {
+                System.out.println("    " + key);
+            }
+            System.exit(1);
+        }
+    }
+
+    /**
+     * The methods listed in the record of known differences, without the reasons.
+     */
+    private static Set<String> known(File record) {
+        if (record == null) {
+            return Set.of();
+        }
+        try {
+            var listed = new HashSet<String>();
+            for (var line : java.nio.file.Files.readAllLines(record.toPath())) {
+                var entry = line.contains("#") ? line.substring(0, line.indexOf('#')).trim() : line.trim();
+                if (!entry.isEmpty()) {
+                    listed.add(entry);
+                }
+            }
+            return Set.copyOf(listed);
+        } catch (java.io.IOException failure) {
+            throw new java.io.UncheckedIOException(failure);
+        }
     }
 
     private record Original(Naming.Member member, MethodNode method) {
@@ -151,7 +200,7 @@ public final class ExpressionCheck {
                 .filter(tree -> keepsOnlyRealParameters(tree, parameters))
                 .collect(Collectors.toUnmodifiableSet());
         } catch (AnalyzerException failure) {
-            return Optional.of(new Difference(describe(method, was),
+            return Optional.of(new Difference(key(owner, method, was), describe(method, was),
                 List.of("could not be run: " + failure.getMessage()), List.of()));
         }
 
@@ -165,7 +214,7 @@ public final class ExpressionCheck {
         if (lost.isEmpty() && gained.isEmpty()) {
             return Optional.empty();
         } else {
-            return Optional.of(new Difference(describe(method, was), lost, gained));
+            return Optional.of(new Difference(key(owner, method, was), describe(method, was), lost, gained));
         }
     }
 
@@ -199,6 +248,7 @@ public final class ExpressionCheck {
             .filter(node -> node.operands().stream()
                 .filter(Expression::rounds)
                 .allMatch(theirs::contains))
+            .filter(node -> theirs.stream().noneMatch(node::couldBe))
             .sorted(Comparator.comparingInt(Expression::id))
             .map(node -> node.render(DIVERGENCE_DEPTH, naming))
             .toList();
@@ -222,6 +272,14 @@ public final class ExpressionCheck {
         return tree.leaves().stream()
             .filter(leaf -> ORIGINAL_PARAMETER.matcher(leaf).matches())
             .allMatch(kept::contains);
+    }
+
+    /**
+     * How a method is named in the record of known differences: its class, its name, and what it
+     * was called in the jar, which tells overloads apart.
+     */
+    private static String key(ClassNode owner, MethodNode method, Original was) {
+        return owner.name + " " + method.name + " " + was.member().name() + was.member().descriptor();
     }
 
     private static String describe(MethodNode method, Original was) {
@@ -254,6 +312,11 @@ public final class ExpressionCheck {
         public List<Expression> arguments(MethodInsnNode call, List<Expression> given) {
             return given;
         }
+
+        @Override
+        public Optional<String> helperOperation(String member) {
+            return naming.helperOperation(member);
+        }
     }
 
     /**
@@ -274,6 +337,11 @@ public final class ExpressionCheck {
         @Override
         public String parameter(int position) {
             return "param " + position;
+        }
+
+        @Override
+        public Optional<String> helperOperation(String member) {
+            return naming.helperOperation(member);
         }
 
         @Override

@@ -1,0 +1,23 @@
+# Methods verifyExpressions reports that are known to compute the same as the jar.
+#
+# Each line names a recompiled class, the method, and what the method was called in the jar, then
+# says why the difference is not a change. A method reported and not listed here fails the check,
+# because it may be decompiler damage. Remove a line when its method is no longer reported.
+
+GlToolkit method6990 p(I)V  # the jar computes the corner floats once before a branch
+Ground_Sub1 drawMinimap a(IIIIIII[[Z)V  # a constant parameter the deobfuscator inlined
+Ground_Sub2 drawMinimap a(IIIIIII[[Z)V  # a constant parameter the deobfuscator inlined
+Model_Sub1 renderOrtho a(Ltt;Lima;II)V  # the jar computes the offset floats once before a branch
+Model_Sub1 render a(Ltt;Lima;I)V  # the jar computes the offset floats once before a branch
+Model_Sub2 render a(Ltt;Lima;I)V  # the jar computes the offset floats once before a branch
+Model_Sub2 renderOrtho a(Ltt;Lima;II)V  # the jar computes the offset floats once before a branch
+OggTheoraStream frameRate g(I)F  # the jar reads the frame rate fields through a reused local
+PerlinNoiseGenerator generate a(FFI[FIFIFIBI)V  # a constant parameter the deobfuscator inlined
+ProjectileAnimation target a(IZIII)V  # the jar computes the time step once before a branch
+Rasterizer drawBlendedTexturedSpan a([I[IIIIFFFFFFFFFFFFFFFFFFFF)V  # an | 0xff000000 that a later shift and mask discard
+Sprite_Sub2 renderParallelogramImpl a(FFFFFFILaa;II)V  # the jar reuses a local for the corner sum
+TextureOpEmboss updateLightDirection c(B)V  # the jar computes cos(elevation) once and reuses it
+com/jagex/graphics/Sprite renderRotated a(FFIILaa;II)V  # constant parameters the deobfuscator inlined
+com/jagex/graphics/Sprite renderRotated a(FFIIIII)V  # constant parameters the deobfuscator inlined
+com/jagex/sound/SoundStream rightGainFor b(II)I  # the jar reads the parameter through a reused local
+com/jagex/sound/SoundStream leftGainFor a(II)I  # the jar reads the parameter through a reused local

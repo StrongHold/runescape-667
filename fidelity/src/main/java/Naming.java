@@ -206,6 +206,39 @@ public final class Naming {
     }
 
     /**
+     * The one instruction a method of the jar does, when all it does is load its two parameters,
+     * apply one instruction to them and return the answer.
+     *
+     * The obfuscator moved some single operations, such as an and, into a static method of their
+     * own, and the deobfuscator put most of them back. A call to such a method is written as the
+     * operation it does, on both sides, so that it matches where it was put back.
+     */
+    public Optional<String> helperOperation(String member) {
+        var dot = member.indexOf('.');
+        var paren = member.indexOf('(');
+        var found = originalMethod(new Member(member.substring(0, dot), member.substring(dot + 1, paren),
+            member.substring(paren)));
+        if (found.isEmpty() || (found.get().access & org.objectweb.asm.Opcodes.ACC_STATIC) == 0) {
+            return Optional.empty();
+        }
+
+        // The obfuscator wrapped many methods in an exception handler, which follows the return.
+        var instructions = new java.util.ArrayList<org.objectweb.asm.tree.AbstractInsnNode>();
+        for (var insn : found.get().instructions) {
+            if (insn.getOpcode() >= 0 && instructions.size() < 4) {
+                instructions.add(insn);
+            }
+        }
+        if (instructions.size() != 4
+            || !(instructions.get(0) instanceof org.objectweb.asm.tree.VarInsnNode first) || first.var != 0
+            || !(instructions.get(1) instanceof org.objectweb.asm.tree.VarInsnNode second) || second.var != 1
+            || instructions.get(3).getOpcode() != org.objectweb.asm.Opcodes.IRETURN) {
+            return Optional.empty();
+        }
+        return Optional.of(Symbolic.name(instructions.get(2)));
+    }
+
+    /**
      * The recompiled method an original one became, when the annotations say.
      */
     public Optional<MethodNode> recompiledMethod(String original) {
