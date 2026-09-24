@@ -29,9 +29,6 @@ tasks.run.configure {
     args = listOf("1", "1000", "local", "live", "english", "game0")
 }
 
-/**
- * The jar this source was recovered from, unpacked so that single classes can be read out of it.
- */
 val unpackOriginal = tasks.register<Copy>("unpackOriginal") {
     description = "Unpacks the jar this source was recovered from."
     from(zipTree(layout.projectDirectory.file("../lib/runescape.jar")))

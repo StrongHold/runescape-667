@@ -153,11 +153,6 @@ val captureFrames = tasks.register<JavaExec>("captureFrames") {
     }
 }
 
-/**
- * A static scene must produce the same bytes every frame. The toolkit concatenates its transforms
- * onto whatever context it is handed, so anything the surface fails to reset accumulates and shows
- * up as the picture changing between frames of an unchanging scene.
- */
 val verifyToolkitLifetime = tasks.register<JavaExec>("verifyToolkitLifetime") {
     description = "Builds and discards software toolkits to prove none is torn down by the collector."
     dependsOn(patchToolkit)
@@ -169,14 +164,6 @@ val verifyToolkitLifetime = tasks.register<JavaExec>("verifyToolkitLifetime") {
     args("--library", patchedToolkit.get().asFile.absolutePath)
 }
 
-/**
- * The same check against our own toolkit.
- *
- * Choosing a graphics profile, changing the antialiasing, or anything else that asks the client
- * for a toolkit builds a new one and discards the one before it. The client swallows a failure
- * there without a word and comes up on the Java renderer instead, so a toolkit that cannot be
- * built a second time looks like the renderer being slow rather than like a fault.
- */
 val verifyOwnToolkitLifetime = tasks.register<JavaExec>("verifyOwnToolkitLifetime") {
     description = "Builds and discards our software toolkits to prove a second one can be made."
     dependsOn(compileSoftwareToolkit, ":unpackX64Jdk")
@@ -188,10 +175,6 @@ val verifyOwnToolkitLifetime = tasks.register<JavaExec>("verifyOwnToolkitLifetim
     args("--library", toolkitLibrary.get().asFile.absolutePath)
 }
 
-/**
- * What becomes of the window when the client stops drawing with one toolkit and starts with
- * another, which is what opening the world map does.
- */
 val verifyCanvasHandover = tasks.register<JavaExec>("verifyCanvasHandover") {
     description = "Hands the window from our software toolkit to the Java one and reads the screen."
     dependsOn(compileSoftwareToolkit, ":unpackX64Jdk")
@@ -207,12 +190,6 @@ val toolkitClasses = listOf("a", "ba", "h", "i", "j", "ja", "n", "na", "oa", "p"
 
 val skeletonSource = layout.buildDirectory.file("generated/sw3d-skeleton.c")
 
-/**
- * Writes an implementation of every native the toolkit classes declare, each one doing nothing.
- *
- * The point is the surface rather than the behaviour. A skeleton that loads and resolves every
- * call proves the contract is complete and gives each real implementation somewhere to land.
- */
 val generateToolkitSkeleton = tasks.register("generateToolkitSkeleton") {
     description = "Writes a do-nothing implementation of every native the toolkit declares."
     dependsOn(":runescape:compileJava")
@@ -279,11 +256,6 @@ val generateToolkitSkeleton = tasks.register("generateToolkitSkeleton") {
 
 val skeletonLibrary = layout.buildDirectory.file("natives/libsw3d-skeleton.dylib")
 
-/**
- * Builds the skeleton for arm64, the architecture the shipped toolkit does not have. Nothing it
- * produces is drawn yet, so its value is that it loads and that every call the client makes
- * resolves.
- */
 val compileToolkitSkeleton = tasks.register<Exec>("compileToolkitSkeleton") {
     description = "Builds the arm64 skeleton of the software toolkit."
     dependsOn(generateToolkitSkeleton, ":unpackX64Jdk")
@@ -313,10 +285,6 @@ val compileToolkitSkeleton = tasks.register<Exec>("compileToolkitSkeleton") {
     }
 }
 
-/**
- * Runs on the machine's own architecture rather than the translated one, because the skeleton is
- * the arm64 implementation and the point is that it needs no translation.
- */
 val verifyToolkitSkeleton = tasks.register<JavaExec>("verifyToolkitSkeleton") {
     description = "Builds the software toolkit against the arm64 skeleton."
     dependsOn(compileToolkitSkeleton)
@@ -329,14 +297,6 @@ val verifyToolkitSkeleton = tasks.register<JavaExec>("verifyToolkitSkeleton") {
 val openGlSource = layout.buildDirectory.file("generated/jaggl-opengl.c")
 val openGlReport = layout.buildDirectory.file("generated/jaggl-outstanding.txt")
 
-/**
- * Writes the part of the OpenGL binding that needs no judgement, and lists what is left.
- *
- * The binding is not a renderer. Almost every native is named after the OpenGL entry point it
- * calls and passes its arguments straight through, so most of it is generated from the JNI headers
- * the client build emits. What remains is the handful that marshals arrays or strings and the
- * platform calls that own the context, and those are written by hand.
- */
 val generateOpenGlBinding = tasks.register("generateOpenGlBinding") {
     description = "Writes the mechanical part of the OpenGL binding from the client's JNI headers."
     dependsOn(":runescape:compileJava")
@@ -490,12 +450,6 @@ val generateOpenGlBinding = tasks.register("generateOpenGlBinding") {
 
 val openGlLibrary = layout.buildDirectory.file("natives/libjaggl.dylib")
 
-/**
- * Builds the OpenGL binding.
- *
- * The mechanical half is generated from the client's JNI headers and the platform half, which
- * owns the context and the layer that presents it, is written by hand beside it.
- */
 val compileOpenGlBinding = tasks.register<Exec>("compileOpenGlBinding") {
     description = "Builds the OpenGL binding."
     dependsOn(generateOpenGlBinding, ":unpackX64Jdk")
@@ -566,15 +520,6 @@ val patchOpenGlBinding = tasks.register<Exec>("patchOpenGlBinding") {
 val bindingAnswers = layout.buildDirectory.file("answers/binding-shipped.txt")
 val ownBindingAnswers = layout.buildDirectory.file("answers/binding-ours.txt")
 
-/**
- * Drives a binding through the same script and writes down what it carried back.
- *
- * Both sides need the shim to wait for the view it hands over. The shipped binding builds its
- * context out of NSOpenGLContext and gives it a view, and the call that takes a view makes the
- * context current on whichever thread runs it. The shim hands that call to the main thread and
- * does not wait, which is what the client needs and what leaves a harness drawing into a context
- * current somewhere else.
- */
 fun registerBindingCapture(name: String, library: Provider<RegularFile>, answers: Provider<RegularFile>,
                            after: TaskProvider<*>) =
     tasks.register<JavaExec>(name) {
@@ -598,11 +543,6 @@ val captureBinding = registerBindingCapture(
 val captureOwnBinding = registerBindingCapture(
     "captureOwnBinding", openGlLibrary, ownBindingAnswers, compileOpenGlBinding)
 
-/**
- * The samples are not compared against the shipped binding, because the two do not agree on them
- * and cannot: the shipped one gives two where none are asked for. What is held here is that this
- * one draws with as many as it was asked for and can still be read back afterwards.
- */
 val verifyOpenGlSamples = tasks.register<JavaExec>("verifyOpenGlSamples") {
     description = "Draws through the OpenGL binding at each sample count and reads the picture back."
     dependsOn(compileOpenGlBinding, ":unpackX64Jdk")
@@ -616,10 +556,6 @@ val verifyOpenGlSamples = tasks.register<JavaExec>("verifyOpenGlSamples") {
     inputs.file(openGlLibrary)
 }
 
-/**
- * What a binding carries is held to being identical. What sort of context it built is not, and is
- * reported instead: the two do not build the same one, and `jaggl/README.md` says why.
- */
 val verifyOpenGlBinding = tasks.register<JavaExec>("verifyOpenGlBinding") {
     description = "Checks our OpenGL binding against the shipped one, answer for answer."
     dependsOn(captureBinding, captureOwnBinding)
@@ -635,12 +571,6 @@ val verifyOpenGlBinding = tasks.register<JavaExec>("verifyOpenGlBinding") {
 val memorySource = layout.projectDirectory.file("src/main/native/jaclib/jaclib.c")
 val memoryLibrary = layout.buildDirectory.file("natives/libjaclib.dylib")
 
-/**
- * Builds the native memory library.
- *
- * The client's own JNI headers are on the include path and the source includes them, so a
- * signature that does not match the Java declaration fails the compile rather than the client.
- */
 val compileMemoryLibrary = tasks.register<Exec>("compileMemoryLibrary") {
     description = "Builds the native memory library the hardware toolkits allocate from."
     dependsOn(":unpackX64Jdk", ":runescape:compileJava")
@@ -752,10 +682,6 @@ val captureOwnMemory = tasks.register<JavaExec>("captureOwnMemory") {
     doFirst { written.parentFile.mkdirs() }
 }
 
-/**
- * Both are driven through the x86_64 virtual machine, because the shipped library has no slice
- * for anything else and the two have to be asked the same questions on the same machine.
- */
 val verifyMemoryAnswers = tasks.register<JavaExec>("verifyMemoryAnswers") {
     description = "Checks our memory library against the shipped one, answer for answer."
     dependsOn(captureMemory, captureOwnMemory)
@@ -803,11 +729,6 @@ val compileMiscLibrary = tasks.register<Exec>("compileMiscLibrary") {
     }
 }
 
-/**
- * The game's file store holds jagmisc for Windows and for nothing else, so there is no shipped
- * library here to measure against. Each answer is held against a second way of asking the machine
- * the same question instead.
- */
 val verifyMiscLibrary = tasks.register<JavaExec>("verifyMiscLibrary") {
     description = "Holds the clock, the memory sizes and the ping against what the machine says."
     dependsOn(compileMiscLibrary)
@@ -819,13 +740,6 @@ val verifyMiscLibrary = tasks.register<JavaExec>("verifyMiscLibrary") {
 
 val toolkitTrace = layout.buildDirectory.file("generated/sw3d-trace.txt")
 
-/**
- * Records which natives the toolkit reaches, and in what order, while a frame is drawn.
- *
- * The skeleton answers every call with nothing, so no frame comes out and the run is expected to
- * fail. What it leaves behind is the order the client asks for things in, which is the order they
- * are worth implementing in.
- */
 val traceToolkit = tasks.register<JavaExec>("traceToolkit") {
     description = "Records the natives a frame reaches, in the order the client asks for them."
     dependsOn(compileToolkitSkeleton)
@@ -864,13 +778,6 @@ val toolkitDirectory = layout.projectDirectory.dir("src/main/native/sw3d")
 val toolkitStubs = layout.buildDirectory.file("generated/sw3d-stubs.c")
 val toolkitOutstanding = layout.buildDirectory.file("generated/sw3d-outstanding.txt")
 
-/**
- * Writes a do-nothing implementation of every native the toolkit declares and this module does
- * not yet answer, so the library always exports the whole surface while it is being filled in.
- *
- * Which natives are written is read from the sources rather than listed here, so the two cannot
- * drift apart.
- */
 val generateToolkitStubs = tasks.register("generateToolkitStubs") {
     description = "Stubs every toolkit native that is not written yet, and lists what is left."
     dependsOn(":runescape:compileJava")
@@ -963,12 +870,6 @@ val generateToolkitStubs = tasks.register("generateToolkitStubs") {
 
 val toolkitLibrary = layout.buildDirectory.file("natives/libsw3d.dylib")
 
-/**
- * Builds the software toolkit.
- *
- * The sources are listed when the task runs rather than when it is configured, so that adding a
- * file to the directory rebuilds rather than being silently left out of the link.
- */
 val compileSoftwareToolkit = tasks.register<Exec>("compileSoftwareToolkit") {
     description = "Builds the software toolkit."
     dependsOn(generateToolkitStubs, ":unpackX64Jdk")
@@ -1029,15 +930,6 @@ val compileSoftwareToolkit = tasks.register<Exec>("compileSoftwareToolkit") {
 
 val ownFrames = layout.buildDirectory.dir("own-frames")
 
-/**
- * Renders the fixed scene through our own toolkit and leaves the frames beside the ones the
- * shipped toolkit produced, so the two can be compared.
- *
- * This runs on whatever machine it is asked on, unlike the shipped toolkit, which has only ever
- * been built for x86_64. The rasteriser reads its approximations from a table rather than asking
- * the processor for them, so the picture is the same on either architecture and a comparison
- * across the two measures the toolkit rather than the processor.
- */
 val captureOwnFrames = tasks.register<JavaExec>("captureOwnFrames") {
     description = "Renders the fixed scene through our own software toolkit."
     dependsOn(compileSoftwareToolkit)
@@ -1064,14 +956,6 @@ val captureOwnFrames = tasks.register<JavaExec>("captureOwnFrames") {
     }
 }
 
-/**
- * Draws the scenes through the toolkit written in Java, the one the client falls back to when it
- * loads no natives at all.
- *
- * Nothing here is compared. The frames are there to be looked at, because a fault in the client
- * that shows in the Java toolkit can be looked for without a server. Pass `-Pscene=<title>` to
- * draw one scene.
- */
 tasks.register<JavaExec>("captureJavaFrames") {
     description = "Draws the scenes through the toolkit written in Java."
     dependsOn(compileSoftwareToolkit)
@@ -1113,12 +997,6 @@ val ownWatchFrames = watchDirectory.map { it.dir("own-frames") }
  */
 val tracedScene = providers.gradleProperty("scene")
 
-/**
- * Builds the watcher, which is inserted into the virtual machine that drives the shipped toolkit.
- *
- * It is built for x86_64 alone, because it only ever sits beside the shipped toolkit and that has
- * no other slice.
- */
 val compileWatcher = tasks.register<Exec>("compileWatcher") {
     description = "Builds the library that watches the shipped toolkit call its own routines."
     inputs.file(watchSource)
@@ -1139,13 +1017,6 @@ val compileWatcher = tasks.register<Exec>("compileWatcher") {
     }
 }
 
-/**
- * Draws one scene through the shipped toolkit with some of its routines watched, and keeps what
- * each call was handed. Name the scene with -Pscene and the routines with -Pwatch, several of them
- * apart by semicolons:
- *
- *     ./gradlew :natives:compareTraces -Pscene=FoggedHorizon -Pwatch='body:2,0,0,0,1,3,0,0'
- */
 val watchShipped = tasks.register<JavaExec>("watchShipped") {
     description = "Draws one scene through the shipped toolkit and traces the routines named."
     dependsOn(patchToolkit, compileWatcher)
@@ -1188,9 +1059,6 @@ val watchShipped = tasks.register<JavaExec>("watchShipped") {
     }
 }
 
-/**
- * Draws the same scene through our toolkit with its trace switched on.
- */
 val traceOwn = tasks.register<JavaExec>("traceOwn") {
     description = "Draws one scene through our toolkit and traces every textured pixel."
     dependsOn(compileSoftwareToolkit)
@@ -1222,13 +1090,6 @@ val traceOwn = tasks.register<JavaExec>("traceOwn") {
     }
 }
 
-/**
- * Lines the two traces up pixel by pixel and says which value differs where the pictures do.
- *
- * -Pat prints pixels in full, as x,y apart by semicolons. -Pignore leaves values out of the
- * comparison, for a face that does not use them. -Pdump prints the first calls to every watched
- * routine that is not the body of a span.
- */
 tasks.register<JavaExec>("compareTraces") {
     description = "Says which value differs first between the two toolkits, pixel by pixel."
     dependsOn(watchShipped, traceOwn)
@@ -1258,14 +1119,6 @@ tasks.register<JavaExec>("compareTraces") {
     outputs.upToDateWhen { false }
 }
 
-/**
- * Checks both toolkits against the scenes and against each other.
- *
- * This is the oracle the rest of the toolkit is written against. Both sides draw the same scenes
- * through the same harness and dump their frames the same way, so a scene that disagrees with
- * itself is state left behind, and a scene that disagrees with the other side is a difference in
- * the rasteriser and nothing else.
- */
 val verifyToolkit = tasks.register<JavaExec>("verifyToolkit") {
     description = "Checks our toolkit against the shipped one, scene by scene and pixel by pixel."
     dependsOn(captureFrames, captureOwnFrames)
@@ -1282,14 +1135,6 @@ val verifyToolkit = tasks.register<JavaExec>("verifyToolkit") {
 
 val goldenFrames = layout.projectDirectory.dir("goldens")
 
-/**
- * Keeps what the shipped toolkit drew, one frame per scene, so that a machine without the shipped
- * library can still check our toolkit.
- *
- * The shipped library comes out of the game's cache and is not ours to publish, so it reaches no
- * machine but one that has already run the client. Run this when a scene is added or when a change
- * to the harness moves what the shipped toolkit draws, and read the change as pictures.
- */
 val updateGoldens = tasks.register<JavaExec>("updateGoldens") {
     description = "Keeps one frame per scene from the shipped toolkit."
     dependsOn(captureFrames)
@@ -1301,14 +1146,6 @@ val updateGoldens = tasks.register<JavaExec>("updateGoldens") {
     )
 }
 
-/**
- * Checks our toolkit against the frames kept in the repository rather than against the shipped
- * library.
- *
- * This is what runs where the shipped library cannot, which is everywhere but a developer's own
- * machine. It measures the same thing verifyToolkit does and holds the same record, so a scene
- * that is allowed to be a certain distance out is allowed the same distance here.
- */
 val verifyGoldens = tasks.register<JavaExec>("verifyGoldens") {
     description = "Checks our toolkit against the frames kept in the repository."
     dependsOn(captureOwnFrames)
@@ -1330,17 +1167,6 @@ val verifyGoldens = tasks.register<JavaExec>("verifyGoldens") {
     mustRunAfter(updateGoldens)
 }
 
-/**
- * Registers a probe that asks both toolkits the same questions and compares the answers.
- *
- * Not everything a toolkit does ends up on the screen, and what does not cannot be checked by
- * comparing pictures. A probe drives one named class through each toolkit, writes every answer as
- * a line of text, and the check reads the two files back. Adding one is three tasks, so they are
- * written once here rather than three more times for each new family of natives.
- *
- * The shipped side runs on the x86_64 virtual machine it needs, and ours runs there too, so both
- * sides are asked on the same instruction set.
- */
 fun registerProbe(name: String, probe: String, what: String): TaskProvider<JavaExec> {
     val shippedAnswers = layout.buildDirectory.file("answers/$name-shipped.txt")
     val ownAnswers = layout.buildDirectory.file("answers/$name-ours.txt")
@@ -1390,11 +1216,6 @@ fun registerProbe(name: String, probe: String, what: String): TaskProvider<JavaE
     }
 }
 
-/**
- * The one native the shipped toolkit exports under a C++ name, which no virtual machine can
- * find, so it cannot be driven and there is no answer to compare against. What can be checked
- * is that it agrees with the two written natives that do the same thing in two steps.
- */
 val verifySpriteLift = tasks.register<JavaExec>("verifySpriteLift") {
     description = "Checks a sprite lifted straight out of the buffer against the same in two steps."
     dependsOn(compileSoftwareToolkit, ":unpackX64Jdk")
@@ -1409,16 +1230,6 @@ val verifyMatrices = registerProbe("matrices", "MatrixProbe", "matrix answers")
 val verifyPoints = registerProbe("points", "PointProbe", "projection answers")
 val verifyModels = registerProbe("models", "ModelProbe", "model answers")
 
-/**
- * Every check the toolkit is held to, in one place.
- *
- * Run this before changing anything under the toolkit. It is not part of `check`, because what it
- * measures against is the shipped library out of the game's own cache, which is on a developer's
- * machine and not in this repository: a `check` that depended on it would fail for anyone who has
- * not run the client. Nor can it run anywhere but macOS, because it loads a dylib through a shim
- * built against the window server, and it needs the x86_64 virtual machine that library was built
- * for.
- */
 val verifyNatives = tasks.register("verifyNatives") {
     group = "verification"
     description = "Runs every check the toolkit is held to against the shipped library."
@@ -1438,9 +1249,6 @@ val verifyNatives = tasks.register("verifyNatives") {
     )
 }
 
-/**
- * Keeps the models the scenes are drawn with beside them, so that drawing them needs no cache.
- */
 tasks.register<JavaExec>("keepModels") {
     description = "Writes the models the scenes are drawn with beside the scenes."
     mainClass = "KeepModels"

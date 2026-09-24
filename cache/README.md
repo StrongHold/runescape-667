@@ -6,7 +6,7 @@ drawn with models read from here, and the tools print what the cache holds for a
 | task | what it does |
 |---|---|
 | `listCacheLibraries` | Lists the native libraries the cache holds, for every platform. |
-| `extractCacheLibrary` | Writes one named native library out of the cache. |
+| `extractCacheLibrary` | Writes one named native library out of the cache, under the build directory. |
 | `listTerrain` | Says what the map is made of on one tile. |
 | `describeModel` | Says what one model out of the cache is made of. |
 | `listLocType` | Lists the models one kind of location is built from. |

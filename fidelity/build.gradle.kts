@@ -15,12 +15,6 @@ val recompiledClasses = runescape.layout.buildDirectory.dir("classes/java/main")
 val originalClasses = runescape.layout.buildDirectory.dir("original")
 val runescapeSources = runescape.layout.projectDirectory.dir("src/main/java")
 
-/**
- * Compares which value opcodes each method uses, between the jar and the recompiled classes.
- *
- * Pass `-Pclasses=Terrain,Rasterizer` to check named classes. The default is every class whose
- * original is still in the jar, which takes a while.
- */
 tasks.register<JavaExec>("verifyOpcodes") {
     description = "Compares the value opcodes of each recompiled method with the original jar."
     dependsOn(":runescape:compileJava", ":runescape:unpackOriginal")
@@ -67,16 +61,6 @@ tasks.register<JavaExec>("verifyOpcodes") {
     })
 }
 
-/**
- * Compares what each method computes, as trees of arithmetic, between the jar and the recompiled
- * classes.
- *
- * It fails when a method differs that `expressions-outstanding.txt` does not list, since that may be
- * damage the decompiler did. Pass `-Pclasses=Terrain,Rasterizer` to check named classes. The report
- * says where the floating
- * point arithmetic of the two sides parts. Pass `-Pwhole` to write out every tree that differs
- * instead, and `-Pevery` with it to include integer arithmetic.
- */
 tasks.register<JavaExec>("verifyExpressions") {
     description = "Compares the arithmetic of each recompiled method with the original jar."
     dependsOn(":runescape:compileJava", ":runescape:unpackOriginal")
@@ -100,10 +84,6 @@ tasks.register<JavaExec>("verifyExpressions") {
     })
 }
 
-/**
- * Sets the records two clients wrote with the agent side by side. Pass -Pjar=<file> for the jar's
- * client and -Pours=<file> for the recompiled one.
- */
 tasks.register<JavaExec>("diffNativeTraces") {
     description = "Compares what two clients handed the native software toolkit."
     mainClass = "NativeTraceDiff"
