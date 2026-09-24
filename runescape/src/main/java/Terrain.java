@@ -585,7 +585,7 @@ public class Terrain {
                         }
 
                         if (!tileEdgeSplits[(direction + 2) & 0x3]) {
-                            edgeSplits[2] = BLENDED_EDGE_SPLITS[shapeNorth][--directionNorth & 0x3];
+                            edgeSplits[2] = BLENDED_EDGE_SPLITS[shapeNorth][directionNorth & 0x3];
                         }
                     } else if (!tileEdgeSplits[(direction + 2) & 0x3]) {
                         edgeSplits[2] = UNBLENDED_EDGE_SPLITS[shapeNorth][directionNorth & 0x3];
