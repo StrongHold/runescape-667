@@ -9,8 +9,6 @@ dependencies {
 }
 
 /**
- * The native pieces the client needs on macOS, and the harness that exercises them.
- *
  * The shim is built for x86_64 because it is loaded next to the shipped software toolkit, which
  * has no arm64 slice.
  */

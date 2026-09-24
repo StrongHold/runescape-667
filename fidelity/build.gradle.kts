@@ -2,13 +2,6 @@ plugins {
     java
 }
 
-/**
- * Checks the recompiled client against the jar it was recovered from.
- *
- * The client in `runescape` was decompiled, recompiled and then renamed a wave at a time. None of
- * that is meant to change what any method computes, and the tools here are how that is checked.
- * They read class files, never source, so what they compare is what the virtual machine runs.
- */
 dependencies {
     implementation(project(":cli"))
     implementation(libs.asm.tree)

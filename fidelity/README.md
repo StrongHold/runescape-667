@@ -69,33 +69,6 @@ Some differences are the deobfuscator's own work, and they compute the same answ
   place. The jar reads a variable where the source has a number.
 - An `| 0xff000000` whose bits a later shift and mask discard was removed.
 
-## The trace agent
+## Comparing two running clients
 
-    ./gradlew :native-trace:jar
-    ./gradlew client:run -PnativeTrace=/tmp/ours.trace,classes=none,methods=JavaGround.U(II[I[I[I[I[I[I[I[IIIIZ)V
-    ./gradlew :fidelity:diffNativeTraces -Pjar=/tmp/jar.trace -Pours=/tmp/ours.trace
-
-The agent writes down calls a client makes, with every argument, to compare the recompiled client
-with the jar while both run. Pass it to the jar's client with `-javaagent:` in the same way. The jar
-needs Java 11, because its loader uses Pack200, so the agent is built for Java 11.
-
-After the file, the settings are:
-
-- `classes=t:ja` watches every native method of the classes named. This is the default.
-- `methods=<class>.<name><descriptor>;...` watches Java methods by name. The jar and the recompiled
-  client name the same method differently, so each run names its own.
-- `every=<class>` watches every method of a class.
-- `calls=<n>` sets how many calls of one method are written down. The default is 20000.
-
-A Java method's record names the object, the thread and the caller. It also has the object's
-simple fields whenever they change, and any object or array the method hands back.
-
-Compare what is built once, such as the tiles of the ground. Two runs look from two cameras, so
-calls made every frame seldom match one for one.
-
-## What the agent found
-
-The client drew lines of gaps between tiles, and the jar did not. The two clients built about 200
-tiles in an area differently. The jar read an edge split at `-(-direction) & 3`. The decompiler
-wrote that as `--direction & 3`, which in Java is a decrement. A double negation in the jar is worth
-checking in the source wherever it appears.
+`diffNativeTraces` compares two records written by the agent in `native-trace`. See its README.

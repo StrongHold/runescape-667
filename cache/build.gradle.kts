@@ -2,12 +2,6 @@ plugins {
     `java-library`
 }
 
-/**
- * Reads the game's cache, and the tools that say what is in it.
- *
- * The readers are a library as well as a set of tools. The scenes in `natives` are drawn with
- * models read from here, and the tools below print what the cache holds for a person to read.
- */
 dependencies {
     api(project(":cli"))
     api(project(":runescape"))

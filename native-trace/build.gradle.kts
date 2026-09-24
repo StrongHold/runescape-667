@@ -3,11 +3,8 @@ plugins {
 }
 
 /**
- * An agent that writes down the calls a client makes, to compare the recompiled client with the
- * jar while both run. See NativeTrace.
- *
- * It is handed to clients that run on Java 11 as well as 21, since the jar the client came from
- * needs Pack200, which Java 14 removed.
+ * The jar the client came from needs Pack200, which Java 14 removed, so the agent must load on
+ * Java 11 as well as 21.
  */
 tasks.compileJava {
     options.release = 11
