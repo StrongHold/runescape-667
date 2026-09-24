@@ -1052,7 +1052,7 @@ public final class GlToolkit extends Toolkit {
     @Override
     public int JA(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5) {
         @Pc(7) int local7 = 0;
-        @Pc(32) float local32 = this.aClass73_Sub3_3.aFloat159 + (float) arg1 * this.aClass73_Sub3_3.aFloat151 + (float) arg0 * this.aClass73_Sub3_3.aFloat155 + this.aClass73_Sub3_3.aFloat154 * (float) arg2;
+        @Pc(32) float local32 = this.aClass73_Sub3_3.aFloat159 + ((float) arg1 * this.aClass73_Sub3_3.aFloat151 + (float) arg0 * this.aClass73_Sub3_3.aFloat155 + this.aClass73_Sub3_3.aFloat154 * (float) arg2);
         if (local32 < 1.0F) {
             local32 = 1.0F;
         }
@@ -1065,14 +1065,14 @@ public final class GlToolkit extends Toolkit {
         } else if (local32 > (float) this.anInt8018 && local63 > (float) this.anInt8018) {
             local7 |= 0x20;
         }
-        @Pc(141) int local141 = (int) ((float) this.anInt8001 * (this.aClass73_Sub3_3.aFloat152 + this.aClass73_Sub3_3.aFloat160 * (float) arg2 + (float) arg0 * this.aClass73_Sub3_3.aFloat153 + (float) arg1 * this.aClass73_Sub3_3.aFloat157) / local32);
-        @Pc(173) int local173 = (int) ((float) this.anInt8001 * (this.aClass73_Sub3_3.aFloat152 + this.aClass73_Sub3_3.aFloat153 * (float) arg3 + this.aClass73_Sub3_3.aFloat157 * (float) arg4 + this.aClass73_Sub3_3.aFloat160 * (float) arg5) / local63);
+        @Pc(141) int local141 = (int) ((float) this.anInt8001 * (this.aClass73_Sub3_3.aFloat152 + ((float) arg0 * this.aClass73_Sub3_3.aFloat153 + (float) arg1 * this.aClass73_Sub3_3.aFloat157 + this.aClass73_Sub3_3.aFloat160 * (float) arg2)) / local32);
+        @Pc(173) int local173 = (int) ((float) this.anInt8001 * (this.aClass73_Sub3_3.aFloat152 + (this.aClass73_Sub3_3.aFloat153 * (float) arg3 + this.aClass73_Sub3_3.aFloat157 * (float) arg4 + this.aClass73_Sub3_3.aFloat160 * (float) arg5)) / local63);
         if (this.aFloat145 > (float) local141 && this.aFloat145 > (float) local173) {
             local7 |= 0x1;
         } else if (this.aFloat138 < (float) local141 && this.aFloat138 < (float) local173) {
             local7 |= 0x2;
         }
-        @Pc(245) int local245 = (int) ((this.aClass73_Sub3_3.aFloat150 * (float) arg2 + (float) arg0 * this.aClass73_Sub3_3.aFloat161 + (float) arg1 * this.aClass73_Sub3_3.aFloat156 + this.aClass73_Sub3_3.aFloat158) * (float) this.anInt8025 / local32);
+        @Pc(245) int local245 = (int) (((float) arg0 * this.aClass73_Sub3_3.aFloat161 + (float) arg1 * this.aClass73_Sub3_3.aFloat156 + this.aClass73_Sub3_3.aFloat150 * (float) arg2 + this.aClass73_Sub3_3.aFloat158) * (float) this.anInt8025 / local32);
         @Pc(277) int local277 = (int) (((float) arg3 * this.aClass73_Sub3_3.aFloat161 + this.aClass73_Sub3_3.aFloat156 * (float) arg4 + (float) arg5 * this.aClass73_Sub3_3.aFloat150 + this.aClass73_Sub3_3.aFloat158) * (float) this.anInt8025 / local63);
         if ((float) local245 < this.aFloat141 && (float) local277 < this.aFloat141) {
             local7 |= 0x4;
@@ -1737,12 +1737,12 @@ public final class GlToolkit extends Toolkit {
     @OriginalMember(owner = "client!qha", name = "H", descriptor = "(III[I)V")
     @Override
     public void H(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int[] arg3) {
-        @Pc(28) float local28 = this.aClass73_Sub3_3.aFloat159 + (float) arg2 * this.aClass73_Sub3_3.aFloat154 + this.aClass73_Sub3_3.aFloat151 * (float) arg1 + (float) arg0 * this.aClass73_Sub3_3.aFloat155;
+        @Pc(28) float local28 = this.aClass73_Sub3_3.aFloat159 + (this.aClass73_Sub3_3.aFloat151 * (float) arg1 + (float) arg0 * this.aClass73_Sub3_3.aFloat155 + (float) arg2 * this.aClass73_Sub3_3.aFloat154);
         if (local28 == 0.0F) {
             arg3[0] = arg3[1] = arg3[2] = -1;
             return;
         }
-        @Pc(78) int local78 = (int) ((this.aClass73_Sub3_3.aFloat152 + (float) arg2 * this.aClass73_Sub3_3.aFloat160 + this.aClass73_Sub3_3.aFloat157 * (float) arg1 + this.aClass73_Sub3_3.aFloat153 * (float) arg0) * (float) this.anInt8001 / local28);
+        @Pc(78) int local78 = (int) ((this.aClass73_Sub3_3.aFloat152 + (this.aClass73_Sub3_3.aFloat157 * (float) arg1 + this.aClass73_Sub3_3.aFloat153 * (float) arg0 + (float) arg2 * this.aClass73_Sub3_3.aFloat160)) * (float) this.anInt8001 / local28);
         arg3[0] = (int) ((float) local78 - this.aFloat145);
         @Pc(119) int local119 = (int) ((float) this.anInt8025 * (this.aClass73_Sub3_3.aFloat161 * (float) arg0 + (float) arg1 * this.aClass73_Sub3_3.aFloat156 + (float) arg2 * this.aClass73_Sub3_3.aFloat150 + this.aClass73_Sub3_3.aFloat158) / local28);
         arg3[2] = (int) local28;
@@ -1798,7 +1798,7 @@ public final class GlToolkit extends Toolkit {
         OpenGL.glTexCoord2f((float) (x1 - maskX) * local39, local46 * (float) (y1 - maskY));
         OpenGL.glVertex2f((float) x1 + 0.35F, (float) y1 + 0.35F);
         OpenGL.glTexCoord2f(local39 * (float) (x2 - maskX), local46 * (float) (y2 - maskY));
-        OpenGL.glVertex2f(local91 + (float) x2 + 0.35F, local95 + 0.35F + (float) y2);
+        OpenGL.glVertex2f(local91 + (float) x2 + 0.35F, local95 + (float) y2 + 0.35F);
         OpenGL.glEnd();
         this.method7021(5890, 768, 0);
     }
@@ -1888,12 +1888,12 @@ public final class GlToolkit extends Toolkit {
     @OriginalMember(owner = "client!qha", name = "da", descriptor = "(III[I)V")
     @Override
     public void da(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int[] arg3) {
-        @Pc(28) float local28 = this.aClass73_Sub3_3.aFloat159 + this.aClass73_Sub3_3.aFloat155 * (float) arg0 + this.aClass73_Sub3_3.aFloat151 * (float) arg1 + (float) arg2 * this.aClass73_Sub3_3.aFloat154;
+        @Pc(28) float local28 = this.aClass73_Sub3_3.aFloat159 + (this.aClass73_Sub3_3.aFloat155 * (float) arg0 + this.aClass73_Sub3_3.aFloat151 * (float) arg1 + (float) arg2 * this.aClass73_Sub3_3.aFloat154);
         if ((float) this.anInt8010 > local28 || local28 > (float) this.anInt8018) {
             arg3[0] = arg3[1] = arg3[2] = -1;
             return;
         }
-        @Pc(88) int local88 = (int) ((float) this.anInt8001 * (this.aClass73_Sub3_3.aFloat152 + (float) arg2 * this.aClass73_Sub3_3.aFloat160 + (float) arg0 * this.aClass73_Sub3_3.aFloat153 + (float) arg1 * this.aClass73_Sub3_3.aFloat157) / local28);
+        @Pc(88) int local88 = (int) ((float) this.anInt8001 * (this.aClass73_Sub3_3.aFloat152 + ((float) arg0 * this.aClass73_Sub3_3.aFloat153 + (float) arg1 * this.aClass73_Sub3_3.aFloat157 + (float) arg2 * this.aClass73_Sub3_3.aFloat160)) / local28);
         @Pc(120) int local120 = (int) ((float) this.anInt8025 * ((float) arg0 * this.aClass73_Sub3_3.aFloat161 + (float) arg1 * this.aClass73_Sub3_3.aFloat156 + this.aClass73_Sub3_3.aFloat150 * (float) arg2 + this.aClass73_Sub3_3.aFloat158) / local28);
         if (this.aFloat145 <= (float) local88 && (float) local88 <= this.aFloat138 && (float) local120 >= this.aFloat141 && this.aFloat133 >= (float) local120) {
             arg3[0] = (int) ((float) local88 - this.aFloat145);
@@ -2213,7 +2213,7 @@ public final class GlToolkit extends Toolkit {
     @OriginalMember(owner = "client!qha", name = "r", descriptor = "(IIIIIII)I")
     @Override
     public int r(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) int arg6) {
-        @Pc(30) float local30 = (float) arg2 * this.aClass73_Sub3_3.aFloat154 + this.aClass73_Sub3_3.aFloat155 * (float) arg0 + (float) arg1 * this.aClass73_Sub3_3.aFloat151 + this.aClass73_Sub3_3.aFloat159;
+        @Pc(30) float local30 = this.aClass73_Sub3_3.aFloat155 * (float) arg0 + (float) arg1 * this.aClass73_Sub3_3.aFloat151 + (float) arg2 * this.aClass73_Sub3_3.aFloat154 + this.aClass73_Sub3_3.aFloat159;
         @Pc(55) float local55 = (float) arg3 * this.aClass73_Sub3_3.aFloat155 + this.aClass73_Sub3_3.aFloat151 * (float) arg4 + this.aClass73_Sub3_3.aFloat154 * (float) arg5 + this.aClass73_Sub3_3.aFloat159;
         @Pc(57) int local57 = 0;
         if ((float) this.anInt8010 > local30 && local55 < (float) this.anInt8010) {
@@ -2221,14 +2221,14 @@ public final class GlToolkit extends Toolkit {
         } else if (local30 > (float) this.anInt8018 && local55 > (float) this.anInt8018) {
             local57 |= 0x20;
         }
-        @Pc(130) int local130 = (int) ((float) this.anInt8001 * (this.aClass73_Sub3_3.aFloat152 + (float) arg2 * this.aClass73_Sub3_3.aFloat160 + this.aClass73_Sub3_3.aFloat153 * (float) arg0 + this.aClass73_Sub3_3.aFloat157 * (float) arg1) / (float) arg6);
-        @Pc(163) int local163 = (int) ((float) this.anInt8001 * (this.aClass73_Sub3_3.aFloat152 + (float) arg4 * this.aClass73_Sub3_3.aFloat157 + (float) arg3 * this.aClass73_Sub3_3.aFloat153 + (float) arg5 * this.aClass73_Sub3_3.aFloat160) / (float) arg6);
+        @Pc(130) int local130 = (int) ((float) this.anInt8001 * (this.aClass73_Sub3_3.aFloat152 + (this.aClass73_Sub3_3.aFloat153 * (float) arg0 + this.aClass73_Sub3_3.aFloat157 * (float) arg1 + (float) arg2 * this.aClass73_Sub3_3.aFloat160)) / (float) arg6);
+        @Pc(163) int local163 = (int) ((float) this.anInt8001 * (this.aClass73_Sub3_3.aFloat152 + ((float) arg4 * this.aClass73_Sub3_3.aFloat157 + (float) arg3 * this.aClass73_Sub3_3.aFloat153 + (float) arg5 * this.aClass73_Sub3_3.aFloat160)) / (float) arg6);
         if (this.aFloat145 > (float) local130 && this.aFloat145 > (float) local163) {
             local57 |= 0x1;
         } else if ((float) local130 > this.aFloat138 && (float) local163 > this.aFloat138) {
             local57 |= 0x2;
         }
-        @Pc(236) int local236 = (int) ((float) this.anInt8025 * (this.aClass73_Sub3_3.aFloat158 + this.aClass73_Sub3_3.aFloat161 * (float) arg0 + (float) arg1 * this.aClass73_Sub3_3.aFloat156 + (float) arg2 * this.aClass73_Sub3_3.aFloat150) / (float) arg6);
+        @Pc(236) int local236 = (int) ((float) this.anInt8025 * (this.aClass73_Sub3_3.aFloat161 * (float) arg0 + (float) arg1 * this.aClass73_Sub3_3.aFloat156 + (float) arg2 * this.aClass73_Sub3_3.aFloat150 + this.aClass73_Sub3_3.aFloat158) / (float) arg6);
         @Pc(269) int local269 = (int) ((float) this.anInt8025 * ((float) arg3 * this.aClass73_Sub3_3.aFloat161 + (float) arg4 * this.aClass73_Sub3_3.aFloat156 + (float) arg5 * this.aClass73_Sub3_3.aFloat150 + this.aClass73_Sub3_3.aFloat158) / (float) arg6);
         if ((float) local236 < this.aFloat141 && this.aFloat141 > (float) local269) {
             local57 |= 0x4;
@@ -2483,8 +2483,8 @@ public final class GlToolkit extends Toolkit {
             local100 = (float) (arg5 + arg6 - local63) * local86;
             local98 = local82 * (float) (arg6 + arg5 - local63);
         }
-        @Pc(152) float local152 = (float) arg0 + local98 + 0.35F;
-        @Pc(159) float local159 = local100 + (float) arg1 + 0.35F;
+        @Pc(152) float local152 = (float) arg0 + 0.35F + local98;
+        @Pc(159) float local159 = local100 + ((float) arg1 + 0.35F);
         @Pc(164) float local164 = (float) arg6 * local82;
         @Pc(169) float local169 = local86 * (float) arg6;
         while (true) {
@@ -2618,8 +2618,8 @@ public final class GlToolkit extends Toolkit {
             arg4[0] = arg4[1] = arg4[2] = -1;
             return;
         }
-        @Pc(89) int local89 = (int) ((float) this.anInt8001 * (this.aClass73_Sub3_3.aFloat152 + (float) arg2 * this.aClass73_Sub3_3.aFloat160 + this.aClass73_Sub3_3.aFloat157 * (float) arg1 + this.aClass73_Sub3_3.aFloat153 * (float) arg0) / (float) arg3);
-        @Pc(122) int local122 = (int) ((this.aClass73_Sub3_3.aFloat158 + this.aClass73_Sub3_3.aFloat150 * (float) arg2 + this.aClass73_Sub3_3.aFloat156 * (float) arg1 + (float) arg0 * this.aClass73_Sub3_3.aFloat161) * (float) this.anInt8025 / (float) arg3);
+        @Pc(89) int local89 = (int) ((float) this.anInt8001 * (this.aClass73_Sub3_3.aFloat152 + (this.aClass73_Sub3_3.aFloat157 * (float) arg1 + this.aClass73_Sub3_3.aFloat153 * (float) arg0 + (float) arg2 * this.aClass73_Sub3_3.aFloat160)) / (float) arg3);
+        @Pc(122) int local122 = (int) ((this.aClass73_Sub3_3.aFloat156 * (float) arg1 + (float) arg0 * this.aClass73_Sub3_3.aFloat161 + this.aClass73_Sub3_3.aFloat150 * (float) arg2 + this.aClass73_Sub3_3.aFloat158) * (float) this.anInt8025 / (float) arg3);
         if ((float) local89 >= this.aFloat145 && this.aFloat138 >= (float) local89 && this.aFloat141 <= (float) local122 && this.aFloat133 >= (float) local122) {
             arg4[1] = (int) ((float) local122 - this.aFloat141);
             arg4[0] = (int) ((float) local89 - this.aFloat145);
@@ -2903,8 +2903,8 @@ public final class GlToolkit extends Toolkit {
             local136 = local118 * (float) (arg8 - local95);
             local134 = (float) (arg8 - local95) * local114;
         }
-        @Pc(187) float local187 = (float) x1 + local130 + 0.35F;
-        @Pc(194) float local194 = local132 + (float) y1 + 0.35F;
+        @Pc(187) float local187 = (float) x1 + 0.35F + local130;
+        @Pc(194) float local194 = local132 + ((float) y1 + 0.35F);
         @Pc(199) float local199 = local114 * (float) arg9;
         @Pc(204) float local204 = (float) arg9 * local118;
         while (true) {
@@ -2941,7 +2941,7 @@ public final class GlToolkit extends Toolkit {
             OpenGL.glBegin(OpenGL.GL_LINES);
             OpenGL.glTexCoord2f(local55 * (local187 - (float) maskX), local62 * ((float) -maskY + local194));
             OpenGL.glVertex2f(local187, local194);
-            OpenGL.glTexCoord2f(((float) -maskX + local187 + local134) * local55, local62 * (local136 + local194 - (float) maskY));
+            OpenGL.glTexCoord2f(((float) -maskX + (local187 + local134)) * local55, local62 * (local136 + local194 - (float) maskY));
             OpenGL.glVertex2f(local134 + local187, local194 + local136);
             local187 += local134 + local199;
             OpenGL.glEnd();

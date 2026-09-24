@@ -63,7 +63,7 @@ public final class Matrix_Sub1 extends Matrix {
         @Pc(6) int local6 = (int) ((float) x - this.aFloat46);
         @Pc(13) int local13 = (int) ((float) z - this.aFloat43);
         @Pc(20) int local20 = (int) ((float) y - this.aFloat37);
-        destination[2] = (int) (this.aFloat47 * (float) local13 + this.aFloat41 * (float) local20 + this.aFloat38 * (float) local6);
+        destination[2] = (int) (this.aFloat47 * (float) local13 + (this.aFloat41 * (float) local20 + this.aFloat38 * (float) local6));
         destination[0] = (int) ((float) local6 * this.aFloat39 + (float) local20 * this.aFloat44 + (float) local13 * this.aFloat45);
         destination[1] = (int) ((float) local6 * this.aFloat40 + (float) local20 * this.aFloat42 + (float) local13 * this.aFloat36);
     }
@@ -88,19 +88,19 @@ public final class Matrix_Sub1 extends Matrix {
         @Pc(21) float local21 = this.aFloat38;
         @Pc(24) float local24 = this.aFloat41;
         @Pc(27) float local27 = this.aFloat46;
-        this.aFloat44 = local6.aFloat41 * this.aFloat45 + local9 * local6.aFloat44 + local12 * local6.aFloat42;
+        this.aFloat44 = local6.aFloat41 * this.aFloat45 + (local9 * local6.aFloat44 + local12 * local6.aFloat42);
         @Pc(47) float local47 = this.aFloat37;
-        this.aFloat39 = local6.aFloat38 * this.aFloat45 + local6.aFloat39 * local9 + local6.aFloat40 * local12;
-        this.aFloat42 = local6.aFloat41 * this.aFloat36 + local6.aFloat42 * local18 + local6.aFloat44 * local15;
+        this.aFloat39 = local6.aFloat38 * this.aFloat45 + (local6.aFloat39 * local9 + local6.aFloat40 * local12);
+        this.aFloat42 = local6.aFloat41 * this.aFloat36 + (local6.aFloat42 * local18 + local6.aFloat44 * local15);
         this.aFloat45 = local9 * local6.aFloat45 + local12 * local6.aFloat36 + local6.aFloat47 * this.aFloat45;
-        this.aFloat40 = this.aFloat36 * local6.aFloat38 + local6.aFloat39 * local15 + local18 * local6.aFloat40;
+        this.aFloat40 = this.aFloat36 * local6.aFloat38 + (local6.aFloat39 * local15 + local18 * local6.aFloat40);
         this.aFloat36 = local6.aFloat36 * local18 + local15 * local6.aFloat45 + this.aFloat36 * local6.aFloat47;
         this.aFloat38 = local6.aFloat40 * local24 + local6.aFloat39 * local21 + this.aFloat47 * local6.aFloat38;
         this.aFloat41 = local24 * local6.aFloat42 + local6.aFloat44 * local21 + this.aFloat47 * local6.aFloat41;
         this.aFloat47 = local24 * local6.aFloat36 + local21 * local6.aFloat45 + local6.aFloat47 * this.aFloat47;
-        this.aFloat46 = local6.aFloat46 + local47 * local6.aFloat40 + local27 * local6.aFloat39 + local6.aFloat38 * this.aFloat43;
-        this.aFloat37 = local6.aFloat37 + local27 * local6.aFloat44 + local6.aFloat42 * local47 + local6.aFloat41 * this.aFloat43;
-        this.aFloat43 = local6.aFloat43 + local6.aFloat45 * local27 + local6.aFloat36 * local47 + this.aFloat43 * local6.aFloat47;
+        this.aFloat46 = local6.aFloat46 + (local47 * local6.aFloat40 + local27 * local6.aFloat39 + local6.aFloat38 * this.aFloat43);
+        this.aFloat37 = local6.aFloat37 + (local27 * local6.aFloat44 + local6.aFloat42 * local47 + local6.aFloat41 * this.aFloat43);
+        this.aFloat43 = local6.aFloat43 + (local6.aFloat45 * local27 + local6.aFloat36 * local47 + this.aFloat43 * local6.aFloat47);
     }
 
     @OriginalMember(owner = "client!cw", name = "c", descriptor = "(I)V")
@@ -125,7 +125,7 @@ public final class Matrix_Sub1 extends Matrix {
     @OriginalMember(owner = "client!cw", name = "a", descriptor = "(FFBF[FF)V")
     public void method1879(@OriginalArg(0) float arg0, @OriginalArg(1) float arg1, @OriginalArg(3) float arg2, @OriginalArg(4) float[] arg3, @OriginalArg(5) float arg4) {
         arg3[2] = arg4 * this.aFloat45 + arg1 * this.aFloat36 + this.aFloat47 * arg2;
-        arg3[1] = arg2 * this.aFloat41 + arg4 * this.aFloat44 + this.aFloat42 * arg1;
+        arg3[1] = arg2 * this.aFloat41 + (arg4 * this.aFloat44 + this.aFloat42 * arg1);
         arg3[0] = arg1 * this.aFloat40 + this.aFloat39 * arg4 + this.aFloat38 * arg2;
         @Pc(107) float local107;
         @Pc(99) float local99;
@@ -174,7 +174,7 @@ public final class Matrix_Sub1 extends Matrix {
         this.aFloat36 = local6.aFloat41;
         this.aFloat47 = local6.aFloat47;
         this.aFloat37 = -(this.aFloat42 * local6.aFloat37 + this.aFloat44 * local6.aFloat46 + local6.aFloat43 * this.aFloat41);
-        this.aFloat43 = -(this.aFloat47 * local6.aFloat43 + this.aFloat45 * local6.aFloat46 + this.aFloat36 * local6.aFloat37);
+        this.aFloat43 = -(this.aFloat47 * local6.aFloat43 + (this.aFloat45 * local6.aFloat46 + this.aFloat36 * local6.aFloat37));
     }
 
     @OriginalMember(owner = "client!cw", name = "a", descriptor = "(I[F)[F")
@@ -207,7 +207,7 @@ public final class Matrix_Sub1 extends Matrix {
 
     @OriginalMember(owner = "client!cw", name = "a", descriptor = "(IFFF)F")
     public float method1883(@OriginalArg(1) float arg0, @OriginalArg(2) float arg1, @OriginalArg(3) float arg2) {
-        return this.aFloat37 + arg1 * this.aFloat44 + arg2 * this.aFloat42 + arg0 * this.aFloat41;
+        return this.aFloat37 + (arg1 * this.aFloat44 + arg2 * this.aFloat42 + arg0 * this.aFloat41);
     }
 
     @OriginalMember(owner = "client!cw", name = "a", descriptor = "(I)V")
@@ -238,7 +238,7 @@ public final class Matrix_Sub1 extends Matrix {
 
     @OriginalMember(owner = "client!cw", name = "a", descriptor = "(FFFZ)F")
     public float method1885(@OriginalArg(0) float arg0, @OriginalArg(1) float arg1, @OriginalArg(2) float arg2) {
-        return this.aFloat46 + arg1 * this.aFloat38 + arg0 * this.aFloat40 + this.aFloat39 * arg2;
+        return this.aFloat46 + (arg0 * this.aFloat40 + this.aFloat39 * arg2 + arg1 * this.aFloat38);
     }
 
     @OriginalMember(owner = "client!cw", name = "b", descriptor = "(III)V")
@@ -285,8 +285,8 @@ public final class Matrix_Sub1 extends Matrix {
     @OriginalMember(owner = "client!cw", name = "c", descriptor = "(III[I)V")
     @Override
     public void project(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int[] destination) {
-        destination[2] = (int) (this.aFloat47 * (float) z + this.aFloat36 * (float) y + this.aFloat45 * (float) x + this.aFloat43);
-        destination[0] = (int) ((float) z * this.aFloat38 + (float) y * this.aFloat40 + this.aFloat39 * (float) x + this.aFloat46);
+        destination[2] = (int) (this.aFloat47 * (float) z + (this.aFloat36 * (float) y + this.aFloat45 * (float) x) + this.aFloat43);
+        destination[0] = (int) ((float) z * this.aFloat38 + ((float) y * this.aFloat40 + this.aFloat39 * (float) x) + this.aFloat46);
         destination[1] = (int) (this.aFloat42 * (float) y + (float) x * this.aFloat44 + (float) z * this.aFloat41 + this.aFloat37);
     }
 
@@ -313,7 +313,7 @@ public final class Matrix_Sub1 extends Matrix {
 
     @OriginalMember(owner = "client!cw", name = "b", descriptor = "(FFFZ)F")
     public float method1889(@OriginalArg(0) float arg0, @OriginalArg(1) float arg1, @OriginalArg(2) float arg2) {
-        return this.aFloat47 * arg0 + this.aFloat36 * arg1 + arg2 * this.aFloat45 + this.aFloat43;
+        return this.aFloat47 * arg0 + (this.aFloat36 * arg1 + arg2 * this.aFloat45) + this.aFloat43;
     }
 
     @OriginalMember(owner = "client!cw", name = "a", descriptor = "(IIIIII)V")
@@ -336,27 +336,27 @@ public final class Matrix_Sub1 extends Matrix {
         this.aFloat41 = local27 * local39 + local43 * local21;
         this.aFloat47 = local21 * local9;
         this.aFloat42 = local33 * local9;
-        this.aFloat46 = -((float) z * this.aFloat38) - this.aFloat40 * (float) y + (float) -x * this.aFloat39;
+        this.aFloat46 = (float) -x * this.aFloat39 - this.aFloat40 * (float) y - (float) z * this.aFloat38;
         this.aFloat37 = -((float) y * this.aFloat42) + (float) -x * this.aFloat44 - this.aFloat41 * (float) z;
-        this.aFloat43 = -((float) z * this.aFloat47) - this.aFloat36 * (float) y + (float) -x * this.aFloat45;
+        this.aFloat43 = (float) -x * this.aFloat45 - this.aFloat36 * (float) y - (float) z * this.aFloat47;
     }
 
     @OriginalMember(owner = "client!cw", name = "a", descriptor = "(Lclient!tt;Lclient!tt;)V")
     public void method1890(@OriginalArg(0) Matrix arg0, @OriginalArg(1) Matrix arg1) {
         @Pc(6) Matrix_Sub1 local6 = (Matrix_Sub1) arg0;
         @Pc(9) Matrix_Sub1 local9 = (Matrix_Sub1) arg1;
-        this.aFloat39 = local9.aFloat45 * local6.aFloat38 + local9.aFloat39 * local6.aFloat39 + local6.aFloat40 * local9.aFloat44;
+        this.aFloat39 = local9.aFloat45 * local6.aFloat38 + (local9.aFloat39 * local6.aFloat39 + local6.aFloat40 * local9.aFloat44);
         this.aFloat44 = local9.aFloat44 * local6.aFloat42 + local9.aFloat39 * local6.aFloat44 + local9.aFloat45 * local6.aFloat41;
         this.aFloat45 = local9.aFloat39 * local6.aFloat45 + local6.aFloat36 * local9.aFloat44 + local9.aFloat45 * local6.aFloat47;
         this.aFloat40 = local6.aFloat39 * local9.aFloat40 + local6.aFloat40 * local9.aFloat42 + local9.aFloat36 * local6.aFloat38;
         this.aFloat42 = local6.aFloat42 * local9.aFloat42 + local9.aFloat40 * local6.aFloat44 + local6.aFloat41 * local9.aFloat36;
         this.aFloat36 = local9.aFloat40 * local6.aFloat45 + local9.aFloat42 * local6.aFloat36 + local6.aFloat47 * local9.aFloat36;
-        this.aFloat38 = local6.aFloat38 * local9.aFloat47 + local6.aFloat40 * local9.aFloat41 + local6.aFloat39 * local9.aFloat38;
-        this.aFloat41 = local6.aFloat41 * local9.aFloat47 + local6.aFloat42 * local9.aFloat41 + local9.aFloat38 * local6.aFloat44;
-        this.aFloat47 = local6.aFloat47 * local9.aFloat47 + local6.aFloat45 * local9.aFloat38 + local6.aFloat36 * local9.aFloat41;
-        this.aFloat46 = local6.aFloat38 * local9.aFloat43 + local6.aFloat40 * local9.aFloat37 + local6.aFloat39 * local9.aFloat46 + local6.aFloat46;
-        this.aFloat37 = local6.aFloat37 + local9.aFloat43 * local6.aFloat41 + local9.aFloat46 * local6.aFloat44 + local6.aFloat42 * local9.aFloat37;
-        this.aFloat43 = local6.aFloat43 + local6.aFloat47 * local9.aFloat43 + local9.aFloat37 * local6.aFloat36 + local9.aFloat46 * local6.aFloat45;
+        this.aFloat38 = local6.aFloat38 * local9.aFloat47 + (local6.aFloat40 * local9.aFloat41 + local6.aFloat39 * local9.aFloat38);
+        this.aFloat41 = local6.aFloat41 * local9.aFloat47 + (local6.aFloat42 * local9.aFloat41 + local9.aFloat38 * local6.aFloat44);
+        this.aFloat47 = local6.aFloat47 * local9.aFloat47 + (local6.aFloat45 * local9.aFloat38 + local6.aFloat36 * local9.aFloat41);
+        this.aFloat46 = local6.aFloat38 * local9.aFloat43 + (local6.aFloat40 * local9.aFloat37 + local6.aFloat39 * local9.aFloat46) + local6.aFloat46;
+        this.aFloat37 = local6.aFloat37 + (local9.aFloat43 * local6.aFloat41 + (local9.aFloat46 * local6.aFloat44 + local6.aFloat42 * local9.aFloat37));
+        this.aFloat43 = local6.aFloat43 + (local6.aFloat47 * local9.aFloat43 + (local9.aFloat37 * local6.aFloat36 + local9.aFloat46 * local6.aFloat45));
     }
 
     @OriginalMember(owner = "client!cw", name = "a", descriptor = "()V")
@@ -445,11 +445,11 @@ public final class Matrix_Sub1 extends Matrix {
         this.aFloat40 = -2.0F * local65 * (float) arg1;
         this.aFloat43 = arg0;
         this.aFloat46 = (float) (arg2 * 2) * (local65 * 0.5F - local59 * 0.5F) + arg4;
-        this.aFloat39 = (float) arg2 * local59 * 2.0F;
+        this.aFloat39 = (float) arg2 * (local59 * 2.0F);
         this.aFloat45 = this.aFloat36 = this.aFloat38 = this.aFloat41 = 0.0F;
-        this.aFloat44 = (float) arg2 * local65 * 2.0F;
+        this.aFloat44 = (float) arg2 * (local65 * 2.0F);
         this.aFloat47 = 1.0F;
-        this.aFloat42 = (float) arg1 * local59 * 2.0F;
+        this.aFloat42 = (float) arg1 * (local59 * 2.0F);
     }
 
     @OriginalMember(owner = "client!cw", name = "a", descriptor = "(III)V")
@@ -470,7 +470,7 @@ public final class Matrix_Sub1 extends Matrix {
         @Pc(29) float local29 = (float) destination[2] - this.aFloat43;
         destination[0] = (int) (local12 * this.aFloat39 + local20 * this.aFloat44 + this.aFloat45 * local29);
         destination[2] = (int) (local12 * this.aFloat38 + this.aFloat41 * local20 + local29 * this.aFloat47);
-        destination[1] = (int) (local29 * this.aFloat36 + local12 * this.aFloat40 + this.aFloat42 * local20);
+        destination[1] = (int) (local29 * this.aFloat36 + (local12 * this.aFloat40 + this.aFloat42 * local20));
     }
 
     @OriginalMember(owner = "client!cw", name = "b", descriptor = "()Lclient!tt;")
@@ -526,7 +526,7 @@ public final class Matrix_Sub1 extends Matrix {
     @OriginalMember(owner = "client!cw", name = "b", descriptor = "(III[I)V")
     @Override
     public void projectDirection(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int[] destination) {
-        destination[0] = (int) (this.aFloat38 * (float) z + this.aFloat40 * (float) y + (float) x * this.aFloat39);
+        destination[0] = (int) (this.aFloat38 * (float) z + (this.aFloat40 * (float) y + (float) x * this.aFloat39));
         destination[1] = (int) (this.aFloat42 * (float) y + this.aFloat44 * (float) x + (float) z * this.aFloat41);
         destination[2] = (int) (this.aFloat36 * (float) y + this.aFloat45 * (float) x + (float) z * this.aFloat47);
     }
@@ -567,9 +567,9 @@ public final class Matrix_Sub1 extends Matrix {
 
     @OriginalMember(owner = "client!cw", name = "a", descriptor = "(F[FFFB)V")
     public void method1897(@OriginalArg(0) float arg0, @OriginalArg(1) float[] arg1, @OriginalArg(2) float arg2, @OriginalArg(3) float arg3) {
-        arg1[2] = arg3 * this.aFloat47 + this.aFloat36 * arg2 + arg0 * this.aFloat45;
-        arg1[0] = this.aFloat38 * arg3 + this.aFloat39 * arg0 + arg2 * this.aFloat40;
-        arg1[1] = this.aFloat41 * arg3 + this.aFloat42 * arg2 + this.aFloat44 * arg0;
+        arg1[2] = arg3 * this.aFloat47 + (this.aFloat36 * arg2 + arg0 * this.aFloat45);
+        arg1[0] = this.aFloat38 * arg3 + (arg2 * this.aFloat40 + this.aFloat39 * arg0);
+        arg1[1] = this.aFloat41 * arg3 + (this.aFloat44 * arg0 + this.aFloat42 * arg2);
     }
 
     @OriginalMember(owner = "client!cw", name = "a", descriptor = "([FZ)[F")
