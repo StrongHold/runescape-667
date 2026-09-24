@@ -277,7 +277,7 @@ public final class Node_Sub33 extends Node {
         local275 = (float) (this.aClass2_Sub7_2.getX() - local15);
         local283 = (float) (this.aClass2_Sub7_2.getY() - local30);
         local290 = (float) (this.aClass2_Sub7_2.getZ() - local23);
-        local297 = (float) Math.sqrt(local290 * local290 + local275 * local275 + local283 * local283);
+        local297 = (float) Math.sqrt(local290 * local290 + (local275 * local275 + local283 * local283));
         local304 = 1.0F / local297;
         local283 *= local304;
         local290 *= local304;

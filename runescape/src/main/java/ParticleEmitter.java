@@ -197,12 +197,12 @@ public final class ParticleEmitter extends Node {
                         weightU = 1.0F - weightU;
                         weightV = 1.0F - weightV;
                     }
-                    @Pc(639) float weightW = 1.0F - weightV - weightU;
-                    local435 = (int) ((float) this.triangle.anInt4276 * weightW + (float) this.triangle.anInt4281 * weightV + weightU * (float) this.triangle.anInt4279);
+                    @Pc(639) float weightW = 1.0F - (weightV + weightU);
+                    local435 = (int) ((float) this.triangle.anInt4276 * weightW + ((float) this.triangle.anInt4281 * weightV + weightU * (float) this.triangle.anInt4279));
                     local577 = (int) ((float) this.triangle.anInt4283 * weightV + weightU * (float) this.triangle.anInt4280 + weightW * (float) this.triangle.anInt4269);
                     local581 = (int) ((float) this.triangle.anInt4270 * weightU + (float) this.triangle.anInt4277 * weightV + weightW * (float) this.triangle.anInt4275);
-                    @Pc(727) int previousX = (int) (weightW * (float) this.previousTriangle.anInt4276 + (float) this.previousTriangle.anInt4281 * weightV + (float) this.previousTriangle.anInt4279 * weightU);
-                    @Pc(749) int previousY = (int) (weightW * (float) this.previousTriangle.anInt4269 + weightV * (float) this.previousTriangle.anInt4283 + weightU * (float) this.previousTriangle.anInt4280);
+                    @Pc(727) int previousX = (int) (weightW * (float) this.previousTriangle.anInt4276 + ((float) this.previousTriangle.anInt4281 * weightV + (float) this.previousTriangle.anInt4279 * weightU));
+                    @Pc(749) int previousY = (int) (weightW * (float) this.previousTriangle.anInt4269 + (weightV * (float) this.previousTriangle.anInt4283 + weightU * (float) this.previousTriangle.anInt4280));
                     @Pc(771) int previousZ = (int) (weightV * (float) this.previousTriangle.anInt4277 + (float) this.previousTriangle.anInt4270 * weightU + (float) this.previousTriangle.anInt4275 * weightW);
                     @Pc(776) int deltaX = local435 - previousX;
                     @Pc(780) int deltaY = local577 - previousY;

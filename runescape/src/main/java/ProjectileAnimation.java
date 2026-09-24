@@ -162,7 +162,7 @@ public final class ProjectileAnimation extends PositionEntity {
                 this.verticalSpeed = -this.horizontalSpeed * Math.tan((double) this.verticalAngle * 0.02454369D);
             }
 
-            this.verticalAcceleration = (((double) y - (deltaT * this.verticalSpeed) - this.translateY) * 2.0D) / (deltaT * deltaT);
+            this.verticalAcceleration = (((double) y - this.translateY - (deltaT * this.verticalSpeed)) * 2.0D) / (deltaT * deltaT);
         }
     }
 

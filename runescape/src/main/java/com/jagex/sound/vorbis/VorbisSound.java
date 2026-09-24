@@ -588,8 +588,8 @@ public final class VorbisSound extends Node {
                 u[n_2 + k * 2] = (un_2_2k + u_n_2k_2 + v) * 0.5F;
                 u[n - k * 2 - 2] = (un_2_2k + u_n_2k_2 - v) * 0.5F;
                 v = C2k_1 * (un_2_2k_1 + u_n_2k_1) - C2k * (un_2_2k - u_n_2k_2);
-                u[n_2 + k * 2 + 1] = (un_2_2k_1 + v - u_n_2k_1) * 0.5F;
-                u[n - k * 2 - 1] = (u_n_2k_1 + v - un_2_2k_1) * 0.5F;
+                u[n_2 + k * 2 + 1] = (v + (un_2_2k_1 - u_n_2k_1)) * 0.5F;
+                u[n - k * 2 - 1] = (v + (u_n_2k_1 - un_2_2k_1)) * 0.5F;
             }
 
             for (@Pc(520) int k = 0; k < n_4; k++) {

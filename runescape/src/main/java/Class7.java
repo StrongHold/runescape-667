@@ -95,7 +95,7 @@ public final class Class7 {
                     for (@Pc(90) int x = 0; x < TEXTURE_WIDTH; x++) {
                         @Pc(111) float slopeY = (float) ((heights[aboveStart + x] & 0xFF) - (heights[x + belowStart] & 0xFF));
                         @Pc(138) float slopeX = (float) ((heights[rowStart + (x - 1 & WIDTH_MASK)] & 0xFF) - (heights[rowStart + (x + 1 & WIDTH_MASK)] & 0xFF));
-                        @Pc(153) float scale = (float) (HEIGHT_SCALE / Math.sqrt(slopeY * slopeY + slopeX * slopeX + HEIGHT_SCALE * HEIGHT_SCALE));
+                        @Pc(153) float scale = (float) (HEIGHT_SCALE / Math.sqrt(slopeY * slopeY + (slopeX * slopeX + HEIGHT_SCALE * HEIGHT_SCALE)));
                         normals[normalIndex++] = (byte) (int) (slopeX * scale + 127.0F);
                         normals[normalIndex++] = (byte) (int) (scale * HEIGHT_SCALE + 127.0F);
                         normals[normalIndex++] = (byte) (int) (slopeY * scale + 127.0F);

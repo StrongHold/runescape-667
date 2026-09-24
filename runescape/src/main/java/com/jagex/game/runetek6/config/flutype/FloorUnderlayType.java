@@ -108,9 +108,9 @@ public final class FloorUnderlayType {
         this.anInt6639 = (int) (local66 * 256.0D);
         local58 /= 6.0D;
         if (local66 > 0.5D) {
-            this.anInt6632 = (int) ((1.0D - local66) * 512.0D * local60);
+            this.anInt6632 = (int) (512.0D * ((1.0D - local66) * local60));
         } else {
-            this.anInt6632 = (int) (local66 * 512.0D * local60);
+            this.anInt6632 = (int) (512.0D * (local66 * local60));
         }
         if (this.anInt6639 < 0) {
             this.anInt6639 = 0;

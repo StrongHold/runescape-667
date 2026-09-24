@@ -4104,7 +4104,7 @@ public final class ScriptRunner {
                     intStack[intStackPointer++] = 256;
                 }
 
-                @Pc(10162) double local10162 = (Math.random() * (double) (max + min) + 800.0D - (double) min) / 100.0D;
+                @Pc(10162) double local10162 = (Math.random() * (double) (max + min) - (double) min + 800.0D) / 100.0D;
                 intStack[intStackPointer++] = (int) (Math.pow(2.0D, local10162) + 0.5D);
                 return;
             }

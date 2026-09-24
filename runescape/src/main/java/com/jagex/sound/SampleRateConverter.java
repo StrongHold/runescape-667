@@ -32,7 +32,7 @@ public final class SampleRateConverter {
                 @Pc(41) int[] weights = this.filterWeights[i];
                 @Pc(49) double d = (double) i / (double) dividedBase + 6.0D;
 
-                @Pc(57) int lo = (int) Math.floor(d + 1.0D - 7.0D);
+                @Pc(57) int lo = (int) Math.floor(d - 7.0D + 1.0D);
                 if (lo < 0) {
                     lo = 0;
                 }
