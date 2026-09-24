@@ -39,15 +39,9 @@ import java.util.spi.ToolProvider;
  *   <li>A method the annotations cannot match is not compared at all. The count of those is
  *   reported rather than hidden.</li>
  * </ul>
- * Run with the JDK source launcher, which needs no build step and no dependency beyond the JDK:
- * <pre>
- * java tools/Fidelity.java [--] &lt;source.java&gt; &lt;original.class&gt;
- *     &lt;recompiled.class&gt; [...]
- * </pre>
- * The {@code verifyFidelity} task of the {@code runescape} module works out the triples and runs
- * it.
+ * The {@code verifyOpcodes} task works out the triples and runs it.
  */
-public final class Fidelity {
+public final class OpcodeCheck {
 
     /**
      * The opcodes that decide a value. Loads, stores, branches and stack shuffling are all
@@ -78,7 +72,7 @@ public final class Fidelity {
 
     private static final int WRONG_USAGE = 2;
 
-    private static final String USAGE = "Usage: java tools/Fidelity.java [--] <source.java> "
+    private static final String USAGE = "Usage: OpcodeCheck [--] <source.java> "
         + "<original.class> <recompiled.class> [...]";
 
     /**
@@ -499,7 +493,7 @@ public final class Fidelity {
         }
     }
 
-    private Fidelity() {
+    private OpcodeCheck() {
         /* empty */
     }
 }

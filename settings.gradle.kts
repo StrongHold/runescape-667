@@ -24,6 +24,7 @@ include(
     "client",
     "fidelity",
     "loader",
+    "native-trace",
     "natives",
     "runescape",
 )

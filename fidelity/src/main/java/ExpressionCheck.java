@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * Compares what each recompiled method computes with what it computed in the jar, as trees of
  * arithmetic.
  *
- * The opcode comparison in {@code tools/Fidelity.java} cannot tell a harmless reordering of
+ * The opcode comparison in {@link OpcodeCheck} cannot tell a harmless reordering of
  * statements from a re-association of floating point arithmetic, and only the second changes an
  * answer. Here every value a method lets out is written as the tree that made it, on both sides,
  * with every field, call and parameter named the way the jar named it. A tree found on one side

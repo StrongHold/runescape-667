@@ -44,6 +44,13 @@ integer arithmetic.
 A value that reaches an instruction by more than one path is written as `merged`. The tree does not
 follow a loop round, so a difference inside a loop is found where the loop body computes it.
 
+## verifyOpcodes
+
+    ./gradlew :fidelity:verifyOpcodes -Pclasses=Terrain,Rasterizer
+
+This compares only which opcodes that make a value each method uses. It is quicker to read than
+the trees, but it cannot tell a harmless reordering of statements from a change in grouping.
+
 ## What it found
 
 The decompiler dropped parentheses from sums of floating point numbers. The jar computed
@@ -51,7 +58,7 @@ The decompiler dropped parentheses from sums of floating point numbers. The jar 
 For integers the two are the same. For floating point numbers they round differently, so a corner
 of a tile could land one unit in the last place away from where the jar put it.
 
-The tool in `tools/Fidelity.java` compares only which opcodes each method uses. It cannot tell this
+`verifyOpcodes` compares only which opcodes each method uses. It cannot tell this
 change from a harmless reordering of statements. This check can.
 
 ## Differences that are not changes
@@ -64,7 +71,7 @@ Some differences are the deobfuscator's own work, and they compute the same answ
 
 ## The trace agent
 
-    ./gradlew :fidelity:nativeTraceAgent
+    ./gradlew :native-trace:jar
     ./gradlew client:run -PnativeTrace=/tmp/ours.trace,classes=none,methods=JavaGround.U(II[I[I[I[I[I[I[I[IIIIZ)V
     ./gradlew :fidelity:diffNativeTraces -Pjar=/tmp/jar.trace -Pours=/tmp/ours.trace
 

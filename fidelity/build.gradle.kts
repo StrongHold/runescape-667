@@ -9,19 +9,7 @@ plugins {
  * that is meant to change what any method computes, and the tools here are how that is checked.
  * They read class files, never source, so what they compare is what the virtual machine runs.
  */
-/**
- * The agent is handed to clients that run on Java 11 as well as 21, since the jar the client came
- * from needs Pack200, which Java 14 removed. It is built on its own for that reason.
- */
-val agent = sourceSets.create("agent")
-
-tasks.named<JavaCompile>("compileAgentJava") {
-    options.release = 11
-}
-
 dependencies {
-    "agentImplementation"(libs.asm.tree)
-    "agentImplementation"(libs.asm.commons)
     implementation(project(":cli"))
     implementation(libs.asm.tree)
     implementation(libs.asm.analysis)
@@ -32,6 +20,59 @@ dependencies {
 val runescape = project(":runescape")
 val recompiledClasses = runescape.layout.buildDirectory.dir("classes/java/main")
 val originalClasses = runescape.layout.buildDirectory.dir("original")
+val runescapeSources = runescape.layout.projectDirectory.dir("src/main/java")
+
+/**
+ * Compares which value opcodes each method uses, between the jar and the recompiled classes.
+ *
+ * Pass `-Pclasses=Terrain,Rasterizer` to check named classes. The default is every class whose
+ * original is still in the jar, which takes a while.
+ */
+tasks.register<JavaExec>("verifyOpcodes") {
+    description = "Compares the value opcodes of each recompiled method with the original jar."
+    dependsOn(":runescape:compileJava", ":runescape:unpackOriginal")
+    mainClass = "OpcodeCheck"
+    classpath = sourceSets["main"].runtimeClasspath
+
+    val asked = providers.gradleProperty("classes").getOrElse("")
+    val sources = runescapeSources.asFile
+    val recompiled = recompiledClasses.get().asFile
+    val original = originalClasses.get().asFile
+    val owner = Regex("""@OriginalClass\("[^!]+!([^"]+)"\)""")
+
+    /*
+     * The classes are listed when the task runs, so that a class added to the module is checked
+     * instead of being left out of a list made when the build was configured.
+     */
+    argumentProviders.add(CommandLineArgumentProvider {
+        val wanted = if (asked.isEmpty()) {
+            sources.listFiles().orEmpty()
+                .filter { it.name.endsWith(".java") }
+                .map { it.name.removeSuffix(".java") }
+                .sorted()
+        } else {
+            asked.split(',')
+        }
+
+        val triples = wanted.flatMap { name ->
+            val source = File(sources, "$name.java")
+            val compiled = File(recompiled, "$name.class")
+            val was = source.takeIf { it.isFile }
+                ?.useLines { lines -> lines.firstNotNullOfOrNull { owner.find(it) } }
+                ?.groupValues?.get(1)
+                ?.let { File(original, "$it.class") }
+
+            if (was != null && was.isFile && compiled.isFile) {
+                listOf(source.absolutePath, was.absolutePath, compiled.absolutePath)
+            } else {
+                emptyList()
+            }
+        }
+
+        require(triples.isNotEmpty()) { "No class in $sources matched a class in the original jar." }
+        triples
+    })
+}
 
 /**
  * Compares what each method computes, as trees of arithmetic, between the jar and the recompiled
@@ -64,31 +105,6 @@ tasks.register<JavaExec>("verifyExpressions") {
         listOf("--recompiled", recompiled, "--original", original, "--outstanding", outstanding) +
             chosen + wide + written
     })
-}
-
-/**
- * The agent that writes down every call a client makes into the native software toolkit, with
- * ASM packed inside it, so that it can be handed to any client with -javaagent.
- *
- * The jar the client came from and the recompiled client can both be run with it, and the two
- * records compared. See NativeTrace.
- */
-tasks.register<Jar>("nativeTraceAgent") {
-    description = "Builds the agent that records calls into the native software toolkit."
-    archiveFileName = "native-trace.jar"
-    from(agent.output)
-    from(configurations["agentRuntimeClasspath"].filter { it.name.startsWith("asm") }.map { zipTree(it) }) {
-        exclude("module-info.class", "META-INF/**")
-    }
-    manifest {
-        attributes(
-            "Premain-Class" to "NativeTrace",
-            "Can-Set-Native-Method-Prefix" to "true",
-            // The jar's classes may be loaded by a class loader that cannot see the application's
-            // classes, so the record is kept where every class loader can reach it.
-            "Boot-Class-Path" to "native-trace.jar",
-        )
-    }
 }
 
 /**
