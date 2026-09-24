@@ -26,11 +26,24 @@ public final class NativeLog {
     /**
      * How many calls of one method are written down, and how many numbers of one array.
      */
-    private static final int CALLS = Integer.getInteger("nativetrace.calls", 20000);
+    private static int calls = 20000;
     private static final int NUMBERS = Integer.getInteger("nativetrace.numbers", 1 << 16);
 
     private static final Map<String, Integer> COUNTS = new HashMap<>();
+
+    /**
+     * What each receiver's simple fields held when it was last written down, so that they are
+     * written again only when they change.
+     */
+    private static final Map<Object, String> LAST_SEEN = new java.util.IdentityHashMap<>();
     private static BufferedWriter out;
+
+    /**
+     * How many calls of one method are written down, when the default is not enough.
+     */
+    static void limit(int most) {
+        calls = most;
+    }
 
     static void open(String file) {
         if (file == null || file.isEmpty()) {
@@ -74,9 +87,51 @@ public final class NativeLog {
         }
     }
 
+    /**
+     * Names the object a Java method was called on, with its fields of a simple type whenever they
+     * differ from the last time it was named. Which object drew something, and in what state it
+     * was, can decide what was drawn as much as the arguments do.
+     */
+    public static synchronized Object self(Object self) {
+        var fields = new StringBuilder();
+        for (Class<?> type = self.getClass(); type != null && type != Object.class; type = type.getSuperclass()) {
+            for (var field : type.getDeclaredFields()) {
+                if (!java.lang.reflect.Modifier.isStatic(field.getModifiers())
+                    && (field.getType().isPrimitive())) {
+                    try {
+                        field.setAccessible(true);
+                        fields.append(field.getName()).append('=').append(field.get(self)).append(' ');
+                    } catch (ReflectiveOperationException | RuntimeException ignored) {
+                        /* empty */
+                    }
+                }
+            }
+        }
+        var now = fields.toString();
+        var named = "on " + self.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(self))
+            + " in " + Thread.currentThread().getName().replace(' ', '_')
+            + " from " + caller();
+        if (now.equals(LAST_SEEN.get(self)) && !Boolean.getBoolean("nativetrace.always")) {
+            return named;
+        } else {
+            LAST_SEEN.put(self, now);
+            return named + " {" + now.trim() + "}";
+        }
+    }
+
+    /**
+     * The method that called the one being written down: three frames above this one, past the
+     * traced method itself.
+     */
+    private static String caller() {
+        return StackWalker.getInstance().walk(frames -> frames.skip(3).findFirst()
+            .map(frame -> frame.getClassName() + "." + frame.getMethodName() + ":" + frame.getLineNumber())
+            .orElse("?"));
+    }
+
     public static synchronized void record(String method, Object[] arguments, Object answer) {
         var count = COUNTS.merge(method, 1, Integer::sum);
-        if (count > CALLS) {
+        if (count > calls) {
             return;
         }
 
@@ -88,7 +143,9 @@ public final class NativeLog {
             write(line, arguments[at]);
         }
         line.append(')');
-        if (answer != null) {
+        if (answer instanceof String && ((String) answer).startsWith("on ")) {
+            line.append(' ').append(answer);
+        } else if (answer != null) {
             line.append(" = ");
             write(line, answer);
         }

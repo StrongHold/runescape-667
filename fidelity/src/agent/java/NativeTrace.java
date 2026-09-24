@@ -34,6 +34,7 @@ import java.util.Set;
  * {@code ,methods=lb.a(FFFFFFFFFI)V;Rasterizer.renderFlatTriangleRgb(FFFFFFFFFI)V}. Its arguments
  * are written down as it is entered. This is how the toolkit written in Java is compared, since it
  * makes no native calls at all, and the jar and the recompiled client name its methods differently.
+ * Every method of a class is watched with {@code ,every=JavaToolkit}.
  */
 public final class NativeTrace {
 
@@ -55,16 +56,21 @@ public final class NativeTrace {
         var settings = argument == null ? new String[]{""} : argument.split(",");
         var classes = GROUND_AND_CAMERA;
         var methods = new HashSet<String>();
+        var every = new HashSet<String>();
         for (var at = 1; at < settings.length; at++) {
             if (settings[at].startsWith("classes=")) {
                 classes = settings[at].substring("classes=".length());
+            } else if (settings[at].startsWith("every=")) {
+                every.addAll(Set.of(settings[at].substring("every=".length()).split(":")));
+            } else if (settings[at].startsWith("calls=")) {
+                NativeLog.limit(Integer.parseInt(settings[at].substring("calls=".length())));
             } else if (settings[at].startsWith("methods=")) {
                 methods.addAll(Set.of(settings[at].substring("methods=".length()).split(";")));
             }
         }
 
         NativeLog.open(settings[0]);
-        var transformer = new Wrapper(Set.of(classes.split(":")), methods);
+        var transformer = new Wrapper(Set.of(classes.split(":")), methods, every);
         instrumentation.addTransformer(transformer);
         instrumentation.setNativeMethodPrefix(transformer, PREFIX);
     }
@@ -74,10 +80,13 @@ public final class NativeTrace {
         private final Set<String> watched;
         private final Set<String> methods;
         private final Set<String> owners = new HashSet<>();
+        private final Set<String> every;
 
-        Wrapper(Set<String> watched, Set<String> methods) {
+        Wrapper(Set<String> watched, Set<String> methods, Set<String> every) {
             this.watched = Set.copyOf(watched);
             this.methods = Set.copyOf(methods);
+            this.every = Set.copyOf(every);
+            owners.addAll(every);
             for (var method : methods) {
                 owners.add(method.substring(0, method.indexOf('.')));
             }
@@ -93,7 +102,8 @@ public final class NativeTrace {
             try {
                 var reader = new ClassReader(bytes);
                 var writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
-                reader.accept(new Renaming(writer, name, watched.contains(name), methods), ClassReader.EXPAND_FRAMES);
+                reader.accept(new Renaming(writer, name, watched.contains(name), methods, every.contains(name)),
+                    ClassReader.EXPAND_FRAMES);
                 return writer.toByteArray();
             } catch (RuntimeException failure) {
                 // The virtual machine drops what a transformer throws without a word, which
@@ -112,21 +122,25 @@ public final class NativeTrace {
         private final String owner;
         private final boolean natives;
         private final Set<String> methods;
+        private final boolean every;
 
-        Renaming(ClassVisitor next, String owner, boolean natives, Set<String> methods) {
+        Renaming(ClassVisitor next, String owner, boolean natives, Set<String> methods, boolean every) {
             super(Opcodes.ASM9, next);
             this.owner = owner;
             this.natives = natives;
             this.methods = methods;
+            this.every = every;
         }
 
         @Override
         public MethodVisitor visitMethod(int access, String name, String descriptor, String signature,
                                          String[] exceptions) {
             var named = owner + "." + name + descriptor;
-            if (methods.contains(named)) {
+            var entered = methods.contains(named)
+                || (every && (access & (Opcodes.ACC_NATIVE | Opcodes.ACC_ABSTRACT)) == 0 && !name.startsWith("<"));
+            if (entered) {
                 var next = super.visitMethod(access, name, descriptor, signature, exceptions);
-                return new Entering(next, access, name, descriptor, owner + "." + name);
+                return new Entering(next, access, name, descriptor, named);
             } else if (!natives || (access & Opcodes.ACC_NATIVE) == 0) {
                 return super.visitMethod(access, name, descriptor, signature, exceptions);
             } else {
@@ -198,17 +212,41 @@ public final class NativeTrace {
     private static final class Entering extends AdviceAdapter {
 
         private final String named;
+        private final Type returns;
 
         Entering(MethodVisitor next, int access, String name, String descriptor, String named) {
             super(Opcodes.ASM9, next, access, name, descriptor);
             this.named = named;
+            this.returns = Type.getReturnType(descriptor);
+        }
+
+        /**
+         * Writes down what the method hands back, when it hands back an object or an array. That
+         * is what a method that makes something, such as a texture's pixels, is watched for.
+         */
+        @Override
+        protected void onMethodExit(int opcode) {
+            if (opcode == Opcodes.ARETURN) {
+                dup();
+                push(named + " returned");
+                swap();
+                push(0);
+                newArray(Type.getType(Object.class));
+                swap();
+                invokeStatic(Type.getType(NativeLog.class), Method.getMethod("void record(String, Object[], Object)"));
+            }
         }
 
         @Override
         protected void onMethodEnter() {
             push(named);
             loadArgArray();
-            visitInsn(Opcodes.ACONST_NULL);
+            if ((methodAccess & Opcodes.ACC_STATIC) == 0) {
+                loadThis();
+                invokeStatic(Type.getType(NativeLog.class), Method.getMethod("Object self(Object)"));
+            } else {
+                visitInsn(Opcodes.ACONST_NULL);
+            }
             invokeStatic(Type.getType(NativeLog.class), Method.getMethod("void record(String, Object[], Object)"));
         }
     }

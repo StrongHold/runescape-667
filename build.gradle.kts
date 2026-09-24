@@ -161,6 +161,17 @@ subprojects {
                  * which only catches for a moment can be asked the same with
                  * -Dclient.freezes=<milliseconds>.
                  */
+                /*
+                 * Options for the virtual machine the client runs on, as -PclientJvmArgs="...",
+                 * for when the question is whether the virtual machine is part of a fault.
+                 */
+                val clientJvmArgs = providers.gradleProperty("clientJvmArgs").orNull
+                if (clientJvmArgs != null) {
+                    jvmArgumentProviders.add(CommandLineArgumentProvider {
+                        clientJvmArgs.split(' ').filter { it.isNotBlank() }
+                    })
+                }
+
                 providers.systemProperty("client.stalls").orNull?.let {
                     systemProperty("client.stalls", it)
                 }
