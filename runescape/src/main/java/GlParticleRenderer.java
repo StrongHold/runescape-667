@@ -396,7 +396,7 @@ public final class GlParticleRenderer {
             @Pc(59) Node2 node;
             for (node = sentinel.next2; node != sentinel; node = node.next2) {
                 @Pc(64) Particle particle = (Particle) node;
-                @Pc(91) int depth = (int) (depthOffset + depthZ * (float) (particle.z >> 12) + (float) (particle.x >> 12) * depthX + (float) (particle.y >> 12) * depthY);
+                @Pc(91) int depth = (int) (depthOffset + (depthZ * (float) (particle.z >> 12) + ((float) (particle.x >> 12) * depthX + (float) (particle.y >> 12) * depthY)));
                 if (depth > maxDepth) {
                     maxDepth = depth;
                 }

@@ -51,7 +51,7 @@ public final class FixedFunctionSpecularPass extends RenderPass {
                 for (@Pc(47) int column = 0; column < CUBE_FACE_SIZE; column++) {
                     @Pc(57) float u = (float) column * 2.0F / (float) CUBE_FACE_SIZE - 1.0F;
                     @Pc(66) float v = (float) row * 2.0F / (float) CUBE_FACE_SIZE - 1.0F;
-                    @Pc(81) float z = (float) (1.0D / Math.sqrt(v * v + u * u + 1.0F));
+                    @Pc(81) float z = (float) (1.0D / Math.sqrt(v * v + (u * u + 1.0F)));
                     @Pc(85) float y = v * z;
                     @Pc(89) float x = u * z;
                     for (@Pc(91) int face = 0; face < CUBE_FACE_COUNT; face++) {

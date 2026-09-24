@@ -198,7 +198,7 @@ public final class Ground_Sub2 extends Ground {
         this.aClass19_Sub3_33.method7046(-2);
         this.aClass19_Sub3_33.method7001(null);
         Static699.aFloatArray81[5] = (float) 1024 / ((float) super.tileSize * 128.0F * (float) this.aClass19_Sub3_33.anInt7956);
-        Static699.aFloatArray81[0] = (float) 1024 / ((float) this.aClass19_Sub3_33.anInt7869 * 128.0F * (float) super.tileSize);
+        Static699.aFloatArray81[0] = (float) 1024 / ((float) this.aClass19_Sub3_33.anInt7869 * (128.0F * (float) super.tileSize));
         Static699.aFloatArray81[2] = 0.0F;
         Static699.aFloatArray81[15] = 1.0F;
         Static699.aFloatArray81[8] = 0.0F;
@@ -442,7 +442,7 @@ public final class Ground_Sub2 extends Ground {
                                 }
                                 local579 = ColourUtils.HSL_TO_RGB[local536 & 0xFF80 | local826];
                                 if ((this.anInt7486 & 0x7) == 0) {
-                                    local581 = local602 * this.aClass19_Sub3_33.aFloatArray51[2] + local608 * this.aClass19_Sub3_33.aFloatArray51[1] + local610 * this.aClass19_Sub3_33.aFloatArray51[0];
+                                    local581 = local602 * this.aClass19_Sub3_33.aFloatArray51[2] + (local608 * this.aClass19_Sub3_33.aFloatArray51[1] + local610 * this.aClass19_Sub3_33.aFloatArray51[0]);
                                     local581 = this.aClass19_Sub3_33.aFloat149 + local581 * (local581 > 0.0F ? this.aClass19_Sub3_33.aFloat129 : this.aClass19_Sub3_33.aFloat130);
                                 }
                             }

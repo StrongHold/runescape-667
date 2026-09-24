@@ -132,7 +132,7 @@ public final class FlowingWaterEffect extends TextureEffect {
             Static617.aFloatArray69[2] = 0.0F;
             OpenGL.glTexGenfv(OpenGL.GL_R, OpenGL.GL_OBJECT_PLANE, Static617.aFloatArray69, 0);
         } else {
-            @Pc(148) int frame = (int) ((float) super.toolkit.anInt7987 * (float) FRAME_COUNT * animationSpeed);
+            @Pc(148) int frame = (int) ((float) super.toolkit.anInt7987 * animationSpeed * (float) FRAME_COUNT);
             super.toolkit.method7001(this.textures.aClass93_Sub2Array4[frame % FRAME_COUNT]);
         }
         super.toolkit.method7014(0);

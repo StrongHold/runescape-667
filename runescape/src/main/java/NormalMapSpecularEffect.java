@@ -58,7 +58,7 @@ public final class NormalMapSpecularEffect extends TextureEffect {
                 for (@Pc(45) int y = 0; y < CUBE_FACE_SIZE; y++) {
                     @Pc(55) float u = (float) x * 2.0F / (float) CUBE_FACE_SIZE - 1.0F;
                     @Pc(64) float v = (float) y * 2.0F / (float) CUBE_FACE_SIZE - 1.0F;
-                    @Pc(79) float nz = (float) (1.0D / Math.sqrt(v * v + u * u + 1.0F));
+                    @Pc(79) float nz = (float) (1.0D / Math.sqrt(v * v + 1.0F + u * u));
                     @Pc(83) float nx = u * nz;
                     @Pc(87) float ny = v * nz;
                     for (@Pc(89) int face = 0; face < CUBE_FACE_COUNT; face++) {

@@ -1255,22 +1255,22 @@ public abstract class NativeToolkit extends Toolkit {
     @Override
     public final int r(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) int arg6) {
         @Pc(7) int local7 = 0;
-        @Pc(32) float local32 = this.aClass73_Sub1_16.aFloat43 + this.aClass73_Sub1_16.aFloat47 * (float) arg2 + this.aClass73_Sub1_16.aFloat36 * (float) arg1 + (float) arg0 * this.aClass73_Sub1_16.aFloat45;
-        @Pc(57) float local57 = this.aClass73_Sub1_16.aFloat43 + (float) arg5 * this.aClass73_Sub1_16.aFloat47 + this.aClass73_Sub1_16.aFloat45 * (float) arg3 + (float) arg4 * this.aClass73_Sub1_16.aFloat36;
+        @Pc(32) float local32 = this.aClass73_Sub1_16.aFloat43 + (this.aClass73_Sub1_16.aFloat47 * (float) arg2 + (this.aClass73_Sub1_16.aFloat36 * (float) arg1 + (float) arg0 * this.aClass73_Sub1_16.aFloat45));
+        @Pc(57) float local57 = this.aClass73_Sub1_16.aFloat43 + ((float) arg5 * this.aClass73_Sub1_16.aFloat47 + (this.aClass73_Sub1_16.aFloat45 * (float) arg3 + (float) arg4 * this.aClass73_Sub1_16.aFloat36));
         if ((float) this.anInt9181 > local32 && (float) this.anInt9181 > local57) {
             local7 |= 0x10;
         } else if ((float) this.anInt9167 < local32 && (float) this.anInt9167 < local57) {
             local7 |= 0x20;
         }
         @Pc(130) int local130 = (int) ((this.aClass73_Sub1_16.aFloat39 * (float) arg0 + (float) arg1 * this.aClass73_Sub1_16.aFloat40 + this.aClass73_Sub1_16.aFloat38 * (float) arg2 + this.aClass73_Sub1_16.aFloat46) * (float) this.anInt9151 / (float) arg6);
-        @Pc(163) int local163 = (int) ((float) this.anInt9151 * (this.aClass73_Sub1_16.aFloat46 + this.aClass73_Sub1_16.aFloat39 * (float) arg3 + (float) arg4 * this.aClass73_Sub1_16.aFloat40 + this.aClass73_Sub1_16.aFloat38 * (float) arg5) / (float) arg6);
+        @Pc(163) int local163 = (int) ((float) this.anInt9151 * (this.aClass73_Sub1_16.aFloat46 + (this.aClass73_Sub1_16.aFloat39 * (float) arg3 + (float) arg4 * this.aClass73_Sub1_16.aFloat40 + this.aClass73_Sub1_16.aFloat38 * (float) arg5)) / (float) arg6);
         if ((float) local130 < this.aFloat185 && this.aFloat185 > (float) local163) {
             local7 |= 0x1;
         } else if ((float) local130 > this.aFloat190 && (float) local163 > this.aFloat190) {
             local7 |= 0x2;
         }
         @Pc(236) int local236 = (int) ((float) this.anInt9180 * (this.aClass73_Sub1_16.aFloat42 * (float) arg1 + this.aClass73_Sub1_16.aFloat44 * (float) arg0 + (float) arg2 * this.aClass73_Sub1_16.aFloat41 + this.aClass73_Sub1_16.aFloat37) / (float) arg6);
-        @Pc(269) int local269 = (int) ((this.aClass73_Sub1_16.aFloat41 * (float) arg5 + (float) arg3 * this.aClass73_Sub1_16.aFloat44 + this.aClass73_Sub1_16.aFloat42 * (float) arg4 + this.aClass73_Sub1_16.aFloat37) * (float) this.anInt9180 / (float) arg6);
+        @Pc(269) int local269 = (int) ((this.aClass73_Sub1_16.aFloat41 * (float) arg5 + ((float) arg3 * this.aClass73_Sub1_16.aFloat44 + this.aClass73_Sub1_16.aFloat42 * (float) arg4) + this.aClass73_Sub1_16.aFloat37) * (float) this.anInt9180 / (float) arg6);
         if (this.aFloat183 > (float) local236 && (float) local269 < this.aFloat183) {
             local7 |= 0x4;
         } else if ((float) local236 > this.aFloat188 && this.aFloat188 < (float) local269) {
@@ -2763,7 +2763,7 @@ public abstract class NativeToolkit extends Toolkit {
         if (local32 < 1.0F) {
             local32 = 1.0F;
         }
-        @Pc(63) float local63 = this.aClass73_Sub1_16.aFloat43 + this.aClass73_Sub1_16.aFloat45 * (float) arg3 + (float) arg4 * this.aClass73_Sub1_16.aFloat36 + this.aClass73_Sub1_16.aFloat47 * (float) arg5;
+        @Pc(63) float local63 = this.aClass73_Sub1_16.aFloat43 + (this.aClass73_Sub1_16.aFloat45 * (float) arg3 + (float) arg4 * this.aClass73_Sub1_16.aFloat36 + this.aClass73_Sub1_16.aFloat47 * (float) arg5);
         if (local63 < 1.0F) {
             local63 = 1.0F;
         }
@@ -2772,14 +2772,14 @@ public abstract class NativeToolkit extends Toolkit {
         } else if ((float) this.anInt9167 < local32 && (float) this.anInt9167 < local63) {
             local7 |= 0x20;
         }
-        @Pc(141) int local141 = (int) ((float) this.anInt9151 * ((float) arg2 * this.aClass73_Sub1_16.aFloat38 + (float) arg0 * this.aClass73_Sub1_16.aFloat39 + (float) arg1 * this.aClass73_Sub1_16.aFloat40 + this.aClass73_Sub1_16.aFloat46) / local32);
-        @Pc(173) int local173 = (int) ((float) this.anInt9151 * (this.aClass73_Sub1_16.aFloat46 + this.aClass73_Sub1_16.aFloat39 * (float) arg3 + this.aClass73_Sub1_16.aFloat40 * (float) arg4 + (float) arg5 * this.aClass73_Sub1_16.aFloat38) / local63);
+        @Pc(141) int local141 = (int) ((float) this.anInt9151 * ((float) arg2 * this.aClass73_Sub1_16.aFloat38 + ((float) arg0 * this.aClass73_Sub1_16.aFloat39 + (float) arg1 * this.aClass73_Sub1_16.aFloat40) + this.aClass73_Sub1_16.aFloat46) / local32);
+        @Pc(173) int local173 = (int) ((float) this.anInt9151 * (this.aClass73_Sub1_16.aFloat46 + (this.aClass73_Sub1_16.aFloat39 * (float) arg3 + this.aClass73_Sub1_16.aFloat40 * (float) arg4 + (float) arg5 * this.aClass73_Sub1_16.aFloat38)) / local63);
         if (this.aFloat185 > (float) local141 && this.aFloat185 > (float) local173) {
             local7 |= 0x1;
         } else if (this.aFloat190 < (float) local141 && (float) local173 > this.aFloat190) {
             local7 |= 0x2;
         }
-        @Pc(245) int local245 = (int) ((this.aClass73_Sub1_16.aFloat37 + (float) arg0 * this.aClass73_Sub1_16.aFloat44 + this.aClass73_Sub1_16.aFloat42 * (float) arg1 + this.aClass73_Sub1_16.aFloat41 * (float) arg2) * (float) this.anInt9180 / local32);
+        @Pc(245) int local245 = (int) ((this.aClass73_Sub1_16.aFloat37 + ((float) arg0 * this.aClass73_Sub1_16.aFloat44 + this.aClass73_Sub1_16.aFloat42 * (float) arg1 + this.aClass73_Sub1_16.aFloat41 * (float) arg2)) * (float) this.anInt9180 / local32);
         @Pc(277) int local277 = (int) ((this.aClass73_Sub1_16.aFloat44 * (float) arg3 + this.aClass73_Sub1_16.aFloat42 * (float) arg4 + (float) arg5 * this.aClass73_Sub1_16.aFloat41 + this.aClass73_Sub1_16.aFloat37) * (float) this.anInt9180 / local63);
         if ((float) local245 < this.aFloat183 && this.aFloat183 > (float) local277) {
             local7 |= 0x4;

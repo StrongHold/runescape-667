@@ -531,13 +531,13 @@ public final class Model_Sub2 extends Model {
                         @Pc(2381) float local2381 = local1818 * local2233 - local2242 * local1795;
                         @Pc(2395) float local2395 = 1.0F / (local1634 * local2373 + local2364 * local1626 + local2381 * local2224);
                         local1293 = (local1749 * local2373 + local1741 * local2364 + local2381 * local1772) * local2395;
-                        local1285 = local2395 * (local2277 * local2381 + local2373 * local2269 + local2364 * local2260);
-                        local1289 = local2395 * (local1733 * local2381 + local2294 * local2373 + local2286 * local2364);
+                        local1285 = local2395 * (local2277 * local2381 + (local2373 * local2269 + local2364 * local2260));
+                        local1289 = local2395 * (local1733 * local2381 + (local2294 * local2373 + local2286 * local2364));
                         @Pc(2446) float local2446 = local2355 * local1634 - local1818 * local2224;
                         @Pc(2454) float local2454 = local1795 * local2224 - local1626 * local2355;
                         @Pc(2462) float local2462 = local1818 * local1626 - local1795 * local1634;
-                        @Pc(2476) float local2476 = 1.0F / (local2251 * local2462 + local2233 * local2446 + local2454 * local2242);
-                        local1295 = (local1772 * local2462 + local2454 * local1749 + local1741 * local2446) * local2476;
+                        @Pc(2476) float local2476 = 1.0F / (local2251 * local2462 + (local2233 * local2446 + local2454 * local2242));
+                        local1295 = (local1772 * local2462 + (local2454 * local1749 + local1741 * local2446)) * local2476;
                         local1291 = local2476 * (local2446 * local2286 + local2294 * local2454 + local2462 * local1733);
                         local1287 = (local2446 * local2260 + local2269 * local2454 + local2462 * local2277) * local2476;
                     } else {
@@ -609,8 +609,8 @@ public final class Model_Sub2 extends Model {
                             local1741 = 64.0F / (float) arg1.texSpaceScaleY[local918];
                             local1749 = 64.0F / (float) arg1.texSpaceScaleZ[local918];
                             local1772 = ((float) local1707 * local1375[0] + local1375[1] * (float) local1716 + local1375[2] * (float) local1725) / local1733;
-                            local1795 = (local1375[5] * (float) local1725 + local1375[3] * (float) local1707 + (float) local1716 * local1375[4]) / local1741;
-                            local1818 = ((float) local1725 * local1375[8] + local1375[7] * (float) local1716 + (float) local1707 * local1375[6]) / local1749;
+                            local1795 = (local1375[5] * (float) local1725 + (local1375[3] * (float) local1707 + (float) local1716 * local1375[4])) / local1741;
+                            local1818 = ((float) local1725 * local1375[8] + (local1375[7] * (float) local1716 + (float) local1707 * local1375[6])) / local1749;
                             local1301 = TextureMapping.cubeFace(local1772, local1795, local1818);
                             TextureMapping.cubeMap(arg1.vertexX[local1345], arg1.vertexY[local1345], arg1.vertexZ[local1345], local1360, local1365, local1370, local1375, local1388, local1626, local1634, local1301, local1380, Static414.aFloatArray43);
                             local1287 = Static414.aFloatArray43[1];
@@ -823,17 +823,17 @@ public final class Model_Sub2 extends Model {
     public boolean method4981(@OriginalArg(0) Matrix arg0, @OriginalArg(1) boolean arg1, @OriginalArg(3) int arg2, @OriginalArg(4) int arg3, @OriginalArg(5) int arg4, @OriginalArg(6) int arg5) {
         @Pc(8) Matrix_Sub3 local8 = (Matrix_Sub3) arg0;
         @Pc(12) Matrix_Sub3 local12 = this.aClass19_Sub3_24.aClass73_Sub3_3;
-        @Pc(33) float local33 = local12.aFloat152 + local8.aFloat158 * local12.aFloat157 + local8.aFloat152 * local12.aFloat153 + local12.aFloat160 * local8.aFloat159;
-        @Pc(54) float local54 = local12.aFloat158 + local12.aFloat156 * local8.aFloat158 + local8.aFloat152 * local12.aFloat161 + local8.aFloat159 * local12.aFloat150;
+        @Pc(33) float local33 = local12.aFloat152 + (local8.aFloat158 * local12.aFloat157 + local8.aFloat152 * local12.aFloat153 + local12.aFloat160 * local8.aFloat159);
+        @Pc(54) float local54 = local12.aFloat158 + (local12.aFloat156 * local8.aFloat158 + local8.aFloat152 * local12.aFloat161 + local8.aFloat159 * local12.aFloat150);
         Static188.aFloat65 = local8.aFloat156 * local12.aFloat151 + local8.aFloat157 * local12.aFloat155 + local8.aFloat151 * local12.aFloat154;
         Static430.aFloat120 = local12.aFloat161 * local8.aFloat153 + local12.aFloat156 * local8.aFloat161 + local12.aFloat150 * local8.aFloat155;
-        Static238.aFloat73 = local8.aFloat151 * local12.aFloat160 + local12.aFloat157 * local8.aFloat156 + local12.aFloat153 * local8.aFloat157;
+        Static238.aFloat73 = local8.aFloat151 * local12.aFloat160 + (local12.aFloat157 * local8.aFloat156 + local12.aFloat153 * local8.aFloat157);
         Static393.aFloat117 = local8.aFloat161 * local12.aFloat157 + local8.aFloat153 * local12.aFloat153 + local8.aFloat155 * local12.aFloat160;
         Static190.aFloat66 = local12.aFloat151 * local8.aFloat150 + local8.aFloat160 * local12.aFloat155 + local8.aFloat154 * local12.aFloat154;
         Static409.aFloat118 = local8.aFloat150 * local12.aFloat156 + local8.aFloat160 * local12.aFloat161 + local8.aFloat154 * local12.aFloat150;
-        Static376.aFloat113 = local12.aFloat160 * local8.aFloat154 + local12.aFloat157 * local8.aFloat150 + local8.aFloat160 * local12.aFloat153;
+        Static376.aFloat113 = local12.aFloat160 * local8.aFloat154 + (local12.aFloat157 * local8.aFloat150 + local8.aFloat160 * local12.aFloat153);
         Static91.aFloat208 = local12.aFloat161 * local8.aFloat157 + local12.aFloat156 * local8.aFloat156 + local8.aFloat151 * local12.aFloat150;
-        @Pc(219) float local219 = local12.aFloat159 + local12.aFloat155 * local8.aFloat152 + local8.aFloat158 * local12.aFloat151 + local8.aFloat159 * local12.aFloat154;
+        @Pc(219) float local219 = local12.aFloat159 + (local12.aFloat155 * local8.aFloat152 + local8.aFloat158 * local12.aFloat151 + local8.aFloat159 * local12.aFloat154);
         Static289.aFloat84 = local8.aFloat161 * local12.aFloat151 + local12.aFloat155 * local8.aFloat153 + local8.aFloat155 * local12.aFloat154;
         @Pc(239) boolean local239 = false;
         @Pc(241) float local241 = Float.MAX_VALUE;
@@ -891,9 +891,9 @@ public final class Model_Sub2 extends Model {
             local458 = (float) Static421.anIntArray501[local449];
             local463 = (float) Static351.anIntArray437[local449];
             local468 = (float) Static648.anIntArray754[local449];
-            local482 = local33 + local458 * Static393.aFloat117 + Static238.aFloat73 * local463 + local468 * Static376.aFloat113;
+            local482 = local33 + (local458 * Static393.aFloat117 + Static238.aFloat73 * local463 + local468 * Static376.aFloat113);
             local496 = Static188.aFloat65 * local463 + local458 * Static289.aFloat84 + local468 * Static190.aFloat66 + local219;
-            local510 = local54 + local468 * Static409.aFloat118 + Static430.aFloat120 * local458 + Static91.aFloat208 * local463;
+            local510 = local54 + (local468 * Static409.aFloat118 + (Static430.aFloat120 * local458 + Static91.aFloat208 * local463));
             if (local496 >= (float) this.aClass19_Sub3_24.anInt8010) {
                 if (arg4 > 0) {
                     local496 = (float) arg4;
@@ -930,7 +930,7 @@ public final class Model_Sub2 extends Model {
                 local458 = (float) this.anIntArray410[local654];
                 local468 = (float) this.anIntArray412[local654];
                 local463 = (float) this.anIntArray409[local654];
-                local496 = local219 + Static190.aFloat66 * local468 + local463 * Static188.aFloat65 + local458 * Static289.aFloat84;
+                local496 = local219 + (Static190.aFloat66 * local468 + (local463 * Static188.aFloat65 + local458 * Static289.aFloat84));
                 local482 = local463 * Static238.aFloat73 + Static393.aFloat117 * local458 + local468 * Static376.aFloat113 + local33;
                 local510 = Static430.aFloat120 * local458 + Static91.aFloat208 * local463 + local468 * Static409.aFloat118 + local54;
                 @Pc(758) int local758;
@@ -1246,10 +1246,10 @@ public final class Model_Sub2 extends Model {
                 @Pc(94) float local94 = (float) (this.anIntArray410[local58.vertexC] + this.anIntArray410[local58.vertexA] + this.anIntArray410[local58.vertexB]) * 0.3333333F;
                 @Pc(115) float local115 = (float) (this.anIntArray409[local58.vertexA] + this.anIntArray409[local58.vertexB] + this.anIntArray409[local58.vertexC]) * 0.3333333F;
                 @Pc(138) float local138 = (float) (this.anIntArray412[local58.vertexA] + this.anIntArray412[local58.vertexB] + this.anIntArray412[local58.vertexC]) * 0.3333333F;
-                @Pc(152) float local152 = Static9.aFloat1 + local138 * Static376.aFloat113 + Static393.aFloat117 * local94 + local115 * Static238.aFloat73;
-                @Pc(166) float local166 = Static209.aFloat70 + Static409.aFloat118 * local138 + Static91.aFloat208 * local115 + Static430.aFloat120 * local94;
+                @Pc(152) float local152 = Static9.aFloat1 + (local138 * Static376.aFloat113 + (Static393.aFloat117 * local94 + local115 * Static238.aFloat73));
+                @Pc(166) float local166 = Static209.aFloat70 + (Static409.aFloat118 * local138 + (Static91.aFloat208 * local115 + Static430.aFloat120 * local94));
                 @Pc(180) float local180 = local115 * Static188.aFloat65 + Static289.aFloat84 * local94 + Static190.aFloat66 * local138 + Static24.aFloat20;
-                @Pc(201) float local201 = (float) (1.0D / Math.sqrt(local180 * local180 + local152 * local152 + local166 * local166)) * (float) local58.distance;
+                @Pc(201) float local201 = (float) (1.0D / Math.sqrt(local180 * local180 + (local152 * local152 + local166 * local166))) * (float) local58.distance;
                 local16.method7144(local63.scaleX * local58.width >> 7, (float) local63.offsetX + local152 - local201 * local152, local63.angle, local58.height * local63.scaleY >> 7, local201 * local180 - local180, local166 * local201 + ((float) local63.offsetY - local166));
                 this.aClass19_Sub3_24.method7012(local16);
                 @Pc(253) int local253 = local63.colour;
@@ -1492,14 +1492,14 @@ public final class Model_Sub2 extends Model {
                     local22 = local20.next;
                 }
                 local22.anInt8518 = (int) (local8.aFloat153 * (float) this.anIntArray410[local20.anInt8514] + local8.aFloat157 * (float) this.anIntArray409[local20.anInt8514] + (float) this.anIntArray412[local20.anInt8514] * local8.aFloat160 + local8.aFloat152);
-                local22.anInt8502 = (int) ((float) this.anIntArray412[local20.anInt8514] * local8.aFloat150 + (float) this.anIntArray409[local20.anInt8514] * local8.aFloat156 + local8.aFloat161 * (float) this.anIntArray410[local20.anInt8514] + local8.aFloat158);
-                local22.anInt8504 = (int) (local8.aFloat154 * (float) this.anIntArray412[local20.anInt8514] + (float) this.anIntArray410[local20.anInt8514] * local8.aFloat155 + local8.aFloat151 * (float) this.anIntArray409[local20.anInt8514] + local8.aFloat159);
-                local22.anInt8516 = (int) (local8.aFloat160 * (float) this.anIntArray412[local20.anInt8508] + (float) this.anIntArray409[local20.anInt8508] * local8.aFloat157 + (float) this.anIntArray410[local20.anInt8508] * local8.aFloat153 + local8.aFloat152);
-                local22.anInt8507 = (int) (local8.aFloat158 + local8.aFloat150 * (float) this.anIntArray412[local20.anInt8508] + (float) this.anIntArray410[local20.anInt8508] * local8.aFloat161 + local8.aFloat156 * (float) this.anIntArray409[local20.anInt8508]);
-                local22.anInt8509 = (int) (local8.aFloat159 + (float) this.anIntArray409[local20.anInt8508] * local8.aFloat151 + local8.aFloat155 * (float) this.anIntArray410[local20.anInt8508] + local8.aFloat154 * (float) this.anIntArray412[local20.anInt8508]);
-                local22.anInt8512 = (int) (local8.aFloat152 + local8.aFloat160 * (float) this.anIntArray412[local20.anInt8505] + (float) this.anIntArray409[local20.anInt8505] * local8.aFloat157 + (float) this.anIntArray410[local20.anInt8505] * local8.aFloat153);
+                local22.anInt8502 = (int) ((float) this.anIntArray412[local20.anInt8514] * local8.aFloat150 + ((float) this.anIntArray409[local20.anInt8514] * local8.aFloat156 + local8.aFloat161 * (float) this.anIntArray410[local20.anInt8514]) + local8.aFloat158);
+                local22.anInt8504 = (int) (local8.aFloat154 * (float) this.anIntArray412[local20.anInt8514] + ((float) this.anIntArray410[local20.anInt8514] * local8.aFloat155 + local8.aFloat151 * (float) this.anIntArray409[local20.anInt8514]) + local8.aFloat159);
+                local22.anInt8516 = (int) (local8.aFloat160 * (float) this.anIntArray412[local20.anInt8508] + ((float) this.anIntArray409[local20.anInt8508] * local8.aFloat157 + (float) this.anIntArray410[local20.anInt8508] * local8.aFloat153) + local8.aFloat152);
+                local22.anInt8507 = (int) (local8.aFloat158 + (local8.aFloat150 * (float) this.anIntArray412[local20.anInt8508] + ((float) this.anIntArray410[local20.anInt8508] * local8.aFloat161 + local8.aFloat156 * (float) this.anIntArray409[local20.anInt8508])));
+                local22.anInt8509 = (int) (local8.aFloat159 + ((float) this.anIntArray409[local20.anInt8508] * local8.aFloat151 + local8.aFloat155 * (float) this.anIntArray410[local20.anInt8508] + local8.aFloat154 * (float) this.anIntArray412[local20.anInt8508]));
+                local22.anInt8512 = (int) (local8.aFloat152 + (local8.aFloat160 * (float) this.anIntArray412[local20.anInt8505] + ((float) this.anIntArray409[local20.anInt8505] * local8.aFloat157 + (float) this.anIntArray410[local20.anInt8505] * local8.aFloat153)));
                 local22.anInt8503 = (int) ((float) this.anIntArray410[local20.anInt8505] * local8.aFloat161 + (float) this.anIntArray409[local20.anInt8505] * local8.aFloat156 + (float) this.anIntArray412[local20.anInt8505] * local8.aFloat150 + local8.aFloat158);
-                local22.anInt8520 = (int) (local8.aFloat159 + local8.aFloat154 * (float) this.anIntArray412[local20.anInt8505] + (float) this.anIntArray410[local20.anInt8505] * local8.aFloat155 + local8.aFloat151 * (float) this.anIntArray409[local20.anInt8505]);
+                local22.anInt8520 = (int) (local8.aFloat159 + (local8.aFloat154 * (float) this.anIntArray412[local20.anInt8505] + ((float) this.anIntArray410[local20.anInt8505] * local8.aFloat155 + local8.aFloat151 * (float) this.anIntArray409[local20.anInt8505])));
             }
         }
         if (this.aModelParticleEffectorArray4 == null) {
@@ -1570,7 +1570,7 @@ public final class Model_Sub2 extends Model {
             this.method4982();
         }
         Static188.aFloat65 = local17.aFloat155 * local20.aFloat157 + local17.aFloat151 * local20.aFloat156 + local20.aFloat151 * local17.aFloat154;
-        Static24.aFloat20 = local17.aFloat159 + local17.aFloat151 * local20.aFloat158 + local17.aFloat155 * local20.aFloat152 + local20.aFloat159 * local17.aFloat154;
+        Static24.aFloat20 = local17.aFloat159 + (local17.aFloat151 * local20.aFloat158 + local17.aFloat155 * local20.aFloat152 + local20.aFloat159 * local17.aFloat154);
         @Pc(75) float local75 = (float) this.aShort63 * Static188.aFloat65 + Static24.aFloat20;
         @Pc(83) float local83 = Static24.aFloat20 + Static188.aFloat65 * (float) this.aShort68;
         @Pc(100) float local100;
@@ -1602,7 +1602,7 @@ public final class Model_Sub2 extends Model {
             return;
         }
         Static209.aFloat70 = local20.aFloat152 * local17.aFloat161 + local17.aFloat156 * local20.aFloat158 + local20.aFloat159 * local17.aFloat150 + local17.aFloat158;
-        Static91.aFloat208 = local20.aFloat151 * local17.aFloat150 + local20.aFloat156 * local17.aFloat156 + local20.aFloat157 * local17.aFloat161;
+        Static91.aFloat208 = local20.aFloat151 * local17.aFloat150 + (local20.aFloat156 * local17.aFloat156 + local20.aFloat157 * local17.aFloat161);
         @Pc(305) float local305 = Static209.aFloat70 + (float) this.aShort63 * Static91.aFloat208;
         @Pc(313) float local313 = Static91.aFloat208 * (float) this.aShort68 + Static209.aFloat70;
         @Pc(328) float local328;
@@ -1618,11 +1618,11 @@ public final class Model_Sub2 extends Model {
             return;
         }
         if (cylinder != null || this.billboardFaces != null) {
-            Static376.aFloat113 = local17.aFloat160 * local20.aFloat154 + local17.aFloat157 * local20.aFloat150 + local17.aFloat153 * local20.aFloat160;
+            Static376.aFloat113 = local17.aFloat160 * local20.aFloat154 + (local17.aFloat157 * local20.aFloat150 + local17.aFloat153 * local20.aFloat160);
             Static430.aFloat120 = local17.aFloat161 * local20.aFloat153 + local17.aFloat156 * local20.aFloat161 + local17.aFloat150 * local20.aFloat155;
             Static393.aFloat117 = local17.aFloat157 * local20.aFloat161 + local17.aFloat153 * local20.aFloat153 + local17.aFloat160 * local20.aFloat155;
-            Static190.aFloat66 = local17.aFloat154 * local20.aFloat154 + local17.aFloat151 * local20.aFloat150 + local20.aFloat160 * local17.aFloat155;
-            Static409.aFloat118 = local17.aFloat150 * local20.aFloat154 + local20.aFloat160 * local17.aFloat161 + local17.aFloat156 * local20.aFloat150;
+            Static190.aFloat66 = local17.aFloat154 * local20.aFloat154 + (local17.aFloat151 * local20.aFloat150 + local20.aFloat160 * local17.aFloat155);
+            Static409.aFloat118 = local17.aFloat150 * local20.aFloat154 + (local20.aFloat160 * local17.aFloat161 + local17.aFloat156 * local20.aFloat150);
             Static289.aFloat84 = local20.aFloat161 * local17.aFloat151 + local20.aFloat153 * local17.aFloat155 + local17.aFloat154 * local20.aFloat155;
         }
         if (cylinder != null) {
@@ -1630,17 +1630,17 @@ public final class Model_Sub2 extends Model {
             @Pc(506) boolean local506 = true;
             @Pc(514) int local514 = this.aShort62 + this.aShort66 >> 1;
             @Pc(523) int local523 = this.aShort61 + this.aShort69 >> 1;
-            @Pc(542) int local542 = (int) ((float) local523 * Static376.aFloat113 + (float) this.aShort63 * Static238.aFloat73 + (float) local514 * Static393.aFloat117 + Static9.aFloat1);
-            @Pc(561) int local561 = (int) ((float) local523 * Static409.aFloat118 + (float) this.aShort63 * Static91.aFloat208 + Static430.aFloat120 * (float) local514 + Static209.aFloat70);
-            @Pc(580) int local580 = (int) ((float) this.aShort63 * Static188.aFloat65 + Static24.aFloat20 + (float) local514 * Static289.aFloat84 + Static190.aFloat66 * (float) local523);
+            @Pc(542) int local542 = (int) ((float) local523 * Static376.aFloat113 + ((float) this.aShort63 * Static238.aFloat73 + ((float) local514 * Static393.aFloat117 + Static9.aFloat1)));
+            @Pc(561) int local561 = (int) ((float) local523 * Static409.aFloat118 + ((float) this.aShort63 * Static91.aFloat208 + (Static430.aFloat120 * (float) local514 + Static209.aFloat70)));
+            @Pc(580) int local580 = (int) ((float) this.aShort63 * Static188.aFloat65 + (Static24.aFloat20 + (float) local514 * Static289.aFloat84) + Static190.aFloat66 * (float) local523);
             if (local580 >= this.aClass19_Sub3_24.anInt8010) {
                 cylinder.anInt4504 = local542 * this.aClass19_Sub3_24.anInt8001 / local580 + this.aClass19_Sub3_24.anInt8021;
                 cylinder.anInt4505 = this.aClass19_Sub3_24.anInt8025 * local561 / local580 + this.aClass19_Sub3_24.anInt8016;
             } else {
                 local504 = true;
             }
-            @Pc(636) int local636 = (int) ((float) local523 * Static376.aFloat113 + (float) this.aShort68 * Static238.aFloat73 + Static9.aFloat1 + (float) local514 * Static393.aFloat117);
-            @Pc(655) int local655 = (int) (Static91.aFloat208 * (float) this.aShort68 + Static209.aFloat70 + Static430.aFloat120 * (float) local514 + (float) local523 * Static409.aFloat118);
+            @Pc(636) int local636 = (int) ((float) local523 * Static376.aFloat113 + ((float) this.aShort68 * Static238.aFloat73 + (Static9.aFloat1 + (float) local514 * Static393.aFloat117)));
+            @Pc(655) int local655 = (int) (Static91.aFloat208 * (float) this.aShort68 + (Static209.aFloat70 + Static430.aFloat120 * (float) local514) + (float) local523 * Static409.aFloat118);
             @Pc(674) int local674 = (int) (Static24.aFloat20 + Static289.aFloat84 * (float) local514 + (float) this.aShort68 * Static188.aFloat65 + (float) local523 * Static190.aFloat66);
             if (this.aClass19_Sub3_24.anInt8010 <= local674) {
                 cylinder.anInt4503 = this.aClass19_Sub3_24.anInt8025 * local655 / local674 + this.aClass19_Sub3_24.anInt8016;
@@ -1930,7 +1930,7 @@ public final class Model_Sub2 extends Model {
             this.method4982();
         }
         Static188.aFloat65 = local17.aFloat156 * local14.aFloat151 + local14.aFloat155 * local17.aFloat157 + local14.aFloat154 * local17.aFloat151;
-        Static24.aFloat20 = local14.aFloat159 + local14.aFloat155 * local17.aFloat152 + local17.aFloat158 * local14.aFloat151 + local17.aFloat159 * local14.aFloat154;
+        Static24.aFloat20 = local14.aFloat159 + (local14.aFloat155 * local17.aFloat152 + local17.aFloat158 * local14.aFloat151 + local17.aFloat159 * local14.aFloat154);
         @Pc(72) float local72 = (float) this.aShort63 * Static188.aFloat65 + Static24.aFloat20;
         @Pc(80) float local80 = Static24.aFloat20 + (float) this.aShort68 * Static188.aFloat65;
         @Pc(90) float local90;
@@ -1946,7 +1946,7 @@ public final class Model_Sub2 extends Model {
             return;
         }
         Static238.aFloat73 = local17.aFloat156 * local14.aFloat157 + local17.aFloat157 * local14.aFloat153 + local14.aFloat160 * local17.aFloat151;
-        Static9.aFloat1 = local14.aFloat152 + local17.aFloat159 * local14.aFloat160 + local14.aFloat157 * local17.aFloat158 + local17.aFloat152 * local14.aFloat153;
+        Static9.aFloat1 = local14.aFloat152 + (local17.aFloat159 * local14.aFloat160 + (local14.aFloat157 * local17.aFloat158 + local17.aFloat152 * local14.aFloat153));
         @Pc(175) float local175 = (float) this.aShort63 * Static238.aFloat73 + Static9.aFloat1;
         @Pc(183) float local183 = Static9.aFloat1 + (float) this.aShort68 * Static238.aFloat73;
         @Pc(210) float local210;
@@ -1962,7 +1962,7 @@ public final class Model_Sub2 extends Model {
             return;
         }
         Static91.aFloat208 = local17.aFloat157 * local14.aFloat161 + local17.aFloat156 * local14.aFloat156 + local17.aFloat151 * local14.aFloat150;
-        Static209.aFloat70 = local14.aFloat150 * local17.aFloat159 + local14.aFloat156 * local17.aFloat158 + local14.aFloat161 * local17.aFloat152 + local14.aFloat158;
+        Static209.aFloat70 = local14.aFloat150 * local17.aFloat159 + (local14.aFloat156 * local17.aFloat158 + local14.aFloat161 * local17.aFloat152) + local14.aFloat158;
         @Pc(303) float local303 = Static209.aFloat70 + (float) this.aShort63 * Static91.aFloat208;
         @Pc(311) float local311 = Static91.aFloat208 * (float) this.aShort68 + Static209.aFloat70;
         @Pc(326) float local326;
@@ -1980,19 +1980,19 @@ public final class Model_Sub2 extends Model {
         if (cylinder != null || this.billboardFaces != null) {
             Static409.aFloat118 = local17.aFloat160 * local14.aFloat161 + local17.aFloat150 * local14.aFloat156 + local17.aFloat154 * local14.aFloat150;
             Static289.aFloat84 = local14.aFloat151 * local17.aFloat161 + local14.aFloat155 * local17.aFloat153 + local17.aFloat155 * local14.aFloat154;
-            Static376.aFloat113 = local17.aFloat154 * local14.aFloat160 + local17.aFloat160 * local14.aFloat153 + local14.aFloat157 * local17.aFloat150;
+            Static376.aFloat113 = local17.aFloat154 * local14.aFloat160 + (local17.aFloat160 * local14.aFloat153 + local14.aFloat157 * local17.aFloat150);
             Static393.aFloat117 = local14.aFloat153 * local17.aFloat153 + local14.aFloat157 * local17.aFloat161 + local14.aFloat160 * local17.aFloat155;
-            Static190.aFloat66 = local17.aFloat154 * local14.aFloat154 + local14.aFloat155 * local17.aFloat160 + local17.aFloat150 * local14.aFloat151;
+            Static190.aFloat66 = local17.aFloat154 * local14.aFloat154 + (local14.aFloat155 * local17.aFloat160 + local17.aFloat150 * local14.aFloat151);
             Static430.aFloat120 = local14.aFloat156 * local17.aFloat161 + local17.aFloat153 * local14.aFloat161 + local14.aFloat150 * local17.aFloat155;
         }
         if (cylinder != null) {
             @Pc(511) int local511 = this.aShort66 + this.aShort62 >> 1;
             @Pc(519) int local519 = this.aShort61 + this.aShort69 >> 1;
-            @Pc(538) int local538 = (int) ((float) this.aShort63 * Static238.aFloat73 + Static393.aFloat117 * (float) local511 + Static9.aFloat1 + Static376.aFloat113 * (float) local519);
-            @Pc(557) int local557 = (int) (Static91.aFloat208 * (float) this.aShort63 + Static430.aFloat120 * (float) local511 + Static209.aFloat70 + Static409.aFloat118 * (float) local519);
-            @Pc(576) int local576 = (int) (Static190.aFloat66 * (float) local519 + Static188.aFloat65 * (float) this.aShort63 + Static24.aFloat20 + (float) local511 * Static289.aFloat84);
-            @Pc(595) int local595 = (int) (Static376.aFloat113 * (float) local519 + Static238.aFloat73 * (float) this.aShort68 + Static9.aFloat1 + Static393.aFloat117 * (float) local511);
-            @Pc(614) int local614 = (int) ((float) this.aShort68 * Static91.aFloat208 + Static209.aFloat70 + (float) local511 * Static430.aFloat120 + Static409.aFloat118 * (float) local519);
+            @Pc(538) int local538 = (int) ((float) this.aShort63 * Static238.aFloat73 + (Static393.aFloat117 * (float) local511 + Static9.aFloat1) + Static376.aFloat113 * (float) local519);
+            @Pc(557) int local557 = (int) (Static91.aFloat208 * (float) this.aShort63 + (Static430.aFloat120 * (float) local511 + Static209.aFloat70) + Static409.aFloat118 * (float) local519);
+            @Pc(576) int local576 = (int) (Static190.aFloat66 * (float) local519 + (Static188.aFloat65 * (float) this.aShort63 + (Static24.aFloat20 + (float) local511 * Static289.aFloat84)));
+            @Pc(595) int local595 = (int) (Static376.aFloat113 * (float) local519 + (Static238.aFloat73 * (float) this.aShort68 + (Static9.aFloat1 + Static393.aFloat117 * (float) local511)));
+            @Pc(614) int local614 = (int) ((float) this.aShort68 * Static91.aFloat208 + (Static209.aFloat70 + (float) local511 * Static430.aFloat120) + Static409.aFloat118 * (float) local519);
             @Pc(633) int local633 = (int) (Static24.aFloat20 + Static289.aFloat84 * (float) local511 + Static188.aFloat65 * (float) this.aShort68 + (float) local519 * Static190.aFloat66);
             cylinder.anInt4503 = this.aClass19_Sub3_24.anInt8016 + local614 * this.aClass19_Sub3_24.anInt8025 / arg2;
             cylinder.anInt4501 = this.aClass19_Sub3_24.anInt8001 * local595 / arg2 + this.aClass19_Sub3_24.anInt8021;
@@ -2898,9 +2898,9 @@ public final class Model_Sub2 extends Model {
                     @Pc(536) float local536 = (float) (local500 >>> 24) * this.aClass19_Sub3_24.aFloat148;
                     @Pc(541) short local541 = local422[local505];
                     if (local541 == 0) {
-                        local569 = (local454 * (float) local418[local505] + local442 * (float) local410[local505] + local448 * (float) local414[local505]) * 0.0026041667F;
+                        local569 = (local454 * (float) local418[local505] + (local442 * (float) local410[local505] + local448 * (float) local414[local505])) * 0.0026041667F;
                     } else {
-                        local569 = (local454 * (float) local418[local505] + local448 * (float) local414[local505] + (float) local410[local505] * local442) / (float) (local541 * 256);
+                        local569 = (local454 * (float) local418[local505] + (local448 * (float) local414[local505] + (float) local410[local505] * local442)) / (float) (local541 * 256);
                     }
                     @Pc(610) float local610 = (local569 < 0.0F ? local478 : local468) * local569 + local458;
                     @Pc(615) int local615 = (int) (local610 * local536);
@@ -2929,7 +2929,7 @@ public final class Model_Sub2 extends Model {
                     local505 = this.aShortArray71[local480];
                     local541 = local422[local505];
                     if (local541 == 0) {
-                        local569 = (local454 * (float) local418[local505] + (float) local414[local505] * local448 + (float) local410[local505] * local442) * 0.0026041667F;
+                        local569 = (local454 * (float) local418[local505] + ((float) local414[local505] * local448 + (float) local410[local505] * local442)) * 0.0026041667F;
                     } else {
                         local569 = (local442 * (float) local410[local505] + (float) local414[local505] * local448 + local454 * (float) local418[local505]) / (float) (local541 * 256);
                     }
@@ -2960,7 +2960,7 @@ public final class Model_Sub2 extends Model {
                     local505 = this.aShortArray76[local480];
                     local541 = local422[local505];
                     if (local541 == 0) {
-                        local569 = (local454 * (float) local418[local505] + (float) local410[local505] * local442 + local448 * (float) local414[local505]) * 0.0026041667F;
+                        local569 = (local454 * (float) local418[local505] + ((float) local410[local505] * local442 + local448 * (float) local414[local505])) * 0.0026041667F;
                     } else {
                         local569 = ((float) local410[local505] * local442 + local448 * (float) local414[local505] + local454 * (float) local418[local505]) / (float) (local541 * 256);
                     }

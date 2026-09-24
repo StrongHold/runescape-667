@@ -474,7 +474,7 @@ public final class Ground_Sub1 extends Ground {
                                     }
                                     local1004 = ColourUtils.HSL_TO_RGB[local1014 | local563 & 0xFF80];
                                     if ((this.anInt4302 & 0x7) == 0) {
-                                        local724 = this.aClass19_Sub1_9.aFloatArray60[2] * local620 + this.aClass19_Sub1_9.aFloatArray60[1] * local618 + local622 * this.aClass19_Sub1_9.aFloatArray60[0];
+                                        local724 = this.aClass19_Sub1_9.aFloatArray60[2] * local620 + (this.aClass19_Sub1_9.aFloatArray60[1] * local618 + local622 * this.aClass19_Sub1_9.aFloatArray60[0]);
                                         local724 = this.aClass19_Sub1_9.aFloat186 + (local604 > 0.0F ? this.aClass19_Sub1_9.aFloat181 : this.aClass19_Sub1_9.aFloat180) * local604;
                                         @Pc(1090) int local1090 = local1004 >> 16 & 0xFF;
                                         @Pc(1096) int local1096 = local1004 >> 8 & 0xFF;
