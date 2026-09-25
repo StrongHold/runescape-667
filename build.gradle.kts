@@ -83,6 +83,8 @@ val unpackX64Jdk = tasks.register<Exec>("unpackX64Jdk") {
  * comma. See native-trace/src/main/java/NativeTrace.java.
  */
 val nativeTrace = providers.gradleProperty("nativeTrace")
+val toolkitCoverage = providers.gradleProperty("sw3dCoverage").isPresent
+val toolkitProfiles = layout.projectDirectory.dir("natives/build/coverage/raw")
 val nativeTraceAgent = layout.projectDirectory.file("native-trace/build/libs/native-trace.jar")
 
 subprojects {
@@ -94,6 +96,12 @@ subprojects {
                 val settings = nativeTrace.get().removePrefix(file)
                 val agent = "-javaagent:${nativeTraceAgent.asFile.absolutePath}=${File(file).absolutePath}$settings"
                 jvmArgumentProviders.add(CommandLineArgumentProvider { listOf(agent) })
+            }
+        }
+
+        if (toolkitCoverage) {
+            tasks.withType<JavaExec>().configureEach {
+                environment("LLVM_PROFILE_FILE", toolkitProfiles.file("%p.profraw").asFile.absolutePath)
             }
         }
 

@@ -39,6 +39,19 @@ belongs to whoever ran the client, and it needs macOS and an x86_64 virtual mach
 models the scenes are drawn with are kept in `natives/models`, so nothing but that library is
 wanted from the cache.
 
+## What the checks reach
+
+A picture that matches says nothing about code that no scene runs. To see which lines the checks
+reach, build the toolkit with coverage and run them:
+
+    ./gradlew -Psw3dCoverage :natives:captureOwnFrames :natives:captureOwnMatrices \
+        :natives:captureOwnPoints :natives:captureOwnModels :natives:verifyOwnToolkitLifetime
+    ./gradlew :natives:reportToolkitCoverage
+
+`-Psw3dCoverage` works with any task that loads the toolkit, the client included. Each run adds a
+profile under `natives/build/coverage/raw`. Delete that directory to start again. The report is
+written as HTML under `natives/build/coverage/html`.
+
 ## What is not finished
 
 **A tile drawn from above comes out in perspective.** The client names a distance in ortho mode,

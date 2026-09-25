@@ -869,6 +869,8 @@ val generateToolkitStubs = tasks.register("generateToolkitStubs") {
 }
 
 val toolkitLibrary = layout.buildDirectory.file("natives/libsw3d.dylib")
+val toolkitCoverage = providers.gradleProperty("sw3dCoverage").isPresent
+val coverageDirectory = layout.buildDirectory.dir("coverage")
 
 val compileSoftwareToolkit = tasks.register<Exec>("compileSoftwareToolkit") {
     description = "Builds the software toolkit."
@@ -894,6 +896,8 @@ val compileSoftwareToolkit = tasks.register<Exec>("compileSoftwareToolkit") {
     inputs.files(headers)
     inputs.file(toolkitStubs)
     outputs.file(toolkitLibrary)
+    val coverage = if (toolkitCoverage) listOf("-fprofile-instr-generate", "-fcoverage-mapping") else emptyList()
+    inputs.property("coverage", coverage)
 
     executable = "clang"
 
@@ -914,6 +918,7 @@ val compileSoftwareToolkit = tasks.register<Exec>("compileSoftwareToolkit") {
                 // compiler fuse the pair rounds once instead of twice and moves the answer.
                 "-ffp-contract=off",
             )
+                + coverage
                 + includes.flatMap { listOf("-I", it) }
                 + listOf(
                     "-framework", "Cocoa",
@@ -1254,4 +1259,38 @@ tasks.register<JavaExec>("keepModels") {
     mainClass = "KeepModels"
     classpath = sourceSets["main"].runtimeClasspath
     args("--into", layout.projectDirectory.dir("models").asFile.absolutePath)
+}
+
+val mergeToolkitCoverage = tasks.register<Exec>("mergeToolkitCoverage") {
+    description = "Merges the coverage profiles written by runs with -Psw3dCoverage."
+    val raw = coverageDirectory.get().dir("raw").asFile
+    val merged = coverageDirectory.get().file("sw3d.profdata").asFile
+    executable = "xcrun"
+    argumentProviders.add(CommandLineArgumentProvider {
+        val profiles = raw.listFiles().orEmpty().filter { it.name.endsWith(".profraw") }.map { it.absolutePath }
+        if (profiles.isEmpty()) {
+            throw GradleException("No profile in $raw. Run a task with -Psw3dCoverage first.")
+        }
+        listOf("llvm-profdata", "merge", "-sparse", "-o", merged.absolutePath) + profiles.sorted()
+    })
+    outputs.upToDateWhen { false }
+}
+
+tasks.register<Exec>("reportToolkitCoverage") {
+    description = "Reports which lines of the software toolkit the merged profiles reached."
+    dependsOn(mergeToolkitCoverage)
+    val html = coverageDirectory.get().dir("html").asFile
+    executable = "xcrun"
+    args(
+        "llvm-cov", "show", toolkitLibrary.get().asFile.absolutePath,
+        "-arch", "arm64",
+        "-instr-profile", coverageDirectory.get().file("sw3d.profdata").asFile.absolutePath,
+        "-format", "html",
+        "-output-dir", html.absolutePath,
+        "-ignore-filename-regex", "generated",
+    )
+    outputs.upToDateWhen { false }
+    doLast {
+        logger.lifecycle("Coverage written to ${html.resolve("index.html")}")
+    }
 }
