@@ -56,7 +56,7 @@ public final class HandTextureSource implements TextureSource {
         metrics.effectParam2 = plain * 17;
         metrics.small = (plain & 8) != 0;
         metrics.alpha = (byte) (plain == 3 ? 200 : 96);
-        metrics.aByte57 = (byte) (plain == 3 ? 7 : 24);
+        metrics.aByte57 = (byte) (id == NOT_BRIGHTENED ? 0 : (plain == 3 ? 7 : 24));
         metrics.speedU = (byte) (plain == 1 ? 3 : 0);
         metrics.speedV = (byte) (plain == 2 ? 5 : 0);
         /*
@@ -83,6 +83,12 @@ public final class HandTextureSource implements TextureSource {
      * picture, so a scene laying one of them differs from a scene laying the plain one in the
      * effect alone.
      */
+    /**
+     * A texture that does not brighten the face it is worn on. Every other one does, and many of
+     * the game's own do not.
+     */
+    public static final short NOT_BRIGHTENED = 200;
+
     public static final int WATER_STILL = 240;
     public static final int WATER_MOVING = 242;
     public static final int WATER_DEEP = 244;

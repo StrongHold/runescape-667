@@ -1003,6 +1003,19 @@ static uint32_t waterOverTile;
  * The same, for a face with no texture, whose light is kept with eight places after the point.
  */
 
+/**
+ * Where one pixel of a group stands on the texture.
+ *
+ * The toolkit carries the places of a group as two pairs. The first pair is where the group
+ * begins and one step on from it, and the second pair is the first moved on by two steps. So the
+ * last pixel of a group is one step on and then two, not three steps on, and near an edge of a
+ * texel the two sums read different texels.
+ */
+static float pairedLane(float base, float step, int lane) {
+    float pair = lane % 2 == 0 ? base : base + step;
+    return lane < 2 ? pair : pair + (step + step);
+}
+
 static void fillSpan(int y, const Side *left, const Side *right) {
     int from = (int) lrintf(left->x);
     int to = (int) lrintf(right->x);
@@ -1076,8 +1089,8 @@ static void fillSpan(int y, const Side *left, const Side *right) {
     float depthLane[GROUP];
 
     for (int lane = 0; lane < GROUP; lane++) {
-        uLane[lane] = uBase + (float) lane * uStep;
-        vLane[lane] = vBase + (float) lane * vStep;
+        uLane[lane] = pairedLane(uBase, uStep, lane);
+        vLane[lane] = pairedLane(vBase, vStep, lane);
         wLane[lane] = wBase + (float) lane * wStep;
         depthLane[lane] = depthBase + (float) lane * depthStep;
     }
@@ -1980,6 +1993,11 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
                 continue;
             }
 
+            int shading = modelFaceShading(model, face);
+            if (shading == HIDDEN_AT_A_JOIN) {
+                continue;
+            }
+
             uint32_t unlit = 0;
             if (shade == NULL) {
                 unlit = unlitColour(faceColour == NULL ? 0 : faceColour[face] & 0xFFFF,
@@ -2007,6 +2025,10 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
                     colours[corner] = litByNearby(model, face, corners[corner][face],
                         colours[corner], nearby);
                 }
+            }
+
+            if (shading == DRAWN_BLACK) {
+                colours[0] = colours[1] = colours[2] = 0;
             }
 
             const Texture *texture = faceTexture == NULL || faceTexture[face] == -1

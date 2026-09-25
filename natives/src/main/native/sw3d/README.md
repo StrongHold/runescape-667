@@ -25,7 +25,7 @@ the pictures pixel by pixel. Run:
     ./gradlew :natives:verifyNatives
 
 It answers for the pictures, for the answers the probes ask that never reach a picture, and for
-the lifetime of a handle, the skeleton, the memory library and the sprite lift. All seventy five
+the lifetime of a handle, the skeleton, the memory library and the sprite lift. All eighty
 scenes are identical to the shipped toolkit, pixel for pixel, and so are 64479 matrix answers,
 1185 projection answers and 431 model answers.
 
@@ -52,6 +52,11 @@ reach, build the toolkit with coverage and run them:
 profile under `natives/build/coverage/raw`. Delete that directory to start again. The report is
 written as HTML under `natives/build/coverage/html`.
 
+The checks reach 83% of the lines. A client that was played for two and a half hours with
+coverage reached 68%. Every line that the client reached and that can change a pixel is also
+reached by a scene. The lines that only the client reaches free memory, ask how much memory is in
+use, resize the window, or find what is under the mouse.
+
 ## What is not finished
 
 **A tile drawn from above comes out in perspective.** The client names a distance in ortho mode,
@@ -60,12 +65,18 @@ change is written out in the comment there and was withdrawn. The shipped toolki
 a tile from above at all for any patch this harness can build, so no picture can show that the
 change is right.
 
-## Two faults in the original
+## Faults in the original
 
-Both take the virtual machine with them, so neither can be measured against:
+Each of these either takes the virtual machine with them or changes from one run to the next, so
+none can be measured against:
 
-- `ground.p` asked for way 2 walks off the end of something in `model::hillchange`.
+- `i.p` asked for way 2 divides by the height of the model's top, so a model whose top is at
+  nought stops the virtual machine. The same way reads the ground under every vertex without
+  asking whether the vertex is over the ground.
 - Building model 32421 walks off the end of something in `Java_i_R`.
+- A face shaded black takes its colour out of memory the toolkit never wrote, so it comes out a
+  different colour on each run. When every face of a model is black it comes out black, which is
+  what the Java toolkit draws, so that is what this draws.
 
 ## Reading the source
 

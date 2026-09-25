@@ -6,6 +6,7 @@ import com.jagex.graphics.Model;
 import com.jagex.graphics.Sprite;
 import com.jagex.graphics.Toolkit;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -121,7 +122,12 @@ public sealed interface Scene {
         new DoubledFaces(),
         new OnTheGround(),
         new BlackBacked(),
-        new NearAndFar()
+        new NearAndFar(),
+        new FlatPointLit(),
+        new SlidingTextures(),
+        new LeansTowardsTheFloor(),
+        new LinesDrawnBackwards(),
+        new NotBrightened()
     );
 
     /**
@@ -135,7 +141,8 @@ public sealed interface Scene {
                  Ground shadowed, Ground blended, Model stairs, Model priorities,
                  Model billboards, Mesh located, Mesh blackBacked, Model doubled,
                  Ground shadowedRepeat, Ground watered, Ground surface, Ground waterSurface,
-                 Ground halfBed, Ground overlaidWaterSurface, Ground glaringWater) {
+                 Ground halfBed, Ground overlaidWaterSurface, Ground glaringWater,
+                 Mesh texturedMesh) {
         /* empty */
     }
 
@@ -173,6 +180,47 @@ public sealed interface Scene {
 
     private static int grey(int value) {
         return (value << 16) | (value << 8) | value;
+    }
+
+    /**
+     * Places, across, up and along from the model's own origin, for vertices no face is built
+     * from. The client hangs particles off vertices like these, after the ones the faces use. One
+     * stands far outside any patch of ground.
+     */
+    int[][] LOOSE_VERTICES = {{0, -40, 0}, {120, 0, -80}, {1_000_000, 0, 1_000_000}};
+
+    /**
+     * Builds a model from the mesh with the loose vertices added after the ones its faces use,
+     * and leaves the mesh as it was.
+     */
+    private static Model withLooseVertices(Toolkit toolkit, Mesh mesh, int functions, int features,
+                                           int ambient, int contrast) {
+        var count = mesh.vertexCount;
+        var x = mesh.vertexX;
+        var y = mesh.vertexY;
+        var z = mesh.vertexZ;
+        var label = mesh.vertexLabel;
+        var wider = count + LOOSE_VERTICES.length;
+
+        mesh.vertexX = Arrays.copyOf(x, wider);
+        mesh.vertexY = Arrays.copyOf(y, wider);
+        mesh.vertexZ = Arrays.copyOf(z, wider);
+        mesh.vertexLabel = label == null ? null : Arrays.copyOf(label, wider);
+        for (var loose = 0; loose < LOOSE_VERTICES.length; loose++) {
+            mesh.vertexX[count + loose] = LOOSE_VERTICES[loose][0];
+            mesh.vertexY[count + loose] = LOOSE_VERTICES[loose][1];
+            mesh.vertexZ[count + loose] = LOOSE_VERTICES[loose][2];
+        }
+        mesh.vertexCount = wider;
+
+        var model = toolkit.createModel(mesh, functions, features, ambient, contrast);
+
+        mesh.vertexX = x;
+        mesh.vertexY = y;
+        mesh.vertexZ = z;
+        mesh.vertexLabel = label;
+        mesh.vertexCount = count;
+        return model;
     }
 
     /**
@@ -498,9 +546,9 @@ public sealed interface Scene {
         /**
          * The way of fitting a model to the ground that leans it towards the floor.
          *
-         * The toolkit this stands in for walks off the end of something working this one out and
-         * takes the whole program with it, so it is left out rather than drawn. Every other way is
-         * asked for.
+         * The toolkit this stands in for divides by the height of the model's top to work this
+         * one out, and the top of this model is at nought, so it would stop the whole program.
+         * It is left out here and drawn by LeansTowardsTheFloor with a model that rises.
          */
         private static final int LEANS_AND_FALLS_OVER = 2;
 
@@ -2386,7 +2434,7 @@ public sealed interface Scene {
         /** Where the models stand, and how far apart. */
         private static final int APART = 260;
 
-        private static final int[] LIGHTS = {
+        static final int[] LIGHTS = {
             -140, -80, DEPTH - 150, 90, 0xFF4040,
             160, 60, DEPTH - 120, 110, 0x40FF60,
             0, -200, DEPTH, 140, 0x8080FF,
@@ -2394,13 +2442,13 @@ public sealed interface Scene {
             400, 400, DEPTH, 200, 0xFFFFFF
         };
 
-        private static final float[] STRENGTHS = {1.0F, 0.45F, 2.5F, 0.8F, 1.0F};
+        static final float[] STRENGTHS = {1.0F, 0.45F, 2.5F, 0.8F, 1.0F};
 
         /**
          * A model only meets these lights if it was built asking for the directions its vertices
          * face, which is a feature the scenes drawn by a lit model do not otherwise need.
          */
-        private static final int FACING = 0x10;
+        static final int FACING = 0x10;
 
         private static final int FUNCTIONS = 2048;
 
@@ -3111,6 +3159,244 @@ public sealed interface Scene {
 
             toolkit.la();
             toolkit.aa(0, 370, WIDTH, 10, 0xFF00FF00, 0);
+        }
+    }
+
+    /**
+     * Point lights on a model with faces shaded smooth, flat, and hidden at a join with a
+     * neighbour.
+     *
+     * A face may also be shaded black. The toolkit this stands in for colours such a face out of
+     * memory it never wrote, so it comes out different from one run to the next, and it is left
+     * out.
+     *
+     * A light meets a flat face through the direction of the face and a smooth one through the
+     * direction of each corner. The second copy is turned a quarter by the model, which carries
+     * the direction of every face round with it, and turns its loose vertices on their own. The third is told it may no longer share its
+     * light, which lights it again and leaves the hidden faces hidden.
+     */
+    record FlatPointLit() implements Scene {
+
+        /** Everything a model may be asked to do, so that the turn is allowed. */
+        private static final int FUNCTIONS = 0xFFFF;
+
+        /** The function that lets a model share its light with the models it is drawn beside. */
+        private static final int SHARES_LIGHT = 0x10000;
+
+        private static final int FEATURES = 64;
+        private static final int AMBIENT = 64;
+        private static final int CONTRAST = 768;
+
+        /** Smooth, flat and hidden. */
+        private static final int SHADINGS = 3;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            var mesh = props.mesh();
+            var held = mesh.shadingType;
+            mesh.shadingType = new byte[mesh.faceCount];
+            for (var face = 0; face < mesh.faceCount; face++) {
+                mesh.shadingType[face] = (byte) (face % SHADINGS);
+            }
+
+            var still = toolkit.createModel(mesh, FUNCTIONS, FEATURES | PointLit.FACING, AMBIENT,
+                CONTRAST);
+            var turned = withLooseVertices(toolkit, mesh, FUNCTIONS, FEATURES | PointLit.FACING,
+                AMBIENT, CONTRAST);
+            turned.k(TURN / 4);
+            var unshared = toolkit.createModel(mesh, FUNCTIONS | SHARES_LIGHT,
+                FEATURES | PointLit.FACING, AMBIENT, CONTRAST);
+            unshared.s(FUNCTIONS);
+            mesh.shadingType = held;
+
+            var software = (oa) toolkit;
+            software.N(PointLit.LIGHTS.length / 5, PointLit.LIGHTS, PointLit.STRENGTHS);
+
+            var models = List.of(still, turned, unshared);
+            for (var step = 0; step < models.size(); step++) {
+                props.matrix().makeRotationZ(0);
+                props.matrix().translate((step - 1) * SPREAD * 2 / 3, 0, DEPTH);
+                models.get(step).render(props.matrix(), null, 1);
+            }
+
+            software.N(0, PointLit.LIGHTS, PointLit.STRENGTHS);
+        }
+    }
+
+    /**
+     * Textures that slide of their own accord, drawn before and after the toolkit is told the
+     * time.
+     *
+     * The top row is drawn where the textures start, and the bottom row after the toolkit has
+     * moved them on. One texture slides across and one slides down. The third model starts on a
+     * texture that stands still and is swapped onto the one that slides across. The time is put
+     * back to nought at the end, so that no later scene finds a texture moved.
+     */
+    record SlidingTextures() implements Scene {
+
+        private static final int FUNCTIONS = 0xFFFF;
+
+        /**
+         * No features at all. The feature the other scenes ask for turns off every texture the
+         * player may turn off, and the texture that slides across is one of those.
+         */
+        private static final int FEATURES = 0;
+        private static final int AMBIENT = 64;
+        private static final int CONTRAST = 768;
+
+        private static final short STILL = 0;
+        private static final short ACROSS = 1;
+        private static final short DOWN = 2;
+
+        /** A time that moves each texture some way short of coming back round. */
+        private static final int LATER = 470;
+
+        private static final int ROW = 110;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            var mesh = props.texturedMesh();
+            if (mesh == null) {
+                return;
+            }
+
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            var held = mesh.faceTexture.clone();
+            var across = wearing(toolkit, mesh, ACROSS);
+            var down = wearing(toolkit, mesh, DOWN);
+            var swapped = wearing(toolkit, mesh, STILL);
+            swapped.aa(STILL, ACROSS);
+            System.arraycopy(held, 0, mesh.faceTexture, 0, held.length);
+
+            var models = List.of(across, down, swapped);
+            var software = (oa) toolkit;
+
+            row(props, models, -ROW);
+            software.d(LATER);
+            row(props, models, ROW);
+            software.d(0);
+        }
+
+        private static Model wearing(Toolkit toolkit, Mesh mesh, short texture) {
+            Arrays.fill(mesh.faceTexture, texture);
+            return toolkit.createModel(mesh, FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
+        }
+
+        private static void row(Props props, List<Model> models, int y) {
+            for (var step = 0; step < models.size(); step++) {
+                props.matrix().makeRotationZ(0);
+                props.matrix().translate((step - 1) * SPREAD / 2, y, DEPTH);
+                models.get(step).render(props.matrix(), null, 1);
+            }
+        }
+    }
+
+    /**
+     * A model fitted to the ground by leaning its lower part towards the floor.
+     *
+     * The toolkit reads the height of the ground under every vertex a face uses without asking
+     * whether the vertex is over the ground at all, so the model stands in the middle of it. The
+     * loose vertices after those are asked about, and one of them is off the ground. It also divides
+     * by the height of the model's top, so the model has to rise above where it stands. Each copy
+     * says a different share of the model's height is to lean, counted in sixty five thousand
+     * five hundred and thirty sixths.
+     */
+    record LeansTowardsTheFloor() implements Scene {
+
+        private static final int FUNCTIONS = 0xFFFF;
+        private static final int FEATURES = 64;
+        private static final int AMBIENT = 64;
+        private static final int CONTRAST = 768;
+
+        private static final int LEANS_TOWARDS_THE_FLOOR = 2;
+
+        private static final int[] SHARES = {8192, 32768, 65536};
+
+        /**
+         * About the height of the ground in the middle of the patch, so that the model moves by
+         * how the ground slopes under it rather than by how far the ground is from nought.
+         */
+        private static final int STANDS_AT = -440;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            var middle = HandGround.TILES / 2 * HandGround.TILE + HandGround.TILE / 2;
+
+            for (var step = 0; step < SHARES.length; step++) {
+                var model = withLooseVertices(toolkit, props.mesh(), FUNCTIONS, FEATURES, AMBIENT,
+                    CONTRAST);
+                model.p(LEANS_TOWARDS_THE_FLOOR, SHARES[step], props.ground(), null, middle,
+                    STANDS_AT, middle);
+
+                props.matrix().makeRotationZ(0);
+                props.matrix().translate((step - 1) * SPREAD * 2, 0, DEPTH * 3);
+                model.render(props.matrix(), null, 1);
+            }
+        }
+    }
+
+    /**
+     * Lines given from their far end back to their near end, straight up and straight left.
+     *
+     * A line that runs straight along a row or a column is drawn as a run, and the run starts
+     * from whichever end is nearer the corner.
+     */
+    record LinesDrawnBackwards() implements Scene {
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.line(100, 340, 100, 40, 0xFFCCCC11, 0);
+            toolkit.line(160, 300, 160, 80, 0x8011CCCC, 1);
+            toolkit.line(460, 200, 220, 200, 0xFFFF4444, 0);
+            toolkit.line(460, 260, 220, 260, 0x80FFFFFF, 1);
+        }
+    }
+
+    /**
+     * A model wearing a texture that does not brighten it, beside the same model wearing one that
+     * does.
+     */
+    record NotBrightened() implements Scene {
+
+        private static final int FUNCTIONS = 0xFFFF;
+
+        /** No features, so that no texture is turned off. */
+        private static final int FEATURES = 0;
+
+        private static final int AMBIENT = 64;
+        private static final int CONTRAST = 768;
+
+        private static final short BRIGHTENED = 0;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            var mesh = props.texturedMesh();
+            if (mesh == null) {
+                return;
+            }
+
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            var held = mesh.faceTexture.clone();
+            var textures = new short[] {HandTextureSource.NOT_BRIGHTENED, BRIGHTENED};
+            for (var step = 0; step < textures.length; step++) {
+                Arrays.fill(mesh.faceTexture, textures[step]);
+                var model = toolkit.createModel(mesh, FUNCTIONS, FEATURES, AMBIENT, CONTRAST);
+
+                props.matrix().makeRotationZ(0);
+                props.matrix().translate((step * 2 - 1) * SPREAD / 4, 0, DEPTH / 2);
+                model.render(props.matrix(), null, 1);
+            }
+            System.arraycopy(held, 0, mesh.faceTexture, 0, held.length);
         }
     }
 }

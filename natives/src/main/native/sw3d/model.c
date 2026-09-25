@@ -56,11 +56,6 @@ enum { MAY_CHANGE_THE_LIGHT = 0x17218 };
  */
 enum { MAY_CHANGE_THE_DIRECTIONS = MAY_TURN_NORMALS | MAY_MIRROR | MAY_TURN_NORMALS_WHILE_ANIMATING };
 
-/**
- * A face that asked to be shaded only while the model is being animated. Once the client gives up
- * the right to animate, such a face is shaded like any other.
- */
-enum { SHADED_WHEN_ANIMATED = 2 };
 
 /**
  * What a model has to have been built to draw, as the bits the client passed for its features.
@@ -2076,8 +2071,8 @@ JNIEXPORT void JNICALL Java_i_v(JNIEnv *env, jobject self) {
  * Narrows what the client may do to the model from here on.
  *
  * Only narrowing is allowed: a mask asking for anything the model was not already built for is a
- * mistake in the client. Giving up the right to animate settles the shading of every face that
- * was waiting on an animation to decide it, so the model is lit again.
+ * mistake in the client. A model that gives up sharing its light is lit again. A face hidden at a
+ * join stays hidden.
  */
 JNIEXPORT void JNICALL Java_i_s(JNIEnv *env, jobject self, jint functions) {
     Model *model = modelOf(env, self);
@@ -2095,14 +2090,6 @@ JNIEXPORT void JNICALL Java_i_s(JNIEnv *env, jobject self, jint functions) {
     }
 
     if ((model->functions & MAY_SHARE_LIGHT) != 0 && (functions & MAY_SHARE_LIGHT) == 0) {
-        if (model->shadingType != NULL) {
-            for (int face = 0; face < model->faceCount; face++) {
-                if (model->shadingType[face] == SHADED_WHEN_ANIMATED) {
-                    model->shadingType[face] = 0;
-                }
-            }
-        }
-
         unlight(model);
     }
 
@@ -2963,6 +2950,11 @@ void modelBillboard(const void *handle, int which, int *face, int *wide, int *hi
     *insteadOfTheFace = billboard->insteadOfTheFace;
 }
 
+int modelFaceShading(const void *handle, int face) {
+    const Model *model = handle;
+    return model->shadingType == NULL ? SHADED_SMOOTH : model->shadingType[face];
+}
+
 int modelFaceIsFlat(const void *handle, int face) {
     const Model *model = handle;
     return model->shadingType != NULL && model->shadingType[face] != 0;
@@ -3050,7 +3042,7 @@ static void castShadow(Model *model, Shadow *shadow) {
             continue;
         }
 
-        if (model->shadingType != NULL && model->shadingType[face] == SHADED_WHEN_ANIMATED) {
+        if (model->shadingType != NULL && model->shadingType[face] == HIDDEN_AT_A_JOIN) {
             continue;
         }
 

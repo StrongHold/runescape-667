@@ -435,19 +435,22 @@ void textureCacheReady(JNIEnv *env, jobject client) {
     (*env)->DeleteLocalRef(env, owner);
 }
 
+/** How long a sliding texture waits before it moves on by its speed once more. */
+enum { MILLISECONDS_A_STEP = 20 };
+
 /**
  * Moves every texture that moves of its own accord on to where it stands at this moment.
  *
- * The moment is counted in hundredths rather than in milliseconds, and it comes back round every
- * hundred and twenty eight of them, so a texture that scrolls is back where it started about
- * every second and a quarter.
+ * The moment is counted in fiftieths of a second rather than in milliseconds, and it comes back
+ * round every hundred and twenty eight of them, so a texture that scrolls is back where it started
+ * about every two and a half seconds.
  */
 void textureCacheService(int time) {
     if (cache.walkingCount == 0) {
         return;
     }
 
-    int step = (time / 10) % TEXTURE_SIZE;
+    int step = (time / MILLISECONDS_A_STEP) % TEXTURE_SIZE;
 
     for (int which = 0; which < cache.walkingCount; which++) {
         Texture *texture = &cache.withPixels[cache.walking[which]];

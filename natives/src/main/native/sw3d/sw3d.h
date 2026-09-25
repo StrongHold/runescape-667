@@ -699,6 +699,17 @@ void modelBillboard(const void *handle, int which, int *face, int *wide, int *hi
                     int *texture, int *colourOp, int *blendMode, int *insteadOfTheFace);
 
 int modelFaceIsFlat(const void *handle, int face);
+
+/**
+ * How a face is shaded.
+ *
+ * A face hidden at a join is one whose corners all meet a neighbouring model the light is shared
+ * with. The two models close over it, so it is not drawn. A face drawn black is drawn in black and
+ * nothing else.
+ */
+enum { SHADED_SMOOTH = 0, SHADED_FLAT = 1, HIDDEN_AT_A_JOIN = 2, DRAWN_BLACK = 3 };
+
+int modelFaceShading(const void *handle, int face);
 int modelAmbient(const void *handle);
 int modelContrast(const void *handle);
 
