@@ -25,7 +25,7 @@ the pictures pixel by pixel. Run:
     ./gradlew :natives:verifyNatives
 
 It answers for the pictures, for the answers the probes ask that never reach a picture, and for
-the lifetime of a handle, the skeleton, the memory library and the sprite lift. All eighty one
+the lifetime of a handle, the skeleton, the memory library and the sprite lift. All eighty two
 scenes are identical to the shipped toolkit, pixel for pixel, and so are 64479 matrix answers,
 1185 projection answers and 431 model answers.
 
@@ -58,11 +58,12 @@ use, resize the window, or find what is under the mouse.
 
 ## What is not finished
 
-**A tile drawn from above comes out in perspective.** The client names a distance in ortho mode,
-and every corner should be laid down through it. `Java_a_Z` reads the distance and drops it. The
-change is written out in the comment there and was withdrawn. The shipped toolkit refuses to draw
-a tile from above at all for any patch this harness can build, so no picture can show that the
-change is right.
+Nothing the client draws. One case outside what the client asks for differs:
+
+**A tile drawn from above with no far edge.** The shipped toolkit draws nothing, and this draws
+the tile. The client never asks for it: in ortho mode it sets the far edge to twice the distance
+it draws the world to, and the near edge to the same distance behind the eye. `FromAbove` draws
+the ground that way, and it is identical.
 
 ## Faults in the original
 

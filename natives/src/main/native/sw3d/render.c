@@ -2570,7 +2570,7 @@ static float liftedTowardsTheSurface(const Transform *onto, const float *stands,
     return reached * (LIFT_LEAVES_IT_AT - (float) deep);
 }
 
-void renderGroundTile(const void *ground, int x, int z) {
+void renderGroundTile(const void *ground, int x, int z, int smaller) {
     int corners = 0;
     const void *tile = groundTile(ground, x, z, &corners);
     const void *camera = cameraMatrix();
@@ -2628,7 +2628,7 @@ void renderGroundTile(const void *ground, int x, int z) {
         return;
     }
 
-    Transform projector = projectionMatrix();
+    Transform projector = pictureOf(smaller);
     Transform onto = after(matrixRows(camera), &projector);
 
     const Projection *view = projection();
@@ -2721,7 +2721,7 @@ void renderGroundTile(const void *ground, int x, int z) {
          * of water lies below the ground over it and reaches past that edge first, so dropping
          * what reaches past it leaves water with nothing behind it.
          */
-        landed->visible = away >= view->near;
+        landed->visible = smaller >= 0 || away >= view->near;
         landed->away = away;
 
         /*
@@ -2906,35 +2906,23 @@ JNIEXPORT void JNICALL Java_a_H(JNIEnv *env, jobject self, jlong worker, jlong g
     (void) worker;
 
     if (!switchedOff("SW3D_NO_GROUND")) {
-        renderGroundTile((const void *) (intptr_t) ground, x, z);
+        renderGroundTile((const void *) (intptr_t) ground, x, z, THROUGH_THE_EYE);
     }
 }
 
 /**
- * Draws one tile of the ground as though every corner of it stood the distance away the client
- * names, which is how it draws the world from above in ortho mode.
- *
- * The distance is read and dropped, so a tile asked for this way comes out in perspective. What
- * it should come to is not in doubt: the client's own renderer lays a corner down through the
- * distance it names rather than through the corner's own, and cuts nothing away for standing too
- * near or too far. Ortho mode divides by the same number in the same place.
- *
- * It is dropped because nothing here can show that it is right. The shipped toolkit refuses to
- * draw a tile this way at all: it skips any tile with the second bit of a flag set, and every
- * tile a patch built here hands over has it, whatever the ground is asked for and whatever
- * colours, overlays or features it carries. Until a patch can be built that the shipped toolkit
- * will draw from above, laying the corners down through the named distance would be putting in a
- * behaviour no picture can check.
+ * Draws one tile of the ground from no particular place, which is how the client draws the world
+ * in ortho mode. The distance the client names is how much smaller than the eye's picture it is.
+ * Every corner is laid down, however near or far it stands.
  */
 JNIEXPORT void JNICALL Java_a_Z(JNIEnv *env, jobject self, jlong worker, jlong ground,
                                  jint x, jint z, jint depth) {
     (void) env;
     (void) self;
     (void) worker;
-    (void) depth;
 
     if (!switchedOff("SW3D_NO_GROUND")) {
-        renderGroundTile((const void *) (intptr_t) ground, x, z);
+        renderGroundTile((const void *) (intptr_t) ground, x, z, depth);
     }
 }
 

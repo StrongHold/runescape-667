@@ -312,8 +312,11 @@ void groundTileCorner(const void *held, const void *at, int corner, int tileSize
                       int x, int z, int *into, uint32_t *colour);
 int groundTileSize(const void *held);
 
-/** Draws one tile of the ground, or one depth of it. */
-void renderGroundTile(const void *ground, int x, int z);
+/**
+ * Draws one tile of the ground through the eye. With a distance of nought or more it draws the
+ * tile from no particular place instead, that much smaller than the eye's picture.
+ */
+void renderGroundTile(const void *ground, int x, int z, int smaller);
 
 int groundTileSize(const void *ground);
 int groundTileShift(const void *ground);

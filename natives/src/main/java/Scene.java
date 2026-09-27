@@ -128,7 +128,8 @@ public sealed interface Scene {
         new LeansTowardsTheFloor(),
         new LinesDrawnBackwards(),
         new NotBrightened(),
-        new MeetingModels()
+        new MeetingModels(),
+        new FromAbove()
     );
 
     /**
@@ -3451,6 +3452,45 @@ public sealed interface Scene {
                 props.matrix().applyTranslation(across + away[0], away[1] + 140, DEPTH * 2 + away[2]);
                 second.render(props.matrix(), null, 1);
             }
+        }
+    }
+
+    /**
+     * The ground drawn from above in ortho mode, where nothing shrinks with distance.
+     *
+     * The client sets what may be drawn to reach as far in front of the eye as behind it, twice
+     * the distance it draws the world to. The picture is that much smaller than the eye's.
+     */
+    record FromAbove() implements Scene {
+
+        /** Twice the distance the client draws the world to. */
+        private static final int REACH = 20000;
+
+        /** How much smaller than the eye's picture this one is. */
+        private static final int SMALLER = 7500;
+
+        private static final int ABOVE = 4000;
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(-REACH, REACH);
+
+            var middle = HandGround.TILES * HandGround.TILE / 2;
+            var camera = toolkit.createMatrix();
+            camera.createCamera(middle, ABOVE, middle, TURN / 4, 0, 0);
+            toolkit.setCamera(camera);
+
+            var visible = new boolean[HandGround.TILES * 2][HandGround.TILES * 2];
+            for (var across = 0; across < visible.length; across++) {
+                for (var along = 0; along < visible.length; along++) {
+                    visible[across][along] = true;
+                }
+            }
+
+            props.ground().renderTilesAtDepth(HandGround.TILES / 2, HandGround.TILES / 2,
+                HandGround.TILES, visible, false, SMALLER, 0);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
         }
     }
 }
