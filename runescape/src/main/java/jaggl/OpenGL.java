@@ -328,10 +328,6 @@ public final class OpenGL {
     @OriginalMember(owner = "client!jaggl/OpenGL", name = "glNormal3f", descriptor = "(FFF)V")
     public static native void glNormal3f(@OriginalArg(0) float nx, @OriginalArg(1) float ny, @OriginalArg(2) float nz);
 
-    /**
-     * Not in the Mac build of jaggl, which exports no glGetTexImage of either width. Nothing
-     * calls this one, so it is only a problem for anything added later that does.
-     */
     @OriginalMember(owner = "client!jaggl/OpenGL", name = "glGetTexImageub", descriptor = "(IIII[BI)V")
     public static native void glGetTexImageub(@OriginalArg(0) int target, @OriginalArg(1) int level, @OriginalArg(2) int format, @OriginalArg(3) int type, @OriginalArg(4) byte[] pixels, @OriginalArg(5) int pixelsOffset);
 
@@ -452,11 +448,6 @@ public final class OpenGL {
     @OriginalMember(owner = "client!jaggl/OpenGL", name = "glColorMaterial", descriptor = "(II)V")
     public static native void glColorMaterial(@OriginalArg(0) int face, @OriginalArg(1) int mode);
 
-    /**
-     * Not in the Mac build of jaggl, which exports no glGetTexImage of either width, so this
-     * throws UnsatisfiedLinkError there the first time it is reached. GlTexture2D and
-     * GlRectangleTexture both call it to read a texture back out of the card.
-     */
     @OriginalMember(owner = "client!jaggl/OpenGL", name = "glGetTexImagei", descriptor = "(IIII[II)V")
     public static native void glGetTexImagei(@OriginalArg(0) int target, @OriginalArg(1) int level, @OriginalArg(2) int format, @OriginalArg(3) int type, @OriginalArg(4) int[] pixels, @OriginalArg(5) int pixelsOffset);
 
@@ -526,12 +517,6 @@ public final class OpenGL {
     @OriginalMember(owner = "client!jaggl/OpenGL", name = "glPopAttrib", descriptor = "()V")
     public static native void glPopAttrib();
 
-    /**
-     * The Mac build of jaggl has no entry point under this name. It exports glDeleteProgram
-     * instead, which no virtual machine will bind to a method declared as glDeleteProgramARB, so
-     * this throws UnsatisfiedLinkError there the first time it is reached. GlToolkit and
-     * GlxToolkit both call it while tearing a shader down.
-     */
     @OriginalMember(owner = "client!jaggl/OpenGL", name = "glDeleteProgramARB", descriptor = "(I)V")
     public static native void glDeleteProgramARB(@OriginalArg(0) int arg0);
 
@@ -763,10 +748,6 @@ public final class OpenGL {
     @OriginalMember(owner = "client!jaggl/OpenGL", name = "glPopMatrix", descriptor = "()V")
     public static native void glPopMatrix();
 
-    /**
-     * Not in the Mac build of jaggl, which exports neither of the two stencil calls. Nothing sets
-     * up a stencil test, so it is only a problem for anything added later that does.
-     */
     @OriginalMember(owner = "client!jaggl/OpenGL", name = "glStencilFunc", descriptor = "(III)V")
     public static native void glStencilFunc(@OriginalArg(0) int func, @OriginalArg(1) int ref, @OriginalArg(2) int mask);
 
@@ -806,10 +787,6 @@ public final class OpenGL {
     @OriginalMember(owner = "client!jaggl/OpenGL", name = "glVertex2f", descriptor = "(FF)V")
     public static native void glVertex2f(@OriginalArg(0) float x, @OriginalArg(1) float y);
 
-    /**
-     * Not in the Mac build of jaggl, which exports neither of the two stencil calls. Nothing sets
-     * up a stencil test, so it is only a problem for anything added later that does.
-     */
     @OriginalMember(owner = "client!jaggl/OpenGL", name = "glStencilOp", descriptor = "(III)V")
     public static native void glStencilOp(@OriginalArg(0) int fail, @OriginalArg(1) int zfail, @OriginalArg(2) int zpass);
 
