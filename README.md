@@ -37,6 +37,29 @@ Original exception messages from these leaks have been restored, often shedding 
 Native libraries are stored in the cache, which prevents various classes from being repackaged from the root or renamed.
 These are classes that typically have `native` methods and one or two letter classnames.
 
+## Changes from the original client
+
+The `runescape` module computes what the 2011 jar computed. The code below is the only code in it
+that is not in the jar, and each piece says so in its Javadoc or in a comment where it is called.
+Keep this list up to date when you add or remove one.
+
+| where | what it does | why |
+|---|---|---|
+| `rs2.client.loading.library.LibraryOverride`, `LibrarySource`, called from `Static14.loadNativeLibrary` | lets the application supply a native library in place of the one the client downloaded | loads the libraries in `natives`, which are the only ones that draw on current macOS |
+| `com.jagex.graphics.sw.SoftwareToolkitLifetime`, called from `Static226.create` and `SoftwareMemoryManager.free` | keeps software toolkits alive instead of releasing them on the collector's thread | the shipped macOS software toolkit ends the process when it is released on another thread |
+| `JavaScript.invokeOnWindow`, called from the three methods of `JavaScript` | reaches the browser window by reflection | the `JSObject` in current JDKs has no `getWindow`, so the direct call does not compile |
+
+Some code differs from what the decompiler wrote so that it computes what the jar did. None of it
+adds anything:
+
+- Sums of floating point numbers are grouped as the jar grouped them. The decompiler dropped the
+  parentheses, and floating point addition is not associative. `./gradlew :fidelity:verifyExpressions`
+  checks every method against the jar.
+- `Terrain.blendOverlay` reads the north edge split at `directionNorth & 3`. The jar negated the
+  direction twice, and the decompiler wrote that as a decrement.
+- `nativeid` on `oa` and `xa` is not `final`, as in the jar. As a `final` field given a constant,
+  every read of it was the constant.
+
 ## Noteworthy
 
 Below is a list of noteworthy parts of the client that have been refactored.

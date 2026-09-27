@@ -89,6 +89,12 @@ grep -rlw <name> --include=*.java runescape/src/main/java
 Rename only when every reference is a file you are already changing. Names are recovered from the leaks described in the
 README, so prefer a canonical Jagex name over an invented one, and leave a name obfuscated rather than guess at it.
 
+### Code that is not in the jar is listed
+
+Any code added to `runescape` that is not in the jar says so in its Javadoc, or in a comment
+where it is called, and is listed under "Changes from the original client" in `README.md`.
+Keep the list and the code in step.
+
 ### Existing bugs are preserved, never fixed
 
 This client is a record of what Jagex shipped in 2011. A bug in the original code is part of that

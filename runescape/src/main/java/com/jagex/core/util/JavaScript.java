@@ -1,6 +1,5 @@
 package com.jagex.core.util;
 
-import netscape.javascript.JSObject;
 import org.openrs2.deob.annotation.OriginalArg;
 import org.openrs2.deob.annotation.OriginalMember;
 
@@ -11,29 +10,31 @@ public final class JavaScript {
 
     @OriginalMember(owner = "client!ac", name = "a", descriptor = "(BLjava/applet/Applet;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/Object;")
     public static Object call(@OriginalArg(1) Applet applet, @OriginalArg(2) String arg1, @OriginalArg(3) Object[] arg2) throws Throwable {
-        // todo: use reflection so LiveConnect can still function in a compatible JVM
-        // return JSObject.getWindow(applet).call(arg1, arg2);
+        // Not part of the original client, which called JSObject.getWindow(applet).call(arg1, arg2) here.
         return invokeOnWindow(applet, "call", new Class<?>[] { String.class, Object[].class }, new Object[] { arg1, arg2 });
     }
 
     @OriginalMember(owner = "client!ac", name = "a", descriptor = "(Ljava/lang/String;Ljava/applet/Applet;B)Ljava/lang/Object;")
     public static Object call(@OriginalArg(0) String arg0, @OriginalArg(1) Applet applet) throws Throwable {
-        // todo: use reflection so LiveConnect can still function in a compatible JVM
-        // return JSObject.getWindow(applet).call(arg0, (Object[]) null);
+        // Not part of the original client, which called JSObject.getWindow(applet).call(arg0, (Object[]) null) here.
         return invokeOnWindow(applet, "call", new Class<?>[] { String.class, Object[].class }, new Object[] { arg0, null });
     }
 
     @OriginalMember(owner = "client!ac", name = "a", descriptor = "(Ljava/lang/String;Ljava/applet/Applet;I)V")
     public static void eval(@OriginalArg(0) String string, @OriginalArg(1) Applet applet) throws Throwable {
-        // todo: use reflection so LiveConnect can still function in a compatible JVM
-        // JSObject.getWindow(applet).eval(string);
+        // Not part of the original client, which called JSObject.getWindow(applet).eval(string) here.
         invokeOnWindow(applet, "eval", new Class<?>[] { String.class }, new Object[] { string });
     }
 
     /**
-     * The browser window is reached reflectively because {@code JSObject.getWindow} is only present
-     * in a JVM hosting the client as an applet. A direct call stops the client building anywhere
-     * else.
+     * Calls a method of the browser window, which the client reaches through
+     * {@code JSObject.getWindow}.
+     *
+     * The window is reached by reflection because the {@code JSObject} in current JDKs has no
+     * {@code getWindow}, and it takes the place of the one the client was built against. A direct
+     * call does not compile.
+     *
+     * This method is not part of the original client.
      */
     private static Object invokeOnWindow(Applet applet, String name, Class<?>[] types, Object[] args) throws Throwable {
         Class<?> clazz = Class.forName("netscape.javascript.JSObject");
