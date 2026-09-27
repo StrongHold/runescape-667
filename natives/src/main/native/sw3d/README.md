@@ -25,7 +25,7 @@ the pictures pixel by pixel. Run:
     ./gradlew :natives:verifyNatives
 
 It answers for the pictures, for the answers the probes ask that never reach a picture, and for
-the lifetime of a handle, the skeleton, the memory library and the sprite lift. All eighty
+the lifetime of a handle, the skeleton, the memory library and the sprite lift. All eighty one
 scenes are identical to the shipped toolkit, pixel for pixel, and so are 64479 matrix answers,
 1185 projection answers and 431 model answers.
 
@@ -52,9 +52,8 @@ reach, build the toolkit with coverage and run them:
 profile under `natives/build/coverage/raw`. Delete that directory to start again. The report is
 written as HTML under `natives/build/coverage/html`.
 
-The checks reach 83% of the lines. A client that was played for two and a half hours with
-coverage reached 68%. Every line that the client reached and that can change a pixel is also
-reached by a scene. The lines that only the client reaches free memory, ask how much memory is in
+The checks reach 82% of the lines. A client played with coverage reached 66%. Every line that
+the client reached and that can change a pixel is also reached by a scene. The lines that only the client reaches free memory, ask how much memory is in
 use, resize the window, or find what is under the mouse.
 
 ## What is not finished

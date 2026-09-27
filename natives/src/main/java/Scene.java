@@ -127,7 +127,8 @@ public sealed interface Scene {
         new SlidingTextures(),
         new LeansTowardsTheFloor(),
         new LinesDrawnBackwards(),
-        new NotBrightened()
+        new NotBrightened(),
+        new MeetingModels()
     );
 
     /**
@@ -3397,6 +3398,59 @@ public sealed interface Scene {
                 model.render(props.matrix(), null, 1);
             }
             System.arraycopy(held, 0, mesh.faceTexture, 0, held.length);
+        }
+    }
+
+    /**
+     * Whole models told that they meet another, where many vertices meet at once.
+     *
+     * The first pair stands in one place, so every vertex meets its twin. It is told so twice,
+     * once marked and once not. The last pair stands part of the way apart, so most vertices are
+     * above, below or beside the other model and are passed over.
+     */
+    record MeetingModels() implements Scene {
+
+        private static final int MAY_SHARE_LIGHT = 0x10000;
+        private static final int FEATURES = 64;
+        private static final int AMBIENT = 64;
+        private static final int CONTRAST = 768;
+
+        private static final int[][] APART = {{0, 0, 0}, {0, 0, 0}, {60, -40, 30}};
+        private static final boolean[] MARKED = {true, false, true};
+
+        @Override
+        public void draw(Toolkit toolkit, Props props) {
+            toolkit.DA(WIDTH / 2, HEIGHT / 2, 512, 512);
+            toolkit.f(NEAR, Integer.MAX_VALUE);
+
+            var mesh = props.mesh();
+            var held = mesh.shadingType;
+
+            for (var pair = 0; pair < APART.length; pair++) {
+                if (pair == APART.length - 1) {
+                    mesh.shadingType = new byte[mesh.faceCount];
+                    for (var face = 0; face < mesh.faceCount; face += 2) {
+                        mesh.shadingType[face] = 1;
+                    }
+                }
+
+                var first = toolkit.createModel(mesh, MAY_SHARE_LIGHT, FEATURES, AMBIENT,
+                    CONTRAST);
+                var second = toolkit.createModel(mesh, MAY_SHARE_LIGHT, FEATURES, AMBIENT,
+                    CONTRAST);
+                mesh.shadingType = held;
+                var away = APART[pair];
+                first.method7481(second, away[0], away[1], away[2], MARKED[pair]);
+
+                var across = (pair - 1) * SPREAD * 2 / 3;
+                props.matrix().makeRotationZ(0);
+                props.matrix().applyTranslation(across, 0, DEPTH * 2);
+                first.render(props.matrix(), null, 1);
+
+                props.matrix().makeRotationZ(0);
+                props.matrix().applyTranslation(across + away[0], away[1] + 140, DEPTH * 2 + away[2]);
+                second.render(props.matrix(), null, 1);
+            }
         }
     }
 }
