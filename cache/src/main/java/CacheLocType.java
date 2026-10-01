@@ -107,60 +107,9 @@ public final class CacheLocType {
 
     /**
      * One file out of a group, where a group holds more than one.
-     *
-     * The sizes of the files are written after them rather than before, each as how much longer
-     * it is than the one before, and how many times over that is written is the very last byte.
      */
     static byte[] fileFrom(byte[] data, Js5Index index, int group, int wanted) {
-        var count = index.fileCounts[group];
-        var ids = index.fileIds[group];
-
-        if (count <= 1) {
-            return (ids == null ? 0 : ids[0]) == wanted ? data : null;
-        }
-
-        var at = data.length - 1;
-        var blocks = data[at] & 0xFF;
-        at -= blocks * count * 4;
-
-        var sizes = new int[count];
-        var packet = new Packet(data);
-        packet.pos = at;
-
-        for (var block = 0; block < blocks; block++) {
-            var size = 0;
-            for (var file = 0; file < count; file++) {
-                size += packet.g4();
-                sizes[file] += size;
-            }
-        }
-
-        var held = new byte[count][];
-        for (var file = 0; file < count; file++) {
-            held[file] = new byte[sizes[file]];
-        }
-
-        packet.pos = at;
-        var into = new int[count];
-        var from = 0;
-
-        for (var block = 0; block < blocks; block++) {
-            var size = 0;
-            for (var file = 0; file < count; file++) {
-                size += packet.g4();
-                System.arraycopy(data, from, held[file], into[file], size);
-                into[file] += size;
-                from += size;
-            }
-        }
-
-        for (var file = 0; file < count; file++) {
-            if ((ids == null ? file : ids[file]) == wanted) {
-                return held[file];
-            }
-        }
-
-        return null;
+        return Cache.split(data, index, group).get(wanted);
     }
 
     static FileSystem_Client store(File cache, int archive) throws Exception {

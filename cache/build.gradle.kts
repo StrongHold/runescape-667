@@ -44,3 +44,9 @@ tasks.register<JavaExec>("listLocations") {
     environment("SW3D_LOCATION_KEYS",
         providers.environmentVariable("SW3D_LOCATION_KEYS").getOrElse(""))
 }
+
+tasks.register<JavaExec>("censusTypes") {
+    description = "Lists every opcode each exported config type holds in the cache, and what it sets."
+    mainClass = "CacheCensus"
+    classpath = sourceSets["main"].runtimeClasspath
+}
