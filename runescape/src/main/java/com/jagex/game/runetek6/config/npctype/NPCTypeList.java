@@ -98,15 +98,15 @@ public final class NPCTypeList {
 
     @OriginalMember(owner = "client!ql", name = "a", descriptor = "(II)V")
     public void cacheClean(@OriginalArg(0) int maxAge) {
-        @Pc(2) ReferenceCache local2 = this.recentUse;
+        @Pc(2) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.clean(maxAge);
         }
-        local2 = this.models;
+        lock = this.models;
         synchronized (this.models) {
             this.models.clean(maxAge);
         }
-        local2 = this.headModels;
+        lock = this.headModels;
         synchronized (this.headModels) {
             this.headModels.clean(maxAge);
         }
@@ -114,15 +114,15 @@ public final class NPCTypeList {
 
     @OriginalMember(owner = "client!ql", name = "b", descriptor = "(B)V")
     public void cacheReset() {
-        @Pc(2) ReferenceCache local2 = this.recentUse;
+        @Pc(2) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.reset();
         }
-        local2 = this.models;
+        lock = this.models;
         synchronized (this.models) {
             this.models.reset();
         }
-        local2 = this.headModels;
+        lock = this.headModels;
         synchronized (this.headModels) {
             this.headModels.reset();
         }
@@ -130,15 +130,15 @@ public final class NPCTypeList {
 
     @OriginalMember(owner = "client!ql", name = "a", descriptor = "(B)V")
     public void cacheRemoveSoftReferences() {
-        @Pc(2) ReferenceCache local2 = this.recentUse;
+        @Pc(2) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.removeSoftReferences();
         }
-        local2 = this.models;
+        lock = this.models;
         synchronized (this.models) {
             this.models.removeSoftReferences();
         }
-        local2 = this.headModels;
+        lock = this.headModels;
         synchronized (this.headModels) {
             this.headModels.removeSoftReferences();
         }
@@ -154,11 +154,11 @@ public final class NPCTypeList {
 
     @OriginalMember(owner = "client!ql", name = "c", descriptor = "(B)V")
     public void modelCacheReset() {
-        @Pc(2) ReferenceCache local2 = this.models;
+        @Pc(2) ReferenceCache lock = this.models;
         synchronized (this.models) {
             this.models.reset();
         }
-        local2 = this.headModels;
+        lock = this.headModels;
         synchronized (this.headModels) {
             this.headModels.reset();
         }
@@ -166,7 +166,7 @@ public final class NPCTypeList {
 
     @OriginalMember(owner = "client!ql", name = "a", descriptor = "(IB)Lclient!o;")
     public NPCType list(@OriginalArg(0) int id) {
-        @Pc(14) ReferenceCache local14 = this.recentUse;
+        @Pc(14) ReferenceCache lookupLock = this.recentUse;
         @Pc(24) NPCType type;
         synchronized (this.recentUse) {
             type = (NPCType) this.recentUse.get(id);
@@ -175,7 +175,7 @@ public final class NPCTypeList {
             return type;
         }
 
-        @Pc(38) js5 local38 = this.configClient;
+        @Pc(38) js5 configLock = this.configClient;
         @Pc(51) byte[] data;
         synchronized (this.configClient) {
             data = this.configClient.getfile(fileId(id), groupId(id));
@@ -190,7 +190,7 @@ public final class NPCTypeList {
         }
         type.postDecode();
 
-        @Pc(90) ReferenceCache local90 = this.recentUse;
+        @Pc(90) ReferenceCache storeLock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.put(type, id);
             return type;
@@ -198,14 +198,14 @@ public final class NPCTypeList {
     }
 
     @OriginalMember(owner = "client!ql", name = "a", descriptor = "(ZI)V")
-    public void setFeatureMask(@OriginalArg(1) int arg0) {
-        this.featureMask = arg0;
+    public void setFeatureMask(@OriginalArg(1) int featureMask) {
+        this.featureMask = featureMask;
 
-        @Pc(9) ReferenceCache local9 = this.models;
+        @Pc(9) ReferenceCache lock = this.models;
         synchronized (this.models) {
             this.models.reset();
         }
-        local9 = this.headModels;
+        lock = this.headModels;
         synchronized (this.headModels) {
             this.headModels.reset();
         }

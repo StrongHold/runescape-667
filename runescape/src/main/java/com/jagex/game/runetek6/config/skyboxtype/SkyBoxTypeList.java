@@ -44,7 +44,7 @@ public final class SkyBoxTypeList {
 
     @OriginalMember(owner = "client!qk", name = "b", descriptor = "(II)V")
     public void cacheClean(@OriginalArg(0) int maxAge) {
-        @Pc(13) ReferenceCache local13 = this.recentUse;
+        @Pc(13) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.clean(maxAge);
         }
@@ -52,7 +52,7 @@ public final class SkyBoxTypeList {
 
     @OriginalMember(owner = "client!qk", name = "a", descriptor = "(I)V")
     public void cacheRemoveSoftReferences() {
-        @Pc(10) ReferenceCache local10 = this.recentUse;
+        @Pc(10) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.removeSoftReferences();
         }
@@ -60,7 +60,7 @@ public final class SkyBoxTypeList {
 
     @OriginalMember(owner = "client!qk", name = "a", descriptor = "(II)Lclient!ema;")
     public SkyBoxType list(@OriginalArg(0) int id) {
-        @Pc(6) ReferenceCache local6 = this.recentUse;
+        @Pc(6) ReferenceCache lookupLock = this.recentUse;
         @Pc(22) SkyBoxType type;
         synchronized (this.recentUse) {
             type = (SkyBoxType) this.recentUse.get(id);
@@ -69,7 +69,7 @@ public final class SkyBoxTypeList {
             return type;
         }
 
-        @Pc(36) js5 local36 = this.configClient;
+        @Pc(36) js5 configLock = this.configClient;
         @Pc(45) byte[] data;
         synchronized (this.configClient) {
             data = this.configClient.getfile(id, 29);
@@ -80,7 +80,7 @@ public final class SkyBoxTypeList {
             type.decode(new Packet(data));
         }
 
-        @Pc(69) ReferenceCache local69 = this.recentUse;
+        @Pc(69) ReferenceCache storeLock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.put(type, id);
             return type;
@@ -89,7 +89,7 @@ public final class SkyBoxTypeList {
 
     @OriginalMember(owner = "client!qk", name = "c", descriptor = "(I)V")
     public void cacheReset() {
-        @Pc(2) ReferenceCache local2 = this.recentUse;
+        @Pc(2) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.reset();
         }
@@ -105,10 +105,10 @@ public final class SkyBoxTypeList {
 
             for (@Pc(28) int i = 0; i < spheres.length; i++) {
                 @Pc(37) SkyBoxSphereType sphereType = typeList.list(type.sphereIds[i]);
-                spheres[i] = new SkyBoxSphere(sphereType.anInt129, sphereType.anInt124, sphereType.anInt125, sphereType.anInt130, sphereType.anInt132, sphereType.anInt123, sphereType.anInt131, sphereType.aBoolean10, sphereType.anInt128, sphereType.anInt133, sphereType.anInt126);
+                spheres[i] = new SkyBoxSphere(sphereType.renderType, sphereType.contentId, sphereType.x, sphereType.y, sphereType.z, sphereType.size, sphereType.colour, sphereType.infinite, sphereType.rotateX, sphereType.rotateY, sphereType.rotateZ);
             }
         }
 
-        return new SkyBox(type.texture, spheres, type.anInt2624, sphereOffsetX, sphereOffsetY, sphereOffsetZ, type.anInt2625, type.anInt2621);
+        return new SkyBox(type.texture, spheres, type.lightSphereIndex, sphereOffsetX, sphereOffsetY, sphereOffsetZ, type.tileMode, type.meshId);
     }
 }

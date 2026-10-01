@@ -205,7 +205,7 @@ public final class EntitySceneBuilder {
                     }
                     if (npc.type.renderHighPriority) {
                         priority += 1024;
-                    } else if (!npc.type.aBoolean503) {
+                    } else if (!npc.type.renderLowPriority) {
                         priority += 256;
                     }
                     npc.drawPriority = priority + 1;

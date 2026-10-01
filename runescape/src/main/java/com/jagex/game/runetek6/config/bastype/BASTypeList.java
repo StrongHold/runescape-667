@@ -45,7 +45,7 @@ public final class BASTypeList {
 
     @OriginalMember(owner = "client!qp", name = "b", descriptor = "(B)V")
     public void cacheReset() {
-        @Pc(2) ReferenceCache local2 = this.recentUse;
+        @Pc(2) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.reset();
         }
@@ -53,7 +53,7 @@ public final class BASTypeList {
 
     @OriginalMember(owner = "client!qp", name = "a", descriptor = "(IZ)V")
     public void cacheClean(@OriginalArg(0) int maxAge) {
-        @Pc(14) ReferenceCache local14 = this.recentUse;
+        @Pc(14) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.clean(maxAge);
         }
@@ -61,7 +61,7 @@ public final class BASTypeList {
 
     @OriginalMember(owner = "client!qp", name = "a", descriptor = "(I)V")
     public void cacheRemoveSoftReferences() {
-        @Pc(2) ReferenceCache local2 = this.recentUse;
+        @Pc(2) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.removeSoftReferences();
         }
@@ -69,7 +69,7 @@ public final class BASTypeList {
 
     @OriginalMember(owner = "client!qp", name = "a", descriptor = "(BI)Lclient!pda;")
     public BASType list(@OriginalArg(1) int id) {
-        @Pc(6) ReferenceCache local6 = this.recentUse;
+        @Pc(6) ReferenceCache lookupLock = this.recentUse;
         @Pc(16) BASType type;
         synchronized (this.recentUse) {
             type = (BASType) this.recentUse.get(id);
@@ -78,7 +78,7 @@ public final class BASTypeList {
             return type;
         }
 
-        @Pc(30) js5 local30 = this.configClient;
+        @Pc(30) js5 configLock = this.configClient;
         @Pc(39) byte[] data;
         synchronized (this.configClient) {
             data = this.configClient.getfile(id, Js5ConfigGroup.BASTYPE);
@@ -90,7 +90,7 @@ public final class BASTypeList {
             type.decode(new Packet(data));
         }
 
-        @Pc(66) ReferenceCache local66 = this.recentUse;
+        @Pc(66) ReferenceCache storeLock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.put(type, id);
             return type;

@@ -44,7 +44,7 @@ public final class IDKTypeList {
 
     @OriginalMember(owner = "client!kr", name = "d", descriptor = "(I)V")
     public void cacheRemoveSoftReferences() {
-        @Pc(6) ReferenceCache local6 = this.recentUse;
+        @Pc(6) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.removeSoftReferences();
         }
@@ -52,7 +52,7 @@ public final class IDKTypeList {
 
     @OriginalMember(owner = "client!kr", name = "a", descriptor = "(IB)Lclient!pka;")
     public IDKType list(@OriginalArg(0) int id) {
-        @Pc(6) ReferenceCache local6 = this.recentUse;
+        @Pc(6) ReferenceCache lookupLock = this.recentUse;
         @Pc(24) IDKType type;
         synchronized (this.recentUse) {
             type = (IDKType) this.recentUse.get(id);
@@ -61,7 +61,7 @@ public final class IDKTypeList {
             return type;
         }
 
-        @Pc(38) js5 local38 = this.configClient;
+        @Pc(38) js5 configLock = this.configClient;
         @Pc(47) byte[] data;
         synchronized (this.configClient) {
             data = this.configClient.getfile(id, Js5ConfigGroup.IDKTYPE);
@@ -73,7 +73,7 @@ public final class IDKTypeList {
             type.decode(new Packet(data));
         }
 
-        @Pc(74) ReferenceCache local74 = this.recentUse;
+        @Pc(74) ReferenceCache storeLock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.put(type, id);
             return type;
@@ -82,7 +82,7 @@ public final class IDKTypeList {
 
     @OriginalMember(owner = "client!kr", name = "a", descriptor = "(I)V")
     public void cacheReset() {
-        @Pc(2) ReferenceCache local2 = this.recentUse;
+        @Pc(2) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.reset();
         }
@@ -90,7 +90,7 @@ public final class IDKTypeList {
 
     @OriginalMember(owner = "client!kr", name = "a", descriptor = "(II)V")
     public void cacheClean(@OriginalArg(0) int maxAge) {
-        @Pc(7) ReferenceCache local7 = this.recentUse;
+        @Pc(7) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.clean(maxAge);
         }

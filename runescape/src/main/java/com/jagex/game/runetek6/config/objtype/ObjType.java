@@ -301,23 +301,23 @@ public final class ObjType {
     }
 
     @OriginalMember(owner = "client!vfa", name = "a", descriptor = "(Lclient!vfa;ILclient!vfa;)V")
-    public void genCert(@OriginalArg(0) ObjType arg0, @OriginalArg(2) ObjType arg1) {
-        this.yof2d = arg0.yof2d;
-        this.recol_s = arg0.recol_s;
-        this.cost = arg1.cost;
-        this.name = arg1.name;
-        this.retex_d = arg0.retex_d;
-        this.yan2d = arg0.yan2d;
-        this.zan2d = arg0.zan2d;
-        this.retex_s = arg0.retex_s;
-        this.mesh = arg0.mesh;
-        this.zoom2d = arg0.zoom2d;
-        this.recol_d_palette = arg0.recol_d_palette;
+    public void genCert(@OriginalArg(0) ObjType template, @OriginalArg(2) ObjType original) {
+        this.yof2d = template.yof2d;
+        this.recol_s = template.recol_s;
+        this.cost = original.cost;
+        this.name = original.name;
+        this.retex_d = template.retex_d;
+        this.yan2d = template.yan2d;
+        this.zan2d = template.zan2d;
+        this.retex_s = template.retex_s;
+        this.mesh = template.mesh;
+        this.zoom2d = template.zoom2d;
+        this.recol_d_palette = template.recol_d_palette;
         this.stackable = 1;
-        this.xan2d = arg0.xan2d;
-        this.xof2d = arg0.xof2d;
-        this.members = arg1.members;
-        this.recol_d = arg0.recol_d;
+        this.xan2d = template.xan2d;
+        this.xof2d = template.xof2d;
+        this.members = original.members;
+        this.recol_d = template.recol_d;
     }
 
     @OriginalMember(owner = "client!vfa", name = "a", descriptor = "(III)I")
@@ -521,7 +521,7 @@ public final class ObjType {
     }
 
     @OriginalMember(owner = "client!vfa", name = "a", descriptor = "(ILclient!ha;IBIZLclient!ju;Lclient!ha;Lclient!da;I)[I")
-    public int[] sprite(@OriginalArg(0) int objNumMode, @OriginalArg(1) Toolkit toolkit, @OriginalArg(2) int invCount, @OriginalArg(4) int graphicShadow, @OriginalArg(5) boolean arg4, @OriginalArg(6) PlayerModel playerModel, @OriginalArg(7) Toolkit scratchToolkit, @OriginalArg(8) Font font, @OriginalArg(9) int outline) {
+    public int[] sprite(@OriginalArg(0) int objNumMode, @OriginalArg(1) Toolkit toolkit, @OriginalArg(2) int invCount, @OriginalArg(4) int graphicShadow, @OriginalArg(5) boolean zoomOut, @OriginalArg(6) PlayerModel playerModel, @OriginalArg(7) Toolkit scratchToolkit, @OriginalArg(8) Font font, @OriginalArg(9) int outline) {
         @Pc(14) Mesh mesh = Mesh.load(this.mesh, this.myList.meshes);
         if (mesh == null) {
             return null;
@@ -592,7 +592,7 @@ public final class ObjType {
         }
 
         @Pc(363) int zoom;
-        if (arg4) {
+        if (zoomOut) {
             zoom = (int) ((double) this.zoom2d * 1.5D) << 2;
         } else if (outline == 2) {
             zoom = (int) ((double) this.zoom2d * 1.04D) << 2;
@@ -819,8 +819,8 @@ public final class ObjType {
                 recol_d = customisation.recol_d;
             }
 
-            for (@Pc(156) int local156 = 0; local156 < this.recol_s.length; local156++) {
-                mesh.recolour(this.recol_s[local156], recol_d[local156]);
+            for (@Pc(156) int i = 0; i < this.recol_s.length; i++) {
+                mesh.recolour(this.recol_s[i], recol_d[i]);
             }
         }
 
@@ -832,8 +832,8 @@ public final class ObjType {
                 retex_d = customisation.retex_d;
             }
 
-            for (@Pc(156) int local156 = 0; local156 < this.retex_s.length; local156++) {
-                mesh.retexture(this.retex_s[local156], retex_d[local156]);
+            for (@Pc(156) int i = 0; i < this.retex_s.length; i++) {
+                mesh.retexture(this.retex_s[i], retex_d[i]);
             }
         }
 
@@ -886,13 +886,13 @@ public final class ObjType {
     }
 
     @OriginalMember(owner = "client!vfa", name = "c", descriptor = "(II)Ljava/lang/String;")
-    public String formatAmount(@OriginalArg(1) int arg0) {
-        if (arg0 < 100000) {
-            return "<col=ffff00>" + arg0 + "</col>";
-        } else if (arg0 < 10000000) {
-            return "<col=ffffff>" + arg0 / 1000 + LocalisedText.THOUSAND_SHORT.localise(this.myList.languageId) + "</col>";
+    public String formatAmount(@OriginalArg(1) int amount) {
+        if (amount < 100000) {
+            return "<col=ffff00>" + amount + "</col>";
+        } else if (amount < 10000000) {
+            return "<col=ffffff>" + amount / 1000 + LocalisedText.THOUSAND_SHORT.localise(this.myList.languageId) + "</col>";
         } else {
-            return "<col=00ff80>" + arg0 / 1000000 + LocalisedText.MILLION_SHORT.localise(this.myList.languageId) + "</col>";
+            return "<col=00ff80>" + amount / 1000000 + LocalisedText.MILLION_SHORT.localise(this.myList.languageId) + "</col>";
         }
     }
 
@@ -930,7 +930,7 @@ public final class ObjType {
             newFunctionMask = functionMask | animator.functionMask();
         }
 
-        @Pc(87) ReferenceCache local87 = this.myList.modelCache;
+        @Pc(87) ReferenceCache lookupLock = this.myList.modelCache;
         @Pc(104) Model model;
         synchronized (this.myList.modelCache) {
             model = (Model) this.myList.modelCache.get(this.myid | toolkit.index << 29);
@@ -999,7 +999,7 @@ public final class ObjType {
             }
 
             model.s(newFunctionMask);
-            @Pc(426) ReferenceCache local426 = this.myList.modelCache;
+            @Pc(426) ReferenceCache storeLock = this.myList.modelCache;
             synchronized (this.myList.modelCache) {
                 this.myList.modelCache.put(model, this.myid | toolkit.index << 29);
             }

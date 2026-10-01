@@ -94,7 +94,7 @@ public final class NPCType {
     public int size = 1;
 
     @OriginalMember(owner = "client!o", name = "L", descriptor = "I")
-    public int anInt6706 = -1;
+    public int quickPick = -1;
 
     @OriginalMember(owner = "client!o", name = "d", descriptor = "Z")
     public boolean crawl = true;
@@ -112,7 +112,7 @@ public final class NPCType {
     public int crawlSound = -1;
 
     @OriginalMember(owner = "client!o", name = "r", descriptor = "Z")
-    public boolean aBoolean503 = false;
+    public boolean renderLowPriority = false;
 
     @OriginalMember(owner = "client!o", name = "m", descriptor = "I")
     public int combatLevel = -1;
@@ -124,7 +124,7 @@ public final class NPCType {
     public boolean renderHighPriority = false;
 
     @OriginalMember(owner = "client!o", name = "w", descriptor = "B")
-    public byte aByte107 = -1;
+    public byte lowPriorityAttackOps = -1;
 
     @OriginalMember(owner = "client!o", name = "n", descriptor = "B")
     public byte movementCapabilities = 0;
@@ -234,11 +234,11 @@ public final class NPCType {
             this.models = new int[0];
         }
 
-        if (this.aByte107 == -1) {
+        if (this.lowPriorityAttackOps == -1) {
             if (this.typeList.game == ModeGame.RUNESCAPE) {
-                this.aByte107 = 1;
+                this.lowPriorityAttackOps = 1;
             } else {
-                this.aByte107 = 0;
+                this.lowPriorityAttackOps = 0;
             }
         }
     }
@@ -338,8 +338,8 @@ public final class NPCType {
             @Pc(12) int count = packet.g1();
             this.headModels = new int[count];
 
-            for (@Pc(18) int local18 = 0; local18 < count; local18++) {
-                this.headModels[local18] = packet.g2();
+            for (@Pc(18) int i = 0; i < count; i++) {
+                this.headModels[i] = packet.g2();
             }
         } else if (code == 93) {
             this.displayOnMiniMap = false;
@@ -465,7 +465,7 @@ public final class NPCType {
         } else if (code == 142) {
             this.mapElement = packet.g2();
         } else if (code == 143) {
-            this.aBoolean503 = true;
+            this.renderLowPriority = true;
         } else if (code >= 150 && code < 155) {
             this.op[code - 150] = packet.gjstr();
 
@@ -478,20 +478,20 @@ public final class NPCType {
             this.colourLightness = packet.g1b();
             this.colourScale = packet.g1b();
         } else if (code == 158) {
-            this.aByte107 = 1;
+            this.lowPriorityAttackOps = 1;
         } else if (code == 159) {
-            this.aByte107 = 0;
+            this.lowPriorityAttackOps = 0;
         } else if (code == 160) {
             @Pc(12) int count = packet.g1();
             this.quests = new int[count];
 
-            for (@Pc(18) int local18 = 0; local18 < count; local18++) {
-                this.quests[local18] = packet.g2();
+            for (@Pc(18) int i = 0; i < count; i++) {
+                this.quests[i] = packet.g2();
             }
         } else if (code == 162) {
             this.vorbis = true;
         } else if (code == 163) {
-            this.anInt6706 = packet.g1();
+            this.quickPick = packet.g1();
         } else if (code == 164) {
             this.soundRateMin = packet.g2();
             this.soundRateMax = packet.g2();
@@ -554,7 +554,7 @@ public final class NPCType {
             key |= customisation.id << 24;
         }
 
-        @Pc(84) ReferenceCache local84 = this.typeList.headModels;
+        @Pc(84) ReferenceCache lookupLock = this.typeList.headModels;
         @Pc(94) Model model;
         synchronized (this.typeList.headModels) {
             model = (Model) this.typeList.headModels.get(key);
@@ -578,7 +578,7 @@ public final class NPCType {
 
             @Pc(163) int[] modelIds = customisation == null || customisation.remodel_d == null ? this.headModels : customisation.remodel_d;
             @Pc(165) boolean notReady = false;
-            @Pc(169) js5 local169 = this.typeList.meshes;
+            @Pc(169) js5 meshLock = this.typeList.meshes;
             synchronized (this.typeList.meshes) {
                 for (@Pc(173) int i = 0; i < modelIds.length; i++) {
                     if (!this.typeList.meshes.requestdownload(0, modelIds[i])) {
@@ -592,7 +592,7 @@ public final class NPCType {
             }
 
             @Pc(215) Mesh[] msehes = new Mesh[modelIds.length];
-            @Pc(219) js5 local219 = this.typeList.meshes;
+            @Pc(219) js5 loadLock = this.typeList.meshes;
             synchronized (this.typeList.meshes) {
                 @Pc(223) int i = 0;
                 while (true) {
@@ -654,7 +654,7 @@ public final class NPCType {
 
             model.s(newFunctionMask);
 
-            @Pc(469) ReferenceCache local469 = this.typeList.headModels;
+            @Pc(469) ReferenceCache storeLock = this.typeList.headModels;
             synchronized (this.typeList.headModels) {
                 this.typeList.headModels.put(model, key);
             }
@@ -670,10 +670,10 @@ public final class NPCType {
     }
 
     @OriginalMember(owner = "client!o", name = "a", descriptor = "(Lclient!uk;Lclient!ha;Lclient!qp;BLclient!gu;I[ILclient!vk;Lclient!gu;I[Lclient!gu;)Lclient!ka;")
-    public Model getModel(@OriginalArg(0) VarDomain arg0, @OriginalArg(1) Toolkit toolkit, @OriginalArg(2) BASTypeList basTypeList, @OriginalArg(4) Animator actionAnimator, @OriginalArg(5) int arg4, @OriginalArg(6) int[] wornRotation, @OriginalArg(7) NPCTypeCustomisation customisation, @OriginalArg(8) Animator movementAnimator, @OriginalArg(9) int functionMask, @OriginalArg(10) Animator[] animators) {
+    public Model getModel(@OriginalArg(0) VarDomain varDomain, @OriginalArg(1) Toolkit toolkit, @OriginalArg(2) BASTypeList basTypeList, @OriginalArg(4) Animator actionAnimator, @OriginalArg(5) int yaw, @OriginalArg(6) int[] wornRotation, @OriginalArg(7) NPCTypeCustomisation customisation, @OriginalArg(8) Animator movementAnimator, @OriginalArg(9) int functionMask, @OriginalArg(10) Animator[] animators) {
         if (this.multinpcs != null) {
-            @Pc(11) NPCType type = this.getMultiNPC(arg0);
-            return type == null ? null : type.getModel(arg0, toolkit, basTypeList, actionAnimator, arg4, wornRotation, customisation, movementAnimator, functionMask, animators);
+            @Pc(11) NPCType type = this.getMultiNPC(varDomain);
+            return type == null ? null : type.getModel(varDomain, toolkit, basTypeList, actionAnimator, yaw, wornRotation, customisation, movementAnimator, functionMask, animators);
         }
 
         @Pc(32) int newFunctionMask = functionMask;
@@ -708,7 +708,7 @@ public final class NPCType {
             key |= customisation.id << 24;
         }
 
-        @Pc(129) ReferenceCache local129 = this.typeList.models;
+        @Pc(129) ReferenceCache lookupLock = this.typeList.models;
         @Pc(139) Model model;
         synchronized (this.typeList.models) {
             model = (Model) this.typeList.models.get(key);
@@ -737,10 +737,10 @@ public final class NPCType {
 
             @Pc(216) int[] modelIds = (customisation != null && customisation.remodel_d != null) ? customisation.remodel_d : this.models;
             @Pc(218) boolean notReady = false;
-            @Pc(222) js5 local222 = this.typeList.meshes;
+            @Pc(222) js5 meshLock = this.typeList.meshes;
             synchronized (this.typeList.meshes) {
-                for (@Pc(226) int local226 = 0; local226 < modelIds.length; local226++) {
-                    if (modelIds[local226] != -1 && !this.typeList.meshes.requestdownload(0, modelIds[local226])) {
+                for (@Pc(226) int i = 0; i < modelIds.length; i++) {
+                    if (modelIds[i] != -1 && !this.typeList.meshes.requestdownload(0, modelIds[i])) {
                         notReady = true;
                     }
                 }
@@ -753,7 +753,7 @@ public final class NPCType {
             @Pc(267) Mesh[] meshes = new Mesh[modelIds.length];
             for (@Pc(226) int i = 0; i < modelIds.length; i++) {
                 if (modelIds[i] != -1) {
-                    @Pc(280) js5 local280 = this.typeList.meshes;
+                    @Pc(280) js5 loadLock = this.typeList.meshes;
                     synchronized (this.typeList.meshes) {
                         meshes[i] = Mesh.load(modelIds[i], this.typeList.meshes);
                     }
@@ -843,7 +843,7 @@ public final class NPCType {
             }
 
             model.s(newFunctionMask);
-            @Pc(685) ReferenceCache local685 = this.typeList.models;
+            @Pc(685) ReferenceCache storeLock = this.typeList.models;
             synchronized (this.typeList.models) {
                 this.typeList.models.put(model, key);
             }
@@ -890,7 +890,7 @@ public final class NPCType {
         if (rotated) {
             for (@Pc(377) int i = 0; i < 12; i++) {
                 if (wornRotation[i] != -1) {
-                    @Pc(396) int angle = wornRotation[i] - arg4;
+                    @Pc(396) int angle = wornRotation[i] - yaw;
                     angle &= 0x3FFF;
                     @Pc(838) Matrix matrix = toolkit.createMatrix();
                     matrix.rotate(angle);

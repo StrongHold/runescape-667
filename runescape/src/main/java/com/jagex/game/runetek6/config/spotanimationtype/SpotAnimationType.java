@@ -76,7 +76,7 @@ public final class SpotAnimationType {
     }
 
     @OriginalMember(owner = "client!lia", name = "a", descriptor = "(BZILclient!gu;Lclient!s;BILclient!s;IILclient!ha;)Lclient!ka;")
-    public Model model(@OriginalArg(0) byte arg0, @OriginalArg(1) boolean hillChange, @OriginalArg(2) int z, @OriginalArg(3) Animator animator, @OriginalArg(4) Ground ceiling, @OriginalArg(6) int x, @OriginalArg(7) Ground floor, @OriginalArg(8) int functionMask, @OriginalArg(9) int y, @OriginalArg(10) Toolkit toolkit) {
+    public Model model(@OriginalArg(0) byte slot, @OriginalArg(1) boolean hillChange, @OriginalArg(2) int z, @OriginalArg(3) Animator animator, @OriginalArg(4) Ground ceiling, @OriginalArg(6) int x, @OriginalArg(7) Ground floor, @OriginalArg(8) int functionMask, @OriginalArg(9) int y, @OriginalArg(10) Toolkit toolkit) {
         @Pc(13) boolean hillChanged = hillChange & this.hillType != 0;
 
         @Pc(15) int newFunctionMask = functionMask;
@@ -93,7 +93,7 @@ public final class SpotAnimationType {
             newFunctionMask |= 0x5;
         }
 
-        @Pc(65) ReferenceCache local65 = this.myList.modelCache;
+        @Pc(65) ReferenceCache lookupLock = this.myList.modelCache;
         @Pc(85) Model model;
         synchronized (this.myList.modelCache) {
             model = (Model) this.myList.modelCache.get(this.id |= toolkit.index << 29);
@@ -135,13 +135,13 @@ public final class SpotAnimationType {
 
             model.s(newFunctionMask);
 
-            @Pc(232) ReferenceCache local232 = this.myList.modelCache;
+            @Pc(232) ReferenceCache storeLock = this.myList.modelCache;
             synchronized (this.myList.modelCache) {
                 this.myList.modelCache.put(model, this.id |= toolkit.index << 29);
             }
         }
 
-        @Pc(263) Model result = model.copy(arg0, newFunctionMask, true);
+        @Pc(263) Model result = model.copy(slot, newFunctionMask, true);
         if (animator != null) {
             animator.animate(result, 0);
         }
@@ -210,23 +210,23 @@ public final class SpotAnimationType {
             @Pc(132) int count = packet.g1();
             this.recol_d = new short[count];
             this.recol_s = new short[count];
-            for (@Pc(142) int local142 = 0; local142 < count; local142++) {
-                this.recol_s[local142] = (short) packet.g2();
-                this.recol_d[local142] = (short) packet.g2();
+            for (@Pc(142) int i = 0; i < count; i++) {
+                this.recol_s[i] = (short) packet.g2();
+                this.recol_d[i] = (short) packet.g2();
             }
         } else if (code == 41) {
             @Pc(132) int count = packet.g1();
             this.retex_d = new short[count];
             this.retex_s = new short[count];
-            for (@Pc(142) int local142 = 0; local142 < count; local142++) {
-                this.retex_s[local142] = (short) packet.g2();
-                this.retex_d[local142] = (short) packet.g2();
+            for (@Pc(142) int i = 0; i < count; i++) {
+                this.retex_s[i] = (short) packet.g2();
+                this.retex_d[i] = (short) packet.g2();
             }
         }
     }
 
     @OriginalMember(owner = "client!lia", name = "a", descriptor = "(Lclient!gu;BIBLclient!ha;)Lclient!ka;")
-    public Model model(@OriginalArg(0) Animator animator, @OriginalArg(1) byte arg1, @OriginalArg(2) int functionMask, @OriginalArg(4) Toolkit toolkit) {
-        return this.model(arg1, false, 0, animator, null, 0, null, functionMask, 0, toolkit);
+    public Model model(@OriginalArg(0) Animator animator, @OriginalArg(1) byte slot, @OriginalArg(2) int functionMask, @OriginalArg(4) Toolkit toolkit) {
+        return this.model(slot, false, 0, animator, null, 0, null, functionMask, 0, toolkit);
     }
 }

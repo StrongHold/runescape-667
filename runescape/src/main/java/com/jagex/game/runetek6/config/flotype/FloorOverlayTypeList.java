@@ -44,7 +44,7 @@ public final class FloorOverlayTypeList {
 
     @OriginalMember(owner = "client!ef", name = "a", descriptor = "(B)V")
     public void cacheReset() {
-        @Pc(2) ReferenceCache local2 = this.recentUse;
+        @Pc(2) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.reset();
         }
@@ -52,7 +52,7 @@ public final class FloorOverlayTypeList {
 
     @OriginalMember(owner = "client!ef", name = "b", descriptor = "(I)V")
     public void cacheRemoveSoftReferences() {
-        @Pc(9) ReferenceCache local9 = this.recentUse;
+        @Pc(9) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.removeSoftReferences();
         }
@@ -60,7 +60,7 @@ public final class FloorOverlayTypeList {
 
     @OriginalMember(owner = "client!ef", name = "a", descriptor = "(IB)Lclient!re;")
     public FloorOverlayType list(@OriginalArg(0) int id) {
-        @Pc(15) ReferenceCache local15 = this.recentUse;
+        @Pc(15) ReferenceCache lookupLock = this.recentUse;
         @Pc(25) FloorOverlayType type;
         synchronized (this.recentUse) {
             type = (FloorOverlayType) this.recentUse.get(id);
@@ -69,7 +69,7 @@ public final class FloorOverlayTypeList {
             return type;
         }
 
-        @Pc(39) js5 local39 = this.configClient;
+        @Pc(39) js5 configLock = this.configClient;
         @Pc(48) byte[] data;
         synchronized (this.configClient) {
             data = this.configClient.getfile(id, 4);
@@ -83,7 +83,7 @@ public final class FloorOverlayTypeList {
         }
         type.postDecode();
 
-        @Pc(81) ReferenceCache local81 = this.recentUse;
+        @Pc(81) ReferenceCache storeLock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.put(type, id);
             return type;
@@ -92,7 +92,7 @@ public final class FloorOverlayTypeList {
 
     @OriginalMember(owner = "client!ef", name = "a", descriptor = "(II)V")
     public void cacheClean(@OriginalArg(0) int maxAge) {
-        @Pc(2) ReferenceCache local2 = this.recentUse;
+        @Pc(2) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.clean(maxAge);
         }

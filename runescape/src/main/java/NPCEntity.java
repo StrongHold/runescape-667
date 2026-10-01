@@ -122,13 +122,13 @@ public final class NPCEntity extends PathingEntity {
                     if (this.type.pickSizeShift <= 0) {
                         label48:
                         {
-                            if (this.type.anInt6706 == -1) {
+                            if (this.type.quickPick == -1) {
                                 if (this.type.size == 1) {
                                     break label48;
                                 }
                                 var10000 = false;
                             } else {
-                                if (this.type.anInt6706 == 1) {
+                                if (this.type.quickPick == 1) {
                                     break label48;
                                 }
                                 var10000 = false;

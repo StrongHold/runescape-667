@@ -50,16 +50,16 @@ public final class IDKType {
             this.recol_d = new short[count];
             this.recol_s = new short[count];
 
-            for (@Pc(69) int local69 = 0; local69 < count; local69++) {
-                this.recol_s[local69] = (short) packet.g2();
-                this.recol_d[local69] = (short) packet.g2();
+            for (@Pc(69) int i = 0; i < count; i++) {
+                this.recol_s[i] = (short) packet.g2();
+                this.recol_d[i] = (short) packet.g2();
             }
         } else if (code == 41) {
-            @Pc(59) int local59 = packet.g1();
-            this.retex_d = new short[local59];
-            this.retex_s = new short[local59];
+            @Pc(59) int count = packet.g1();
+            this.retex_d = new short[count];
+            this.retex_s = new short[count];
 
-            for (@Pc(69) int i = 0; i < local59; i++) {
+            for (@Pc(69) int i = 0; i < count; i++) {
                 this.retex_s[i] = (short) packet.g2();
                 this.retex_d[i] = (short) packet.g2();
             }
@@ -85,7 +85,7 @@ public final class IDKType {
         @Pc(8) Mesh[] meshes = new Mesh[5];
         @Pc(10) int count = 0;
 
-        @Pc(22) js5 local22 = this.typeList.meshes;
+        @Pc(22) js5 lock = this.typeList.meshes;
         synchronized (this.typeList.meshes) {
             for (@Pc(26) int i = 0; i < 5; i++) {
                 if (this.headMeshes[i] != -1) {
@@ -118,7 +118,7 @@ public final class IDKType {
     @OriginalMember(owner = "client!pka", name = "a", descriptor = "(Z)Z")
     public boolean isHeadLoaded() {
         @Pc(7) boolean loaded = true;
-        @Pc(11) js5 local11 = this.typeList.meshes;
+        @Pc(11) js5 lock = this.typeList.meshes;
         synchronized (this.typeList.meshes) {
             for (@Pc(15) int i = 0; i < 5; i++) {
                 if (this.headMeshes[i] != -1 && !this.typeList.meshes.requestdownload(0, this.headMeshes[i])) {
@@ -136,7 +136,7 @@ public final class IDKType {
         }
 
         @Pc(11) boolean loaded = true;
-        @Pc(15) js5 local15 = this.typeList.meshes;
+        @Pc(15) js5 lock = this.typeList.meshes;
         synchronized (this.typeList.meshes) {
             for (@Pc(19) int i = 0; i < this.meshes.length; i++) {
                 if (!this.typeList.meshes.requestdownload(0, this.meshes[i])) {
@@ -154,7 +154,7 @@ public final class IDKType {
         }
 
         @Pc(14) Mesh[] parts = new Mesh[this.meshes.length];
-        @Pc(18) js5 local18 = this.typeList.meshes;
+        @Pc(18) js5 lock = this.typeList.meshes;
         synchronized (typeList.meshes) {
             for (@Pc(22) int i = 0; i < this.meshes.length; i++) {
                 parts[i] = Mesh.load(this.meshes[i], this.typeList.meshes);

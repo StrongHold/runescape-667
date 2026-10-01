@@ -126,24 +126,24 @@ public final class ObjTypeList {
 
     @OriginalMember(owner = "client!es", name = "b", descriptor = "(B)V")
     public void cacheReset() {
-        @Pc(6) ReferenceCache local6 = this.recentUse;
+        @Pc(6) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.reset();
         }
 
-        local6 = this.modelCache;
+        lock = this.modelCache;
         synchronized (this.modelCache) {
             this.modelCache.reset();
         }
 
-        @Pc(44) KeyedReferenceCache local44 = this.spriteCache;
+        @Pc(44) KeyedReferenceCache spriteLock = this.spriteCache;
         synchronized (this.spriteCache) {
             this.spriteCache.reset();
         }
     }
 
     @OriginalMember(owner = "client!es", name = "a", descriptor = "(ILclient!ha;Lclient!ha;Lclient!ju;ZIIZILclient!da;II)Lclient!st;")
-    public Sprite sprite(@OriginalArg(0) int outline, @OriginalArg(1) Toolkit scratchToolkit, @OriginalArg(2) Toolkit realToolkit, @OriginalArg(3) PlayerModel playerModel, @OriginalArg(4) boolean temporary, @OriginalArg(5) int graphicShadow, @OriginalArg(6) int invCount, @OriginalArg(7) boolean arg7, @OriginalArg(8) int objNumMode, @OriginalArg(9) Font font, @OriginalArg(10) int objId) {
+    public Sprite sprite(@OriginalArg(0) int outline, @OriginalArg(1) Toolkit scratchToolkit, @OriginalArg(2) Toolkit realToolkit, @OriginalArg(3) PlayerModel playerModel, @OriginalArg(4) boolean temporary, @OriginalArg(5) int graphicShadow, @OriginalArg(6) int invCount, @OriginalArg(7) boolean zoomOut, @OriginalArg(8) int objNumMode, @OriginalArg(9) Font font, @OriginalArg(10) int objId) {
         @Pc(24) Sprite cachedSprite = this.getCachedSprite(playerModel, realToolkit, objNumMode, objId, outline, invCount, graphicShadow);
         if (cachedSprite != null) {
             return cachedSprite;
@@ -163,7 +163,7 @@ public final class ObjTypeList {
             }
         }
 
-        @Pc(101) int[] image = type.sprite(objNumMode, realToolkit, invCount, graphicShadow, arg7, playerModel, scratchToolkit, font, outline);
+        @Pc(101) int[] image = type.sprite(objNumMode, realToolkit, invCount, graphicShadow, zoomOut, playerModel, scratchToolkit, font, outline);
         if (image == null) {
             return null;
         }
@@ -192,17 +192,17 @@ public final class ObjTypeList {
 
     @OriginalMember(owner = "client!es", name = "c", descriptor = "(II)V")
     public void cacheClean(int maxAge) {
-        @Pc(14) ReferenceCache local14 = this.recentUse;
+        @Pc(14) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.clean(maxAge);
         }
 
-        local14 = this.modelCache;
+        lock = this.modelCache;
         synchronized (this.modelCache) {
             this.modelCache.clean(maxAge);
         }
 
-        @Pc(48) KeyedReferenceCache local48 = this.spriteCache;
+        @Pc(48) KeyedReferenceCache spriteLock = this.spriteCache;
         synchronized (this.spriteCache) {
             this.spriteCache.clean(maxAge);
         }
@@ -210,17 +210,17 @@ public final class ObjTypeList {
 
     @OriginalMember(owner = "client!es", name = "a", descriptor = "(B)V")
     public void cacheRemoveSoftReferences() {
-        @Pc(6) ReferenceCache local6 = this.recentUse;
+        @Pc(6) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.removeSoftReferences();
         }
 
-        local6 = this.modelCache;
+        lock = this.modelCache;
         synchronized (this.modelCache) {
             this.modelCache.removeSoftReferences();
         }
 
-        @Pc(44) KeyedReferenceCache local44 = this.spriteCache;
+        @Pc(44) KeyedReferenceCache spriteLock = this.spriteCache;
         synchronized (this.spriteCache) {
             this.spriteCache.removeSoftReferences();
         }
@@ -230,7 +230,7 @@ public final class ObjTypeList {
     public void setFeatureMask(@OriginalArg(0) int featureMask) {
         this.featureMask = featureMask;
 
-        @Pc(17) ReferenceCache local17 = this.modelCache;
+        @Pc(17) ReferenceCache lock = this.modelCache;
         synchronized (this.modelCache) {
             this.modelCache.reset();
         }
@@ -238,7 +238,7 @@ public final class ObjTypeList {
 
     @OriginalMember(owner = "client!es", name = "a", descriptor = "(I)V")
     public void modelCacheReset() {
-        @Pc(2) ReferenceCache local2 = this.modelCache;
+        @Pc(2) ReferenceCache lock = this.modelCache;
         synchronized (this.modelCache) {
             this.modelCache.reset();
         }
@@ -258,7 +258,7 @@ public final class ObjTypeList {
 
     @OriginalMember(owner = "client!es", name = "c", descriptor = "(I)V")
     public void spriteCacheReset() {
-        @Pc(6) KeyedReferenceCache local6 = this.spriteCache;
+        @Pc(6) KeyedReferenceCache lock = this.spriteCache;
         synchronized (this.spriteCache) {
             this.spriteCache.reset();
         }
@@ -274,7 +274,7 @@ public final class ObjTypeList {
 
     @OriginalMember(owner = "client!es", name = "a", descriptor = "(II)Lclient!vfa;")
     public ObjType list(@OriginalArg(0) int id) {
-        @Pc(14) ReferenceCache local14 = this.recentUse;
+        @Pc(14) ReferenceCache lookupLock = this.recentUse;
         @Pc(26) ObjType type;
 
         synchronized (this.recentUse) {
@@ -284,7 +284,7 @@ public final class ObjTypeList {
             return type;
         }
 
-        @Pc(40) js5 local40 = this.configClient;
+        @Pc(40) js5 configLock = this.configClient;
         @Pc(53) byte[] data;
         synchronized (this.configClient) {
             data = this.configClient.getfile(fileId(id), groupId(id));
@@ -339,7 +339,7 @@ public final class ObjTypeList {
             }
         }
 
-        @Pc(238) ReferenceCache local238 = this.recentUse;
+        @Pc(238) ReferenceCache storeLock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.put(type, id);
             return type;

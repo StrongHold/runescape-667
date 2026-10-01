@@ -34,15 +34,15 @@ public final class LightType {
     }
 
     @OriginalMember(owner = "client!vt", name = "a", descriptor = "(ILclient!ge;B)V")
-    public void decode(@OriginalArg(0) int code, @OriginalArg(1) Packet arg1) {
+    public void decode(@OriginalArg(0) int code, @OriginalArg(1) Packet packet) {
         if (code == 1) {
-            this.pattern = arg1.g1();
+            this.pattern = packet.g1();
         } else if (code == 2) {
-            this.frequency = arg1.g2();
+            this.frequency = packet.g2();
         } else if (code == 3) {
-            this.amplitude = arg1.g2();
+            this.amplitude = packet.g2();
         } else if (code == 4) {
-            this.ambient = arg1.g2s();
+            this.ambient = packet.g2s();
         }
     }
 }

@@ -61,7 +61,7 @@ public final class SpotAnimationTypeList {
 
     @OriginalMember(owner = "client!fh", name = "a", descriptor = "(II)Lclient!lia;")
     public SpotAnimationType list(@OriginalArg(1) int id) {
-        @Pc(14) ReferenceCache local14 = this.recentUse;
+        @Pc(14) ReferenceCache lookupLock = this.recentUse;
         @Pc(24) SpotAnimationType type;
         synchronized (this.recentUse) {
             type = (SpotAnimationType) this.recentUse.get(id);
@@ -70,7 +70,7 @@ public final class SpotAnimationTypeList {
             return type;
         }
 
-        @Pc(38) js5 local38 = this.configClient;
+        @Pc(38) js5 configLock = this.configClient;
         @Pc(51) byte[] data;
         synchronized (this.configClient) {
             data = this.configClient.getfile(fileId(id), groupId(id));
@@ -83,7 +83,7 @@ public final class SpotAnimationTypeList {
             type.decode(new Packet(data));
         }
 
-        @Pc(81) ReferenceCache local81 = this.recentUse;
+        @Pc(81) ReferenceCache storeLock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.put(type, id);
             return type;
@@ -94,7 +94,7 @@ public final class SpotAnimationTypeList {
     public void setFeatureMask(@OriginalArg(1) int featureMask) {
         this.featureMask = featureMask;
 
-        @Pc(9) ReferenceCache local9 = this.modelCache;
+        @Pc(9) ReferenceCache lock = this.modelCache;
         synchronized (this.modelCache) {
             this.modelCache.reset();
         }
@@ -102,11 +102,11 @@ public final class SpotAnimationTypeList {
 
     @OriginalMember(owner = "client!fh", name = "a", descriptor = "(Z)V")
     public void cacheRemoveSoftReferences() {
-        @Pc(6) ReferenceCache local6 = this.recentUse;
+        @Pc(6) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.removeSoftReferences();
         }
-        local6 = this.modelCache;
+        lock = this.modelCache;
         synchronized (this.modelCache) {
             this.modelCache.removeSoftReferences();
         }
@@ -114,11 +114,11 @@ public final class SpotAnimationTypeList {
 
     @OriginalMember(owner = "client!fh", name = "b", descriptor = "(II)V")
     public void cacheClean(@OriginalArg(1) int maxAge) {
-        @Pc(2) ReferenceCache local2 = this.recentUse;
+        @Pc(2) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.clean(maxAge);
         }
-        @Pc(30) ReferenceCache local30 = this.modelCache;
+        @Pc(30) ReferenceCache modelCacheLock = this.modelCache;
         synchronized (this.modelCache) {
             this.modelCache.clean(maxAge);
         }
@@ -126,11 +126,11 @@ public final class SpotAnimationTypeList {
 
     @OriginalMember(owner = "client!fh", name = "a", descriptor = "(I)V")
     public void cacheReset() {
-        @Pc(6) ReferenceCache local6 = this.recentUse;
+        @Pc(6) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.reset();
         }
-        local6 = this.modelCache;
+        lock = this.modelCache;
         synchronized (this.modelCache) {
             this.modelCache.reset();
         }

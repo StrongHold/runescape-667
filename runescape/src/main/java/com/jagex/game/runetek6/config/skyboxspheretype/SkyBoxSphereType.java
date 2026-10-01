@@ -10,58 +10,58 @@ import org.openrs2.deob.annotation.Pc;
 public final class SkyBoxSphereType {
 
     @OriginalMember(owner = "client!afa", name = "n", descriptor = "I")
-    public int anInt124;
+    public int contentId;
 
     @OriginalMember(owner = "client!afa", name = "o", descriptor = "I")
-    public int anInt125;
+    public int x;
 
     @OriginalMember(owner = "client!afa", name = "f", descriptor = "I")
-    public int anInt126;
+    public int rotateZ;
 
     @OriginalMember(owner = "client!afa", name = "l", descriptor = "I")
-    public int anInt128;
+    public int rotateX;
 
     @OriginalMember(owner = "client!afa", name = "e", descriptor = "I")
-    public int anInt129;
+    public int renderType;
 
     @OriginalMember(owner = "client!afa", name = "g", descriptor = "I")
-    public int anInt130;
+    public int y;
 
     @OriginalMember(owner = "client!afa", name = "j", descriptor = "I")
-    public int anInt132;
+    public int z;
 
     @OriginalMember(owner = "client!afa", name = "d", descriptor = "I")
-    public int anInt133;
+    public int rotateY;
 
     @OriginalMember(owner = "client!afa", name = "m", descriptor = "Z")
-    public boolean aBoolean10;
+    public boolean infinite;
 
     @OriginalMember(owner = "client!afa", name = "i", descriptor = "I")
-    public int anInt123 = 8;
+    public int size = 8;
 
     @OriginalMember(owner = "client!afa", name = "k", descriptor = "I")
-    public int anInt131 = 0xFFFFFF;
+    public int colour = 0xFFFFFF;
 
     @OriginalMember(owner = "client!afa", name = "a", descriptor = "(ILclient!ge;I)V")
     public void decode(@OriginalArg(0) int code, @OriginalArg(1) Packet packet) {
         if (code == 1) {
-            this.anInt123 = packet.g2();
+            this.size = packet.g2();
         } else if (code == 2) {
-            this.aBoolean10 = true;
+            this.infinite = true;
         } else if (code == 3) {
-            this.anInt125 = packet.g2s();
-            this.anInt130 = packet.g2s();
-            this.anInt132 = packet.g2s();
+            this.x = packet.g2s();
+            this.y = packet.g2s();
+            this.z = packet.g2s();
         } else if (code == 4) {
-            this.anInt129 = packet.g1();
+            this.renderType = packet.g1();
         } else if (code == 5) {
-            this.anInt124 = packet.g2();
+            this.contentId = packet.g2();
         } else if (code == 6) {
-            this.anInt131 = packet.g3();
+            this.colour = packet.g3();
         } else if (code == 7) {
-            this.anInt128 = packet.g2s();
-            this.anInt133 = packet.g2s();
-            this.anInt126 = packet.g2s();
+            this.rotateX = packet.g2s();
+            this.rotateY = packet.g2s();
+            this.rotateZ = packet.g2s();
         }
     }
 

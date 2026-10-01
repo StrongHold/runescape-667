@@ -790,7 +790,7 @@ public final class MiniMenu {
         }
 
         for (@Pc(189) int op = ops.length - 1; op >= 0; op--) {
-            if (ops[op] != null && (type.aByte107 == 0 || !ops[op].equalsIgnoreCase(LocalisedText.ATTACK.localise(Client.language)) && !ops[op].equalsIgnoreCase(LocalisedText.EXAMINE.localise(Client.language)))) {
+            if (ops[op] != null && (type.lowPriorityAttackOps == 0 || !ops[op].equalsIgnoreCase(LocalisedText.ATTACK.localise(Client.language)) && !ops[op].equalsIgnoreCase(LocalisedText.EXAMINE.localise(Client.language)))) {
                 @Pc(226) short action = 0;
                 @Pc(228) int cursor = Cursor.interaction;
 
@@ -824,7 +824,7 @@ public final class MiniMenu {
             }
         }
 
-        if (type.aByte107 == 1) {
+        if (type.lowPriorityAttackOps == 1) {
             for (@Pc(341) int op = 0; op < ops.length; op++) {
                 if (ops[op] != null && (ops[op].equalsIgnoreCase(LocalisedText.ATTACK.localise(Client.language)) || ops[op].equalsIgnoreCase(LocalisedText.EXAMINE.localise(Client.language)))) {
                     @Pc(372) short offset = 0;
