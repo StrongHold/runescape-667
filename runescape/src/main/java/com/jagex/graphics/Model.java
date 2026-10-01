@@ -27,55 +27,55 @@ public abstract class Model {
      * animationPartialTransform
      */
     @OriginalMember(owner = "client!ka", name = "I", descriptor = "(I[IIIIZI[I)V")
-    protected abstract void I(@OriginalArg(0) int arg0, @OriginalArg(1) int[] arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) boolean arg5, @OriginalArg(6) int arg6, @OriginalArg(7) int[] arg7);
+    protected abstract void I(@OriginalArg(0) int type, @OriginalArg(1) int[] labels, @OriginalArg(2) int x, @OriginalArg(3) int y, @OriginalArg(4) int z, @OriginalArg(5) boolean rotateNormals, @OriginalArg(6) int originMask, @OriginalArg(7) int[] matrix);
 
     @OriginalMember(owner = "client!ka", name = "a", descriptor = "()Z")
     public abstract boolean loadedTextures();
 
     @OriginalMember(owner = "client!ka", name = "a", descriptor = "(III[I[IZZIII)V")
-    public void method7475(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int[] arg3, @OriginalArg(4) int[] arg4, @OriginalArg(5) boolean arg5, @OriginalArg(7) int arg6, @OriginalArg(8) int arg7, @OriginalArg(9) int arg8) {
-        @Pc(18) int local18;
-        if (arg6 == 1) {
-            if (arg1 == 0 || arg1 == 1) {
-                local18 = -arg7;
-                arg7 = arg0;
-                arg0 = local18;
-            } else if (arg1 == 3) {
-                local18 = arg7;
-                arg7 = arg0;
-                arg0 = local18;
-            } else if (arg1 == 2) {
-                local18 = arg7;
-                arg7 = -arg0 & 0x3FFF;
-                arg0 = local18 & 0x3FFF;
+    public void applyTransform(@OriginalArg(0) int z, @OriginalArg(1) int type, @OriginalArg(2) int originMask, @OriginalArg(3) int[] labels, @OriginalArg(4) int[] matrix, @OriginalArg(5) boolean rotateNormals, @OriginalArg(7) int rotation, @OriginalArg(8) int x, @OriginalArg(9) int y) {
+        @Pc(18) int swap;
+        if (rotation == 1) {
+            if (type == 0 || type == 1) {
+                swap = -x;
+                x = z;
+                z = swap;
+            } else if (type == 3) {
+                swap = x;
+                x = z;
+                z = swap;
+            } else if (type == 2) {
+                swap = x;
+                x = -z & 0x3FFF;
+                z = swap & 0x3FFF;
             }
-        } else if (arg6 == 2) {
-            if (arg1 == 0 || arg1 == 1) {
-                arg7 = -arg7;
-                arg0 = -arg0;
-            } else if (arg1 == 2) {
-                arg0 = -arg0 & 0x3FFF;
-                arg7 = -arg7 & 0x3FFF;
+        } else if (rotation == 2) {
+            if (type == 0 || type == 1) {
+                x = -x;
+                z = -z;
+            } else if (type == 2) {
+                z = -z & 0x3FFF;
+                x = -x & 0x3FFF;
             }
-        } else if (arg6 == 3) {
-            if (arg1 == 0 || arg1 == 1) {
-                local18 = arg7;
-                arg7 = -arg0;
-                arg0 = local18;
-            } else if (arg1 == 3) {
-                local18 = arg7;
-                arg7 = arg0;
-                arg0 = local18;
-            } else if (arg1 == 2) {
-                local18 = arg7;
-                arg7 = arg0 & 0x3FFF;
-                arg0 = -local18 & 0x3FFF;
+        } else if (rotation == 3) {
+            if (type == 0 || type == 1) {
+                swap = x;
+                x = -z;
+                z = swap;
+            } else if (type == 3) {
+                swap = x;
+                x = z;
+                z = swap;
+            } else if (type == 2) {
+                swap = x;
+                x = z & 0x3FFF;
+                z = -swap & 0x3FFF;
             }
         }
-        if (arg2 == 65535) {
-            this.method7499(arg1, arg3, arg7, arg8, arg0, arg6, arg5);
+        if (originMask == 65535) {
+            this.applyTransformUnmasked(type, labels, x, y, z, rotation, rotateNormals);
         } else {
-            this.I(arg1, arg3, arg7, arg8, arg0, arg5, arg2, arg4);
+            this.I(type, labels, x, y, z, rotateNormals, originMask, matrix);
         }
     }
 
@@ -86,7 +86,7 @@ public abstract class Model {
     public abstract boolean F();
 
     @OriginalMember(owner = "client!ka", name = "a", descriptor = "(Lclient!tt;)V")
-    public abstract void apply(@OriginalArg(0) Matrix arg0);
+    public abstract void apply(@OriginalArg(0) Matrix matrix);
 
     /**
      * setContrast
@@ -104,44 +104,44 @@ public abstract class Model {
      * rotateZAxis
      */
     @OriginalMember(owner = "client!ka", name = "VA", descriptor = "(I)V")
-    public abstract void VA(@OriginalArg(0) int arg0);
+    public abstract void VA(@OriginalArg(0) int angle);
 
     @OriginalMember(owner = "client!ka", name = "a", descriptor = "(IILclient!rw;IIILclient!rw;Lclient!rw;IZILclient!rw;[ZII)V")
-    public final void method7477(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) AnimFrameset arg2, @OriginalArg(3) int arg3, @OriginalArg(5) int arg4, @OriginalArg(6) AnimFrameset arg5, @OriginalArg(7) AnimFrameset arg6, @OriginalArg(8) int arg7, @OriginalArg(9) boolean arg8, @OriginalArg(10) int arg9, @OriginalArg(11) AnimFrameset arg10, @OriginalArg(12) boolean[] arg11, @OriginalArg(13) int arg12, @OriginalArg(14) int arg13) {
-        if (arg1 == -1) {
+    public final void animateBlended(@OriginalArg(0) int otherFrameOffset, @OriginalArg(1) int frame, @OriginalArg(2) AnimFrameset nextFrameset, @OriginalArg(3) int otherNextFrame, @OriginalArg(5) int nextFrame, @OriginalArg(6) AnimFrameset otherNextFrameset, @OriginalArg(7) AnimFrameset frameset, @OriginalArg(8) int frameOffset, @OriginalArg(9) boolean rotateNormals, @OriginalArg(10) int otherFrameDuration, @OriginalArg(11) AnimFrameset otherFrameset, @OriginalArg(12) boolean[] blendFlags, @OriginalArg(13) int frameDuration, @OriginalArg(14) int otherFrame) {
+        if (frame == -1) {
             return;
         }
-        if (arg11 == null || arg13 == -1) {
-            this.method7487(arg6, arg7, arg12, arg2, arg1, arg4, 0, arg8);
+        if (blendFlags == null || otherFrame == -1) {
+            this.animate(frameset, frameOffset, frameDuration, nextFrameset, frame, nextFrame, 0, rotateNormals);
             return;
         }
-        this.method7491();
+        this.lock();
         if (!this.NA()) {
-            this.method7494();
+            this.unlock();
             return;
         }
-        @Pc(44) AnimFrame local44 = arg6.frames[arg1];
-        @Pc(47) AnimBase local47 = local44.base;
-        @Pc(49) AnimFrame local49 = null;
-        if (arg2 != null) {
-            local49 = arg2.frames[arg4];
-            if (local49.base != local47) {
-                local49 = null;
+        @Pc(44) AnimFrame current = frameset.frames[frame];
+        @Pc(47) AnimBase base = current.base;
+        @Pc(49) AnimFrame next = null;
+        if (nextFrameset != null) {
+            next = nextFrameset.frames[nextFrame];
+            if (next.base != base) {
+                next = null;
             }
         }
-        this.method7497(local49, arg11, arg7, false, null, 0, arg12, local44, local47, 65535, arg8);
-        @Pc(81) AnimFrame local81 = arg10.frames[arg13];
-        @Pc(83) AnimFrame local83 = null;
-        if (arg5 != null) {
-            local83 = arg5.frames[arg3];
-            if (local47 != local83.base) {
-                local83 = null;
+        this.applyFrame(next, blendFlags, frameOffset, false, null, 0, frameDuration, current, base, 65535, rotateNormals);
+        @Pc(81) AnimFrame otherCurrent = otherFrameset.frames[otherFrame];
+        @Pc(83) AnimFrame otherNext = null;
+        if (otherNextFrameset != null) {
+            otherNext = otherNextFrameset.frames[otherNextFrame];
+            if (base != otherNext.base) {
+                otherNext = null;
             }
         }
-        this.method7499(0, new int[0], 0, 0, 0, 0, arg8);
-        this.method7497(local83, arg11, arg0, true, null, 0, arg9, local81, local81.base, 65535, arg8);
+        this.applyTransformUnmasked(0, new int[0], 0, 0, 0, 0, rotateNormals);
+        this.applyFrame(otherNext, blendFlags, otherFrameOffset, true, null, 0, otherFrameDuration, otherCurrent, otherCurrent.base, 65535, rotateNormals);
         this.wa();
-        this.method7494();
+        this.unlock();
     }
 
     /**
@@ -163,10 +163,10 @@ public abstract class Model {
     public abstract ModelParticleEffector[] particleEffectors();
 
     @OriginalMember(owner = "client!ka", name = "a", descriptor = "(Lclient!ka;IIIZ)V")
-    public abstract void method7481(@OriginalArg(0) Model arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) boolean arg4);
+    public abstract void shareLight(@OriginalArg(0) Model other, @OriginalArg(1) int x, @OriginalArg(2) int y, @OriginalArg(3) int z, @OriginalArg(4) boolean hideSharedFaces);
 
     @OriginalMember(owner = "client!ka", name = "P", descriptor = "(IIII)V")
-    protected abstract void P(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3);
+    protected abstract void P(@OriginalArg(0) int type, @OriginalArg(1) int x, @OriginalArg(2) int y, @OriginalArg(3) int z);
 
     @OriginalMember(owner = "client!ka", name = "f", descriptor = "()[Lclient!rv;")
     public abstract ModelParticleEmitter[] particleEmitters();
@@ -181,33 +181,33 @@ public abstract class Model {
     public abstract int HA();
 
     @OriginalMember(owner = "client!ka", name = "a", descriptor = "(Lclient!tt;Lclient!ima;II)V")
-    public abstract void renderOrtho(@OriginalArg(0) Matrix arg0, @OriginalArg(1) PickingCylinder cylinder, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3);
+    public abstract void renderOrtho(@OriginalArg(0) Matrix matrix, @OriginalArg(1) PickingCylinder cylinder, @OriginalArg(2) int orthoDepth, @OriginalArg(3) int flags);
 
     @OriginalMember(owner = "client!ka", name = "a", descriptor = "(IILclient!tt;ZI)Z")
     public abstract boolean picked(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) Matrix matrix, @OriginalArg(3) boolean quick, @OriginalArg(4) int sizeShift);
 
     @OriginalMember(owner = "client!ka", name = "a", descriptor = "(Lclient!rw;IILclient!rw;IIIIZ)V")
-    public final void method7487(@OriginalArg(0) AnimFrameset arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) AnimFrameset arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) int arg6, @OriginalArg(8) boolean arg7) {
-        if (arg4 == -1) {
+    public final void animate(@OriginalArg(0) AnimFrameset frameset, @OriginalArg(1) int frameOffset, @OriginalArg(2) int frameDuration, @OriginalArg(3) AnimFrameset nextFrameset, @OriginalArg(4) int frame, @OriginalArg(5) int nextFrame, @OriginalArg(6) int rotation, @OriginalArg(8) boolean rotateNormals) {
+        if (frame == -1) {
             return;
         }
-        this.method7491();
+        this.lock();
         if (!this.NA()) {
-            this.method7494();
+            this.unlock();
             return;
         }
-        @Pc(23) AnimFrame local23 = arg0.frames[arg4];
-        @Pc(26) AnimBase local26 = local23.base;
-        @Pc(28) AnimFrame local28 = null;
-        if (arg3 != null) {
-            local28 = arg3.frames[arg5];
-            if (local28.base != local26) {
-                local28 = null;
+        @Pc(23) AnimFrame current = frameset.frames[frame];
+        @Pc(26) AnimBase base = current.base;
+        @Pc(28) AnimFrame next = null;
+        if (nextFrameset != null) {
+            next = nextFrameset.frames[nextFrame];
+            if (next.base != base) {
+                next = null;
             }
         }
-        this.method7497(local28, null, arg1, false, null, arg6, arg2, local23, local26, 65535, arg7);
+        this.applyFrame(next, null, frameOffset, false, null, rotation, frameDuration, current, base, 65535, rotateNormals);
         this.wa();
-        this.method7494();
+        this.unlock();
     }
 
     /**
@@ -238,7 +238,7 @@ public abstract class Model {
      * rotateYAxis
      */
     @OriginalMember(owner = "client!ka", name = "a", descriptor = "(I)V")
-    public abstract void a(@OriginalArg(0) int arg0);
+    public abstract void a(@OriginalArg(0) int angle);
 
     /**
      * mirror
@@ -271,68 +271,68 @@ public abstract class Model {
     public abstract int G();
 
     @OriginalMember(owner = "client!ka", name = "a", descriptor = "(IIIIIIILclient!s;I)V")
-    protected final void method7490(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(4) int arg3, @OriginalArg(5) int arg4, @OriginalArg(6) int arg5, @OriginalArg(7) Ground arg6, @OriginalArg(8) int arg7) {
-        @Pc(24) int local24 = -arg3 / 2;
-        @Pc(29) int local29 = -arg5 / 2;
-        @Pc(40) int local40 = arg6.averageHeight(arg2 - -local24, local29 + arg4);
-        @Pc(44) int local44 = arg3 / 2;
-        @Pc(49) int local49 = -arg5 / 2;
-        @Pc(61) int local61 = arg6.averageHeight(arg2 + local44, local49 + arg4);
-        @Pc(66) int local66 = -arg3 / 2;
-        @Pc(70) int local70 = arg5 / 2;
-        @Pc(82) int local82 = arg6.averageHeight(local66 + arg2, local70 + arg4);
-        @Pc(86) int local86 = arg3 / 2;
-        @Pc(90) int local90 = arg5 / 2;
-        @Pc(101) int local101 = arg6.averageHeight(arg2 - -local86, local90 + arg4);
-        @Pc(113) int local113 = local61 > local40 ? local40 : local61;
-        @Pc(125) int local125 = local101 <= local82 ? local101 : local82;
-        @Pc(133) int local133 = local61 >= local101 ? local101 : local61;
-        @Pc(141) int local141 = local82 > local40 ? local40 : local82;
-        @Pc(171) int local171;
-        if (arg5 != 0) {
-            @Pc(156) int local156 = (int) (Math.atan2(local113 - local125, arg5) * 2607.5945876176133D) & 0x3FFF;
-            if (local156 != 0) {
-                if (arg1 != 0) {
-                    if (local156 > 8192) {
-                        local171 = 16384 - arg1;
-                        if (local156 < local171) {
-                            local156 = local171;
+    protected final void conformToGround(@OriginalArg(0) int y, @OriginalArg(1) int maxAngleX, @OriginalArg(2) int x, @OriginalArg(4) int sizeX, @OriginalArg(5) int z, @OriginalArg(6) int sizeZ, @OriginalArg(7) Ground floor, @OriginalArg(8) int maxAngleZ) {
+        @Pc(24) int southWestX = -sizeX / 2;
+        @Pc(29) int southWestZ = -sizeZ / 2;
+        @Pc(40) int southWest = floor.averageHeight(x - -southWestX, southWestZ + z);
+        @Pc(44) int southEastX = sizeX / 2;
+        @Pc(49) int southEastZ = -sizeZ / 2;
+        @Pc(61) int southEast = floor.averageHeight(x + southEastX, southEastZ + z);
+        @Pc(66) int northWestX = -sizeX / 2;
+        @Pc(70) int northWestZ = sizeZ / 2;
+        @Pc(82) int northWest = floor.averageHeight(northWestX + x, northWestZ + z);
+        @Pc(86) int northEastX = sizeX / 2;
+        @Pc(90) int northEastZ = sizeZ / 2;
+        @Pc(101) int northEast = floor.averageHeight(x - -northEastX, northEastZ + z);
+        @Pc(113) int south = southEast > southWest ? southWest : southEast;
+        @Pc(125) int north = northEast <= northWest ? northEast : northWest;
+        @Pc(133) int east = southEast >= northEast ? northEast : southEast;
+        @Pc(141) int west = northWest > southWest ? southWest : northWest;
+        @Pc(171) int limit;
+        if (sizeZ != 0) {
+            @Pc(156) int angleX = (int) (Math.atan2(south - north, sizeZ) * 2607.5945876176133D) & 0x3FFF;
+            if (angleX != 0) {
+                if (maxAngleX != 0) {
+                    if (angleX > 8192) {
+                        limit = 16384 - maxAngleX;
+                        if (angleX < limit) {
+                            angleX = limit;
                         }
-                    } else if (arg1 < local156) {
-                        local156 = arg1;
+                    } else if (maxAngleX < angleX) {
+                        angleX = maxAngleX;
                     }
                 }
-                this.FA(local156);
+                this.FA(angleX);
             }
         }
-        @Pc(192) int local192 = local40 + local101;
-        if (arg3 != 0) {
-            @Pc(207) int local207 = (int) (Math.atan2(local141 - local133, arg3) * 2607.5945876176133D) & 0x3FFF;
-            if (local207 != 0) {
-                if (arg7 != 0) {
-                    if (local207 > 8192) {
-                        local171 = 16384 - arg7;
-                        if (local171 > local207) {
-                            local207 = local171;
+        @Pc(192) int height = southWest + northEast;
+        if (sizeX != 0) {
+            @Pc(207) int angleZ = (int) (Math.atan2(west - east, sizeX) * 2607.5945876176133D) & 0x3FFF;
+            if (angleZ != 0) {
+                if (maxAngleZ != 0) {
+                    if (angleZ > 8192) {
+                        limit = 16384 - maxAngleZ;
+                        if (limit > angleZ) {
+                            angleZ = limit;
                         }
-                    } else if (local207 > arg7) {
-                        local207 = arg7;
+                    } else if (angleZ > maxAngleZ) {
+                        angleZ = maxAngleZ;
                     }
                 }
-                this.VA(local207);
+                this.VA(angleZ);
             }
         }
-        if (local192 > local61 + local82) {
-            local192 = local82 + local61;
+        if (height > southEast + northWest) {
+            height = northWest + southEast;
         }
-        local192 = (local192 >> 1) - arg0;
-        if (local192 != 0) {
-            this.H(0, local192, 0);
+        height = (height >> 1) - y;
+        if (height != 0) {
+            this.H(0, height, 0);
         }
     }
 
     @OriginalMember(owner = "client!ka", name = "g", descriptor = "()V")
-    protected abstract void method7491();
+    protected abstract void lock();
 
     /**
      * recolour
@@ -347,38 +347,38 @@ public abstract class Model {
     public abstract int EA();
 
     @OriginalMember(owner = "client!ka", name = "a", descriptor = "(Lclient!tt;IZ)V")
-    public abstract void transform(@OriginalArg(0) Matrix matrix, @OriginalArg(1) int arg1, @OriginalArg(2) boolean arg2);
+    public abstract void transform(@OriginalArg(0) Matrix matrix, @OriginalArg(1) int originMask, @OriginalArg(2) boolean relative);
 
     @OriginalMember(owner = "client!ka", name = "a", descriptor = "(IILclient!rw;)V")
-    public final void method7493(@OriginalArg(0) int i, @OriginalArg(2) AnimFrameset frameset) {
-        if (i == -1) {
+    public final void animateShadow(@OriginalArg(0) int frame, @OriginalArg(2) AnimFrameset frameset) {
+        if (frame == -1) {
             return;
         }
-        this.method7491();
+        this.lock();
         if (!this.NA()) {
-            this.method7494();
+            this.unlock();
             return;
         }
-        @Pc(33) AnimFrame frame = frameset.frames[i];
-        @Pc(36) AnimBase base = frame.base;
-        for (@Pc(38) int local38 = 0; local38 < frame.anInt6359; local38++) {
-            @Pc(45) short local45 = frame.aShortArray87[local38];
-            if (base.aBooleanArray25[local45]) {
-                if (frame.aShortArray86[local38] != -1) {
+        @Pc(33) AnimFrame current = frameset.frames[frame];
+        @Pc(36) AnimBase base = current.base;
+        for (@Pc(38) int i = 0; i < current.transformCount; i++) {
+            @Pc(45) short group = current.groups[i];
+            if (base.shadowed[group]) {
+                if (current.origins[i] != -1) {
                     this.P(0, 0, 0, 0);
                 }
-                this.P(base.anIntArray619[local45], frame.aShortArray93[local38], frame.aShortArray94[local38], frame.aShortArray89[local38]);
+                this.P(base.transformTypes[group], current.xValues[i], current.yValues[i], current.zValues[i]);
             }
         }
         this.wa();
-        this.method7494();
+        this.unlock();
     }
 
     @OriginalMember(owner = "client!ka", name = "d", descriptor = "()V")
-    protected abstract void method7494();
+    protected abstract void unlock();
 
     @OriginalMember(owner = "client!ka", name = "a", descriptor = "(BIZ)Lclient!ka;")
-    public abstract Model copy(@OriginalArg(0) byte arg0, @OriginalArg(1) int functionMask, @OriginalArg(2) boolean arg2);
+    public abstract Model copy(@OriginalArg(0) byte slot, @OriginalArg(1) int functionMask, @OriginalArg(2) boolean ensureLit);
 
     /**
      * setAmbient
@@ -390,7 +390,7 @@ public abstract class Model {
      * rotateXAxis
      */
     @OriginalMember(owner = "client!ka", name = "FA", descriptor = "(I)V")
-    public abstract void FA(@OriginalArg(0) int arg0);
+    public abstract void FA(@OriginalArg(0) int angle);
 
     /**
      * getMovingTextures
@@ -399,160 +399,160 @@ public abstract class Model {
     public abstract boolean r();
 
     @OriginalMember(owner = "client!ka", name = "a", descriptor = "(ILclient!rw;Lclient!rw;II[IBIZII)V")
-    public final void method7496(@OriginalArg(0) int arg0, @OriginalArg(1) AnimFrameset arg1, @OriginalArg(2) AnimFrameset arg2, @OriginalArg(3) int arg3, @OriginalArg(5) int[] arg4, @OriginalArg(7) int arg5, @OriginalArg(8) boolean arg6, @OriginalArg(9) int arg7, @OriginalArg(10) int arg8) {
-        if (arg3 == -1) {
+    public final void animateMasked(@OriginalArg(0) int frameOffset, @OriginalArg(1) AnimFrameset frameset, @OriginalArg(2) AnimFrameset nextFrameset, @OriginalArg(3) int frame, @OriginalArg(5) int[] matrix, @OriginalArg(7) int frameDuration, @OriginalArg(8) boolean rotateNormals, @OriginalArg(9) int nextFrame, @OriginalArg(10) int originMask) {
+        if (frame == -1) {
             return;
         }
-        this.method7491();
+        this.lock();
         if (!this.NA()) {
-            this.method7494();
+            this.unlock();
             return;
         }
-        @Pc(29) AnimFrame local29 = arg1.frames[arg3];
-        @Pc(32) AnimBase local32 = local29.base;
-        @Pc(34) AnimFrame local34 = null;
-        if (arg2 != null) {
-            local34 = arg2.frames[arg7];
-            if (local34.base != local32) {
-                local34 = null;
+        @Pc(29) AnimFrame current = frameset.frames[frame];
+        @Pc(32) AnimBase base = current.base;
+        @Pc(34) AnimFrame next = null;
+        if (nextFrameset != null) {
+            next = nextFrameset.frames[nextFrame];
+            if (next.base != base) {
+                next = null;
             }
         }
-        this.method7497(local34, null, arg0, false, arg4, 0, arg5, local29, local32, arg8, arg6);
+        this.applyFrame(next, null, frameOffset, false, matrix, 0, frameDuration, current, base, originMask, rotateNormals);
         this.wa();
-        this.method7494();
+        this.unlock();
     }
 
     @OriginalMember(owner = "client!ka", name = "a", descriptor = "(Lclient!nb;[ZIZB[IIILclient!nb;Lclient!qda;IZ)V")
-    public void method7497(@OriginalArg(0) AnimFrame arg0, @OriginalArg(1) boolean[] arg1, @OriginalArg(2) int arg2, @OriginalArg(3) boolean arg3, @OriginalArg(5) int[] arg4, @OriginalArg(6) int arg5, @OriginalArg(7) int arg6, @OriginalArg(8) AnimFrame arg7, @OriginalArg(9) AnimBase arg8, @OriginalArg(10) int arg9, @OriginalArg(11) boolean arg10) {
-        @Pc(11) int local11;
-        if (arg0 == null || arg2 == 0) {
-            for (local11 = 0; local11 < arg7.anInt6359; local11++) {
-                @Pc(17) short local17 = arg7.aShortArray87[local11];
-                if (arg1 == null || arg3 == arg1[local17] || arg8.anIntArray619[local17] == 0) {
-                    @Pc(43) short local43 = arg7.aShortArray86[local11];
-                    if (local43 != -1) {
-                        this.method7475(0, 0, arg9 & arg8.anIntArray618[local43], arg8.anIntArrayArray196[local43], arg4, arg10, arg5, 0, 0);
+    public void applyFrame(@OriginalArg(0) AnimFrame next, @OriginalArg(1) boolean[] blendFlags, @OriginalArg(2) int frameOffset, @OriginalArg(3) boolean blended, @OriginalArg(5) int[] matrix, @OriginalArg(6) int rotation, @OriginalArg(7) int frameDuration, @OriginalArg(8) AnimFrame frame, @OriginalArg(9) AnimBase base, @OriginalArg(10) int originMask, @OriginalArg(11) boolean rotateNormals) {
+        @Pc(11) int index;
+        if (next == null || frameOffset == 0) {
+            for (index = 0; index < frame.transformCount; index++) {
+                @Pc(17) short group = frame.groups[index];
+                if (blendFlags == null || blended == blendFlags[group] || base.transformTypes[group] == 0) {
+                    @Pc(43) short origin = frame.origins[index];
+                    if (origin != -1) {
+                        this.applyTransform(0, 0, originMask & base.originMasks[origin], base.transformLabels[origin], matrix, rotateNormals, rotation, 0, 0);
                     }
-                    this.method7475(arg7.aShortArray89[local11], arg8.anIntArray619[local17], arg9 & arg8.anIntArray618[local17], arg8.anIntArrayArray196[local17], arg4, arg10, arg5, arg7.aShortArray93[local11], arg7.aShortArray94[local11]);
+                    this.applyTransform(frame.zValues[index], base.transformTypes[group], originMask & base.originMasks[group], base.transformLabels[group], matrix, rotateNormals, rotation, frame.xValues[index], frame.yValues[index]);
                 }
             }
             return;
         }
-        local11 = 0;
-        @Pc(116) int local116 = 0;
-        for (@Pc(123) int local123 = 0; local123 < arg8.anInt7690; local123++) {
-            @Pc(126) boolean local126 = false;
-            if (arg7.anInt6359 > local11 && local123 == arg7.aShortArray87[local11]) {
-                local126 = true;
+        index = 0;
+        @Pc(116) int nextIndex = 0;
+        for (@Pc(123) int group = 0; group < base.transformCount; group++) {
+            @Pc(126) boolean inFrame = false;
+            if (frame.transformCount > index && group == frame.groups[index]) {
+                inFrame = true;
             }
-            @Pc(146) boolean local146 = false;
-            if (arg0.anInt6359 > local116 && local123 == arg0.aShortArray87[local116]) {
-                local146 = true;
+            @Pc(146) boolean inNext = false;
+            if (next.transformCount > nextIndex && group == next.groups[nextIndex]) {
+                inNext = true;
             }
-            if (local126 || local146) {
-                if (arg1 == null || arg1[local123] == arg3 || arg8.anIntArray619[local123] == 0) {
-                    @Pc(206) short local206 = 0;
-                    @Pc(211) int local211 = arg8.anIntArray619[local123];
-                    if (local211 == 3 || local211 == 10) {
-                        local206 = 128;
+            if (inFrame || inNext) {
+                if (blendFlags == null || blendFlags[group] == blended || base.transformTypes[group] == 0) {
+                    @Pc(206) short defaultValue = 0;
+                    @Pc(211) int type = base.transformTypes[group];
+                    if (type == 3 || type == 10) {
+                        defaultValue = 128;
                     }
-                    @Pc(243) short local243;
-                    @Pc(238) short local238;
-                    @Pc(228) short local228;
-                    @Pc(233) short local233;
-                    @Pc(248) byte local248;
-                    if (local126) {
-                        local228 = arg7.aShortArray89[local11];
-                        local233 = arg7.aShortArray86[local11];
-                        local238 = arg7.aShortArray94[local11];
-                        local243 = arg7.aShortArray93[local11];
-                        local248 = arg7.aByteArray70[local11];
-                        local11++;
+                    @Pc(243) short x;
+                    @Pc(238) short y;
+                    @Pc(228) short z;
+                    @Pc(233) short origin;
+                    @Pc(248) byte flags;
+                    if (inFrame) {
+                        z = frame.zValues[index];
+                        origin = frame.origins[index];
+                        y = frame.yValues[index];
+                        x = frame.xValues[index];
+                        flags = frame.tweenFlags[index];
+                        index++;
                     } else {
-                        local248 = 0;
-                        local228 = local206;
-                        local243 = local206;
-                        local233 = -1;
-                        local238 = local206;
+                        flags = 0;
+                        z = defaultValue;
+                        x = defaultValue;
+                        origin = -1;
+                        y = defaultValue;
                     }
-                    @Pc(267) short local267;
-                    @Pc(282) short local282;
-                    @Pc(272) short local272;
-                    @Pc(287) short local287;
-                    @Pc(277) byte local277;
-                    if (local146) {
-                        local267 = arg0.aShortArray93[local116];
-                        local272 = arg0.aShortArray89[local116];
-                        local277 = arg0.aByteArray70[local116];
-                        local282 = arg0.aShortArray94[local116];
-                        local287 = arg0.aShortArray86[local116];
-                        local116++;
+                    @Pc(267) short nextX;
+                    @Pc(282) short nextY;
+                    @Pc(272) short nextZ;
+                    @Pc(287) short nextOrigin;
+                    @Pc(277) byte nextFlags;
+                    if (inNext) {
+                        nextX = next.xValues[nextIndex];
+                        nextZ = next.zValues[nextIndex];
+                        nextFlags = next.tweenFlags[nextIndex];
+                        nextY = next.yValues[nextIndex];
+                        nextOrigin = next.origins[nextIndex];
+                        nextIndex++;
                     } else {
-                        local282 = local206;
-                        local272 = local206;
-                        local277 = 0;
-                        local287 = -1;
-                        local267 = local206;
+                        nextY = defaultValue;
+                        nextZ = defaultValue;
+                        nextFlags = 0;
+                        nextOrigin = -1;
+                        nextX = defaultValue;
                     }
-                    if (local233 != -1) {
-                        this.method7475(0, 0, arg9 & arg8.anIntArray618[local233], arg8.anIntArrayArray196[local233], arg4, arg10, arg5, 0, 0);
-                    } else if (local287 != -1) {
-                        this.method7475(0, 0, arg9 & arg8.anIntArray618[local287], arg8.anIntArrayArray196[local287], arg4, arg10, arg5, 0, 0);
+                    if (origin != -1) {
+                        this.applyTransform(0, 0, originMask & base.originMasks[origin], base.transformLabels[origin], matrix, rotateNormals, rotation, 0, 0);
+                    } else if (nextOrigin != -1) {
+                        this.applyTransform(0, 0, originMask & base.originMasks[nextOrigin], base.transformLabels[nextOrigin], matrix, rotateNormals, rotation, 0, 0);
                     }
-                    @Pc(423) int local423;
-                    @Pc(413) int local413;
-                    @Pc(439) int local439;
-                    if ((local248 & 0x2) == 0 && (local277 & 0x1) == 0) {
-                        @Pc(376) int local376;
-                        if (local211 == 2) {
-                            local376 = local267 - local243 & 0x3FFF;
-                            @Pc(383) int local383 = local282 - local238 & 0x3FFF;
-                            @Pc(389) int local389 = local272 - local228 & 0x3FFF;
-                            if (local376 >= 8192) {
-                                local376 -= 16384;
+                    @Pc(423) int tweenX;
+                    @Pc(413) int tweenY;
+                    @Pc(439) int tweenZ;
+                    if ((flags & 0x2) == 0 && (nextFlags & 0x1) == 0) {
+                        @Pc(376) int deltaX;
+                        if (type == 2) {
+                            deltaX = nextX - x & 0x3FFF;
+                            @Pc(383) int deltaY = nextY - y & 0x3FFF;
+                            @Pc(389) int deltaZ = nextZ - z & 0x3FFF;
+                            if (deltaX >= 8192) {
+                                deltaX -= 16384;
                             }
-                            if (local383 >= 8192) {
-                                local383 -= 16384;
+                            if (deltaY >= 8192) {
+                                deltaY -= 16384;
                             }
-                            local413 = local238 + arg2 * local383 / arg6 & 0x3FFF;
-                            local423 = local376 * arg2 / arg6 + local243 & 0x3FFF;
-                            if (local389 >= 8192) {
-                                local389 -= 16384;
+                            tweenY = y + frameOffset * deltaY / frameDuration & 0x3FFF;
+                            tweenX = deltaX * frameOffset / frameDuration + x & 0x3FFF;
+                            if (deltaZ >= 8192) {
+                                deltaZ -= 16384;
                             }
-                            local439 = arg2 * local389 / arg6 + local228 & 0x3FFF;
-                        } else if (local211 == 9) {
-                            local376 = local267 - local243 & 0x3FFF;
-                            if (local376 >= 8192) {
-                                local376 -= 16384;
+                            tweenZ = frameOffset * deltaZ / frameDuration + z & 0x3FFF;
+                        } else if (type == 9) {
+                            deltaX = nextX - x & 0x3FFF;
+                            if (deltaX >= 8192) {
+                                deltaX -= 16384;
                             }
-                            local439 = 0;
-                            local413 = 0;
-                            local423 = local243 + arg2 * local376 / arg6 & 0x3FFF;
-                        } else if (local211 == 7) {
-                            local376 = local267 - local243 & 0x3F;
-                            if (local376 >= 32) {
-                                local376 -= 64;
+                            tweenZ = 0;
+                            tweenY = 0;
+                            tweenX = x + frameOffset * deltaX / frameDuration & 0x3FFF;
+                        } else if (type == 7) {
+                            deltaX = nextX - x & 0x3F;
+                            if (deltaX >= 32) {
+                                deltaX -= 64;
                             }
-                            local439 = (local272 - local228) * arg2 / arg6 + local228;
-                            local413 = (local282 - local238) * arg2 / arg6 + local238;
-                            local423 = local243 + arg2 * local376 / arg6 & 0x3F;
+                            tweenZ = (nextZ - z) * frameOffset / frameDuration + z;
+                            tweenY = (nextY - y) * frameOffset / frameDuration + y;
+                            tweenX = x + frameOffset * deltaX / frameDuration & 0x3F;
                         } else {
-                            local439 = local228 + (local272 - local228) * arg2 / arg6;
-                            local413 = (local282 - local238) * arg2 / arg6 + local238;
-                            local423 = arg2 * (local267 - local243) / arg6 + local243;
+                            tweenZ = z + (nextZ - z) * frameOffset / frameDuration;
+                            tweenY = (nextY - y) * frameOffset / frameDuration + y;
+                            tweenX = frameOffset * (nextX - x) / frameDuration + x;
                         }
                     } else {
-                        local413 = local238;
-                        local423 = local243;
-                        local439 = local228;
+                        tweenY = y;
+                        tweenX = x;
+                        tweenZ = z;
                     }
-                    this.method7475(local439, local211, arg8.anIntArray618[local123] & arg9, arg8.anIntArrayArray196[local123], arg4, arg10, arg5, local423, local413);
+                    this.applyTransform(tweenZ, type, base.originMasks[group] & originMask, base.transformLabels[group], matrix, rotateNormals, rotation, tweenX, tweenY);
                 } else {
-                    if (local146) {
-                        local116++;
+                    if (inNext) {
+                        nextIndex++;
                     }
-                    if (local126) {
-                        local11++;
+                    if (inFrame) {
+                        index++;
                     }
                 }
             }
@@ -560,7 +560,7 @@ public abstract class Model {
     }
 
     @OriginalMember(owner = "client!ka", name = "a", descriptor = "(B[B)V")
-    public abstract void updateAlphas(@OriginalArg(0) byte arg0, @OriginalArg(1) byte[] arg1);
+    public abstract void updateAlphas(@OriginalArg(0) byte alpha, @OriginalArg(1) byte[] alphas);
 
     /**
      * getMaxX
@@ -596,7 +596,7 @@ public abstract class Model {
      * scale
      */
     @OriginalMember(owner = "client!ka", name = "O", descriptor = "(III)V")
-    public abstract void O(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2);
+    public abstract void O(@OriginalArg(0) int scaleX, @OriginalArg(1) int scaleY, @OriginalArg(2) int scaleZ);
 
     /**
      * getMinX
@@ -605,11 +605,11 @@ public abstract class Model {
     public abstract int V();
 
     @OriginalMember(owner = "client!ka", name = "a", descriptor = "(I[IIIIIZ)V")
-    protected abstract void method7499(@OriginalArg(0) int arg0, @OriginalArg(1) int[] arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) boolean arg6);
+    protected abstract void applyTransformUnmasked(@OriginalArg(0) int type, @OriginalArg(1) int[] labels, @OriginalArg(2) int x, @OriginalArg(3) int y, @OriginalArg(4) int z, @OriginalArg(5) int rotation, @OriginalArg(6) boolean rotateNormals);
 
     /**
      * rotateYAxisWithNormals
      */
     @OriginalMember(owner = "client!ka", name = "k", descriptor = "(I)V")
-    public abstract void k(@OriginalArg(0) int arg0);
+    public abstract void k(@OriginalArg(0) int angle);
 }

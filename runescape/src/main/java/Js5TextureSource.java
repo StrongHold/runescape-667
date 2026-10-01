@@ -55,12 +55,12 @@ public final class Js5TextureSource implements TextureSource {
         }
         for (@Pc(132) int i = 0; i < this.textureCount; i++) {
             if (this.textureMetrics[i] != null) {
-                this.textureMetrics[i].aBoolean234 = packet.g1() == 1;
+                this.textureMetrics[i].skipFaces = packet.g1() == 1;
             }
         }
         for (@Pc(168) int i = 0; i < this.textureCount; i++) {
             if (this.textureMetrics[i] != null) {
-                this.textureMetrics[i].aByte57 = packet.g1b();
+                this.textureMetrics[i].brightness = packet.g1b();
             }
         }
         for (@Pc(200) int i = 0; i < this.textureCount; i++) {
@@ -80,7 +80,7 @@ public final class Js5TextureSource implements TextureSource {
         }
         for (@Pc(288) int i = 0; i < this.textureCount; i++) {
             if (this.textureMetrics[i] != null) {
-                this.textureMetrics[i].aShort37 = (short) packet.g2();
+                this.textureMetrics[i].averageColour = (short) packet.g2();
             }
         }
         for (@Pc(321) int i = 0; i < this.textureCount; i++) {
@@ -95,32 +95,32 @@ public final class Js5TextureSource implements TextureSource {
         }
         for (@Pc(381) int i = 0; i < this.textureCount; i++) {
             if (this.textureMetrics[i] != null) {
-                this.textureMetrics[i].aBoolean239 = packet.g1() == 1;
+                this.textureMetrics[i].unusedFlag = packet.g1() == 1;
             }
         }
         for (@Pc(421) int i = 0; i < this.textureCount; i++) {
             if (this.textureMetrics[i] != null) {
-                this.textureMetrics[i].aBoolean238 = packet.g1() == 1;
+                this.textureMetrics[i].transposed = packet.g1() == 1;
             }
         }
         for (@Pc(455) int i = 0; i < this.textureCount; i++) {
             if (this.textureMetrics[i] != null) {
-                this.textureMetrics[i].aByte53 = packet.g1b();
+                this.textureMetrics[i].mipmap = packet.g1b();
             }
         }
         for (@Pc(483) int i = 0; i < this.textureCount; i++) {
             if (this.textureMetrics[i] != null) {
-                this.textureMetrics[i].aBoolean236 = packet.g1() == 1;
+                this.textureMetrics[i].repeatsU = packet.g1() == 1;
             }
         }
         for (@Pc(521) int i = 0; i < this.textureCount; i++) {
             if (this.textureMetrics[i] != null) {
-                this.textureMetrics[i].aBoolean235 = packet.g1() == 1;
+                this.textureMetrics[i].repeatsV = packet.g1() == 1;
             }
         }
         for (@Pc(559) int i = 0; i < this.textureCount; i++) {
             if (this.textureMetrics[i] != null) {
-                this.textureMetrics[i].aBoolean237 = packet.g1() == 1;
+                this.textureMetrics[i].hdr = packet.g1() == 1;
             }
         }
         for (@Pc(595) int i = 0; i < this.textureCount; i++) {
@@ -159,8 +159,8 @@ public final class Js5TextureSource implements TextureSource {
 
     @OriginalMember(owner = "client!qea", name = "a", descriptor = "(IZIIBF)[I")
     @Override
-    public int[] rgbOutput(@OriginalArg(0) int arg0, @OriginalArg(1) boolean arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int id, @OriginalArg(5) float arg4) {
-        return this.list(id).method8951(this.sprites, arg4, this.textureMetrics[id].aBoolean238, this, arg1, arg2, arg0);
+    public int[] rgbOutput(@OriginalArg(0) int width, @OriginalArg(1) boolean reverse, @OriginalArg(2) int height, @OriginalArg(3) int id, @OriginalArg(5) float gamma) {
+        return this.list(id).rgbOutput(this.sprites, gamma, this.textureMetrics[id].transposed, this, reverse, height, width);
     }
 
     @OriginalMember(owner = "client!qea", name = "a", descriptor = "(I)I")
@@ -178,19 +178,19 @@ public final class Js5TextureSource implements TextureSource {
 
     @OriginalMember(owner = "client!qea", name = "b", descriptor = "(II)Lclient!fa;")
     @Override
-    public TextureMetrics getMetrics(@OriginalArg(0) int arg0) {
-        return this.textureMetrics[arg0];
+    public TextureMetrics getMetrics(@OriginalArg(0) int id) {
+        return this.textureMetrics[id];
     }
 
     @OriginalMember(owner = "client!qea", name = "a", descriptor = "(IIFBIZ)[F")
     @Override
-    public float[] floatArgbOutput(@OriginalArg(0) int arg0, @OriginalArg(1) int id, @OriginalArg(2) float arg2, @OriginalArg(4) int arg3) {
-        return this.list(id).method8946(arg0, this, this.sprites, this.textureMetrics[id].aBoolean238, arg3);
+    public float[] floatArgbOutput(@OriginalArg(0) int height, @OriginalArg(1) int id, @OriginalArg(2) float gamma, @OriginalArg(4) int width) {
+        return this.list(id).floatArgbOutput(height, this, this.sprites, this.textureMetrics[id].transposed, width);
     }
 
     @OriginalMember(owner = "client!qea", name = "a", descriptor = "(FIIZZI)[I")
     @Override
-    public int[] argbOutput(@OriginalArg(0) float f, @OriginalArg(1) int id, @OriginalArg(2) int width, @OriginalArg(5) int height) {
-        return this.list(id).method8948(width, f, this.textureMetrics[id].aBoolean238, height, this, this.sprites);
+    public int[] argbOutput(@OriginalArg(0) float gamma, @OriginalArg(1) int id, @OriginalArg(2) int width, @OriginalArg(5) int height) {
+        return this.list(id).argbOutput(width, gamma, this.textureMetrics[id].transposed, height, this, this.sprites);
     }
 }

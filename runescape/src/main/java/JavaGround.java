@@ -613,15 +613,15 @@ public final class JavaGround extends Ground {
                         if (local2258) {
                             local2264 = blendedTextures[local1961];
                             if (local2264 != -1 && !this.toolkit.textureSource.getMetrics(local2264).disableable) {
-                                local1760.vertexColours[local1961] = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(this.toolkit.textureSource.getMetrics(local2264).aShort37 & 0xFFFF) & 0xFFFF];
+                                local1760.vertexColours[local1961] = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(this.toolkit.textureSource.getMetrics(local2264).averageColour & 0xFFFF) & 0xFFFF];
                             }
                             local2264 = blendedTextures[local2008];
                             if (local2264 != -1 && !this.toolkit.textureSource.getMetrics(local2264).disableable) {
-                                local1760.vertexColours[local2008] = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(this.toolkit.textureSource.getMetrics(local2264).aShort37 & 0xFFFF) & 0xFFFF];
+                                local1760.vertexColours[local2008] = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(this.toolkit.textureSource.getMetrics(local2264).averageColour & 0xFFFF) & 0xFFFF];
                             }
                             local2264 = blendedTextures[local2098];
                             if (local2264 != -1 && !this.toolkit.textureSource.getMetrics(local2264).disableable) {
-                                local1760.vertexColours[local2098] = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(this.toolkit.textureSource.getMetrics(local2264).aShort37 & 0xFFFF) & 0xFFFF];
+                                local1760.vertexColours[local2098] = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(this.toolkit.textureSource.getMetrics(local2264).averageColour & 0xFFFF) & 0xFFFF];
                             }
                         }
                         local1760.faceTextures[local1834] = -1;

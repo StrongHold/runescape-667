@@ -10,7 +10,7 @@ public final class Static428 {
     public static int anInt6495 = 0;
 
     @OriginalMember(owner = "client!nia", name = "v", descriptor = "Z")
-    public static boolean aBoolean487 = false;
+    public static boolean highMemory = false;
 
     @OriginalMember(owner = "client!nia", name = "a", descriptor = "(Lclient!hla;I)I")
     public static int method5796(@OriginalArg(0) Class168 arg0) {

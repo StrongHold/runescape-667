@@ -159,7 +159,7 @@ public final class Node_Sub39 extends Node {
                     arg0 = (local24 * (local49 & 0xFF00FF) + local68 * (arg0 & 0xFF00FF) & 0xFF00FF00) + ((arg0 & 0xFF00) * local68 + (local49 & 0xFF00) * local24 & 0xFF0000) >> 8;
                 }
             }
-            local49 = local19.aByte57 & 0xFF;
+            local49 = local19.brightness & 0xFF;
             if (local49 != 0) {
                 local49 += 256;
                 @Pc(122) int local122 = (arg0 >> 16 & 0xFF) * local49;

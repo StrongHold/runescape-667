@@ -43,7 +43,7 @@ public final class MapElementType {
     public int[] landmarkPalette;
 
     @OriginalMember(owner = "client!el", name = "h", descriptor = "I")
-    public int anInt2600;
+    public int textOffsetX;
 
     @OriginalMember(owner = "client!el", name = "v", descriptor = "I")
     public int secondaryVarEnd;
@@ -70,13 +70,13 @@ public final class MapElementType {
     public int landmarkVarStart;
 
     @OriginalMember(owner = "client!el", name = "q", descriptor = "I")
-    public int anInt2617;
+    public int textOffsetY;
 
     @OriginalMember(owner = "client!el", name = "x", descriptor = "I")
     public int secondaryVarp = -1;
 
     @OriginalMember(owner = "client!el", name = "d", descriptor = "I")
-    public int anInt2587 = -1;
+    public int gapLength = -1;
 
     @OriginalMember(owner = "client!el", name = "H", descriptor = "I")
     public int secondaryVarBit = -1;
@@ -112,13 +112,13 @@ public final class MapElementType {
     public int hoverTextColour = -1;
 
     @OriginalMember(owner = "client!el", name = "n", descriptor = "I")
-    public int anInt2603 = -1;
+    public int dashLength = -1;
 
     @OriginalMember(owner = "client!el", name = "U", descriptor = "Z")
-    public boolean aBoolean217 = true;
+    public boolean showOnWorldMap = true;
 
     @OriginalMember(owner = "client!el", name = "D", descriptor = "Z")
-    public boolean aBoolean218 = false;
+    public boolean showOnMinimap = false;
 
     @OriginalMember(owner = "client!el", name = "b", descriptor = "I")
     public int maxX = Integer.MAX_VALUE;
@@ -130,7 +130,7 @@ public final class MapElementType {
     public int multiVarBit = -1;
 
     @OriginalMember(owner = "client!el", name = "i", descriptor = "I")
-    public int anInt2607 = -1;
+    public int dashPhase = -1;
 
     @OriginalMember(owner = "client!el", name = "w", descriptor = "I")
     public int worldMapSprite = -1;
@@ -192,11 +192,11 @@ public final class MapElementType {
     }
 
     @OriginalMember(owner = "client!el", name = "a", descriptor = "(III)I")
-    public int param(@OriginalArg(1) int dflt, @OriginalArg(2) int arg1) {
+    public int param(@OriginalArg(1) int dflt, @OriginalArg(2) int paramId) {
         if (this.params == null) {
             return dflt;
         } else {
-            @Pc(27) IntNode param = (IntNode) this.params.get(arg1);
+            @Pc(27) IntNode param = (IntNode) this.params.get(paramId);
             return param != null ? param.value : dflt;
         }
     }
@@ -283,7 +283,7 @@ public final class MapElementType {
                 this.enabled = false;
             }
             if ((flags & 0x2) == 2) {
-                this.aBoolean218 = true;
+                this.showOnMinimap = true;
             }
         } else if (code == 8) {
             this.randomise = packet.g1() == 1;
@@ -318,11 +318,11 @@ public final class MapElementType {
             }
 
             this.landmarkColorIndices = new byte[polygonCount];
-            for (@Pc(419) int local419 = 0; local419 < polygonCount; local419++) {
-                this.landmarkColorIndices[local419] = packet.g1b();
+            for (@Pc(419) int i = 0; i < polygonCount; i++) {
+                this.landmarkColorIndices[i] = packet.g1b();
             }
         } else if (code == 16) {
-            this.aBoolean217 = false;
+            this.showOnWorldMap = false;
         } else if (code == 17) {
             this.opBase = packet.gjstr();
         } else if (code == 18) {
@@ -345,12 +345,12 @@ public final class MapElementType {
         } else if (code == 22) {
             this.fillColour = packet.g4();
         } else if (code == 23) {
-            this.anInt2603 = packet.g1();
-            this.anInt2587 = packet.g1();
-            this.anInt2607 = packet.g1();
+            this.dashLength = packet.g1();
+            this.gapLength = packet.g1();
+            this.dashPhase = packet.g1();
         } else if (code == 24) {
-            this.anInt2600 = packet.g2s();
-            this.anInt2617 = packet.g2s();
+            this.textOffsetX = packet.g2s();
+            this.textOffsetY = packet.g2s();
         } else if (code == 249) {
             @Pc(74) int count = packet.g1();
             if (this.params == null) {

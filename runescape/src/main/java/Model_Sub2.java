@@ -239,7 +239,7 @@ public final class Model_Sub2 extends Model {
             if (arg1.shadingType == null || arg1.shadingType[local129] != 2) {
                 if (arg1.faceTexture != null && arg1.faceTexture[local129] != -1) {
                     @Pc(168) TextureMetrics local168 = local116.getMetrics(arg1.faceTexture[local129] & 0xFFFF);
-                    if (((this.anInt5529 & 0x40) == 0 || !local168.disableable) && local168.aBoolean234) {
+                    if (((this.anInt5529 & 0x40) == 0 || !local168.disableable) && local168.skipFaces) {
                         continue;
                     }
                 }
@@ -349,14 +349,14 @@ public final class Model_Sub2 extends Model {
                 }
                 local674 = ColourUtils.HSL_TO_RGB[arg1.faceColour[local612.face] & 0xFFFF] & 0xFFFFFF;
                 @Pc(692) int local692 = local674 | 255 - (arg1.faceAlpha == null ? 0 : arg1.faceAlpha[local612.face]) << 24;
-                this.billboardFaces[local603] = new GlBillboardFace(local619, arg1.faceA[local612.face], arg1.faceB[local612.face], arg1.faceC[local612.face], local617.width, local617.height, local617.texture, local617.anInt9697, local617.blendMode, local617.hideFace, local617.aBoolean748, local612.distance);
+                this.billboardFaces[local603] = new GlBillboardFace(local619, arg1.faceA[local612.face], arg1.faceB[local612.face], arg1.faceC[local612.face], local617.width, local617.height, local617.texture, local617.colourOp, local617.blendMode, local617.hideFace, local617.hideWithBloom, local612.distance);
                 this.billboardAttributes[local603] = new GlBillboardAttributes(local692);
             }
         }
         local603 = this.anInt5560 * 3;
         this.aShortArray70 = new short[local603];
         this.aShort64 = (short) arg3;
-        if (arg1.aShortArray20 != null) {
+        if (arg1.faceOriginModels != null) {
             this.aShortArray68 = new short[this.anInt5560];
         }
         this.aShortArray69 = new short[local603];
@@ -692,8 +692,8 @@ public final class Model_Sub2 extends Model {
             if (arg1.faceAlpha != null) {
                 this.aByteArray54[local291] = arg1.faceAlpha[local1216];
             }
-            if (arg1.aShortArray20 != null) {
-                this.aShortArray68[local291] = arg1.aShortArray20[local1216];
+            if (arg1.faceOriginModels != null) {
+                this.aShortArray68[local291] = arg1.faceOriginModels[local1216];
             }
             this.aShortArray74[local291] = arg1.faceColour[local1216];
             this.aShortArray75[local291] = local1260;
@@ -776,14 +776,14 @@ public final class Model_Sub2 extends Model {
         if (src != -1) {
             @Pc(53) TextureMetrics local53 = local9.getMetrics(src & 0xFFFF);
             local39 = local53.alpha;
-            local41 = local53.aByte57;
+            local41 = local53.brightness;
         }
         @Pc(61) byte local61 = 0;
         @Pc(63) byte local63 = 0;
         if (dest != -1) {
             @Pc(73) TextureMetrics local73 = local9.getMetrics(dest & 0xFFFF);
             local61 = local73.alpha;
-            local63 = local73.aByte57;
+            local63 = local73.brightness;
             if (local73.speedU != 0 || local73.speedV != 0) {
                 this.aBoolean423 = true;
             }
@@ -1292,7 +1292,7 @@ public final class Model_Sub2 extends Model {
                     local20 = ((local20 & 0xFF00) * local78 + local38 * (local49 & 0xFF00) & 0xFF0000) + ((local20 & 0xFF00FF) * local78 + (local49 & 0xFF00FF) * local38 & 0xFF00FF00) >> 8;
                 }
             }
-            local49 = local33.aByte57 & 0xFF;
+            local49 = local33.brightness & 0xFF;
             if (local49 != 0) {
                 local49 += 256;
                 @Pc(124) int local124 = local49 * (local20 >> 16 & 0xFF);
@@ -1345,7 +1345,7 @@ public final class Model_Sub2 extends Model {
 
     @OriginalMember(owner = "client!kla", name = "d", descriptor = "()V")
     @Override
-    protected void method7494() {
+    protected void unlock() {
     }
 
     @OriginalMember(owner = "client!kla", name = "NA", descriptor = "()Z")
@@ -1491,15 +1491,15 @@ public final class Model_Sub2 extends Model {
                 if (local20.next != null) {
                     local22 = local20.next;
                 }
-                local22.anInt8518 = (int) (local8.aFloat153 * (float) this.anIntArray410[local20.anInt8514] + local8.aFloat157 * (float) this.anIntArray409[local20.anInt8514] + (float) this.anIntArray412[local20.anInt8514] * local8.aFloat160 + local8.aFloat152);
-                local22.anInt8502 = (int) ((float) this.anIntArray412[local20.anInt8514] * local8.aFloat150 + ((float) this.anIntArray409[local20.anInt8514] * local8.aFloat156 + local8.aFloat161 * (float) this.anIntArray410[local20.anInt8514]) + local8.aFloat158);
-                local22.anInt8504 = (int) (local8.aFloat154 * (float) this.anIntArray412[local20.anInt8514] + ((float) this.anIntArray410[local20.anInt8514] * local8.aFloat155 + local8.aFloat151 * (float) this.anIntArray409[local20.anInt8514]) + local8.aFloat159);
-                local22.anInt8516 = (int) (local8.aFloat160 * (float) this.anIntArray412[local20.anInt8508] + ((float) this.anIntArray409[local20.anInt8508] * local8.aFloat157 + (float) this.anIntArray410[local20.anInt8508] * local8.aFloat153) + local8.aFloat152);
-                local22.anInt8507 = (int) (local8.aFloat158 + (local8.aFloat150 * (float) this.anIntArray412[local20.anInt8508] + ((float) this.anIntArray410[local20.anInt8508] * local8.aFloat161 + local8.aFloat156 * (float) this.anIntArray409[local20.anInt8508])));
-                local22.anInt8509 = (int) (local8.aFloat159 + ((float) this.anIntArray409[local20.anInt8508] * local8.aFloat151 + local8.aFloat155 * (float) this.anIntArray410[local20.anInt8508] + local8.aFloat154 * (float) this.anIntArray412[local20.anInt8508]));
-                local22.anInt8512 = (int) (local8.aFloat152 + (local8.aFloat160 * (float) this.anIntArray412[local20.anInt8505] + ((float) this.anIntArray409[local20.anInt8505] * local8.aFloat157 + (float) this.anIntArray410[local20.anInt8505] * local8.aFloat153)));
-                local22.anInt8503 = (int) ((float) this.anIntArray410[local20.anInt8505] * local8.aFloat161 + (float) this.anIntArray409[local20.anInt8505] * local8.aFloat156 + (float) this.anIntArray412[local20.anInt8505] * local8.aFloat150 + local8.aFloat158);
-                local22.anInt8520 = (int) (local8.aFloat159 + (local8.aFloat154 * (float) this.anIntArray412[local20.anInt8505] + ((float) this.anIntArray410[local20.anInt8505] * local8.aFloat155 + local8.aFloat151 * (float) this.anIntArray409[local20.anInt8505])));
+                local22.transformedAX = (int) (local8.aFloat153 * (float) this.anIntArray410[local20.vertexA] + local8.aFloat157 * (float) this.anIntArray409[local20.vertexA] + (float) this.anIntArray412[local20.vertexA] * local8.aFloat160 + local8.aFloat152);
+                local22.transformedAY = (int) ((float) this.anIntArray412[local20.vertexA] * local8.aFloat150 + ((float) this.anIntArray409[local20.vertexA] * local8.aFloat156 + local8.aFloat161 * (float) this.anIntArray410[local20.vertexA]) + local8.aFloat158);
+                local22.transformedAZ = (int) (local8.aFloat154 * (float) this.anIntArray412[local20.vertexA] + ((float) this.anIntArray410[local20.vertexA] * local8.aFloat155 + local8.aFloat151 * (float) this.anIntArray409[local20.vertexA]) + local8.aFloat159);
+                local22.transformedBX = (int) (local8.aFloat160 * (float) this.anIntArray412[local20.vertexB] + ((float) this.anIntArray409[local20.vertexB] * local8.aFloat157 + (float) this.anIntArray410[local20.vertexB] * local8.aFloat153) + local8.aFloat152);
+                local22.transformedBY = (int) (local8.aFloat158 + (local8.aFloat150 * (float) this.anIntArray412[local20.vertexB] + ((float) this.anIntArray410[local20.vertexB] * local8.aFloat161 + local8.aFloat156 * (float) this.anIntArray409[local20.vertexB])));
+                local22.transformedBZ = (int) (local8.aFloat159 + ((float) this.anIntArray409[local20.vertexB] * local8.aFloat151 + local8.aFloat155 * (float) this.anIntArray410[local20.vertexB] + local8.aFloat154 * (float) this.anIntArray412[local20.vertexB]));
+                local22.transformedCX = (int) (local8.aFloat152 + (local8.aFloat160 * (float) this.anIntArray412[local20.vertexC] + ((float) this.anIntArray409[local20.vertexC] * local8.aFloat157 + (float) this.anIntArray410[local20.vertexC] * local8.aFloat153)));
+                local22.transformedCY = (int) ((float) this.anIntArray410[local20.vertexC] * local8.aFloat161 + (float) this.anIntArray409[local20.vertexC] * local8.aFloat156 + (float) this.anIntArray412[local20.vertexC] * local8.aFloat150 + local8.aFloat158);
+                local22.transformedCZ = (int) (local8.aFloat159 + (local8.aFloat154 * (float) this.anIntArray412[local20.vertexC] + ((float) this.anIntArray410[local20.vertexC] * local8.aFloat155 + local8.aFloat151 * (float) this.anIntArray409[local20.vertexC])));
             }
         }
         if (this.aModelParticleEffectorArray4 == null) {
@@ -1740,7 +1740,7 @@ public final class Model_Sub2 extends Model {
 
     @OriginalMember(owner = "client!kla", name = "a", descriptor = "(Lclient!ka;IIIZ)V")
     @Override
-    public void method7481(@OriginalArg(0) Model arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) boolean arg4) {
+    public void shareLight(@OriginalArg(0) Model arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) boolean arg4) {
         @Pc(8) Model_Sub2 local8 = (Model_Sub2) arg0;
         if (this.anInt5560 == 0 || local8.anInt5560 == 0) {
             return;
@@ -3428,7 +3428,7 @@ public final class Model_Sub2 extends Model {
 
     @OriginalMember(owner = "client!kla", name = "a", descriptor = "(I[IIIIIZ)V")
     @Override
-    protected void method7499(@OriginalArg(0) int arg0, @OriginalArg(1) int[] arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) boolean arg6) {
+    protected void applyTransformUnmasked(@OriginalArg(0) int arg0, @OriginalArg(1) int[] arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) boolean arg6) {
         @Pc(8) int local8 = arg1.length;
         @Pc(27) int local27;
         @Pc(35) int local35;
@@ -3806,7 +3806,7 @@ public final class Model_Sub2 extends Model {
                     if (x - (local314 >> 1) < 0 || floor.sizeX << floor.tileSizeShift <= (local314 >> 1) + x + floor.tileSize || z - (local240 >> 1) < 0 || z + (local240 >> 1) + floor.tileSize >= floor.sizeZ << floor.tileSizeShift) {
                         return;
                     }
-                    this.method7490(y, local251, x, local314, z, local240, floor, local338);
+                    this.conformToGround(y, local251, x, local314, z, local240, floor, local338);
                 } else if (hillType == 4) {
                     local314 = this.aShort68 - this.aShort63;
                     for (local240 = 0; local240 < this.anInt5543; local240++) {
@@ -3881,7 +3881,7 @@ public final class Model_Sub2 extends Model {
 
     @OriginalMember(owner = "client!kla", name = "g", descriptor = "()V")
     @Override
-    protected void method7491() {
+    protected void lock() {
     }
 
     @OriginalMember(owner = "client!kla", name = "EA", descriptor = "()I")

@@ -45,9 +45,9 @@ public final class i extends Model implements SoftwareObject {
         @Pc(36) int local36 = 0;
         @Pc(43) int[] local43 = new int[local24 * 3 + local34];
         for (@Pc(45) int local45 = 0; local45 < local24; local45++) {
-            local43[local36++] = this.aModelParticleEmitterArray3[local45].anInt8514;
-            local43[local36++] = this.aModelParticleEmitterArray3[local45].anInt8508;
-            local43[local36++] = this.aModelParticleEmitterArray3[local45].anInt8505;
+            local43[local36++] = this.aModelParticleEmitterArray3[local45].vertexA;
+            local43[local36++] = this.aModelParticleEmitterArray3[local45].vertexB;
+            local43[local36++] = this.aModelParticleEmitterArray3[local45].vertexC;
         }
         for (@Pc(79) int local79 = 0; local79 < local34; local79++) {
             local43[local36++] = this.aModelParticleEffectorArray3[local79].vertex;
@@ -62,7 +62,7 @@ public final class i extends Model implements SoftwareObject {
             local110[local112++] = local125.width;
             local110[local112++] = local125.height;
             local110[local112++] = local125.texture;
-            local110[local112++] = local125.anInt9697;
+            local110[local112++] = local125.colourOp;
             local110[local112++] = local125.blendMode;
             local110[local112++] = local125.hideFace ? -1 : 0;
         }
@@ -70,7 +70,7 @@ public final class i extends Model implements SoftwareObject {
             @Pc(184) MeshBillboard local184 = arg2.billboards[local178];
             local110[local112++] = local184.group;
         }
-        this.R(this.anOa2, this.aYa1, arg2.vertexCount, arg2.maxVertex, arg2.vertexX, arg2.vertexY, arg2.vertexZ, arg2.vertexLabel, arg2.originModels, arg2.faceCount, arg2.faceA, arg2.faceB, arg2.faceC, arg2.shadingType, arg2.facePriority, arg2.faceAlpha, arg2.faceTexSpace, arg2.faceColour, arg2.faceTexture, arg2.faceLabel, arg2.globalPriority, arg2.aShortArray20, arg2.texSpaceCount, arg2.texMappingType, arg2.texSpaceDefA, arg2.texSpaceDefB, arg2.texSpaceDefC, arg2.texSpaceScaleX, arg2.texSpaceScaleY, arg2.texSpaceScaleZ, arg2.texRotation, arg2.texDirection, arg2.texOffsetX, arg2.texOffsetY, arg2.texOffsetZ, local43, local24, local34, arg3, arg4, arg5, arg6, local110);
+        this.R(this.anOa2, this.aYa1, arg2.vertexCount, arg2.maxVertex, arg2.vertexX, arg2.vertexY, arg2.vertexZ, arg2.vertexLabel, arg2.originModels, arg2.faceCount, arg2.faceA, arg2.faceB, arg2.faceC, arg2.shadingType, arg2.facePriority, arg2.faceAlpha, arg2.faceTexSpace, arg2.faceColour, arg2.faceTexture, arg2.faceLabel, arg2.globalPriority, arg2.faceOriginModels, arg2.texSpaceCount, arg2.texMappingType, arg2.texSpaceDefA, arg2.texSpaceDefB, arg2.texSpaceDefC, arg2.texSpaceScaleX, arg2.texSpaceScaleY, arg2.texSpaceScaleZ, arg2.texRotation, arg2.texDirection, arg2.texOffsetX, arg2.texOffsetY, arg2.texOffsetZ, local43, local24, local34, arg3, arg4, arg5, arg6, local110);
     }
 
     @OriginalMember(owner = "client!i", name = "<init>", descriptor = "(Lclient!oa;)V")
@@ -100,7 +100,7 @@ public final class i extends Model implements SoftwareObject {
 
     @OriginalMember(owner = "client!i", name = "g", descriptor = "()V")
     @Override
-    protected void method7491() {
+    protected void lock() {
         if (this.anOa2.anInt6770 <= 1) {
             return;
         }
@@ -143,7 +143,7 @@ public final class i extends Model implements SoftwareObject {
 
     @OriginalMember(owner = "client!i", name = "a", descriptor = "(I[IIIIIZ)V")
     @Override
-    protected void method7499(@OriginalArg(0) int arg0, @OriginalArg(1) int[] arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) boolean arg6) {
+    protected void applyTransformUnmasked(@OriginalArg(0) int arg0, @OriginalArg(1) int[] arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) boolean arg6) {
         this.l(this.nativeid, arg0, arg1, arg2, arg3, arg4, arg5, arg6);
     }
 
@@ -189,15 +189,15 @@ public final class i extends Model implements SoftwareObject {
         if (this.aModelParticleEmitterArray3 != null) {
             for (local10 = 0; local10 < this.aModelParticleEmitterArray3.length; local10++) {
                 @Pc(16) ModelParticleEmitter local16 = this.aModelParticleEmitterArray3[local10];
-                local16.anInt8518 = Static445.anIntArray537[local5++];
-                local16.anInt8502 = Static445.anIntArray537[local5++];
-                local16.anInt8504 = Static445.anIntArray537[local5++];
-                local16.anInt8516 = Static445.anIntArray537[local5++];
-                local16.anInt8507 = Static445.anIntArray537[local5++];
-                local16.anInt8509 = Static445.anIntArray537[local5++];
-                local16.anInt8512 = Static445.anIntArray537[local5++];
-                local16.anInt8503 = Static445.anIntArray537[local5++];
-                local16.anInt8520 = Static445.anIntArray537[local5++];
+                local16.transformedAX = Static445.anIntArray537[local5++];
+                local16.transformedAY = Static445.anIntArray537[local5++];
+                local16.transformedAZ = Static445.anIntArray537[local5++];
+                local16.transformedBX = Static445.anIntArray537[local5++];
+                local16.transformedBY = Static445.anIntArray537[local5++];
+                local16.transformedBZ = Static445.anIntArray537[local5++];
+                local16.transformedCX = Static445.anIntArray537[local5++];
+                local16.transformedCY = Static445.anIntArray537[local5++];
+                local16.transformedCZ = Static445.anIntArray537[local5++];
             }
         }
         if (this.aModelParticleEffectorArray3 == null) {
@@ -294,7 +294,7 @@ public final class i extends Model implements SoftwareObject {
 
     @OriginalMember(owner = "client!i", name = "d", descriptor = "()V")
     @Override
-    protected void method7494() {
+    protected void unlock() {
         if (this.anOa2.anInt6770 > 1) {
             synchronized (this) {
                 super.locked = false;
@@ -372,7 +372,7 @@ public final class i extends Model implements SoftwareObject {
 
     @OriginalMember(owner = "client!i", name = "a", descriptor = "(Lclient!ka;IIIZ)V")
     @Override
-    public void method7481(@OriginalArg(0) Model arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) boolean arg4) {
+    public void shareLight(@OriginalArg(0) Model arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) boolean arg4) {
         this.anOa2.method6087().method10(this, arg0, arg1, arg2, arg3, arg4);
     }
 

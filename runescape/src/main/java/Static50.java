@@ -13,7 +13,7 @@ public final class Static50 {
     public static boolean previousFocus = true;
 
     @OriginalMember(owner = "client!bm", name = "e", descriptor = "Z")
-    public static boolean aBoolean566 = false;
+    public static boolean highWaterDetail = false;
 
     @OriginalMember(owner = "client!bm", name = "a", descriptor = "(Lclient!cg;B)V")
     public static void animationTick(@OriginalArg(0) PathingEntity arg0) {

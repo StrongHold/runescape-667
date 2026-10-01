@@ -136,12 +136,12 @@ public final class StaticWall extends Wall implements Location {
         if (entity instanceof StaticWall) {
             @Pc(34) StaticWall wall = (StaticWall) entity;
             if (this.model != null && wall.model != null) {
-                this.model.method7481(wall.model, offsetX, offsetY, offsetZ, arg1);
+                this.model.shareLight(wall.model, offsetX, offsetY, offsetZ, arg1);
             }
         } else if (entity instanceof StaticLocation) {
             @Pc(10) StaticLocation loc = (StaticLocation) entity;
             if (this.model != null && loc.model != null) {
-                this.model.method7481(loc.model, offsetX, offsetY, offsetZ, arg1);
+                this.model.shareLight(loc.model, offsetX, offsetY, offsetZ, arg1);
             }
         }
         if (arg4 < 101) {

@@ -4,7 +4,7 @@ import org.openrs2.deob.annotation.OriginalMember;
 public final class Static279 {
 
     @OriginalMember(owner = "client!io", name = "c", descriptor = "[Z")
-    public static boolean[] aBooleanArray11;
+    public static boolean[] environmentLightApplied;
 
     @OriginalMember(owner = "client!io", name = "a", descriptor = "[Ljava/lang/Object;")
     public static Object[] clanVars;

@@ -6,7 +6,7 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static418 {
 
     @OriginalMember(owner = "client!nda", name = "I", descriptor = "[I")
-    public static int[] anIntArray704;
+    public static int[] countColumns;
 
     @OriginalMember(owner = "client!nda", name = "F", descriptor = "Lclient!hc;")
     public static final CutsceneActionType A_CUTSCENE_ACTION_TYPE___41 = new CutsceneActionType(17);

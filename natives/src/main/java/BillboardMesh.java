@@ -69,7 +69,7 @@ public record BillboardMesh(int size) {
         type.height = 70;
         type.texture = texture;
         type.blendMode = 2;
-        type.anInt9697 = 1;
+        type.colourOp = 1;
         type.hideFace = insteadOfTheFace;
         BillboardTypeList.recentUse.put(type, id);
     }

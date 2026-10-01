@@ -22,10 +22,10 @@ public final class BillboardType {
     public boolean hideFace = false;
 
     @OriginalMember(owner = "client!uja", name = "a", descriptor = "Z")
-    public boolean aBoolean748 = false;
+    public boolean hideWithBloom = false;
 
     @OriginalMember(owner = "client!uja", name = "i", descriptor = "I")
-    public int anInt9697 = 1;
+    public int colourOp = 1;
 
     @OriginalMember(owner = "client!uja", name = "c", descriptor = "I")
     public int width = 64;
@@ -57,9 +57,9 @@ public final class BillboardType {
         } else if (code == 4) {
             this.blendMode = packet.g1();
         } else if (code == 5) {
-            this.anInt9697 = packet.g1();
+            this.colourOp = packet.g1();
         } else if (code == 6) {
-            this.aBoolean748 = true;
+            this.hideWithBloom = true;
         } else if (code == 7) {
             this.hideFace = true;
         }

@@ -2757,7 +2757,7 @@ public sealed interface Scene {
 
             if (meeting) {
                 /* The last thing the client passes is the one the toolkit never reads. */
-                left.method7481(right, -built, 0, 0, true);
+                left.shareLight(right, -built, 0, 0, true);
             }
 
             props.matrix().makeRotationZ(0);
@@ -3441,7 +3441,7 @@ public sealed interface Scene {
                     CONTRAST);
                 mesh.shadingType = held;
                 var away = APART[pair];
-                first.method7481(second, away[0], away[1], away[2], MARKED[pair]);
+                first.shareLight(second, away[0], away[1], away[2], MARKED[pair]);
 
                 var across = (pair - 1) * SPREAD * 2 / 3;
                 props.matrix().makeRotationZ(0);

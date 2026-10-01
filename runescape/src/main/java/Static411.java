@@ -6,20 +6,20 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static411 {
 
     @OriginalMember(owner = "client!mv", name = "a", descriptor = "(IIII)V")
-    public static void method5666(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3) {
-        @Pc(7) Tile local7 = Static334.activeTiles[arg0][arg1][arg2];
-        if (local7 == null) {
+    public static void scaleWallDecorOffsets(@OriginalArg(0) int level, @OriginalArg(1) int x, @OriginalArg(2) int z, @OriginalArg(3) int offset) {
+        @Pc(7) Tile tile = Static334.activeTiles[level][x][z];
+        if (tile == null) {
             return;
         }
-        @Pc(14) WallDecor local14 = local7.wallDecor;
-        @Pc(17) WallDecor local17 = local7.wallDecor2;
-        if (local14 != null) {
-            local14.aShort101 = (short) (local14.aShort101 * arg3 / (0x10 << EnvironmentLight.anInt1066 - 7));
-            local14.aShort102 = (short) (local14.aShort102 * arg3 / (0x10 << EnvironmentLight.anInt1066 - 7));
+        @Pc(14) WallDecor wallDecor = tile.wallDecor;
+        @Pc(17) WallDecor wallDecor2 = tile.wallDecor2;
+        if (wallDecor != null) {
+            wallDecor.aShort101 = (short) (wallDecor.aShort101 * offset / (0x10 << EnvironmentLight.anInt1066 - 7));
+            wallDecor.aShort102 = (short) (wallDecor.aShort102 * offset / (0x10 << EnvironmentLight.anInt1066 - 7));
         }
-        if (local17 != null) {
-            local17.aShort101 = (short) (local17.aShort101 * arg3 / (0x10 << EnvironmentLight.anInt1066 - 7));
-            local17.aShort102 = (short) (local17.aShort102 * arg3 / (0x10 << EnvironmentLight.anInt1066 - 7));
+        if (wallDecor2 != null) {
+            wallDecor2.aShort101 = (short) (wallDecor2.aShort101 * offset / (0x10 << EnvironmentLight.anInt1066 - 7));
+            wallDecor2.aShort102 = (short) (wallDecor2.aShort102 * offset / (0x10 << EnvironmentLight.anInt1066 - 7));
         }
     }
 }

@@ -57,7 +57,7 @@ public final class MovingParticle extends Particle {
         this.directionY = (short) directionY;
         this.directionZ = (short) directionZ;
         this.speed = speed;
-        super.aByte122 = this.emitter.model.aByte130;
+        super.aByte122 = this.emitter.model.priority;
         this.register();
     }
 
@@ -434,7 +434,7 @@ public final class MovingParticle extends Particle {
         this.directionY = (short) directionY;
         this.directionZ = (short) directionZ;
         this.speed = speed;
-        super.aByte122 = this.emitter.model.aByte130;
+        super.aByte122 = this.emitter.model.priority;
         this.register();
     }
 

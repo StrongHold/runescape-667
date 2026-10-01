@@ -111,7 +111,7 @@ public final class SceneRenderer {
             }
         }
         if (Static442.aBoolean500) {
-            for (local85 = 0; local85 < Static319.anInt5080; local85++) {
+            for (local85 = 0; local85 < Static319.environmentLightCount; local85++) {
                 EnvironmentLight.aEnvironmentLightArray1[local85].method8241(flickerDisabled, clock);
             }
         }

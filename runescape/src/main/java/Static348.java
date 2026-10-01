@@ -6,7 +6,7 @@ public final class Static348 {
     public static float aFloat107;
 
     @OriginalMember(owner = "client!kv", name = "c", descriptor = "(I)V")
-    public static void method5107() {
+    public static void rebuildOccluders() {
         Static416.rebuildActiveOccluders();
     }
 

@@ -5,7 +5,7 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static467 {
 
     @OriginalMember(owner = "client!oo", name = "m", descriptor = "[I")
-    public static int[] anIntArray568;
+    public static int[] saturationColumns;
 
     @OriginalMember(owner = "client!oo", name = "a", descriptor = "(III)Lclient!pba;")
     public static PositionEntityNode getHead(@OriginalArg(0) int level, @OriginalArg(1) int x, @OriginalArg(2) int z) {

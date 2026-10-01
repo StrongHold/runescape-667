@@ -27,10 +27,10 @@ public final class Static431 {
         }
         @Pc(93) int local93 = local51 & 0x1F;
         local80 = 256;
-        if (arg0.anIntArray154 != null && arg0.anIntArray155 != null) {
-            local80 = arg0.anIntArray154[arg1] + (int) ((double) (arg0.anIntArray155[arg1] - arg0.anIntArray154[arg1]) * Math.random());
+        if (arg0.soundRateMin != null && arg0.soundRateMax != null) {
+            local80 = arg0.soundRateMin[arg1] + (int) ((double) (arg0.soundRateMax[arg1] - arg0.soundRateMin[arg1]) * Math.random());
         }
-        @Pc(134) int local134 = arg0.anIntArray156 == null ? 255 : arg0.anIntArray156[arg1];
+        @Pc(134) int local134 = arg0.soundVolumes == null ? 255 : arg0.soundVolumes[arg1];
         if (local93 == 0) {
             if (arg2 == PlayerEntity.self) {
                 if (!arg0.vorbisSound) {

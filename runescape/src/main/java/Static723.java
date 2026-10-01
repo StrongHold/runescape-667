@@ -41,8 +41,8 @@ public final class Static723 {
                         local117++;
                     }
                     @Pc(132) int local132 = 0;
-                    if (MapRegion.active.aByteArrayArrayArray12 != null && MapRegion.active.aByteArrayArrayArray12[local117] != null) {
-                        local132 = (MapRegion.active.aByteArrayArrayArray12[local117][local109][local114] & 0xFF) * 8 << 2;
+                    if (MapRegion.active.cameraHeights != null && MapRegion.active.cameraHeights[local117] != null) {
+                        local132 = (MapRegion.active.cameraHeights[local117][local109][local114] & 0xFF) * 8 << 2;
                     }
                     if (Static246.ground != null && Static246.ground[local117] != null) {
                         @Pc(177) int local177 = local132 + local77 - Static246.ground[local117].getHeight(local109, local114);

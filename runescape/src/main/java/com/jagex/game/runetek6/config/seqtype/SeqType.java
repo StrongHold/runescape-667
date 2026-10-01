@@ -10,16 +10,16 @@ import org.openrs2.deob.annotation.Pc;
 public final class SeqType {
 
     @OriginalMember(owner = "client!cka", name = "v", descriptor = "[I")
-    public int[] anIntArray154;
+    public int[] soundRateMin;
 
     @OriginalMember(owner = "client!cka", name = "a", descriptor = "[I")
-    public int[] anIntArray155;
+    public int[] soundRateMax;
 
     @OriginalMember(owner = "client!cka", name = "y", descriptor = "[[I")
     public int[][] soundInfo;
 
     @OriginalMember(owner = "client!cka", name = "z", descriptor = "[I")
-    public int[] anIntArray156;
+    public int[] soundVolumes;
 
     @OriginalMember(owner = "client!cka", name = "e", descriptor = "[Z")
     public boolean[] blendFlags;
@@ -122,8 +122,8 @@ public final class SeqType {
         } else if (code == 3) {
             this.blendFlags = new boolean[256];
 
-            @Pc(20) int local20 = packet.g1();
-            for (@Pc(26) int local26 = 0; local26 < local20; local26++) {
+            @Pc(20) int count = packet.g1();
+            for (@Pc(26) int i = 0; i < count; i++) {
                 this.blendFlags[packet.g1()] = true;
             }
         } else if (code == 5) {
@@ -175,28 +175,28 @@ public final class SeqType {
         } else if (code == 18) {
             this.vorbisSound = true;
         } else if (code == 19) {
-            if (this.anIntArray156 == null) {
-                this.anIntArray156 = new int[this.soundInfo.length];
+            if (this.soundVolumes == null) {
+                this.soundVolumes = new int[this.soundInfo.length];
 
                 for (@Pc(20) int i = 0; i < this.soundInfo.length; i++) {
-                    this.anIntArray156[i] = 255;
+                    this.soundVolumes[i] = 255;
                 }
             }
-            this.anIntArray156[packet.g1()] = packet.g1();
+            this.soundVolumes[packet.g1()] = packet.g1();
         } else if (code == 20) {
-            if (this.anIntArray154 == null || this.anIntArray155 == null) {
-                this.anIntArray154 = new int[this.soundInfo.length];
-                this.anIntArray155 = new int[this.soundInfo.length];
+            if (this.soundRateMin == null || this.soundRateMax == null) {
+                this.soundRateMin = new int[this.soundInfo.length];
+                this.soundRateMax = new int[this.soundInfo.length];
 
                 for (@Pc(20) int i = 0; i < this.soundInfo.length; i++) {
-                    this.anIntArray154[i] = 256;
-                    this.anIntArray155[i] = 256;
+                    this.soundRateMin[i] = 256;
+                    this.soundRateMax[i] = 256;
                 }
             }
 
             @Pc(20) int index = packet.g1();
-            this.anIntArray154[index] = packet.g2();
-            this.anIntArray155[index] = packet.g2();
+            this.soundRateMin[index] = packet.g2();
+            this.soundRateMax[index] = packet.g2();
         }
     }
 }

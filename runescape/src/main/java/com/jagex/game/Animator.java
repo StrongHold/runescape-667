@@ -28,7 +28,7 @@ public class Animator {
         if (animator.resolveSequences() && other.resolveSequences()) {
             @Pc(12) SeqType thisAnimation = animator.animation;
             @Pc(15) SeqType otherAnimation = other.animation;
-            model.method7477(other.frameOffset, animator.primarySequences.frame, animator.primarySequences.nextFrameset, other.primarySequences.nextFrame, animator.primarySequences.nextFrame, other.primarySequences.nextFrameset, animator.primarySequences.frameset, animator.frameOffset, thisAnimation.rotateNormals | otherAnimation.rotateNormals, otherAnimation.frameDurations[other.currentFrame], other.primarySequences.frameset, thisAnimation.blendFlags, thisAnimation.frameDurations[animator.currentFrame], other.primarySequences.frame);
+            model.animateBlended(other.frameOffset, animator.primarySequences.frame, animator.primarySequences.nextFrameset, other.primarySequences.nextFrame, animator.primarySequences.nextFrame, other.primarySequences.nextFrameset, animator.primarySequences.frameset, animator.frameOffset, thisAnimation.rotateNormals | otherAnimation.rotateNormals, otherAnimation.frameDurations[other.currentFrame], other.primarySequences.frameset, thisAnimation.blendFlags, thisAnimation.frameDurations[animator.currentFrame], other.primarySequences.frame);
         }
     }
 
@@ -93,10 +93,10 @@ public class Animator {
             return;
         }
 
-        model.method7487(this.primarySequences.frameset, this.frameOffset, this.animation.frameDurations[this.currentFrame], this.primarySequences.nextFrameset, this.primarySequences.frame, this.primarySequences.nextFrame, rotation, this.animation.rotateNormals);
+        model.animate(this.primarySequences.frameset, this.frameOffset, this.animation.frameDurations[this.currentFrame], this.primarySequences.nextFrameset, this.primarySequences.frame, this.primarySequences.nextFrame, rotation, this.animation.rotateNormals);
 
         if (this.runSecondary && this.animation.secondaryFrames != null && this.secondarySequences.resolved) {
-            model.method7487(this.secondarySequences.frameset, this.frameOffset, this.animation.frameDurations[this.currentFrame], this.secondarySequences.nextFrameset, this.secondarySequences.frame, this.secondarySequences.nextFrame, rotation, this.animation.rotateNormals);
+            model.animate(this.secondarySequences.frameset, this.frameOffset, this.animation.frameDurations[this.currentFrame], this.secondarySequences.nextFrameset, this.secondarySequences.frame, this.secondarySequences.nextFrame, rotation, this.animation.rotateNormals);
         }
     }
 
@@ -223,9 +223,9 @@ public class Animator {
     @OriginalMember(owner = "client!gu", name = "a", descriptor = "(Lclient!ka;I)V")
     public final void method9105(@OriginalArg(0) Model model) {
         if (this.resolveSequences()) {
-            model.method7493(this.primarySequences.frame, this.primarySequences.frameset);
+            model.animateShadow(this.primarySequences.frame, this.primarySequences.frameset);
             if (this.runSecondary && this.animation.secondaryFrames != null && this.secondarySequences.resolved) {
-                model.method7493(this.secondarySequences.frame, this.secondarySequences.frameset);
+                model.animateShadow(this.secondarySequences.frame, this.secondarySequences.frameset);
             }
         }
     }
@@ -256,9 +256,9 @@ public class Animator {
     @OriginalMember(owner = "client!gu", name = "a", descriptor = "(IIZLclient!ka;)V")
     public final void animatePartial(@OriginalArg(0) int groupMask, @OriginalArg(3) Model model) {
         if (this.resolveSequences()) {
-            model.method7496(this.frameOffset, this.primarySequences.frameset, this.primarySequences.nextFrameset, this.primarySequences.frame, null, this.animation.frameDurations[this.currentFrame], this.animation.rotateNormals, this.primarySequences.nextFrame, groupMask);
+            model.animateMasked(this.frameOffset, this.primarySequences.frameset, this.primarySequences.nextFrameset, this.primarySequences.frame, null, this.animation.frameDurations[this.currentFrame], this.animation.rotateNormals, this.primarySequences.nextFrame, groupMask);
             if (this.runSecondary && this.animation.secondaryFrames != null && this.secondarySequences.resolved) {
-                model.method7496(this.frameOffset, this.secondarySequences.frameset, this.secondarySequences.nextFrameset, this.secondarySequences.frame, null, this.animation.frameDurations[this.currentFrame], this.animation.rotateNormals, this.secondarySequences.nextFrame, groupMask);
+                model.animateMasked(this.frameOffset, this.secondarySequences.frameset, this.secondarySequences.nextFrameset, this.secondarySequences.frame, null, this.animation.frameDurations[this.currentFrame], this.animation.rotateNormals, this.secondarySequences.nextFrame, groupMask);
             }
         }
     }

@@ -816,10 +816,10 @@ public final class WorldMap {
                     int underlay = underlayIds[addX + z * areaWidth] & 0xFF;
                     if (underlay > 0) {
                         @Pc(50) FloorUnderlayType type = floorUnderlayTypeList.list(underlay - 1);
-                        hueColumns[z] += type.anInt6630;
-                        saturationColumns[z] += type.anInt6637;
-                        lightnessColumns[z] += type.anInt6639;
-                        weightColumns[z] += type.anInt6632;
+                        hueColumns[z] += type.hue;
+                        saturationColumns[z] += type.saturation;
+                        lightnessColumns[z] += type.lightness;
+                        weightColumns[z] += type.hueWeight;
                         previousCount = countColumns[z]++;
                     }
                 }
@@ -828,10 +828,10 @@ public final class WorldMap {
                     int underlay = underlayIds[removeX + z * areaWidth] & 0xFF;
                     if (underlay > 0) {
                         @Pc(50) FloorUnderlayType type = floorUnderlayTypeList.list(underlay - 1);
-                        hueColumns[z] -= type.anInt6630;
-                        saturationColumns[z] -= type.anInt6637;
-                        lightnessColumns[z] -= type.anInt6639;
-                        weightColumns[z] -= type.anInt6632;
+                        hueColumns[z] -= type.hue;
+                        saturationColumns[z] -= type.saturation;
+                        lightnessColumns[z] -= type.lightness;
+                        weightColumns[z] -= type.hueWeight;
                         previousCount = countColumns[z]--;
                     }
                 }
@@ -1082,7 +1082,7 @@ public final class WorldMap {
             @Pc(55) int blendedHsl = (hsl + hueOffset & 0xFC00) + (hsl & 0x380) + lightness;
             colour = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(ColourUtils.method3066(blendedHsl)) & 0xFFFF] | 0xFF000000;
         } else if (texture >= 0) {
-            colour = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(ColourUtils.method3066(textureSource.getMetrics(texture).aShort37)) & 0xFFFF] | 0xFF000000;
+            colour = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(ColourUtils.method3066(textureSource.getMetrics(texture).averageColour)) & 0xFFFF] | 0xFF000000;
         } else if (type.colour == -1) {
             colour = 0;
         } else {
@@ -1141,7 +1141,7 @@ public final class WorldMap {
             points[i * 2 + 1] = screenY2 - (screenY2 - screenY1) * (pointZ - viewZ1) / (viewZ2 - viewZ1);
         }
         Minimap.fillLandmarkPolygon(toolkit, points, type.landmarkBackground);
-        if (type.anInt2603 > 0) {
+        if (type.dashLength > 0) {
             @Pc(102) int y1;
             @Pc(110) int x2;
             @Pc(120) int y2;
@@ -1164,7 +1164,7 @@ public final class WorldMap {
                     y1 = y2;
                     y2 = tempX;
                 }
-                toolkit.method7995(x1, y1, x2, y2, type.landmarkPalette[type.landmarkColorIndices[edge] & 0xFF], type.anInt2603, type.anInt2587, type.anInt2607);
+                toolkit.method7995(x1, y1, x2, y2, type.landmarkPalette[type.landmarkColorIndices[edge] & 0xFF], type.dashLength, type.gapLength, type.dashPhase);
             }
             x1 = points[points.length - 2];
             y1 = points[points.length - 1];
@@ -1182,7 +1182,7 @@ public final class WorldMap {
                 y1 = y2;
                 y2 = tempX;
             }
-            toolkit.method7995(x1, y1, x2, y2, type.landmarkPalette[type.landmarkColorIndices[type.landmarkColorIndices.length - 1] & 0xFF], type.anInt2603, type.anInt2587, type.anInt2607);
+            toolkit.method7995(x1, y1, x2, y2, type.landmarkPalette[type.landmarkColorIndices[type.landmarkColorIndices.length - 1] & 0xFF], type.dashLength, type.gapLength, type.dashPhase);
             return;
         }
         for (edge = 0; edge < points.length / 2 - 1; edge++) {
@@ -1611,7 +1611,7 @@ public final class WorldMap {
             return null;
         } else {
             @Pc(42) MapElementType type = mapElementTypeList.list(entry.id);
-            return type != null && type.aBoolean217 && type.variableTest(varDomain) ? entry : nextElement();
+            return type != null && type.showOnWorldMap && type.variableTest(varDomain) ? entry : nextElement();
         }
     }
 
@@ -1624,7 +1624,7 @@ public final class WorldMap {
         for (@Pc(17) MapElementListEntry entry = (MapElementListEntry) elementIterator.next(); entry != null; entry = (MapElementListEntry) elementIterator.next()) {
             @Pc(30) MapElementType type = mapElementTypeList.list(entry.id);
 
-            if (type != null && type.aBoolean217 && type.variableTest(varDomain)) {
+            if (type != null && type.showOnWorldMap && type.variableTest(varDomain)) {
                 return entry;
             }
         }
@@ -1785,8 +1785,8 @@ public final class WorldMap {
 
             if (font != null) {
                 lineCount = Fonts.p11Metrics.splitLines(mapElementTextLines, null, null, element.text);
-                textY = entry.spriteY - element.anInt2617 * (screenY2 - screenY1) / (viewZ2 - viewZ1);
-                textX = element.anInt2600 * (screenX2 - screenX1) / (viewX2 - viewX1) + entry.spriteX;
+                textY = entry.spriteY - element.textOffsetY * (screenY2 - screenY1) / (viewZ2 - viewZ1);
+                textX = element.textOffsetX * (screenX2 - screenX1) / (viewX2 - viewX1) + entry.spriteX;
 
                 if (sprite != null) {
                     textY -= (sprite.scaleHeight() >> 1) + (font.getHeight() * lineCount);

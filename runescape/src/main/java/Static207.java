@@ -7,11 +7,11 @@ public final class Static207 {
 
     @OriginalMember(owner = "client!gh", name = "a", descriptor = "(I)V")
     public static void method4432() {
-        Static467.anIntArray568 = null;
-        Static397.anIntArray482 = null;
-        Static501.anIntArray606 = null;
-        Static418.anIntArray704 = null;
-        Static359.anIntArray449 = null;
+        Static467.saturationColumns = null;
+        Static397.hueColumns = null;
+        Static501.lightnessColumns = null;
+        Static418.countColumns = null;
+        Static359.hueWeightColumns = null;
         Static404.renderShadows = false;
     }
 }

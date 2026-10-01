@@ -37,28 +37,28 @@ public final class AnimFrame {
     public boolean hasAlphaTransform = false;
 
     @OriginalMember(owner = "client!nb", name = "k", descriptor = "I")
-    public int anInt6359 = 0;
+    public int transformCount = 0;
 
     @OriginalMember(owner = "client!nb", name = "m", descriptor = "Z")
     public boolean hasBillboardTransform = false;
 
     @OriginalMember(owner = "client!nb", name = "b", descriptor = "[S")
-    public short[] aShortArray87;
+    public short[] groups;
 
     @OriginalMember(owner = "client!nb", name = "j", descriptor = "[S")
-    public short[] aShortArray93;
+    public short[] xValues;
 
     @OriginalMember(owner = "client!nb", name = "p", descriptor = "[S")
-    public short[] aShortArray94;
+    public short[] yValues;
 
     @OriginalMember(owner = "client!nb", name = "c", descriptor = "[S")
-    public short[] aShortArray89;
+    public short[] zValues;
 
     @OriginalMember(owner = "client!nb", name = "h", descriptor = "[S")
-    public short[] aShortArray86;
+    public short[] origins;
 
     @OriginalMember(owner = "client!nb", name = "n", descriptor = "[B")
-    public byte[] aByteArray70;
+    public byte[] tweenFlags;
 
     @OriginalMember(owner = "client!nb", name = "<init>", descriptor = "([BLclient!qda;)V")
     public AnimFrame(@OriginalArg(0) byte[] data, @OriginalArg(1) AnimBase base) {
@@ -73,20 +73,20 @@ public final class AnimFrame {
             @Pc(47) int origin = -1;
             @Pc(49) int appliedOrigin = -1;
             values.pos = flags.pos + groupCount;
-            @Pc(64) int local64;
+            @Pc(64) int type;
             for (@Pc(57) int group = 0; group < groupCount; group++) {
-                local64 = this.base.anIntArray619[group];
-                if (local64 == 0) {
+                type = this.base.transformTypes[group];
+                if (type == 0) {
                     origin = group;
                 }
                 @Pc(72) int mask = flags.g1();
                 if (mask > 0) {
-                    if (local64 == 0) {
+                    if (type == 0) {
                         appliedOrigin = group;
                     }
                     tmpGroups[count] = (short) group;
                     @Pc(87) short defaultValue = 0;
-                    if (local64 == 3 || local64 == 10) {
+                    if (type == 3 || type == 10) {
                         defaultValue = 128;
                     }
                     if ((mask & 0x1) == 0) {
@@ -105,22 +105,22 @@ public final class AnimFrame {
                         tmpZ[count] = (short) values.gsmarts();
                     }
                     tmpTweenFlags[count] = (byte) (mask >>> 3 & 0x3);
-                    if (local64 == 2 || local64 == 9) {
+                    if (type == 2 || type == 9) {
                         tmpX[count] = (short) (tmpX[count] << 2 & 0x3FFF);
                         tmpY[count] = (short) (tmpY[count] << 2 & 0x3FFF);
                         tmpZ[count] = (short) (tmpZ[count] << 2 & 0x3FFF);
                     }
                     tmpOrigins[count] = -1;
-                    if (local64 == 1 || local64 == 2 || local64 == 3) {
+                    if (type == 1 || type == 2 || type == 3) {
                         if (origin > appliedOrigin) {
                             tmpOrigins[count] = (short) origin;
                             appliedOrigin = origin;
                         }
-                    } else if (local64 == 5) {
+                    } else if (type == 5) {
                         this.hasAlphaTransform = true;
-                    } else if (local64 == 7) {
+                    } else if (type == 7) {
                         this.hasColourTransform = true;
-                    } else if (local64 == 9 || local64 == 10 || local64 == 8) {
+                    } else if (type == 9 || type == 10 || type == 8) {
                         this.hasBillboardTransform = true;
                     }
                     count++;
@@ -129,23 +129,23 @@ public final class AnimFrame {
             if (values.pos != data.length) {
                 throw new RuntimeException();
             }
-            this.anInt6359 = count;
-            this.aShortArray87 = new short[count];
-            this.aShortArray93 = new short[count];
-            this.aShortArray94 = new short[count];
-            this.aShortArray89 = new short[count];
-            this.aShortArray86 = new short[count];
-            this.aByteArray70 = new byte[count];
-            for (local64 = 0; local64 < count; local64++) {
-                this.aShortArray87[local64] = tmpGroups[local64];
-                this.aShortArray93[local64] = tmpX[local64];
-                this.aShortArray94[local64] = tmpY[local64];
-                this.aShortArray89[local64] = tmpZ[local64];
-                this.aShortArray86[local64] = tmpOrigins[local64];
-                this.aByteArray70[local64] = tmpTweenFlags[local64];
+            this.transformCount = count;
+            this.groups = new short[count];
+            this.xValues = new short[count];
+            this.yValues = new short[count];
+            this.zValues = new short[count];
+            this.origins = new short[count];
+            this.tweenFlags = new byte[count];
+            for (type = 0; type < count; type++) {
+                this.groups[type] = tmpGroups[type];
+                this.xValues[type] = tmpX[type];
+                this.yValues[type] = tmpY[type];
+                this.zValues[type] = tmpZ[type];
+                this.origins[type] = tmpOrigins[type];
+                this.tweenFlags[type] = tmpTweenFlags[type];
             }
         } catch (@Pc(359) Exception ex) {
-            this.anInt6359 = 0;
+            this.transformCount = 0;
             this.hasAlphaTransform = false;
             this.hasColourTransform = false;
         }

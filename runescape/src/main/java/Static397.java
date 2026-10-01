@@ -11,7 +11,7 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static397 {
 
     @OriginalMember(owner = "client!mia", name = "e", descriptor = "[I")
-    public static int[] anIntArray482;
+    public static int[] hueColumns;
 
     @OriginalMember(owner = "client!mia", name = "a", descriptor = "(IIIIBI[B)V")
     public static void method5554(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(5) int arg4, @OriginalArg(6) byte[] arg5) {

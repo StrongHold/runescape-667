@@ -122,7 +122,7 @@ public final class StaticGroundDecor extends GroundDecor implements Location {
         if (entity instanceof StaticGroundDecor) {
             @Pc(21) StaticGroundDecor decor = (StaticGroundDecor) entity;
             if (this.model != null && decor.model != null) {
-                this.model.method7481(decor.model, offsetX, offsetY, offsetZ, arg1);
+                this.model.shareLight(decor.model, offsetX, offsetY, offsetZ, arg1);
             }
         }
     }

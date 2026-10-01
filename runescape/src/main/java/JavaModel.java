@@ -283,7 +283,7 @@ public final class JavaModel extends Model {
         this.facePriority = base.facePriority;
         this.faceColour = base.faceColour;
         this.faceAlpha = base.faceAlpha;
-        this.faceOriginModels = base.aShortArray20;
+        this.faceOriginModels = base.faceOriginModels;
         this.shadingType = base.shadingType;
         this.emitters = base.emitters;
         this.effectors = base.effectors;
@@ -376,7 +376,7 @@ public final class JavaModel extends Model {
                 @Pc(399) BillboardType type = BillboardTypeList.list(billboard.id);
                 @Pc(335) int color = ColourUtils.HSV_TO_RGB[base.faceColour[billboard.face] & 0xFFFF] & 0xFFFFFF;
                 color |= 255 - (base.faceAlpha == null ? 0 : base.faceAlpha[billboard.face] & 0xFF) << 24;
-                this.billboardFaces[index] = new JavaBillboardFace(billboard.face, base.faceA[billboard.face], base.faceB[billboard.face], base.faceC[billboard.face], type.width, type.height, type.texture, type.anInt9697, type.blendMode, type.hideFace, billboard.distance);
+                this.billboardFaces[index] = new JavaBillboardFace(billboard.face, base.faceA[billboard.face], base.faceB[billboard.face], base.faceC[billboard.face], type.width, type.height, type.texture, type.colourOp, type.blendMode, type.hideFace, billboard.distance);
                 this.billboardAttributes[index] = new JavaBillboardAttributes(color);
             }
         }
@@ -1620,7 +1620,7 @@ public final class JavaModel extends Model {
 
     @OriginalMember(owner = "client!rs", name = "g", descriptor = "()V")
     @Override
-    protected void method7491() {
+    protected void lock() {
         if (this.toolkit.threadCount <= 1) {
             return;
         }
@@ -1814,15 +1814,15 @@ public final class JavaModel extends Model {
                 if (local13.next != null) {
                     local15 = local13.next;
                 }
-                local15.anInt8518 = (int) (local2.tx + (local2.e1_1 * (float) this.vertexX[local13.anInt8514] + local2.e1_2 * (float) this.vertexY[local13.anInt8514] + local2.e1_3 * (float) this.vertexZ[local13.anInt8514]));
-                local15.anInt8502 = (int) (local2.ty + (local2.e2_1 * (float) this.vertexX[local13.anInt8514] + local2.e2_2 * (float) this.vertexY[local13.anInt8514] + local2.e2_3 * (float) this.vertexZ[local13.anInt8514]));
-                local15.anInt8504 = (int) (local2.tz + (local2.e3_1 * (float) this.vertexX[local13.anInt8514] + local2.e3_2 * (float) this.vertexY[local13.anInt8514] + local2.e3_3 * (float) this.vertexZ[local13.anInt8514]));
-                local15.anInt8516 = (int) (local2.tx + (local2.e1_1 * (float) this.vertexX[local13.anInt8508] + local2.e1_2 * (float) this.vertexY[local13.anInt8508] + local2.e1_3 * (float) this.vertexZ[local13.anInt8508]));
-                local15.anInt8507 = (int) (local2.ty + (local2.e2_1 * (float) this.vertexX[local13.anInt8508] + local2.e2_2 * (float) this.vertexY[local13.anInt8508] + local2.e2_3 * (float) this.vertexZ[local13.anInt8508]));
-                local15.anInt8509 = (int) (local2.tz + (local2.e3_1 * (float) this.vertexX[local13.anInt8508] + local2.e3_2 * (float) this.vertexY[local13.anInt8508] + local2.e3_3 * (float) this.vertexZ[local13.anInt8508]));
-                local15.anInt8512 = (int) (local2.tx + (local2.e1_1 * (float) this.vertexX[local13.anInt8505] + local2.e1_2 * (float) this.vertexY[local13.anInt8505] + local2.e1_3 * (float) this.vertexZ[local13.anInt8505]));
-                local15.anInt8503 = (int) (local2.ty + (local2.e2_1 * (float) this.vertexX[local13.anInt8505] + local2.e2_2 * (float) this.vertexY[local13.anInt8505] + local2.e2_3 * (float) this.vertexZ[local13.anInt8505]));
-                local15.anInt8520 = (int) (local2.tz + (local2.e3_1 * (float) this.vertexX[local13.anInt8505] + local2.e3_2 * (float) this.vertexY[local13.anInt8505] + local2.e3_3 * (float) this.vertexZ[local13.anInt8505]));
+                local15.transformedAX = (int) (local2.tx + (local2.e1_1 * (float) this.vertexX[local13.vertexA] + local2.e1_2 * (float) this.vertexY[local13.vertexA] + local2.e1_3 * (float) this.vertexZ[local13.vertexA]));
+                local15.transformedAY = (int) (local2.ty + (local2.e2_1 * (float) this.vertexX[local13.vertexA] + local2.e2_2 * (float) this.vertexY[local13.vertexA] + local2.e2_3 * (float) this.vertexZ[local13.vertexA]));
+                local15.transformedAZ = (int) (local2.tz + (local2.e3_1 * (float) this.vertexX[local13.vertexA] + local2.e3_2 * (float) this.vertexY[local13.vertexA] + local2.e3_3 * (float) this.vertexZ[local13.vertexA]));
+                local15.transformedBX = (int) (local2.tx + (local2.e1_1 * (float) this.vertexX[local13.vertexB] + local2.e1_2 * (float) this.vertexY[local13.vertexB] + local2.e1_3 * (float) this.vertexZ[local13.vertexB]));
+                local15.transformedBY = (int) (local2.ty + (local2.e2_1 * (float) this.vertexX[local13.vertexB] + local2.e2_2 * (float) this.vertexY[local13.vertexB] + local2.e2_3 * (float) this.vertexZ[local13.vertexB]));
+                local15.transformedBZ = (int) (local2.tz + (local2.e3_1 * (float) this.vertexX[local13.vertexB] + local2.e3_2 * (float) this.vertexY[local13.vertexB] + local2.e3_3 * (float) this.vertexZ[local13.vertexB]));
+                local15.transformedCX = (int) (local2.tx + (local2.e1_1 * (float) this.vertexX[local13.vertexC] + local2.e1_2 * (float) this.vertexY[local13.vertexC] + local2.e1_3 * (float) this.vertexZ[local13.vertexC]));
+                local15.transformedCY = (int) (local2.ty + (local2.e2_1 * (float) this.vertexX[local13.vertexC] + local2.e2_2 * (float) this.vertexY[local13.vertexC] + local2.e2_3 * (float) this.vertexZ[local13.vertexC]));
+                local15.transformedCZ = (int) (local2.tz + (local2.e3_1 * (float) this.vertexX[local13.vertexC] + local2.e3_2 * (float) this.vertexY[local13.vertexC] + local2.e3_3 * (float) this.vertexZ[local13.vertexC]));
             }
         }
         if (this.effectors == null) {
@@ -2089,7 +2089,7 @@ public final class JavaModel extends Model {
 
     @OriginalMember(owner = "client!rs", name = "a", descriptor = "(Lclient!ka;IIIZ)V")
     @Override
-    public void method7481(@OriginalArg(0) Model other, @OriginalArg(1) int x, @OriginalArg(2) int y, @OriginalArg(3) int z, @OriginalArg(4) boolean arg4) {
+    public void shareLight(@OriginalArg(0) Model other, @OriginalArg(1) int x, @OriginalArg(2) int y, @OriginalArg(3) int z, @OriginalArg(4) boolean arg4) {
         @Pc(2) JavaModel local2 = (JavaModel) other;
         if ((this.functionMask & 0x10000) != 65536) {
             throw new IllegalStateException("");
@@ -2199,7 +2199,7 @@ public final class JavaModel extends Model {
 
     @OriginalMember(owner = "client!rs", name = "a", descriptor = "(I[IIIIIZ)V")
     @Override
-    protected void method7499(@OriginalArg(0) int type, @OriginalArg(1) int[] labels, @OriginalArg(2) int x, @OriginalArg(3) int y, @OriginalArg(4) int z, @OriginalArg(5) int arg5, @OriginalArg(6) boolean arg6) {
+    protected void applyTransformUnmasked(@OriginalArg(0) int type, @OriginalArg(1) int[] labels, @OriginalArg(2) int x, @OriginalArg(3) int y, @OriginalArg(4) int z, @OriginalArg(5) int arg5, @OriginalArg(6) boolean arg6) {
         @Pc(2) int local2 = labels.length;
         @Pc(21) int local21;
         @Pc(69) int local69;
@@ -3833,7 +3833,7 @@ public final class JavaModel extends Model {
 
     @OriginalMember(owner = "client!rs", name = "d", descriptor = "()V")
     @Override
-    protected void method7494() {
+    protected void unlock() {
         if (this.toolkit.threadCount > 1) {
             synchronized (this) {
                 super.locked = false;
@@ -4317,7 +4317,7 @@ public final class JavaModel extends Model {
                 rgb = ((local26 & 0xFF00FF) * local20 + (rgb & 0xFF00FF) * local38 & 0xFF00FF00) + ((local26 & 0xFF00) * local20 + (rgb & 0xFF00) * local38 & 0xFF0000) >> 8;
             }
         }
-        local26 = metrics.aByte57 & 0xFF;
+        local26 = metrics.brightness & 0xFF;
         if (local26 != 0) {
             local26 += 256;
             @Pc(84) int local84 = (rgb >> 16 & 0xFF) * local26;
@@ -4577,7 +4577,7 @@ public final class JavaModel extends Model {
                     if (x - (local226 >> 1) < 0 || x + (local226 >> 1) + floor.tileSize >= floor.sizeX << floor.tileSizeShift || z - (local228 >> 1) < 0 || z + (local228 >> 1) + floor.tileSize >= floor.sizeZ << floor.tileSizeShift) {
                         return;
                     }
-                    this.method7490(y, local236, x, local226, z, local228, floor, local243);
+                    this.conformToGround(y, local236, x, local226, z, local228, floor, local243);
                 } else if (hillType == 4) {
                     local226 = ceiling.tileSize - 1;
                     local228 = this.maxY - this.minY;

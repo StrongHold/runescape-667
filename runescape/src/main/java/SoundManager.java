@@ -187,7 +187,7 @@ public final class SoundManager {
             sound.stream.setVolume(soundRange);
             sound.stream.setRange(soundRangeY);
         } else if (sound.id >= 0) {
-            @Pc(264) int rate = sound.rateMax == 256 && sound.rateMin == 256 ? 256 : method2572(sound.rateMin, sound.rateMax);
+            @Pc(264) int rate = sound.rateMax == 256 && sound.rateMin == 256 ? 256 : randomRate(sound.rateMin, sound.rateMax);
 
             if (sound.vorbis) {
                 if (sound.vorbisSound == null) {
@@ -267,7 +267,7 @@ public final class SoundManager {
     }
 
     @OriginalMember(owner = "client!ew", name = "a", descriptor = "(III)I")
-    public static int method2572(@OriginalArg(0) int arg0, @OriginalArg(2) int arg1) {
+    public static int randomRate(@OriginalArg(0) int arg0, @OriginalArg(2) int arg1) {
         @Pc(17) double max = Math.log(arg1) / Math.log(2.0D);
         @Pc(24) double min = Math.log(arg0) / Math.log(2.0D);
         @Pc(33) double local33 = min + Math.random() * (max - min);
@@ -275,28 +275,28 @@ public final class SoundManager {
     }
 
     @OriginalMember(owner = "client!k", name = "a", descriptor = "(IILclient!cka;)V")
-    public static void method4577(@OriginalArg(0) int arg0, @OriginalArg(2) SeqType arg1) {
-        if (count >= 50 || (arg1 == null || arg1.soundInfo == null || arg1.soundInfo.length <= arg0 || arg1.soundInfo[arg0] == null)) {
+    public static void method4577(@OriginalArg(0) int frame, @OriginalArg(2) SeqType type) {
+        if (count >= 50 || (type == null || type.soundInfo == null || type.soundInfo.length <= frame || type.soundInfo[frame] == null)) {
             return;
         }
-        @Pc(42) int local42 = arg1.soundInfo[arg0][0];
-        @Pc(46) int local46 = local42 >> 8;
-        @Pc(63) int local63;
-        if (arg1.soundInfo[arg0].length > 1) {
-            local63 = (int) (Math.random() * (double) arg1.soundInfo[arg0].length);
-            if (local63 > 0) {
-                local46 = arg1.soundInfo[arg0][local63];
+        @Pc(42) int sound = type.soundInfo[frame][0];
+        @Pc(46) int id = sound >> 8;
+        @Pc(63) int rate;
+        if (type.soundInfo[frame].length > 1) {
+            rate = (int) (Math.random() * (double) type.soundInfo[frame].length);
+            if (rate > 0) {
+                id = type.soundInfo[frame][rate];
             }
         }
-        @Pc(81) int local81 = local42 >> 5 & 0x7;
-        local63 = 256;
-        if (arg1.anIntArray154 != null && arg1.anIntArray155 != null) {
-            local63 = method2572(arg1.anIntArray154[arg0], arg1.anIntArray155[arg0]);
+        @Pc(81) int loops = sound >> 5 & 0x7;
+        rate = 256;
+        if (type.soundRateMin != null && type.soundRateMax != null) {
+            rate = randomRate(type.soundRateMin[frame], type.soundRateMax[frame]);
         }
-        if (arg1.vorbisSound) {
-            playVorbisSound(local46, local81, 0, 255, local63, false);
+        if (type.vorbisSound) {
+            playVorbisSound(id, loops, 0, 255, rate, false);
         } else {
-            playSynthSound(local46, local81, 0, 255, local63);
+            playSynthSound(id, loops, 0, 255, rate);
         }
     }
 

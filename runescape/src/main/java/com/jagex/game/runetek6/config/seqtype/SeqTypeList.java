@@ -44,7 +44,7 @@ public final class SeqTypeList {
     private final int num;
 
     @OriginalMember(owner = "client!bp", name = "<init>", descriptor = "(Lclient!ul;ILclient!sb;Lclient!sb;Lclient!sb;)V")
-    public SeqTypeList(@OriginalArg(0) ModeGame game, @OriginalArg(1) int languageId, @OriginalArg(2) js5 configClient, @OriginalArg(3) js5 bases, @OriginalArg(4) js5 anims) {
+    public SeqTypeList(@OriginalArg(0) ModeGame game, @OriginalArg(1) int languageId, @OriginalArg(2) js5 configClient, @OriginalArg(3) js5 anims, @OriginalArg(4) js5 bases) {
         this.game = game;
         this.languageId = languageId;
         this.configClient = configClient;
@@ -56,12 +56,12 @@ public final class SeqTypeList {
             this.num = 0;
         }
 
-        AnimFrameset.init(anims, bases);
+        AnimFrameset.init(bases, anims);
     }
 
     @OriginalMember(owner = "client!bp", name = "a", descriptor = "(IB)Lclient!cka;")
     public SeqType list(@OriginalArg(0) int id) {
-        @Pc(6) ReferenceCache local6 = this.recentUse;
+        @Pc(6) ReferenceCache lock = this.recentUse;
         @Pc(16) SeqType type;
         synchronized (this.recentUse) {
             type = (SeqType) this.recentUse.get(id);
@@ -70,7 +70,7 @@ public final class SeqTypeList {
             return type;
         }
 
-        @Pc(30) js5 local30 = this.configClient;
+        @Pc(30) js5 configLock = this.configClient;
         @Pc(43) byte[] data;
         synchronized (this.configClient) {
             data = this.configClient.getfile(fileId(id), groupId(id));
@@ -83,7 +83,7 @@ public final class SeqTypeList {
         }
         type.postDecode();
 
-        @Pc(73) ReferenceCache local73 = this.recentUse;
+        @Pc(73) ReferenceCache putLock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.put(type, id);
             return type;
@@ -92,11 +92,11 @@ public final class SeqTypeList {
 
     @OriginalMember(owner = "client!bp", name = "a", descriptor = "(II)V")
     public void cacheClean(@OriginalArg(1) int maxAge) {
-        @Pc(6) ReferenceCache local6 = this.recentUse;
+        @Pc(6) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.clean(maxAge);
         }
-        local6 = this.framesetCache;
+        lock = this.framesetCache;
         synchronized (this.framesetCache) {
             this.framesetCache.clean(maxAge);
         }
@@ -104,11 +104,11 @@ public final class SeqTypeList {
 
     @OriginalMember(owner = "client!bp", name = "b", descriptor = "(I)V")
     public void cacheRemoveSoftReferences() {
-        @Pc(2) ReferenceCache local2 = this.recentUse;
+        @Pc(2) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.removeSoftReferences();
         }
-        local2 = this.framesetCache;
+        lock = this.framesetCache;
         synchronized (this.framesetCache) {
             this.framesetCache.removeSoftReferences();
         }
@@ -116,11 +116,11 @@ public final class SeqTypeList {
 
     @OriginalMember(owner = "client!bp", name = "a", descriptor = "(B)V")
     public void cacheReset() {
-        @Pc(7) ReferenceCache local7 = this.recentUse;
+        @Pc(7) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.reset();
         }
-        local7 = this.framesetCache;
+        lock = this.framesetCache;
         synchronized (this.framesetCache) {
             this.framesetCache.reset();
         }
@@ -128,7 +128,7 @@ public final class SeqTypeList {
 
     @OriginalMember(owner = "client!bp", name = "b", descriptor = "(II)Lclient!rw;")
     public AnimFrameset getFrameset(@OriginalArg(0) int id) {
-        @Pc(12) ReferenceCache local12 = this.framesetCache;
+        @Pc(12) ReferenceCache lock = this.framesetCache;
         synchronized (this.framesetCache) {
             @Pc(22) AnimFrameset frameset = (AnimFrameset) this.framesetCache.get(id);
             if (frameset == null) {

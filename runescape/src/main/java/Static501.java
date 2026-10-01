@@ -7,7 +7,7 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static501 {
 
     @OriginalMember(owner = "client!pq", name = "v", descriptor = "[I")
-    public static int[] anIntArray606;
+    public static int[] lightnessColumns;
 
     @OriginalMember(owner = "client!pq", name = "z", descriptor = "I")
     public static int mapLength = 104;

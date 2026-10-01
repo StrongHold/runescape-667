@@ -23,9 +23,9 @@ public final class Static358 {
     }
 
     @OriginalMember(owner = "client!lf", name = "a", descriptor = "()V")
-    public static void method9182() {
-        for (@Pc(1) int local1 = 0; local1 < Static319.anInt5080; local1++) {
-            if (!Static279.aBooleanArray11[local1]) {
+    public static void applyEnvironmentLights() {
+        for (@Pc(1) int local1 = 0; local1 < Static319.environmentLightCount; local1++) {
+            if (!Static279.environmentLightApplied[local1]) {
                 @Pc(10) EnvironmentLight local10 = EnvironmentLight.aEnvironmentLightArray1[local1];
                 @Pc(13) PointLight local13 = local10.light;
                 @Pc(16) int local16 = local10.level;
@@ -111,7 +111,7 @@ public final class Static358 {
                     }
                     local32++;
                 }
-                Static279.aBooleanArray11[local1] = true;
+                Static279.environmentLightApplied[local1] = true;
                 Static246.ground[local16].method7868(local13, local37);
             }
         }

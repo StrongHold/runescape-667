@@ -104,19 +104,19 @@ public final class LocTypeList {
 
     @OriginalMember(owner = "client!gea", name = "a", descriptor = "(I)V")
     public void cacheRemoveSoftReferences() {
-        @Pc(2) ReferenceCache local2 = this.recentUse;
+        @Pc(2) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.removeSoftReferences();
         }
-        local2 = this.models;
+        lock = this.models;
         synchronized (this.models) {
             this.models.removeSoftReferences();
         }
-        local2 = this.modelAndShadows;
+        lock = this.modelAndShadows;
         synchronized (this.modelAndShadows) {
             this.modelAndShadows.removeSoftReferences();
         }
-        local2 = this.wallModels;
+        lock = this.wallModels;
         synchronized (this.wallModels) {
             this.wallModels.removeSoftReferences();
         }
@@ -132,19 +132,19 @@ public final class LocTypeList {
 
     @OriginalMember(owner = "client!gea", name = "b", descriptor = "(I)V")
     public void cacheReset() {
-        @Pc(14) ReferenceCache local14 = this.recentUse;
+        @Pc(14) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.reset();
         }
-        local14 = this.models;
+        lock = this.models;
         synchronized (this.models) {
             this.models.reset();
         }
-        local14 = this.modelAndShadows;
+        lock = this.modelAndShadows;
         synchronized (this.modelAndShadows) {
             this.modelAndShadows.reset();
         }
-        local14 = this.wallModels;
+        lock = this.wallModels;
         synchronized (this.wallModels) {
             this.wallModels.reset();
         }
@@ -165,7 +165,7 @@ public final class LocTypeList {
 
     @OriginalMember(owner = "client!gea", name = "d", descriptor = "(II)Lclient!c;")
     public LocType list(@OriginalArg(0) int id) {
-        @Pc(12) ReferenceCache local12 = this.recentUse;
+        @Pc(12) ReferenceCache getLock = this.recentUse;
         @Pc(22) LocType type;
         synchronized (this.recentUse) {
             type = (LocType) this.recentUse.get(id);
@@ -174,7 +174,7 @@ public final class LocTypeList {
             return type;
         }
 
-        @Pc(36) js5 local36 = this.configClient;
+        @Pc(36) js5 fileLock = this.configClient;
         @Pc(49) byte[] data;
         synchronized (this.configClient) {
             data = this.configClient.getfile(fileId(id), groupId(id));
@@ -199,7 +199,7 @@ public final class LocTypeList {
             type.quests = null;
         }
 
-        @Pc(115) ReferenceCache local115 = this.recentUse;
+        @Pc(115) ReferenceCache putLock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.put(type, id);
             return type;
@@ -208,19 +208,19 @@ public final class LocTypeList {
 
     @OriginalMember(owner = "client!gea", name = "c", descriptor = "(II)V")
     public void cacheClean(@OriginalArg(0) int maxAge) {
-        @Pc(11) ReferenceCache local11 = this.recentUse;
+        @Pc(11) ReferenceCache lock = this.recentUse;
         synchronized (this.recentUse) {
             this.recentUse.clean(maxAge);
         }
-        local11 = this.models;
+        lock = this.models;
         synchronized (this.models) {
             this.models.clean(maxAge);
         }
-        local11 = this.modelAndShadows;
+        lock = this.modelAndShadows;
         synchronized (this.modelAndShadows) {
             this.modelAndShadows.clean(maxAge);
         }
-        local11 = this.wallModels;
+        lock = this.wallModels;
         synchronized (this.wallModels) {
             this.wallModels.clean(maxAge);
         }
@@ -229,15 +229,15 @@ public final class LocTypeList {
     @OriginalMember(owner = "client!gea", name = "b", descriptor = "(II)V")
     public void setFeatureMask(@OriginalArg(0) int featureMask) {
         this.featureMask = featureMask;
-        @Pc(9) ReferenceCache local9 = this.models;
+        @Pc(9) ReferenceCache lock = this.models;
         synchronized (this.models) {
             this.models.reset();
         }
-        local9 = this.modelAndShadows;
+        lock = this.modelAndShadows;
         synchronized (this.modelAndShadows) {
             this.modelAndShadows.reset();
         }
-        local9 = this.wallModels;
+        lock = this.wallModels;
         synchronized (this.wallModels) {
             this.wallModels.reset();
         }

@@ -347,7 +347,7 @@ public final class oa extends Toolkit implements SoftwareObject {
             if (local9 == null) {
                 return false;
             } else {
-                this.AA(arg0, local9.aShort37, local9.alphaBlendMode, local9.effectType, local9.effectParam1, local9.effectParam2, local9.small, local9.alpha, local9.aByte57, local9.speedU, local9.speedV, local9.disableable, local9.aBoolean234, local9.aBoolean239, local9.aBoolean236, local9.aBoolean235, local9.aByte53, local9.aBoolean237, local9.aBoolean238, local9.colorOp);
+                this.AA(arg0, local9.averageColour, local9.alphaBlendMode, local9.effectType, local9.effectParam1, local9.effectParam2, local9.small, local9.alpha, local9.brightness, local9.speedU, local9.speedV, local9.disableable, local9.skipFaces, local9.unusedFlag, local9.repeatsU, local9.repeatsV, local9.mipmap, local9.hdr, local9.transposed, local9.colorOp);
                 return true;
             }
         }
@@ -629,7 +629,7 @@ public final class oa extends Toolkit implements SoftwareObject {
             } else {
                 local44 = super.textureSource.rgbOutput(128, true, 128, arg0, 0.7F);
             }
-            this.CA(arg0, local44, local22.aShort37, local22.alphaBlendMode, local22.effectType, local22.effectParam1, local22.effectParam2, local22.small, local22.alpha, local22.aByte57, local22.speedU, local22.speedV, local22.disableable, local22.aBoolean234, local22.aBoolean239, local22.aBoolean236, local22.aBoolean235, local22.aByte53, local22.aBoolean237, local22.aBoolean238, local22.colorOp);
+            this.CA(arg0, local44, local22.averageColour, local22.alphaBlendMode, local22.effectType, local22.effectParam1, local22.effectParam2, local22.small, local22.alpha, local22.brightness, local22.speedU, local22.speedV, local22.disableable, local22.skipFaces, local22.unusedFlag, local22.repeatsU, local22.repeatsV, local22.mipmap, local22.hdr, local22.transposed, local22.colorOp);
             return true;
         }
     }

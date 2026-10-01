@@ -31,7 +31,7 @@ public final class LocType {
     public static final ModelAndShadow modelAndShadow = new ModelAndShadow();
 
     @OriginalMember(owner = "client!sv", name = "N", descriptor = "[Lclient!dv;")
-    public static final Mesh[] A_MESH_ARRAY_1 = new Mesh[4];
+    public static final Mesh[] MERGE_MESHES = new Mesh[4];
 
     @OriginalMember(owner = "client!ne", name = "o", descriptor = "[S")
     public static short[] clientpalette = new short[256];
@@ -97,7 +97,7 @@ public final class LocType {
     public int resizey = 128;
 
     @OriginalMember(owner = "client!c", name = "x", descriptor = "I")
-    public int anInt1213 = 0;
+    public int translateY = 0;
 
     @OriginalMember(owner = "client!c", name = "g", descriptor = "B")
     public byte colourShiftPercentage = 0;
@@ -118,7 +118,7 @@ public final class LocType {
     public int soundSize = 0;
 
     @OriginalMember(owner = "client!c", name = "k", descriptor = "I")
-    public int anInt1214 = 0;
+    public int translateX = 0;
 
     @OriginalMember(owner = "client!c", name = "K", descriptor = "I")
     public int resizex = 128;
@@ -160,7 +160,7 @@ public final class LocType {
     public int resizez = 128;
 
     @OriginalMember(owner = "client!c", name = "y", descriptor = "I")
-    public int anInt1248 = 0;
+    public int translateZ = 0;
 
     @OriginalMember(owner = "client!c", name = "f", descriptor = "I")
     public int soundVolume = 255;
@@ -238,7 +238,7 @@ public final class LocType {
     public boolean blockrange = true;
 
     @OriginalMember(owner = "client!c", name = "Mb", descriptor = "Z")
-    public boolean aBoolean91 = false;
+    public boolean dynamic = false;
 
     @OriginalMember(owner = "client!c", name = "e", descriptor = "Z")
     public boolean sharelight = false;
@@ -355,8 +355,8 @@ public final class LocType {
             @Pc(37) int count = packet.g1();
             this.recol_d_palette = new byte[count];
 
-            for (@Pc(47) int local47 = 0; local47 < count; local47++) {
-                this.recol_d_palette[local47] = packet.g1b();
+            for (@Pc(47) int i = 0; i < count; i++) {
+                this.recol_d_palette[i] = packet.g1b();
             }
         } else if (code == 62) {
             this.mirror = true;
@@ -496,8 +496,8 @@ public final class LocType {
             @Pc(37) int count = packet.g1();
             this.quests = new int[count];
 
-            for (@Pc(47) int local47 = 0; local47 < count; local47++) {
-                this.quests[local47] = packet.g2();
+            for (@Pc(47) int i = 0; i < count; i++) {
+                this.quests[i] = packet.g2();
             }
         } else if (code == 162) {
             this.hillchange = 3;
@@ -508,11 +508,11 @@ public final class LocType {
             this.targetLightness = packet.g1b();
             this.colourShiftPercentage = packet.g1b();
         } else if (code == 164) {
-            this.anInt1214 = packet.g2s();
+            this.translateX = packet.g2s();
         } else if (code == 165) {
-            this.anInt1213 = packet.g2s();
+            this.translateY = packet.g2s();
         } else if (code == 166) {
-            this.anInt1248 = packet.g2s();
+            this.translateZ = packet.g2s();
         } else if (code == 167) {
             this.offsetY = packet.g2();
         } else if (code == 168) {
@@ -527,7 +527,7 @@ public final class LocType {
             this.soundRateMin = packet.g2();
             this.soundRateMax = packet.g2();
         } else if (code == 177) {
-            this.aBoolean91 = true;
+            this.dynamic = true;
         } else if (code == 178) {
             this.soundSize = packet.g1();
         } else if (code == 249) {
@@ -604,7 +604,7 @@ public final class LocType {
         }
 
         @Pc(11) boolean loaded = true;
-        @Pc(15) js5 local15 = this.typeList.meshes;
+        @Pc(15) js5 meshesLock = this.typeList.meshes;
         synchronized (this.typeList.meshes) {
             for (@Pc(19) int i = 0; i < this.models.length; i++) {
                 for (@Pc(22) int j = 0; j < this.models[i].length; j++) {
@@ -639,7 +639,7 @@ public final class LocType {
             return true;
         }
 
-        @Pc(13) js5 local13 = this.typeList.meshes;
+        @Pc(13) js5 meshesLock = this.typeList.meshes;
         synchronized (this.typeList.meshes) {
             for (@Pc(26) int i = 0; i < this.modelShapes.length; i++) {
                 if (shape == this.modelShapes[i]) {
@@ -690,7 +690,7 @@ public final class LocType {
         }
 
         if (this.hasAnimations() || this.animated || this.multiloc != null) {
-            this.aBoolean91 = true;
+            this.dynamic = true;
         }
     }
 
@@ -730,13 +730,13 @@ public final class LocType {
         if (this.hillchange == 3) {
             newFunctionMask = functionMask | 0x7;
         } else {
-            if (this.hillchange != 0 || this.anInt1213 != 0) {
+            if (this.hillchange != 0 || this.translateY != 0) {
                 newFunctionMask = functionMask | 0x2;
             }
-            if (this.anInt1214 != 0) {
+            if (this.translateX != 0) {
                 newFunctionMask |= 0x1;
             }
-            if (this.anInt1248 != 0) {
+            if (this.translateZ != 0) {
                 newFunctionMask |= 0x4;
             }
         }
@@ -745,7 +745,7 @@ public final class LocType {
             newFunctionMask |= 0x40000;
         }
 
-        @Pc(96) ReferenceCache local96 = this.typeList.modelAndShadows;
+        @Pc(96) ReferenceCache getLock = this.typeList.modelAndShadows;
         @Pc(106) ModelAndShadow modelAndShadow;
         synchronized (this.typeList.modelAndShadows) {
             modelAndShadow = (ModelAndShadow) this.typeList.modelAndShadows.get(key);
@@ -788,23 +788,23 @@ public final class LocType {
             modelAndShadow.shadow = shadow;
             modelAndShadow.model = model;
 
-            @Pc(210) ReferenceCache local210 = this.typeList.modelAndShadows;
+            @Pc(210) ReferenceCache putLock = this.typeList.modelAndShadows;
             synchronized (this.typeList.modelAndShadows) {
                 this.typeList.modelAndShadows.put(modelAndShadow, key);
             }
         }
 
-        @Pc(271) boolean local271 = this.hillchange != 0 && (floor != null || ceiling != null);
-        @Pc(292) boolean local292 = this.anInt1214 != 0 || this.anInt1213 != 0 || this.anInt1248 != 0;
-        if (local271 || local292) {
+        @Pc(271) boolean adjustToGround = this.hillchange != 0 && (floor != null || ceiling != null);
+        @Pc(292) boolean translated = this.translateX != 0 || this.translateY != 0 || this.translateZ != 0;
+        if (adjustToGround || translated) {
             model = model.copy((byte) 0, newFunctionMask, true);
 
-            if (local271) {
+            if (adjustToGround) {
                 model.p(this.hillchange, this.hillskew, floor, ceiling, x, y, z);
             }
 
-            if (local292) {
-                model.H(this.anInt1214, this.anInt1213, this.anInt1248);
+            if (translated) {
+                model.H(this.translateX, this.translateY, this.translateZ);
             }
 
             model.s(functionMask);
@@ -819,7 +819,7 @@ public final class LocType {
     }
 
     @OriginalMember(owner = "client!c", name = "a", descriptor = "(IIIILclient!s;Lclient!gu;ILclient!ha;Lclient!s;Lclient!gp;II)Lclient!ka;")
-    public Model wallModel(@OriginalArg(0) int rotation, @OriginalArg(1) int arg1, @OriginalArg(2) int shape, @OriginalArg(3) int arg3, @OriginalArg(4) Ground arg4, @OriginalArg(5) Animator animator, @OriginalArg(7) Toolkit toolkit, @OriginalArg(8) Ground arg7, @OriginalArg(9) LocTypeCustomisation customisation, @OriginalArg(10) int functionMask, @OriginalArg(11) int arg10) {
+    public Model wallModel(@OriginalArg(0) int rotation, @OriginalArg(1) int z, @OriginalArg(2) int shape, @OriginalArg(3) int x, @OriginalArg(4) Ground ceiling, @OriginalArg(5) Animator animator, @OriginalArg(7) Toolkit toolkit, @OriginalArg(8) Ground floor, @OriginalArg(9) LocTypeCustomisation customisation, @OriginalArg(10) int functionMask, @OriginalArg(11) int y) {
         if (LocShapes.isWallDecor(shape)) {
             shape = LocShapes.WALLDECOR_STRAIGHT_NOOFFSET;
         }
@@ -838,15 +838,15 @@ public final class LocType {
         if (this.hillchange == 3) {
             functionMask |= 0x7;
         } else {
-            if (this.hillchange != 0 || this.anInt1213 != 0) {
+            if (this.hillchange != 0 || this.translateY != 0) {
                 functionMask |= 0x2;
             }
 
-            if (this.anInt1214 != 0) {
+            if (this.translateX != 0) {
                 functionMask |= 0x1;
             }
 
-            if (this.anInt1248 != 0) {
+            if (this.translateZ != 0) {
                 functionMask |= 0x4;
             }
         }
@@ -855,7 +855,7 @@ public final class LocType {
             functionMask |= 0x5;
         }
 
-        @Pc(116) ReferenceCache local116 = this.typeList.wallModels;
+        @Pc(116) ReferenceCache cacheLock = this.typeList.wallModels;
         @Pc(126) Model model;
         synchronized (this.typeList.wallModels) {
             model = (Model) this.typeList.wallModels.get(key);
@@ -872,7 +872,7 @@ public final class LocType {
                 return null;
             }
 
-            local116 = this.typeList.wallModels;
+            cacheLock = this.typeList.wallModels;
             synchronized (this.typeList.wallModels) {
                 this.typeList.wallModels.put(model, key);
             }
@@ -898,15 +898,15 @@ public final class LocType {
                 copied = true;
                 model = model.copy((byte) 3, functionMask, true);
             }
-            model.p(this.hillchange, this.hillskew, arg7, arg4, arg3, arg10, arg1);
+            model.p(this.hillchange, this.hillskew, floor, ceiling, x, y, z);
         }
 
-        if (this.anInt1214 != 0 || this.anInt1213 != 0 || this.anInt1248 != 0) {
+        if (this.translateX != 0 || this.translateY != 0 || this.translateZ != 0) {
             if (!copied) {
                 model = model.copy((byte) 3, functionMask, true);
                 copied = true;
             }
-            model.H(this.anInt1214, this.anInt1213, this.anInt1248);
+            model.H(this.translateX, this.translateY, this.translateZ);
         }
 
         if (copied) {
@@ -979,7 +979,7 @@ public final class LocType {
                 key = (key * 67783L) + (long) models[i];
             }
 
-            @Pc(211) ReferenceCache local211 = this.typeList.models;
+            @Pc(211) ReferenceCache getLock = this.typeList.models;
             synchronized (this.typeList.models) {
                 model = (Model) this.typeList.models.get(key);
             }
@@ -1001,10 +1001,10 @@ public final class LocType {
                 }
 
                 @Pc(275) Mesh mesh = null;
-                @Pc(277) Mesh[] local277 = A_MESH_ARRAY_1;
-                synchronized (A_MESH_ARRAY_1) {
+                @Pc(277) Mesh[] mergeLock = MERGE_MESHES;
+                synchronized (MERGE_MESHES) {
                     for (@Pc(281) int i = 0; i < modelCount; i++) {
-                        @Pc(286) js5 local286 = this.typeList.meshes;
+                        @Pc(286) js5 meshesLock = this.typeList.meshes;
                         synchronized (this.typeList.meshes) {
                             mesh = Mesh.load(models[i] & 0xFFFF, this.typeList.meshes);
                         }
@@ -1018,18 +1018,18 @@ public final class LocType {
                         }
 
                         if (modelCount > 1) {
-                            A_MESH_ARRAY_1[i] = mesh;
+                            MERGE_MESHES[i] = mesh;
                         }
                     }
 
                     if (modelCount > 1) {
-                        mesh = new Mesh(A_MESH_ARRAY_1, modelCount);
+                        mesh = new Mesh(MERGE_MESHES, modelCount);
                     }
                 }
 
                 model = toolkit.createModel(mesh, innerFunctionMask, this.typeList.featureMask, ambient, contrast);
 
-                @Pc(372) ReferenceCache local372 = this.typeList.models;
+                @Pc(372) ReferenceCache putLock = this.typeList.models;
                 synchronized (this.typeList.models) {
                     this.typeList.models.put(model, key);
                 }

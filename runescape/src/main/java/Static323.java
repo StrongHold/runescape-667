@@ -8,7 +8,7 @@ public final class Static323 {
     public static int anInt5120;
 
     @OriginalMember(owner = "client!kda", name = "a", descriptor = "()V")
-    public static void method4624() {
+    public static void shareLights() {
         for (@Pc(1) int level = Static296.tileMinLevel; level < Static299.tileMaxLevel; level++) {
             for (@Pc(4) int x = 0; x < Static619.tileMaxX; x++) {
                 for (@Pc(7) int z = 0; z < Static662.tileMaxZ; z++) {

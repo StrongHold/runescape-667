@@ -15,7 +15,7 @@ public final class Static305 {
     public static int crossY = 0;
 
     @OriginalMember(owner = "client!jm", name = "p", descriptor = "Z")
-    public static boolean aBoolean371 = false;
+    public static boolean highLightDetail = false;
 
     @OriginalMember(owner = "client!jm", name = "a", descriptor = "(Lclient!ge;B)Lclient!qba;")
     public static TextureShapeLine readLine(@OriginalArg(0) Packet packet) {

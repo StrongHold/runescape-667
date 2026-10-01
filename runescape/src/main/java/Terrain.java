@@ -91,8 +91,12 @@ public class Terrain {
      */
     private static final int UNDERLAY_BLEND_RADIUS = 5;
 
+    /**
+     * The height in units of 32 that the camera keeps clear of above each tile, by level. Map squares set it in
+     * blocks of 4 by 4 tiles. The camera raises its minimum pitch to look down over the highest value near it.
+     */
     @OriginalMember(owner = "client!qja", name = "e", descriptor = "[[[B")
-    public byte[][][] aByteArrayArrayArray12;
+    public byte[][][] cameraHeights;
 
     @OriginalMember(owner = "client!qja", name = "j", descriptor = "[I")
     public final int[] tileOffsetY = {0, 0, 0, 256, 512, 512, 512, 256, 256, 384, 128, 128, 256};
@@ -215,27 +219,27 @@ public class Terrain {
             groundFlags = 0;
             featureFlags = 0;
             if (!this.underwater) {
-                if (Static50.aBoolean566) {
+                if (Static50.highWaterDetail) {
                     featureFlags = 8;
                 }
-                if (Static305.aBoolean371) {
+                if (Static305.highLightDetail) {
                     groundFlags = 2;
                 }
-                if (Static439.anInt6674 != 0) {
+                if (Static439.hardShadows != 0) {
                     groundFlags |= 0x1;
-                    if (level == 0 | Static428.aBoolean487) {
+                    if (level == 0 | Static428.highMemory) {
                         featureFlags |= 0x10;
                     }
                 }
             }
-            if (Static305.aBoolean371) {
+            if (Static305.highLightDetail) {
                 featureFlags |= 0x7;
             }
-            if (!Static196.aBoolean262) {
+            if (!Static196.textures) {
                 featureFlags |= 0x20;
             }
             @Pc(165) int[][] heights = waterHeights == null || level >= waterHeights.length ? this.tileHeights[level] : waterHeights[level];
-            Static429.method5805(level, toolkit.createGround(this.width, this.length, this.tileHeights[level], heights, groundFlags, featureFlags));
+            Static429.setGround(level, toolkit.createGround(this.width, this.length, this.tileHeights[level], heights, groundFlags, featureFlags));
         }
     }
 
@@ -353,7 +357,7 @@ public class Terrain {
                                     @Pc(477) int waterX = offsetX[i] + (x << 9);
                                     @Pc(485) int waterY = (z << 9) + offsetY[i];
                                     depths[i] = ground.averageHeight(waterX, waterY) - surfaceGround.averageHeight(waterX, waterY);
-                                } else if (underwaterGround != null && !Static355.aBooleanArrayArray4[shape][i]) {
+                                } else if (underwaterGround != null && !Static355.UNDERLAY_VERTICES[shape][i]) {
                                     @Pc(477) int waterX = (x << 9) + offsetX[i];
                                     @Pc(485) int waterY = offsetY[i] + (z << 9);
                                     depths[i] = underwaterGround.averageHeight(waterX, waterY) - ground.averageHeight(waterX, waterY);
@@ -764,7 +768,7 @@ public class Terrain {
                 if (this.underwater) {
                     this.tileHeights[0][x + offsetX][z + offsetZ] = 0;
                 } else if (level == 0) {
-                    this.tileHeights[0][x + offsetX][z + offsetZ] = -Static144.method2406(localX + 932731, localZ + 556238) * 8 << 2;
+                    this.tileHeights[0][x + offsetX][z + offsetZ] = -Static144.generateHeight(localX + 932731, localZ + 556238) * 8 << 2;
                 } else {
                     this.tileHeights[level][x + offsetX][z + offsetZ] = this.tileHeights[level - 1][x + offsetX][z + offsetZ] - 960;
                 }
@@ -808,21 +812,21 @@ public class Terrain {
 
     @OriginalMember(owner = "client!qja", name = "a", descriptor = "(BLclient!ha;Lclient!s;Lclient!s;)V")
     public final void load(@OriginalArg(1) Toolkit toolkit, @OriginalArg(2) Ground underwaterGround, @OriginalArg(3) Ground surfaceGround) {
-        if (Static397.anIntArray482 == null || this.length != Static397.anIntArray482.length) {
-            Static501.anIntArray606 = new int[this.length];
-            Static418.anIntArray704 = new int[this.length];
-            Static397.anIntArray482 = new int[this.length];
-            Static359.anIntArray449 = new int[this.length];
-            Static467.anIntArray568 = new int[this.length];
+        if (Static397.hueColumns == null || this.length != Static397.hueColumns.length) {
+            Static501.lightnessColumns = new int[this.length];
+            Static418.countColumns = new int[this.length];
+            Static397.hueColumns = new int[this.length];
+            Static359.hueWeightColumns = new int[this.length];
+            Static467.saturationColumns = new int[this.length];
         }
         @Pc(45) int[][] colour = new int[this.width][this.length];
         for (@Pc(47) int level = 0; level < this.levels; level++) {
             for (@Pc(50) int z = 0; z < this.length; z++) {
-                Static397.anIntArray482[z] = 0;
-                Static467.anIntArray568[z] = 0;
-                Static501.anIntArray606[z] = 0;
-                Static359.anIntArray449[z] = 0;
-                Static418.anIntArray704[z] = 0;
+                Static397.hueColumns[z] = 0;
+                Static467.saturationColumns[z] = 0;
+                Static501.lightnessColumns[z] = 0;
+                Static359.hueWeightColumns[z] = 0;
+                Static418.countColumns[z] = 0;
             }
             for (@Pc(78) int x = -UNDERLAY_BLEND_RADIUS; x < this.width; x++) {
                 for (@Pc(81) int columnZ = 0; columnZ < this.length; columnZ++) {
@@ -831,11 +835,11 @@ public class Terrain {
                         @Pc(101) int addedUnderlay = this.underlay[level][addedX][columnZ] & 0xFF;
                         if (addedUnderlay > 0) {
                             @Pc(114) FloorUnderlayType addedType = this.underlayTypeList.list(addedUnderlay - 1);
-                            Static397.anIntArray482[columnZ] += addedType.anInt6630;
-                            Static467.anIntArray568[columnZ] += addedType.anInt6637;
-                            Static501.anIntArray606[columnZ] += addedType.anInt6639;
-                            Static359.anIntArray449[columnZ] += addedType.anInt6632;
-                            Static418.anIntArray704[columnZ]++;
+                            Static397.hueColumns[columnZ] += addedType.hue;
+                            Static467.saturationColumns[columnZ] += addedType.saturation;
+                            Static501.lightnessColumns[columnZ] += addedType.lightness;
+                            Static359.hueWeightColumns[columnZ] += addedType.hueWeight;
+                            Static418.countColumns[columnZ]++;
                         }
                     }
                     @Pc(101) int removedX = x - UNDERLAY_BLEND_RADIUS;
@@ -843,11 +847,11 @@ public class Terrain {
                         @Pc(170) int removedUnderlay = this.underlay[level][removedX][columnZ] & 0xFF;
                         if (removedUnderlay > 0) {
                             @Pc(180) FloorUnderlayType removedType = this.underlayTypeList.list(removedUnderlay - 1);
-                            Static397.anIntArray482[columnZ] -= removedType.anInt6630;
-                            Static467.anIntArray568[columnZ] -= removedType.anInt6637;
-                            Static501.anIntArray606[columnZ] -= removedType.anInt6639;
-                            Static359.anIntArray449[columnZ] -= removedType.anInt6632;
-                            Static418.anIntArray704[columnZ]--;
+                            Static397.hueColumns[columnZ] -= removedType.hue;
+                            Static467.saturationColumns[columnZ] -= removedType.saturation;
+                            Static501.lightnessColumns[columnZ] -= removedType.lightness;
+                            Static359.hueWeightColumns[columnZ] -= removedType.hueWeight;
+                            Static418.countColumns[columnZ]--;
                         }
                     }
                 }
@@ -860,19 +864,19 @@ public class Terrain {
                     for (@Pc(244) int z = -UNDERLAY_BLEND_RADIUS; z < this.length; z++) {
                         @Pc(249) int addedZ = z + UNDERLAY_BLEND_RADIUS;
                         if (this.length > addedZ) {
-                            saturation += Static467.anIntArray568[addedZ];
-                            hue += Static397.anIntArray482[addedZ];
-                            hueWeight += Static359.anIntArray449[addedZ];
-                            lightness += Static501.anIntArray606[addedZ];
-                            count += Static418.anIntArray704[addedZ];
+                            saturation += Static467.saturationColumns[addedZ];
+                            hue += Static397.hueColumns[addedZ];
+                            hueWeight += Static359.hueWeightColumns[addedZ];
+                            lightness += Static501.lightnessColumns[addedZ];
+                            count += Static418.countColumns[addedZ];
                         }
                         @Pc(291) int removedZ = z - UNDERLAY_BLEND_RADIUS;
                         if (removedZ >= 0) {
-                            lightness -= Static501.anIntArray606[removedZ];
-                            hueWeight -= Static359.anIntArray449[removedZ];
-                            hue -= Static397.anIntArray482[removedZ];
-                            count -= Static418.anIntArray704[removedZ];
-                            saturation -= Static467.anIntArray568[removedZ];
+                            lightness -= Static501.lightnessColumns[removedZ];
+                            hueWeight -= Static359.hueWeightColumns[removedZ];
+                            hue -= Static397.hueColumns[removedZ];
+                            count -= Static418.countColumns[removedZ];
+                            saturation -= Static467.saturationColumns[removedZ];
                         }
                         if (z >= 0 && hueWeight > 0 && count > 0) {
                             colour[x][z] = Static318.hsl24to16(lightness / count, saturation / count, hue * 256 / hueWeight);
@@ -891,11 +895,11 @@ public class Terrain {
             this.tileDirections[level] = null;
         }
         if (!this.underwater) {
-            if (Static439.anInt6674 != 0) {
-                Static176.method6688();
+            if (Static439.hardShadows != 0) {
+                Static176.castFloorShadows();
             }
-            if (Static305.aBoolean371) {
-                Static358.method9182();
+            if (Static305.highLightDetail) {
+                Static358.applyEnvironmentLights();
             }
         }
         for (@Pc(50) int level = 0; level < this.levels; level++) {
@@ -1258,7 +1262,7 @@ public class Terrain {
                                                 @Pc(1501) int worldX = rotatedX + (x << 9);
                                                 @Pc(1508) int worldY = (z << 9) + rotatedY;
                                                 waterDepths[vertexIndex] = ground.averageHeight(worldX, worldY) - surfaceGround.averageHeight(worldX, worldY);
-                                            } else if (underwaterGround != null && !Static355.aBooleanArrayArray4[shape][vertex]) {
+                                            } else if (underwaterGround != null && !Static355.UNDERLAY_VERTICES[shape][vertex]) {
                                                 @Pc(1501) int worldX = rotatedX + (x << 9);
                                                 @Pc(1508) int worldY = rotatedY + (z << 9);
                                                 waterDepths[vertexIndex] = underwaterGround.averageHeight(worldX, worldY) - ground.averageHeight(worldX, worldY);
@@ -1398,7 +1402,7 @@ public class Terrain {
                                                 worldX = (x << 9) + rotatedX;
                                                 worldY = rotatedY + (z << 9);
                                                 waterDepths[vertexIndex] = ground.averageHeight(worldX, worldY) - surfaceGround.averageHeight(worldX, worldY);
-                                            } else if (underwaterGround != null && !Static355.aBooleanArrayArray4[shape][vertex]) {
+                                            } else if (underwaterGround != null && !Static355.UNDERLAY_VERTICES[shape][vertex]) {
                                                 worldX = rotatedX + (x << 9);
                                                 worldY = (z << 9) + rotatedY;
                                                 waterDepths[vertexIndex] = underwaterGround.averageHeight(worldX, worldY) - ground.averageHeight(worldX, worldY);
@@ -1449,9 +1453,9 @@ public class Terrain {
                                                     blendedTextures[vertexIndex] = underlayTypeNW.texture;
                                                     blendedSizes[vertexIndex] = underlayTypeNW.size;
                                                 }
-                                                int colourSouth = Static273.method3966(colours[nextX][z], rotatedX << 7 >> 9, colours[x][z]);
-                                                int colourNorth = Static273.method3966(colours[nextX][nextZ], rotatedX << 7 >> 9, colours[x][nextZ]);
-                                                blendedColours[vertexIndex] = Static273.method3966(colourNorth, rotatedY << 7 >> 9, colourSouth);
+                                                int colourSouth = Static273.interpolateHsl(colours[nextX][z], rotatedX << 7 >> 9, colours[x][z]);
+                                                int colourNorth = Static273.interpolateHsl(colours[nextX][nextZ], rotatedX << 7 >> 9, colours[x][nextZ]);
+                                                blendedColours[vertexIndex] = Static273.interpolateHsl(colourNorth, rotatedY << 7 >> 9, colourSouth);
                                             }
 
                                             if (overlayBlendColours != null) {

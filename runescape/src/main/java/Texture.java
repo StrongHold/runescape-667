@@ -97,7 +97,7 @@ public final class Texture extends Node2 {
     }
 
     @OriginalMember(owner = "client!vm", name = "a", descriptor = "(BILclient!d;Lclient!sb;ZI)[F")
-    public float[] method8946(@OriginalArg(1) int height, @OriginalArg(2) TextureSource source, @OriginalArg(3) js5 sprites, @OriginalArg(4) boolean transpose, @OriginalArg(5) int width) {
+    public float[] floatArgbOutput(@OriginalArg(1) int height, @OriginalArg(2) TextureSource source, @OriginalArg(3) js5 sprites, @OriginalArg(4) boolean transpose, @OriginalArg(5) int width) {
         Static582.aJs5_108 = sprites;
         Static677.anTextureSource_11 = source;
         for (@Pc(25) int i = 0; i < this.ops.length; i++) {
@@ -187,7 +187,7 @@ public final class Texture extends Node2 {
     }
 
     @OriginalMember(owner = "client!vm", name = "a", descriptor = "(IDZIBLclient!d;Lclient!sb;)[I")
-    public int[] method8948(@OriginalArg(0) int width, @OriginalArg(1) double gamma, @OriginalArg(2) boolean transpose, @OriginalArg(3) int height, @OriginalArg(5) TextureSource source, @OriginalArg(6) js5 sprites) {
+    public int[] argbOutput(@OriginalArg(0) int width, @OriginalArg(1) double gamma, @OriginalArg(2) boolean transpose, @OriginalArg(3) int height, @OriginalArg(5) TextureSource source, @OriginalArg(6) js5 sprites) {
         Static582.aJs5_108 = sprites;
         Static677.anTextureSource_11 = source;
         for (@Pc(11) int i = 0; i < this.ops.length; i++) {
@@ -268,7 +268,7 @@ public final class Texture extends Node2 {
     }
 
     @OriginalMember(owner = "client!vm", name = "a", descriptor = "(Lclient!sb;DZLclient!d;ZIII)[I")
-    public int[] method8951(@OriginalArg(0) js5 sprites, @OriginalArg(1) double gamma, @OriginalArg(2) boolean transpose, @OriginalArg(3) TextureSource source, @OriginalArg(4) boolean reverse, @OriginalArg(5) int height, @OriginalArg(6) int width) {
+    public int[] rgbOutput(@OriginalArg(0) js5 sprites, @OriginalArg(1) double gamma, @OriginalArg(2) boolean transpose, @OriginalArg(3) TextureSource source, @OriginalArg(4) boolean reverse, @OriginalArg(5) int height, @OriginalArg(6) int width) {
         Static677.anTextureSource_11 = source;
         Static582.aJs5_108 = sprites;
         for (@Pc(11) int i = 0; i < this.ops.length; i++) {

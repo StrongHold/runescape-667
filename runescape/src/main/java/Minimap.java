@@ -436,7 +436,7 @@ public final class Minimap {
     @OriginalMember(owner = "client!tka", name = "a", descriptor = "(IIILclient!aa;Lclient!ha;IIILclient!hda;)V")
     public static void drawMapElement(@OriginalArg(0) int drawY, @OriginalArg(2) int screenX, @OriginalArg(3) ClippingMask mask, @OriginalArg(4) Toolkit toolkit, @OriginalArg(5) int id, @OriginalArg(6) int screenY, @OriginalArg(7) int drawX, @OriginalArg(8) Component component) {
         @Pc(10) MapElementType elementType = MapElementTypeList.instance.list(id);
-        if (elementType == null || !elementType.aBoolean218 || !elementType.variableTest(TimedVarDomain.instance)) {
+        if (elementType == null || !elementType.showOnMinimap || !elementType.variableTest(TimedVarDomain.instance)) {
             return;
         }
 
@@ -468,7 +468,7 @@ public final class Minimap {
                 PolygonFiller.fillPolygon(toolkit, polygon, elementType.landmarkBackground, graphic.lineOffsets, graphic.lineWidths);
             }
 
-            if (elementType.anInt2603 > 0) {
+            if (elementType.dashLength > 0) {
                 @Pc(250) int swapX;
                 @Pc(252) int swapY;
 
@@ -492,7 +492,7 @@ public final class Minimap {
                         y2 = swapY;
                     }
 
-                    toolkit.method7942(x1, y1, x2, y2, elementType.landmarkPalette[elementType.landmarkColorIndices[i] & 0xFF], 1, mask, screenX, screenY, elementType.anInt2603, elementType.anInt2587, elementType.anInt2607);
+                    toolkit.method7942(x1, y1, x2, y2, elementType.landmarkPalette[elementType.landmarkColorIndices[i] & 0xFF], 1, mask, screenX, screenY, elementType.dashLength, elementType.gapLength, elementType.dashPhase);
                 }
 
                 @Pc(66) int x1 = polygon[polygon.length - 2];
@@ -514,7 +514,7 @@ public final class Minimap {
                     y2 = swapY;
                 }
 
-                toolkit.method7942(x1, y1, x2, y2, elementType.landmarkPalette[elementType.landmarkColorIndices[elementType.landmarkColorIndices.length - 1] & 0xFF], 1, mask, screenX, screenY, elementType.anInt2603, elementType.anInt2587, elementType.anInt2607);
+                toolkit.method7942(x1, y1, x2, y2, elementType.landmarkPalette[elementType.landmarkColorIndices[elementType.landmarkColorIndices.length - 1] & 0xFF], 1, mask, screenX, screenY, elementType.dashLength, elementType.gapLength, elementType.dashPhase);
             } else {
                 for (@Pc(62) int i = 0; i < polygon.length / 2 - 1; i++) {
                     toolkit.line(polygon[i * 2], polygon[i * 2 + 1], polygon[i * 2 + 2], polygon[(i + 1) * 2 + 1], elementType.landmarkPalette[elementType.landmarkColorIndices[i] & 0xFF], 0, mask, screenX, screenY);

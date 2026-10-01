@@ -88,11 +88,11 @@ public final class MapRegion extends Terrain {
 
     @OriginalMember(owner = "client!wba", name = "a", descriptor = "(Lclient!th;)V")
     public static void registerLight(@OriginalArg(0) EnvironmentLight environmentLight) {
-        if (Static319.anInt5080 < 65535) {
+        if (Static319.environmentLightCount < 65535) {
             @Pc(7) PointLight light = environmentLight.light;
-            EnvironmentLight.aEnvironmentLightArray1[Static319.anInt5080] = environmentLight;
-            Static279.aBooleanArray11[Static319.anInt5080] = false;
-            Static319.anInt5080++;
+            EnvironmentLight.aEnvironmentLightArray1[Static319.environmentLightCount] = environmentLight;
+            Static279.environmentLightApplied[Static319.environmentLightCount] = false;
+            Static319.environmentLightCount++;
 
             @Pc(22) int minLevel = environmentLight.level;
             if (environmentLight.aBoolean716) {
@@ -131,13 +131,13 @@ public final class MapRegion extends Terrain {
                     for (@Pc(127) int x = minX; x <= maxX; x++) {
                         @Pc(136) long lightFlags = Client.tileLightFlags[level][x][z];
                         if ((lightFlags & 0xFFFFL) == 0L) {
-                            Client.tileLightFlags[level][x][z] = lightFlags | (long) Static319.anInt5080;
+                            Client.tileLightFlags[level][x][z] = lightFlags | (long) Static319.environmentLightCount;
                         } else if ((lightFlags & 0xFFFF0000L) == 0L) {
-                            Client.tileLightFlags[level][x][z] = lightFlags | (long) Static319.anInt5080 << 16;
+                            Client.tileLightFlags[level][x][z] = lightFlags | (long) Static319.environmentLightCount << 16;
                         } else if ((lightFlags & 0xFFFF00000000L) == 0L) {
-                            Client.tileLightFlags[level][x][z] = lightFlags | (long) Static319.anInt5080 << 32;
+                            Client.tileLightFlags[level][x][z] = lightFlags | (long) Static319.environmentLightCount << 32;
                         } else if ((lightFlags & 0xFFFF000000000000L) == 0L) {
-                            Client.tileLightFlags[level][x][z] = lightFlags | (long) Static319.anInt5080 << 48;
+                            Client.tileLightFlags[level][x][z] = lightFlags | (long) Static319.environmentLightCount << 48;
                         }
                     }
                 }
@@ -298,13 +298,13 @@ public final class MapRegion extends Terrain {
                     }
                     environment.decodeSkyBox(packet);
                 } else if (code == 129) {
-                    if (super.aByteArrayArrayArray12 == null) {
-                        super.aByteArrayArrayArray12 = new byte[4][][];
+                    if (super.cameraHeights == null) {
+                        super.cameraHeights = new byte[4][][];
                     }
                     mapLoaded = true;
                     for (@Pc(86) int level = 0; level < 4; level++) {
                         @Pc(91) byte mode = packet.g1b();
-                        if (mode == 0 && super.aByteArrayArrayArray12[level] != null) {
+                        if (mode == 0 && super.cameraHeights[level] != null) {
                             @Pc(143) int minX = x;
                             @Pc(147) int maxX = x + 64;
                             @Pc(149) int minZ = z;
@@ -331,14 +331,14 @@ public final class MapRegion extends Terrain {
                             }
                             while (maxX > minX) {
                                 while (minZ < maxZ) {
-                                    super.aByteArrayArrayArray12[level][minX][minZ] = 0;
+                                    super.cameraHeights[level][minX][minZ] = 0;
                                     minZ++;
                                 }
                                 minX++;
                             }
                         } else if (mode == 1) {
-                            if (super.aByteArrayArrayArray12[level] == null) {
-                                super.aByteArrayArrayArray12[level] = new byte[super.width + 1][super.length + 1];
+                            if (super.cameraHeights[level] == null) {
+                                super.cameraHeights[level] = new byte[super.width + 1][super.length + 1];
                             }
                             for (@Pc(143) int localX = 0; localX < 64; localX += 4) {
                                 for (@Pc(147) int localZ = 0; localZ < 64; localZ += 4) {
@@ -346,15 +346,15 @@ public final class MapRegion extends Terrain {
                                     for (@Pc(153) int tileX = localX + x; tileX < localX + x + 4; tileX++) {
                                         for (@Pc(290) int tileZ = z + localZ; tileZ < z + localZ + 4; tileZ++) {
                                             if (tileX >= 0 && super.width > tileX && tileZ >= 0 && super.length > tileZ) {
-                                                super.aByteArrayArrayArray12[level][tileX][tileZ] = height;
+                                                super.cameraHeights[level][tileX][tileZ] = height;
                                             }
                                         }
                                     }
                                 }
                             }
                         } else if (mode == 2) {
-                            if (super.aByteArrayArrayArray12[level] == null) {
-                                super.aByteArrayArrayArray12[level] = new byte[super.width + 1][super.length + 1];
+                            if (super.cameraHeights[level] == null) {
+                                super.cameraHeights[level] = new byte[super.width + 1][super.length + 1];
                             }
                             if (level > 0) {
                                 @Pc(143) int minX = x;
@@ -383,7 +383,7 @@ public final class MapRegion extends Terrain {
                                 }
                                 while (minX < maxX) {
                                     while (maxZ > minZ) {
-                                        super.aByteArrayArrayArray12[level][minX][minZ] = super.aByteArrayArrayArray12[level - 1][minX][minZ];
+                                        super.cameraHeights[level][minX][minZ] = super.cameraHeights[level - 1][minX][minZ];
                                         minZ++;
                                     }
                                     minX++;
@@ -406,20 +406,20 @@ public final class MapRegion extends Terrain {
                     @Pc(504) int mapZoneX = zoneX + (x >> 3);
                     @Pc(143) int mapZoneZ = zoneZ + (z >> 3);
                     if (mapZoneX >= 0 && super.width >> 3 > mapZoneX && mapZoneZ >= 0 && super.length >> 3 > mapZoneZ) {
-                        Static108.method2064(mapZoneZ, mapZoneX, environment);
+                        Static108.setEnvironment(mapZoneZ, mapZoneX, environment);
                     }
                 }
             }
         }
-        if (!mapLoaded && super.aByteArrayArrayArray12 != null) {
+        if (!mapLoaded && super.cameraHeights != null) {
             for (@Pc(28) int level = 0; level < 4; level++) {
-                if (super.aByteArrayArrayArray12[level] != null) {
+                if (super.cameraHeights[level] != null) {
                     for (@Pc(86) int zoneX = 0; zoneX < 16; zoneX++) {
                         for (@Pc(504) int zoneZ = 0; zoneZ < 16; zoneZ++) {
                             @Pc(143) int mapZoneX = (x >> 2) + zoneX;
                             @Pc(147) int mapZoneZ = (z >> 2) + zoneZ;
                             if (mapZoneX >= 0 && mapZoneX < 26 && mapZoneZ >= 0 && mapZoneZ < 26) {
-                                super.aByteArrayArrayArray12[level][mapZoneX][mapZoneZ] = 0;
+                                super.cameraHeights[level][mapZoneX][mapZoneZ] = 0;
                             }
                         }
                     }
@@ -491,7 +491,7 @@ public final class MapRegion extends Terrain {
             SoundManager.addSounds(level, x, z, null, null, locType, rotation);
         }
 
-        @Pc(248) boolean isStatic = animation == -1 && !locType.hasAnimations() && locType.multiloc == null && !locType.animated && !locType.aBoolean91;
+        @Pc(248) boolean isStatic = animation == -1 && !locType.hasAnimations() && locType.multiloc == null && !locType.animated && !locType.dynamic;
 
         boolean skipWall = LocShapes.isWall(shape) && locType.occlude != LocOcclusionMode.ALL;
         boolean skipRoof = LocShapes.isRoof(shape) && locType.occlude == LocOcclusionMode.ROOFS;
@@ -648,7 +648,7 @@ public final class MapRegion extends Terrain {
             }
 
             if (locType.walloff != 64) {
-                Static411.method5666(level, x, z, locType.walloff);
+                Static411.scaleWallDecorOffsets(level, x, z, locType.walloff);
             }
         } else if (shape == LocShapes.WALL_DIAGONALCORNER) {
             @Pc(1079) Wall wall;
@@ -732,7 +732,7 @@ public final class MapRegion extends Terrain {
             }
 
             if (locType.walloff != 64) {
-                Static411.method5666(level, x, z, locType.walloff);
+                Static411.scaleWallDecorOffsets(level, x, z, locType.walloff);
             }
         } else if (shape == LocShapes.WALL_SQUARECORNER) {
             @Pc(1079) Wall wall;
@@ -799,7 +799,7 @@ public final class MapRegion extends Terrain {
             }
 
             if (locType.walloff != 64) {
-                Static411.method5666(level, x, z, locType.walloff);
+                Static411.scaleWallDecorOffsets(level, x, z, locType.walloff);
             }
         } else if (shape == LocShapes.WALLDECOR_STRAIGHT_NOOFFSET) {
             @Pc(1813) WallDecor decor;
@@ -968,12 +968,12 @@ public final class MapRegion extends Terrain {
                 }
                 environment.decodeSkyBox(packet);
             } else if (code == 129) {
-                if (super.aByteArrayArrayArray12 == null) {
-                    super.aByteArrayArrayArray12 = new byte[4][][];
+                if (super.cameraHeights == null) {
+                    super.cameraHeights = new byte[4][][];
                 }
                 for (@Pc(63) int mapLevel = 0; mapLevel < 4; mapLevel++) {
                     @Pc(311) byte mode = packet.g1b();
-                    if (mode == 0 && super.aByteArrayArrayArray12[level] != null) {
+                    if (mode == 0 && super.cameraHeights[level] != null) {
                         if (pointerLevel >= mapLevel) {
                             @Pc(327) int minX = x;
                             @Pc(331) int maxX = x + 7;
@@ -1003,15 +1003,15 @@ public final class MapRegion extends Terrain {
                             }
                             while (maxX > minX) {
                                 while (maxZ > minZ) {
-                                    super.aByteArrayArrayArray12[level][minX][minZ] = 0;
+                                    super.cameraHeights[level][minX][minZ] = 0;
                                     minZ++;
                                 }
                                 minX++;
                             }
                         }
                     } else if (mode == 1) {
-                        if (super.aByteArrayArrayArray12[level] == null) {
-                            super.aByteArrayArrayArray12[level] = new byte[super.width + 1][super.length + 1];
+                        if (super.cameraHeights[level] == null) {
+                            super.cameraHeights[level] = new byte[super.width + 1][super.length + 1];
                         }
 
                         for (@Pc(327) int blockX = 0; blockX < 64; blockX += 4) {
@@ -1024,7 +1024,7 @@ public final class MapRegion extends Terrain {
                                                 @Pc(200) int tileX = x + rotateZoneX(localX & 0x7, localZ & 0x7, pointerRotation);
                                                 @Pc(534) int tileZ = z + rotateZoneZ(localX & 0x7, localZ & 0x7, pointerRotation);
                                                 if (tileX >= 0 && tileX < super.width && tileZ >= 0 && tileZ < super.length) {
-                                                    super.aByteArrayArrayArray12[level][tileX][tileZ] = height;
+                                                    super.cameraHeights[level][tileX][tileZ] = height;
                                                     mapLoaded = true;
                                                 }
                                             }
@@ -1041,15 +1041,15 @@ public final class MapRegion extends Terrain {
         }
 
         if (environment != null) {
-            Static108.method2064(z >> 3, x >> 3, environment);
+            Static108.setEnvironment(z >> 3, x >> 3, environment);
         }
 
-        if (!mapLoaded && super.aByteArrayArrayArray12 != null && super.aByteArrayArrayArray12[level] != null) {
+        if (!mapLoaded && super.cameraHeights != null && super.cameraHeights[level] != null) {
             @Pc(35) int maxX = x + 7;
             @Pc(63) int maxZ = z + 7;
             for (@Pc(70) int tileX = x; tileX < maxX; tileX++) {
                 for (@Pc(327) int tileZ = z; tileZ < maxZ; tileZ++) {
-                    super.aByteArrayArrayArray12[level][tileX][tileZ] = 0;
+                    super.cameraHeights[level][tileX][tileZ] = 0;
                 }
             }
         }
@@ -1122,14 +1122,14 @@ public final class MapRegion extends Terrain {
 
     @OriginalMember(owner = "client!taa", name = "a", descriptor = "(ZLclient!ha;B)V")
     public void buildRoofOccluders(@OriginalArg(0) boolean skipOccluders, @OriginalArg(1) Toolkit toolkit) {
-        Static323.method4624();
+        Static323.shareLights();
 
         if (!skipOccluders) {
             if (super.levels > 1) {
                 for (@Pc(23) int x = 0; x < super.width; x++) {
                     for (@Pc(26) int z = 0; super.length > z; z++) {
                         if ((Static280.tileFlags[1][x][z] & TileFlag.BRIDGE) == 2) {
-                            Static646.method8453(x, z);
+                            Static646.applyBridge(x, z);
                         }
                     }
                 }
@@ -1174,7 +1174,7 @@ public final class MapRegion extends Terrain {
                             if ((x2 + 1 - x1) * (z2 + 1 - z1) >= 4) {
                                 @Pc(163) int tileHeight = super.tileHeights[level][x1][z1];
 
-                                Static269.method3911((z2 << 9) + 512, x1 << 9, tileHeight, z1 << 9, tileHeight, level, (x2 << 9) + 512);
+                                Static269.addRoofOccluder((z2 << 9) + 512, x1 << 9, tileHeight, z1 << 9, tileHeight, level, (x2 << 9) + 512);
 
                                 for (@Pc(297) int localX = x1; localX <= x2; localX++) {
                                     for (@Pc(300) int localZ = z1; localZ <= z2; localZ++) {
@@ -1187,7 +1187,7 @@ public final class MapRegion extends Terrain {
                 }
             }
 
-            Static348.method5107();
+            Static348.rebuildOccluders();
         }
 
         super.occluderFlags = null;
@@ -1227,7 +1227,7 @@ public final class MapRegion extends Terrain {
         } else if (layer == LocLayer.WALLDECOR) {
             Static173.clearWallDecor(level, x, z);
         } else if (layer == LocLayer.GROUND) {
-            Static10.method130(level, x, z, locClass == null ? (locClass = getClass("com.jagex.game.Location")) : locClass);
+            Static10.removeEntity(level, x, z, locClass == null ? (locClass = getClass("com.jagex.game.Location")) : locClass);
             if (locType.blockwalk != 0 && super.width > locType.width + x && super.length > locType.width + z && x + locType.length < super.width && locType.length + z < super.length) {
                 collisionMap.unflagLoc(x, z, locType.width, locType.length, rotation, locType.blockrange, !locType.breakroutefinding);
             }

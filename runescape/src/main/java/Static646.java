@@ -5,7 +5,7 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static646 {
 
     @OriginalMember(owner = "client!uga", name = "a", descriptor = "(II)V")
-    public static void method8453(@OriginalArg(0) int x, @OriginalArg(1) int z) {
+    public static void applyBridge(@OriginalArg(0) int x, @OriginalArg(1) int z) {
         @Pc(7) Tile tile0 = Static334.activeTiles[0][x][z];
 
         for (@Pc(9) int level = 0; level < 3; level++) {

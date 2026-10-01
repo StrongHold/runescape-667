@@ -20,7 +20,7 @@ public final class Static718 {
             @Pc(31) TextureMetrics metrics = toolkit.textureSource.getMetrics(overlayType.texture);
 
             if (!metrics.disableable) {
-                return metrics.aShort37;
+                return metrics.averageColour;
             }
         }
 

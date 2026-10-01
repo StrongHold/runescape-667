@@ -7,7 +7,7 @@ public final class Static319 {
     public static byte[][] aByteArrayArray16;
 
     @OriginalMember(owner = "client!kba", name = "R", descriptor = "I")
-    public static int anInt5080;
+    public static int environmentLightCount;
 
     @OriginalMember(owner = "client!kba", name = "N", descriptor = "[I")
     public static final int[] anIntArray384 = new int[6];

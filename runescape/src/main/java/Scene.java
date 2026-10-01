@@ -68,7 +68,7 @@ public final class Scene {
             Static645.onscreenTransparentEntityCount = 0;
         }
         if (EnvironmentLight.aEnvironmentLightArray1 != null) {
-            for (int i = 0; i < Static319.anInt5080; i++) {
+            for (int i = 0; i < Static319.environmentLightCount; i++) {
                 EnvironmentLight.aEnvironmentLightArray1[i] = null;
             }
             for (int level = 0; level < Static299.tileMaxLevel; level++) {
@@ -78,7 +78,7 @@ public final class Scene {
                     }
                 }
             }
-            Static319.anInt5080 = 0;
+            Static319.environmentLightCount = 0;
         }
         Static638.clearPickableEntityPool();
         Static514.activePickList = Static514.scenePickList;

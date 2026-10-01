@@ -23,7 +23,7 @@ public final class Mesh {
     public int[] vertexZ;
 
     @OriginalMember(owner = "client!dv", name = "m", descriptor = "[S")
-    public short[] aShortArray20;
+    public short[] faceOriginModels;
 
     @OriginalMember(owner = "client!dv", name = "S", descriptor = "[I")
     public int[] vertexY;
@@ -135,11 +135,11 @@ public final class Mesh {
     }
 
     @OriginalMember(owner = "client!dv", name = "<init>", descriptor = "([B)V")
-    public Mesh(@OriginalArg(0) byte[] arg0) {
-        if (arg0[arg0.length - 1] == -1 && arg0[arg0.length - 2] == -1) {
-            this.decodeNew(arg0);
+    public Mesh(@OriginalArg(0) byte[] data) {
+        if (data[data.length - 1] == -1 && data[data.length - 2] == -1) {
+            this.decodeNew(data);
         } else {
-            this.decodeOld(arg0);
+            this.decodeOld(data);
         }
     }
 
@@ -241,7 +241,7 @@ public final class Mesh {
         }
         this.originModels = new short[this.vertexCount];
         this.vertexY = new int[this.vertexCount];
-        this.aShortArray20 = new short[this.faceCount];
+        this.faceOriginModels = new short[this.faceCount];
         if (hasFaceGroups) {
             this.faceLabel = new int[this.faceCount];
         }
@@ -346,16 +346,16 @@ public final class Mesh {
                     this.faceA[this.faceCount] = (short) this.addVertex(mesh, mesh.faceA[j], s);
                     this.faceB[this.faceCount] = (short) this.addVertex(mesh, mesh.faceB[j], s);
                     this.faceC[this.faceCount] = (short) this.addVertex(mesh, mesh.faceC[j], s);
-                    this.aShortArray20[this.faceCount] = s;
+                    this.faceOriginModels[this.faceCount] = s;
                     this.faceColour[this.faceCount] = mesh.faceColour[j];
                     this.faceCount++;
                 }
 
                 if (mesh.emitters != null) {
                     for (@Pc(636) int j = 0; j < mesh.emitters.length; j++) {
-                        @Pc(648) int a = this.addVertex(mesh, mesh.emitters[j].anInt8514, s);
-                        @Pc(659) int b = this.addVertex(mesh, mesh.emitters[j].anInt8508, s);
-                        @Pc(670) int c = this.addVertex(mesh, mesh.emitters[j].anInt8505, s);
+                        @Pc(648) int a = this.addVertex(mesh, mesh.emitters[j].vertexA, s);
+                        @Pc(659) int b = this.addVertex(mesh, mesh.emitters[j].vertexB, s);
+                        @Pc(670) int c = this.addVertex(mesh, mesh.emitters[j].vertexC, s);
                         this.emitters[emitterCount] = mesh.emitters[j].copy(a, b, c);
                         emitterCount++;
                     }
@@ -374,9 +374,9 @@ public final class Mesh {
         this.maxVertex = this.vertexCount;
 
         @Pc(747) int textSpaceCount = 0;
-        for (@Pc(749) int local749 = 0; local749 < meshCount; local749++) {
-            @Pc(755) short modelFlag = (short) (0x1 << local749);
-            @Pc(759) Mesh mesh = meshes[local749];
+        for (@Pc(749) int meshIndex = 0; meshIndex < meshCount; meshIndex++) {
+            @Pc(755) short modelFlag = (short) (0x1 << meshIndex);
+            @Pc(759) Mesh mesh = meshes[meshIndex];
 
             if (mesh != null) {
                 for (@Pc(648) int i = 0; i < mesh.faceCount; i++) {
@@ -446,10 +446,10 @@ public final class Mesh {
 
     @OriginalMember(owner = "client!dv", name = "a", descriptor = "(II)V")
     public void upscale() {
-        for (@Pc(1) int local1 = 0; local1 < this.vertexCount; local1++) {
-            this.vertexX[local1] <<= 0x2;
-            this.vertexY[local1] <<= 0x2;
-            this.vertexZ[local1] <<= 0x2;
+        for (@Pc(1) int i = 0; i < this.vertexCount; i++) {
+            this.vertexX[i] <<= 0x2;
+            this.vertexY[i] <<= 0x2;
+            this.vertexZ[i] <<= 0x2;
         }
 
         if (this.texSpaceCount <= 0 || this.texSpaceScaleX == null) {
@@ -488,7 +488,7 @@ public final class Mesh {
                     max = group;
                 }
 
-                @Pc(50) int local50 = counts[group]++;
+                @Pc(50) int previousCount = counts[group]++;
             }
         }
 
@@ -1081,14 +1081,14 @@ public final class Mesh {
     }
 
     @OriginalMember(owner = "client!dv", name = "a", descriptor = "(SSI)V")
-    public void retexture(@OriginalArg(0) short arg0, @OriginalArg(1) short arg1) {
+    public void retexture(@OriginalArg(0) short src, @OriginalArg(1) short dest) {
         if (this.faceTexture == null) {
             return;
         }
 
         for (@Pc(10) int i = 0; i < this.faceCount; i++) {
-            if (this.faceTexture[i] == arg0) {
-                this.faceTexture[i] = arg1;
+            if (this.faceTexture[i] == src) {
+                this.faceTexture[i] = dest;
             }
         }
     }
@@ -1106,7 +1106,7 @@ public final class Mesh {
                     max = group;
                 }
 
-                @Pc(39) int local39 = counts[group]++;
+                @Pc(39) int previousCount = counts[group]++;
             }
         }
 
@@ -1145,7 +1145,7 @@ public final class Mesh {
             @Pc(29) int group = this.faceLabel[i];
 
             if (group >= 0) {
-                @Pc(38) int local38 = counts[group]++;
+                @Pc(38) int previousCount = counts[group]++;
 
                 if (group > max) {
                     max = group;

@@ -65,7 +65,7 @@ public final class Class67_Sub2_Sub1 extends Class67_Sub2 {
                 if (local79 > local46) {
                     local46 = local79;
                 }
-                if (local71.aByte53 > 0) {
+                if (local71.mipmap > 0) {
                     local44 = true;
                 }
             }

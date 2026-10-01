@@ -4,7 +4,7 @@ import org.openrs2.deob.annotation.OriginalMember;
 public final class Static176 {
 
     @OriginalMember(owner = "client!fi", name = "a", descriptor = "()V")
-    public static void method6688() {
+    public static void castFloorShadows() {
         Static374.method5303(Static299.tileMaxLevel);
     }
 

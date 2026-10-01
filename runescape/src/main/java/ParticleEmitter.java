@@ -238,18 +238,18 @@ public final class ParticleEmitter extends Node {
             @Pc(1078) ParticleEmitterRelated swap = this.previousTriangle;
             this.previousTriangle = this.triangle;
             this.triangle = swap;
-            this.triangle.anInt4275 = this.model.anInt8520;
-            this.triangle.anInt4276 = this.model.anInt8512;
-            this.triangle.anInt4283 = this.model.anInt8507;
-            this.triangle.anInt4281 = this.model.anInt8516;
-            this.triangle.anInt4270 = this.model.anInt8504;
-            this.triangle.anInt4280 = this.model.anInt8502;
-            this.triangle.anInt4277 = this.model.anInt8509;
+            this.triangle.anInt4275 = this.model.transformedCZ;
+            this.triangle.anInt4276 = this.model.transformedCX;
+            this.triangle.anInt4283 = this.model.transformedBY;
+            this.triangle.anInt4281 = this.model.transformedBX;
+            this.triangle.anInt4270 = this.model.transformedAZ;
+            this.triangle.anInt4280 = this.model.transformedAY;
+            this.triangle.anInt4277 = this.model.transformedBZ;
             this.triangle.anInt4278 = this.previousTriangle.anInt4278;
             this.triangle.anInt4273 = this.previousTriangle.anInt4273;
-            this.triangle.anInt4279 = this.model.anInt8518;
+            this.triangle.anInt4279 = this.model.transformedAX;
             this.triangle.anInt4271 = this.previousTriangle.anInt4271;
-            this.triangle.anInt4269 = this.model.anInt8503;
+            this.triangle.anInt4269 = this.model.transformedCY;
         }
         this.particleCount = 0;
         for (@Pc(1171) MovingParticle particle = (MovingParticle) this.movingParticles.first(); particle != null; particle = (MovingParticle) this.movingParticles.next()) {
@@ -268,15 +268,15 @@ public final class ParticleEmitter extends Node {
 
     @OriginalMember(owner = "client!rf", name = "a", descriptor = "(B)V")
     public void updateTriangle() {
-        this.triangle.anInt4283 = this.model.anInt8507;
-        this.triangle.anInt4275 = this.model.anInt8520;
-        this.triangle.anInt4276 = this.model.anInt8512;
-        this.triangle.anInt4280 = this.model.anInt8502;
-        this.triangle.anInt4281 = this.model.anInt8516;
-        this.triangle.anInt4270 = this.model.anInt8504;
-        this.triangle.anInt4277 = this.model.anInt8509;
-        this.triangle.anInt4279 = this.model.anInt8518;
-        this.triangle.anInt4269 = this.model.anInt8503;
+        this.triangle.anInt4283 = this.model.transformedBY;
+        this.triangle.anInt4275 = this.model.transformedCZ;
+        this.triangle.anInt4276 = this.model.transformedCX;
+        this.triangle.anInt4280 = this.model.transformedAY;
+        this.triangle.anInt4281 = this.model.transformedBX;
+        this.triangle.anInt4270 = this.model.transformedAZ;
+        this.triangle.anInt4277 = this.model.transformedBZ;
+        this.triangle.anInt4279 = this.model.transformedAX;
+        this.triangle.anInt4269 = this.model.transformedCY;
 
         if (this.triangle.anInt4281 == this.triangle.anInt4279 && this.triangle.anInt4276 == this.triangle.anInt4281 && this.triangle.anInt4280 == this.triangle.anInt4283 && this.triangle.anInt4283 == this.triangle.anInt4269 && this.triangle.anInt4270 == this.triangle.anInt4277 && this.triangle.anInt4275 == this.triangle.anInt4277) {
             this.finished = true;

@@ -488,7 +488,7 @@ public abstract class NativeToolkit extends Toolkit {
                 for (@Pc(371) int local371 = 0; local371 < super.textureSource.textureCount(); local371++) {
                     @Pc(378) TextureMetrics local378 = super.textureSource.getMetrics(local371);
                     if (local378 != null) {
-                        this.aNativeInterface3.initTextureMetrics(local371, local378.alpha, local378.aByte57);
+                        this.aNativeInterface3.initTextureMetrics(local371, local378.alpha, local378.brightness);
                     }
                 }
             }

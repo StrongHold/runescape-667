@@ -2405,7 +2405,7 @@ public final class JavaToolkit extends Toolkit {
 
     @OriginalMember(owner = "client!iaa", name = "m", descriptor = "(I)I")
     public int textureHsl(@OriginalArg(0) int id) {
-        return super.textureSource.getMetrics(id).aShort37 & 0xFFFF;
+        return super.textureSource.getMetrics(id).averageColour & 0xFFFF;
     }
 
     @OriginalMember(owner = "client!iaa", name = "X", descriptor = "(I)V")
@@ -2903,7 +2903,7 @@ public final class JavaToolkit extends Toolkit {
 
     @OriginalMember(owner = "client!iaa", name = "d", descriptor = "(I)Z")
     public boolean textureRepeats(@OriginalArg(0) int id) {
-        return super.textureSource.getMetrics(id).aBoolean236 || super.textureSource.getMetrics(id).aBoolean235;
+        return super.textureSource.getMetrics(id).repeatsU || super.textureSource.getMetrics(id).repeatsV;
     }
 
     @OriginalMember(owner = "client!iaa", name = "I", descriptor = "()I")

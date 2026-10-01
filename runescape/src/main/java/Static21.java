@@ -51,13 +51,13 @@ public final class Static21 {
         if (lighting) {
             Client.tileLightFlags = new long[4][mapWidth][mapLength];
             EnvironmentLight.aEnvironmentLightArray1 = new EnvironmentLight[65535];
-            Static279.aBooleanArray11 = new boolean[65535];
-            Static319.anInt5080 = 0;
+            Static279.environmentLightApplied = new boolean[65535];
+            Static319.environmentLightCount = 0;
         } else {
             Client.tileLightFlags = null;
             EnvironmentLight.aEnvironmentLightArray1 = null;
-            Static279.aBooleanArray11 = null;
-            Static319.anInt5080 = 0;
+            Static279.environmentLightApplied = null;
+            Static319.environmentLightCount = 0;
         }
         Static379.method5355(false);
         Static576.opaqueStationaryEntities = new Entity[2];

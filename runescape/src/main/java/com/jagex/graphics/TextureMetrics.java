@@ -16,22 +16,22 @@ public final class TextureMetrics {
     public boolean small;
 
     @OriginalMember(owner = "client!fa", name = "c", descriptor = "Z")
-    public boolean aBoolean234;
+    public boolean skipFaces;
 
     @OriginalMember(owner = "client!fa", name = "f", descriptor = "I")
     public int effectParam2;
 
     @OriginalMember(owner = "client!fa", name = "z", descriptor = "B")
-    public byte aByte53;
+    public byte mipmap;
 
     @OriginalMember(owner = "client!fa", name = "u", descriptor = "Z")
-    public boolean aBoolean235;
+    public boolean repeatsV;
 
     @OriginalMember(owner = "client!fa", name = "x", descriptor = "B")
     public byte speedU;
 
     @OriginalMember(owner = "client!fa", name = "A", descriptor = "Z")
-    public boolean aBoolean236;
+    public boolean repeatsU;
 
     @OriginalMember(owner = "client!fa", name = "e", descriptor = "B")
     public byte effectParam1;
@@ -40,19 +40,23 @@ public final class TextureMetrics {
     public byte effectType;
 
     @OriginalMember(owner = "client!fa", name = "d", descriptor = "Z")
-    public boolean aBoolean237;
+    public boolean hdr;
 
     @OriginalMember(owner = "client!fa", name = "o", descriptor = "Z")
-    public boolean aBoolean238;
+    public boolean transposed;
 
     @OriginalMember(owner = "client!fa", name = "i", descriptor = "B")
-    public byte aByte57;
+    public byte brightness;
 
     @OriginalMember(owner = "client!fa", name = "h", descriptor = "S")
-    public short aShort37;
+    public short averageColour;
 
+    /**
+     * Decoded and handed to the native toolkit with the rest of the metrics, but nothing in this
+     * build reads it.
+     */
     @OriginalMember(owner = "client!fa", name = "p", descriptor = "Z")
-    public boolean aBoolean239;
+    public boolean unusedFlag;
 
     @OriginalMember(owner = "client!fa", name = "t", descriptor = "Z")
     public boolean disableable;

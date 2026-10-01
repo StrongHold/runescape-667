@@ -38,9 +38,9 @@ public final class Class334 {
             @Pc(35) TextureMetrics local35 = this.anTextureSource_9.getMetrics(arg0);
             @Pc(45) int local45 = local35.small ? 64 : this.aClass19_Sub1_20.anInt9183;
             @Pc(105) Interface18 local105;
-            if (local35.aBoolean237 && this.aClass19_Sub1_20.bloom()) {
+            if (local35.hdr && this.aClass19_Sub1_20.bloom()) {
                 @Pc(116) float[] local116 = this.anTextureSource_9.floatArgbOutput(local45, arg0, 0.7F, local45);
-                local105 = this.aClass19_Sub1_20.method8121(local45, local116, Static172.aClass92_8, local35.aByte53 != 0, local45);
+                local105 = this.aClass19_Sub1_20.method8121(local45, local116, Static172.aClass92_8, local35.mipmap != 0, local45);
             } else {
                 @Pc(79) int[] local79;
                 if (local35.alphaBlendMode != 2 && Static501.method6715(local35.effectType)) {
@@ -48,9 +48,9 @@ public final class Class334 {
                 } else {
                     local79 = this.anTextureSource_9.argbOutput(0.7F, arg0, local45, local45);
                 }
-                local105 = this.aClass19_Sub1_20.method8034(local35.aByte53 != 0, local45, local45, local79);
+                local105 = this.aClass19_Sub1_20.method8034(local35.mipmap != 0, local45, local45, local79);
             }
-            local105.method9052(local35.aBoolean236, local35.aBoolean235);
+            local105.method9052(local35.repeatsU, local35.repeatsV);
             this.aReferenceCache_187.put(local105, arg0);
             return local105;
         } else {

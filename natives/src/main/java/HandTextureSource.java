@@ -49,14 +49,14 @@ public final class HandTextureSource implements TextureSource {
         var plain = plainOf(id);
 
         var metrics = new TextureMetrics();
-        metrics.aShort37 = (short) SIZE;
+        metrics.averageColour = (short) SIZE;
         metrics.alphaBlendMode = plain % 3;
         metrics.effectType = (byte) effectOf(id);
         metrics.effectParam1 = (byte) (plain & 7);
         metrics.effectParam2 = plain * 17;
         metrics.small = (plain & 8) != 0;
         metrics.alpha = (byte) (plain == 3 ? 200 : 96);
-        metrics.aByte57 = (byte) (id == NOT_BRIGHTENED ? 0 : (plain == 3 ? 7 : 24));
+        metrics.brightness = (byte) (id == NOT_BRIGHTENED ? 0 : (plain == 3 ? 7 : 24));
         metrics.speedU = (byte) (plain == 1 ? 3 : 0);
         metrics.speedV = (byte) (plain == 2 ? 5 : 0);
         /*
@@ -64,13 +64,13 @@ public final class HandTextureSource implements TextureSource {
          * a scene can ask for either kind by the number it names.
          */
         metrics.disableable = (plain & 1) != 0;
-        metrics.aBoolean234 = false;
-        metrics.aBoolean239 = (plain & 64) != 0;
-        metrics.aBoolean236 = (plain & 1) != 0;
-        metrics.aBoolean235 = (plain & 2) != 0;
-        metrics.aByte53 = (byte) (plain & 15);
-        metrics.aBoolean237 = (plain & 4) != 0;
-        metrics.aBoolean238 = (plain & 128) != 0;
+        metrics.skipFaces = false;
+        metrics.unusedFlag = (plain & 64) != 0;
+        metrics.repeatsU = (plain & 1) != 0;
+        metrics.repeatsV = (plain & 2) != 0;
+        metrics.mipmap = (byte) (plain & 15);
+        metrics.hdr = (plain & 4) != 0;
+        metrics.transposed = (plain & 128) != 0;
         metrics.colorOp = plain;
         return metrics;
     }

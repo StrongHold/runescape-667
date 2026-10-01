@@ -62,7 +62,7 @@ public final class Class67_Sub1_Sub2 extends Class67_Sub1 {
                 }
                 @Pc(69) TextureMetrics local69 = local37.getMetrics(Static319.anIntArray384[local48]);
                 @Pc(77) int local77 = local69.small ? 64 : 128;
-                if (local69.aByte53 > 0) {
+                if (local69.mipmap > 0) {
                     local44 = true;
                 }
                 if (local46 < local77) {

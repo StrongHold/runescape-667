@@ -5,7 +5,7 @@ import org.openrs2.deob.annotation.OriginalMember;
 public final class Static429 {
 
     @OriginalMember(owner = "client!nj", name = "a", descriptor = "(ILclient!s;)V")
-    public static void method5805(@OriginalArg(0) int arg0, @OriginalArg(1) Ground arg1) {
-        Static246.ground[arg0] = arg1;
+    public static void setGround(@OriginalArg(0) int level, @OriginalArg(1) Ground ground) {
+        Static246.ground[level] = ground;
     }
 }

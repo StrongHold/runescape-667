@@ -162,13 +162,13 @@ public final class MapBuilder {
         System.gc();
         Static314.noTimeout(true);
         Static699.method9139();
-        Static439.anInt6674 = ClientOptions.instance.hardShadows.getValue();
-        Static428.aBoolean487 = GameShell.maxmemory >= 96;
-        Static50.aBoolean566 = ClientOptions.instance.waterDetail.getValue() == 2;
-        Static305.aBoolean371 = ClientOptions.instance.lightDetail.getValue() == 1;
+        Static439.hardShadows = ClientOptions.instance.hardShadows.getValue();
+        Static428.highMemory = GameShell.maxmemory >= 96;
+        Static50.highWaterDetail = ClientOptions.instance.waterDetail.getValue() == 2;
+        Static305.highLightDetail = ClientOptions.instance.lightDetail.getValue() == 1;
         AnimatedBackground.level = ClientOptions.instance.animateBackground.getValue() == 1 ? -1 : Static164.areaLevel;
         Static718.groundBlending = ClientOptions.instance.groundBlending.getValue() == 1;
-        Static196.aBoolean262 = ClientOptions.instance.textures.getValue() == 1;
+        Static196.textures = ClientOptions.instance.textures.getValue() == 1;
         MapRegion.active = new MapRegion(4, Static720.mapWidth, Static501.mapLength, false);
         if (Static117.areaMode == AreaMode.STATIC_AREA) {
             Static73.decodeStaticArea(Static319.aByteArrayArray16, MapRegion.active);

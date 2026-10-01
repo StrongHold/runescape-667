@@ -212,7 +212,7 @@ public final class Node_Sub58 extends Node {
                     arg0 = (local31 * (local57 & 0xFF00) + local83 * (arg0 & 0xFF00) & 0xFF0000) + (local31 * (local57 & 0xFF00FF) + ((arg0 & 0xFF00FF) * local83) & 0xFF00FF00) >> 8;
                 }
             }
-            local57 = local26.aByte57 & 0xFF;
+            local57 = local26.brightness & 0xFF;
             if (local57 != 0) {
                 local57 += 256;
                 @Pc(133) int local133 = (arg0 >> 16 & 0xFF) * local57;
