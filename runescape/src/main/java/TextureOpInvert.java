@@ -23,7 +23,7 @@ public final class TextureOpInvert extends TextureOp {
         @Pc(11) int[] output = super.monochromeCache.get(y);
         if (super.monochromeCache.dirty) {
             @Pc(21) int[] source = this.method9422(y, 0);
-            for (@Pc(23) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            for (@Pc(23) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 output[x] = 4096 - source[x];
             }
         }
@@ -42,7 +42,7 @@ public final class TextureOpInvert extends TextureOp {
             @Pc(44) int[] outputRed = output[0];
             @Pc(48) int[] outputGreen = output[1];
             @Pc(52) int[] outputBlue = output[2];
-            for (@Pc(54) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            for (@Pc(54) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 outputRed[x] = 4096 - sourceRed[x];
                 outputGreen[x] = 4096 - sourceGreen[x];
                 outputBlue[x] = 4096 - sourceBlue[x];

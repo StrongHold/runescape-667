@@ -33,7 +33,7 @@ public abstract class WallDecor extends Entity implements Location {
         if (arg0 != 59) {
             this.aShort101 = -126;
         }
-        return Static282.method3976(this.getMinY(2), super.virtualLevel, super.x >> EnvironmentLight.anInt1066, super.z >> EnvironmentLight.anInt1066);
+        return Static282.method3976(this.getMinY(2), super.virtualLevel, super.x >> EnvironmentLight.tileShift, super.z >> EnvironmentLight.tileShift);
     }
 
     @OriginalMember(owner = "client!tla", name = "j", descriptor = "(I)V")
@@ -65,12 +65,12 @@ public abstract class WallDecor extends Entity implements Location {
     @OriginalMember(owner = "client!tla", name = "a", descriptor = "([Lclient!lca;I)I")
     @Override
     public final int method9288(@OriginalArg(0) PointLight[] arg0) {
-        return this.findLightsAt(arg0, super.z >> EnvironmentLight.anInt1066, super.x >> EnvironmentLight.anInt1066);
+        return this.findLightsAt(arg0, super.z >> EnvironmentLight.tileShift, super.x >> EnvironmentLight.tileShift);
     }
 
     @OriginalMember(owner = "client!tla", name = "g", descriptor = "(I)Z")
     @Override
     public final boolean method9275() {
-        return Static258.aBooleanArrayArray3[(super.x >> EnvironmentLight.anInt1066) + Static35.anInt813 - Static403.anInt6246][(super.z >> EnvironmentLight.anInt1066) + Static35.anInt813 - Static550.anInt8271];
+        return Static258.aBooleanArrayArray3[(super.x >> EnvironmentLight.tileShift) + Static35.anInt813 - Static403.anInt6246][(super.z >> EnvironmentLight.tileShift) + Static35.anInt813 - Static550.anInt8271];
     }
 }

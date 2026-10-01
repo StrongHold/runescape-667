@@ -103,7 +103,7 @@ public final class Texture extends Node2 {
         for (@Pc(25) int i = 0; i < this.ops.length; i++) {
             this.ops[i].initCache(height, width);
         }
-        EnvironmentLight.method2313(height, width);
+        EnvironmentLight.setTextureOpSize(height, width);
         @Pc(54) float[] pixels = new float[width * 4 * height];
         @Pc(56) int index = 0;
         for (@Pc(58) int y = 0; y < height; y++) {
@@ -194,7 +194,7 @@ public final class Texture extends Node2 {
             this.ops[i].initCache(height, width);
         }
         Static725.setGamma(gamma);
-        EnvironmentLight.method2313(height, width);
+        EnvironmentLight.setTextureOpSize(height, width);
         @Pc(53) int[] pixels = new int[width * height];
         @Pc(55) int index = 0;
         for (@Pc(57) int y = 0; y < height; y++) {
@@ -275,7 +275,7 @@ public final class Texture extends Node2 {
             this.ops[i].initCache(height, width);
         }
         Static725.setGamma(gamma);
-        EnvironmentLight.method2313(height, width);
+        EnvironmentLight.setTextureOpSize(height, width);
         @Pc(41) int[] pixels = new int[height * width];
         @Pc(49) int start;
         @Pc(47) int end;

@@ -22,9 +22,9 @@ public abstract class Class8_Sub2_Sub5 extends Entity {
     @OriginalMember(owner = "client!nda", name = "a", descriptor = "(BLclient!ha;)Z")
     @Override
     public final boolean method9284(@OriginalArg(0) byte arg0, @OriginalArg(1) Toolkit arg1) {
-        @Pc(15) PositionEntityNode local15 = Static467.getHead(super.level, super.x >> EnvironmentLight.anInt1066, super.z >> EnvironmentLight.anInt1066);
+        @Pc(15) PositionEntityNode local15 = Static467.getHead(super.level, super.x >> EnvironmentLight.tileShift, super.z >> EnvironmentLight.tileShift);
         if (arg0 == 59) {
-            return local15 != null && local15.entity.aBoolean815 ? Static282.method3976(local15.entity.getMinY(2) + this.getMinY(2), super.level, super.x >> EnvironmentLight.anInt1066, super.z >> EnvironmentLight.anInt1066) : Static588.isTileOccluded(super.z >> EnvironmentLight.anInt1066, super.level, super.x >> EnvironmentLight.anInt1066);
+            return local15 != null && local15.entity.aBoolean815 ? Static282.method3976(local15.entity.getMinY(2) + this.getMinY(2), super.level, super.x >> EnvironmentLight.tileShift, super.z >> EnvironmentLight.tileShift) : Static588.isTileOccluded(super.z >> EnvironmentLight.tileShift, super.level, super.x >> EnvironmentLight.tileShift);
         } else {
             return true;
         }
@@ -33,7 +33,7 @@ public abstract class Class8_Sub2_Sub5 extends Entity {
     @OriginalMember(owner = "client!nda", name = "g", descriptor = "(I)Z")
     @Override
     public final boolean method9275() {
-        return Static258.aBooleanArrayArray3[(super.x >> EnvironmentLight.anInt1066) + Static35.anInt813 - Static403.anInt6246][Static35.anInt813 + (super.z >> EnvironmentLight.anInt1066) - Static550.anInt8271];
+        return Static258.aBooleanArrayArray3[(super.x >> EnvironmentLight.tileShift) + Static35.anInt813 - Static403.anInt6246][Static35.anInt813 + (super.z >> EnvironmentLight.tileShift) - Static550.anInt8271];
     }
 
     @OriginalMember(owner = "client!nda", name = "a", descriptor = "(IZLclient!ha;IBILclient!eo;)V")
@@ -47,7 +47,7 @@ public abstract class Class8_Sub2_Sub5 extends Entity {
     @OriginalMember(owner = "client!nda", name = "a", descriptor = "([Lclient!lca;I)I")
     @Override
     public final int method9288(@OriginalArg(0) PointLight[] arg0) {
-        return this.findLightsAt(arg0, super.z >> EnvironmentLight.anInt1066, super.x >> EnvironmentLight.anInt1066);
+        return this.findLightsAt(arg0, super.z >> EnvironmentLight.tileShift, super.x >> EnvironmentLight.tileShift);
     }
 
     @OriginalMember(owner = "client!nda", name = "j", descriptor = "(I)V")

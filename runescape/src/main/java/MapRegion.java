@@ -90,36 +90,36 @@ public final class MapRegion extends Terrain {
     public static void registerLight(@OriginalArg(0) EnvironmentLight environmentLight) {
         if (Static319.environmentLightCount < 65535) {
             @Pc(7) PointLight light = environmentLight.light;
-            EnvironmentLight.aEnvironmentLightArray1[Static319.environmentLightCount] = environmentLight;
+            EnvironmentLight.lights[Static319.environmentLightCount] = environmentLight;
             Static279.environmentLightApplied[Static319.environmentLightCount] = false;
             Static319.environmentLightCount++;
 
             @Pc(22) int minLevel = environmentLight.level;
-            if (environmentLight.aBoolean716) {
+            if (environmentLight.spansLevelsBelow) {
                 minLevel = 0;
             }
 
             @Pc(30) int maxLevel = environmentLight.level;
-            if (environmentLight.aBoolean717) {
+            if (environmentLight.spansLevelsAbove) {
                 maxLevel = Static299.tileMaxLevel - 1;
             }
 
             for (@Pc(39) int level = minLevel; level <= maxLevel; level++) {
                 @Pc(42) int spanIndex = 0;
-                @Pc(54) int minZ = light.getZ() + EnvironmentLight.anInt3993 - light.getRange() >> EnvironmentLight.anInt1066;
+                @Pc(54) int minZ = light.getZ() + EnvironmentLight.halfTileSize - light.getRange() >> EnvironmentLight.tileShift;
                 if (minZ < 0) {
                     spanIndex = -minZ;
                     minZ = 0;
                 }
 
-                @Pc(74) int maxZ = light.getZ() + light.getRange() - EnvironmentLight.anInt3993 >> EnvironmentLight.anInt1066;
+                @Pc(74) int maxZ = light.getZ() + light.getRange() - EnvironmentLight.halfTileSize >> EnvironmentLight.tileShift;
                 if (maxZ >= Static662.tileMaxZ) {
                     maxZ = Static662.tileMaxZ - 1;
                 }
 
                 for (@Pc(83) int z = minZ; z <= maxZ; z++) {
-                    @Pc(90) short span = environmentLight.aShortArray131[spanIndex++];
-                    @Pc(106) int minX = (light.getX() + EnvironmentLight.anInt3993 - light.getRange() >> EnvironmentLight.anInt1066) + (span >>> 8);
+                    @Pc(90) short span = environmentLight.rowSpans[spanIndex++];
+                    @Pc(106) int minX = (light.getX() + EnvironmentLight.halfTileSize - light.getRange() >> EnvironmentLight.tileShift) + (span >>> 8);
                     @Pc(114) int maxX = minX + (span & 0xFF) - 1;
                     if (minX < 0) {
                         minX = 0;

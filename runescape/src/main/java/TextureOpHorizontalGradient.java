@@ -22,6 +22,6 @@ public final class TextureOpHorizontalGradient extends TextureOp {
         if (arg0 <= 107) {
             this.monochromeOutput(49, -21);
         }
-        return EnvironmentLight.anIntArray92;
+        return EnvironmentLight.textureOpColumns;
     }
 }

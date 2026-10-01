@@ -494,7 +494,7 @@ public abstract class PathingEntity extends PositionEntity {
         } else {
             local31 = -this.minY;
         }
-        @Pc(55) Tile local55 = Static334.activeTiles[super.level][super.x >> EnvironmentLight.anInt1066][super.z >> EnvironmentLight.anInt1066];
+        @Pc(55) Tile local55 = Static334.activeTiles[super.level][super.x >> EnvironmentLight.tileShift][super.z >> EnvironmentLight.tileShift];
         return local55 == null || local55.groundDecor == null ? local31 : local31 + local55.groundDecor.offsetY;
     }
 

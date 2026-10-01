@@ -73,15 +73,15 @@ public final class TextureOpStoneWall extends TextureOp {
         @Pc(45) boolean local45 = true;
         @Pc(47) int local47 = 0;
         @Pc(49) int local49 = 0;
-        @Pc(56) int local56 = EnvironmentLight.anInt9289 * this.minWidth >> 12;
-        @Pc(63) int local63 = this.maxWidth * EnvironmentLight.anInt9289 >> 12;
-        @Pc(70) int local70 = EnvironmentLight.anInt53 * this.minHeight >> 12;
-        @Pc(77) int local77 = this.maxHeight * EnvironmentLight.anInt53 >> 12;
+        @Pc(56) int local56 = EnvironmentLight.textureOpWidth * this.minWidth >> 12;
+        @Pc(63) int local63 = this.maxWidth * EnvironmentLight.textureOpWidth >> 12;
+        @Pc(70) int local70 = EnvironmentLight.textureOpHeight * this.minHeight >> 12;
+        @Pc(77) int local77 = this.maxHeight * EnvironmentLight.textureOpHeight >> 12;
         if (local77 <= 1) {
             return local31[arg1];
         }
-        this.bevelSize = EnvironmentLight.anInt9289 / 8 * this.bevel >> 12;
-        @Pc(101) int local101 = EnvironmentLight.anInt9289 / local56 + 1;
+        this.bevelSize = EnvironmentLight.textureOpWidth / 8 * this.bevel >> 12;
+        @Pc(101) int local101 = EnvironmentLight.textureOpWidth / local56 + 1;
         @Pc(105) int[][] local105 = new int[local101][3];
         @Pc(109) int[][] local109 = new int[local101][3];
         @Pc(116) Random local116 = new Random(this.seed);
@@ -90,9 +90,9 @@ public final class TextureOpStoneWall extends TextureOp {
                 @Pc(126) int local126 = local56 + Node_Sub1_Sub27.method8326(-5208, local63 - local56, local116);
                 @Pc(136) int local136 = local70 + Node_Sub1_Sub27.method8326(-5208, local77 - local70, local116);
                 @Pc(141) int local141 = local39 + local126;
-                if (local141 > EnvironmentLight.anInt9289) {
-                    local126 = EnvironmentLight.anInt9289 - local39;
-                    local141 = EnvironmentLight.anInt9289;
+                if (local141 > EnvironmentLight.textureOpWidth) {
+                    local126 = EnvironmentLight.textureOpWidth - local39;
+                    local141 = EnvironmentLight.textureOpWidth;
                 }
                 @Pc(157) int local157;
                 @Pc(167) int local167;
@@ -104,10 +104,10 @@ public final class TextureOpStoneWall extends TextureOp {
                     local167 = 0;
                     @Pc(171) int local171 = local33 + local141;
                     if (local171 < 0) {
-                        local171 += EnvironmentLight.anInt9289;
+                        local171 += EnvironmentLight.textureOpWidth;
                     }
-                    if (EnvironmentLight.anInt9289 < local171) {
-                        local171 -= EnvironmentLight.anInt9289;
+                    if (EnvironmentLight.textureOpWidth < local171) {
+                        local171 -= EnvironmentLight.textureOpWidth;
                     }
                     local157 = local165[2];
                     while (true) {
@@ -116,10 +116,10 @@ public final class TextureOpStoneWall extends TextureOp {
                             if (local161 != local41) {
                                 @Pc(234) int local234 = local33 + local39;
                                 if (local234 < 0) {
-                                    local234 += EnvironmentLight.anInt9289;
+                                    local234 += EnvironmentLight.textureOpWidth;
                                 }
-                                if (EnvironmentLight.anInt9289 < local234) {
-                                    local234 -= EnvironmentLight.anInt9289;
+                                if (EnvironmentLight.textureOpWidth < local234) {
+                                    local234 -= EnvironmentLight.textureOpWidth;
                                 }
                                 for (@Pc(249) int local249 = 1; local249 <= local167; local249++) {
                                     @Pc(259) int[] local259 = local109[(local249 + local41) % local47];
@@ -141,7 +141,7 @@ public final class TextureOpStoneWall extends TextureOp {
                                             local315 = Math.min(local171, local304);
                                         } else {
                                             local311 = Math.max(local234, local300);
-                                            local315 = EnvironmentLight.anInt9289;
+                                            local315 = EnvironmentLight.textureOpWidth;
                                         }
                                         this.drawStone(local31, local157 - local289, local116, local289, local37 + local311, -local311 + local315, (byte) -58);
                                     }
@@ -158,13 +158,13 @@ public final class TextureOpStoneWall extends TextureOp {
                         }
                     }
                 }
-                if (local157 + local136 > EnvironmentLight.anInt53) {
-                    local136 = EnvironmentLight.anInt53 - local157;
+                if (local157 + local136 > EnvironmentLight.textureOpHeight) {
+                    local136 = EnvironmentLight.textureOpHeight - local157;
                 } else {
                     local43 = false;
                 }
                 @Pc(406) int[] local406;
-                if (local141 == EnvironmentLight.anInt9289) {
+                if (local141 == EnvironmentLight.textureOpWidth) {
                     this.drawStone(local31, local136, local116, local157, local35 + local39, local126, (byte) -58);
                     if (local43) {
                         return local11;
@@ -180,15 +180,15 @@ public final class TextureOpStoneWall extends TextureOp {
                     local105 = local422;
                     local49 = 0;
                     local37 = local35;
-                    local35 = Node_Sub1_Sub27.method8326(-5208, EnvironmentLight.anInt9289, local116);
+                    local35 = Node_Sub1_Sub27.method8326(-5208, EnvironmentLight.textureOpWidth, local116);
                     local33 = local35 - local37;
                     local39 = 0;
                     local167 = local33;
                     if (local33 < 0) {
-                        local167 = local33 + EnvironmentLight.anInt9289;
+                        local167 = local33 + EnvironmentLight.textureOpWidth;
                     }
-                    if (EnvironmentLight.anInt9289 < local167) {
-                        local167 -= EnvironmentLight.anInt9289;
+                    if (EnvironmentLight.textureOpWidth < local167) {
+                        local167 -= EnvironmentLight.textureOpWidth;
                     }
                     local41 = 0;
                     while (true) {
@@ -225,8 +225,8 @@ public final class TextureOpStoneWall extends TextureOp {
         @Pc(22) int local22 = this.shadeVariance <= 0 ? 4096 : 4096 - Node_Sub1_Sub27.method8326(arg6 - 5150, this.shadeVariance, random);
         @Pc(30) int local30 = this.bevelVariance * this.bevelSize >> 12;
         @Pc(49) int local49 = this.bevelSize - (local30 <= 0 ? 0 : Node_Sub1_Sub27.method8326(arg6 ^ 0x146E, local30, random));
-        if (EnvironmentLight.anInt9289 <= x) {
-            x -= EnvironmentLight.anInt9289;
+        if (EnvironmentLight.textureOpWidth <= x) {
+            x -= EnvironmentLight.textureOpWidth;
         }
         if (arg6 != -58) {
             return;
@@ -234,8 +234,8 @@ public final class TextureOpStoneWall extends TextureOp {
         @Pc(82) int local82;
         @Pc(84) int local84;
         if (local49 <= 0) {
-            if (EnvironmentLight.anInt9289 < width + x) {
-                local82 = EnvironmentLight.anInt9289 - x;
+            if (EnvironmentLight.textureOpWidth < width + x) {
+                local82 = EnvironmentLight.textureOpWidth - x;
                 for (local84 = 0; local84 < height; local84++) {
                     @Pc(92) int[] local92 = dest[local84 + y];
                     Arrays.set(local92, x, local82, local22);
@@ -263,16 +263,16 @@ public final class TextureOpStoneWall extends TextureOp {
                     if (this.bevelShape == 0) {
                         for (local217 = 0; local217 < local166; local217++) {
                             local225 = local217 * local22 / local166;
-                            local199[local217 + x & EnvironmentLight.anInt8580] = local199[EnvironmentLight.anInt8580 & width + x - local217 - 1] = local225 * local212 >> 12;
+                            local199[local217 + x & EnvironmentLight.textureOpWidthMask] = local199[EnvironmentLight.textureOpWidthMask & width + x - local217 - 1] = local225 * local212 >> 12;
                         }
                     } else {
                         for (local217 = 0; local217 < local166; local217++) {
                             local225 = local217 * local22 / local166;
-                            local199[EnvironmentLight.anInt8580 & local217 + x] = local199[EnvironmentLight.anInt8580 & x + width - local217 - 1] = local212 > local225 ? local225 : local212;
+                            local199[EnvironmentLight.textureOpWidthMask & local217 + x] = local199[EnvironmentLight.textureOpWidthMask & x + width - local217 - 1] = local212 > local225 ? local225 : local212;
                         }
                     }
-                    if (EnvironmentLight.anInt9289 < local182 + local189) {
-                        local217 = EnvironmentLight.anInt9289 - local182;
+                    if (EnvironmentLight.textureOpWidth < local182 + local189) {
+                        local217 = EnvironmentLight.textureOpWidth - local182;
                         Arrays.set(local199, local182, local217, local212);
                         Arrays.set(local199, 0, local189 - local217, local212);
                     } else {
@@ -286,29 +286,29 @@ public final class TextureOpStoneWall extends TextureOp {
                         if (this.bevelShape == 0) {
                             for (local225 = 0; local225 < local166; local225++) {
                                 local372 = local22 * local225 / local166;
-                                local199[x + local225 & EnvironmentLight.anInt8580] = local199[width + x - local225 - 1 & EnvironmentLight.anInt8580] = local217 * local372 >> 12;
+                                local199[x + local225 & EnvironmentLight.textureOpWidthMask] = local199[width + x - local225 - 1 & EnvironmentLight.textureOpWidthMask] = local217 * local372 >> 12;
                             }
                         } else {
                             for (local225 = 0; local225 < local166; local225++) {
                                 local372 = local225 * local22 / local166;
-                                local199[EnvironmentLight.anInt8580 & x + local225] = local199[x + width - local225 - 1 & EnvironmentLight.anInt8580] = local217 > local372 ? local372 : local217;
+                                local199[EnvironmentLight.textureOpWidthMask & x + local225] = local199[x + width - local225 - 1 & EnvironmentLight.textureOpWidthMask] = local217 > local372 ? local372 : local217;
                             }
                         }
-                        if (EnvironmentLight.anInt9289 >= local189 + local182) {
+                        if (EnvironmentLight.textureOpWidth >= local189 + local182) {
                             Arrays.set(local199, local182, local189, local217);
                         } else {
-                            local225 = EnvironmentLight.anInt9289 - local182;
+                            local225 = EnvironmentLight.textureOpWidth - local182;
                             Arrays.set(local199, local182, local225, local217);
                             Arrays.set(local199, 0, local189 - local225, local217);
                         }
                     } else {
                         for (local217 = 0; local217 < local166; local217++) {
-                            local199[EnvironmentLight.anInt8580 & x + local217] = local199[EnvironmentLight.anInt8580 & width + x - local217 - 1] = local217 * local22 / local166;
+                            local199[EnvironmentLight.textureOpWidthMask & x + local217] = local199[EnvironmentLight.textureOpWidthMask & width + x - local217 - 1] = local217 * local22 / local166;
                         }
-                        if (EnvironmentLight.anInt9289 >= local182 + local189) {
+                        if (EnvironmentLight.textureOpWidth >= local182 + local189) {
                             Arrays.set(local199, local182, local189, local22);
                         } else {
-                            local225 = EnvironmentLight.anInt9289 - local182;
+                            local225 = EnvironmentLight.textureOpWidth - local182;
                             Arrays.set(local199, local182, local225, local22);
                             Arrays.set(local199, 0, local189 - local225, local22);
                         }

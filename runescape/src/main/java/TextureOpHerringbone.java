@@ -46,8 +46,8 @@ public final class TextureOpHerringbone extends TextureOp {
     public int[] monochromeOutput(@OriginalArg(0) int arg0, @OriginalArg(1) int y) {
         @Pc(11) int[] output = super.monochromeCache.get(y);
         if (super.monochromeCache.dirty) {
-            for (@Pc(17) int x = 0; x < EnvironmentLight.anInt9289; x++) {
-                @Pc(23) int columnCoord = EnvironmentLight.anIntArray92[x];
+            for (@Pc(17) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
+                @Pc(23) int columnCoord = EnvironmentLight.textureOpColumns[x];
                 @Pc(27) int rowCoord = MonochromeImageCache.anIntArray341[y];
                 @Pc(34) int column = columnCoord * this.columns >> 12;
                 @Pc(41) int row = rowCoord * this.rows >> 12;

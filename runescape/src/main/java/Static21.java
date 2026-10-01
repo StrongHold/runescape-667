@@ -23,10 +23,10 @@ public final class Static21 {
         Static665.aToolkit_15 = toolkit;
         Static32.anInt772 = threadCount;
         Static661.aBoolean457 = Static32.anInt772 > 1 && Static665.aToolkit_15.method7979();
-        EnvironmentLight.anInt1066 = 9;
-        Static340.anInt5586 = 0x1 << EnvironmentLight.anInt1066;
-        EnvironmentLight.anInt3993 = Static340.anInt5586 >> 1;
-        Math.sqrt(EnvironmentLight.anInt3993 * EnvironmentLight.anInt3993 + EnvironmentLight.anInt3993 * EnvironmentLight.anInt3993);
+        EnvironmentLight.tileShift = 9;
+        Static340.anInt5586 = 0x1 << EnvironmentLight.tileShift;
+        EnvironmentLight.halfTileSize = Static340.anInt5586 >> 1;
+        Math.sqrt(EnvironmentLight.halfTileSize * EnvironmentLight.halfTileSize + EnvironmentLight.halfTileSize * EnvironmentLight.halfTileSize);
         Static299.tileMaxLevel = 4;
         Static619.tileMaxX = mapWidth;
         Static662.tileMaxZ = mapLength;
@@ -50,12 +50,12 @@ public final class Static21 {
         }
         if (lighting) {
             Client.tileLightFlags = new long[4][mapWidth][mapLength];
-            EnvironmentLight.aEnvironmentLightArray1 = new EnvironmentLight[65535];
+            EnvironmentLight.lights = new EnvironmentLight[65535];
             Static279.environmentLightApplied = new boolean[65535];
             Static319.environmentLightCount = 0;
         } else {
             Client.tileLightFlags = null;
-            EnvironmentLight.aEnvironmentLightArray1 = null;
+            EnvironmentLight.lights = null;
             Static279.environmentLightApplied = null;
             Static319.environmentLightCount = 0;
         }

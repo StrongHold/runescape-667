@@ -35,10 +35,10 @@ public final class TextureOpShape extends TextureOp {
 
     @OriginalMember(owner = "client!ot", name = "a", descriptor = "(I[[I)V")
     public void render(@OriginalArg(1) int[][] dest) {
-        @Pc(7) int width = EnvironmentLight.anInt9289;
-        @Pc(9) int height = EnvironmentLight.anInt53;
+        @Pc(7) int width = EnvironmentLight.textureOpWidth;
+        @Pc(9) int height = EnvironmentLight.textureOpHeight;
         Static430.method5815(dest);
-        Static96.setClipBounds(EnvironmentLight.anInt7343, EnvironmentLight.anInt8580);
+        Static96.setClipBounds(EnvironmentLight.textureOpHeightMask, EnvironmentLight.textureOpWidthMask);
         if (this.shapes == null) {
             return;
         }
@@ -63,18 +63,18 @@ public final class TextureOpShape extends TextureOp {
     public int[][] method9414(@OriginalArg(0) int row) {
         @Pc(17) int[][] output = super.colourCache.get(row);
         if (super.colourCache.dirty) {
-            @Pc(23) int width = EnvironmentLight.anInt9289;
-            @Pc(25) int height = EnvironmentLight.anInt53;
+            @Pc(23) int width = EnvironmentLight.textureOpWidth;
+            @Pc(25) int height = EnvironmentLight.textureOpHeight;
             @Pc(29) int[][] raster = new int[height][width];
             @Pc(34) int[][][] rows = super.colourCache.get();
             this.render(raster);
-            for (@Pc(40) int y = 0; y < EnvironmentLight.anInt53; y++) {
+            for (@Pc(40) int y = 0; y < EnvironmentLight.textureOpHeight; y++) {
                 @Pc(46) int[] rasterRow = raster[y];
                 @Pc(50) int[][] channels = rows[y];
                 @Pc(54) int[] red = channels[0];
                 @Pc(58) int[] green = channels[1];
                 @Pc(62) int[] blue = channels[2];
-                for (@Pc(64) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+                for (@Pc(64) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                     @Pc(70) int rgb = rasterRow[x];
                     blue[x] = (rgb & 0xFF) << 4;
                     green[x] = rgb >> 4 & 0xFF0;

@@ -37,8 +37,8 @@ public final class Static588 {
             } else if (Static693.underwaterGround == Static246.ground) {
                 return false;
             } else {
-                @Pc(64) int worldX = x << EnvironmentLight.anInt1066;
-                @Pc(68) int worldZ = z << EnvironmentLight.anInt1066;
+                @Pc(64) int worldX = x << EnvironmentLight.tileShift;
+                @Pc(68) int worldZ = z << EnvironmentLight.tileShift;
                 if (Static172.isTriangleOccluded(worldX + Static340.anInt5586 - 1, worldZ + 1, Static246.ground[level].getHeight(x + 1, z + 1), Static246.ground[level].getHeight(x, z + 1), Static246.ground[level].getHeight(x, z), worldZ + Static340.anInt5586 - 1, Static340.anInt5586 + worldZ + -1, worldX + 1, worldX + 1) && Static172.isTriangleOccluded(Static340.anInt5586 + worldX - 1, worldZ + 1, Static246.ground[level].getHeight(x + 1, z), Static246.ground[level].getHeight(x + 1, z + 1), Static246.ground[level].getHeight(x, z), worldZ + 1, Static340.anInt5586 + worldZ + -1, worldX + 1, Static340.anInt5586 + -1 + worldX)) {
                     Static298.occludedGroundCount++;
                     Static446.tileOcclusionCache[level][x][z] = Static675.occlusionFrame;

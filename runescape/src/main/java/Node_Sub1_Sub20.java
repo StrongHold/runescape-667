@@ -88,8 +88,8 @@ public final class Node_Sub1_Sub20 extends TextureOp {
         @Pc(17) int[] output = super.monochromeCache.get(y);
         if (super.monochromeCache.dirty) {
             @Pc(27) int centreOffsetY = MonochromeImageCache.anIntArray341[y] - 2048;
-            for (@Pc(29) int x = 0; x < EnvironmentLight.anInt9289; x++) {
-                @Pc(37) int centreOffsetX = EnvironmentLight.anIntArray92[x] - 2048;
+            for (@Pc(29) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
+                @Pc(37) int centreOffsetX = EnvironmentLight.textureOpColumns[x] - 2048;
                 @Pc(42) int firstSumX = this.firstOffsetX + centreOffsetX;
                 @Pc(52) int firstWrapX = firstSumX < -2048 ? firstSumX + 4096 : firstSumX;
                 @Pc(64) int firstX = firstWrapX > 2048 ? firstWrapX - 4096 : firstWrapX;

@@ -23,8 +23,8 @@ public final class Static374 {
                     for (@Pc(15) int local15 = 0; local15 < Static619.tileMaxX; local15++) {
                         local1 = local8.fa(local15, local12, local1);
                         if (local1 != null) {
-                            @Pc(28) int local28 = local15 << EnvironmentLight.anInt1066;
-                            @Pc(32) int local32 = local12 << EnvironmentLight.anInt1066;
+                            @Pc(28) int local28 = local15 << EnvironmentLight.tileShift;
+                            @Pc(32) int local32 = local12 << EnvironmentLight.tileShift;
                             for (@Pc(36) int local36 = local3 - 1; local36 >= 0; local36--) {
                                 @Pc(41) Ground local41 = Static706.floor[local36];
                                 if (local41 != null) {

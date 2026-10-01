@@ -29,7 +29,7 @@ public final class TextureOpThreshold extends TextureOp {
         @Pc(11) int[] output = super.monochromeCache.get(y);
         if (super.monochromeCache.dirty) {
             @Pc(21) int[] source = this.method9422(y, 0);
-            for (@Pc(23) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            for (@Pc(23) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 @Pc(29) int value = source[x];
                 output[x] = this.min <= value && this.max >= value ? 4096 : 0;
             }

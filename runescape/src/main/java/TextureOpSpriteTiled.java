@@ -20,7 +20,7 @@ public final class TextureOpSpriteTiled extends TextureOpSprite {
             @Pc(38) int[] outputGreen = output[1];
             @Pc(42) int[] outputBlue = output[2];
             @Pc(50) int rowOffset = super.height * (y % super.height);
-            for (@Pc(52) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            for (@Pc(52) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 @Pc(64) int pixel = super.pixels[x % super.width + rowOffset];
                 outputBlue[x] = (pixel & 0xFF) << 4;
                 outputGreen[x] = pixel >> 4 & 0xFF0;

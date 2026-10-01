@@ -53,8 +53,8 @@ public final class TextureOpMandelbrot extends TextureOp {
     public int[] monochromeOutput(@OriginalArg(0) int arg0, @OriginalArg(1) int y) {
         @Pc(11) int[] output = super.monochromeCache.get(y);
         if (super.monochromeCache.dirty) {
-            for (@Pc(17) int x = 0; x < EnvironmentLight.anInt9289; x++) {
-                @Pc(31) int constantReal = this.offsetX + (EnvironmentLight.anIntArray92[x] << 12) / this.scale;
+            for (@Pc(17) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
+                @Pc(31) int constantReal = this.offsetX + (EnvironmentLight.textureOpColumns[x] << 12) / this.scale;
                 @Pc(43) int constantImaginary = (MonochromeImageCache.anIntArray341[y] << 12) / this.scale + this.offsetY;
                 @Pc(49) int real = constantReal;
                 @Pc(51) int imaginary = constantImaginary;

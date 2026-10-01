@@ -28,18 +28,18 @@ public abstract class GroundDecor extends Entity {
         if (arg0 != 59) {
             this.offsetY = -95;
         }
-        return Static588.isTileOccluded(super.z >> EnvironmentLight.anInt1066, super.virtualLevel, super.x >> EnvironmentLight.anInt1066);
+        return Static588.isTileOccluded(super.z >> EnvironmentLight.tileShift, super.virtualLevel, super.x >> EnvironmentLight.tileShift);
     }
 
     @OriginalMember(owner = "client!eia", name = "g", descriptor = "(I)Z")
     @Override
     public final boolean method9275() {
-        return Static258.aBooleanArrayArray3[Static35.anInt813 + (super.x >> EnvironmentLight.anInt1066) - Static403.anInt6246][Static35.anInt813 + (super.z >> EnvironmentLight.anInt1066) - Static550.anInt8271];
+        return Static258.aBooleanArrayArray3[Static35.anInt813 + (super.x >> EnvironmentLight.tileShift) - Static403.anInt6246][Static35.anInt813 + (super.z >> EnvironmentLight.tileShift) - Static550.anInt8271];
     }
 
     @OriginalMember(owner = "client!eia", name = "a", descriptor = "([Lclient!lca;I)I")
     @Override
     public final int method9288(@OriginalArg(0) PointLight[] arg0) {
-        return this.findLightsAt(arg0, super.z >> EnvironmentLight.anInt1066, super.x >> EnvironmentLight.anInt1066);
+        return this.findLightsAt(arg0, super.z >> EnvironmentLight.tileShift, super.x >> EnvironmentLight.tileShift);
     }
 }

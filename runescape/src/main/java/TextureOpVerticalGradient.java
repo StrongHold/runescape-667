@@ -26,7 +26,7 @@ public final class TextureOpVerticalGradient extends TextureOp {
             Static537.anIntArray633 = null;
         }
         if (super.monochromeCache.dirty) {
-            Arrays.set(output, 0, EnvironmentLight.anInt9289, MonochromeImageCache.anIntArray341[y]);
+            Arrays.set(output, 0, EnvironmentLight.textureOpWidth, MonochromeImageCache.anIntArray341[y]);
         }
         return output;
     }

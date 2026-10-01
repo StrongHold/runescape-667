@@ -32,8 +32,8 @@ public final class TextureOpWhiteNoise extends TextureOp {
         @Pc(11) int[] output = super.monochromeCache.get(y);
         if (super.monochromeCache.dirty) {
             @Pc(28) int rowCoord = MonochromeImageCache.anIntArray341[y];
-            for (@Pc(30) int x = 0; x < EnvironmentLight.anInt9289; x++) {
-                output[x] = this.noise(rowCoord, EnvironmentLight.anIntArray92[x]) % 4096;
+            for (@Pc(30) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
+                output[x] = this.noise(rowCoord, EnvironmentLight.textureOpColumns[x]) % 4096;
             }
         }
         return output;

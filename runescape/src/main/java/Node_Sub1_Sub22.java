@@ -37,12 +37,12 @@ public final class Node_Sub1_Sub22 extends TextureOp {
     public int[] monochromeOutput(@OriginalArg(0) int arg0, @OriginalArg(1) int y) {
         @Pc(18) int[] output = super.monochromeCache.get(y);
         if (super.monochromeCache.dirty) {
-            @Pc(32) int[] above = this.method9422(EnvironmentLight.anInt7343 & y - 1, 0);
+            @Pc(32) int[] above = this.method9422(EnvironmentLight.textureOpHeightMask & y - 1, 0);
             @Pc(38) int[] source = this.method9422(y, 0);
-            @Pc(48) int[] below = this.method9422(y + 1 & EnvironmentLight.anInt7343, 0);
-            for (@Pc(50) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            @Pc(48) int[] below = this.method9422(y + 1 & EnvironmentLight.textureOpHeightMask, 0);
+            for (@Pc(50) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 @Pc(63) int scaledGradientY = (below[x] - above[x]) * this.amplitude;
-                @Pc(83) int scaledGradientX = (source[x + 1 & EnvironmentLight.anInt8580] - source[EnvironmentLight.anInt8580 & x - 1]) * this.amplitude;
+                @Pc(83) int scaledGradientX = (source[x + 1 & EnvironmentLight.textureOpWidthMask] - source[EnvironmentLight.textureOpWidthMask & x - 1]) * this.amplitude;
                 @Pc(87) int gradientX = scaledGradientX >> 12;
                 @Pc(91) int gradientY = scaledGradientY >> 12;
                 @Pc(97) int squareX = gradientX * gradientX >> 12;

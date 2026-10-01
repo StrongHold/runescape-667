@@ -29,14 +29,14 @@ public abstract class Wall extends Entity {
         if (arg0 != 59) {
             this.sideMask = -17;
         }
-        return Static73.isWallOccluded(super.x >> EnvironmentLight.anInt1066, super.z >> EnvironmentLight.anInt1066, this, super.virtualLevel);
+        return Static73.isWallOccluded(super.x >> EnvironmentLight.tileShift, super.z >> EnvironmentLight.tileShift, this, super.virtualLevel);
     }
 
     @OriginalMember(owner = "client!kp", name = "a", descriptor = "([Lclient!lca;I)I")
     @Override
     public final int method9288(@OriginalArg(0) PointLight[] lights) {
-        @Pc(10) int localX = super.x >> EnvironmentLight.anInt1066;
-        @Pc(21) int localZ = super.z >> EnvironmentLight.anInt1066;
+        @Pc(10) int localX = super.x >> EnvironmentLight.tileShift;
+        @Pc(21) int localZ = super.z >> EnvironmentLight.tileShift;
         @Pc(23) int directionIndex = 0;
         if (Static403.anInt6246 == localX) {
             directionIndex++;
@@ -75,6 +75,6 @@ public abstract class Wall extends Entity {
     @OriginalMember(owner = "client!kp", name = "g", descriptor = "(I)Z")
     @Override
     public final boolean method9275() {
-        return Static258.aBooleanArrayArray3[(super.x >> EnvironmentLight.anInt1066) + Static35.anInt813 - Static403.anInt6246][Static35.anInt813 + (super.z >> EnvironmentLight.anInt1066) - Static550.anInt8271];
+        return Static258.aBooleanArrayArray3[(super.x >> EnvironmentLight.tileShift) + Static35.anInt813 - Static403.anInt6246][Static35.anInt813 + (super.z >> EnvironmentLight.tileShift) - Static550.anInt8271];
     }
 }

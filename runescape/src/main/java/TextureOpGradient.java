@@ -233,7 +233,7 @@ public final class TextureOpGradient extends TextureOp {
             @Pc(33) int[] outputRed = output[0];
             @Pc(37) int[] outputGreen = output[1];
             @Pc(41) int[] outputBlue = output[2];
-            for (@Pc(43) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            for (@Pc(43) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 @Pc(51) int value = source[x] >> 4;
                 if (value < 0) {
                     value = 0;

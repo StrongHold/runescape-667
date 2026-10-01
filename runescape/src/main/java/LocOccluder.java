@@ -59,12 +59,12 @@ public final class LocOccluder {
         this.anIntArray188[0] = arg10;
         this.anIntArray188[2] = arg12;
         this.anIntArray188[1] = arg11;
-        this.aShort26 = (short) (arg2 >> EnvironmentLight.anInt1066);
+        this.aShort26 = (short) (arg2 >> EnvironmentLight.tileShift);
         this.anIntArray188[3] = arg13;
-        this.aShort24 = (short) (arg4 >> EnvironmentLight.anInt1066);
-        this.aShort23 = (short) (arg10 >> EnvironmentLight.anInt1066);
+        this.aShort24 = (short) (arg4 >> EnvironmentLight.tileShift);
+        this.aShort23 = (short) (arg10 >> EnvironmentLight.tileShift);
         this.aShortArray17 = new short[4];
-        this.aShort25 = (short) (arg12 >> EnvironmentLight.anInt1066);
+        this.aShort25 = (short) (arg12 >> EnvironmentLight.tileShift);
         this.aShortArray18 = new short[4];
         this.aShortArray19 = new short[4];
     }

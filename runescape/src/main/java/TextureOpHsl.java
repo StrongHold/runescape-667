@@ -155,7 +155,7 @@ public final class TextureOpHsl extends TextureOp {
             @Pc(48) int[] outputRed = output[0];
             @Pc(52) int[] outputGreen = output[1];
             @Pc(56) int[] outputBlue = output[2];
-            for (@Pc(58) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            for (@Pc(58) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 this.rgbToHsl(sourceRed[x], sourceBlue[x], sourceGreen[x]);
                 this.lightness += this.lightnessOffset;
                 this.saturation += this.saturationOffset;

@@ -14,12 +14,12 @@ public final class Static411 {
         @Pc(14) WallDecor wallDecor = tile.wallDecor;
         @Pc(17) WallDecor wallDecor2 = tile.wallDecor2;
         if (wallDecor != null) {
-            wallDecor.aShort101 = (short) (wallDecor.aShort101 * offset / (0x10 << EnvironmentLight.anInt1066 - 7));
-            wallDecor.aShort102 = (short) (wallDecor.aShort102 * offset / (0x10 << EnvironmentLight.anInt1066 - 7));
+            wallDecor.aShort101 = (short) (wallDecor.aShort101 * offset / (0x10 << EnvironmentLight.tileShift - 7));
+            wallDecor.aShort102 = (short) (wallDecor.aShort102 * offset / (0x10 << EnvironmentLight.tileShift - 7));
         }
         if (wallDecor2 != null) {
-            wallDecor2.aShort101 = (short) (wallDecor2.aShort101 * offset / (0x10 << EnvironmentLight.anInt1066 - 7));
-            wallDecor2.aShort102 = (short) (wallDecor2.aShort102 * offset / (0x10 << EnvironmentLight.anInt1066 - 7));
+            wallDecor2.aShort101 = (short) (wallDecor2.aShort101 * offset / (0x10 << EnvironmentLight.tileShift - 7));
+            wallDecor2.aShort102 = (short) (wallDecor2.aShort102 * offset / (0x10 << EnvironmentLight.tileShift - 7));
         }
     }
 }

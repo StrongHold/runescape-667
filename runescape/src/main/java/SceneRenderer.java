@@ -12,8 +12,8 @@ public final class SceneRenderer {
         Static29.aBoolean60 = true;
         Static442.aBoolean500 = Static665.aToolkit_15.getMaxLights() > 0;
         Static581.aBoolean657 = true;
-        Static403.anInt6246 = cameraX >> EnvironmentLight.anInt1066;
-        Static550.anInt8271 = cameraZ >> EnvironmentLight.anInt1066;
+        Static403.anInt6246 = cameraX >> EnvironmentLight.tileShift;
+        Static550.anInt8271 = cameraZ >> EnvironmentLight.tileShift;
         Static499.cameraX = cameraX;
         Static715.cameraZ = cameraZ;
         Static523.cameraY = cameraY;
@@ -57,10 +57,10 @@ public final class SceneRenderer {
                     @Pc(118) int tileZ = Static550.anInt8271 + local92 - Static35.anInt813;
                     @Pc(138) int local138;
                     if (tileX >= 0 && tileZ >= 0 && tileX < Static619.tileMaxX && tileZ < Static662.tileMaxZ) {
-                        local138 = tileX << EnvironmentLight.anInt1066;
-                        @Pc(142) int worldZ = tileZ << EnvironmentLight.anInt1066;
-                        @Pc(159) int topY = Static706.floor[Static706.floor.length - 1].getHeight(tileX, tileZ) - (0x3E8 << EnvironmentLight.anInt1066 - 7);
-                        @Pc(188) int bottomY = (Static693.underwaterGround == null ? Static706.floor[0].getHeight(tileX, tileZ) + Static340.anInt5586 : Static693.underwaterGround[0].getHeight(tileX, tileZ) + Static340.anInt5586) + (0x3E8 << EnvironmentLight.anInt1066 - 7);
+                        local138 = tileX << EnvironmentLight.tileShift;
+                        @Pc(142) int worldZ = tileZ << EnvironmentLight.tileShift;
+                        @Pc(159) int topY = Static706.floor[Static706.floor.length - 1].getHeight(tileX, tileZ) - (0x3E8 << EnvironmentLight.tileShift - 7);
+                        @Pc(188) int bottomY = (Static693.underwaterGround == null ? Static706.floor[0].getHeight(tileX, tileZ) + Static340.anInt5586 : Static693.underwaterGround[0].getHeight(tileX, tileZ) + Static340.anInt5586) + (0x3E8 << EnvironmentLight.tileShift - 7);
                         local90 = orthoZoom >= 0 ? Static665.aToolkit_15.r(local138, topY, worldZ, local138, bottomY, worldZ, orthoZoom) : Static665.aToolkit_15.JA(local138, topY, worldZ, local138, bottomY, worldZ);
                         Static142.aBooleanArrayArray1[local85][local92] = local90 == 0;
                     } else {
@@ -112,7 +112,7 @@ public final class SceneRenderer {
         }
         if (Static442.aBoolean500) {
             for (local85 = 0; local85 < Static319.environmentLightCount; local85++) {
-                EnvironmentLight.aEnvironmentLightArray1[local85].method8241(flickerDisabled, clock);
+                EnvironmentLight.lights[local85].updateIntensity(flickerDisabled, clock);
             }
         }
         if (Static661.aBoolean457) {

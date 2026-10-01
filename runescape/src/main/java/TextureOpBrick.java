@@ -156,11 +156,11 @@ public final class TextureOpBrick extends TextureOp {
             @Pc(95) int rowEnd = this.rowBounds[row];
             @Pc(102) int rowStart = this.rowBounds[row - 1];
             if (this.halfGap + rowStart < rowCoord && rowCoord < rowEnd - this.halfGap) {
-                for (@Pc(123) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+                for (@Pc(123) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                     @Pc(127) int column = 0;
                     @Pc(137) int offset = even ? this.stagger : -this.stagger;
                     @Pc(148) int columnCoord;
-                    for (columnCoord = EnvironmentLight.anIntArray92[x] + (offset * this.cellWidth >> 12); columnCoord < 0; columnCoord += 4096) {
+                    for (columnCoord = EnvironmentLight.textureOpColumns[x] + (offset * this.cellWidth >> 12); columnCoord < 0; columnCoord += 4096) {
                         /* empty */
                     }
                     while (columnCoord > 4096) {
@@ -179,7 +179,7 @@ public final class TextureOpBrick extends TextureOp {
                     }
                 }
             } else {
-                Arrays.set(output, 0, EnvironmentLight.anInt9289, 0);
+                Arrays.set(output, 0, EnvironmentLight.textureOpWidth, 0);
             }
         }
         return output;

@@ -66,8 +66,8 @@ public final class TextureOpScratch extends TextureOp {
             for (@Pc(34) int stroke = 0; stroke < this.count; stroke++) {
                 @Pc(60) int strokeAngle = this.angleVariance > 0 ? this.angle + Node_Sub1_Sub27.method8326(-5208, this.angleVariance, random) - halfAngleVariance : this.angle;
                 @Pc(66) int angleIndex = strokeAngle >> 4 & 0xFF;
-                @Pc(71) int startX = Node_Sub1_Sub27.method8326(-5208, EnvironmentLight.anInt9289, random);
-                @Pc(76) int startY = Node_Sub1_Sub27.method8326(-5208, EnvironmentLight.anInt53, random);
+                @Pc(71) int startX = Node_Sub1_Sub27.method8326(-5208, EnvironmentLight.textureOpWidth, random);
+                @Pc(76) int startY = Node_Sub1_Sub27.method8326(-5208, EnvironmentLight.textureOpHeight, random);
                 @Pc(87) int endX = startX + (Static24.anIntArray33[angleIndex] * this.length >> 12);
                 @Pc(98) int endY = startY + (this.length * Static222.anIntArray289[angleIndex] >> 12);
                 @Pc(103) int deltaY = endY - startY;
@@ -110,8 +110,8 @@ public final class TextureOpScratch extends TextureOp {
                     @Pc(214) int minorStep = endY > startY ? 1 : -1;
                     for (@Pc(216) int major = startX; major < endX; major++) {
                         @Pc(228) int shade = shadeStep * (major - startX) + shadeOffset + 1024;
-                        @Pc(232) int wrappedMajor = EnvironmentLight.anInt8580 & major;
-                        @Pc(236) int wrappedMinor = local138 & EnvironmentLight.anInt7343;
+                        @Pc(232) int wrappedMajor = EnvironmentLight.textureOpWidthMask & major;
+                        @Pc(236) int wrappedMinor = local138 & EnvironmentLight.textureOpHeightMask;
                         if (steep) {
                             rows[wrappedMinor][wrappedMajor] = shade;
                         } else {

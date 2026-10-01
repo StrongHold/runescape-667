@@ -28,12 +28,12 @@ public final class TextureOpTile extends TextureOp {
     public int[][] method9414(@OriginalArg(0) int y) {
         @Pc(19) int[][] output = super.colourCache.get(y);
         if (super.colourCache.dirty) {
-            @Pc(28) int cellWidth = EnvironmentLight.anInt9289 / this.columns;
-            @Pc(33) int cellHeight = EnvironmentLight.anInt53 / this.rows;
+            @Pc(28) int cellWidth = EnvironmentLight.textureOpWidth / this.columns;
+            @Pc(33) int cellHeight = EnvironmentLight.textureOpHeight / this.rows;
             @Pc(49) int[][] source;
             if (cellHeight > 0) {
                 @Pc(39) int cellY = y % cellHeight;
-                source = this.method9413(0, cellY * EnvironmentLight.anInt53 / cellHeight);
+                source = this.method9413(0, cellY * EnvironmentLight.textureOpHeight / cellHeight);
             } else {
                 source = this.method9413(0, 0);
             }
@@ -43,13 +43,13 @@ public final class TextureOpTile extends TextureOp {
             @Pc(73) int[] outputRed = output[0];
             @Pc(77) int[] outputGreen = output[1];
             @Pc(81) int[] outputBlue = output[2];
-            for (@Pc(83) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            for (@Pc(83) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 @Pc(91) int sourceX;
                 if (cellWidth <= 0) {
                     sourceX = 0;
                 } else {
                     @Pc(97) int cellX = x % cellWidth;
-                    sourceX = cellX * EnvironmentLight.anInt9289 / cellWidth;
+                    sourceX = cellX * EnvironmentLight.textureOpWidth / cellWidth;
                 }
                 outputRed[x] = sourceRed[sourceX];
                 outputGreen[x] = sourceGreen[sourceX];
@@ -80,20 +80,20 @@ public final class TextureOpTile extends TextureOp {
             this.monochromeOutput(94, -126);
         }
         if (super.monochromeCache.dirty) {
-            @Pc(30) int cellWidth = EnvironmentLight.anInt9289 / this.columns;
-            @Pc(35) int cellHeight = EnvironmentLight.anInt53 / this.rows;
+            @Pc(30) int cellWidth = EnvironmentLight.textureOpWidth / this.columns;
+            @Pc(35) int cellHeight = EnvironmentLight.textureOpHeight / this.rows;
             @Pc(51) int[] source;
             @Pc(41) int local41;
             if (cellHeight > 0) {
                 local41 = y % cellHeight;
-                source = this.method9422(EnvironmentLight.anInt53 * local41 / cellHeight, 0);
+                source = this.method9422(EnvironmentLight.textureOpHeight * local41 / cellHeight, 0);
             } else {
                 source = this.method9422(0, 0);
             }
-            for (local41 = 0; local41 < EnvironmentLight.anInt9289; local41++) {
+            for (local41 = 0; local41 < EnvironmentLight.textureOpWidth; local41++) {
                 if (cellWidth > 0) {
                     @Pc(71) int cellX = local41 % cellWidth;
-                    output[local41] = source[cellX * EnvironmentLight.anInt9289 / cellWidth];
+                    output[local41] = source[cellX * EnvironmentLight.textureOpWidth / cellWidth];
                 } else {
                     output[local41] = source[0];
                 }

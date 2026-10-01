@@ -38,10 +38,10 @@ public final class Static535 {
                     @Pc(166) Wall wall = tile.wall;
                     @Pc(169) Wall adjacentWall = tile.adjacentWall;
                     if (wall != null && wall.method9290(0)) {
-                        entity.shareLight(tileHeight, local1, Static665.aToolkit_15, (curZ - z) * Static340.anInt5586 + (1 - height) * EnvironmentLight.anInt3993, (byte) 110, (curX - x) * Static340.anInt5586 + (1 - width) * EnvironmentLight.anInt3993, wall);
+                        entity.shareLight(tileHeight, local1, Static665.aToolkit_15, (curZ - z) * Static340.anInt5586 + (1 - height) * EnvironmentLight.halfTileSize, (byte) 110, (curX - x) * Static340.anInt5586 + (1 - width) * EnvironmentLight.halfTileSize, wall);
                     }
                     if (adjacentWall != null && adjacentWall.method9290(0)) {
-                        entity.shareLight(tileHeight, local1, Static665.aToolkit_15, (curZ - z) * Static340.anInt5586 + (1 - height) * EnvironmentLight.anInt3993, (byte) 115, (curX - x) * Static340.anInt5586 + (1 - width) * EnvironmentLight.anInt3993, adjacentWall);
+                        entity.shareLight(tileHeight, local1, Static665.aToolkit_15, (curZ - z) * Static340.anInt5586 + (1 - height) * EnvironmentLight.halfTileSize, (byte) 115, (curX - x) * Static340.anInt5586 + (1 - width) * EnvironmentLight.halfTileSize, adjacentWall);
                     }
 
                     for (@Pc(250) PositionEntityNode node = tile.head; node != null; node = node.node) {
@@ -50,7 +50,7 @@ public final class Static535 {
                         if (positionEntity != null && positionEntity.method9290(0) && (curX == positionEntity.x1 || curX == x1) && (curZ == positionEntity.z1 || curZ == z1)) {
                             @Pc(294) int local294 = positionEntity.x2 + 1 - positionEntity.x1;
                             @Pc(302) int local302 = positionEntity.z2 + 1 - positionEntity.z1;
-                            entity.shareLight(tileHeight, local1, Static665.aToolkit_15, (positionEntity.z1 - z) * Static340.anInt5586 + (local302 - height) * EnvironmentLight.anInt3993, (byte) 114, (positionEntity.x1 - x) * Static340.anInt5586 + (local294 - width) * EnvironmentLight.anInt3993, positionEntity);
+                            entity.shareLight(tileHeight, local1, Static665.aToolkit_15, (positionEntity.z1 - z) * Static340.anInt5586 + (local302 - height) * EnvironmentLight.halfTileSize, (byte) 114, (positionEntity.x1 - x) * Static340.anInt5586 + (local294 - width) * EnvironmentLight.halfTileSize, positionEntity);
                         }
                     }
                 }

@@ -12,8 +12,8 @@ public final class Static282 {
         } else if (Static432.occludedPixelCount < 100) {
             return false;
         } else if (Static588.isTileOccluded(arg3, arg1, arg2)) {
-            @Pc(38) int local38 = arg2 << EnvironmentLight.anInt1066;
-            @Pc(42) int local42 = arg3 << EnvironmentLight.anInt1066;
+            @Pc(38) int local38 = arg2 << EnvironmentLight.tileShift;
+            @Pc(42) int local42 = arg3 << EnvironmentLight.tileShift;
             if (Static318.isBoxOccluded(Static340.anInt5586, arg0, local38, local42, Static246.ground[arg1].getHeight(arg2, arg3), Static340.anInt5586)) {
                 Static356.anInt5773++;
                 return true;

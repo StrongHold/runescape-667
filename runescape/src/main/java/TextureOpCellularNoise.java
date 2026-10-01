@@ -99,12 +99,12 @@ public final class TextureOpCellularNoise extends TextureOp {
             @Pc(34) int rowCoord = MonochromeImageCache.anIntArray341[y] * this.rows + 2048;
             @Pc(38) int row = rowCoord >> 12;
             @Pc(42) int rowEnd = row + 1;
-            for (@Pc(44) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            for (@Pc(44) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 Static162.fourthNearestDistance = Integer.MAX_VALUE;
                 Static109.thirdNearestDistance = Integer.MAX_VALUE;
                 Static417.secondNearestDistance = Integer.MAX_VALUE;
                 Static143.nearestDistance = Integer.MAX_VALUE;
-                @Pc(63) int columnCoord = this.columns * EnvironmentLight.anIntArray92[x] + 2048;
+                @Pc(63) int columnCoord = this.columns * EnvironmentLight.textureOpColumns[x] + 2048;
                 @Pc(67) int column = columnCoord >> 12;
                 @Pc(71) int columnEnd = column + 1;
                 @Pc(163) int mode;

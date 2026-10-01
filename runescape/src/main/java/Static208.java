@@ -50,9 +50,9 @@ public final class Static208 {
         if (!Static581.aBoolean657) {
             return false;
         }
-        @Pc(9) int minTileX = entity.x >> EnvironmentLight.anInt1066;
+        @Pc(9) int minTileX = entity.x >> EnvironmentLight.tileShift;
         @Pc(11) int maxTileX = minTileX;
-        @Pc(16) int minTileZ = entity.z >> EnvironmentLight.anInt1066;
+        @Pc(16) int minTileZ = entity.z >> EnvironmentLight.tileShift;
         @Pc(18) int maxTileZ = minTileZ;
         if (entity instanceof PositionEntity) {
             maxTileX = ((PositionEntity) entity).x2;

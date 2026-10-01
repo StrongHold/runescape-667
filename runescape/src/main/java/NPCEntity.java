@@ -169,7 +169,7 @@ public final class NPCEntity extends PathingEntity {
         @Pc(22) Matrix local22 = arg0.scratchMatrix();
         @Pc(27) int local27 = super.yaw.getValue(16383);
         local22.rotate(local27);
-        @Pc(45) Tile local45 = Static334.activeTiles[super.level][super.x >> EnvironmentLight.anInt1066][super.z >> EnvironmentLight.anInt1066];
+        @Pc(45) Tile local45 = Static334.activeTiles[super.level][super.x >> EnvironmentLight.tileShift][super.z >> EnvironmentLight.tileShift];
         if (local45 == null || local45.groundDecor == null) {
             super.anInt10732 = (int) ((float) super.anInt10732 - (float) super.anInt10732 / 10.0F);
         } else {

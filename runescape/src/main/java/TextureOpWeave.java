@@ -42,8 +42,8 @@ public final class TextureOpWeave extends TextureOp {
         @Pc(25) int[] output = super.monochromeCache.get(y);
         if (super.monochromeCache.dirty) {
             @Pc(33) int rowCoord = MonochromeImageCache.anIntArray341[y];
-            for (@Pc(35) int x = 0; x < EnvironmentLight.anInt9289; x++) {
-                @Pc(41) int columnCoord = EnvironmentLight.anIntArray92[x];
+            for (@Pc(35) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
+                @Pc(41) int columnCoord = EnvironmentLight.textureOpColumns[x];
                 @Pc(80) int delta;
                 if (columnCoord > this.halfWidth && columnCoord < 4096 - this.halfWidth && rowCoord > 2048 - this.halfWidth && rowCoord < this.halfWidth + 2048) {
                     delta = 2048 - columnCoord;

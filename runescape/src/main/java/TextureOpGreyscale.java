@@ -28,7 +28,7 @@ public final class TextureOpGreyscale extends TextureOp {
             @Pc(31) int[] sourceRed = source[0];
             @Pc(35) int[] sourceGreen = source[1];
             @Pc(39) int[] sourceBlue = source[2];
-            for (@Pc(41) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            for (@Pc(41) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 output[x] = (sourceBlue[x] + sourceRed[x] + sourceGreen[x]) / 3;
             }
         }

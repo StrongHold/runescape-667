@@ -69,7 +69,7 @@ public final class Static363 {
             @Pc(67) Mesh mesh = Mesh.load(GraphicsDefaults.instance.profilingModel, js5.MODELS);
             @Pc(70) long start = SystemTimer.safetime();
             Toolkit.active.la();
-            Static460.aMatrix_10.applyTranslation(0, EnvironmentLight.anInt3993, 0);
+            Static460.aMatrix_10.applyTranslation(0, EnvironmentLight.halfTileSize, 0);
             Toolkit.active.setCamera(Static460.aMatrix_10);
             Toolkit.active.DA(size.width / 2, size.height / 2, 512, 512);
             Toolkit.active.xa(1.0F);

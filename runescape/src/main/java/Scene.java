@@ -67,9 +67,9 @@ public final class Scene {
             }
             Static645.onscreenTransparentEntityCount = 0;
         }
-        if (EnvironmentLight.aEnvironmentLightArray1 != null) {
+        if (EnvironmentLight.lights != null) {
             for (int i = 0; i < Static319.environmentLightCount; i++) {
-                EnvironmentLight.aEnvironmentLightArray1[i] = null;
+                EnvironmentLight.lights[i] = null;
             }
             for (int level = 0; level < Static299.tileMaxLevel; level++) {
                 for (int x = 0; x < Static619.tileMaxX; x++) {

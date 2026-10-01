@@ -73,9 +73,9 @@ public final class Static416 {
                             local350 = local343 + local101.aShort84 * local328;
                             local367 = Static706.floor[local129 ? local25 + 1 : local25].getHeight(local92, local139 + 1);
                             local375 = local367 + local101.aShort84 * local328;
-                            local379 = local92 << EnvironmentLight.anInt1066;
-                            local383 = local137 << EnvironmentLight.anInt1066;
-                            local389 = (local139 << EnvironmentLight.anInt1066) + Static340.anInt5586;
+                            local379 = local92 << EnvironmentLight.tileShift;
+                            local383 = local137 << EnvironmentLight.tileShift;
+                            local389 = (local139 << EnvironmentLight.tileShift) + Static340.anInt5586;
                             Static607.aLocOccluderArray4[Static444.anInt6751++] = new LocOccluder(1, local25, local101.aShort86 + local379, local379 - -local101.aShort86, local101.aShort86 + local379, local101.aShort86 + local379, local343, local367, local375, local350, local383, local389, local389, local383);
                             for (local428 = local25; local428 <= local25; local428++) {
                                 for (local431 = local137; local431 <= local139; local431++) {
@@ -100,9 +100,9 @@ public final class Static416 {
                             local350 = local328 * local101.aShort83 + local343;
                             local367 = Static706.floor[local129 ? local25 + 1 : local25].getHeight(local139 + 1, local28);
                             local375 = local101.aShort83 * local328 + local367;
-                            local379 = local137 << EnvironmentLight.anInt1066;
-                            local383 = Static340.anInt5586 + (local139 << EnvironmentLight.anInt1066);
-                            local389 = local28 << EnvironmentLight.anInt1066;
+                            local379 = local137 << EnvironmentLight.tileShift;
+                            local383 = Static340.anInt5586 + (local139 << EnvironmentLight.tileShift);
+                            local389 = local28 << EnvironmentLight.tileShift;
                             Static607.aLocOccluderArray4[Static444.anInt6751++] = new LocOccluder(2, local25, local379, local383, local383, local379, local343, local367, local375, local350, local389 + local101.aShort85, local101.aShort85 + local389, local101.aShort85 + local389, local101.aShort85 + local389);
                             for (local428 = local25; local428 <= local25; local428++) {
                                 for (local431 = local137; local431 <= local139; local431++) {

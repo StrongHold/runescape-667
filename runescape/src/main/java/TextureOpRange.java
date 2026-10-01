@@ -44,7 +44,7 @@ public final class TextureOpRange extends TextureOp {
             @Pc(47) int[] outputRed = output[0];
             @Pc(51) int[] outputGreen = output[1];
             @Pc(55) int[] outputBlue = output[2];
-            for (@Pc(57) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            for (@Pc(57) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 outputRed[x] = this.min + (sourceRed[x] * this.range >> 12);
                 outputGreen[x] = (this.range * sourceGreen[x] >> 12) + this.min;
                 outputBlue[x] = (this.range * sourceBlue[x] >> 12) + this.min;
@@ -59,7 +59,7 @@ public final class TextureOpRange extends TextureOp {
         @Pc(11) int[] output = super.monochromeCache.get(y);
         if (super.monochromeCache.dirty) {
             @Pc(21) int[] source = this.method9422(y, 0);
-            for (@Pc(23) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            for (@Pc(23) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 output[x] = (this.range * source[x] >> 12) + this.min;
             }
         }

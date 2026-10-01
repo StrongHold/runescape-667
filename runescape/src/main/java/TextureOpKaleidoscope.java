@@ -32,7 +32,7 @@ public final class TextureOpKaleidoscope extends TextureOp {
 
     @OriginalMember(owner = "client!vba", name = "a", descriptor = "(IIB)V")
     public void reflect(@OriginalArg(0) int x, @OriginalArg(1) int y) {
-        @Pc(9) int columnCoord = EnvironmentLight.anIntArray92[x];
+        @Pc(9) int columnCoord = EnvironmentLight.textureOpColumns[x];
         @Pc(13) int rowCoord = MonochromeImageCache.anIntArray341[y];
         @Pc(24) float angle = (float) Math.atan2(columnCoord - 2048, rowCoord - 2048);
         if ((double) angle >= -3.141592653589793D && (double) angle <= -2.356194490192345D) {
@@ -42,26 +42,26 @@ public final class TextureOpKaleidoscope extends TextureOp {
             Static187.anInt3093 = x;
             Static37.anInt916 = y;
         } else if ((double) angle <= -0.7853981633974483D && (double) angle >= -1.5707963267948966D) {
-            Static37.anInt916 = EnvironmentLight.anInt9289 - y;
+            Static37.anInt916 = EnvironmentLight.textureOpWidth - y;
             Static187.anInt3093 = x;
         } else if (angle <= 0.0F && (double) angle >= -0.7853981633974483D) {
             Static37.anInt916 = x;
-            Static187.anInt3093 = EnvironmentLight.anInt53 - y;
+            Static187.anInt3093 = EnvironmentLight.textureOpHeight - y;
         } else if (angle >= 0.0F && (double) angle <= 0.7853981633974483D) {
-            Static187.anInt3093 = EnvironmentLight.anInt53 - y;
-            Static37.anInt916 = EnvironmentLight.anInt9289 - x;
+            Static187.anInt3093 = EnvironmentLight.textureOpHeight - y;
+            Static37.anInt916 = EnvironmentLight.textureOpWidth - x;
         } else if ((double) angle >= 0.7853981633974483D && (double) angle <= 1.5707963267948966D) {
-            Static187.anInt3093 = EnvironmentLight.anInt53 - x;
-            Static37.anInt916 = EnvironmentLight.anInt9289 - y;
+            Static187.anInt3093 = EnvironmentLight.textureOpHeight - x;
+            Static37.anInt916 = EnvironmentLight.textureOpWidth - y;
         } else if ((double) angle >= 1.5707963267948966D && (double) angle <= 2.356194490192345D) {
             Static37.anInt916 = y;
-            Static187.anInt3093 = EnvironmentLight.anInt53 - x;
+            Static187.anInt3093 = EnvironmentLight.textureOpHeight - x;
         } else if ((double) angle >= 2.356194490192345D && (double) angle <= 3.141592653589793D) {
             Static187.anInt3093 = y;
-            Static37.anInt916 = EnvironmentLight.anInt9289 - x;
+            Static37.anInt916 = EnvironmentLight.textureOpWidth - x;
         }
-        Static187.anInt3093 &= EnvironmentLight.anInt7343;
-        Static37.anInt916 &= EnvironmentLight.anInt8580;
+        Static187.anInt3093 &= EnvironmentLight.textureOpHeightMask;
+        Static37.anInt916 &= EnvironmentLight.textureOpWidthMask;
     }
 
     @OriginalMember(owner = "client!vba", name = "a", descriptor = "(IZ)[[I")
@@ -72,7 +72,7 @@ public final class TextureOpKaleidoscope extends TextureOp {
             @Pc(29) int[] outputRed = output[0];
             @Pc(33) int[] outputGreen = output[1];
             @Pc(37) int[] outputBlue = output[2];
-            for (@Pc(39) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            for (@Pc(39) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 this.reflect(x, y);
                 @Pc(52) int[][] source = this.method9413(0, Static187.anInt3093);
                 outputRed[x] = source[0][Static37.anInt916];
@@ -91,7 +91,7 @@ public final class TextureOpKaleidoscope extends TextureOp {
         }
         @Pc(18) int[] output = super.monochromeCache.get(y);
         if (super.monochromeCache.dirty) {
-            for (@Pc(24) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            for (@Pc(24) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 this.reflect(x, y);
                 @Pc(37) int[] source = this.method9422(Static187.anInt3093, 0);
                 output[x] = source[Static37.anInt916];

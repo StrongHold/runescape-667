@@ -67,7 +67,7 @@ public abstract class Entity extends Node {
                 break;
             }
 
-            pointLights[n++] = EnvironmentLight.aEnvironmentLightArray1[id - 1].light;
+            pointLights[n++] = EnvironmentLight.lights[id - 1].light;
         }
 
         for (@Pc(35) int level = n; level < 4; level++) {

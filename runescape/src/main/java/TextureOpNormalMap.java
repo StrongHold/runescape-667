@@ -42,15 +42,15 @@ public final class TextureOpNormalMap extends TextureOp {
     public int[][] method9414(@OriginalArg(0) int y) {
         @Pc(11) int[][] output = super.colourCache.get(y);
         if (super.colourCache.dirty) {
-            @Pc(25) int[] above = this.method9422(y - 1 & EnvironmentLight.anInt7343, 0);
+            @Pc(25) int[] above = this.method9422(y - 1 & EnvironmentLight.textureOpHeightMask, 0);
             @Pc(31) int[] row = this.method9422(y, 0);
-            @Pc(41) int[] below = this.method9422(y + 1 & EnvironmentLight.anInt7343, 0);
+            @Pc(41) int[] below = this.method9422(y + 1 & EnvironmentLight.textureOpHeightMask, 0);
             @Pc(45) int[] outputRed = output[0];
             @Pc(49) int[] outputGreen = output[1];
             @Pc(53) int[] outputBlue = output[2];
-            for (@Pc(55) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            for (@Pc(55) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 @Pc(68) int deltaY = (below[x] - above[x]) * this.scale;
-                @Pc(88) int deltaX = this.scale * (row[EnvironmentLight.anInt8580 & x + 1] - row[x - 1 & EnvironmentLight.anInt8580]);
+                @Pc(88) int deltaX = this.scale * (row[EnvironmentLight.textureOpWidthMask & x + 1] - row[x - 1 & EnvironmentLight.textureOpWidthMask]);
                 @Pc(92) int gradientX = deltaX >> 12;
                 @Pc(96) int gradientY = deltaY >> 12;
                 @Pc(102) int squareX = gradientX * gradientX >> 12;

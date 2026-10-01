@@ -11,9 +11,9 @@ public final class Static157 {
         if (tile == null) {
             return;
         }
-        entity.x = (x << EnvironmentLight.anInt1066) + EnvironmentLight.anInt3993;
+        entity.x = (x << EnvironmentLight.tileShift) + EnvironmentLight.halfTileSize;
         entity.y = y;
-        entity.z = (z << EnvironmentLight.anInt1066) + EnvironmentLight.anInt3993;
+        entity.z = (z << EnvironmentLight.tileShift) + EnvironmentLight.halfTileSize;
         tile.aClass8_Sub2_Sub5_1 = entity;
         @Pc(36) int groundIndex = Static246.ground == Static693.underwaterGround ? 1 : 0;
         if (entity.isStationary()) {

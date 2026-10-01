@@ -156,8 +156,8 @@ public final class ObjStackEntity extends Class8_Sub2_Sub5 {
     @OriginalMember(owner = "client!sv", name = "a", descriptor = "(ILclient!ha;)Lclient!pea;")
     @Override
     public PickableEntity render(@OriginalArg(1) Toolkit toolkit) {
-        @Pc(17) PositionEntityNode node = Static467.getHead(super.level, super.x >> EnvironmentLight.anInt1066, super.z >> EnvironmentLight.anInt1066);
-        @Pc(29) GroundDecor local29 = Static687.getGroundDecor(super.level, super.x >> EnvironmentLight.anInt1066, super.z >> EnvironmentLight.anInt1066);
+        @Pc(17) PositionEntityNode node = Static467.getHead(super.level, super.x >> EnvironmentLight.tileShift, super.z >> EnvironmentLight.tileShift);
+        @Pc(29) GroundDecor local29 = Static687.getGroundDecor(super.level, super.x >> EnvironmentLight.tileShift, super.z >> EnvironmentLight.tileShift);
 
         @Pc(31) int y = 0;
         if (node != null && node.entity.aBoolean815) {

@@ -58,7 +58,7 @@ public final class TextureOpColourFill extends TextureOp {
             @Pc(25) int[] outputRed = output[0];
             @Pc(29) int[] outputGreen = output[1];
             @Pc(33) int[] outputBlue = output[2];
-            for (@Pc(35) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            for (@Pc(35) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 outputRed[x] = this.red;
                 outputGreen[x] = this.green;
                 outputBlue[x] = this.blue;

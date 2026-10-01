@@ -26,16 +26,16 @@ public final class Static358 {
     public static void applyEnvironmentLights() {
         for (@Pc(1) int local1 = 0; local1 < Static319.environmentLightCount; local1++) {
             if (!Static279.environmentLightApplied[local1]) {
-                @Pc(10) EnvironmentLight local10 = EnvironmentLight.aEnvironmentLightArray1[local1];
+                @Pc(10) EnvironmentLight local10 = EnvironmentLight.lights[local1];
                 @Pc(13) PointLight local13 = local10.light;
                 @Pc(16) int local16 = local10.level;
-                @Pc(22) int local22 = local13.getRange() - EnvironmentLight.anInt3993;
-                @Pc(30) int local30 = (local22 * 2 >> EnvironmentLight.anInt1066) + 1;
+                @Pc(22) int local22 = local13.getRange() - EnvironmentLight.halfTileSize;
+                @Pc(30) int local30 = (local22 * 2 >> EnvironmentLight.tileShift) + 1;
                 @Pc(32) int local32 = 0;
                 @Pc(37) int[] local37 = new int[local30 * local30];
-                @Pc(45) int local45 = local13.getX() - local22 >> EnvironmentLight.anInt1066;
-                @Pc(53) int local53 = local13.getZ() - local22 >> EnvironmentLight.anInt1066;
-                @Pc(61) int local61 = local13.getZ() + local22 >> EnvironmentLight.anInt1066;
+                @Pc(45) int local45 = local13.getX() - local22 >> EnvironmentLight.tileShift;
+                @Pc(53) int local53 = local13.getZ() - local22 >> EnvironmentLight.tileShift;
+                @Pc(61) int local61 = local13.getZ() + local22 >> EnvironmentLight.tileShift;
                 if (local53 < 0) {
                     local32 = -local53;
                     local53 = 0;
@@ -44,7 +44,7 @@ public final class Static358 {
                     local61 = Static662.tileMaxZ - 1;
                 }
                 for (@Pc(78) int local78 = local53; local78 <= local61; local78++) {
-                    @Pc(84) short local84 = local10.aShortArray131[local32];
+                    @Pc(84) short local84 = local10.rowSpans[local32];
                     @Pc(88) int local88 = local84 >>> 8;
                     @Pc(94) int local94 = local32 * local30 + local88;
                     @Pc(100) int local100 = local45 + (local84 >>> 8);
@@ -69,13 +69,13 @@ public final class Static358 {
                                 local169 = local125 - 1 >= local100;
                                 local179 = local125 + 1 <= local108;
                                 if (!local169 && local78 + 1 <= local61) {
-                                    local195 = local10.aShortArray131[local32 + 1];
+                                    local195 = local10.rowSpans[local32 + 1];
                                     local201 = local45 + (local195 >>> 8);
                                     local207 = local201 + (local195 & 0xFF);
                                     local169 = local125 > local201 && local125 < local207;
                                 }
                                 if (!local179 && local78 - 1 >= local53) {
-                                    local195 = local10.aShortArray131[local32 - 1];
+                                    local195 = local10.rowSpans[local32 - 1];
                                     local201 = local45 + (local195 >>> 8);
                                     local207 = local201 + (local195 & 0xFF);
                                     local179 = local125 > local201 && local125 < local207;
@@ -89,13 +89,13 @@ public final class Static358 {
                                 local169 = local125 - 1 >= local100;
                                 local179 = local125 + 1 <= local108;
                                 if (!local169 && local78 - 1 >= local53) {
-                                    local195 = local10.aShortArray131[local32 - 1];
+                                    local195 = local10.rowSpans[local32 - 1];
                                     local201 = local45 + (local195 >>> 8);
                                     local207 = local201 + (local195 & 0xFF);
                                     local169 = local125 > local201 && local125 < local207;
                                 }
                                 if (!local179 && local78 + 1 <= local61) {
-                                    local195 = local10.aShortArray131[local32 + 1];
+                                    local195 = local10.rowSpans[local32 + 1];
                                     local201 = local45 + (local195 >>> 8);
                                     local207 = local201 + (local195 & 0xFF);
                                     local179 = local125 > local201 && local125 < local207;

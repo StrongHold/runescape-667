@@ -37,8 +37,8 @@ public final class TextureOpBlur extends TextureOp {
             @Pc(75) int local75;
             @Pc(77) int local77;
             for (@Pc(55) int row = y - this.verticalRadius; row <= y + this.verticalRadius; row++) {
-                @Pc(67) int[][] source = this.method9413(0, EnvironmentLight.anInt7343 & row);
-                @Pc(71) int[][] blurred = new int[3][EnvironmentLight.anInt9289];
+                @Pc(67) int[][] source = this.method9413(0, EnvironmentLight.textureOpHeightMask & row);
+                @Pc(71) int[][] blurred = new int[3][EnvironmentLight.textureOpWidth];
                 @Pc(73) int local73 = 0;
                 local75 = 0;
                 local77 = 0;
@@ -46,7 +46,7 @@ public final class TextureOpBlur extends TextureOp {
                 @Pc(85) int[] sourceGreen = source[1];
                 @Pc(89) int[] sourceBlue = source[2];
                 for (@Pc(93) int offset = -this.horizontalRadius; offset <= this.horizontalRadius; offset++) {
-                    @Pc(101) int sampleX = offset & EnvironmentLight.anInt8580;
+                    @Pc(101) int sampleX = offset & EnvironmentLight.textureOpWidthMask;
                     local77 += sourceBlue[sampleX];
                     local73 += sourceRed[sampleX];
                     local75 += sourceGreen[sampleX];
@@ -55,16 +55,16 @@ public final class TextureOpBlur extends TextureOp {
                 @Pc(136) int[] blurredGreen = blurred[1];
                 @Pc(140) int[] blurredBlue = blurred[2];
                 @Pc(144) int x = 0;
-                while (EnvironmentLight.anInt9289 > x) {
+                while (EnvironmentLight.textureOpWidth > x) {
                     blurredRed[x] = local73 * horizontalWeight >> 16;
                     blurredGreen[x] = local75 * horizontalWeight >> 16;
                     blurredBlue[x] = horizontalWeight * local77 >> 16;
-                    @Pc(180) int trailingX = EnvironmentLight.anInt8580 & x - this.horizontalRadius;
+                    @Pc(180) int trailingX = EnvironmentLight.textureOpWidthMask & x - this.horizontalRadius;
                     x++;
                     local75 -= sourceGreen[trailingX];
                     local77 -= sourceBlue[trailingX];
                     local73 -= sourceRed[trailingX];
-                    @Pc(206) int leadingX = EnvironmentLight.anInt8580 & x + this.horizontalRadius;
+                    @Pc(206) int leadingX = EnvironmentLight.textureOpWidthMask & x + this.horizontalRadius;
                     local73 += sourceRed[leadingX];
                     local77 += sourceBlue[leadingX];
                     local75 += sourceGreen[leadingX];
@@ -74,7 +74,7 @@ public final class TextureOpBlur extends TextureOp {
             @Pc(256) int[] outputRed = output[0];
             @Pc(260) int[] outputGreen = output[1];
             @Pc(266) int[] outputBlue = output[2];
-            for (local75 = 0; local75 < EnvironmentLight.anInt9289; local75++) {
+            for (local75 = 0; local75 < EnvironmentLight.textureOpWidth; local75++) {
                 local77 = 0;
                 @Pc(274) int greenSum = 0;
                 @Pc(276) int blueSum = 0;
@@ -104,22 +104,22 @@ public final class TextureOpBlur extends TextureOp {
             @Pc(42) int[][] rows = new int[verticalSpan][];
             @Pc(63) int local63;
             for (@Pc(48) int row = y - this.verticalRadius; row <= y + this.verticalRadius; row++) {
-                @Pc(58) int[] source = this.method9422(row & EnvironmentLight.anInt7343, 0);
-                @Pc(61) int[] blurred = new int[EnvironmentLight.anInt9289];
+                @Pc(58) int[] source = this.method9422(row & EnvironmentLight.textureOpHeightMask, 0);
+                @Pc(61) int[] blurred = new int[EnvironmentLight.textureOpWidth];
                 local63 = 0;
                 for (@Pc(67) int offset = -this.horizontalRadius; offset <= this.horizontalRadius; offset++) {
-                    local63 += source[offset & EnvironmentLight.anInt8580];
+                    local63 += source[offset & EnvironmentLight.textureOpWidthMask];
                 }
                 @Pc(84) int x = 0;
-                while (x < EnvironmentLight.anInt9289) {
+                while (x < EnvironmentLight.textureOpWidth) {
                     blurred[x] = horizontalWeight * local63 >> 16;
-                    local63 -= source[EnvironmentLight.anInt8580 & x - this.horizontalRadius];
+                    local63 -= source[EnvironmentLight.textureOpWidthMask & x - this.horizontalRadius];
                     x++;
-                    local63 += source[x + this.horizontalRadius & EnvironmentLight.anInt8580];
+                    local63 += source[x + this.horizontalRadius & EnvironmentLight.textureOpWidthMask];
                 }
                 rows[row + this.verticalRadius - y] = blurred;
             }
-            for (@Pc(146) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            for (@Pc(146) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 @Pc(150) int sum = 0;
                 for (local63 = 0; local63 < verticalSpan; local63++) {
                     sum += rows[local63][x];

@@ -45,7 +45,7 @@ public final class TextureOpRecolour extends TextureOp {
             @Pc(43) int[] outputRed = output[0];
             @Pc(47) int[] outputGreen = output[1];
             @Pc(51) int[] outputBlue = output[2];
-            for (@Pc(53) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            for (@Pc(53) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 @Pc(59) int sourceR = sourceRed[x];
                 @Pc(67) int difference = sourceR - this.keyColour[0];
                 if (difference < 0) {

@@ -38,19 +38,19 @@ public class TextureOpSprite extends TextureOp {
             @Pc(25) int[] outputRed = output[0];
             @Pc(29) int[] outputGreen = output[1];
             @Pc(33) int[] outputBlue = output[2];
-            @Pc(50) int rowOffset = this.width * (EnvironmentLight.anInt53 == this.height ? y : y * this.height / EnvironmentLight.anInt53);
+            @Pc(50) int rowOffset = this.width * (EnvironmentLight.textureOpHeight == this.height ? y : y * this.height / EnvironmentLight.textureOpHeight);
             @Pc(60) int x;
             @Pc(68) int local68;
-            if (this.width == EnvironmentLight.anInt9289) {
-                for (x = 0; x < EnvironmentLight.anInt9289; x++) {
+            if (this.width == EnvironmentLight.textureOpWidth) {
+                for (x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                     local68 = this.pixels[rowOffset++];
                     outputBlue[x] = (local68 & 0xFF) << 4;
                     outputGreen[x] = local68 >> 4 & 0xFF0;
                     outputRed[x] = local68 >> 12 & 0xFF0;
                 }
             } else {
-                for (x = 0; x < EnvironmentLight.anInt9289; x++) {
-                    local68 = this.width * x / EnvironmentLight.anInt9289;
+                for (x = 0; x < EnvironmentLight.textureOpWidth; x++) {
+                    local68 = this.width * x / EnvironmentLight.textureOpWidth;
                     @Pc(122) int pixel = this.pixels[local68 + rowOffset];
                     outputBlue[x] = (pixel & 0xFF) << 4;
                     outputGreen[x] = pixel >> 4 & 0xFF0;

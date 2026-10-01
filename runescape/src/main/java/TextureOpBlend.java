@@ -35,7 +35,7 @@ public final class TextureOpBlend extends TextureOp {
             @Pc(67) int[] secondRed = second[0];
             @Pc(71) int[] secondGreen = second[1];
             @Pc(75) int[] secondBlue = second[2];
-            for (@Pc(77) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            for (@Pc(77) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 @Pc(83) int weight = weights[x];
                 if (weight == 4096) {
                     outputRed[x] = firstRed[x];
@@ -64,7 +64,7 @@ public final class TextureOpBlend extends TextureOp {
             @Pc(21) int[] first = this.method9422(y, 0);
             @Pc(27) int[] second = this.method9422(y, 1);
             @Pc(33) int[] weights = this.method9422(y, 2);
-            for (@Pc(35) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            for (@Pc(35) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 @Pc(41) int weight = weights[x];
                 if (weight == 4096) {
                     output[x] = first[x];

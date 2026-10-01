@@ -25,8 +25,8 @@ public final class Static658 {
                 local6 = ((PositionEntity) arg0).x1;
                 local28 = ((PositionEntity) arg0).z1;
             } else {
-                local6 = arg0.x >> EnvironmentLight.anInt1066;
-                local28 = arg0.z >> EnvironmentLight.anInt1066;
+                local6 = arg0.x >> EnvironmentLight.tileShift;
+                local28 = arg0.z >> EnvironmentLight.tileShift;
             }
             Static665.aToolkit_15.EA(Static706.floor[0].averageHeight(arg0.x, arg0.z), Static100.getWaterColour(local6, local28), Static350.getWaterDepth(local6, local28), Static339.getWaterBias(local6, local28));
         }

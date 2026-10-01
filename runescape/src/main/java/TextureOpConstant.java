@@ -47,7 +47,7 @@ public final class TextureOpConstant extends TextureOp {
         }
         @Pc(16) int[] output = super.monochromeCache.get(y);
         if (super.monochromeCache.dirty) {
-            Arrays.set(output, 0, EnvironmentLight.anInt9289, this.intensity);
+            Arrays.set(output, 0, EnvironmentLight.textureOpWidth, this.intensity);
         }
         return output;
     }

@@ -67,7 +67,7 @@ public final class TextureOpCurve extends TextureOp {
         @Pc(11) int[] output = super.monochromeCache.get(y);
         if (super.monochromeCache.dirty) {
             @Pc(21) int[] source = this.method9422(y, 0);
-            for (@Pc(23) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            for (@Pc(23) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 @Pc(31) int index = source[x] >> 4;
                 if (index < 0) {
                     index = 0;

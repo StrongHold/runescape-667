@@ -15,8 +15,8 @@ public final class Static73 {
         } else if (Static432.occludedPixelCount < 100) {
             return false;
         } else if (Static588.isTileOccluded(z, level, x)) {
-            @Pc(31) int worldX = x << EnvironmentLight.anInt1066;
-            @Pc(35) int worldZ = z << EnvironmentLight.anInt1066;
+            @Pc(31) int worldX = x << EnvironmentLight.tileShift;
+            @Pc(35) int worldZ = z << EnvironmentLight.tileShift;
             @Pc(45) int baseY = Static246.ground[level].getHeight(x, z) - 1;
             @Pc(51) int topY = wall.getMinY(2) + baseY;
             if (wall.sideMask == 1) {
@@ -56,21 +56,21 @@ public final class Static73 {
                     return false;
                 }
             } else if (wall.sideMask == 16) {
-                if (Static318.isBoxOccluded(EnvironmentLight.anInt3993, topY, worldX, EnvironmentLight.anInt3993 + worldZ, baseY, EnvironmentLight.anInt3993)) {
+                if (Static318.isBoxOccluded(EnvironmentLight.halfTileSize, topY, worldX, EnvironmentLight.halfTileSize + worldZ, baseY, EnvironmentLight.halfTileSize)) {
                     Static679.occludedWallCount++;
                     return true;
                 } else {
                     return false;
                 }
             } else if (wall.sideMask == 32) {
-                if (Static318.isBoxOccluded(EnvironmentLight.anInt3993, topY, worldX + EnvironmentLight.anInt3993, EnvironmentLight.anInt3993 + worldZ, baseY, EnvironmentLight.anInt3993)) {
+                if (Static318.isBoxOccluded(EnvironmentLight.halfTileSize, topY, worldX + EnvironmentLight.halfTileSize, EnvironmentLight.halfTileSize + worldZ, baseY, EnvironmentLight.halfTileSize)) {
                     Static679.occludedWallCount++;
                     return true;
                 } else {
                     return false;
                 }
             } else if (wall.sideMask == 64) {
-                if (Static318.isBoxOccluded(EnvironmentLight.anInt3993, topY, EnvironmentLight.anInt3993 + worldX, worldZ, baseY, EnvironmentLight.anInt3993)) {
+                if (Static318.isBoxOccluded(EnvironmentLight.halfTileSize, topY, EnvironmentLight.halfTileSize + worldX, worldZ, baseY, EnvironmentLight.halfTileSize)) {
                     Static679.occludedWallCount++;
                     return true;
                 } else {
@@ -78,7 +78,7 @@ public final class Static73 {
                 }
             } else if (wall.sideMask != 128) {
                 return true;
-            } else if (Static318.isBoxOccluded(EnvironmentLight.anInt3993, topY, worldX, worldZ, baseY, EnvironmentLight.anInt3993)) {
+            } else if (Static318.isBoxOccluded(EnvironmentLight.halfTileSize, topY, worldX, worldZ, baseY, EnvironmentLight.halfTileSize)) {
                 Static679.occludedWallCount++;
                 return true;
             } else {

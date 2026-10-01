@@ -32,13 +32,13 @@ public final class TextureOpDisplace extends TextureOp {
             @Pc(39) int[] outputRed = output[0];
             @Pc(43) int[] outputGreen = output[1];
             @Pc(47) int[] outputBlue = output[2];
-            for (@Pc(49) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            for (@Pc(49) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 @Pc(61) int angle = angles[x] * 255 >> 12 & 0xFF;
                 @Pc(70) int length = lengths[x] * this.distance >> 12;
                 @Pc(78) int offsetX = Static24.anIntArray33[angle] * length >> 12;
                 @Pc(86) int offsetY = Static222.anIntArray289[angle] * length >> 12;
-                @Pc(95) int sampleX = EnvironmentLight.anInt8580 & x + (offsetX >> 12);
-                @Pc(103) int sampleY = EnvironmentLight.anInt7343 & (offsetY >> 12) + y;
+                @Pc(95) int sampleX = EnvironmentLight.textureOpWidthMask & x + (offsetX >> 12);
+                @Pc(103) int sampleY = EnvironmentLight.textureOpHeightMask & (offsetY >> 12) + y;
                 @Pc(109) int[][] source = this.method9413(0, sampleY);
                 outputRed[x] = source[0][sampleX];
                 outputGreen[x] = source[1][sampleX];
@@ -71,13 +71,13 @@ public final class TextureOpDisplace extends TextureOp {
         if (super.monochromeCache.dirty) {
             @Pc(29) int[] angles = this.method9422(y, 1);
             @Pc(35) int[] lengths = this.method9422(y, 2);
-            for (@Pc(37) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            for (@Pc(37) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 @Pc(47) int angle = angles[x] >> 4 & 0xFF;
                 @Pc(56) int length = this.distance * lengths[x] >> 12;
                 @Pc(64) int offsetX = Static24.anIntArray33[angle] * length >> 12;
                 @Pc(72) int offsetY = Static222.anIntArray289[angle] * length >> 12;
-                @Pc(80) int sampleX = EnvironmentLight.anInt8580 & x + (offsetX >> 12);
-                @Pc(88) int sampleY = y + (offsetY >> 12) & EnvironmentLight.anInt7343;
+                @Pc(80) int sampleX = EnvironmentLight.textureOpWidthMask & x + (offsetX >> 12);
+                @Pc(88) int sampleY = y + (offsetY >> 12) & EnvironmentLight.textureOpHeightMask;
                 @Pc(94) int[] source = this.method9422(sampleY, 0);
                 output[x] = source[sampleX];
             }

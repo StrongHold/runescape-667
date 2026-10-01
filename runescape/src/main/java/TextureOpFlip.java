@@ -44,7 +44,7 @@ public final class TextureOpFlip extends TextureOp {
     public int[][] method9414(@OriginalArg(0) int y) {
         @Pc(18) int[][] output = super.colourCache.get(y);
         if (super.colourCache.dirty) {
-            @Pc(39) int[][] source = this.method9413(0, this.vertical ? EnvironmentLight.anInt7343 - y : y);
+            @Pc(39) int[][] source = this.method9413(0, this.vertical ? EnvironmentLight.textureOpHeightMask - y : y);
             @Pc(43) int[] sourceRed = source[0];
             @Pc(47) int[] sourceGreen = source[1];
             @Pc(51) int[] sourceBlue = source[2];
@@ -53,13 +53,13 @@ public final class TextureOpFlip extends TextureOp {
             @Pc(63) int[] outputBlue = output[2];
             @Pc(68) int x;
             if (this.horizontal) {
-                for (x = 0; x < EnvironmentLight.anInt9289; x++) {
-                    outputRed[x] = sourceRed[EnvironmentLight.anInt8580 - x];
-                    outputGreen[x] = sourceGreen[EnvironmentLight.anInt8580 - x];
-                    outputBlue[x] = sourceBlue[EnvironmentLight.anInt8580 - x];
+                for (x = 0; x < EnvironmentLight.textureOpWidth; x++) {
+                    outputRed[x] = sourceRed[EnvironmentLight.textureOpWidthMask - x];
+                    outputGreen[x] = sourceGreen[EnvironmentLight.textureOpWidthMask - x];
+                    outputBlue[x] = sourceBlue[EnvironmentLight.textureOpWidthMask - x];
                 }
             } else {
-                for (x = 0; x < EnvironmentLight.anInt9289; x++) {
+                for (x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                     outputRed[x] = sourceRed[x];
                     outputGreen[x] = sourceGreen[x];
                     outputBlue[x] = sourceBlue[x];
@@ -77,13 +77,13 @@ public final class TextureOpFlip extends TextureOp {
             return null;
         }
         if (super.monochromeCache.dirty) {
-            @Pc(37) int[] source = this.method9422(this.vertical ? EnvironmentLight.anInt7343 - y : y, 0);
+            @Pc(37) int[] source = this.method9422(this.vertical ? EnvironmentLight.textureOpHeightMask - y : y, 0);
             if (this.horizontal) {
-                for (@Pc(52) int x = 0; x < EnvironmentLight.anInt9289; x++) {
-                    output[x] = source[EnvironmentLight.anInt8580 - x];
+                for (@Pc(52) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
+                    output[x] = source[EnvironmentLight.textureOpWidthMask - x];
                 }
             } else {
-                Arrays.copy(source, 0, output, 0, EnvironmentLight.anInt9289);
+                Arrays.copy(source, 0, output, 0, EnvironmentLight.textureOpWidth);
             }
         }
         return output;

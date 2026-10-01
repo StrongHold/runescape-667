@@ -67,7 +67,7 @@ public abstract class PositionEntity extends Entity {
                         if (local44 <= 0) {
                             continue label110;
                         }
-                        @Pc(55) EnvironmentLight local55 = EnvironmentLight.aEnvironmentLightArray1[local44 - 1];
+                        @Pc(55) EnvironmentLight local55 = EnvironmentLight.lights[local44 - 1];
                         for (local57 = 0; local57 < local7; local57++) {
                             if (arg0[local57] == local55.light) {
                                 local34 += 16L;
@@ -121,7 +121,7 @@ public abstract class PositionEntity extends Entity {
                 @Pc(267) long local267 = Client.tileLightFlags[super.level][local183][local188];
                 @Pc(278) EnvironmentLight local278;
                 while (local267 != 0L) {
-                    local278 = EnvironmentLight.aEnvironmentLightArray1[(int) ((local267 & 0xFFFFL) - 1L)];
+                    local278 = EnvironmentLight.lights[(int) ((local267 & 0xFFFFL) - 1L)];
                     local267 >>>= 0x10;
                     if (arg0[local57] == local278.light) {
                         continue label76;
@@ -129,7 +129,7 @@ public abstract class PositionEntity extends Entity {
                 }
                 local267 = Client.tileLightFlags[super.level][local180][local191];
                 while (local267 != 0L) {
-                    local278 = EnvironmentLight.aEnvironmentLightArray1[(int) ((local267 & 0xFFFFL) - 1L)];
+                    local278 = EnvironmentLight.lights[(int) ((local267 & 0xFFFFL) - 1L)];
                     local267 >>>= 0x10;
                     if (local278.light == arg0[local57]) {
                         continue label76;

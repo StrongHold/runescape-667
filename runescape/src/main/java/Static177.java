@@ -43,18 +43,18 @@ public final class Static177 {
         @Pc(42) int y1;
         @Pc(54) int y2;
         if (occlusionType != 8) {
-            x1 = Static340.anInt5586 + (x << EnvironmentLight.anInt1066);
+            x1 = Static340.anInt5586 + (x << EnvironmentLight.tileShift);
             x2 = x1 - Static340.anInt5586;
-            z1 = z << EnvironmentLight.anInt1066;
+            z1 = z << EnvironmentLight.tileShift;
             z2 = z1 + Static340.anInt5586;
             y1 = Static706.floor[level].getHeight(x + 1, z);
             y2 = Static706.floor[level].getHeight(x, z + 1);
             Static285.locOccluders[Static150.locOccluderCount++] = new LocOccluder(occlusionType, level, x1, x2, x2, x1, y1, y2, y2 - occlusionHeight, y1 - occlusionHeight, z1, z2, z2, z1);
             return;
         }
-        x1 = x << EnvironmentLight.anInt1066;
+        x1 = x << EnvironmentLight.tileShift;
         x2 = Static340.anInt5586 + x1;
-        z1 = z << EnvironmentLight.anInt1066;
+        z1 = z << EnvironmentLight.tileShift;
         z2 = z1 + Static340.anInt5586;
         y1 = Static706.floor[level].getHeight(x, z);
         y2 = Static706.floor[level].getHeight(x - -1, z + 1);

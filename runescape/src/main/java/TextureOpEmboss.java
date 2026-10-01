@@ -50,13 +50,13 @@ public final class TextureOpEmboss extends TextureOp {
     public int[] monochromeOutput(@OriginalArg(0) int arg0, @OriginalArg(1) int y) {
         @Pc(11) int[] output = super.monochromeCache.get(y);
         if (super.monochromeCache.dirty) {
-            @Pc(22) int scale = EnvironmentLight.anInt10157 * this.depth >> 12;
-            @Pc(32) int[] above = this.method9422(EnvironmentLight.anInt7343 & y - 1, 0);
+            @Pc(22) int scale = EnvironmentLight.textureOpDepthScale * this.depth >> 12;
+            @Pc(32) int[] above = this.method9422(EnvironmentLight.textureOpHeightMask & y - 1, 0);
             @Pc(38) int[] row = this.method9422(y, 0);
-            @Pc(48) int[] below = this.method9422(y + 1 & EnvironmentLight.anInt7343, 0);
-            for (@Pc(50) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            @Pc(48) int[] below = this.method9422(y + 1 & EnvironmentLight.textureOpHeightMask, 0);
+            for (@Pc(50) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 @Pc(65) int gradientY = scale * (below[x] - above[x]) >> 12;
-                @Pc(86) int gradientX = (row[EnvironmentLight.anInt8580 & x - 1] - row[EnvironmentLight.anInt8580 & x + 1]) * scale >> 12;
+                @Pc(86) int gradientX = (row[EnvironmentLight.textureOpWidthMask & x - 1] - row[EnvironmentLight.textureOpWidthMask & x + 1]) * scale >> 12;
                 @Pc(90) int magnitudeX = gradientX >> 4;
                 if (magnitudeX < 0) {
                     magnitudeX = -magnitudeX;

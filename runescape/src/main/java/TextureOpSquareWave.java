@@ -89,12 +89,12 @@ public final class TextureOpSquareWave extends TextureOp {
                         break;
                     }
                 }
-                Arrays.set(output, 0, EnvironmentLight.anInt9289, value);
+                Arrays.set(output, 0, EnvironmentLight.textureOpWidth, value);
             } else {
-                for (@Pc(31) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+                for (@Pc(31) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                     local35 = 0;
                     @Pc(37) short value = 0;
-                    @Pc(41) int columnCoord = EnvironmentLight.anIntArray92[x];
+                    @Pc(41) int columnCoord = EnvironmentLight.textureOpColumns[x];
                     @Pc(44) int local44 = this.direction;
                     if (local44 == 1) {
                         local35 = columnCoord;

@@ -38,8 +38,8 @@ public final class TextureOpWave extends TextureOp {
         if (super.monochromeCache.dirty) {
             @Pc(27) int rowCoord = MonochromeImageCache.anIntArray341[y];
             @Pc(33) int centreOffsetY = rowCoord - 2048 >> 1;
-            for (@Pc(35) int x = 0; x < EnvironmentLight.anInt9289; x++) {
-                @Pc(41) int columnCoord = EnvironmentLight.anIntArray92[x];
+            for (@Pc(35) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
+                @Pc(41) int columnCoord = EnvironmentLight.textureOpColumns[x];
                 @Pc(47) int centreOffsetX = columnCoord - 2048 >> 1;
                 @Pc(58) int value;
                 if (this.shape == 0) {

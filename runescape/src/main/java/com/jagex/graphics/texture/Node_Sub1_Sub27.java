@@ -148,15 +148,15 @@ public final class Node_Sub1_Sub27 extends TextureOp {
             local81 = anIntArray768[local37];
             local90 = this.aByteArray97[local59 & 0xFF] & 0xFF;
             if (this.aBoolean667) {
-                for (local95 = 0; local95 < EnvironmentLight.anInt9289; local95++) {
-                    local103 = this.anInt8810 * EnvironmentLight.anIntArray92[local95];
+                for (local95 = 0; local95 < EnvironmentLight.textureOpWidth; local95++) {
+                    local103 = this.anInt8810 * EnvironmentLight.textureOpColumns[local95];
                     local117 = this.method7812(local51, local77, local31 * local103 >> 12, local37, local81, local90);
                     local117 = local117 * local24 >> 12;
                     arg1[local95] = (local117 >> 1) + 2048;
                 }
             } else {
-                for (local95 = 0; local95 < EnvironmentLight.anInt9289; local95++) {
-                    local103 = EnvironmentLight.anIntArray92[local95] * this.anInt8810;
+                for (local95 = 0; local95 < EnvironmentLight.textureOpWidth; local95++) {
+                    local103 = EnvironmentLight.textureOpColumns[local95] * this.anInt8810;
                     local117 = this.method7812(local51, local77, local31 * local103 >> 12, local37, local81, local90);
                     arg1[local95] = local117 * local24 >> 12;
                 }
@@ -178,8 +178,8 @@ public final class Node_Sub1_Sub27 extends TextureOp {
             local77 = this.aByteArray97[local55 & 0xFF] & 0xFF;
             local81 = anIntArray768[local37];
             local90 = this.aByteArray97[local59 & 0xFF] & 0xFF;
-            for (local95 = 0; local95 < EnvironmentLight.anInt9289; local95++) {
-                local103 = this.anInt8810 * EnvironmentLight.anIntArray92[local95];
+            for (local95 = 0; local95 < EnvironmentLight.textureOpWidth; local95++) {
+                local103 = this.anInt8810 * EnvironmentLight.textureOpColumns[local95];
                 local117 = this.method7812(local51, local77, local103 * local31 >> 12, local37, local81, local90);
                 arg1[local95] = local117 * local24 >> 12;
             }
@@ -201,15 +201,15 @@ public final class Node_Sub1_Sub27 extends TextureOp {
                 local81 = anIntArray768[local37];
                 local77 = this.aByteArray97[local55 & 0xFF] & 0xFF;
                 if (this.aBoolean667 && this.anInt8803 - 1 == local301) {
-                    for (local95 = 0; local95 < EnvironmentLight.anInt9289; local95++) {
-                        local103 = EnvironmentLight.anIntArray92[local95] * this.anInt8810;
+                    for (local95 = 0; local95 < EnvironmentLight.textureOpWidth; local95++) {
+                        local103 = EnvironmentLight.textureOpColumns[local95] * this.anInt8810;
                         local117 = this.method7812(local51, local77, local103 * local31 >> 12, local37, local81, local90);
                         local117 = (local117 * local24 >> 12) + arg1[local95];
                         arg1[local95] = (local117 >> 1) + 2048;
                     }
                 } else {
-                    for (local95 = 0; local95 < EnvironmentLight.anInt9289; local95++) {
-                        local103 = EnvironmentLight.anIntArray92[local95] * this.anInt8810;
+                    for (local95 = 0; local95 < EnvironmentLight.textureOpWidth; local95++) {
+                        local103 = EnvironmentLight.textureOpColumns[local95] * this.anInt8810;
                         local117 = this.method7812(local51, local77, local31 * local103 >> 12, local37, local81, local90);
                         arg1[local95] += local117 * local24 >> 12;
                     }

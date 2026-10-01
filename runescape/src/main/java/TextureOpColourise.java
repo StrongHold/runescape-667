@@ -39,7 +39,7 @@ public final class TextureOpColourise extends TextureOp {
             @Pc(44) int[] outputRed = output[0];
             @Pc(48) int[] outputGreen = output[1];
             @Pc(52) int[] outputBlue = output[2];
-            for (@Pc(54) int x = 0; x < EnvironmentLight.anInt9289; x++) {
+            for (@Pc(54) int x = 0; x < EnvironmentLight.textureOpWidth; x++) {
                 @Pc(60) int sourceR = sourceRed[x];
                 @Pc(64) int sourceB = sourceBlue[x];
                 @Pc(68) int sourceG = sourceGreen[x];

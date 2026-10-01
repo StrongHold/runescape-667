@@ -314,8 +314,8 @@ public final class MovingParticle extends Particle {
 
     @OriginalMember(owner = "client!pp", name = "a", descriptor = "(Lclient!ha;J)V")
     public void collide(@OriginalArg(0) Toolkit toolkit, @OriginalArg(1) long time) {
-        @Pc(6) int tileX = super.x >> EnvironmentLight.anInt1066 + 12;
-        @Pc(13) int tileZ = super.z >> EnvironmentLight.anInt1066 + 12;
+        @Pc(6) int tileX = super.x >> EnvironmentLight.tileShift + 12;
+        @Pc(13) int tileZ = super.z >> EnvironmentLight.tileShift + 12;
         @Pc(18) int worldY = super.y >> 12;
         if (worldY > 0 || worldY < -262144 || tileX < 0 || tileX >= Static619.tileMaxX || tileZ < 0 || tileZ >= Static662.tileMaxZ) {
             this.remove();
@@ -334,7 +334,7 @@ public final class MovingParticle extends Particle {
         if (level < Static299.tileMaxLevel - 1) {
             heightAbove = grounds[level + 1].getHeight(tileX, tileZ);
         } else {
-            heightAbove = height - (0x8 << EnvironmentLight.anInt1066);
+            heightAbove = height - (0x8 << EnvironmentLight.tileShift);
         }
         if (type.hasHeightLevelBounds) {
             if (type.minHeightLevel == -1 && worldY > height) {
@@ -359,7 +359,7 @@ public final class MovingParticle extends Particle {
         }
         if (type.collidesWithGround && particleLevel == 0 && worldY > grounds[0].getHeight(tileX, tileZ)) {
             this.remove();
-        } else if (particleLevel == Static299.tileMaxLevel - 1 && grounds[particleLevel].getHeight(tileX, tileZ) - worldY > 0x8 << EnvironmentLight.anInt1066) {
+        } else if (particleLevel == Static299.tileMaxLevel - 1 && grounds[particleLevel].getHeight(tileX, tileZ) - worldY > 0x8 << EnvironmentLight.tileShift) {
             this.remove();
         } else {
             tile = Static334.activeTiles[particleLevel][tileX][tileZ];
