@@ -61,7 +61,7 @@ public final class ClientModelReader {
     /**
      * The model the client would draw for a mesh, or nothing where the cache holds no such mesh.
      */
-    public Optional<ReadModel> read(int id) {
+    public Optional<JavaModel> read(int id) {
         var mesh = Mesh.load(id, models);
 
         if (mesh == null) {
@@ -71,8 +71,7 @@ public final class ClientModelReader {
                 mesh.upscale();
             }
 
-            var model = (JavaModel) toolkit.createModel(mesh, NO_FUNCTIONS, TEXTURES_ON, AMBIENT, CONTRAST);
-            return Optional.of(new ReadModel(mesh, model));
+            return Optional.of((JavaModel) toolkit.createModel(mesh, NO_FUNCTIONS, TEXTURES_ON, AMBIENT, CONTRAST));
         }
     }
 
@@ -81,9 +80,10 @@ public final class ClientModelReader {
     }
 
     /**
-     * A model and the mesh it was built from. The mesh still holds what the model does not keep,
-     * such as which faces carry a billboard.
+     * The toolkit models are built with, for a reader of some other kind of thing that the client
+     * builds models for.
      */
-    public record ReadModel(Mesh mesh, JavaModel model) {
+    public JavaToolkit toolkit() {
+        return toolkit;
     }
 }

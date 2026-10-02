@@ -2,6 +2,7 @@ import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,8 @@ public final class GltfBuilder {
     private final List<Object> textures = new ArrayList<>();
     private final List<Object> materials = new ArrayList<>();
     private final List<Object> primitives = new ArrayList<>();
+    private final List<Object> animations = new ArrayList<>();
+    private List<String> targetNames = List.of();
 
     /**
      * Adds a vertex attribute of floats, {@code components} to a vertex.
@@ -40,12 +43,27 @@ public final class GltfBuilder {
      *     requires of a position.
      */
     public int attribute(float[] values, int components, String type, boolean bounded) {
+        return accessor(values, components, type, bounded, ARRAY_BUFFER);
+    }
+
+    /**
+     * Adds the times or the values of an animation. A buffer view that holds them names no
+     * binding, because they are never handed to the GPU as they are.
+     *
+     * @param bounded whether the accessor carries its least and greatest values, which glTF
+     *     requires of the times.
+     */
+    public int animationData(float[] values, String type, int components, boolean bounded) {
+        return accessor(values, components, type, bounded, 0);
+    }
+
+    private int accessor(float[] values, int components, String type, boolean bounded, int target) {
         var bytes = ByteBuffer.allocate(values.length * Float.BYTES).order(ByteOrder.LITTLE_ENDIAN);
         for (var value : values) {
             bytes.putFloat(value);
         }
 
-        var view = bufferView(bytes.array(), ARRAY_BUFFER);
+        var view = bufferView(bytes.array(), target);
         var accessor = new LinkedHashMap<String, Object>();
         accessor.put("bufferView", view);
         accessor.put("componentType", FLOAT);
@@ -78,8 +96,44 @@ public final class GltfBuilder {
         return materials.size() - 1;
     }
 
-    public void primitive(Map<String, Integer> attributes, int material) {
-        primitives.add(Map.of("attributes", attributes, "material", material, "mode", TRIANGLES));
+    /**
+     * @param targets the morph targets of the primitive, which every primitive of the mesh has
+     *     the same number of.
+     */
+    public void primitive(Map<String, Integer> attributes, int material, List<Map<String, Integer>> targets) {
+        var primitive = new LinkedHashMap<String, Object>();
+        primitive.put("attributes", attributes);
+        primitive.put("material", material);
+        primitive.put("mode", TRIANGLES);
+        if (!targets.isEmpty()) {
+            primitive.put("targets", targets);
+        }
+        primitives.add(primitive);
+    }
+
+    /**
+     * Names the mesh's morph targets, in the place three.js, Blender and Godot all look for them.
+     */
+    public void targetNames(List<String> names) {
+        targetNames = List.copyOf(names);
+    }
+
+    /**
+     * Adds an animation that sets the weights of the one mesh's morph targets.
+     *
+     * @param times the accessor of the key times, in seconds.
+     * @param weights the accessor of every target's weight at each key time.
+     */
+    public void weightAnimation(String name, int times, int weights, String interpolation, Map<String, Object> extras) {
+        var sampler = Map.of("input", times, "output", weights, "interpolation", interpolation);
+        var channel = Map.of("sampler", 0, "target", Map.of("node", 0, "path", "weights"));
+
+        var animation = new LinkedHashMap<String, Object>();
+        animation.put("name", name);
+        animation.put("samplers", List.of(sampler));
+        animation.put("channels", List.of(channel));
+        animation.put("extras", extras);
+        animations.add(animation);
     }
 
     public boolean empty() {
@@ -90,12 +144,35 @@ public final class GltfBuilder {
      * The document, holding one scene of one node that wears the one mesh.
      */
     public String json(String name) {
+        return json(name, Map.of());
+    }
+
+    /**
+     * @param extras what the node carries beyond glTF's own properties.
+     */
+    public String json(String name, Map<String, Object> extras) {
+        var node = new LinkedHashMap<String, Object>();
+        node.put("name", name);
+        node.put("mesh", 0);
+        if (!extras.isEmpty()) {
+            node.put("extras", extras);
+        }
+
+        var mesh = new LinkedHashMap<String, Object>();
+        mesh.put("name", name);
+        mesh.put("primitives", primitives);
+        if (!targetNames.isEmpty()) {
+            mesh.put("weights", Collections.nCopies(targetNames.size(), 0.0F));
+            mesh.put("extras", Map.of("targetNames", targetNames));
+        }
+
         var document = new LinkedHashMap<String, Object>();
         document.put("asset", Map.of("version", "2.0", "generator", "runescape-667 export"));
         document.put("scene", 0);
         document.put("scenes", List.of(Map.of("nodes", List.of(0))));
-        document.put("nodes", List.of(Map.of("name", name, "mesh", 0)));
-        document.put("meshes", List.of(Map.of("name", name, "primitives", primitives)));
+        document.put("nodes", List.of(node));
+        document.put("meshes", List.of(mesh));
+        putIfAny(document, "animations", animations);
         document.put("materials", materials);
         putIfAny(document, "textures", textures);
         putIfAny(document, "samplers", samplers);
@@ -111,7 +188,7 @@ public final class GltfBuilder {
     }
 
     /**
-     * @param target the binding a view of vertex data is meant for, or 0 for an image.
+     * @param target the binding a view of vertex data is meant for, or 0 for anything else.
      */
     private int bufferView(byte[] bytes, int target) {
         var offset = bin.size();

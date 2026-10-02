@@ -42,10 +42,10 @@ public final class ModelExport {
 
     private static void export(Args args) throws Exception {
         var reader = new ClientModelReader(args.where.cache());
-        var read = reader.read(args.model)
+        var model = reader.read(args.model)
             .orElseThrow(() -> new IllegalStateException("The cache holds no model " + args.model + "."));
 
-        var result = ModelToGltf.convert(read, reader.textures());
+        var result = ModelToGltf.convert(model, reader.textures());
         if (result.gltf().empty()) {
             throw new IllegalStateException("Model " + args.model + " has no face the client draws.");
         }

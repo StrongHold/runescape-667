@@ -61,6 +61,7 @@
 <div id="panel">
   <input type="file" id="file" accept=".glb,.gltf">
   <label><input type="checkbox" id="wire"> wireframe</label>
+  <select id="animation" hidden></select>
   <p id="status">Choose a .glb file, or drop one anywhere on the page.</p>
 </div>
 <script type="module">
@@ -88,8 +89,12 @@ grid.material.opacity = 0.3;
 scene.add(grid);
 
 const status = document.getElementById('status');
+const picker = document.getElementById('animation');
 const loader = new GLTFLoader();
+const clock = new THREE.Clock();
 let model = null;
+let mixer = null;
+let clips = [];
 
 function resize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -116,6 +121,22 @@ function setWireframe(on) {
   });
 }
 
+function play(index) {
+  mixer.stopAllAction();
+  if (clips[index]) {
+    mixer.clipAction(clips[index]).play();
+  }
+}
+
+function listAnimations(animations) {
+  clips = animations;
+  picker.replaceChildren(new Option('no animation', -1),
+    ...clips.map((clip, index) => new Option(`${clip.name} (${clip.duration.toFixed(2)} s)`, index)));
+  picker.hidden = clips.length === 0;
+  picker.value = clips.length === 0 ? -1 : 0;
+  play(Number(picker.value));
+}
+
 async function open(file) {
   try {
     const gltf = await loader.parseAsync(await file.arrayBuffer(), '');
@@ -124,6 +145,8 @@ async function open(file) {
     }
     model = gltf.scene;
     scene.add(model);
+    mixer = new THREE.AnimationMixer(model);
+    listAnimations(gltf.animations);
     setWireframe(document.getElementById('wire').checked);
     frame(model);
 
@@ -145,6 +168,7 @@ document.getElementById('file').addEventListener('change', event => {
   }
 });
 document.getElementById('wire').addEventListener('change', event => setWireframe(event.target.checked));
+picker.addEventListener('change', () => play(Number(picker.value)));
 
 window.addEventListener('dragover', event => {
   event.preventDefault();
@@ -162,6 +186,7 @@ window.addEventListener('drop', event => {
 window.addEventListener('resize', resize);
 resize();
 renderer.setAnimationLoop(() => {
+  mixer?.update(clock.getDelta());
   controls.update();
   renderer.render(scene, camera);
 });

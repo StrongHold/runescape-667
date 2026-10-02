@@ -1,4 +1,3 @@
-import com.jagex.game.runetek6.config.billboardtype.BillboardTypeList;
 import com.jagex.graphics.TextureMetrics;
 import com.jagex.math.ColourUtils;
 
@@ -6,6 +5,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -30,6 +30,9 @@ import javax.imageio.ImageIO;
  * <p>Faces. Every corner of every face is written as a vertex of its own, so that each face keeps
  * its own colour, alpha and texture coordinates exactly. Faces are grouped into one primitive for
  * each texture and way of blending.
+ *
+ * <p>Poses. Each pose the model is given becomes a morph target of every primitive, which holds
+ * how far each corner has moved from where the model holds it, turned the same way as the model.
  */
 public final class ModelToGltf {
 
@@ -72,22 +75,30 @@ public final class ModelToGltf {
 
     private static final float MASK_CUTOFF = 0.5F;
 
-    private final ClientModelReader.ReadModel read;
     private final JavaModel model;
     private final Js5TextureSource source;
+    private final List<Pose> poses;
     private final GltfBuilder gltf = new GltfBuilder();
     private final Map<PrimitiveKey, Primitive> primitives = new LinkedHashMap<>();
     private final Map<Integer, Integer> gltfTextures = new TreeMap<>();
     private final Map<String, Integer> skipped = new TreeMap<>();
 
-    private ModelToGltf(ClientModelReader.ReadModel read, Js5TextureSource source) {
-        this.read = read;
-        this.model = read.model();
+    private ModelToGltf(JavaModel model, Js5TextureSource source, List<Pose> poses) {
+        this.model = model;
         this.source = source;
+        this.poses = poses;
     }
 
-    public static Result convert(ClientModelReader.ReadModel read, Js5TextureSource source) {
-        return new ModelToGltf(read, source).convert();
+    public static Result convert(JavaModel model, Js5TextureSource source) {
+        return convert(model, source, List.of());
+    }
+
+    /**
+     * @param poses where the model's vertices are in each pose that is written as a morph target,
+     *     in the order the targets are numbered.
+     */
+    public static Result convert(JavaModel model, Js5TextureSource source, List<Pose> poses) {
+        return new ModelToGltf(model, source, poses).convert();
     }
 
     /**
@@ -149,14 +160,17 @@ public final class ModelToGltf {
         }
     }
 
+    /**
+     * The faces that a billboard is drawn in place of. The software toolkit keeps, for each
+     * billboard, the face it sits on and whether its type hides that face.
+     */
     private Set<Integer> billboardHiddenFaces() {
         var hidden = new HashSet<Integer>();
-        var billboards = read.mesh().billboards;
 
-        if (billboards != null) {
-            for (var billboard : billboards) {
-                if (BillboardTypeList.list(billboard.id).hideFace) {
-                    hidden.add(billboard.face);
+        if (model.billboardFaces != null) {
+            for (var billboard : model.billboardFaces) {
+                if (billboard.aBoolean464) {
+                    hidden.add(billboard.anInt6139);
                 }
             }
         }
@@ -170,7 +184,7 @@ public final class ModelToGltf {
         var metrics = texture == -1 ? null : source.getMetrics(texture);
         var mode = alphaMode(face, drawable ? metrics : null);
         var key = new PrimitiveKey(drawable ? texture : -1, mode);
-        var primitive = primitives.computeIfAbsent(key, ignored -> new Primitive(key.texture() != -1));
+        var primitive = primitives.computeIfAbsent(key, ignored -> new Primitive(key.texture() != -1, poses.size()));
 
         var rgb = rgb(face, texture);
         var opacity = opacity(face, drawable ? metrics : null);
@@ -183,6 +197,14 @@ public final class ModelToGltf {
             primitive.positions.add(model.vertexX[vertex] / UNITS_PER_METRE);
             primitive.positions.add(-model.vertexY[vertex] / UNITS_PER_METRE);
             primitive.positions.add(-model.vertexZ[vertex] / UNITS_PER_METRE);
+
+            for (var target = 0; target < poses.size(); target++) {
+                var pose = poses.get(target);
+                var moved = primitive.targets.get(target);
+                moved.add((pose.x()[vertex] - model.vertexX[vertex]) / UNITS_PER_METRE);
+                moved.add(-(pose.y()[vertex] - model.vertexY[vertex]) / UNITS_PER_METRE);
+                moved.add(-(pose.z()[vertex] - model.vertexZ[vertex]) / UNITS_PER_METRE);
+            }
 
             var normal = normal(face, vertex);
             primitive.normals.add(normal[0]);
@@ -340,7 +362,12 @@ public final class ModelToGltf {
             attributes.put("TEXCOORD_0", gltf.attribute(primitive.uvs.toArray(), 2, "VEC2", false));
         }
 
-        gltf.primitive(attributes, material(key));
+        var targets = new ArrayList<Map<String, Integer>>();
+        for (var moved : primitive.targets) {
+            targets.add(Map.of("POSITION", gltf.attribute(moved.toArray(), 3, "VEC3", true)));
+        }
+
+        gltf.primitive(attributes, material(key), targets);
     }
 
     private int material(PrimitiveKey key) {
@@ -448,9 +475,13 @@ public final class ModelToGltf {
         private final FloatList normals = new FloatList();
         private final FloatList colours = new FloatList();
         private final FloatList uvs = new FloatList();
+        private final List<FloatList> targets = new ArrayList<>();
 
-        private Primitive(boolean textured) {
+        private Primitive(boolean textured, int poses) {
             this.textured = textured;
+            for (var pose = 0; pose < poses; pose++) {
+                targets.add(new FloatList());
+            }
         }
     }
 }
