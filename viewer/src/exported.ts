@@ -1,8 +1,12 @@
 /**
  * The kinds of file the export module writes, each in a directory of its own under its build
- * directory: single models, NPCs with their animations, and whole map squares.
+ * directory: single models, NPCs with their animations, and map squares, which are listed by
+ * their descriptions.
  */
 export type ExportKind = 'models' | 'npcs' | 'mapsquares';
+
+/** What a listed file of each kind ends with. */
+export const LISTED_EXTENSION: Readonly<Record<ExportKind, string>> = { models: '.glb', npcs: '.glb', mapsquares: '.json' };
 
 /**
  * One file the export module has written, as the viewer's server lists it.
@@ -32,7 +36,7 @@ export async function fetchExported(): Promise<ExportedFile[]> {
 
 /** The name of a file as it is shown, without its extension. */
 export function shortName(file: ExportedFile): string {
-    return file.name.replace(/\.glb$/, '');
+    return file.name.replace(/\.(glb|json)$/, '');
 }
 
 /**

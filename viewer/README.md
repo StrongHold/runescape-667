@@ -23,8 +23,15 @@ for it: type the start of its name, such as `Flag` or `location 33799`, and pres
 Enter again looks at the same node from its next side, which is how a torch on the inside of a
 wall is seen from in front of the wall.
 
-A map square is 64 tiles across, so it is seen from high over its south edge, and the sun's shadow
-is fitted to it with a larger shadow map than a single model gets. Its own ground takes the
+A map square is listed by its description, and is built from that: its ground is loaded, and
+every location it names is loaded once from the library and copied into place as the export
+module's README says an importer places it, turned, scaled, moved and bent to the ground by the
+client's own integer arithmetic. This is the reference import of the format, and `placing.ts`
+and `bend.ts` are where the steps live. The placing of every location of Lumbridge was compared,
+vertex for vertex, with what the client builds, and all but four clocks match to within a unit,
+and those four were wrong in the comparison's reference rather than here. A map square is 64
+tiles across, so it is seen from high over its south edge, and the sun's shadow is fitted to it
+with a larger shadow map than a single model gets. Its own ground takes the
 shadows in place of the plane a model stands on. The grid of a map square has a line for every tile
 and is drawn at the map square's lowest point, and as the ground is seldom flat it starts hidden. A
 map square is known by what its root node carries, so one dropped on the page is shown the same way.

@@ -17,10 +17,12 @@ import java.util.Optional;
  * for, which for most types is one. Each mesh is the location's asset as {@link ClientLocReader}
  * builds it, and the file's extras carry what an importer needs to place it as {@link LocPlacing}
  * describes. A wall decoration that animates has a second mesh for a diagonal placement, turned
- * already, as {@link ClientLocReader#poser} explains. A location that the client animates has a morph target for every frame of every
- * sequence it can play and an animation for each sequence, as an NPC has. A location that is
- * already in the library is left as it is, so the library is written once and read by every map
- * square after.
+ * already, as {@link ClientLocReader#poser} explains. Each mesh's extras carry the client's own
+ * top and bottom of the model, {@code minY} and {@code maxY}, which the bend measures the model
+ * by: the client takes them over every vertex, and the mesh holds only the faces the client draws.
+ * A location that the client animates has a morph target for every frame of every sequence it can
+ * play and an animation for each sequence, as an NPC has. A location that is already in the
+ * library is left as it is, so the library is written once and read by every map square after.
  */
 public final class LocAssets {
 
@@ -119,7 +121,7 @@ public final class LocAssets {
                 var node = new LinkedHashMap<String, Object>();
                 node.put("name", variant.name());
                 node.put("mesh", mesh);
-                node.put("extras", Map.of("shape", shape, "turned", variant.turned()));
+                node.put("extras", Map.of("shape", shape, "turned", variant.turned(), "minY", still.fa(), "maxY", still.EA()));
                 var number = gltf.node(node);
                 shapeNodes.add(number);
                 faces += result.faces();

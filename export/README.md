@@ -186,7 +186,9 @@ location it names that the library lacks, and leaves one that is there as it is,
 textures.
 
 The file holds a mesh for each shape the location's type has a model for, as a node named
-`shape <n>`, and most types have one. Of 59,434 types with a model, 55,604 have one shape, and the
+`shape <n>`, and most types have one. Each mesh's `extras` carry the client's own top and bottom
+of the model, `minY` and `maxY`, which the bend measures the model by: the client takes them over
+every vertex, and the mesh holds only the faces the client draws. Of 59,434 types with a model, 55,604 have one shape, and the
 rest, such as walls and fences, name a different mesh for each shape. Each mesh is the part of what
 the client builds that is the same wherever the location stands: the shape's meshes merged, mirrored
 where the type says so, and recoloured and retextured. The client turns, scales, moves and bends
@@ -213,8 +215,9 @@ which is how the client stands before the server sends any, and `sequencesOf` na
 whose sequences it plays where that is not the same one.
 
 The description also holds `heights`: the height of every tile corner of each level, and of the
-bed under the water where there is one, from one tile before the map square to one tile after,
-which is what a location is bent against.
+bed under the water where there is one, from eight tiles before the map square to eight tiles
+after, which is what a location is bent against. A large location on the edge of the map square
+reaches well into the neighbour.
 
 An importer places a location by these steps, in order, in the client's units:
 
@@ -230,9 +233,16 @@ An importer places a location by these steps, in order, in the client's units:
 7. A centrepiece placed with a rotation above 3, which the map placed as a diagonal, is turned 45
    degrees about y.
 8. Where `hillchange` is not 0, it is bent to the ground under it as `JavaModel.p` bends it, from
-   the heights of the tile corners it covers, measured from the placement's `y`.
+   the heights of the tile corners it covers, measured from the placement's `y`, with the model's
+   top and bottom taken from the mesh's `minY` and `maxY` scaled as the model was.
 9. It is moved by `translate`.
 10. It stands at the placement's position.
+
+The client does every step in integer arithmetic, and an importer that wants the same vertices
+to the unit does too: a turn of 45 degrees uses the client's sine and cosine of 11585 out of
+16384 and shifts the products right by 14, and a scale multiplies by `resize` and shifts right by
+7. The `viewer` module's import does so for every bent placement, and places the rest with a
+floating point transform, which lands within a unit.
 
 `LocPlacing` writes those steps with the client's own model operations, and every placement of a
 map square is checked against them: the location's asset, placed that way, is compared vertex for

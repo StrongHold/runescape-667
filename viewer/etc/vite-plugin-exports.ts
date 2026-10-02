@@ -2,7 +2,7 @@ import { createReadStream } from 'node:fs';
 import { readdir, stat } from 'node:fs/promises';
 import { extname, join, normalize, sep } from 'node:path';
 import type { Plugin } from 'vite';
-import type { ExportedFile, ExportKind } from '../src/exported.ts';
+import { LISTED_EXTENSION, type ExportedFile, type ExportKind } from '../src/exported.ts';
 
 /**
  * The kinds of file the export module writes, each in a directory of its own under its build
@@ -10,8 +10,12 @@ import type { ExportedFile, ExportKind } from '../src/exported.ts';
  */
 const KINDS: readonly ExportKind[] = ['models', 'npcs', 'mapsquares'];
 
-/** What is served from the export directory: the files, and the textures they refer to. */
-const SERVED_TYPES: Readonly<Record<string, string>> = { '.glb': 'model/gltf-binary', '.png': 'image/png' };
+/** What is served from the export directory: the files, the textures and the locations they refer to. */
+const SERVED_TYPES: Readonly<Record<string, string>> = {
+    '.glb': 'model/gltf-binary',
+    '.png': 'image/png',
+    '.json': 'application/json'
+};
 
 /**
  * Serves what the export module has written, so the viewer lists every model, NPC and map square
@@ -53,7 +57,7 @@ async function listed(directory: string): Promise<ExportedFile[]> {
 
     for (const kind of KINDS) {
         const names = await readdir(join(directory, kind)).catch(() => [] as string[]);
-        for (const name of names.filter(name => name.endsWith('.glb'))) {
+        for (const name of names.filter(name => name.endsWith(LISTED_EXTENSION[kind]))) {
             const { size } = await stat(join(directory, kind, name));
             files.push({ kind, name, path: `/exports/${kind}/${encodeURIComponent(name)}`, bytes: size });
         }

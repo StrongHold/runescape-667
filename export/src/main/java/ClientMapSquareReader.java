@@ -77,9 +77,10 @@ public final class ClientMapSquareReader {
 
     /**
      * How many tiles beyond the map square's edge the heights are read for. A location at the
-     * edge is bent against the corners of the tiles it covers, which can be the neighbour's.
+     * edge is bent against the corners of every tile it covers, and a large one reaches several
+     * tiles into the neighbour.
      */
-    public static final int HEIGHT_MARGIN = 1;
+    public static final int HEIGHT_MARGIN = 8;
 
     private final ClientLocReader locs;
     private final ClientModelReader models;
