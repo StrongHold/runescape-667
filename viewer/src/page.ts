@@ -8,6 +8,7 @@ export interface Page {
     readonly empty: HTMLElement;
     readonly animation: HTMLSelectElement;
     readonly play: HTMLButtonElement;
+    readonly focus: HTMLInputElement;
     readonly wire: HTMLInputElement;
     readonly grid: HTMLInputElement;
     readonly backdrop: HTMLSelectElement;
@@ -21,6 +22,7 @@ export function readPage(): Page {
         empty: element<HTMLElement>('empty'),
         animation: element<HTMLSelectElement>('animation'),
         play: element<HTMLButtonElement>('play'),
+        focus: element<HTMLInputElement>('focus'),
         wire: element<HTMLInputElement>('wire'),
         grid: element<HTMLInputElement>('grid'),
         backdrop: element<HTMLSelectElement>('backdrop'),

@@ -17,6 +17,11 @@ animation playing, and the list can single one out. A location the exporter mark
 at a random frame is started at one, as the game does, so the flags of one kind do not move in
 step.
 
+A node can be found by name, so that one location on a square can be looked at without hunting
+for it: type the start of its name, such as `Flag` or `location 33799`, and press Enter. Pressing
+Enter again looks at the same node from its next side, which is how a torch on the inside of a
+wall is seen from in front of the wall.
+
 A map square is 64 tiles across, so it is seen from high over its south edge, and the sun's shadow
 is fitted to it with a larger shadow map than a single model gets. Its own ground takes the
 shadows in place of the plane a model stands on. The grid of a square has a line for every tile

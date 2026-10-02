@@ -28,6 +28,8 @@ import java.util.TreeMap;
  *
  * <p>Poses. Each pose the model is given becomes a morph target of every primitive, which holds
  * how far each corner has moved from where the model holds it, turned the same way as the model.
+ * Where a pose also changes the colour or the alpha of a face, as the frames of a flame do, the
+ * target holds how far each corner's colour has moved as well.
  */
 public final class ModelToGltf {
 
@@ -64,6 +66,7 @@ public final class ModelToGltf {
     private final GltfMaterials materials;
     private final Map<PrimitiveKey, Primitive> primitives = new LinkedHashMap<>();
     private final Map<String, Integer> skipped = new TreeMap<>();
+    private final boolean colourPosed;
 
     private ModelToGltf(JavaModel model, List<Pose> poses, GltfBuilder gltf, GltfMaterials materials) {
         this.model = model;
@@ -71,6 +74,19 @@ public final class ModelToGltf {
         this.poses = poses;
         this.gltf = gltf;
         this.materials = materials;
+        this.colourPosed = poses.stream().anyMatch(this::changesColour);
+    }
+
+    /**
+     * Whether a pose gives any face a colour or an alpha other than the model's own.
+     */
+    private boolean changesColour(Pose pose) {
+        for (var face = 0; face < model.faceCount; face++) {
+            if (pose.colour()[face] != model.faceColour[face] || (pose.alpha()[face] & 0xFF) != alpha(face)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static Result convert(JavaModel model, Js5TextureSource source) {
@@ -140,13 +156,16 @@ public final class ModelToGltf {
      * <p>The hardware toolkits also leave out every face whose texture's metrics say
      * {@code skipFaces}, and so does this, since what is drawn there is drawn by something
      * other than the face.
+     *
+     * <p>A face that is invisible in the model itself but that a pose fades in is kept, as the
+     * client draws it once the pose has.
      */
     private String skipReason(int face) {
         var alpha = alpha(face);
         var shading = shading(face);
         var texture = texture(face);
 
-        if (alpha == HIDDEN_ALPHA || shading == 2) {
+        if (alpha == HIDDEN_ALPHA && invisibleInEveryPose(face) || shading == 2) {
             return "hidden at a join";
         } else if (alpha == SMEAR_ALPHA) {
             return "smeared instead of drawn";
@@ -159,6 +178,10 @@ public final class ModelToGltf {
         } else {
             return null;
         }
+    }
+
+    private boolean invisibleInEveryPose(int face) {
+        return poses.stream().allMatch(pose -> (pose.alpha()[face] & 0xFF) == HIDDEN_ALPHA);
     }
 
     /**
@@ -187,8 +210,8 @@ public final class ModelToGltf {
         var key = new PrimitiveKey(drawable ? texture : -1, mode);
         var primitive = primitives.computeIfAbsent(key, ignored -> new Primitive(key.texture() != -1, poses.size()));
 
-        var rgb = rgb(face, texture);
-        var opacity = opacity(face, drawable ? metrics : null);
+        var rgb = rgb(face, texture, colour(face));
+        var opacity = opacity(drawable ? metrics : null, alpha(face));
 
         var us = primitive.textured ? drawnCoordinates(model.texCoordU[face]) : null;
         var vs = primitive.textured ? drawnCoordinates(model.texCoordV[face]) : null;
@@ -206,16 +229,16 @@ public final class ModelToGltf {
             } else {
                 primitive.numbers.put(described, primitive.numbers.size());
                 primitive.indices.add(primitive.numbers.size() - 1);
-                addCorner(primitive, vertex, normal, rgb, opacity, u, v);
+                addCorner(primitive, face, vertex, normal, rgb, opacity, u, v);
             }
         }
     }
 
     /**
-     * Writes one vertex of a primitive: where it is, in the base pose and in every pose, and how
-     * it is shaded.
+     * Writes one vertex of a primitive: where it is and how it is coloured, in the base pose and
+     * in every pose.
      */
-    private void addCorner(Primitive primitive, int vertex, float[] normal, int rgb, float opacity,
+    private void addCorner(Primitive primitive, int face, int vertex, float[] normal, int rgb, float opacity,
                            float u, float v) {
         primitive.positions.add(model.vertexX[vertex] / UNITS_PER_METRE);
         primitive.positions.add(-model.vertexY[vertex] / UNITS_PER_METRE);
@@ -233,15 +256,36 @@ public final class ModelToGltf {
         primitive.normals.add(-normal[1]);
         primitive.normals.add(-normal[2]);
 
-        primitive.colours.add(Srgb.toLinear(rgb >> 16 & 0xFF));
-        primitive.colours.add(Srgb.toLinear(rgb >> 8 & 0xFF));
-        primitive.colours.add(Srgb.toLinear(rgb & 0xFF));
-        primitive.colours.add(opacity);
+        addColour(primitive.colours, rgb, opacity);
+        if (colourPosed) {
+            var texture = texture(face);
+            var metrics = primitive.textured ? source.getMetrics(texture) : null;
+            for (var target = 0; target < poses.size(); target++) {
+                var pose = poses.get(target);
+                var posedRgb = rgb(face, texture, pose.colour()[face] & 0xFFFF);
+                var posedOpacity = opacity(metrics, pose.alpha()[face] & 0xFF);
+                addColourChange(primitive.colourTargets.get(target), rgb, opacity, posedRgb, posedOpacity);
+            }
+        }
 
         if (primitive.textured) {
             primitive.uvs.add(u);
             primitive.uvs.add(v);
         }
+    }
+
+    private static void addColour(FloatList colours, int rgb, float opacity) {
+        colours.add(Srgb.toLinear(rgb >> 16 & 0xFF));
+        colours.add(Srgb.toLinear(rgb >> 8 & 0xFF));
+        colours.add(Srgb.toLinear(rgb & 0xFF));
+        colours.add(opacity);
+    }
+
+    private static void addColourChange(FloatList changes, int rgb, float opacity, int posedRgb, float posedOpacity) {
+        changes.add(Srgb.toLinear(posedRgb >> 16 & 0xFF) - Srgb.toLinear(rgb >> 16 & 0xFF));
+        changes.add(Srgb.toLinear(posedRgb >> 8 & 0xFF) - Srgb.toLinear(rgb >> 8 & 0xFF));
+        changes.add(Srgb.toLinear(posedRgb & 0xFF) - Srgb.toLinear(rgb & 0xFF));
+        changes.add(posedOpacity - opacity);
     }
 
     /**
@@ -257,26 +301,28 @@ public final class ModelToGltf {
     }
 
     /**
-     * A face's colour at full light. A textured face is tinted by the colour the client
-     * multiplies its texels by, which the texture's metrics can lighten or turn grey.
+     * A face's colour at full light, given the client's HSL colour it has in some pose. A
+     * textured face is tinted by the colour the client multiplies its texels by, which the
+     * texture's metrics can lighten or turn grey.
      */
-    private int rgb(int face, int texture) {
+    private int rgb(int face, int texture, int hsl) {
         if (texture == -1) {
-            return untexturedRgb(face);
+            return untexturedRgb(face, hsl);
         } else {
-            return model.shadeTexturedRgb(colour(face), (short) texture, FULL_LIGHT);
+            return model.shadeTexturedRgb(hsl, (short) texture, FULL_LIGHT);
         }
     }
 
     /**
-     * How opaque a face is. A face alpha of 0 is opaque and 255 is invisible. A texture that
-     * blends or cuts out by its own alpha takes the place of the face's.
+     * How opaque a face is, given the alpha it has in some pose. A face alpha of 0 is opaque and
+     * 255 is invisible. A texture that blends or cuts out by its own alpha takes the place of the
+     * face's.
      */
-    private float opacity(int face, TextureMetrics metrics) {
+    private static float opacity(TextureMetrics metrics, int alpha) {
         if (metrics != null && metrics.alphaBlendMode != 0) {
             return 1.0F;
         } else {
-            return (255 - alpha(face)) / 255.0F;
+            return (255 - alpha) / 255.0F;
         }
     }
 
@@ -286,29 +332,33 @@ public final class ModelToGltf {
      *
      * <p>A black face is one the software toolkit gives the palette entry 128, which is black.
      */
-    private int untexturedRgb(int face) {
+    private int untexturedRgb(int face, int hsl) {
         if (shading(face) == BLACK) {
             return 0;
         } else {
-            return ColourUtils.HSL_TO_RGB[colour(face)];
+            return ColourUtils.HSL_TO_RGB[hsl];
         }
     }
 
     /**
      * How the client blends a face. The software rasteriser blends a textured face by its
      * texture's alpha blend mode when it has one, and only falls back to the face's own alpha
-     * when it has none.
+     * when it has none. A face that any pose makes see-through is blended, so that the pose can.
      */
     private GltfMaterials.AlphaMode alphaMode(int face, TextureMetrics metrics) {
         if (metrics != null && metrics.alphaBlendMode == GltfMaterials.ALPHA_BLENDED) {
             return GltfMaterials.AlphaMode.BLEND;
         } else if (metrics != null && metrics.alphaBlendMode == GltfMaterials.ALPHA_CUTOUT) {
             return GltfMaterials.AlphaMode.MASK;
-        } else if (alpha(face) != 0) {
+        } else if (alpha(face) != 0 || seeThroughInSomePose(face)) {
             return GltfMaterials.AlphaMode.BLEND;
         } else {
             return GltfMaterials.AlphaMode.OPAQUE;
         }
+    }
+
+    private boolean seeThroughInSomePose(int face) {
+        return poses.stream().anyMatch(pose -> pose.alpha()[face] != 0);
     }
 
     /**
@@ -384,8 +434,13 @@ public final class ModelToGltf {
         }
 
         var targets = new ArrayList<Map<String, Integer>>();
-        for (var moved : primitive.targets) {
-            targets.add(Map.of("POSITION", gltf.attribute(moved.toArray(), 3, "VEC3", true)));
+        for (var target = 0; target < primitive.targets.size(); target++) {
+            var moved = new LinkedHashMap<String, Integer>();
+            moved.put("POSITION", gltf.attribute(primitive.targets.get(target).toArray(), 3, "VEC3", true));
+            if (colourPosed) {
+                moved.put("COLOR_0", gltf.attribute(primitive.colourTargets.get(target).toArray(), 4, "VEC4", false));
+            }
+            targets.add(moved);
         }
 
         var indices = primitive.indices.stream().mapToInt(Integer::intValue).toArray();
@@ -439,6 +494,7 @@ public final class ModelToGltf {
         private final FloatList colours = new FloatList();
         private final FloatList uvs = new FloatList();
         private final List<FloatList> targets = new ArrayList<>();
+        private final List<FloatList> colourTargets = new ArrayList<>();
         private final Map<Corner, Integer> numbers = new HashMap<>();
         private final List<Integer> indices = new ArrayList<>();
 
@@ -446,6 +502,7 @@ public final class ModelToGltf {
             this.textured = textured;
             for (var pose = 0; pose < poses; pose++) {
                 targets.add(new FloatList());
+                colourTargets.add(new FloatList());
             }
         }
     }

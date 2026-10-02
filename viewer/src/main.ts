@@ -3,9 +3,10 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { createAnimationPlayer } from './animation.ts';
 import { bindBackdrop } from './backdrop.ts';
 import { bindDrop } from './drop.ts';
+import { bindFocus } from './focus.ts';
 import { fetchExported, listExported, shortName, SINGULAR, type ExportedFile } from './exported.ts';
 import { describe, isSquare, placements } from './extras.ts';
-import { frame } from './framing.ts';
+import { frame, frameFrom, SIDES } from './framing.ts';
 import { createLighting } from './lighting.ts';
 import { baseBox, isTransparent, meshesOf, setWireframe, triangleCount } from './meshes.ts';
 import { readPage } from './page.ts';
@@ -69,6 +70,15 @@ async function start(): Promise<void> {
 
 bindBackdrop(page.stage, page.backdrop);
 bindDrop(page.stage, (data, name) => void open(data, name));
+bindFocus(page.focus, () => current,
+    (node, again) => {
+        const side = SIDES[again % SIDES.length];
+        frameFrom(stage.camera, stage.controls, lighting, baseBox(node), side.direction);
+        page.status.textContent = `Looking at ${node.name} from ${side.name}.`;
+    },
+    name => {
+        page.status.textContent = `Nothing open is named ${name}.`;
+    });
 page.wire.addEventListener('change', () => {
     if (current !== null) {
         setWireframe(current, page.wire.checked);

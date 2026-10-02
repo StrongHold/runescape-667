@@ -86,8 +86,12 @@ toolkit lights a model once, before it poses it, and never turns the normals as 
 The hardware toolkits do turn them with the parts when a sequence asks them to, and that is not
 written.
 
-A frame can also change the colour or alpha of faces, or move a billboard, and only the movement
-of the vertices is written. A sequence is written in full and loops as a whole, where the client
+A frame can also change the colour or the alpha of the faces of a part, which is how a flame burns
+in place: every tongue of it is in the mesh, and the frames fade them in and out in turn. Where any
+frame does that, each morph target also holds how far each corner's colour and alpha have moved,
+and a face that any frame makes see-through is put in a material that blends, so that it can be.
+A face the mesh itself makes invisible is kept where a frame fades it in. A frame can also move a
+billboard, and that is not written. A sequence is written in full and loops as a whole, where the client
 plays the frames before a sequence's loop once, stops a sequence after its greatest number of
 loops, and picks between idle sequences at random by their weights. The NPC's head model, the
 sounds a sequence plays, its particles and its billboards are not written, and nor are the
