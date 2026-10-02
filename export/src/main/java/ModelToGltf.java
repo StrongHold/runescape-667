@@ -8,6 +8,7 @@ import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -194,32 +195,52 @@ public final class ModelToGltf {
         var corners = new int[] {model.faceA[face], model.faceB[face], model.faceC[face]};
         for (var corner = 0; corner < corners.length; corner++) {
             var vertex = corners[corner];
-            primitive.positions.add(model.vertexX[vertex] / UNITS_PER_METRE);
-            primitive.positions.add(-model.vertexY[vertex] / UNITS_PER_METRE);
-            primitive.positions.add(-model.vertexZ[vertex] / UNITS_PER_METRE);
-
-            for (var target = 0; target < poses.size(); target++) {
-                var pose = poses.get(target);
-                var moved = primitive.targets.get(target);
-                moved.add((pose.x()[vertex] - model.vertexX[vertex]) / UNITS_PER_METRE);
-                moved.add(-(pose.y()[vertex] - model.vertexY[vertex]) / UNITS_PER_METRE);
-                moved.add(-(pose.z()[vertex] - model.vertexZ[vertex]) / UNITS_PER_METRE);
-            }
-
             var normal = normal(face, vertex);
-            primitive.normals.add(normal[0]);
-            primitive.normals.add(-normal[1]);
-            primitive.normals.add(-normal[2]);
+            var u = primitive.textured ? us[corner] : 0.0F;
+            var v = primitive.textured ? vs[corner] : 0.0F;
+            var described = new Corner(vertex, normal[0], normal[1], normal[2], rgb, opacity, u, v);
 
-            primitive.colours.add(Srgb.toLinear(rgb >> 16 & 0xFF));
-            primitive.colours.add(Srgb.toLinear(rgb >> 8 & 0xFF));
-            primitive.colours.add(Srgb.toLinear(rgb & 0xFF));
-            primitive.colours.add(opacity);
-
-            if (primitive.textured) {
-                primitive.uvs.add(us[corner]);
-                primitive.uvs.add(vs[corner]);
+            var known = primitive.numbers.get(described);
+            if (known != null) {
+                primitive.indices.add(known);
+            } else {
+                primitive.numbers.put(described, primitive.numbers.size());
+                primitive.indices.add(primitive.numbers.size() - 1);
+                addCorner(primitive, vertex, normal, rgb, opacity, u, v);
             }
+        }
+    }
+
+    /**
+     * Writes one vertex of a primitive: where it is, in the base pose and in every pose, and how
+     * it is shaded.
+     */
+    private void addCorner(Primitive primitive, int vertex, float[] normal, int rgb, float opacity,
+                           float u, float v) {
+        primitive.positions.add(model.vertexX[vertex] / UNITS_PER_METRE);
+        primitive.positions.add(-model.vertexY[vertex] / UNITS_PER_METRE);
+        primitive.positions.add(-model.vertexZ[vertex] / UNITS_PER_METRE);
+
+        for (var target = 0; target < poses.size(); target++) {
+            var pose = poses.get(target);
+            var moved = primitive.targets.get(target);
+            moved.add((pose.x()[vertex] - model.vertexX[vertex]) / UNITS_PER_METRE);
+            moved.add(-(pose.y()[vertex] - model.vertexY[vertex]) / UNITS_PER_METRE);
+            moved.add(-(pose.z()[vertex] - model.vertexZ[vertex]) / UNITS_PER_METRE);
+        }
+
+        primitive.normals.add(normal[0]);
+        primitive.normals.add(-normal[1]);
+        primitive.normals.add(-normal[2]);
+
+        primitive.colours.add(Srgb.toLinear(rgb >> 16 & 0xFF));
+        primitive.colours.add(Srgb.toLinear(rgb >> 8 & 0xFF));
+        primitive.colours.add(Srgb.toLinear(rgb & 0xFF));
+        primitive.colours.add(opacity);
+
+        if (primitive.textured) {
+            primitive.uvs.add(u);
+            primitive.uvs.add(v);
         }
     }
 
@@ -367,7 +388,8 @@ public final class ModelToGltf {
             targets.add(Map.of("POSITION", gltf.attribute(moved.toArray(), 3, "VEC3", true)));
         }
 
-        gltf.primitive(attributes, material(key), targets);
+        var indices = primitive.indices.stream().mapToInt(Integer::intValue).toArray();
+        gltf.primitive(attributes, gltf.indices(indices, primitive.numbers.size()), material(key), targets);
     }
 
     private int material(PrimitiveKey key) {
@@ -466,6 +488,15 @@ public final class ModelToGltf {
     }
 
     /**
+     * Everything one corner of a face gives its vertex. Two corners that agree on all of it share
+     * a vertex. The client's own vertex number is part of it, because two vertices in one place
+     * can move apart when the model is posed.
+     */
+    private record Corner(int vertex, float normalX, float normalY, float normalZ, int rgb,
+                          float opacity, float u, float v) {
+    }
+
+    /**
      * The corners of every face that one primitive holds, a component at a time.
      */
     private static final class Primitive {
@@ -476,6 +507,8 @@ public final class ModelToGltf {
         private final FloatList colours = new FloatList();
         private final FloatList uvs = new FloatList();
         private final List<FloatList> targets = new ArrayList<>();
+        private final Map<Corner, Integer> numbers = new HashMap<>();
+        private final List<Integer> indices = new ArrayList<>();
 
         private Primitive(boolean textured, int poses) {
             this.textured = textured;

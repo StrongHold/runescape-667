@@ -18,6 +18,12 @@ public final class GltfBuilder {
 
     public static final int FLOAT = 5126;
     public static final int ARRAY_BUFFER = 34962;
+    public static final int ELEMENT_ARRAY_BUFFER = 34963;
+    public static final int UNSIGNED_SHORT = 5123;
+    public static final int UNSIGNED_INT = 5125;
+
+    /** The most vertices a primitive may number with unsigned shorts. */
+    private static final int MAX_SHORT_VERTICES = 0x10000;
     public static final int TRIANGLES = 4;
 
     public static final int LINEAR = 9729;
@@ -80,6 +86,31 @@ public final class GltfBuilder {
         return accessors.size() - 1;
     }
 
+    /**
+     * Adds the vertex numbers of a primitive's triangles, as unsigned shorts where the primitive
+     * has few enough vertices.
+     */
+    public int indices(int[] values, int vertices) {
+        var wide = vertices > MAX_SHORT_VERTICES;
+        var bytes = ByteBuffer.allocate(values.length * (wide ? Integer.BYTES : Short.BYTES))
+            .order(ByteOrder.LITTLE_ENDIAN);
+        for (var value : values) {
+            if (wide) {
+                bytes.putInt(value);
+            } else {
+                bytes.putShort((short) value);
+            }
+        }
+
+        var accessor = new LinkedHashMap<String, Object>();
+        accessor.put("bufferView", bufferView(bytes.array(), ELEMENT_ARRAY_BUFFER));
+        accessor.put("componentType", wide ? UNSIGNED_INT : UNSIGNED_SHORT);
+        accessor.put("count", values.length);
+        accessor.put("type", "SCALAR");
+        accessors.add(accessor);
+        return accessors.size() - 1;
+    }
+
     public int image(byte[] png, String name) {
         images.add(Map.of("bufferView", bufferView(png, 0), "mimeType", "image/png", "name", name));
         return images.size() - 1;
@@ -100,9 +131,11 @@ public final class GltfBuilder {
      * @param targets the morph targets of the primitive, which every primitive of the mesh has
      *     the same number of.
      */
-    public void primitive(Map<String, Integer> attributes, int material, List<Map<String, Integer>> targets) {
+    public void primitive(Map<String, Integer> attributes, int indices, int material,
+                          List<Map<String, Integer>> targets) {
         var primitive = new LinkedHashMap<String, Object>();
         primitive.put("attributes", attributes);
+        primitive.put("indices", indices);
         primitive.put("material", material);
         primitive.put("mode", TRIANGLES);
         if (!targets.isEmpty()) {
