@@ -72,13 +72,13 @@ public final class CacheLocations {
             return;
         }
 
-        var packed = mapStore(cache).read(index.groupIds[group]);
+        var packed = mapStore(cache).read(group);
         if (packed == null) {
             System.out.println(name + " is named but not held");
             return;
         }
 
-        System.out.println(name + " group " + index.groupIds[group]);
+        System.out.println(name + " group " + group);
 
         var data = unlocked(packed, keyFor(name));
         if (data == null) {

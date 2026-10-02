@@ -68,13 +68,13 @@ public final class CacheTerrain {
             return;
         }
 
-        var packed = store(cache).read(index.groupIds[group]);
+        var packed = store(cache).read(group);
         if (packed == null) {
             System.out.println(name + " is named but not held");
             return;
         }
 
-        System.out.println(name + " group " + index.groupIds[group]);
+        System.out.println(name + " group " + group);
         report(new Packet(js5.decodeContainer(packed)), wantX % TILES_ACROSS_A_SQUARE,
             wantZ % TILES_ACROSS_A_SQUARE, wantLevel);
     }
