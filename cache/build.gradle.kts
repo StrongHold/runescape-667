@@ -50,3 +50,9 @@ tasks.register<JavaExec>("censusTypes") {
     mainClass = "CacheCensus"
     classpath = sourceSets["main"].runtimeClasspath
 }
+
+tasks.register<JavaExec>("censusLayouts") {
+    description = "Checks that every model, animation base and animation frame in the cache is read in full."
+    mainClass = "CacheLayoutCensus"
+    classpath = sourceSets["main"].runtimeClasspath
+}
