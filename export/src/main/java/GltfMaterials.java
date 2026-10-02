@@ -53,7 +53,10 @@ public final class GltfMaterials {
      * The material for faces of a texture, or of colour alone where the texture is -1, laid over
      * what is behind them in one way. A textured material says in its {@code extras} whether the
      * texture is {@code disableable}: one the client leaves off when the player turns textures
-     * off, drawing the face in its {@code COLOR_1} instead. Water and the like are not.
+     * off, drawing the face in its {@code COLOR_1} instead. Water and the like are not. It also
+     * says the texture's {@code colourOp}, which is how the GL toolkit combines a texel with the
+     * lit vertex colour: 0 multiplies them, 1 shows the texel alone, 2 interpolates, 3 adds them,
+     * and 4 takes a dot product ({@code GlToolkit.method6991}).
      */
     public int material(int texture, AlphaMode mode) {
         var key = new MaterialKey(texture, mode);
@@ -78,7 +81,11 @@ public final class GltfMaterials {
             material.put("alphaCutoff", MASK_CUTOFF);
         }
         if (texture != -1) {
-            material.put("extras", Map.of("disableable", source.getMetrics(texture).disableable));
+            var metrics = source.getMetrics(texture);
+            var extras = new LinkedHashMap<String, Object>();
+            extras.put("disableable", metrics.disableable);
+            extras.put("colourOp", metrics.colorOp);
+            material.put("extras", extras);
         }
 
         var number = gltf.material(material);

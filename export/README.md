@@ -66,7 +66,9 @@ colour, and builds the ground with no textures, so that a tile shows the colour 
 texture. A model's textured primitive carries the face colour as `COLOR_1`, next to the
 `COLOR_0` that tints the texture; the ground's `COLOR_0` serves both. Not every texture goes:
 water and others the client marks stay on, and a textured material says which in its `extras`,
-as `disableable`.
+as `disableable`. The same `extras` give the texture's `colourOp`, which is how the GL client
+combines a texel with the lit vertex colour: 0 multiplies them, 1 shows the texel alone, 2
+interpolates, 3 adds them and 4 takes a dot product.
 
 
 ## Writing an NPC
