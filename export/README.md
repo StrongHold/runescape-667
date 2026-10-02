@@ -32,11 +32,30 @@ draws are the front faces in glTF too.
 Two face corners share a vertex only where they agree on the client's vertex, the normal, the
 colour, the opacity and the texture coordinate, so each face keeps its own colour exactly. A
 face's colour comes from the client's palette and is written as a vertex colour in linear light.
-A textured face is tinted the way the client tints it, and its texture is drawn by the client's
-texture source and kept in the file as a PNG. Faces are grouped into one primitive for each
-texture and way of blending, so a face that is drawn through what is behind it, or a texture with
-holes in it, gets a material that blends or cuts out. Normals are the client's own: a smooth face
-takes the normals of the faces it meets at each corner, and a flat face takes its own.
+A textured face is tinted the way the client tints it, and refers to its texture in the shared
+texture library below. Faces are grouped into one primitive for each texture and way of
+blending, so a face that is drawn through what is behind it, or a texture with holes in it, gets
+a material that blends or cuts out. Normals are the client's own: a smooth face takes the normals
+of the faces it meets at each corner, and a flat face takes its own.
+
+
+## The texture library
+
+    ./gradlew :export:exportTextures
+    ./gradlew :export:exportModel --args="--model 8 --textures /path/to/textures"
+
+Every file written here refers to its textures by a relative path, such as `../textures/128.png`,
+and carries no copy of them. The textures live in one directory, `export/build/textures` unless
+`--textures` names another, as one PNG for each texture id. An engine then loads each texture
+once, however many models, NPCs and squares use it, and a texture can be replaced by a better one
+by replacing one file.
+
+Each texture is drawn by the client's own texture source, at 128 texels a side or 64 for a small
+one, with the gamma the client draws with, and the alpha the client's rasteriser reads from it:
+its own alpha where it blends, a hole where it is cut out, and opaque otherwise. A texture that
+the client slides over time is drawn still. `exportTextures` writes every texture the cache
+holds, and every other export writes any texture it refers to that the library lacks. A texture
+that is already in the library is left as it is, so a replaced texture survives a re-export.
 
 Faces that the client never draws are left out: a face hidden at a join, a face the rasteriser
 smears instead of drawing, a face whose texture says that its faces are skipped, and a face that

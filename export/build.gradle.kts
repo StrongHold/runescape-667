@@ -6,6 +6,12 @@ dependencies {
     implementation(project(":cache"))
 }
 
+tasks.register<JavaExec>("exportTextures") {
+    description = "Writes every texture out of the cache as a PNG, into the library the other exports refer to."
+    mainClass = "TextureExport"
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
 tasks.register<JavaExec>("exportModel") {
     description = "Writes one model out of the cache as a binary glTF file."
     mainClass = "ModelExport"

@@ -1,6 +1,6 @@
 import { createReadStream } from 'node:fs';
 import { readdir, stat } from 'node:fs/promises';
-import { join, normalize, sep } from 'node:path';
+import { extname, join, normalize, sep } from 'node:path';
 import type { Plugin } from 'vite';
 import type { ExportedFile, ExportKind } from '../src/exported.ts';
 
@@ -10,10 +10,14 @@ import type { ExportedFile, ExportKind } from '../src/exported.ts';
  */
 const KINDS: readonly ExportKind[] = ['models', 'npcs', 'squares'];
 
+/** What is served from the export directory: the files, and the textures they refer to. */
+const SERVED_TYPES: Readonly<Record<string, string>> = { '.glb': 'model/gltf-binary', '.png': 'image/png' };
+
 /**
  * Serves what the export module has written, so the viewer lists every model, NPC and map square
- * without anything being copied. The list is read on every request, so a file exported while the viewer
- * is open shows up on the next reload.
+ * without anything being copied, and the textures those files refer to by relative paths. The
+ * list is read on every request, so a file exported while the viewer is open shows up on the
+ * next reload.
  */
 export function exportsServed(directory: string): Plugin {
     return {
@@ -26,12 +30,13 @@ export function exportsServed(directory: string): Plugin {
 
             server.middlewares.use('/exports/', (request, response, next) => {
                 const wanted = normalize(join(directory, decodeURIComponent(request.url ?? '')));
-                if (!wanted.startsWith(directory + sep) || !wanted.endsWith('.glb')) {
+                const type = SERVED_TYPES[extname(wanted)];
+                if (!wanted.startsWith(directory + sep) || type === undefined) {
                     next();
                     return;
                 }
 
-                response.setHeader('Content-Type', 'model/gltf-binary');
+                response.setHeader('Content-Type', type);
                 createReadStream(wanted)
                     .on('error', () => {
                         response.statusCode = 404;

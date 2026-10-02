@@ -2,6 +2,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 
 import java.nio.file.Path;
+import java.util.List;
 
 /**
  * Writes one model out of the cache as a binary glTF file, which Godot, Blender, three.js and most
@@ -13,6 +14,9 @@ public final class ModelExport {
 
         @ParametersDelegate
         private final CacheArgs where = new CacheArgs();
+
+        @ParametersDelegate
+        private final TextureArgs textures = new TextureArgs();
 
         @Parameter(names = "--model", description = "Which model to write, by its group in the models archive", required = true)
         private int model;
@@ -45,14 +49,16 @@ public final class ModelExport {
         var model = reader.read(args.model)
             .orElseThrow(() -> new IllegalStateException("The cache holds no model " + args.model + "."));
 
-        var result = ModelToGltf.convert(model, reader.textures());
-        if (result.gltf().empty()) {
+        var out = args.out == null ? Path.of("build", "models", args.model + ".glb") : args.out;
+        var gltf = new GltfBuilder();
+        var materials = new GltfMaterials(gltf, reader.textures(), args.textures.library(reader.textures()), out);
+        var result = ModelToGltf.convert(model, gltf, materials, List.of());
+        if (gltf.empty()) {
             throw new IllegalStateException("Model " + args.model + " has no face the client draws.");
         }
 
         var name = "model " + args.model;
-        var out = args.out == null ? Path.of("build", "models", args.model + ".glb") : args.out;
-        Glb.write(out, result.gltf().json(name), result.gltf().bin());
+        Glb.write(out, gltf.json(name), gltf.bin());
 
         System.out.println("wrote " + out.toAbsolutePath().normalize());
         System.out.println("  " + result.faces() + " faces in " + result.primitives() + " primitives");

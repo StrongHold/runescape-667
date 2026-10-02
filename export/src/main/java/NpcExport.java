@@ -21,6 +21,9 @@ public final class NpcExport {
         @ParametersDelegate
         private final CacheArgs where = new CacheArgs();
 
+        @ParametersDelegate
+        private final TextureArgs textures = new TextureArgs();
+
         @Parameter(names = "--npc", description = "Which NPC to write, by its id", required = true)
         private int npc;
 
@@ -71,12 +74,14 @@ public final class NpcExport {
 
         var base = poser.still();
         var poses = baker.poses();
-        var result = ModelToGltf.convert(base, reader.textures(), poses);
-        if (result.gltf().empty()) {
+        var out = args.out == null ? Path.of("build", "npcs", args.npc + ".glb") : args.out;
+        var gltf = new GltfBuilder();
+        var materials = new GltfMaterials(gltf, reader.textures(), args.textures.library(reader.textures()), out);
+        var result = ModelToGltf.convert(base, gltf, materials, poses);
+        if (gltf.empty()) {
             throw new IllegalStateException("NPC " + args.npc + " has no face the client draws.");
         }
 
-        var gltf = result.gltf();
         gltf.targetNames(baker.names());
         var node = List.of(0);
         for (var animation : baked) {
@@ -87,7 +92,6 @@ public final class NpcExport {
         }
 
         var name = type.name + " (npc " + args.npc + ")";
-        var out = args.out == null ? Path.of("build", "npcs", args.npc + ".glb") : args.out;
         Glb.write(out, gltf.json(name, extras(args.npc, type)), gltf.bin());
 
         System.out.println("wrote " + out.toAbsolutePath().normalize());

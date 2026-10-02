@@ -89,17 +89,15 @@ public final class ModelToGltf {
         return false;
     }
 
-    public static Result convert(JavaModel model, Js5TextureSource source) {
-        return convert(model, source, List.of());
-    }
-
     /**
+     * Turns the model into the one mesh of a new document, drawing on the materials given, which
+     * belong to that document.
+     *
      * @param poses where the model's vertices are in each pose that is written as a morph target,
      *     in the order the targets are numbered.
      */
-    public static Result convert(JavaModel model, Js5TextureSource source, List<Pose> poses) {
-        var gltf = new GltfBuilder();
-        return new ModelToGltf(model, poses, gltf, new GltfMaterials(gltf, source)).convert();
+    public static Result convert(JavaModel model, GltfBuilder gltf, GltfMaterials materials, List<Pose> poses) {
+        return new ModelToGltf(model, poses, gltf, materials).convert();
     }
 
     /**

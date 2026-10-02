@@ -1,13 +1,15 @@
 import { readdir, readFile } from 'node:fs/promises';
-import { join, relative, resolve } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 import { validateBytes, type ValidationMessage } from 'gltf-validator';
 
 /**
  * Checks every .glb the export module has written against the Khronos glTF validator, or those
  * named on the command line, and fails on any error or warning.
  *
- * The validator has no command line of its own, so it is driven here. Every issue is counted by
- * its code, and the first few errors are printed in full with the part of the file they point at.
+ * The validator has no command line of its own, so it is driven here. A file refers to its
+ * textures by paths relative to itself, and the validator is handed each one it asks for, so a
+ * missing texture or a broken one is an error too. Every issue is counted by its code, and the
+ * first few errors are printed in full with the part of the file they point at.
  */
 
 const SEVERITIES = ['error', 'warning', 'info', 'hint'] as const;
@@ -20,7 +22,11 @@ const files = named.length > 0 ? named : await exportedFiles(exportDirectory);
 
 let failed = false;
 for (const file of files) {
-    const report = await validateBytes(new Uint8Array(await readFile(file)), { maxIssues: 0 });
+    const report = await validateBytes(new Uint8Array(await readFile(file)), {
+        maxIssues: 0,
+        externalResourceFunction: uri => readFile(resolve(dirname(file), decodeURIComponent(uri)))
+            .then(bytes => new Uint8Array(bytes))
+    });
     const issues = report.issues;
     console.log(`${relative(process.cwd(), file)}: ${issues.numErrors} errors, ${issues.numWarnings} warnings, `
         + `${issues.numInfos} infos, ${issues.numHints} hints`);

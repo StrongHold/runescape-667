@@ -25,6 +25,8 @@ declare module 'gltf-validator' {
     export interface ValidationOptions {
         readonly uri?: string;
         readonly maxIssues?: number;
+        /** Fetches a resource the file refers to by a URI relative to itself. */
+        readonly externalResourceFunction?: (uri: string) => Promise<Uint8Array>;
     }
 
     export function validateBytes(data: Uint8Array, options?: ValidationOptions): Promise<ValidationReport>;

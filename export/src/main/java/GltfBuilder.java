@@ -117,8 +117,12 @@ public final class GltfBuilder {
         return accessors.size() - 1;
     }
 
-    public int image(byte[] png, String name) {
-        images.add(Map.of("bufferView", bufferView(png, 0), "mimeType", "image/png", "name", name));
+    /**
+     * Adds an image kept in a file of its own, which the document refers to by a path relative
+     * to where it is written.
+     */
+    public int image(String uri, String name) {
+        images.add(Map.of("uri", uri, "mimeType", "image/png", "name", name));
         return images.size() - 1;
     }
 

@@ -13,6 +13,9 @@ import { readPage } from './page.ts';
 import { createScenery } from './scenery.ts';
 import { createStage } from './stage.ts';
 
+/** Where a dropped file is taken to be, so that `../textures/<id>.png` finds the served textures. */
+const DROPPED_PATH = '/exports/dropped/';
+
 const page = readPage();
 const stage = createStage(page.stage);
 const lighting = createLighting(stage.scene);
@@ -21,9 +24,16 @@ const player = createAnimationPlayer(page.animation, page.play);
 const loader = new GLTFLoader();
 let current: Object3D | null = null;
 
-async function open(data: ArrayBuffer, label: string): Promise<void> {
+/**
+ * Opens a file's bytes.
+ *
+ * @param path where the file is served from, which the textures it refers to by relative paths
+ *     are resolved against. A dropped file has no path, and is given one beside the exported
+ *     files, so that it finds the same textures.
+ */
+async function open(data: ArrayBuffer, label: string, path: string): Promise<void> {
     try {
-        const gltf = await loader.parseAsync(data, '');
+        const gltf = await loader.parseAsync(data, path);
         if (current !== null) {
             stage.scene.remove(current);
         }
@@ -55,10 +65,14 @@ async function open(data: ArrayBuffer, label: string): Promise<void> {
     }
 }
 
+function servedFrom(path: string): string {
+    return path.slice(0, path.lastIndexOf('/') + 1);
+}
+
 async function openExported(file: ExportedFile): Promise<void> {
     page.status.textContent = `Loading ${SINGULAR[file.kind]} ${shortName(file)}...`;
     const response = await fetch(file.path);
-    await open(await response.arrayBuffer(), `${SINGULAR[file.kind]} ${file.name}`);
+    await open(await response.arrayBuffer(), `${SINGULAR[file.kind]} ${file.name}`, servedFrom(file.path));
 }
 
 async function start(): Promise<void> {
@@ -69,7 +83,7 @@ async function start(): Promise<void> {
 }
 
 bindBackdrop(page.stage, page.backdrop);
-bindDrop(page.stage, (data, name) => void open(data, name));
+bindDrop(page.stage, (data, name) => void open(data, name, DROPPED_PATH));
 bindFocus(page.focus, () => current,
     (node, again) => {
         const side = SIDES[again % SIDES.length];

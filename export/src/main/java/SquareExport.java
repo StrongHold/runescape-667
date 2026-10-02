@@ -33,6 +33,9 @@ public final class SquareExport {
         @ParametersDelegate
         private final CacheArgs where = new CacheArgs();
 
+        @ParametersDelegate
+        private final TextureArgs textures = new TextureArgs();
+
         @Parameter(names = "--x", description = "The square's position from west to east, in squares of 64 tiles", required = true)
         private int x;
 
@@ -71,9 +74,10 @@ public final class SquareExport {
     private static void export(Args args) throws Exception {
         var reader = new ClientSquareReader(args.where.cache(), args.keys);
         var square = reader.read(args.x, args.z, !args.noLocations);
-        var gltf = new GltfBuilder();
-        var materials = new GltfMaterials(gltf, reader.textures());
         var name = args.x + "_" + args.z;
+        var out = args.out == null ? Path.of("build", "squares", name + ".glb") : args.out;
+        var gltf = new GltfBuilder();
+        var materials = new GltfMaterials(gltf, reader.textures(), args.textures.library(reader.textures()), out);
 
         System.out.println("square " + name + ", tiles " + args.x * ClientSquareReader.TILES_ACROSS + ","
             + args.z * ClientSquareReader.TILES_ACROSS + " to " + ((args.x + 1) * ClientSquareReader.TILES_ACROSS - 1)
@@ -98,8 +102,6 @@ public final class SquareExport {
         root.put("extras", Map.of("squareX", args.x, "squareZ", args.z,
             "tileX", args.x * ClientSquareReader.TILES_ACROSS, "tileZ", args.z * ClientSquareReader.TILES_ACROSS));
         var document = gltf.json(List.of(gltf.node(root)));
-
-        var out = args.out == null ? Path.of("build", "squares", name + ".glb") : args.out;
         Glb.write(out, document, gltf.bin());
         System.out.println("wrote " + out.toAbsolutePath().normalize());
     }
