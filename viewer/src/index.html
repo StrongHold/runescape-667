@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Export Viewer</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div class="app">
+    <aside class="side">
+        <header>
+            <h1>Export Viewer</h1>
+            <p>What the export module has written under <code>export/build</code>. Up is +y, north is &minus;z, one grid square is one tile.</p>
+        </header>
+        <nav id="files" aria-label="Exported files"></nav>
+        <p class="hint" id="empty" hidden>Nothing is exported yet. Run <code>./gradlew :export:exportModel --args="--model 19"</code> or <code>:export:exportNpc --args="--npc 9"</code>, then reload.</p>
+        <p class="hint">Drop any .glb on the page to open it.</p>
+    </aside>
+    <main class="view">
+        <div class="stage" id="stage"></div>
+        <div class="controls">
+            <select id="animation" aria-label="Animation" hidden></select>
+            <button type="button" id="play" hidden>Pause</button>
+            <label><input type="checkbox" id="wire"> Wireframe</label>
+            <label><input type="checkbox" id="grid" checked> Tile grid</label>
+        </div>
+        <p class="status" id="status">Choose a file.</p>
+    </main>
+</div>
+<script type="module" src="./main.ts"></script>
+</body>
+</html>

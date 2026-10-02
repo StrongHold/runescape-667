@@ -95,7 +95,4 @@ action sequences an NPC plays when the game tells it to, such as an attack.
 
 ## Looking at a model
 
-`viewer/index.html` is a page that shows a `.glb` file. Open it in a browser, then choose a file
-or drop one on the page. It loads three.js from a CDN, so it needs a network connection. One square
-of its grid is one tile. A file with animations, such as an NPC, starts playing its first one, and
-a list on the page chooses another.
+The `viewer` subproject shows everything written here. See its README.

@@ -28,4 +28,5 @@ include(
     "native-trace",
     "natives",
     "runescape",
+    "viewer",
 )

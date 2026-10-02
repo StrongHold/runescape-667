@@ -1,0 +1,158 @@
+:root {
+    --ground: #e9edf1;
+    --surface: #ffffff;
+    --ink: #17202b;
+    --muted: #5b6878;
+    --line: #cfd6de;
+    --accent: #b5822b;
+    --stage: #dfe5eb;
+    color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --ground: #11151b;
+        --surface: #1a2028;
+        --ink: #e5e9ef;
+        --muted: #94a1b0;
+        --line: #2b333e;
+        --accent: #dba64a;
+        --stage: #161b22;
+        color-scheme: dark;
+    }
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    background: var(--ground);
+    color: var(--ink);
+    font: 14px/1.45 system-ui, sans-serif;
+}
+
+code {
+    font-family: ui-monospace, monospace;
+    font-size: 0.9em;
+}
+
+.app {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    height: 100%;
+}
+
+@media (max-width: 760px) {
+    .app {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+    }
+}
+
+.side {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px;
+    overflow-y: auto;
+    border-right: 1px solid var(--line);
+}
+
+.side h1 {
+    margin: 0;
+    font-size: 1.25rem;
+    letter-spacing: 0.02em;
+}
+
+.side header p, .hint {
+    margin: 4px 0 0;
+    color: var(--muted);
+}
+
+#files {
+    display: grid;
+    gap: 4px;
+}
+
+#files h2 {
+    margin: 10px 0 2px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+}
+
+.file {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: var(--surface);
+}
+
+.file:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.file[aria-pressed="true"] {
+    border-color: var(--accent);
+}
+
+.file .size {
+    color: var(--muted);
+    font-family: ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+}
+
+.view {
+    display: grid;
+    grid-template-rows: 1fr auto auto;
+    gap: 10px;
+    padding: 16px;
+    min-height: 0;
+}
+
+.stage {
+    min-height: 240px;
+    background: var(--stage);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.stage.dropping {
+    outline: 2px dashed var(--accent);
+}
+
+.stage canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 18px;
+}
+
+.controls label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.status {
+    margin: 0;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
