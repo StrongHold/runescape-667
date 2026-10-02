@@ -1,4 +1,4 @@
-import { PCFSoftShadowMap, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
+import { PCFShadowMap, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 /**
@@ -17,7 +17,7 @@ export function createStage(container: HTMLElement): Stage {
     const renderer = new WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = PCFSoftShadowMap;
+    renderer.shadowMap.type = PCFShadowMap;
     container.appendChild(renderer.domElement);
 
     const scene = new Scene();

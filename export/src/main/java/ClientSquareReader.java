@@ -79,6 +79,12 @@ public final class ClientSquareReader {
 
     private static final String NOT_ASKED = "not asked for";
 
+    /**
+     * The weight of a location's one sequence, which it always picks. A location with several
+     * sequences has their weights scaled to add up to this.
+     */
+    private static final int SOLE_WEIGHT = 65535;
+
     private final ClientModelReader models;
     private final js5 maps;
     private final Path keys;
@@ -163,14 +169,53 @@ public final class ClientSquareReader {
      *     decoration, the second decoration of a diagonal wall, a ground decoration, or a location
      *     that stands in the middle of its tiles or across them.
      * @param underwater whether it stands on the bed under the water rather than on land.
+     * @param model the location as it stands with nothing playing.
      * @param conformed whether its type bends it to fit the ground under it.
+     * @param motion how the client animates it, if it does.
      */
     public record Placement(int id, String name, int shape, int rotation, int level, String part,
-                            boolean underwater, int x, int y, int z, JavaModel model, boolean conformed) {
+                            boolean underwater, int x, int y, int z, JavaModel model, boolean conformed,
+                            Motion motion) {
 
         private Placement under(boolean water) {
-            return new Placement(id, name, shape, rotation, level, part, water, x, y, z, model, conformed);
+            return new Placement(id, name, shape, rotation, level, part, water, x, y, z, model, conformed, motion);
         }
+    }
+
+    /**
+     * How the client animates a location.
+     */
+    public sealed interface Motion {
+
+        /**
+         * The location never moves.
+         */
+        record Still() implements Motion {
+        }
+
+        /**
+         * The location plays one of its sequences from the moment it is placed. A location with
+         * one sequence loops it. A location with several plays one for as many loops as the
+         * sequence allows, then picks another by weight.
+         *
+         * @param clips every sequence it can play, each baked, in the order its type lists them.
+         * @param poses every distinct frame of those sequences, in the order the morph targets
+         *     are numbered.
+         * @param targetNames the name of each pose, in the same order.
+         * @param randomStartFrame whether the client starts the sequence at a random frame, so
+         *     that locations of one type do not move in step.
+         */
+        record Animated(List<LocClip> clips, List<Pose> poses, List<String> targetNames, boolean randomStartFrame)
+            implements Motion {
+        }
+    }
+
+    /**
+     * One sequence a location can play.
+     *
+     * @param weight the chance of its being picked, out of 65535, where the location has several.
+     */
+    public record LocClip(int sequence, int weight, PoseBaker.Clip clip) {
     }
 
     /**
@@ -474,29 +519,48 @@ public final class ClientSquareReader {
     /**
      * A location that the client animates, or that takes the look of another by a variable.
      *
-     * The client asks its entity for a model every frame, which poses it at whatever frame its
-     * animation has reached, and the animation of many starts at a random frame. So the model is
-     * built here as {@code LocEntity.model} builds it while nothing is playing, through
-     * {@code LocType.modelAndShadow}, which bends it to the ground under it as for any other
-     * location. A location that takes the look of another does so with every variable at 0, which
-     * is how the client stands before the server sends any.
+     * A location that takes the look of another does so with every variable at 0, which is how
+     * the client stands before the server sends any. It is built as {@code LocEntity.model}
+     * builds it while nothing is playing, through {@code LocType.modelAndShadow}, which bends it
+     * to the ground under it as for any other location.
+     *
+     * A location with animations is asked for a model every frame, posed at whatever frame its
+     * animation has reached. It is built through {@link LocPoser}, still and at every frame of
+     * every sequence it can play. The sequences are those of the look it has taken, or its own
+     * where that look has none, as {@code LocEntity.animate} picks them.
      */
     private static Optional<Placement> dynamic(LocEntity entity, String part, int x, int y, int z, JavaToolkit toolkit) {
-        var type = LocTypeList.instance.list(entity.id);
-        if (type.multiloc != null) {
-            type = type.getMultiLoc(TimedVarDomain.instance);
-        }
+        var own = LocTypeList.instance.list(entity.id);
+        var type = own.multiloc == null ? own : own.getMultiLoc(TimedVarDomain.instance);
         if (type == null) {
             return Optional.empty();
         }
 
-        var floor = LocGround.floor(entity.underwater, entity.virtualLevel);
-        var ceiling = LocGround.ceiling(entity.underwater, entity.virtualLevel);
-        var diagonal = entity.shape == LocShapes.CENTREPIECE_DIAGONAL;
-        var built = type.modelAndShadow(diagonal ? entity.rotation + 4 : entity.rotation, entity.entity.z,
-            entity.entity.x, floor, false, floor.averageHeight(entity.entity.x, entity.entity.z),
-            diagonal ? LocShapes.CENTREPIECE_STRAIGHT : entity.shape, toolkit, null, UNLIT_LOCATION, ceiling);
-        return placement(type.id, entity.shape, entity.rotation, entity.level, part, x, y, z, model(built));
+        var animations = type.hasAnimations() ? type : own.hasAnimations() ? own : null;
+        if (animations == null) {
+            var floor = LocGround.floor(entity.underwater, entity.virtualLevel);
+            var ceiling = LocGround.ceiling(entity.underwater, entity.virtualLevel);
+            var diagonal = entity.shape == LocShapes.CENTREPIECE_DIAGONAL;
+            var built = type.modelAndShadow(diagonal ? entity.rotation + 4 : entity.rotation, entity.entity.z,
+                entity.entity.x, floor, false, floor.averageHeight(entity.entity.x, entity.entity.z),
+                diagonal ? LocShapes.CENTREPIECE_STRAIGHT : entity.shape, toolkit, null, UNLIT_LOCATION, ceiling);
+            return placement(type.id, entity.shape, entity.rotation, entity.level, part, x, y, z, model(built),
+                new Motion.Still());
+        } else {
+            var poser = new LocPoser(type, entity, toolkit, UNLIT_LOCATION);
+            var baker = new PoseBaker(poser);
+            var clips = new ArrayList<LocClip>();
+            for (var i = 0; i < animations.anim.length; i++) {
+                if (animations.anim[i] != -1) {
+                    var weight = animations.anim.length > 1 ? animations.anim_weight[i] : SOLE_WEIGHT;
+                    clips.add(new LocClip(animations.anim[i], weight, baker.bake(animations.anim[i])));
+                }
+            }
+            var motion = new Motion.Animated(List.copyOf(clips), baker.poses(), baker.names(),
+                animations.randomanimframe);
+            return placement(type.id, entity.shape, entity.rotation, entity.level, part, x, y, z, poser.still(),
+                motion);
+        }
     }
 
     private static JavaModel model(ModelAndShadow built) {
@@ -505,19 +569,25 @@ public final class ClientSquareReader {
 
     private static Optional<Placement> placement(int id, int shape, int rotation, int level, String part,
                                                  int x, int y, int z, JavaModel model) {
+        return placement(id, shape, rotation, level, part, x, y, z, model, new Motion.Still());
+    }
+
+    private static Optional<Placement> placement(int id, int shape, int rotation, int level, String part,
+                                                 int x, int y, int z, JavaModel model, Motion motion) {
         if (model == null) {
             return Optional.empty();
         } else {
             var type = LocTypeList.instance.list(id & 0xFFFF);
             return Optional.of(new Placement(id & 0xFFFF, type.name, shape, rotation, level, part, false, x, y, z, model,
-                type.hillchange != 0));
+                type.hillchange != 0, motion));
         }
     }
 
     /**
      * Options as a player on high detail has them. They are made without their constructor, which
      * asks the machine the client runs on about itself, and only the options that building a
-     * region reads are set.
+     * region reads are set. Placing a location starts its animation at a random frame, and a frame
+     * that plays a sound asks how loud sounds are, so they are turned off.
      */
     private static ClientOptions highDetailOptions() {
         var options = allocated(ClientOptions.class);
@@ -528,6 +598,7 @@ public final class ClientSquareReader {
         options.hardShadows = new HardShadowsOption(OFF, options);
         options.lightDetail = new LightDetailOption(OFF, options);
         options.waterDetail = new WaterDetailOption(HIGH_WATER_DETAIL, options);
+        options.backgroundSoundVolume = new VolumeOption(OFF, options);
         return options;
     }
 

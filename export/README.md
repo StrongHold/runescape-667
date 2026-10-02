@@ -159,10 +159,23 @@ Each distinct model is written as one mesh that every node of it wears, so a tre
 times costs one mesh. A location bent to fit the ground is the same model only where the ground
 under it is the same shape, so on a slope each is a mesh of its own.
 
-Some of this is not what the client draws. A location that the client animates is written in the
-model it has while nothing plays, and a location that takes the look of another by a variable
-takes the one it has with every variable at 0, which is how the client stands before the server
-sends any. The particles, billboards and sounds of a location are not written, and nor are the
+A location that the client animates is written with its sequences, as an NPC is. Its model is
+built by the method the client builds an animated location with on every frame it draws,
+`LocType.wallModel`, which poses a copy of the model and only then bends it to the ground and
+moves it, so a location on a slope is bent again at every frame, and such a location is a mesh
+of its own as above. Each frame becomes a morph target of the mesh, and each sequence the
+location can play becomes an animation, named after the location and the sequence, which every
+node of that location on the square plays. A location with one sequence loops it. A location
+with several plays one for as many loops as the sequence allows and then picks another by
+weight, and the sequences are written but that choice is not. The node's `extras` name the
+sequences, their weights where there are several, and whether the client starts the sequence at
+a random frame, which it does for most, so that the flags and fires of one kind do not move in
+step. The animation itself starts every node at the first frame, so that the file is the same
+bytes every run, and an engine staggers them from the `extras`.
+
+Some of this is not what the client draws. A location that takes the look of another by a
+variable takes the one it has with every variable at 0, which is how the client stands before
+the server sends any. The particles, billboards and sounds of a location are not written, and nor are the
 NPCs and items the server puts on the square. The light the client bakes into the ground and the
 shadows locations cast on it are left out, as the ground is lit where it is shown. So are the
 square's sun, fog, point lights and sky box, the water's moving textures, and the way the client
@@ -171,7 +184,8 @@ those above the player. A bridge keeps the level its tiles are given in the map,
 client draws it with the level below.
 
 The tool prints how many tiles and faces each level has, how many faces are written as layers or
-left out and why, and how many locations it placed and how many distinct meshes they wear.
+left out and why, how many locations it placed and how many distinct meshes they wear, and each
+animation it wrote with how many nodes play it.
 
 
 ## Looking at a model

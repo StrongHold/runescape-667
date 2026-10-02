@@ -158,19 +158,23 @@ public final class GltfBuilder {
     }
 
     /**
-     * Adds an animation that sets the weights of the one mesh's morph targets.
+     * Adds an animation that sets the weights of the morph targets of the mesh each node named
+     * wears, all from the one sampler.
      *
      * @param times the accessor of the key times, in seconds.
      * @param weights the accessor of every target's weight at each key time.
      */
-    public void weightAnimation(String name, int times, int weights, String interpolation, Map<String, Object> extras) {
+    public void weightAnimation(String name, int times, int weights, String interpolation, List<Integer> nodes,
+                                Map<String, Object> extras) {
         var sampler = Map.of("input", times, "output", weights, "interpolation", interpolation);
-        var channel = Map.of("sampler", 0, "target", Map.of("node", 0, "path", "weights"));
+        var channels = nodes.stream()
+            .map(node -> Map.of("sampler", 0, "target", Map.of("node", node, "path", "weights")))
+            .toList();
 
         var animation = new LinkedHashMap<String, Object>();
         animation.put("name", name);
         animation.put("samplers", List.of(sampler));
-        animation.put("channels", List.of(channel));
+        animation.put("channels", channels);
         animation.put("extras", extras);
         animations.add(animation);
     }

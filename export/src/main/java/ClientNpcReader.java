@@ -66,30 +66,29 @@ public final class ClientNpcReader {
     }
 
     /**
-     * The NPC's model in the pose an animator is at.
+     * Builds the NPC still, or in the pose an animator is at.
      *
      * The client hands the sequence an NPC stands, turns or walks with to {@code getModel} as its
-     * movement animator. The model it returns is filled again by the next call, so a caller copies
-     * out what it needs first.
+     * movement animator. It scales the model only after it has posed it, and an NPC the client
+     * draws is always posed, because it always has a movement sequence. So the still model is
+     * scaled the same way with nothing posed, and differs from each pose by the pose alone.
      */
-    public JavaModel posed(NPCType type, SequenceAnimator animator) {
-        return model(type, animator);
-    }
+    public Poser poser(NPCType type) {
+        return new Poser() {
+            @Override
+            public JavaModel still() {
+                var model = model(type, null);
+                if (type.scaleH != FULL_SCALE || type.scaleV != FULL_SCALE) {
+                    model.O(type.scaleH, type.scaleV, type.scaleH);
+                }
+                return model;
+            }
 
-    /**
-     * The NPC's model with no sequence playing.
-     *
-     * The client scales an NPC's model only after it has posed it, and an NPC the client draws
-     * is always posed, because it always has a movement sequence. Here the model is scaled the
-     * same way with nothing posed, so that it differs from each pose by the pose alone.
-     */
-    public JavaModel unanimated(NPCType type) {
-        var model = model(type, null);
-
-        if (type.scaleH != FULL_SCALE || type.scaleV != FULL_SCALE) {
-            model.O(type.scaleH, type.scaleV, type.scaleH);
-        }
-        return model;
+            @Override
+            public JavaModel posed(SequenceAnimator animator) {
+                return model(type, animator);
+            }
+        };
     }
 
     /**

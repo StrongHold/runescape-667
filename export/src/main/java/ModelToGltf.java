@@ -91,7 +91,15 @@ public final class ModelToGltf {
      * rest of the document shares. The caller closes the mesh.
      */
     public static Result convertInto(GltfBuilder gltf, GltfMaterials materials, JavaModel model) {
-        return new ModelToGltf(model, List.of(), gltf, materials).convert();
+        return convertInto(gltf, materials, model, List.of());
+    }
+
+    /**
+     * @param poses where the model's vertices are in each pose that is written as a morph target
+     *     of every primitive, in the order the targets are numbered.
+     */
+    public static Result convertInto(GltfBuilder gltf, GltfMaterials materials, JavaModel model, List<Pose> poses) {
+        return new ModelToGltf(model, poses, gltf, materials).convert();
     }
 
     /**

@@ -141,7 +141,9 @@ public final class SquareExport {
 
     /**
      * One node of locations for each level, holding a node for each location placed on it. Each
-     * distinct model is written as one mesh, which every placement of it wears.
+     * distinct model is written as one mesh, which every placement of it wears, and a location
+     * the client animates gets a morph target for every frame it can show and an animation for
+     * every sequence it can play, which every node of that location plays.
      */
     private static List<Integer> locations(GltfBuilder gltf, GltfMaterials materials,
                                            List<ClientSquareReader.Placement> placements) {
@@ -151,18 +153,23 @@ public final class SquareExport {
 
         var meshes = new HashMap<MeshKey, Integer>();
         var byLevel = new TreeMap<String, List<Integer>>();
+        var animations = new LinkedHashMap<AnimationKey, Animation>();
         var parts = new TreeMap<String, Integer>();
         var faces = 0;
         var empty = 0;
+        var animated = 0;
 
         for (var placement : placements) {
             var key = MeshKey.of(placement);
             var mesh = meshes.get(key);
             if (mesh == null && !meshes.containsKey(key)) {
-                var result = ModelToGltf.convertInto(gltf, materials, placement.model());
+                var result = ModelToGltf.convertInto(gltf, materials, placement.model(), poses(placement));
                 if (gltf.empty()) {
                     mesh = null;
                 } else {
+                    if (placement.motion() instanceof ClientSquareReader.Motion.Animated moving) {
+                        gltf.targetNames(moving.targetNames());
+                    }
                     mesh = gltf.mesh(meshName(placement));
                     faces += result.faces();
                 }
@@ -172,10 +179,22 @@ public final class SquareExport {
             if (mesh == null) {
                 empty++;
             } else {
-                byLevel.computeIfAbsent(groupName(placement), ignored -> new ArrayList<>())
-                    .add(gltf.node(placementNode(placement, mesh)));
+                var node = gltf.node(placementNode(placement, mesh));
+                byLevel.computeIfAbsent(groupName(placement), ignored -> new ArrayList<>()).add(node);
                 parts.merge(placement.part(), 1, Integer::sum);
+                if (placement.motion() instanceof ClientSquareReader.Motion.Animated moving) {
+                    animated++;
+                    for (var clip : moving.clips()) {
+                        animations.computeIfAbsent(new AnimationKey(placement.id(), clip.sequence()),
+                                ignored -> new Animation(label(placement), clip.clip(), moving.poses().size()))
+                            .play(node, moving.poses().size());
+                    }
+                }
             }
+        }
+
+        for (var animation : animations.values()) {
+            animation.write(gltf);
         }
 
         var roots = new ArrayList<Integer>();
@@ -191,10 +210,21 @@ public final class SquareExport {
         System.out.println("  " + placed + " locations placed, wearing " + written + " distinct meshes of "
             + faces + " faces");
         parts.forEach((part, count) -> System.out.println("    " + count + " " + part));
+        if (animated > 0) {
+            System.out.println("    " + animated + " animated, playing " + animations.size() + " animations");
+            animations.values().forEach(animation -> System.out.println("      " + animation.describe()));
+        }
         if (empty > 0) {
             System.out.println("    " + empty + " placements left out, as their model has no face the client draws");
         }
         return roots;
+    }
+
+    private static List<Pose> poses(ClientSquareReader.Placement placement) {
+        return switch (placement.motion()) {
+            case ClientSquareReader.Motion.Still still -> List.of();
+            case ClientSquareReader.Motion.Animated moving -> moving.poses();
+        };
     }
 
     private static String groupName(ClientSquareReader.Placement placement) {
@@ -226,23 +256,83 @@ public final class SquareExport {
         extras.put("level", placement.level());
         extras.put("part", placement.part());
         extras.put("underwater", placement.underwater());
+        if (placement.motion() instanceof ClientSquareReader.Motion.Animated moving) {
+            extras.put("sequences", moving.clips().stream().map(ClientSquareReader.LocClip::sequence).toList());
+            if (moving.clips().size() > 1) {
+                extras.put("sequenceWeights", moving.clips().stream().map(ClientSquareReader.LocClip::weight).toList());
+            }
+            extras.put("randomStartFrame", moving.randomStartFrame());
+        }
         node.put("extras", extras);
         return node;
     }
 
     /**
+     * One sequence of one location, which every node of that location on the square plays.
+     */
+    private record AnimationKey(int loc, int sequence) {
+    }
+
+    /**
+     * The nodes that play one sequence of one location. Every node of a location wears a mesh of
+     * the same morph targets, in the same order, however the ground under each bends it, so one
+     * sampler of weights serves them all.
+     */
+    private static final class Animation {
+
+        private final String name;
+        private final PoseBaker.Clip clip;
+        private final int targets;
+        private final List<Integer> nodes = new ArrayList<>();
+
+        private Animation(String label, PoseBaker.Clip clip, int targets) {
+            this.name = label + " sequence " + clip.sequence().id;
+            this.clip = clip;
+            this.targets = targets;
+        }
+
+        private void play(int node, int nodeTargets) {
+            if (nodeTargets != targets) {
+                throw new IllegalStateException(name + " is played on a node of " + nodeTargets
+                    + " morph targets, where the first node of it has " + targets);
+            }
+            nodes.add(node);
+        }
+
+        private void write(GltfBuilder gltf) {
+            if (!clip.keys().isEmpty()) {
+                AnimationWriter.write(gltf, name, clip, targets, List.copyOf(nodes), Map.of("nodes", nodes.size()));
+            }
+        }
+
+        private String describe() {
+            return AnimationWriter.describe(name, clip) + ", on " + nodes.size() + " nodes";
+        }
+    }
+
+    /**
      * What makes two placements wear the same mesh: the same location, put down as the same shape
      * and turned the same way. A location that is bent to fit the ground under it is only the same
-     * where the ground bends it the same way, so its heights are part of what it is.
+     * where the ground bends it the same way, so its heights are part of what it is. A location
+     * that is animated is bent again at every frame, so where its frames put every vertex is part
+     * of it too.
      */
-    private record MeshKey(int id, int shape, int rotation, List<Integer> heights) {
+    private record MeshKey(int id, int shape, int rotation, List<Integer> heights, List<Integer> frames) {
 
         private static MeshKey of(ClientSquareReader.Placement placement) {
             var model = placement.model();
             var heights = placement.conformed()
                 ? Arrays.stream(Arrays.copyOf(model.vertexY, model.vertexCount)).boxed().toList()
                 : List.<Integer>of();
-            return new MeshKey(placement.id(), placement.shape(), placement.rotation(), heights);
+            var frames = new ArrayList<Integer>();
+            for (var pose : poses(placement)) {
+                for (var vertex = 0; vertex < model.vertexCount; vertex++) {
+                    frames.add(pose.x()[vertex]);
+                    frames.add(pose.y()[vertex]);
+                    frames.add(pose.z()[vertex]);
+                }
+            }
+            return new MeshKey(placement.id(), placement.shape(), placement.rotation(), heights, List.copyOf(frames));
         }
     }
 

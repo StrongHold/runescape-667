@@ -33,7 +33,7 @@ async function open(data: ArrayBuffer, label: string): Promise<void> {
             mesh.receiveShadow = square;
         }
         stage.scene.add(current);
-        player.load(current, gltf.animations);
+        player.load(current, gltf.animations, square);
         setWireframe(current, page.wire.checked);
 
         const box = baseBox(current);

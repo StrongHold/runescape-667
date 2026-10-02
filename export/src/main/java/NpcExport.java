@@ -6,27 +6,15 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Writes one NPC out of the cache as a binary glTF file: its model as the client builds it, with
  * a morph target for every frame of the sequences it stands, turns and moves with, and one
- * animation for each of those sequences.
- *
- * <p>An animation shows each frame for as long as the client does and then jumps to the next. The
- * client also tweens from one frame towards the next while it shows a frame, when the sequence
- * asks for that, and that is not written.
+ * animation for each of those sequences, as {@link AnimationWriter} writes them.
  */
 public final class NpcExport {
-
-    /**
-     * How long one of the client's cycles is. The client runs its logic every
-     * {@code GameShell.logicUpdateInterval}, which is 20 ms, and {@code Static50.animationTick}
-     * moves an NPC's movement animator on by one cycle each time.
-     */
-    private static final float SECONDS_PER_CYCLE = 0.02F;
-
-    private static final String STEP = "STEP";
 
     public static final class Args implements Arguments {
 
@@ -74,13 +62,14 @@ public final class NpcExport {
     }
 
     private static void write(Args args, ClientNpcReader reader, NPCType type) throws Exception {
-        var baker = new PoseBaker(reader, type);
-        var clips = new ArrayList<PoseBaker.Clip>();
+        var poser = reader.poser(type);
+        var baker = new PoseBaker(poser);
+        var baked = new ArrayList<Baked>();
         for (var movement : reader.movements(type)) {
-            clips.add(baker.bake(movement));
+            baked.add(new Baked(movement, baker.bake(movement.sequence())));
         }
 
-        var base = reader.unanimated(type);
+        var base = poser.still();
         var poses = baker.poses();
         var result = ModelToGltf.convert(base, reader.textures(), poses);
         if (result.gltf().empty()) {
@@ -89,9 +78,11 @@ public final class NpcExport {
 
         var gltf = result.gltf();
         gltf.targetNames(baker.names());
-        for (var clip : clips) {
-            if (!clip.keys().isEmpty()) {
-                addAnimation(gltf, clip, poses.size());
+        var node = List.of(0);
+        for (var animation : baked) {
+            if (!animation.clip().keys().isEmpty()) {
+                AnimationWriter.write(gltf, animation.name(), animation.clip(), poses.size(), node,
+                    Map.of("role", animation.movement().role()));
             }
         }
 
@@ -105,60 +96,20 @@ public final class NpcExport {
         for (var skip : result.skipped().entrySet()) {
             System.out.println("  " + skip.getValue() + " faces left out, " + skip.getKey());
         }
-        for (var clip : clips) {
-            System.out.println("  " + describe(clip));
+        for (var animation : baked) {
+            System.out.println("  " + AnimationWriter.describe(animation.name(), animation.clip()));
         }
     }
 
     /**
-     * Adds an animation that shows one frame of a sequence at a time, each from the moment the
-     * client moves on to it. A last key at the end of the sequence holds the last frame until the
-     * animation loops, so the animation lasts as long as the sequence does.
+     * One sequence of the NPC's base animation set, baked, and named after what the set uses it
+     * for and the sequence's id.
      */
-    private static void addAnimation(GltfBuilder gltf, PoseBaker.Clip clip, int targets) {
-        var keys = clip.keys();
-        var times = new float[keys.size() + 1];
-        var weights = new float[times.length * targets];
-        var cycles = 0;
+    private record Baked(ClientNpcReader.Movement movement, PoseBaker.Clip clip) {
 
-        for (var key = 0; key < keys.size(); key++) {
-            times[key] = cycles * SECONDS_PER_CYCLE;
-            weights[key * targets + keys.get(key).target()] = 1.0F;
-            cycles += keys.get(key).cycles();
+        private String name() {
+            return movement.role() + " " + movement.sequence();
         }
-        times[keys.size()] = cycles * SECONDS_PER_CYCLE;
-        weights[keys.size() * targets + keys.getLast().target()] = 1.0F;
-
-        var input = gltf.animationData(times, "SCALAR", 1, true);
-        var output = gltf.animationData(weights, "SCALAR", 1, false);
-        gltf.weightAnimation(animationName(clip), input, output, STEP, animationExtras(clip));
-    }
-
-    private static String animationName(PoseBaker.Clip clip) {
-        return clip.movement().role() + " " + clip.movement().sequence();
-    }
-
-    /**
-     * What an engine needs to play the sequence the way the client does, beyond its frames. A
-     * sequence that loops over only its last few frames plays the ones before them once.
-     */
-    private static Map<String, Object> animationExtras(PoseBaker.Clip clip) {
-        var sequence = clip.sequence();
-        var extras = new LinkedHashMap<String, Object>();
-        extras.put("role", clip.movement().role());
-        extras.put("sequence", sequence.id);
-        extras.put("tweened", sequence.tweened);
-
-        if (sequence.loopOffset > 0 && sequence.loopOffset <= sequence.frames.length) {
-            var loopStart = sequence.frames.length - sequence.loopOffset;
-            var cycles = 0;
-            for (var frame = 0; frame < loopStart; frame++) {
-                cycles += sequence.frameDurations[frame];
-            }
-            extras.put("loopStart", cycles * SECONDS_PER_CYCLE);
-        }
-
-        return extras;
     }
 
     private static Map<String, Object> extras(int id, NPCType type) {
@@ -170,21 +121,6 @@ public final class NpcExport {
             extras.put("bas", type.basId);
         }
         return extras;
-    }
-
-    private static String describe(PoseBaker.Clip clip) {
-        var name = animationName(clip);
-        var sequence = clip.sequence();
-
-        if (clip.keys().isEmpty()) {
-            return name + ": no frame the client shows, left out";
-        } else {
-            var durations = clip.keys().stream().map(PoseBaker.Key::cycles).toList();
-            var cycles = durations.stream().mapToInt(Integer::intValue).sum();
-            return name + ": " + clip.keys().size() + " frames, " + cycles + " cycles ("
-                + Math.round(cycles * SECONDS_PER_CYCLE * 1000) + " ms), frame cycles " + durations
-                + (sequence.tweened ? ", tweened in the client" : "");
-        }
     }
 
     private NpcExport() {
