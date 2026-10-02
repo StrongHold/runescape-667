@@ -22,6 +22,7 @@ include(
     "cache",
     "cli",
     "client",
+    "export",
     "fidelity",
     "loader",
     "native-trace",
