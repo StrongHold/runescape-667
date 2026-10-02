@@ -61,6 +61,13 @@ Faces that the client never draws are left out: a face hidden at a join, a face 
 smears instead of drawing, a face whose texture says that its faces are skipped, and a face that
 a billboard hides. The billboards themselves, particles and moving textures are not written.
 
+When the player turns textures off, the client draws a model's textured face in the face's own
+colour, and builds the ground with no textures, so that a tile shows the colour that tints its
+texture. A model's textured primitive carries the face colour as `COLOR_1`, next to the
+`COLOR_0` that tints the texture; the ground's `COLOR_0` serves both. Not every texture goes:
+water and others the client marks stay on, and a textured material says which in its `extras`,
+as `disableable`.
+
 
 ## Writing an NPC
 

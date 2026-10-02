@@ -246,6 +246,7 @@ public final class ModelToGltf {
         var primitive = primitives.computeIfAbsent(key, ignored -> new Primitive(key.texture() != -1, poses.size()));
 
         var rgb = rgb(face, texture, colour(face));
+        var plainRgb = primitive.textured ? untexturedRgb(face, colour(face)) : rgb;
         var opacity = opacity(drawable ? metrics : null, alpha(face));
 
         var us = primitive.textured ? drawnCoordinates(model.texCoordU[face]) : null;
@@ -256,7 +257,7 @@ public final class ModelToGltf {
             var normal = normal(face, vertex);
             var u = primitive.textured ? us[corner] : 0.0F;
             var v = primitive.textured ? vs[corner] : 0.0F;
-            var described = new Corner(vertex, normal[0], normal[1], normal[2], rgb, opacity, u, v);
+            var described = new Corner(vertex, normal[0], normal[1], normal[2], rgb, plainRgb, opacity, u, v);
 
             var known = primitive.numbers.get(described);
             if (known != null) {
@@ -264,17 +265,17 @@ public final class ModelToGltf {
             } else {
                 primitive.numbers.put(described, primitive.numbers.size());
                 primitive.indices.add(primitive.numbers.size() - 1);
-                addCorner(primitive, face, vertex, normal, rgb, opacity, u, v);
+                addCorner(primitive, face, vertex, normal, rgb, plainRgb, opacity, u, v);
             }
         }
     }
 
     /**
      * Writes one vertex of a primitive: where it is and how it is coloured, in the base pose and
-     * in every pose.
+     * in every pose, and the colour it takes when its texture is off.
      */
-    private void addCorner(Primitive primitive, int face, int vertex, float[] normal, int rgb, float opacity,
-                           float u, float v) {
+    private void addCorner(Primitive primitive, int face, int vertex, float[] normal, int rgb, int plainRgb,
+                           float opacity, float u, float v) {
         primitive.positions.add(model.vertexX[vertex] / UNITS_PER_METRE);
         primitive.positions.add(-model.vertexY[vertex] / UNITS_PER_METRE);
         primitive.positions.add(-model.vertexZ[vertex] / UNITS_PER_METRE);
@@ -315,6 +316,9 @@ public final class ModelToGltf {
         }
 
         if (primitive.textured) {
+            primitive.plainColours.add(Srgb.toLinear(plainRgb >> 16 & 0xFF));
+            primitive.plainColours.add(Srgb.toLinear(plainRgb >> 8 & 0xFF));
+            primitive.plainColours.add(Srgb.toLinear(plainRgb & 0xFF));
             primitive.uvs.add(u);
             primitive.uvs.add(v);
         }
@@ -373,8 +377,9 @@ public final class ModelToGltf {
     }
 
     /**
-     * The colour an untextured face has at full light, before any light falls on it. The palette
-     * the client draws through is gamma corrected for the screen, so this is an sRGB colour.
+     * The colour an untextured face has at full light, before any light falls on it, which is also
+     * the colour a textured face shows when the player turns textures off. The palette the client
+     * draws through is gamma corrected for the screen, so this is an sRGB colour.
      *
      * <p>A black face is one the software toolkit gives the palette entry 128, which is black.
      */
@@ -476,6 +481,7 @@ public final class ModelToGltf {
         attributes.put("NORMAL", gltf.attribute(primitive.normals.toArray(), 3, "VEC3", false));
         attributes.put("COLOR_0", gltf.attribute(primitive.colours.toArray(), 4, "VEC4", false));
         if (primitive.textured) {
+            attributes.put("COLOR_1", gltf.attribute(primitive.plainColours.toArray(), 3, "VEC3", false));
             attributes.put("TEXCOORD_0", gltf.attribute(primitive.uvs.toArray(), 2, "VEC2", false));
         }
         if (jointOfVertex != null) {
@@ -534,7 +540,7 @@ public final class ModelToGltf {
      * a vertex. The client's own vertex number is part of it, because two vertices in one place
      * can move apart when the model is posed.
      */
-    private record Corner(int vertex, float normalX, float normalY, float normalZ, int rgb,
+    private record Corner(int vertex, float normalX, float normalY, float normalZ, int rgb, int plainRgb,
                           float opacity, float u, float v) {
     }
 
@@ -547,6 +553,7 @@ public final class ModelToGltf {
         private final FloatList positions = new FloatList();
         private final FloatList normals = new FloatList();
         private final FloatList colours = new FloatList();
+        private final FloatList plainColours = new FloatList();
         private final FloatList uvs = new FloatList();
         private final List<FloatList> targets = new ArrayList<>();
         private final List<FloatList> colourTargets = new ArrayList<>();

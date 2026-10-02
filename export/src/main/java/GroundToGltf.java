@@ -35,6 +35,11 @@ import java.util.TreeMap;
  * <p>Normals. The client lights each corner of a tile from the slope across the two tiles either
  * side of it, and lights a point within a tile by blending its four corners. The same slope gives
  * each corner a normal here, and a point within a tile blends the normals of its four corners.
+ *
+ * <p>Textures off. When the player turns textures off, the client builds the tiles with no
+ * textures at all, and a tile shows the colour that tints its texture here, so a textured face
+ * carries no other colour for that: {@code COLOR_0} serves. The material says whether its
+ * texture is {@code disableable}, and water and the like stay textured.
  */
 public final class GroundToGltf {
 
