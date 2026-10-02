@@ -52,7 +52,9 @@ tasks.register<JavaExec>("censusTypes") {
 }
 
 tasks.register<JavaExec>("censusLayouts") {
-    description = "Checks that every model, animation base and animation frame in the cache is read in full."
+    description = "Checks that every model, animation, map square and the texture metrics in the cache are read in full."
     mainClass = "CacheLayoutCensus"
     classpath = sourceSets["main"].runtimeClasspath
+    environment("SW3D_LOCATION_KEYS",
+        providers.environmentVariable("SW3D_LOCATION_KEYS").getOrElse(""))
 }

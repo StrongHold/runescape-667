@@ -47,12 +47,29 @@ public final class Cache {
 
     /** Reads one group out of an archive, undoing the compression it is held under. */
     public static byte[] group(File cache, int archive, int group) throws Exception {
-        byte[] packed = open(cache, archive).read(group);
+        byte[] packed = packed(cache, archive, group);
         if (packed == null) {
             throw new IllegalStateException(
                 "Archive " + archive + " of the cache holds no group " + group + ".");
         }
         return js5.decodeContainer(packed);
+    }
+
+    /**
+     * One group as it is stored, still compressed and followed by its two byte version, or null
+     * when the cache does not hold it.
+     */
+    public static byte[] packed(File cache, int archive, int group) throws Exception {
+        return open(cache, archive).read(group);
+    }
+
+    /**
+     * An archive as the client's own {@code js5} sees it, for handing to the client's readers that
+     * take one. It keeps no group once a file of it is handed out, so a tool that reads a whole
+     * archive does not hold all of it at once.
+     */
+    public static js5 js5(File cache, int archive) {
+        return new js5(new CacheResourceProvider(cache, archive), true, 1);
     }
 
     /**

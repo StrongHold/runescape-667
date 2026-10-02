@@ -70,7 +70,7 @@ public final class Layout {
 
         private final String name;
         private final int start;
-        private final int end;
+        private int end;
         private int pos;
 
         private Cursor(String name, int start, int end) {
@@ -94,6 +94,52 @@ public final class Layout {
 
         public int g3() {
             return g1() << 16 | g2();
+        }
+
+        public int g4() {
+            return g2() << 16 | g2();
+        }
+
+        /**
+         * A value held in one byte when it is below 128 and in two otherwise, as {@code Packet.gsmart}
+         * reads it.
+         */
+        public int gsmart() {
+            if ((byteAt(pos) & 0x80) == 0) {
+                return g1();
+            } else {
+                return g2() - 0x8000;
+            }
+        }
+
+        /**
+         * A value that may be too large for one {@link #gsmart()}, held as a run of them in which
+         * every one but the last is the largest a smart can hold, as {@code Packet.gExtended1or2}
+         * reads it.
+         */
+        public int gExtended1or2() {
+            var total = 0;
+            var part = gsmart();
+            while (part == Short.MAX_VALUE) {
+                total += Short.MAX_VALUE;
+                part = gsmart();
+            }
+            return total + part;
+        }
+
+        /**
+         * Whether the cursor has not yet reached the end of its section, for a section that is
+         * read until nothing is left of it.
+         */
+        public boolean more() {
+            return pos < end;
+        }
+
+        /**
+         * How far into the data the cursor has read.
+         */
+        public int pos() {
+            return pos;
         }
 
         /**
@@ -164,6 +210,23 @@ public final class Layout {
      */
     public Cursor rest(String name) {
         return section(name, footerStart - next);
+    }
+
+    /**
+     * Adds a body section that declares no size of its own but is followed by others, so that only
+     * reading it says where it ends. It ends wherever its cursor is when {@link #close(Cursor)} is
+     * called, and the next section starts there.
+     */
+    public Cursor open(String name) {
+        return rest(name);
+    }
+
+    /**
+     * Ends a section added by {@link #open(String)} where its cursor stopped.
+     */
+    public void close(Cursor cursor) {
+        cursor.end = cursor.pos;
+        next = cursor.pos;
     }
 
     /**
