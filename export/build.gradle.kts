@@ -24,6 +24,12 @@ tasks.register<JavaExec>("exportNpc") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
+tasks.register<JavaExec>("exportLoc") {
+    description = "Writes one location type out of the cache as a binary glTF file, into the library the map squares refer to."
+    mainClass = "LocExport"
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
 tasks.register<JavaExec>("exportMapSquare") {
     description = "Writes one map square out of the cache as a binary glTF file: its ground on every level and the locations standing on it."
     mainClass = "MapSquareExport"

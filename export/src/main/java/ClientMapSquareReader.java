@@ -1,15 +1,10 @@
 import com.jagex.core.constants.LocShapes;
-import com.jagex.core.constants.ModeGame;
 import com.jagex.core.io.Packet;
-import com.jagex.game.Animator;
 import com.jagex.game.collision.CollisionMap;
-import com.jagex.game.runetek6.config.flotype.FloorOverlayTypeList;
-import com.jagex.game.runetek6.config.flutype.FloorUnderlayTypeList;
+import com.jagex.game.runetek6.config.loctype.LocType;
 import com.jagex.game.runetek6.config.loctype.LocTypeList;
-import com.jagex.game.runetek6.config.seqtype.SeqTypeList;
 import com.jagex.game.runetek6.config.vartype.TimedVarDomain;
-import com.jagex.game.runetek6.config.vartype.bit.VarBitTypeListClient;
-import com.jagex.game.runetek6.config.vartype.player.VarPlayerTypeListClient;
+import com.jagex.graphics.Ground;
 import com.jagex.graphics.ModelAndShadow;
 import com.jagex.js5.Js5Archive;
 import com.jagex.js5.js5;
@@ -21,8 +16,10 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -72,7 +69,6 @@ public final class ClientMapSquareReader {
      */
     private static final int UNLIT_LOCATION = 0x800 | 0x10000;
 
-    private static final int LANGUAGE = 0;
     private static final int ON = 1;
     private static final int OFF = 0;
     private static final int HIGH_WATER_DETAIL = 2;
@@ -80,36 +76,44 @@ public final class ClientMapSquareReader {
     private static final String NOT_ASKED = "not asked for";
 
     /**
-     * The weight of a location's one sequence, which it always picks. A location with several
-     * sequences has their weights scaled to add up to this.
+     * How many tiles beyond the map square's edge the heights are read for. A location at the
+     * edge is bent against the corners of the tiles it covers, which can be the neighbour's.
      */
-    private static final int SOLE_WEIGHT = 65535;
+    public static final int HEIGHT_MARGIN = 1;
 
+    private final ClientLocReader locs;
     private final ClientModelReader models;
     private final js5 maps;
     private final Path keys;
 
+    /**
+     * How far a posed vertex may be from the client's, in the client's units. The client turns a
+     * frame's angles and offsets to suit a placement's rotation before it poses, and an importer
+     * poses the asset and turns the result, and the two round the same arithmetic differently by
+     * at most one unit, which is a five hundred and twelfth of a tile.
+     */
+    private static final int POSED_TOLERANCE = 1;
+
+    /**
+     * The asset of each location and shape placed so far, which every placement of it is
+     * checked against.
+     */
+    private final Map<Long, Optional<JavaModel>> assets = new HashMap<>();
+
     public ClientMapSquareReader(File cache, Path keys) {
-        this.models = new ClientModelReader(cache);
+        this.locs = new ClientLocReader(cache);
+        this.models = locs.models();
         this.maps = Cache.js5(cache, Js5Archive.MAPS);
         this.keys = keys;
-
         ClientOptions.instance = highDetailOptions();
-        var config = Cache.js5(cache, Js5Archive.CONFIG);
-        FloorOverlayTypeList.instance = new FloorOverlayTypeList(ModeGame.RUNESCAPE, LANGUAGE, config);
-        FloorUnderlayTypeList.instance = new FloorUnderlayTypeList(ModeGame.RUNESCAPE, LANGUAGE, config);
-        LocTypeList.instance = new LocTypeList(ModeGame.RUNESCAPE, LANGUAGE, true,
-            Cache.js5(cache, Js5Archive.CONFIG_LOC), Cache.js5(cache, Js5Archive.MODELS));
-        VarBitTypeListClient.instance = new VarBitTypeListClient(ModeGame.RUNESCAPE, LANGUAGE,
-            Cache.js5(cache, Js5Archive.CONFIG_STRUCT));
-        VarPlayerTypeListClient.instance = new VarPlayerTypeListClient(ModeGame.RUNESCAPE, LANGUAGE, config);
-        TimedVarDomain.instance = new TimedVarDomain();
-        Animator.setSeqTL(new SeqTypeList(ModeGame.RUNESCAPE, LANGUAGE, Cache.js5(cache, Js5Archive.CONFIG_SEQ),
-            Cache.js5(cache, Js5Archive.ANIMS), Cache.js5(cache, Js5Archive.BASES)));
     }
 
     public Js5TextureSource textures() {
         return models.textures();
+    }
+
+    public ClientLocReader locs() {
+        return locs;
     }
 
     /**
@@ -117,13 +121,15 @@ public final class ClientMapSquareReader {
      *
      * @param grounds the ground the toolkit was given for each level, holding every tile of the
      *     region as the client will draw it.
+     * @param heights the height of every tile corner of each level, from one tile before the
+     *     map square to one tile after, as [level][x][z], in the client's units.
      * @param underwater the bed under the region's water, where it has one.
-     * @param placements every location of the map square, on land and under the water, with the model
-     *     the client builds for it and where it is drawn.
+     * @param placements every location of the map square, on land and under the water, and where
+     *     the client draws it.
      * @param locations whether the map square's locations on land were placed.
      */
-    public record MapSquare(int x, int z, List<JavaGround> grounds, List<Placement> placements, Placing locations,
-                         Underwater underwater) {
+    public record MapSquare(int x, int z, List<JavaGround> grounds, int[][][] heights, List<Placement> placements,
+                            Placing locations, Underwater underwater) {
     }
 
     /**
@@ -155,71 +161,59 @@ public final class ClientMapSquareReader {
         /**
          * @param ground the ground of the bed, holding every tile of the region as the client will
          *     draw it.
+         * @param heights the height of every tile corner of the bed, as the land's are read.
          * @param locations whether the locations on the map square's bed were placed.
          */
-        record Bed(JavaGround ground, Placing locations) implements Underwater {
+        record Bed(JavaGround ground, int[][] heights, Placing locations) implements Underwater {
         }
     }
 
     /**
-     * One model of a location, and where the client draws it, in the region's units: 512 to a
-     * tile, x east, y down and z north.
+     * One location, and where the client draws it, in the region's units: 512 to a tile, x east,
+     * y down and z north.
      *
+     * @param shape the shape the client builds the location's model as, which is one shape for
+     *     every wall decoration and a straight centrepiece for a diagonal one.
+     * @param rotation the rotation the client builds it with, which is above 3 for a diagonal.
      * @param part what the client keeps it as: a wall, the second wall of a corner, a wall
      *     decoration, the second decoration of a diagonal wall, a ground decoration, or a location
      *     that stands in the middle of its tiles or across them.
+     * @param virtualLevel the level whose ground it is bent against and drawn with, which a
+     *     bridge makes differ from the level it is kept on.
      * @param underwater whether it stands on the bed under the water rather than on land.
-     * @param model the location as it stands with nothing playing.
-     * @param conformed whether its type bends it to fit the ground under it.
-     * @param motion how the client animates it, if it does.
+     * @param sequencesOf the location whose sequences it plays, which for a location that takes
+     *     the look of another can be the one it was placed as.
+     * @param check whether its asset, placed as {@link LocPlacing} describes, is what the client
+     *     builds for it.
      */
-    public record Placement(int id, String name, int shape, int rotation, int level, String part,
-                            boolean underwater, int x, int y, int z, JavaModel model, boolean conformed,
-                            Motion motion) {
+    public record Placement(int id, String name, int shape, int rotation, int level, int virtualLevel, String part,
+                            boolean underwater, int x, int y, int z, int sequencesOf, Check check) {
 
         private Placement under(boolean water) {
-            return new Placement(id, name, shape, rotation, level, part, water, x, y, z, model, conformed, motion);
+            return new Placement(id, name, shape, rotation, level, virtualLevel, part, water, x, y, z, sequencesOf,
+                check);
         }
     }
 
     /**
-     * How the client animates a location.
+     * Whether a placement's asset, placed by the importer's steps, is what the client builds.
      */
-    public sealed interface Motion {
-
+    public enum Check {
+        /** Every vertex is where the client puts it, still and at the first frame alike. */
+        MATCHES,
+        /** The still model differs from the client's. */
+        DIFFERS,
         /**
-         * The location never moves.
+         * The still model matches and the first frame of the first sequence is further from the
+         * client's than rounding allows.
          */
-        record Still() implements Motion {
-        }
-
-        /**
-         * The location plays one of its sequences from the moment it is placed. A location with
-         * one sequence loops it. A location with several plays one for as many loops as the
-         * sequence allows, then picks another by weight.
-         *
-         * @param clips every sequence it can play, each baked, in the order its type lists them.
-         * @param poses every distinct frame of those sequences, in the order the morph targets
-         *     are numbered.
-         * @param targetNames the name of each pose, in the same order.
-         * @param randomStartFrame whether the client starts the sequence at a random frame, so
-         *     that locations of one type do not move in step.
-         */
-        record Animated(List<LocClip> clips, List<Pose> poses, List<String> targetNames, boolean randomStartFrame)
-            implements Motion {
-        }
+        DIFFERS_POSED,
+        /** The client builds a model and the asset has none, or the other way about. */
+        NO_ASSET
     }
 
     /**
-     * One sequence a location can play.
-     *
-     * @param weight the chance of its being picked, out of 65535, where the location has several.
-     */
-    public record LocClip(int sequence, int weight, PoseBaker.Clip clip) {
-    }
-
-    /**
-     * Builds the region around a square in the order {@code MapBuilder.build} does, and reads
+     * Builds the region around a map square in the order {@code MapBuilder.build} does, and reads
      * the map square back.
      *
      * Where the region has a world under its water, the client reads it as a region of its own of
@@ -272,11 +266,32 @@ public final class ClientMapSquareReader {
             if (bedLocations instanceof Placing.Placed) {
                 placements.addAll(placements(toolkit, Static420.aTileArrayArrayArray2, true));
             }
-            underwaterWorld = new Underwater.Bed((JavaGround) Static693.underwaterGround[0], bedLocations);
+            underwaterWorld = new Underwater.Bed((JavaGround) Static693.underwaterGround[0],
+                heights(Static693.underwaterGround[0]), bedLocations);
         }
 
-        var grounds = Arrays.stream(Static706.floor).map(ground -> (JavaGround) ground).toList();
-        return new MapSquare(mapSquareX, mapSquareZ, grounds, List.copyOf(placements), locations, underwaterWorld);
+        var grounds = new ArrayList<JavaGround>();
+        var heights = new int[LEVELS][][];
+        for (var level = 0; level < LEVELS; level++) {
+            grounds.add((JavaGround) Static706.floor[level]);
+            heights[level] = heights(Static706.floor[level]);
+        }
+        return new MapSquare(mapSquareX, mapSquareZ, List.copyOf(grounds), heights, List.copyOf(placements), locations,
+            underwaterWorld);
+    }
+
+    /**
+     * The height of every tile corner the map square's locations can be bent against.
+     */
+    private static int[][] heights(Ground ground) {
+        var across = TILES_ACROSS + 2 * HEIGHT_MARGIN + 1;
+        var heights = new int[across][across];
+        for (var x = 0; x < across; x++) {
+            for (var z = 0; z < across; z++) {
+                heights[x][z] = ground.tileHeights[ORIGIN - HEIGHT_MARGIN + x][ORIGIN - HEIGHT_MARGIN + z];
+            }
+        }
+        return heights;
     }
 
     /**
@@ -436,7 +451,7 @@ public final class ClientMapSquareReader {
      * Every location of the map square, read from the tiles the client keeps them on. A location that
      * covers several tiles is held by each, and is read once.
      */
-    private static List<Placement> placements(JavaToolkit toolkit, Tile[][][] tiles, boolean underwater) {
+    private List<Placement> placements(JavaToolkit toolkit, Tile[][][] tiles, boolean underwater) {
         var placements = new ArrayList<Placement>();
         Set<Object> seen = Collections.newSetFromMap(new IdentityHashMap<>());
 
@@ -454,7 +469,7 @@ public final class ClientMapSquareReader {
         return List.copyOf(placements);
     }
 
-    private static List<Placement> placementsOn(Tile tile, JavaToolkit toolkit, Set<Object> seen) {
+    private List<Placement> placementsOn(Tile tile, JavaToolkit toolkit, Set<Object> seen) {
         var placements = new ArrayList<Placement>();
 
         wall(tile.wall, "wall", toolkit).ifPresent(placements::add);
@@ -472,21 +487,21 @@ public final class ClientMapSquareReader {
         return placements;
     }
 
-    private static Optional<Placement> wall(Wall wall, String part, JavaToolkit toolkit) {
+    private Optional<Placement> wall(Wall wall, String part, JavaToolkit toolkit) {
         return switch (wall) {
             case null -> Optional.empty();
-            case StaticWall held -> placement(held.id, held.shape, held.rotation, held.level, part,
-                held.x, held.y, held.z, model(held.modelAndShadow(toolkit, UNLIT_LOCATION, false)));
+            case StaticWall held -> placement(held.id, held.shape, held.rotation, held.level, held.virtualLevel, part,
+                held.x, held.y, held.z, held.underwater, model(held.modelAndShadow(toolkit, UNLIT_LOCATION, false)));
             case DynamicWall moving -> dynamic(moving.entity, part, moving.x, moving.y, moving.z, toolkit);
             default -> throw new IllegalStateException("A wall of a kind the client never places: " + wall.getClass());
         };
     }
 
-    private static Optional<Placement> wallDecor(WallDecor decor, String part, JavaToolkit toolkit) {
+    private Optional<Placement> wallDecor(WallDecor decor, String part, JavaToolkit toolkit) {
         return switch (decor) {
             case null -> Optional.empty();
-            case StaticWallDecor held -> placement(held.id, held.shape, held.rotation, held.level, part,
-                held.x + held.aShort101, held.y, held.z + held.aShort102,
+            case StaticWallDecor held -> placement(held.id, held.shape, held.rotation, held.level, held.virtualLevel,
+                part, held.x + held.aShort101, held.y, held.z + held.aShort102, held.underwater,
                 model(held.modelAndShadow(toolkit, UNLIT_LOCATION, false)));
             case DynamicWallDecor moving -> dynamic(moving.entity, part,
                 moving.x + moving.aShort101, moving.y, moving.z + moving.aShort102, toolkit);
@@ -495,11 +510,12 @@ public final class ClientMapSquareReader {
         };
     }
 
-    private static Optional<Placement> groundDecor(GroundDecor decor, JavaToolkit toolkit) {
+    private Optional<Placement> groundDecor(GroundDecor decor, JavaToolkit toolkit) {
         return switch (decor) {
             case null -> Optional.empty();
             case StaticGroundDecor held -> placement(held.id, LocShapes.GROUNDDECOR, held.rotation, held.level,
-                "ground decoration", held.x, held.y, held.z, model(held.modelAndShadow(UNLIT_LOCATION, toolkit, false)));
+                held.virtualLevel, "ground decoration", held.x, held.y, held.z, held.underwater,
+                model(held.modelAndShadow(UNLIT_LOCATION, toolkit, false)));
             case DynamicGroundDecor moving -> dynamic(moving.entity, "ground decoration", moving.x, moving.y,
                 moving.z, toolkit);
             default -> throw new IllegalStateException("A ground decoration of a kind the client never places: "
@@ -507,10 +523,11 @@ public final class ClientMapSquareReader {
         };
     }
 
-    private static Optional<Placement> standing(PositionEntity entity, JavaToolkit toolkit) {
+    private Optional<Placement> standing(PositionEntity entity, JavaToolkit toolkit) {
         return switch (entity) {
-            case StaticLocation held -> placement(held.id, held.shape, held.rotation, held.level, "location",
-                held.x, held.y, held.z, model(held.modelAndShadow(toolkit, false, UNLIT_LOCATION)));
+            case StaticLocation held -> placement(held.id, held.shape, held.rotation, held.level, held.virtualLevel,
+                "location", held.x, held.y, held.z, held.underwater,
+                model(held.modelAndShadow(toolkit, false, UNLIT_LOCATION)));
             case DynamicLocation moving -> dynamic(moving.entity, "location", moving.x, moving.y, moving.z, toolkit);
             default -> Optional.empty();
         };
@@ -520,67 +537,103 @@ public final class ClientMapSquareReader {
      * A location that the client animates, or that takes the look of another by a variable.
      *
      * A location that takes the look of another does so with every variable at 0, which is how
-     * the client stands before the server sends any. It is built as {@code LocEntity.model}
-     * builds it while nothing is playing, through {@code LocType.modelAndShadow}, which bends it
-     * to the ground under it as for any other location.
-     *
-     * A location with animations is asked for a model every frame, posed at whatever frame its
-     * animation has reached. It is built through {@link LocPoser}, still and at every frame of
-     * every sequence it can play. The sequences are those of the look it has taken, or its own
-     * where that look has none, as {@code LocEntity.animate} picks them.
+     * the client stands before the server sends any. The sequences it plays are those of the look
+     * it has taken, or its own where that look has none, as {@code LocEntity.animate} picks them.
+     * It is built as {@code LocEntity.model} builds it while nothing is playing, through
+     * {@code LocType.modelAndShadow}, which bends it to the ground under it as for any other
+     * location.
      */
-    private static Optional<Placement> dynamic(LocEntity entity, String part, int x, int y, int z, JavaToolkit toolkit) {
+    private Optional<Placement> dynamic(LocEntity entity, String part, int x, int y, int z, JavaToolkit toolkit) {
         var own = LocTypeList.instance.list(entity.id);
         var type = own.multiloc == null ? own : own.getMultiLoc(TimedVarDomain.instance);
         if (type == null) {
             return Optional.empty();
         }
 
-        var animations = type.hasAnimations() ? type : own.hasAnimations() ? own : null;
-        if (animations == null) {
-            var floor = LocGround.floor(entity.underwater, entity.virtualLevel);
-            var ceiling = LocGround.ceiling(entity.underwater, entity.virtualLevel);
-            var diagonal = entity.shape == LocShapes.CENTREPIECE_DIAGONAL;
-            var built = type.modelAndShadow(diagonal ? entity.rotation + 4 : entity.rotation, entity.entity.z,
-                entity.entity.x, floor, false, floor.averageHeight(entity.entity.x, entity.entity.z),
-                diagonal ? LocShapes.CENTREPIECE_STRAIGHT : entity.shape, toolkit, null, UNLIT_LOCATION, ceiling);
-            return placement(type.id, entity.shape, entity.rotation, entity.level, part, x, y, z, model(built),
-                new Motion.Still());
-        } else {
-            var poser = new LocPoser(type, entity, toolkit, UNLIT_LOCATION);
-            var baker = new PoseBaker(poser);
-            var clips = new ArrayList<LocClip>();
-            for (var i = 0; i < animations.anim.length; i++) {
-                if (animations.anim[i] != -1) {
-                    var weight = animations.anim.length > 1 ? animations.anim_weight[i] : SOLE_WEIGHT;
-                    clips.add(new LocClip(animations.anim[i], weight, baker.bake(animations.anim[i])));
-                }
-            }
-            var motion = new Motion.Animated(List.copyOf(clips), baker.poses(), baker.names(),
-                animations.randomanimframe);
-            return placement(type.id, entity.shape, entity.rotation, entity.level, part, x, y, z, poser.still(),
-                motion);
-        }
+        var floor = LocGround.floor(entity.underwater, entity.virtualLevel);
+        var ceiling = LocGround.ceiling(entity.underwater, entity.virtualLevel);
+        var diagonal = entity.shape == LocShapes.CENTREPIECE_DIAGONAL;
+        var groundY = floor.averageHeight(entity.entity.x, entity.entity.z);
+        var built = type.modelAndShadow(diagonal ? entity.rotation + 4 : entity.rotation, entity.entity.z,
+            entity.entity.x, floor, false, groundY, diagonal ? LocShapes.CENTREPIECE_STRAIGHT : entity.shape, toolkit,
+            null, UNLIT_LOCATION, ceiling);
+        var sequencesOf = type.hasAnimations() ? type : own.hasAnimations() ? own : type;
+        return placement(type.id, entity.shape, entity.rotation, entity.level, entity.virtualLevel, part, x, y, z,
+            entity.underwater, model(built), sequencesOf.id, groundY, entity.entity.x, entity.entity.z);
     }
 
     private static JavaModel model(ModelAndShadow built) {
         return built == null ? null : (JavaModel) built.model;
     }
 
-    private static Optional<Placement> placement(int id, int shape, int rotation, int level, String part,
-                                                 int x, int y, int z, JavaModel model) {
-        return placement(id, shape, rotation, level, part, x, y, z, model, new Motion.Still());
+    private Optional<Placement> placement(int id, int shape, int rotation, int level, int virtualLevel, String part,
+                                          int x, int y, int z, boolean underwater, JavaModel model) {
+        return placement(id & 0xFFFF, shape, rotation, level, virtualLevel, part, x, y, z, underwater, model,
+            id & 0xFFFF, y, x, z);
     }
 
-    private static Optional<Placement> placement(int id, int shape, int rotation, int level, String part,
-                                                 int x, int y, int z, JavaModel model, Motion motion) {
+    /**
+     * @param model the model the client builds for the placement, or null where it builds none.
+     * @param groundY the height the client bends the model against, which an animated location
+     *     measures at its own tile rather than where it is drawn.
+     * @param groundX where the client bends the model at, which an animated wall decoration
+     *     measures at the wall rather than where it is drawn.
+     */
+    private Optional<Placement> placement(int id, int shape, int rotation, int level, int virtualLevel, String part,
+                                          int x, int y, int z, boolean underwater, JavaModel model, int sequencesOf,
+                                          int groundY, int groundX, int groundZ) {
+        var type = LocTypeList.instance.list(id);
+        var builtShape = LocShapes.isWallDecor(shape) ? LocShapes.WALLDECOR_STRAIGHT_NOOFFSET
+            : shape == LocShapes.CENTREPIECE_DIAGONAL ? LocShapes.CENTREPIECE_STRAIGHT : shape;
+        var builtRotation = shape == LocShapes.CENTREPIECE_DIAGONAL ? rotation + 4 : rotation;
+        var check = check(type, builtShape, builtRotation, underwater, virtualLevel, groundX, groundY, groundZ, model);
+
         if (model == null) {
             return Optional.empty();
         } else {
-            var type = LocTypeList.instance.list(id & 0xFFFF);
-            return Optional.of(new Placement(id & 0xFFFF, type.name, shape, rotation, level, part, false, x, y, z, model,
-                type.hillchange != 0, motion));
+            return Optional.of(new Placement(id, type.name, builtShape, builtRotation, level, virtualLevel, part,
+                underwater, x, y, z, sequencesOf, check));
         }
+    }
+
+    /**
+     * Places the location's asset as an importer would and compares it with what the client
+     * built, still and, for a location that animates, at the first frame of its first sequence.
+     *
+     * The client hands out a posed model from a pool that the next pose fills again, so the
+     * client's is copied out before the asset is posed.
+     */
+    private Check check(LocType type, int shape, int rotation, boolean underwater, int virtualLevel, int x, int y,
+                        int z, JavaModel built) {
+        var turned = rotation > 3 && ClientLocReader.needsTurnedAsset(type, shape);
+        var asset = assets.computeIfAbsent((long) type.id << 9 | shape << 1 | (turned ? 1 : 0),
+            ignored -> Optional.ofNullable(locs.poser(type, shape, turned).still()));
+        if (asset.isEmpty() || built == null) {
+            return asset.isEmpty() && built == null ? Check.MATCHES : Check.NO_ASSET;
+        }
+
+        var floor = LocGround.floor(underwater, virtualLevel);
+        var ceiling = LocGround.ceiling(underwater, virtualLevel);
+        var placed = LocPlacing.place(asset.get(), type, shape, rotation, floor, ceiling, x, y, z, turned);
+        if (!LocPlacing.sameVertices(placed, built, 0)) {
+            return Check.DIFFERS;
+        }
+
+        if (type.hasAnimations() && type.anim[0] != -1) {
+            var animator = new SequenceAnimator(type.anim[0]);
+            if (animator.show(0)) {
+                var pooled = (JavaModel) type.wallModel(rotation, z, shape, x, ceiling, animator, locs.toolkit(),
+                    floor, null, UNLIT_LOCATION, y);
+                var clientPosed = pooled == null ? null : (JavaModel) pooled.copy((byte) 0, ClientLocReader.EVERY_FUNCTION, true);
+                animator.show(0);
+                var assetPosed = locs.poser(type, shape, turned).posed(animator);
+                var placedPosed = LocPlacing.place(assetPosed, type, shape, rotation, floor, ceiling, x, y, z, turned);
+                if (clientPosed == null || !LocPlacing.sameVertices(placedPosed, clientPosed, POSED_TOLERANCE)) {
+                    return Check.DIFFERS_POSED;
+                }
+            }
+        }
+        return Check.MATCHES;
     }
 
     /**

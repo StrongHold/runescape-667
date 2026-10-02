@@ -123,24 +123,29 @@ action sequences an NPC plays when the game tells it to, such as an attack.
     ./gradlew :export:exportMapSquare --args="--x 52 --z 47 --out /tmp/desert.glb"
     ./gradlew :export:exportMapSquare --args="--x 50 --z 50 --no-locations"
 
-A map square is 64 tiles by 64, named by where it is in mapsquares: square 50_50 holds tiles 3200,3200
-to 3263,3263, which is Lumbridge. Without `--out` it is written to
-`export/build/mapsquares/<x>_<z>.glb`, and `--out` and `--cache` work as they do for a model. The
-locations of a map square are locked with a key, which is read from `--keys`, or else as the `cache`
-module's census reads it. A map square with no key that opens it is written with its ground alone, and
-the tool says why. `--no-locations` writes the ground alone on purpose.
+A map square is 64 tiles by 64, named by where it is in map squares: map square 50_50 holds tiles
+3200,3200 to 3263,3263, which is Lumbridge. It is written as two files: its ground, as binary glTF,
+and a description of where each of its locations stands, as JSON beside it. Without `--out` they
+are `export/build/mapsquares/<x>_<z>.glb` and `<x>_<z>.json`, and `--out`, `--cache` and
+`--textures` work as they do for a model. The locations of a map square are locked with a key,
+which is read from `--keys`, or else as the `cache` module's census reads it. A map square with no
+key that opens it is written with its ground alone, and the tool says why. `--no-locations` writes
+the ground alone on purpose.
 
 The map square is built the way the client builds the world around the player, by the client's own
-code. The client never builds one map square on its own: the colour of a tile at the edge of a map square
-is smoothed with the map squares beside it, and the heights of its corners are theirs too. So the
-map square is built as the middle of a region of three map squares by three, and only the middle one is
-written. The tiles of each map square are read with `Terrain.decodeMapSquare`, and the toolkit is
-given a ground for each level by `Terrain.createGrounds`. The map square's locations are placed with
-`MapRegion.loadLocations`, and then `Terrain.load` smooths the underlays across their neighbours,
-blends the overlays into them, and hands every tile to the ground with its shape cut, its colours
-and its textures. Everything runs on the software toolkit, with the options of a player on high
-detail: ground blending, textures, ground decorations and high water detail on, and every
+code. The client never builds one map square on its own: the colour of a tile at the edge of a map
+square is smoothed with the map squares beside it, and the heights of its corners are theirs too. So
+the map square is built as the middle of a region of three map squares by three, and only the middle
+one is written. The tiles of each map square are read with `Terrain.decodeMapSquare`, and the
+toolkit is given a ground for each level by `Terrain.createGrounds`. The map square's locations are
+placed with `MapRegion.loadLocations`, and then `Terrain.load` smooths the underlays across their
+neighbours, blends the overlays into them, and hands every tile to the ground with its shape cut,
+its colours and its textures. Everything runs on the software toolkit, with the options of a player
+on high detail: ground blending, textures, ground decorations and high water detail on, and every
 location placed whatever level the player stands on.
+
+
+### The ground
 
 The ground the toolkit is left with holds each tile as the rasteriser draws it, as triangles with
 a height, a colour, a texture and a texture size at each corner, and that is what is written. The
@@ -170,45 +175,84 @@ Where the region has a world under its water, the client reads it as a region of
 builds it beneath the land, against the land's heights. Its ground is written as the node
 `underwater bed`, and its locations, which the client reads without a key, with the rest.
 
-Each location is read back from the tiles the client placed it on, as a wall, a corner's second
-wall, a wall decoration, a ground decoration, or a location that stands on its tiles. Its model is
-built by the method the client builds it with when it places it, `LocType.modelAndShadow`, which
-swaps its colours and textures, mirrors, turns, scales and moves it as its type says, and bends it
-to fit the ground under it where its type asks for that. It is placed where the client draws it,
-and a wall decoration is moved off its wall as the client moves it. Each location is a node named
-after the location and its id, such as `Oak 38739`, with its id, shape, turn, level and what the
-client keeps it as in its `extras`. The locations of each level hang from a node of their own.
-Each distinct model is written as one mesh that every node of it wears, so a tree planted many
-times costs one mesh. A location bent to fit the ground is the same model only where the ground
-under it is the same shape, so on a slope each is a mesh of its own.
 
-A location that the client animates is written with its sequences, as an NPC is. Its model is
-built by the method the client builds an animated location with on every frame it draws,
-`LocType.wallModel`, which poses a copy of the model and only then bends it to the ground and
-moves it, so a location on a slope is bent again at every frame, and such a location is a mesh
-of its own as above. Each frame becomes a morph target of the mesh, and each sequence the
-location can play becomes an animation, named after the location and the sequence, which every
-node of that location on the map square plays. A location with one sequence loops it. A location
-with several plays one for as many loops as the sequence allows and then picks another by
-weight, and the sequences are written but that choice is not. The node's `extras` name the
-sequences, their weights where there are several, and whether the client starts the sequence at
-a random frame, which it does for most, so that the flags and fires of one kind do not move in
-step. The animation itself starts every node at the first frame, so that the file is the same
-bytes every run, and an engine staggers them from the `extras`.
+### The location library
 
-Some of this is not what the client draws. A location that takes the look of another by a
-variable takes the one it has with every variable at 0, which is how the client stands before
-the server sends any. The particles, billboards and sounds of a location are not written, and nor are the
-NPCs and items the server puts on the map square. The light the client bakes into the ground and the
-shadows locations cast on it are left out, as the ground is lit where it is shown. So are the
-map square's sun, fog, point lights and sky box, the water's moving textures, and the way the client
-darkens what it sees through water by its depth. Every roof is written, where the client hides
-those above the player. A bridge keeps the level its tiles are given in the map, where the
-client draws it with the level below.
+    ./gradlew :export:exportLoc --args="--loc 33799"
+
+A location is written once, as `export/build/locs/<id>.glb` unless `--locs` names another
+directory, and every map square that places it refers to it by its id. A map square writes any
+location it names that the library lacks, and leaves one that is there as it is, as it does with
+textures.
+
+The file holds a mesh for each shape the location's type has a model for, as a node named
+`shape <n>`, and most types have one. Of 59,434 types with a model, 55,604 have one shape, and the
+rest, such as walls and fences, name a different mesh for each shape. Each mesh is the part of what
+the client builds that is the same wherever the location stands: the shape's meshes merged, mirrored
+where the type says so, and recoloured and retextured. The client turns, scales, moves and bends
+the model after that, and all of it depends on the placement, so none of it is in the mesh. The
+file's `extras` carry what that needs: the type's `resize`, `offset`, `translate`, `hillchange` and
+`hillskew`, whether the mesh is `mirrored`, and the `sequences` the location plays, their weights
+and whether the client starts at a random frame. A location that animates has a morph target for
+every frame and an animation for every sequence, as an NPC has. A wall decoration that animates
+has a second mesh, `shape 4 turned`, for a diagonal placement: the client turns such a decoration
+45 degrees before the frames of its sequence move it, and the frames are not turned with it, so
+that mesh is turned already and an importer does not turn it again.
+
+
+### The description
+
+The description names the ground file and the library, and lists every placement in the client's
+units: 512 to a tile, x east, y down and z north, which the glTF frame takes as (x, -y, -z) over
+512. Each placement names its `loc`, the `shape` the client builds its model as, its `rotation`,
+its `level`, the `virtualLevel` whose ground it is bent against, whether it is `underwater`, where
+it stands as `x`, `y` and `z`, and what the client keeps it as, its `part`. A location that takes
+the look of another by a variable is named as the look it has taken, with every variable at 0,
+which is how the client stands before the server sends any, and `sequencesOf` names the location
+whose sequences it plays where that is not the same one.
+
+The description also holds `heights`: the height of every tile corner of each level, and of the
+bed under the water where there is one, from one tile before the map square to one tile after,
+which is what a location is bent against.
+
+An importer places a location by these steps, in order, in the client's units:
+
+1. It takes the mesh of the placement's shape, or the turned one for a wall decoration that
+   animates placed with a rotation above 3.
+2. An L-shaped wall placed with a rotation above 3 is mirrored along z.
+3. A wall decoration placed with a rotation above 3 is turned 45 degrees about y, unless the
+   mesh is the turned one, and moved by (180, 0, -180).
+4. The model is turned about y by a quarter turn for each of the rotation's low two bits, which
+   takes (x, z) to (z, -x) in the client's frame.
+5. It is scaled by `resize` over 128 along each axis of the world.
+6. It is moved by `offset`.
+7. A centrepiece placed with a rotation above 3, which the map placed as a diagonal, is turned 45
+   degrees about y.
+8. Where `hillchange` is not 0, it is bent to the ground under it as `JavaModel.p` bends it, from
+   the heights of the tile corners it covers, measured from the placement's `y`.
+9. It is moved by `translate`.
+10. It stands at the placement's position.
+
+`LocPlacing` writes those steps with the client's own model operations, and every placement of a
+map square is checked against them: the location's asset, placed that way, is compared vertex for
+vertex with the model the client builds for the placement, and a map square with any that differ
+is reported and fails. A location that animates is also checked at the first frame of its first
+sequence, to within one unit, because the client turns a frame's angles to suit the placement
+before it poses and an importer turns the posed result, and the two round differently by at most
+one unit. Every placement of Lumbridge passes, and a planted missing turn fails 23 of the
+desert's 44.
+
+Some of this is not what the client draws. The particles, billboards and sounds of a location are
+not written, and nor are the NPCs and items the server puts on the map square. The light the
+client bakes into the ground and the shadows locations cast on it are left out, as the ground is
+lit where it is shown. So are the map square's sun, fog, point lights and sky box, the water's
+moving textures, and the way the client darkens what it sees through water by its depth. Every
+roof is written, where the client hides those above the player. A bridge keeps the level its tiles
+are given in the map, where the client draws it with the level below.
 
 The tool prints how many tiles and faces each level has, how many faces are written as layers or
-left out and why, how many locations it placed and how many distinct meshes they wear, and each
-animation it wrote with how many nodes play it.
+left out and why, how many locations it placed and of how many kinds, and how many placements the
+importer's steps reproduce.
 
 
 ## Looking at a model
