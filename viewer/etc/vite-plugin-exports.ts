@@ -8,7 +8,7 @@ import type { ExportedFile, ExportKind } from '../src/exported.ts';
  * The kinds of file the export module writes, each in a directory of its own under its build
  * directory.
  */
-const KINDS: readonly ExportKind[] = ['models', 'npcs', 'squares'];
+const KINDS: readonly ExportKind[] = ['models', 'npcs', 'mapsquares'];
 
 /** What is served from the export directory: the files, and the textures they refer to. */
 const SERVED_TYPES: Readonly<Record<string, string>> = { '.glb': 'model/gltf-binary', '.png': 'image/png' };

@@ -5,7 +5,7 @@ import { bindBackdrop } from './backdrop.ts';
 import { bindDrop } from './drop.ts';
 import { bindFocus } from './focus.ts';
 import { fetchExported, listExported, shortName, SINGULAR, type ExportedFile } from './exported.ts';
-import { describe, isSquare, placements } from './extras.ts';
+import { describe, isMapSquare, placements } from './extras.ts';
 import { frame, frameFrom, SIDES } from './framing.ts';
 import { createLighting } from './lighting.ts';
 import { baseBox, isTransparent, meshesOf, setWireframe, triangleCount } from './meshes.ts';
@@ -38,24 +38,24 @@ async function open(data: ArrayBuffer, label: string, path: string): Promise<voi
             stage.scene.remove(current);
         }
         current = gltf.scene;
-        const square = isSquare(current);
+        const mapSquare = isMapSquare(current);
         for (const mesh of meshesOf(current)) {
             mesh.castShadow = !isTransparent(mesh);
-            mesh.receiveShadow = square;
+            mesh.receiveShadow = mapSquare;
         }
         stage.scene.add(current);
-        player.load(current, gltf.animations, square);
+        player.load(current, gltf.animations, mapSquare);
         setWireframe(current, page.wire.checked);
 
         const box = baseBox(current);
-        frame(stage.camera, stage.controls, lighting, box, square);
-        if (square) {
+        frame(stage.camera, stage.controls, lighting, box, mapSquare);
+        if (mapSquare) {
             page.grid.checked = false;
         }
-        scenery.show(square, box.min.y, page.grid.checked);
+        scenery.show(mapSquare, box.min.y, page.grid.checked);
 
         const meshes = meshesOf(current);
-        const contents = square
+        const contents = mapSquare
             ? `${placements(current)} locations`
             : `${gltf.animations.length} animations`;
         page.status.textContent = `${describe(current, label)}: ${triangleCount(meshes).toLocaleString()} triangles in `

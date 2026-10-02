@@ -7,7 +7,7 @@ import { GridHelper, Mesh, PlaneGeometry, Scene, ShadowMaterial } from 'three';
 const GROUND = 0;
 
 /** A map square is 64 tiles across, its south west corner at the origin and north along -z. */
-const SQUARE_TILES = 64;
+const MAP_SQUARE_TILES = 64;
 
 /**
  * The grid and the ground around what is open. A model stands on a plane that catches its shadow,
@@ -19,9 +19,9 @@ export interface Scenery {
     /**
      * Shows the scenery that suits what is open.
      *
-     * @param lowest the height of the lowest point of what is open, where a square's grid is drawn.
+     * @param lowest the height of the lowest point of what is open, where a map square's grid is drawn.
      */
-    readonly show: (square: boolean, lowest: number, gridOn: boolean) => void;
+    readonly show: (mapSquare: boolean, lowest: number, gridOn: boolean) => void;
     readonly showGrid: (on: boolean) => void;
 }
 
@@ -29,28 +29,28 @@ export function createScenery(scene: Scene): Scenery {
     const grid = tileGrid(10, 0.35);
     grid.position.y = GROUND;
 
-    const squareGrid = tileGrid(SQUARE_TILES, 0.2);
-    squareGrid.position.set(SQUARE_TILES / 2, GROUND, -SQUARE_TILES / 2);
-    squareGrid.visible = false;
+    const mapSquareGrid = tileGrid(MAP_SQUARE_TILES, 0.2);
+    mapSquareGrid.position.set(MAP_SQUARE_TILES / 2, GROUND, -MAP_SQUARE_TILES / 2);
+    mapSquareGrid.visible = false;
 
     const ground = new Mesh(new PlaneGeometry(40, 40), new ShadowMaterial({ opacity: 0.3 }));
     ground.rotation.x = -Math.PI / 2;
     ground.position.y = GROUND;
     ground.receiveShadow = true;
 
-    scene.add(grid, squareGrid, ground);
-    let showingSquare = false;
+    scene.add(grid, mapSquareGrid, ground);
+    let showingMapSquare = false;
 
     const showGrid = (on: boolean): void => {
-        grid.visible = on && !showingSquare;
-        squareGrid.visible = on && showingSquare;
+        grid.visible = on && !showingMapSquare;
+        mapSquareGrid.visible = on && showingMapSquare;
     };
 
     return {
-        show: (square, lowest, gridOn) => {
-            showingSquare = square;
-            ground.visible = !square;
-            squareGrid.position.y = lowest;
+        show: (mapSquare, lowest, gridOn) => {
+            showingMapSquare = mapSquare;
+            ground.visible = !mapSquare;
+            mapSquareGrid.position.y = lowest;
             showGrid(gridOn);
         },
         showGrid

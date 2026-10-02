@@ -5,13 +5,13 @@ import { AnimationAction, AnimationClip, AnimationMixer, Object3D, PropertyBindi
  *
  * An NPC's animations are its ways of moving, and only one plays at a time. A map square's are
  * the sequences of its locations, which all play at once in the game, so the list offers every
- * animation together, and starts there for a square.
+ * animation together, and starts there for a map square.
  */
 export interface AnimationPlayer {
     /**
      * Takes over the animations of a newly opened object.
      *
-     * @param together whether the animations play at once, as a square's do, which is offered
+     * @param together whether the animations play at once, as a map square's do, which is offered
      *     and started with, rather than one at a time, as an NPC's do.
      */
     readonly load: (root: Object3D, clips: readonly AnimationClip[], together: boolean) => void;

@@ -47,7 +47,7 @@ of the faces it meets at each corner, and a flat face takes its own.
 Every file written here refers to its textures by a relative path, such as `../textures/128.png`,
 and carries no copy of them. The textures live in one directory, `export/build/textures` unless
 `--textures` names another, as one PNG for each texture id. An engine then loads each texture
-once, however many models, NPCs and squares use it, and a texture can be replaced by a better one
+once, however many models, NPCs and map squares use it, and a texture can be replaced by a better one
 by replacing one file.
 
 Each texture is drawn by the client's own texture source, at 128 texels a side or 64 for a small
@@ -119,23 +119,23 @@ action sequences an NPC plays when the game tells it to, such as an attack.
 
 ## Writing a map square
 
-    ./gradlew :export:exportSquare --args="--x 50 --z 50"
-    ./gradlew :export:exportSquare --args="--x 52 --z 47 --out /tmp/desert.glb"
-    ./gradlew :export:exportSquare --args="--x 50 --z 50 --no-locations"
+    ./gradlew :export:exportMapSquare --args="--x 50 --z 50"
+    ./gradlew :export:exportMapSquare --args="--x 52 --z 47 --out /tmp/desert.glb"
+    ./gradlew :export:exportMapSquare --args="--x 50 --z 50 --no-locations"
 
-A square is 64 tiles by 64, named by where it is in squares: square 50_50 holds tiles 3200,3200
+A map square is 64 tiles by 64, named by where it is in mapsquares: square 50_50 holds tiles 3200,3200
 to 3263,3263, which is Lumbridge. Without `--out` it is written to
-`export/build/squares/<x>_<z>.glb`, and `--out` and `--cache` work as they do for a model. The
-locations of a square are locked with a key, which is read from `--keys`, or else as the `cache`
-module's census reads it. A square with no key that opens it is written with its ground alone, and
+`export/build/mapsquares/<x>_<z>.glb`, and `--out` and `--cache` work as they do for a model. The
+locations of a map square are locked with a key, which is read from `--keys`, or else as the `cache`
+module's census reads it. A map square with no key that opens it is written with its ground alone, and
 the tool says why. `--no-locations` writes the ground alone on purpose.
 
-The square is built the way the client builds the world around the player, by the client's own
-code. The client never builds one square on its own: the colour of a tile at the edge of a square
-is smoothed with the squares beside it, and the heights of its corners are theirs too. So the
-square is built as the middle of a region of three squares by three, and only the middle one is
-written. The tiles of each square are read with `Terrain.decodeMapSquare`, and the toolkit is
-given a ground for each level by `Terrain.createGrounds`. The square's locations are placed with
+The map square is built the way the client builds the world around the player, by the client's own
+code. The client never builds one map square on its own: the colour of a tile at the edge of a map square
+is smoothed with the map squares beside it, and the heights of its corners are theirs too. So the
+map square is built as the middle of a region of three map squares by three, and only the middle one is
+written. The tiles of each map square are read with `Terrain.decodeMapSquare`, and the toolkit is
+given a ground for each level by `Terrain.createGrounds`. The map square's locations are placed with
 `MapRegion.loadLocations`, and then `Terrain.load` smooths the underlays across their neighbours,
 blends the overlays into them, and hands every tile to the ground with its shape cut, its colours
 and its textures. Everything runs on the software toolkit, with the options of a player on high
@@ -145,7 +145,7 @@ location placed whatever level the player stands on.
 The ground the toolkit is left with holds each tile as the rasteriser draws it, as triangles with
 a height, a colour, a texture and a texture size at each corner, and that is what is written. The
 ground of each level that has tiles is a node of its own, named for the level. The ground is
-turned and scaled as a model is, with the square's south west corner at the origin and the
+turned and scaled as a model is, with the map square's south west corner at the origin and the
 client's heights kept, so a level of ground lies where the client draws it and a location placed
 on it stands on it. Tiles meet corner to corner, and a corner that two tiles share is one vertex.
 
@@ -154,7 +154,7 @@ and that light is turned up to full here, so the colours written are the ground'
 model's are. Each corner is given a normal from the same slope the client lights it by, and a
 point within a tile blends the normals of its corners as the client blends their light. The
 texture coordinates are the client's too: where a corner is in the world over the size the floor
-type gives its texture, so a texture runs on from tile to tile, and from one square to the next.
+type gives its texture, so a texture runs on from tile to tile, and from one map square to the next.
 
 A face the rasteriser skips because its first corner has no colour is left out. Where the corners
 of a face name different textures, the rasteriser blends them across the face, each weighted by
@@ -188,7 +188,7 @@ built by the method the client builds an animated location with on every frame i
 moves it, so a location on a slope is bent again at every frame, and such a location is a mesh
 of its own as above. Each frame becomes a morph target of the mesh, and each sequence the
 location can play becomes an animation, named after the location and the sequence, which every
-node of that location on the square plays. A location with one sequence loops it. A location
+node of that location on the map square plays. A location with one sequence loops it. A location
 with several plays one for as many loops as the sequence allows and then picks another by
 weight, and the sequences are written but that choice is not. The node's `extras` name the
 sequences, their weights where there are several, and whether the client starts the sequence at
@@ -199,9 +199,9 @@ bytes every run, and an engine staggers them from the `extras`.
 Some of this is not what the client draws. A location that takes the look of another by a
 variable takes the one it has with every variable at 0, which is how the client stands before
 the server sends any. The particles, billboards and sounds of a location are not written, and nor are the
-NPCs and items the server puts on the square. The light the client bakes into the ground and the
+NPCs and items the server puts on the map square. The light the client bakes into the ground and the
 shadows locations cast on it are left out, as the ground is lit where it is shown. So are the
-square's sun, fog, point lights and sky box, the water's moving textures, and the way the client
+map square's sun, fog, point lights and sky box, the water's moving textures, and the way the client
 darkens what it sees through water by its depth. Every roof is written, where the client hides
 those above the player. A bridge keeps the level its tiles are given in the map, where the
 client draws it with the level below.

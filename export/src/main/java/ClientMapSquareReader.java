@@ -33,7 +33,7 @@ import java.util.Set;
  * decodes every tile of each, gives the toolkit a ground for each level, places the locations on
  * them, and only then works out the colour of every tile, smoothing the underlays across their
  * neighbours and blending the overlays into them. A tile at the edge of a square takes its colour
- * and the heights of its corners from the squares beside it, so the square wanted is built here as
+ * and the heights of its corners from the map squares beside it, so the map square wanted is built here as
  * the middle of a region of three squares by three, and only the middle one is read back.
  *
  * Everything runs on the software toolkit, which needs no window, with the client's own texture
@@ -42,13 +42,13 @@ import java.util.Set;
  * The lighting the client bakes into the ground is turned off, so that the colours read back are
  * the colours of the ground itself, as the colours of a model are.
  */
-public final class ClientSquareReader {
+public final class ClientMapSquareReader {
 
     public static final int TILES_ACROSS = 64;
     public static final int LEVELS = 4;
 
     /**
-     * The region is three squares across, and the square wanted starts one square in.
+     * The region is three squares across, and the map square wanted starts one square in.
      */
     private static final int REGION_TILES = TILES_ACROSS * 3;
     public static final int ORIGIN = TILES_ACROSS;
@@ -89,7 +89,7 @@ public final class ClientSquareReader {
     private final js5 maps;
     private final Path keys;
 
-    public ClientSquareReader(File cache, Path keys) {
+    public ClientMapSquareReader(File cache, Path keys) {
         this.models = new ClientModelReader(cache);
         this.maps = Cache.js5(cache, Js5Archive.MAPS);
         this.keys = keys;
@@ -118,11 +118,11 @@ public final class ClientSquareReader {
      * @param grounds the ground the toolkit was given for each level, holding every tile of the
      *     region as the client will draw it.
      * @param underwater the bed under the region's water, where it has one.
-     * @param placements every location of the square, on land and under the water, with the model
+     * @param placements every location of the map square, on land and under the water, with the model
      *     the client builds for it and where it is drawn.
-     * @param locations whether the square's locations on land were placed.
+     * @param locations whether the map square's locations on land were placed.
      */
-    public record Square(int x, int z, List<JavaGround> grounds, List<Placement> placements, Placing locations,
+    public record MapSquare(int x, int z, List<JavaGround> grounds, List<Placement> placements, Placing locations,
                          Underwater underwater) {
     }
 
@@ -155,7 +155,7 @@ public final class ClientSquareReader {
         /**
          * @param ground the ground of the bed, holding every tile of the region as the client will
          *     draw it.
-         * @param locations whether the locations on the square's bed were placed.
+         * @param locations whether the locations on the map square's bed were placed.
          */
         record Bed(JavaGround ground, Placing locations) implements Underwater {
         }
@@ -220,25 +220,25 @@ public final class ClientSquareReader {
 
     /**
      * Builds the region around a square in the order {@code MapBuilder.build} does, and reads
-     * the square back.
+     * the map square back.
      *
      * Where the region has a world under its water, the client reads it as a region of its own of
      * one level, raises it by the heights of the land, and gives the land the heights of the bed
      * to light its water by. The bed is built after the land, against the land's ground, which
      * lifts the bed's overlays to the surface of the water.
      */
-    public Square read(int squareX, int squareZ, boolean withLocations) throws IOException {
+    public MapSquare read(int mapSquareX, int mapSquareZ, boolean withLocations) throws IOException {
         var toolkit = models.toolkit();
-        var underwater = hasUnderwater(squareX, squareZ);
+        var underwater = hasUnderwater(mapSquareX, mapSquareZ);
         var collisionMaps = scene(toolkit, underwater);
         var region = new MapRegion(LEVELS, REGION_TILES, REGION_TILES, false);
-        decodeTiles(region, collisionMaps, "m", squareX, squareZ);
+        decodeTiles(region, collisionMaps, "m", mapSquareX, mapSquareZ);
 
         MapRegion bed = null;
         if (underwater) {
             switchScene(true);
             bed = new MapRegion(1, REGION_TILES, REGION_TILES, true);
-            decodeTiles(bed, null, "um", squareX, squareZ);
+            decodeTiles(bed, null, "um", mapSquareX, mapSquareZ);
             bed.addHeightOffsets(region.tileHeights[0]);
             bed.createGrounds(null, toolkit, null);
             switchScene(false);
@@ -246,7 +246,7 @@ public final class ClientSquareReader {
 
         region.createGrounds(bed == null ? null : bed.tileHeights, toolkit, collisionMaps);
         var locations = withLocations
-            ? placeLocations(region, collisionMaps, squareX, squareZ)
+            ? placeLocations(region, collisionMaps, mapSquareX, mapSquareZ)
             : new Placing.NotPlaced(NOT_ASKED);
 
         for (var ground : Static706.floor) {
@@ -265,7 +265,7 @@ public final class ClientSquareReader {
         Underwater underwaterWorld = new Underwater.Dry();
         if (bed != null) {
             switchScene(true);
-            var bedLocations = withLocations ? placeBedLocations(bed, squareX, squareZ) : new Placing.NotPlaced(NOT_ASKED);
+            var bedLocations = withLocations ? placeBedLocations(bed, mapSquareX, mapSquareZ) : new Placing.NotPlaced(NOT_ASKED);
             bed.load(toolkit, null, Static706.floor[0]);
             switchScene(false);
 
@@ -276,7 +276,7 @@ public final class ClientSquareReader {
         }
 
         var grounds = Arrays.stream(Static706.floor).map(ground -> (JavaGround) ground).toList();
-        return new Square(squareX, squareZ, grounds, List.copyOf(placements), locations, underwaterWorld);
+        return new MapSquare(mapSquareX, mapSquareZ, grounds, List.copyOf(placements), locations, underwaterWorld);
     }
 
     /**
@@ -291,11 +291,11 @@ public final class ClientSquareReader {
      * Whether any square of the region has a world under its water, which the client only builds
      * on high water detail.
      */
-    private boolean hasUnderwater(int squareX, int squareZ) {
+    private boolean hasUnderwater(int mapSquareX, int mapSquareZ) {
         var any = false;
         for (var across = -1; across <= 1; across++) {
             for (var up = -1; up <= 1; up++) {
-                any |= maps.getgroupid("um" + (squareX + across) + "_" + (squareZ + up)) != -1;
+                any |= maps.getgroupid("um" + (mapSquareX + across) + "_" + (mapSquareZ + up)) != -1;
             }
         }
         return any;
@@ -333,17 +333,17 @@ public final class ClientSquareReader {
      * Reads every tile of the region's squares as {@code Static73.decodeStaticArea} does. A square
      * the cache holds no tiles for is the sea, and is given the flat heights the client gives it.
      *
-     * @param prefix what the client names the squares' groups by: {@code m} for the land and
+     * @param prefix what the client names the map squares' groups by: {@code m} for the land and
      *     {@code um} for the world under its water.
      */
-    private void decodeTiles(MapRegion region, CollisionMap[] collisionMaps, String prefix, int squareX, int squareZ) {
-        var baseX = (squareX - 1) * TILES_ACROSS;
-        var baseZ = (squareZ - 1) * TILES_ACROSS;
+    private void decodeTiles(MapRegion region, CollisionMap[] collisionMaps, String prefix, int mapSquareX, int mapSquareZ) {
+        var baseX = (mapSquareX - 1) * TILES_ACROSS;
+        var baseZ = (mapSquareZ - 1) * TILES_ACROSS;
         var missing = new ArrayList<int[]>();
 
         for (var across = 0; across < 3; across++) {
             for (var up = 0; up < 3; up++) {
-                var data = file(prefix + (squareX - 1 + across) + "_" + (squareZ - 1 + up), null);
+                var data = file(prefix + (mapSquareX - 1 + across) + "_" + (mapSquareZ - 1 + up), null);
                 var x = across * TILES_ACROSS;
                 var z = up * TILES_ACROSS;
 
@@ -361,15 +361,15 @@ public final class ClientSquareReader {
     }
 
     /**
-     * Places the square's locations on land as {@code Static338.loadStaticLocations} does, or
-     * says why they could not be. They are locked with the square's key.
+     * Places the map square's locations on land as {@code Static338.loadStaticLocations} does, or
+     * says why they could not be. They are locked with the map square's key.
      *
-     * Only the square wanted is placed: a location belongs to the square its first tile is in, and
-     * the export takes the square's locations alone.
+     * Only the map square wanted is placed: a location belongs to the map square its first tile is in, and
+     * the export takes the map square's locations alone.
      */
-    private Placing placeLocations(MapRegion region, CollisionMap[] collisionMaps, int squareX, int squareZ)
+    private Placing placeLocations(MapRegion region, CollisionMap[] collisionMaps, int mapSquareX, int mapSquareZ)
             throws IOException {
-        var name = "l" + squareX + "_" + squareZ;
+        var name = "l" + mapSquareX + "_" + mapSquareZ;
         var key = LocationKeys.read(keys, name);
         if (maps.getgroupid(name) == -1) {
             return new Placing.NotPlaced("the cache holds no " + name);
@@ -387,10 +387,10 @@ public final class ClientSquareReader {
     }
 
     /**
-     * Places the locations under the square's water, which the client reads without a key.
+     * Places the locations under the map square's water, which the client reads without a key.
      */
-    private Placing placeBedLocations(MapRegion bed, int squareX, int squareZ) {
-        var name = "ul" + squareX + "_" + squareZ;
+    private Placing placeBedLocations(MapRegion bed, int mapSquareX, int mapSquareZ) {
+        var name = "ul" + mapSquareX + "_" + mapSquareZ;
         var data = file(name, null);
         if (data == null) {
             return new Placing.NotPlaced("the cache holds no " + name);
@@ -433,7 +433,7 @@ public final class ClientSquareReader {
     }
 
     /**
-     * Every location of the square, read from the tiles the client keeps them on. A location that
+     * Every location of the map square, read from the tiles the client keeps them on. A location that
      * covers several tiles is held by each, and is read once.
      */
     private static List<Placement> placements(JavaToolkit toolkit, Tile[][][] tiles, boolean underwater) {

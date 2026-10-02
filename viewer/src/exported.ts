@@ -2,7 +2,7 @@
  * The kinds of file the export module writes, each in a directory of its own under its build
  * directory: single models, NPCs with their animations, and whole map squares.
  */
-export type ExportKind = 'models' | 'npcs' | 'squares';
+export type ExportKind = 'models' | 'npcs' | 'mapsquares';
 
 /**
  * One file the export module has written, as the viewer's server lists it.
@@ -15,12 +15,12 @@ export interface ExportedFile {
 }
 
 /** What one file of each kind is called on the page. */
-export const SINGULAR: Readonly<Record<ExportKind, string>> = { models: 'Model', npcs: 'NPC', squares: 'Square' };
+export const SINGULAR: Readonly<Record<ExportKind, string>> = { models: 'Model', npcs: 'NPC', mapsquares: 'Map square' };
 
-const HEADINGS: Readonly<Record<ExportKind, string>> = { models: 'Models', npcs: 'NPCs', squares: 'Map squares' };
+const HEADINGS: Readonly<Record<ExportKind, string>> = { models: 'Models', npcs: 'NPCs', mapsquares: 'Map squares' };
 
 /** The order the kinds are listed in. */
-const LISTED: readonly ExportKind[] = ['npcs', 'models', 'squares'];
+const LISTED: readonly ExportKind[] = ['npcs', 'models', 'mapsquares'];
 
 /**
  * Everything the export module has written, as the viewer's server lists it.

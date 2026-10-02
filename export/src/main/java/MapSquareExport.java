@@ -15,18 +15,18 @@ import java.util.TreeMap;
 /**
  * Writes one map square, its ground and the locations standing on it, as a binary glTF file.
  *
- * <p>The scene has one root node for the square, named for it, whose south west corner is the
+ * <p>The scene has one root node for the map square, named for it, whose south west corner is the
  * origin. Under it hangs a node for the ground of each level that has tiles, a node for the bed
- * under the square's water where it has one, and a node for the locations of each level and for
+ * under the map square's water where it has one, and a node for the locations of each level and for
  * those under the water, which holds a node for each location placed. A location's node is named
  * after the location and its id, moved to where the client draws it, and wears the mesh of its
  * model. Each distinct model is written once, so the same tree planted many times on level ground
  * is one mesh.
  */
-public final class SquareExport {
+public final class MapSquareExport {
 
     private static final float UNITS_PER_METRE = 512.0F;
-    private static final int SQUARE_UNITS = ClientSquareReader.ORIGIN * 512;
+    private static final int MAP_SQUARE_UNITS = ClientMapSquareReader.ORIGIN * 512;
 
     public static final class Args implements Arguments {
 
@@ -64,7 +64,7 @@ public final class SquareExport {
     }
 
     public static void main(String[] arguments) throws Exception {
-        var parsed = CommandLine.parse("exportSquare", new Args(), arguments);
+        var parsed = CommandLine.parse("exportMapSquare", new Args(), arguments);
 
         if (parsed.isPresent()) {
             export(parsed.get());
@@ -72,23 +72,23 @@ public final class SquareExport {
     }
 
     private static void export(Args args) throws Exception {
-        var reader = new ClientSquareReader(args.where.cache(), args.keys);
+        var reader = new ClientMapSquareReader(args.where.cache(), args.keys);
         var square = reader.read(args.x, args.z, !args.noLocations);
         var name = args.x + "_" + args.z;
-        var out = args.out == null ? Path.of("build", "squares", name + ".glb") : args.out;
+        var out = args.out == null ? Path.of("build", "mapsquares", name + ".glb") : args.out;
         var gltf = new GltfBuilder();
         var materials = new GltfMaterials(gltf, reader.textures(), args.textures.library(reader.textures()), out);
 
-        System.out.println("square " + name + ", tiles " + args.x * ClientSquareReader.TILES_ACROSS + ","
-            + args.z * ClientSquareReader.TILES_ACROSS + " to " + ((args.x + 1) * ClientSquareReader.TILES_ACROSS - 1)
-            + "," + ((args.z + 1) * ClientSquareReader.TILES_ACROSS - 1));
+        System.out.println("mapsquare " + name + ", tiles " + args.x * ClientMapSquareReader.TILES_ACROSS + ","
+            + args.z * ClientMapSquareReader.TILES_ACROSS + " to " + ((args.x + 1) * ClientMapSquareReader.TILES_ACROSS - 1)
+            + "," + ((args.z + 1) * ClientMapSquareReader.TILES_ACROSS - 1));
 
         var children = new ArrayList<Integer>();
-        for (var level = 0; level < ClientSquareReader.LEVELS; level++) {
+        for (var level = 0; level < ClientMapSquareReader.LEVELS; level++) {
             terrain(gltf, materials, square, square.grounds().get(level), "terrain level " + level, level)
                 .ifPresent(children::add);
         }
-        if (square.underwater() instanceof ClientSquareReader.Underwater.Bed bed) {
+        if (square.underwater() instanceof ClientMapSquareReader.Underwater.Bed bed) {
             terrain(gltf, materials, square, bed.ground(), "underwater bed", 0).ifPresent(children::add);
             report("locations under the water", bed.locations());
         }
@@ -97,32 +97,32 @@ public final class SquareExport {
         children.addAll(locations(gltf, materials, square.placements()));
 
         var root = new LinkedHashMap<String, Object>();
-        root.put("name", "square " + name);
+        root.put("name", "mapsquare " + name);
         root.put("children", children);
-        root.put("extras", Map.of("squareX", args.x, "squareZ", args.z,
-            "tileX", args.x * ClientSquareReader.TILES_ACROSS, "tileZ", args.z * ClientSquareReader.TILES_ACROSS));
+        root.put("extras", Map.of("mapSquareX", args.x, "mapSquareZ", args.z,
+            "tileX", args.x * ClientMapSquareReader.TILES_ACROSS, "tileZ", args.z * ClientMapSquareReader.TILES_ACROSS));
         var document = gltf.json(List.of(gltf.node(root)));
         Glb.write(out, document, gltf.bin());
         System.out.println("wrote " + out.toAbsolutePath().normalize());
     }
 
-    private static void report(String what, ClientSquareReader.Placing placing) {
+    private static void report(String what, ClientMapSquareReader.Placing placing) {
         switch (placing) {
-            case ClientSquareReader.Placing.Placed placed -> {
+            case ClientMapSquareReader.Placing.Placed placed -> {
                 /* empty */
             }
-            case ClientSquareReader.Placing.NotPlaced not -> System.out.println("  no " + what + ": " + not.reason());
+            case ClientMapSquareReader.Placing.NotPlaced not -> System.out.println("  no " + what + ": " + not.reason());
         }
     }
 
     /**
-     * One node wearing the ground of one level, or nothing where the square has no tile on it.
+     * One node wearing the ground of one level, or nothing where the map square has no tile on it.
      */
     private static Optional<Integer> terrain(GltfBuilder gltf, GltfMaterials materials,
-                                             ClientSquareReader.Square square, JavaGround ground, String name,
+                                             ClientMapSquareReader.MapSquare square, JavaGround ground, String name,
                                              int level) {
-        var result = GroundToGltf.convertInto(gltf, materials, ground, ClientSquareReader.ORIGIN,
-            square.x() * ClientSquareReader.TILES_ACROSS, square.z() * ClientSquareReader.TILES_ACROSS);
+        var result = GroundToGltf.convertInto(gltf, materials, ground, ClientMapSquareReader.ORIGIN,
+            square.x() * ClientMapSquareReader.TILES_ACROSS, square.z() * ClientMapSquareReader.TILES_ACROSS);
         if (gltf.empty()) {
             return Optional.empty();
         }
@@ -148,7 +148,7 @@ public final class SquareExport {
      * every sequence it can play, which every node of that location plays.
      */
     private static List<Integer> locations(GltfBuilder gltf, GltfMaterials materials,
-                                           List<ClientSquareReader.Placement> placements) {
+                                           List<ClientMapSquareReader.Placement> placements) {
         if (placements.isEmpty()) {
             return List.of();
         }
@@ -169,7 +169,7 @@ public final class SquareExport {
                 if (gltf.empty()) {
                     mesh = null;
                 } else {
-                    if (placement.motion() instanceof ClientSquareReader.Motion.Animated moving) {
+                    if (placement.motion() instanceof ClientMapSquareReader.Motion.Animated moving) {
                         gltf.targetNames(moving.targetNames());
                     }
                     mesh = gltf.mesh(meshName(placement));
@@ -184,7 +184,7 @@ public final class SquareExport {
                 var node = gltf.node(placementNode(placement, mesh));
                 byLevel.computeIfAbsent(groupName(placement), ignored -> new ArrayList<>()).add(node);
                 parts.merge(placement.part(), 1, Integer::sum);
-                if (placement.motion() instanceof ClientSquareReader.Motion.Animated moving) {
+                if (placement.motion() instanceof ClientMapSquareReader.Motion.Animated moving) {
                     animated++;
                     for (var clip : moving.clips()) {
                         animations.computeIfAbsent(new AnimationKey(placement.id(), clip.sequence()),
@@ -222,34 +222,34 @@ public final class SquareExport {
         return roots;
     }
 
-    private static List<Pose> poses(ClientSquareReader.Placement placement) {
+    private static List<Pose> poses(ClientMapSquareReader.Placement placement) {
         return switch (placement.motion()) {
-            case ClientSquareReader.Motion.Still still -> List.of();
-            case ClientSquareReader.Motion.Animated moving -> moving.poses();
+            case ClientMapSquareReader.Motion.Still still -> List.of();
+            case ClientMapSquareReader.Motion.Animated moving -> moving.poses();
         };
     }
 
-    private static String groupName(ClientSquareReader.Placement placement) {
+    private static String groupName(ClientMapSquareReader.Placement placement) {
         return placement.underwater() ? "underwater locations" : "locations level " + placement.level();
     }
 
-    private static String meshName(ClientSquareReader.Placement placement) {
+    private static String meshName(ClientMapSquareReader.Placement placement) {
         return label(placement) + " shape " + placement.shape() + " rotation " + placement.rotation();
     }
 
-    private static String label(ClientSquareReader.Placement placement) {
+    private static String label(ClientMapSquareReader.Placement placement) {
         var name = placement.name() == null || placement.name().equals("null") ? "location" : placement.name();
         return name + " " + placement.id();
     }
 
-    private static Map<String, Object> placementNode(ClientSquareReader.Placement placement, int mesh) {
+    private static Map<String, Object> placementNode(ClientMapSquareReader.Placement placement, int mesh) {
         var node = new LinkedHashMap<String, Object>();
         node.put("name", label(placement));
         node.put("mesh", mesh);
         node.put("translation", List.of(
-            (placement.x() - SQUARE_UNITS) / UNITS_PER_METRE,
+            (placement.x() - MAP_SQUARE_UNITS) / UNITS_PER_METRE,
             -placement.y() / UNITS_PER_METRE,
-            -(placement.z() - SQUARE_UNITS) / UNITS_PER_METRE));
+            -(placement.z() - MAP_SQUARE_UNITS) / UNITS_PER_METRE));
 
         var extras = new LinkedHashMap<String, Object>();
         extras.put("loc", placement.id());
@@ -258,10 +258,10 @@ public final class SquareExport {
         extras.put("level", placement.level());
         extras.put("part", placement.part());
         extras.put("underwater", placement.underwater());
-        if (placement.motion() instanceof ClientSquareReader.Motion.Animated moving) {
-            extras.put("sequences", moving.clips().stream().map(ClientSquareReader.LocClip::sequence).toList());
+        if (placement.motion() instanceof ClientMapSquareReader.Motion.Animated moving) {
+            extras.put("sequences", moving.clips().stream().map(ClientMapSquareReader.LocClip::sequence).toList());
             if (moving.clips().size() > 1) {
-                extras.put("sequenceWeights", moving.clips().stream().map(ClientSquareReader.LocClip::weight).toList());
+                extras.put("sequenceWeights", moving.clips().stream().map(ClientMapSquareReader.LocClip::weight).toList());
             }
             extras.put("randomStartFrame", moving.randomStartFrame());
         }
@@ -270,7 +270,7 @@ public final class SquareExport {
     }
 
     /**
-     * One sequence of one location, which every node of that location on the square plays.
+     * One sequence of one location, which every node of that location on the map square plays.
      */
     private record AnimationKey(int loc, int sequence) {
     }
@@ -321,7 +321,7 @@ public final class SquareExport {
      */
     private record MeshKey(int id, int shape, int rotation, List<Integer> heights, List<Integer> frames) {
 
-        private static MeshKey of(ClientSquareReader.Placement placement) {
+        private static MeshKey of(ClientMapSquareReader.Placement placement) {
             var model = placement.model();
             var heights = placement.conformed()
                 ? Arrays.stream(Arrays.copyOf(model.vertexY, model.vertexCount)).boxed().toList()
@@ -338,7 +338,7 @@ public final class SquareExport {
         }
     }
 
-    private SquareExport() {
+    private MapSquareExport() {
         /* empty */
     }
 }

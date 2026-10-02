@@ -29,7 +29,7 @@ import java.util.TreeMap;
  * <p>Texture coordinates. The client works out a ground texture's coordinates from where each
  * vertex is in the world, divided by the size the floor type gives the texture, so a texture runs
  * on unbroken from tile to tile. They are worked out the same way here, measured from a multiple
- * of the texture's size near the square, so the numbers stay small and two squares written apart
+ * of the texture's size near the map square, so the numbers stay small and two squares written apart
  * still meet.
  *
  * <p>Normals. The client lights each corner of a tile from the slope across the two tiles either
@@ -69,7 +69,7 @@ public final class GroundToGltf {
     /**
      * What one level came to.
      *
-     * @param tiles how many tiles of the square the level has.
+     * @param tiles how many tiles of the map square the level has.
      * @param faces how many faces the client draws, each counted once however many layers it is
      *     written as.
      * @param approximated how many faces are written other than as the client draws them, and why.
@@ -83,8 +83,8 @@ public final class GroundToGltf {
      * Adds the primitives of one level's tiles inside a square to the mesh a document is building.
      * The caller closes the mesh.
      *
-     * @param origin where the square starts in the region the ground covers, in tiles.
-     * @param worldX where the square starts in the world, in tiles, which places its textures.
+     * @param origin where the map square starts in the region the ground covers, in tiles.
+     * @param worldX where the map square starts in the world, in tiles, which places its textures.
      */
     public static Result convertInto(GltfBuilder gltf, GltfMaterials materials, JavaGround ground,
                                      int origin, int worldX, int worldZ) {
@@ -96,8 +96,8 @@ public final class GroundToGltf {
         var faces = 0;
 
         if (ground.genericBlendedTiles != null) {
-            for (var x = origin; x < origin + ClientSquareReader.TILES_ACROSS; x++) {
-                for (var z = origin; z < origin + ClientSquareReader.TILES_ACROSS; z++) {
+            for (var x = origin; x < origin + ClientMapSquareReader.TILES_ACROSS; x++) {
+                for (var z = origin; z < origin + ClientMapSquareReader.TILES_ACROSS; z++) {
                     var tile = ground.genericBlendedTiles[x][z];
                     if (tile != null) {
                         tiles++;
@@ -261,7 +261,7 @@ public final class GroundToGltf {
 
     /**
      * A texture coordinate along one axis: where the vertex is in the world over the texture's
-     * size, measured from the last multiple of that size before the square starts.
+     * size, measured from the last multiple of that size before the map square starts.
      */
     private static float textureCoordinate(int squareStart, int local, int size) {
         var start = (long) squareStart * TILE;
