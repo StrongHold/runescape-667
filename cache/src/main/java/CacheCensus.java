@@ -32,6 +32,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HexFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -121,7 +122,13 @@ public final class CacheCensus {
     private static final class Opcode {
         private int items;
         private final Set<String> sets = new TreeSet<>();
+
+        /** The bytes each item gave this opcode, as hex, and how many items gave each. */
+        private final Map<String, Integer> values = new TreeMap<>();
     }
+
+    /** How many of the values an opcode that sets nothing was given are written out. */
+    private static final int SHOWN_VALUES = 20;
 
     private record Failure(int id, String why) {
         /* empty */
@@ -180,10 +187,12 @@ public final class CacheCensus {
         try {
             for (var code = packet.g1(); code != 0; code = packet.g1()) {
                 var before = snapshot(type, fields);
+                var from = packet.pos;
                 invoke(step, type, packet, id, code);
                 var opcode = opcodes.computeIfAbsent(code, unused -> new Opcode());
                 opcode.items++;
                 opcode.sets.addAll(changed(before, snapshot(type, fields), fields));
+                opcode.values.merge(HexFormat.of().formatHex(data, from, packet.pos), 1, Integer::sum);
             }
         } catch (InvocationTargetException | RuntimeException failure) {
             var cause = failure instanceof InvocationTargetException thrown ? thrown.getCause() : failure;
@@ -201,8 +210,13 @@ public final class CacheCensus {
             .forEach(failure -> System.out.println("  item " + failure.id() + " " + failure.why()));
 
         System.out.println("  opcode   items  sets");
-        opcodes.forEach((code, opcode) -> System.out.printf("  %6d %7d  %s%n", code, opcode.items,
-            opcode.sets.isEmpty() ? "NOTHING" : String.join(", ", opcode.sets)));
+        opcodes.forEach((code, opcode) -> {
+            System.out.printf("  %6d %7d  %s%n", code, opcode.items,
+                opcode.sets.isEmpty() ? "NOTHING" : String.join(", ", opcode.sets));
+            if (opcode.sets.isEmpty()) {
+                System.out.println("                  given " + valuesOf(opcode));
+            }
+        });
 
         var set = new TreeSet<String>();
         opcodes.values().forEach(opcode -> set.addAll(opcode.sets));
@@ -212,6 +226,17 @@ public final class CacheCensus {
             .toList();
         System.out.println("  set by no opcode: " + (never.isEmpty() ? "none" : String.join(", ", never)));
         System.out.println();
+    }
+
+    /** The values an opcode was given, most common first, as hex with how many items gave each. */
+    private static String valuesOf(Opcode opcode) {
+        var shown = opcode.values.entrySet().stream()
+            .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+            .limit(SHOWN_VALUES)
+            .map(entry -> (entry.getKey().isEmpty() ? "nothing" : entry.getKey()) + " x" + entry.getValue())
+            .toList();
+        var rest = opcode.values.size() - shown.size();
+        return String.join(", ", shown) + (rest > 0 ? ", and " + rest + " more" : "");
     }
 
     /** Every item of a type, by its id, in the order the cache holds them. */
