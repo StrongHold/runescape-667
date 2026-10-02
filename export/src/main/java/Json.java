@@ -28,17 +28,21 @@ public final class Json {
         }
     }
 
+    /**
+     * Writes an object's keys in alphabetical order. The order a map hands them out in is not
+     * always the same from one run to the next, and the file written must be the same bytes
+     * every time it is written from the same cache.
+     */
     private static void writeObject(Map<?, ?> map, StringBuilder out) {
         out.append('{');
-        var first = true;
-        for (var entry : map.entrySet()) {
-            if (!first) {
+        var keys = map.keySet().stream().map(String.class::cast).sorted().toList();
+        for (var key : keys) {
+            if (!key.equals(keys.getFirst())) {
                 out.append(',');
             }
-            writeString((String) entry.getKey(), out);
+            writeString(key, out);
             out.append(':');
-            write(entry.getValue(), out);
-            first = false;
+            write(map.get(key), out);
         }
         out.append('}');
     }
