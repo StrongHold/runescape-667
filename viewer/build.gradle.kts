@@ -28,6 +28,13 @@ tasks.assemble {
     dependsOn(viteBuild)
 }
 
+tasks.register<NpmTask>("validate") {
+    dependsOn(tasks.npmInstall)
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    description = "Checks every file under export/build with the Khronos glTF validator."
+    args = listOf("run", "validate")
+}
+
 tasks.register<NpmTask>("dev") {
     dependsOn(tasks.npmInstall)
     group = "application"
