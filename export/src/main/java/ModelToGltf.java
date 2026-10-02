@@ -1,10 +1,6 @@
 import com.jagex.graphics.TextureMetrics;
 import com.jagex.math.ColourUtils;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -14,8 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-
-import javax.imageio.ImageIO;
 
 /**
  * Turns a model the client has built into a glTF mesh.
@@ -63,31 +57,20 @@ public final class ModelToGltf {
      */
     private static final int FULL_LIGHT = 127;
 
-    /**
-     * The gamma both toolkits ask the texture source to draw a texture with.
-     */
-    private static final float TEXTURE_GAMMA = 0.7F;
-
-    private static final int TEXTURE_SIZE = 128;
-    private static final int SMALL_TEXTURE_SIZE = 64;
-
-    private static final int ALPHA_CUTOUT = 1;
-    private static final int ALPHA_BLENDED = 2;
-
-    private static final float MASK_CUTOFF = 0.5F;
-
     private final JavaModel model;
     private final Js5TextureSource source;
     private final List<Pose> poses;
-    private final GltfBuilder gltf = new GltfBuilder();
+    private final GltfBuilder gltf;
+    private final GltfMaterials materials;
     private final Map<PrimitiveKey, Primitive> primitives = new LinkedHashMap<>();
-    private final Map<Integer, Integer> gltfTextures = new TreeMap<>();
     private final Map<String, Integer> skipped = new TreeMap<>();
 
-    private ModelToGltf(JavaModel model, Js5TextureSource source, List<Pose> poses) {
+    private ModelToGltf(JavaModel model, List<Pose> poses, GltfBuilder gltf, GltfMaterials materials) {
         this.model = model;
-        this.source = source;
+        this.source = materials.source();
         this.poses = poses;
+        this.gltf = gltf;
+        this.materials = materials;
     }
 
     public static Result convert(JavaModel model, Js5TextureSource source) {
@@ -99,7 +82,16 @@ public final class ModelToGltf {
      *     in the order the targets are numbered.
      */
     public static Result convert(JavaModel model, Js5TextureSource source, List<Pose> poses) {
-        return new ModelToGltf(model, source, poses).convert();
+        var gltf = new GltfBuilder();
+        return new ModelToGltf(model, poses, gltf, new GltfMaterials(gltf, source)).convert();
+    }
+
+    /**
+     * Adds the model's primitives to the mesh a document is building, drawing on the materials the
+     * rest of the document shares. The caller closes the mesh.
+     */
+    public static Result convertInto(GltfBuilder gltf, GltfMaterials materials, JavaModel model) {
+        return new ModelToGltf(model, List.of(), gltf, materials).convert();
     }
 
     /**
@@ -299,15 +291,15 @@ public final class ModelToGltf {
      * texture's alpha blend mode when it has one, and only falls back to the face's own alpha
      * when it has none.
      */
-    private AlphaMode alphaMode(int face, TextureMetrics metrics) {
-        if (metrics != null && metrics.alphaBlendMode == ALPHA_BLENDED) {
-            return AlphaMode.BLEND;
-        } else if (metrics != null && metrics.alphaBlendMode == ALPHA_CUTOUT) {
-            return AlphaMode.MASK;
+    private GltfMaterials.AlphaMode alphaMode(int face, TextureMetrics metrics) {
+        if (metrics != null && metrics.alphaBlendMode == GltfMaterials.ALPHA_BLENDED) {
+            return GltfMaterials.AlphaMode.BLEND;
+        } else if (metrics != null && metrics.alphaBlendMode == GltfMaterials.ALPHA_CUTOUT) {
+            return GltfMaterials.AlphaMode.MASK;
         } else if (alpha(face) != 0) {
-            return AlphaMode.BLEND;
+            return GltfMaterials.AlphaMode.BLEND;
         } else {
-            return AlphaMode.OPAQUE;
+            return GltfMaterials.AlphaMode.OPAQUE;
         }
     }
 
@@ -393,71 +385,7 @@ public final class ModelToGltf {
     }
 
     private int material(PrimitiveKey key) {
-        var pbr = new LinkedHashMap<String, Object>();
-        pbr.put("baseColorFactor", List.of(1.0F, 1.0F, 1.0F, 1.0F));
-        pbr.put("metallicFactor", 0.0F);
-        pbr.put("roughnessFactor", 1.0F);
-
-        if (key.texture() != -1) {
-            pbr.put("baseColorTexture", Map.of("index", gltfTexture(key.texture())));
-        }
-
-        var material = new LinkedHashMap<String, Object>();
-        material.put("name", (key.texture() == -1 ? "colour" : "texture " + key.texture())
-            + " " + key.mode().name().toLowerCase());
-        material.put("pbrMetallicRoughness", pbr);
-        material.put("alphaMode", key.mode().name());
-        if (key.mode() == AlphaMode.MASK) {
-            material.put("alphaCutoff", MASK_CUTOFF);
-        }
-
-        return gltf.material(material);
-    }
-
-    private int gltfTexture(int id) {
-        var held = gltfTextures.get(id);
-        if (held != null) {
-            return held;
-        }
-
-        var metrics = source.getMetrics(id);
-        var size = metrics.small ? SMALL_TEXTURE_SIZE : TEXTURE_SIZE;
-        var pixels = source.argbOutput(TEXTURE_GAMMA, id, size, size);
-        var image = gltf.image(png(pixels, size, metrics.alphaBlendMode), "texture " + id);
-        var wrapS = metrics.repeatsU ? GltfBuilder.REPEAT : GltfBuilder.CLAMP_TO_EDGE;
-        var wrapT = metrics.repeatsV ? GltfBuilder.REPEAT : GltfBuilder.CLAMP_TO_EDGE;
-        var minFilter = metrics.mipmap != 0 ? GltfBuilder.LINEAR_MIPMAP_LINEAR : GltfBuilder.LINEAR;
-
-        var texture = gltf.texture(image, wrapS, wrapT, minFilter);
-        gltfTextures.put(id, texture);
-        return texture;
-    }
-
-    /**
-     * The texture as a PNG, with the alpha the client's rasteriser reads from it: its own alpha
-     * where the texture blends, none at all where it is cut out except that a texel of zero is a
-     * hole, and fully opaque otherwise. The texels are stored a row at a time from the top, which
-     * is also how glTF lays out texture coordinates.
-     */
-    private static byte[] png(int[] pixels, int size, int blendMode) {
-        var image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
-        for (var i = 0; i < pixels.length; i++) {
-            var texel = pixels[i];
-            var alpha = switch (blendMode) {
-                case ALPHA_BLENDED -> texel >>> 24;
-                case ALPHA_CUTOUT -> texel == 0 ? 0 : 0xFF;
-                default -> 0xFF;
-            };
-            image.setRGB(i % size, i / size, alpha << 24 | texel & 0xFFFFFF);
-        }
-
-        var out = new ByteArrayOutputStream();
-        try {
-            ImageIO.write(image, "png", out);
-        } catch (IOException failure) {
-            throw new UncheckedIOException(failure);
-        }
-        return out.toByteArray();
+        return materials.material(key.texture(), key.mode());
     }
 
     private int alpha(int face) {
@@ -480,11 +408,7 @@ public final class ModelToGltf {
         return model.faceColour[face] & 0xFFFF;
     }
 
-    private enum AlphaMode {
-        OPAQUE, MASK, BLEND
-    }
-
-    private record PrimitiveKey(int texture, AlphaMode mode) {
+    private record PrimitiveKey(int texture, GltfMaterials.AlphaMode mode) {
     }
 
     /**

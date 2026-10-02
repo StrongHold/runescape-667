@@ -10,7 +10,6 @@ import com.jagex.js5.Js5Index;
 import com.jagex.js5.js5;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,14 +34,6 @@ import java.util.TreeMap;
 public final class CacheLayoutCensus {
 
     private static final List<String> FORMATS = List.of("model", "base", "frame", "terrain", "location", "texture");
-
-    /**
-     * The variable that can name where the keys the map's locations are locked with are kept, and
-     * the server's own copy of them, read when neither it nor {@code --keys} names a place.
-     */
-    private static final String KEYS_VARIABLE = "SW3D_LOCATION_KEYS";
-    private static final Path DEFAULT_KEYS = Path.of(System.getProperty("user.home"),
-        "code/stronghold/game/share/location-keys");
 
     /**
      * How far a map square's position can run on either axis: the client keeps each in a byte.
@@ -92,7 +83,7 @@ public final class CacheLayoutCensus {
         private List<String> formats = new ArrayList<>();
 
         @Parameter(names = "--keys", description = "The directory holding the key each square's locations are locked with, one <name>.txt of four numbers per square")
-        private Path keys = defaultKeys();
+        private Path keys = LocationKeys.defaultDirectory();
 
         @Parameter(names = "--help", help = true, description = "Print this message")
         private boolean help;
@@ -423,7 +414,7 @@ public final class CacheLayoutCensus {
         for (var square : squaresNamed(index, "l").entrySet()) {
             var name = square.getKey();
             var group = square.getValue();
-            var key = keyFor(keys, name);
+            var key = LocationKeys.read(keys, name).orElse(null);
             var packed = Cache.packed(cache, Js5Archive.MAPS, group);
             var data = unlock(packed, key == null ? NO_KEY : key);
 
@@ -434,7 +425,7 @@ public final class CacheLayoutCensus {
             } else if (data == null) {
                 tally.add(name, List.of(new Layout.Mismatch("the key does not unlock the group", "group " + group)));
             } else {
-                if (key == null || isOpen(key)) {
+                if (key == null || LocationKeys.isOpen(key)) {
                     open++;
                 } else {
                     locked++;
@@ -494,31 +485,6 @@ public final class CacheLayoutCensus {
     }
 
     /**
-     * The key a square's locations are locked with, out of a file of four numbers named for the
-     * square, or null when there is no such file.
-     */
-    private static int[] keyFor(Path keys, String name) throws Exception {
-        var file = keys.resolve(name + ".txt");
-        if (!Files.isReadable(file)) {
-            return null;
-        }
-
-        var lines = Files.readAllLines(file);
-        var key = new int[4];
-        for (var part = 0; part < key.length; part++) {
-            key[part] = Integer.parseInt(lines.get(part).trim());
-        }
-        return key;
-    }
-
-    /**
-     * Whether a key is the key of nothing, which the client takes to mean the group is not locked.
-     */
-    private static boolean isOpen(int[] key) {
-        return key[0] == 0 && key[1] == 0 && key[2] == 0 && key[3] == 0;
-    }
-
-    /**
      * Unlocks a group and undoes its compression as {@code js5.unpackFile} does, or answers null
      * when the key does not fit it.
      *
@@ -536,7 +502,7 @@ public final class CacheLayoutCensus {
      */
     private static byte[] unlock(byte[] packed, int[] key) {
         var copy = packed.clone();
-        if (!isOpen(key)) {
+        if (!LocationKeys.isOpen(key)) {
             new Packet(copy).tinydec(key, copy.length);
         }
 
@@ -667,11 +633,6 @@ public final class CacheLayoutCensus {
             "effect param 2 sum", held.stream().mapToInt(metrics -> metrics.effectParam2).sum(),
             "alpha blend mode sum", held.stream().mapToInt(metrics -> metrics.alphaBlendMode).sum()
         );
-    }
-
-    private static Path defaultKeys() {
-        var named = System.getenv(KEYS_VARIABLE);
-        return named == null || named.isEmpty() ? DEFAULT_KEYS : Path.of(named);
     }
 
     /**

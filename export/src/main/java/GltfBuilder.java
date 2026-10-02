@@ -13,6 +13,10 @@ import java.util.Map;
  * Each part is added once and named by its place in its list, which is how glTF refers to one
  * part from another. Everything written into the buffer starts on a four byte boundary, which is
  * the strictest alignment any accessor here asks for.
+ *
+ * Primitives are added to the mesh being built, which {@link #mesh} closes. A document of one
+ * mesh worn by one node is written by {@link #json(String)}, and a document of many by
+ * {@link #json(List)}, from the nodes added with {@link #node}.
  */
 public final class GltfBuilder {
 
@@ -38,8 +42,10 @@ public final class GltfBuilder {
     private final List<Object> samplers = new ArrayList<>();
     private final List<Object> textures = new ArrayList<>();
     private final List<Object> materials = new ArrayList<>();
-    private final List<Object> primitives = new ArrayList<>();
+    private final List<Object> meshes = new ArrayList<>();
+    private final List<Object> nodes = new ArrayList<>();
     private final List<Object> animations = new ArrayList<>();
+    private List<Object> primitives = new ArrayList<>();
     private List<String> targetNames = List.of();
 
     /**
@@ -169,8 +175,42 @@ public final class GltfBuilder {
         animations.add(animation);
     }
 
+    /**
+     * Whether the mesh being built has no primitive yet.
+     */
     public boolean empty() {
         return primitives.isEmpty();
+    }
+
+    /**
+     * Closes the mesh being built, with every primitive added since the last one was closed, and
+     * starts another.
+     *
+     * @return the mesh's number, which a node names to wear it.
+     */
+    public int mesh(String name) {
+        var mesh = new LinkedHashMap<String, Object>();
+        mesh.put("name", name);
+        mesh.put("primitives", primitives);
+        if (!targetNames.isEmpty()) {
+            mesh.put("weights", Collections.nCopies(targetNames.size(), 0.0F));
+            mesh.put("extras", Map.of("targetNames", targetNames));
+        }
+
+        meshes.add(mesh);
+        primitives = new ArrayList<>();
+        targetNames = List.of();
+        return meshes.size() - 1;
+    }
+
+    /**
+     * Adds a node, which may wear a mesh, be moved, and hold other nodes.
+     *
+     * @return the node's number, which a scene or a parent node names it by.
+     */
+    public int node(Map<String, Object> node) {
+        nodes.add(node);
+        return nodes.size() - 1;
     }
 
     /**
@@ -186,33 +226,33 @@ public final class GltfBuilder {
     public String json(String name, Map<String, Object> extras) {
         var node = new LinkedHashMap<String, Object>();
         node.put("name", name);
-        node.put("mesh", 0);
+        node.put("mesh", mesh(name));
         if (!extras.isEmpty()) {
             node.put("extras", extras);
         }
+        return json(List.of(node(node)));
+    }
 
-        var mesh = new LinkedHashMap<String, Object>();
-        mesh.put("name", name);
-        mesh.put("primitives", primitives);
-        if (!targetNames.isEmpty()) {
-            mesh.put("weights", Collections.nCopies(targetNames.size(), 0.0F));
-            mesh.put("extras", Map.of("targetNames", targetNames));
-        }
-
+    /**
+     * The document, holding one scene of the nodes named, which the other nodes hang from.
+     */
+    public String json(List<Integer> roots) {
         var document = new LinkedHashMap<String, Object>();
         document.put("asset", Map.of("version", "2.0", "generator", "runescape-667 export"));
         document.put("scene", 0);
-        document.put("scenes", List.of(Map.of("nodes", List.of(0))));
-        document.put("nodes", List.of(node));
-        document.put("meshes", List.of(mesh));
+        document.put("scenes", List.of(Map.of("nodes", roots)));
+        document.put("nodes", nodes);
+        putIfAny(document, "meshes", meshes);
         putIfAny(document, "animations", animations);
-        document.put("materials", materials);
+        putIfAny(document, "materials", materials);
         putIfAny(document, "textures", textures);
         putIfAny(document, "samplers", samplers);
         putIfAny(document, "images", images);
-        document.put("accessors", accessors);
-        document.put("bufferViews", bufferViews);
-        document.put("buffers", List.of(Map.of("byteLength", bin.size())));
+        putIfAny(document, "accessors", accessors);
+        putIfAny(document, "bufferViews", bufferViews);
+        if (bin.size() > 0) {
+            document.put("buffers", List.of(Map.of("byteLength", bin.size())));
+        }
         return Json.write(document);
     }
 

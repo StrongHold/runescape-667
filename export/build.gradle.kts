@@ -17,3 +17,11 @@ tasks.register<JavaExec>("exportNpc") {
     mainClass = "NpcExport"
     classpath = sourceSets["main"].runtimeClasspath
 }
+
+tasks.register<JavaExec>("exportSquare") {
+    description = "Writes one map square out of the cache as a binary glTF file: its ground on every level and the locations standing on it."
+    mainClass = "SquareExport"
+    classpath = sourceSets["main"].runtimeClasspath
+    environment("SW3D_LOCATION_KEYS",
+        providers.environmentVariable("SW3D_LOCATION_KEYS").getOrElse(""))
+}

@@ -46,7 +46,8 @@ stopped, which it has to read without failing, and cut one byte shorter, which i
 The locations of a square are locked with a key that only the server holds, and are read from a
 directory of one file of four numbers per square, named for the square, as `--keys` gives or else
 `SW3D_LOCATION_KEYS`, or else the `game/share/location-keys` of a checkout of the server beside
-this one. A square with no key is read as the client reads one it is handed a key of nothing for,
+this one. `LocationKeys` reads them, for the census and for anything else that places a square's
+locations, such as the `export` module's map squares. A square with no key is read as the client reads one it is handed a key of nothing for,
 and a square that does not open that way is counted apart rather than failed. A locked group still
 says in the open how long it is, so every stored map group is also checked to be its container and
 its two byte version and nothing more.

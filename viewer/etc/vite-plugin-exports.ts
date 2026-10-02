@@ -2,17 +2,17 @@ import { createReadStream } from 'node:fs';
 import { readdir, stat } from 'node:fs/promises';
 import { join, normalize, sep } from 'node:path';
 import type { Plugin } from 'vite';
-import type { ExportedFile } from '../src/exported.ts';
+import type { ExportedFile, ExportKind } from '../src/exported.ts';
 
 /**
  * The kinds of file the export module writes, each in a directory of its own under its build
  * directory.
  */
-const KINDS: readonly ExportedFile['kind'][] = ['models', 'npcs'];
+const KINDS: readonly ExportKind[] = ['models', 'npcs', 'squares'];
 
 /**
- * Serves what the export module has written, so the viewer lists every model and NPC without
- * anything being copied. The list is read on every request, so a file exported while the viewer
+ * Serves what the export module has written, so the viewer lists every model, NPC and map square
+ * without anything being copied. The list is read on every request, so a file exported while the viewer
  * is open shows up on the next reload.
  */
 export function exportsServed(directory: string): Plugin {
@@ -54,10 +54,13 @@ async function listed(directory: string): Promise<ExportedFile[]> {
         }
     }
 
-    return files.sort((a, b) => a.kind.localeCompare(b.kind) || idOf(a.name) - idOf(b.name));
+    return files.sort((a, b) => a.kind.localeCompare(b.kind) || byNumbers(a.name, b.name));
 }
 
-function idOf(name: string): number {
-    const id = Number.parseInt(name, 10);
-    return Number.isNaN(id) ? Number.MAX_SAFE_INTEGER : id;
+/**
+ * Orders names by the numbers in them, so model 9 comes before model 10 and square 50_49 before
+ * square 50_50.
+ */
+function byNumbers(a: string, b: string): number {
+    return a.localeCompare(b, 'en', { numeric: true });
 }
