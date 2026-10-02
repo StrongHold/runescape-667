@@ -28,6 +28,12 @@ import java.util.TreeSet;
  */
 public final class MapSquareExport {
 
+    /**
+     * Where the map square starts in the region it is built in, in the client's units, which
+     * every placement is measured from so that it stands on the ground as written.
+     */
+    private static final int MAP_SQUARE_UNITS = ClientMapSquareReader.ORIGIN * 512;
+
     public static final class Args implements Arguments {
 
         @ParametersDelegate
@@ -214,9 +220,9 @@ public final class MapSquareExport {
         description.put("level", placement.level());
         description.put("virtualLevel", placement.virtualLevel());
         description.put("underwater", placement.underwater());
-        description.put("x", placement.x());
+        description.put("x", placement.x() - MAP_SQUARE_UNITS);
         description.put("y", placement.y());
-        description.put("z", placement.z());
+        description.put("z", placement.z() - MAP_SQUARE_UNITS);
         description.put("part", placement.part());
         if (placement.sequencesOf() != placement.id()) {
             description.put("sequencesOf", placement.sequencesOf());

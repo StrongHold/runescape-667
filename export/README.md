@@ -206,7 +206,8 @@ The description names the ground file and the library, and lists every placement
 units: 512 to a tile, x east, y down and z north, which the glTF frame takes as (x, -y, -z) over
 512. Each placement names its `loc`, the `shape` the client builds its model as, its `rotation`,
 its `level`, the `virtualLevel` whose ground it is bent against, whether it is `underwater`, where
-it stands as `x`, `y` and `z`, and what the client keeps it as, its `part`. A location that takes
+it stands as `x`, `y` and `z` from the map square's south west corner, and what the client keeps
+it as, its `part`. A location that takes
 the look of another by a variable is named as the look it has taken, with every variable at 0,
 which is how the client stands before the server sends any, and `sequencesOf` names the location
 whose sequences it plays where that is not the same one.
