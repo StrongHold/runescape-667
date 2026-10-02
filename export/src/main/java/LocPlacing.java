@@ -15,7 +15,8 @@ import com.jagex.graphics.Ground;
  *     because the client turns it before the frames of its sequence move it, and the frames are
  *     not turned with it. That asset is only moved.</li>
  * <li>The model is turned about y by a quarter turn for each of the rotation's low two bits.</li>
- * <li>It is scaled by the type's resize, over 128, along each axis of the world.</li>
+ * <li>It is scaled by the type's resize, over 128, along each axis of the world. An animated
+ *     location is scaled in its asset already, and its extras say so.</li>
  * <li>It is moved by the type's offsets.</li>
  * <li>A centrepiece placed with a rotation above 3, which the map placed as a diagonal, is turned
  *     45 degrees about y.</li>
@@ -44,9 +45,10 @@ public final class LocPlacing {
      * @param rotation the rotation the client builds it with, which is above 3 for a diagonal.
      * @param y the height of the ground at the placement, which the bend measures from.
      * @param turned whether the asset is the one turned 45 degrees already.
+     * @param scaled whether the asset is scaled already, as an animated location's is.
      */
     public static JavaModel place(JavaModel asset, LocType type, int shape, int rotation, Ground floor, Ground ceiling,
-                                  int x, int y, int z, boolean turned) {
+                                  int x, int y, int z, boolean turned, boolean scaled) {
         var model = (JavaModel) asset.copy((byte) 0, ClientLocReader.EVERY_FUNCTION, true);
 
         if (shape == LocShapes.WALL_L && rotation > 3) {
@@ -61,7 +63,7 @@ public final class LocPlacing {
         if ((rotation & 3) != 0) {
             model.k((rotation & 3) * QUARTER_TURN);
         }
-        if (type.resizex != FULL_SCALE || type.resizey != FULL_SCALE || type.resizez != FULL_SCALE) {
+        if (!scaled && (type.resizex != FULL_SCALE || type.resizey != FULL_SCALE || type.resizez != FULL_SCALE)) {
             model.O(type.resizex, type.resizey, type.resizez);
         }
         if (type.xoff != 0 || type.yoff != 0 || type.zoff != 0) {

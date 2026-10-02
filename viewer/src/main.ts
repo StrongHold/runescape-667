@@ -9,7 +9,7 @@ import { describe, isMapSquare } from './extras.ts';
 import { loadMapSquare } from './mapsquare.ts';
 import { frame, frameFrom, SIDES } from './framing.ts';
 import { createLighting } from './lighting.ts';
-import { baseBox, isTransparent, meshesOf, setWireframe, triangleCount } from './meshes.ts';
+import { baseBox, completeMorphTargets, isTransparent, meshesOf, setWireframe, triangleCount } from './meshes.ts';
 import { readPage } from './page.ts';
 import { createScenery } from './scenery.ts';
 import { createStage } from './stage.ts';
@@ -68,6 +68,7 @@ function failed(label: string, failure: unknown): void {
 async function open(data: ArrayBuffer, label: string, path: string): Promise<void> {
     try {
         const gltf = await loader.parseAsync(data, path);
+        completeMorphTargets(gltf.scene);
         show(gltf.scene, gltf.animations, label, `${gltf.animations.length} animations`);
     } catch (failure) {
         failed(label, failure);

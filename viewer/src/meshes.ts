@@ -1,4 +1,4 @@
-import { Box3, Mesh, Object3D, Vector3 } from 'three';
+import { Box3, BufferAttribute, Mesh, Object3D, Vector3 } from 'three';
 
 export function meshesOf(object: Object3D): Mesh[] {
     const meshes: Mesh[] = [];
@@ -24,6 +24,23 @@ export function setWireframe(object: Object3D, on: boolean): void {
             if ('wireframe' in material) {
                 material.wireframe = on;
             }
+        }
+    }
+}
+
+/**
+ * Gives every mesh whose morph targets hold only colours a position target of no movement as
+ * well. The exporter writes a target of colours alone for a frame that only fades or recolours a
+ * part, which glTF allows, and three.js reads the number of vertices to morph from the position
+ * targets and fails without them.
+ */
+export function completeMorphTargets(object: Object3D): void {
+    for (const mesh of meshesOf(object)) {
+        const geometry = mesh.geometry;
+        const colours = geometry.morphAttributes.color;
+        if (colours !== undefined && geometry.morphAttributes.position === undefined) {
+            const still = new BufferAttribute(new Float32Array(geometry.attributes.position.count * 3), 3);
+            geometry.morphAttributes.position = colours.map(() => still);
         }
     }
 }

@@ -12,6 +12,7 @@ import {
     Vector3
 } from 'three';
 import { GLTFLoader, type GLTF } from 'three/addons/loaders/GLTFLoader.js';
+import { clone as cloneWithSkeleton } from 'three/addons/utils/SkeletonUtils.js';
 import { bend, Ground, type Bounds, type ClientVertex } from './bend.ts';
 import {
     isLocExtras,
@@ -21,6 +22,7 @@ import {
     type Placement,
     type ShapeExtras
 } from './description.ts';
+import { completeMorphTargets } from './meshes.ts';
 import { placeBounds, placementMatrix, placeVertices, standingMatrix, usesTurnedMesh } from './placing.ts';
 
 /**
@@ -92,7 +94,10 @@ async function loadLocs(directory: string, description: MapSquareDescription,
     for (let from = 0; from < ids.length; from += FETCHED_AT_ONCE) {
         const batch = ids.slice(from, from + FETCHED_AT_ONCE);
         const loaded = await Promise.all(batch.map(id => loader.loadAsync(`${directory}${id}.glb`)));
-        batch.forEach((id, index) => locs.set(id, loaded[index]));
+        batch.forEach((id, index) => {
+            completeMorphTargets(loaded[index].scene);
+            locs.set(id, loaded[index]);
+        });
     }
     return locs;
 }
@@ -117,7 +122,7 @@ function place(loc: GLTF, placement: Placement, description: MapSquareDescriptio
         return null;
     }
 
-    const copy = source.clone();
+    const copy = cloneWithSkeleton(source);
     const inner = new Object3D();
     inner.matrixAutoUpdate = false;
     inner.add(copy);
@@ -129,7 +134,7 @@ function place(loc: GLTF, placement: Placement, description: MapSquareDescriptio
     }
 
     const outer = new Object3D();
-    outer.name = `${extras.name ?? 'location'} ${placement.loc}`;
+    outer.name = `${extras.name === null || extras.name === 'null' ? 'location' : extras.name} ${placement.loc}`;
     outer.userData = { ...placement, randomStartFrame: extras.randomStartFrame === true };
     outer.matrixAutoUpdate = false;
     outer.matrix.copy(standingMatrix(extras, placement));
@@ -138,14 +143,11 @@ function place(loc: GLTF, placement: Placement, description: MapSquareDescriptio
     return { object: outer, clips: rebindClips(loc, source, copy, outer.name) };
 }
 
+/**
+ * The location's extras, which its file carries on its scene.
+ */
 function locExtras(loc: GLTF): LocExtras | null {
-    let found: LocExtras | null = null;
-    loc.scene.traverse(node => {
-        if (found === null && isLocExtras(node.userData)) {
-            found = node.userData;
-        }
-    });
-    return found;
+    return isLocExtras(loc.scene.userData) ? loc.scene.userData : null;
 }
 
 function shapeNode(loc: GLTF, shape: number, turned: boolean): Object3D | null {
@@ -230,8 +232,8 @@ function bentGeometry(geometry: BufferGeometry, matrix: Matrix4, bounds: Bounds,
 
 /**
  * The location's animations, bound to the copy. The loader names each track after the node it
- * moves, and the copy's meshes are named by their own ids instead, in the order the source's
- * were, so that each placement animates on its own.
+ * moves, a mesh for its morph targets or a bone, and the copy's nodes are named by their own ids
+ * instead, in the order the source's were, so that each placement animates on its own.
  */
 function rebindClips(loc: GLTF, source: Object3D, copy: Object3D, label: string): AnimationClip[] {
     const sourceNodes = descendants(source);

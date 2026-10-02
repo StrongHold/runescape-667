@@ -4,6 +4,7 @@ import com.jagex.game.runetek6.config.npctype.NPCType;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -77,26 +78,48 @@ public final class NpcExport {
         var out = args.out == null ? Path.of("build", "npcs", args.npc + ".glb") : args.out;
         var gltf = new GltfBuilder();
         var materials = new GltfMaterials(gltf, reader.textures(), args.textures.library(reader.textures()), out);
-        var result = ModelToGltf.convert(base, gltf, materials, poses);
+        var bones = Bones.of(baker);
+        var result = bones.isPresent()
+            ? ModelToGltf.convertSkinned(base, gltf, materials, poses, bones.get().joints().ofVertex())
+            : ModelToGltf.convert(base, gltf, materials, poses);
         if (gltf.empty()) {
             throw new IllegalStateException("NPC " + args.npc + " has no face the client draws.");
         }
 
-        gltf.targetNames(baker.names());
-        var node = List.of(0);
+        if (result.targets()) {
+            gltf.targetNames(baker.names());
+        }
+        var name = type.name + " (npc " + args.npc + ")";
+        var node = new LinkedHashMap<String, Object>();
+        node.put("name", name);
+        node.put("mesh", gltf.mesh(name));
+        node.put("extras", extras(args.npc, type));
+        var skin = bones.map(held -> SkinWriter.write(gltf, held.joints()));
+        skin.ifPresent(held -> {
+            node.put("skin", held.number());
+            node.put("children", held.childNodes());
+        });
+        var nodeNumber = gltf.node(node);
+
         for (var animation : baked) {
             if (!animation.clip().keys().isEmpty()) {
-                AnimationWriter.write(gltf, animation.name(), animation.clip(), poses.size(), node,
-                    Map.of("role", animation.movement().role()));
+                var extras = Map.<String, Object>of("role", animation.movement().role());
+                if (bones.isPresent()) {
+                    SkinWriter.writeClip(gltf, animation.name(), animation.clip(), bones.get().joints(),
+                        baker.framePoses(), skin.orElseThrow(), nodeNumber, result.targets() ? poses.size() : 0, extras);
+                } else {
+                    AnimationWriter.write(gltf, animation.name(), animation.clip(), poses.size(), List.of(nodeNumber),
+                        extras);
+                }
             }
         }
 
-        var name = type.name + " (npc " + args.npc + ")";
-        Glb.write(out, gltf.json(name, extras(args.npc, type)), gltf.bin());
+        Glb.write(out, gltf.json(List.of(nodeNumber)), gltf.bin());
 
         System.out.println("wrote " + out.toAbsolutePath().normalize());
         System.out.println("  " + name + ", " + base.vertexCount + " vertices, " + result.faces() + " faces in "
-            + result.primitives() + " primitives, " + poses.size() + " morph targets");
+            + result.primitives() + " primitives, " + (result.targets() ? poses.size() : 0) + " morph targets");
+        System.out.println("  " + Bones.describe(baker, bones));
         for (var skip : result.skipped().entrySet()) {
             System.out.println("  " + skip.getValue() + " faces left out, " + skip.getKey());
         }

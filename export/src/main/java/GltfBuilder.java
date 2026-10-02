@@ -21,6 +21,7 @@ import java.util.Map;
 public final class GltfBuilder {
 
     public static final int FLOAT = 5126;
+    public static final int UNSIGNED_BYTE = 5121;
     public static final int ARRAY_BUFFER = 34962;
     public static final int ELEMENT_ARRAY_BUFFER = 34963;
     public static final int UNSIGNED_SHORT = 5123;
@@ -45,6 +46,7 @@ public final class GltfBuilder {
     private final List<Object> meshes = new ArrayList<>();
     private final List<Object> nodes = new ArrayList<>();
     private final List<Object> animations = new ArrayList<>();
+    private final List<Object> skins = new ArrayList<>();
     private List<Object> primitives = new ArrayList<>();
     private List<String> targetNames = List.of();
 
@@ -90,6 +92,62 @@ public final class GltfBuilder {
 
         accessors.add(accessor);
         return accessors.size() - 1;
+    }
+
+    /**
+     * Adds a vertex attribute of small whole numbers, {@code components} to a vertex, as unsigned
+     * bytes where they all fit and unsigned shorts otherwise, which is how glTF asks for the
+     * joints of a vertex.
+     */
+    public int wholeAttribute(int[] values, int components, String type) {
+        var greatest = 0;
+        for (var value : values) {
+            greatest = Math.max(greatest, value);
+        }
+        var wide = greatest > 0xFF;
+        var bytes = ByteBuffer.allocate(values.length * (wide ? Short.BYTES : Byte.BYTES)).order(ByteOrder.LITTLE_ENDIAN);
+        for (var value : values) {
+            if (wide) {
+                bytes.putShort((short) value);
+            } else {
+                bytes.put((byte) value);
+            }
+        }
+
+        var accessor = new LinkedHashMap<String, Object>();
+        accessor.put("bufferView", bufferView(bytes.array(), ARRAY_BUFFER));
+        accessor.put("componentType", wide ? UNSIGNED_SHORT : UNSIGNED_BYTE);
+        accessor.put("count", values.length / components);
+        accessor.put("type", type);
+        accessors.add(accessor);
+        return accessors.size() - 1;
+    }
+
+    /**
+     * Adds a skin: the joints a mesh is bound to, in the order its vertices number them.
+     *
+     * @param inverseBindMatrices the accessor of one matrix for each joint, which takes the mesh
+     *     into the joint's frame at bind time.
+     */
+    public int skin(List<Integer> joints, int inverseBindMatrices) {
+        var skin = new LinkedHashMap<String, Object>();
+        skin.put("joints", joints);
+        skin.put("inverseBindMatrices", inverseBindMatrices);
+        skins.add(skin);
+        return skins.size() - 1;
+    }
+
+    /**
+     * Adds an animation of any channels, each driven by one of the samplers.
+     */
+    public void animation(String name, List<Map<String, Object>> samplers, List<Map<String, Object>> channels,
+                          Map<String, Object> extras) {
+        var animation = new LinkedHashMap<String, Object>();
+        animation.put("name", name);
+        animation.put("samplers", samplers);
+        animation.put("channels", channels);
+        animation.put("extras", extras);
+        animations.add(animation);
     }
 
     /**
@@ -222,6 +280,15 @@ public final class GltfBuilder {
     }
 
     /**
+     * The one child of a node added earlier.
+     */
+    @SuppressWarnings("unchecked")
+    public int childOf(int node) {
+        var children = (List<Integer>) ((Map<String, Object>) nodes.get(node)).get("children");
+        return children.getFirst();
+    }
+
+    /**
      * The document, holding one scene of one node that wears the one mesh.
      */
     public String json(String name) {
@@ -245,13 +312,31 @@ public final class GltfBuilder {
      * The document, holding one scene of the nodes named, which the other nodes hang from.
      */
     public String json(List<Integer> roots) {
+        return json(roots, null, Map.of());
+    }
+
+    /**
+     * @param name what the scene is called, or null for no name.
+     * @param extras what the scene carries beyond glTF's own properties.
+     */
+    public String json(List<Integer> roots, String name, Map<String, Object> extras) {
+        var scene = new LinkedHashMap<String, Object>();
+        scene.put("nodes", roots);
+        if (name != null) {
+            scene.put("name", name);
+        }
+        if (!extras.isEmpty()) {
+            scene.put("extras", extras);
+        }
+
         var document = new LinkedHashMap<String, Object>();
         document.put("asset", Map.of("version", "2.0", "generator", "runescape-667 export"));
         document.put("scene", 0);
-        document.put("scenes", List.of(Map.of("nodes", roots)));
+        document.put("scenes", List.of(scene));
         document.put("nodes", nodes);
         putIfAny(document, "meshes", meshes);
         putIfAny(document, "animations", animations);
+        putIfAny(document, "skins", skins);
         putIfAny(document, "materials", materials);
         putIfAny(document, "textures", textures);
         putIfAny(document, "samplers", samplers);

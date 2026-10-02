@@ -1,3 +1,4 @@
+import com.jagex.AnimFrame;
 import com.jagex.game.Animator;
 import com.jagex.game.runetek6.config.seqtype.SeqType;
 
@@ -24,6 +25,13 @@ final class SequenceAnimator extends Animator {
 
     SeqType sequence() {
         return getAnimation();
+    }
+
+    /**
+     * The frame the animator is held at, as the client reads it from the cache.
+     */
+    AnimFrame frame() {
+        return primarySequences.frameset.frames[primarySequences.frame];
     }
 
     /**

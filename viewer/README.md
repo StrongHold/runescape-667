@@ -27,7 +27,8 @@ A map square is listed by its description, and is built from that: its ground is
 every location it names is loaded once from the library and copied into place as the export
 module's README says an importer places it, turned, scaled, moved and bent to the ground by the
 client's own integer arithmetic. This is the reference import of the format, and `placing.ts`
-and `bend.ts` are where the steps live. The placing of every location of Lumbridge was compared,
+and `bend.ts` are where the steps live. A location with bones is copied with its skeleton, and
+its animations are bound to the copy's own bones, so each placement plays on its own. The placing of every location of Lumbridge was compared,
 vertex for vertex, with what the client builds, and all but four clocks match to within a unit,
 and those four were wrong in the comparison's reference rather than here. A map square is 64
 tiles across, so it is seen from high over its south edge, and the sun's shadow is fitted to it

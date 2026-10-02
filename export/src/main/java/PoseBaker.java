@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Poses a model at every frame of the sequences it plays, and keeps each distinct pose once.
@@ -17,10 +18,33 @@ public final class PoseBaker {
     private final Poser poser;
     private final Map<Integer, Integer> targets = new LinkedHashMap<>();
     private final List<Pose> poses = new ArrayList<>();
+    private final List<Skinning.FramePose> framePoses = new ArrayList<>();
     private final List<String> names = new ArrayList<>();
+    private Skinning skinning;
+    private double worstDeviation;
 
     public PoseBaker(Poser poser) {
         this.poser = poser;
+    }
+
+    /**
+     * The transform of each label in each pose kept so far, in the same order as the poses, or
+     * nothing where no pose has been kept.
+     */
+    public Optional<Skinning> skinning() {
+        return Optional.ofNullable(skinning);
+    }
+
+    public List<Skinning.FramePose> framePoses() {
+        return List.copyOf(framePoses);
+    }
+
+    /**
+     * How far, at most, a vertex moved by its label's transform lands from where the client put
+     * it, over every pose kept, in the client's units.
+     */
+    public double worstDeviation() {
+        return worstDeviation;
     }
 
     /**
@@ -69,7 +93,24 @@ public final class PoseBaker {
                 + " is frame " + (named & 0xFFFF) + " of frameset " + (named >>> 16)
                 + ", which the cache does not hold.");
         } else {
-            poses.add(Pose.of(poser.posed(animator)));
+            var posed = poser.posed(animator);
+            var pose = Pose.of(posed);
+            if (skinning == null) {
+                skinning = new Skinning(poser.unscaledStill(), poser.scale(),
+                    posed.vertexLabels == null ? new int[0][] : posed.vertexLabels);
+            }
+            if (named == 91684916 && java.nio.file.Files.exists(java.nio.file.Path.of("/tmp/debug-skin"))) {
+                try { java.nio.file.Files.writeString(java.nio.file.Path.of("/tmp/debug-skin-ops"), ""); } catch (java.io.IOException e) { throw new RuntimeException(e); }
+            }
+            var framePose = skinning.pose(animator.frame());
+            try { java.nio.file.Files.deleteIfExists(java.nio.file.Path.of("/tmp/debug-skin-ops")); } catch (java.io.IOException e) { throw new RuntimeException(e); }
+            var deviation = skinning.deviation(framePose, pose);
+            if (deviation > 2 && java.nio.file.Files.exists(java.nio.file.Path.of("/tmp/debug-skin"))) {
+                System.out.println("DEBUG frame " + named + " deviation " + deviation + " secondary " + (animator.sequence().secondaryFrames != null) + " transforms " + animator.frame().transformCount + " " + skinning.describeWorst(framePose, pose));
+            }
+            worstDeviation = Math.max(worstDeviation, deviation);
+            poses.add(pose);
+            framePoses.add(framePose);
             names.add("frameset " + (named >>> 16) + " frame " + (named & 0xFFFF));
             targets.put(named, poses.size() - 1);
             return poses.size() - 1;

@@ -88,6 +88,17 @@ public final class ClientNpcReader {
             public JavaModel posed(SequenceAnimator animator) {
                 return model(type, animator);
             }
+
+            @Override
+            public JavaModel unscaledStill() {
+                return model(type, null);
+            }
+
+            @Override
+            public double[] scale() {
+                return new double[] {type.scaleH / (double) FULL_SCALE, type.scaleV / (double) FULL_SCALE,
+                    type.scaleH / (double) FULL_SCALE};
+            }
         };
     }
 

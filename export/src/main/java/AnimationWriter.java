@@ -32,29 +32,51 @@ public final class AnimationWriter {
      */
     public static void write(GltfBuilder gltf, String name, PoseBaker.Clip clip, int targets, List<Integer> nodes,
                              Map<String, Object> extras) {
+        var sampler = weightsSampler(gltf, clip, targets);
+        gltf.weightAnimation(name, sampler.input(), sampler.output(), STEP, nodes, sequenceExtras(clip, extras));
+    }
+
+    /**
+     * The accessors of a sampler that sets the weight of one target at a time through a clip.
+     *
+     * @param input the key times.
+     * @param output every target's weight at each key time.
+     */
+    public record Sampler(int input, int output) {
+    }
+
+    public static Sampler weightsSampler(GltfBuilder gltf, PoseBaker.Clip clip, int targets) {
+        var keys = clip.keys();
+        var times = keyTimes(clip);
+        var weights = new float[times.length * targets];
+        for (var key = 0; key < keys.size(); key++) {
+            weights[key * targets + keys.get(key).target()] = 1.0F;
+        }
+        weights[keys.size() * targets + keys.getLast().target()] = 1.0F;
+        return new Sampler(gltf.animationData(times, "SCALAR", 1, true), gltf.animationData(weights, "SCALAR", 1, false));
+    }
+
+    /**
+     * When each key of a clip starts, in seconds, with a last key at the end of the clip that
+     * holds the last frame until the clip loops.
+     */
+    public static float[] keyTimes(PoseBaker.Clip clip) {
         var keys = clip.keys();
         var times = new float[keys.size() + 1];
-        var weights = new float[times.length * targets];
         var cycles = 0;
-
         for (var key = 0; key < keys.size(); key++) {
             times[key] = cycles * SECONDS_PER_CYCLE;
-            weights[key * targets + keys.get(key).target()] = 1.0F;
             cycles += keys.get(key).cycles();
         }
         times[keys.size()] = cycles * SECONDS_PER_CYCLE;
-        weights[keys.size() * targets + keys.getLast().target()] = 1.0F;
-
-        var input = gltf.animationData(times, "SCALAR", 1, true);
-        var output = gltf.animationData(weights, "SCALAR", 1, false);
-        gltf.weightAnimation(name, input, output, STEP, nodes, sequenceExtras(clip, extras));
+        return times;
     }
 
     /**
      * What an engine needs to play the sequence the way the client does, beyond its frames. A
      * sequence that loops over only its last few frames plays the ones before them once.
      */
-    private static Map<String, Object> sequenceExtras(PoseBaker.Clip clip, Map<String, Object> given) {
+    public static Map<String, Object> sequenceExtras(PoseBaker.Clip clip, Map<String, Object> given) {
         var sequence = clip.sequence();
         var extras = new LinkedHashMap<String, Object>(given);
         extras.put("sequence", sequence.id);

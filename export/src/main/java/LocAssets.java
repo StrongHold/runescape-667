@@ -14,7 +14,9 @@ import java.util.Optional;
  * The locations every map square shares, one glTF file for each location type in one directory.
  *
  * A location is written once, under its id, and holds a mesh for each shape its type has a model
- * for, which for most types is one. Each mesh is the location's asset as {@link ClientLocReader}
+ * for, which for most types is one, each as a root of the file's one scene, and the scene carries
+ * the location's name and extras. A skinned mesh is best left a root, as its own transform is
+ * ignored in favour of its joints'. Each mesh is the location's asset as {@link ClientLocReader}
  * builds it, and the file's extras carry what an importer needs to place it as {@link LocPlacing}
  * describes. A wall decoration that animates has a second mesh for a diagonal placement, turned
  * already, as {@link ClientLocReader#poser} explains. Each mesh's extras carry the client's own
@@ -27,6 +29,7 @@ import java.util.Optional;
 public final class LocAssets {
 
     private static final int SOLE_WEIGHT = 65535;
+    private static final int FULL_SCALE = 128;
 
     private final ClientLocReader reader;
     private final TextureLibrary textures;
@@ -112,26 +115,44 @@ public final class LocAssets {
             }
 
             var poses = baker.poses();
-            var result = ModelToGltf.convertInto(gltf, materials, still, poses);
+            var bones = Bones.of(baker);
+            var result = bones.isPresent()
+                ? ModelToGltf.convertSkinnedInto(gltf, materials, still, poses, bones.get().joints().ofVertex())
+                : ModelToGltf.convertInto(gltf, materials, still, poses);
             if (gltf.empty()) {
                 /* empty */
             } else {
-                gltf.targetNames(baker.names());
+                if (result.targets()) {
+                    gltf.targetNames(baker.names());
+                }
                 var mesh = gltf.mesh(variant.name());
                 var node = new LinkedHashMap<String, Object>();
                 node.put("name", variant.name());
                 node.put("mesh", mesh);
                 node.put("extras", Map.of("shape", shape, "turned", variant.turned(), "minY", still.fa(), "maxY", still.EA()));
+                var skin = bones.map(held -> SkinWriter.write(gltf, held.joints()));
+                skin.ifPresent(held -> {
+                    node.put("skin", held.number());
+                    node.put("children", held.childNodes());
+                });
                 var number = gltf.node(node);
                 shapeNodes.add(number);
                 faces += result.faces();
-                targets = poses.size();
+                targets = result.targets() ? poses.size() : 0;
+                if (!poses.isEmpty()) {
+                    animations.add(variant.name() + " " + Bones.describe(baker, bones));
+                }
 
                 for (var clip : clips) {
                     if (!clip.baked().keys().isEmpty()) {
                         var name = variant.name() + " sequence " + clip.sequence();
-                        AnimationWriter.write(gltf, name, clip.baked(), poses.size(), List.of(number),
-                            Map.of("shape", shape));
+                        var extras = Map.<String, Object>of("shape", shape);
+                        if (bones.isPresent()) {
+                            SkinWriter.writeClip(gltf, name, clip.baked(), bones.get().joints(), baker.framePoses(),
+                                skin.orElseThrow(), number, result.targets() ? poses.size() : 0, extras);
+                        } else {
+                            AnimationWriter.write(gltf, name, clip.baked(), poses.size(), List.of(number), extras);
+                        }
                         animations.add(name);
                     }
                 }
@@ -142,11 +163,7 @@ public final class LocAssets {
             return Optional.empty();
         }
 
-        var root = new LinkedHashMap<String, Object>();
-        root.put("name", label(type));
-        root.put("children", shapeNodes);
-        root.put("extras", extras(type));
-        var document = gltf.json(List.of(gltf.node(root)));
+        var document = gltf.json(shapeNodes, label(type), extras(type));
         try {
             Glb.write(file, document, gltf.bin());
         } catch (IOException failure) {
@@ -170,7 +187,12 @@ public final class LocAssets {
         extras.put("name", type.name);
         extras.put("shapes", ClientLocReader.shapes(type));
         extras.put("mirrored", type.mirror);
-        extras.put("resize", List.of(type.resizex, type.resizey, type.resizez));
+        if (ClientLocReader.scaledInAsset(type)) {
+            extras.put("resize", List.of(FULL_SCALE, FULL_SCALE, FULL_SCALE));
+            extras.put("scaledInAsset", List.of(type.resizex, type.resizey, type.resizez));
+        } else {
+            extras.put("resize", List.of(type.resizex, type.resizey, type.resizez));
+        }
         extras.put("offset", List.of(type.xoff, type.yoff, type.zoff));
         extras.put("translate", List.of(type.translateX, type.translateY, type.translateZ));
         extras.put("hillchange", (int) type.hillchange);

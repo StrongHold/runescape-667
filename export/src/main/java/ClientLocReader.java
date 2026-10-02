@@ -104,15 +104,42 @@ public final class ClientLocReader {
         return new Poser() {
             @Override
             public JavaModel still() {
-                return build(type, shape, null, turned);
+                return build(type, shape, null, turned, scaledInAsset(type));
             }
 
             @Override
             public JavaModel posed(SequenceAnimator animator) {
-                return build(type, shape, animator, turned);
+                return build(type, shape, animator, turned, scaledInAsset(type));
+            }
+
+            @Override
+            public JavaModel unscaledStill() {
+                return build(type, shape, null, turned, false);
+            }
+
+            @Override
+            public double[] scale() {
+                return scaledInAsset(type)
+                    ? new double[] {type.resizex / (double) FULL_SCALE, type.resizey / (double) FULL_SCALE,
+                        type.resizez / (double) FULL_SCALE}
+                    : new double[] {1, 1, 1};
             }
         };
     }
+
+    /**
+     * Whether the type's scale is in its asset rather than left to the importer. The client scales
+     * a location before it poses it, so a frame's move is not scaled, and bones that play the
+     * frames on an unscaled asset would move too far once the importer scaled it. An animated
+     * location is therefore scaled in its asset, with its bones worked out to match, and its
+     * extras tell the importer there is nothing left to scale. A location that never moves is
+     * left to the importer, which scales it along the axes of the world as the client does.
+     */
+    public static boolean scaledInAsset(LocType type) {
+        return type.hasAnimations();
+    }
+
+    private static final int FULL_SCALE = 128;
 
     /**
      * Whether a shape of a type needs an asset of its own for a diagonal placement: a wall
@@ -132,7 +159,7 @@ public final class ClientLocReader {
      * frames to match, but not for a scale that the frames would move the parts of.
      * {@link LocPlacing} checks each placement against the client for that reason.
      */
-    private JavaModel build(LocType type, int shape, SequenceAnimator animator, boolean turned) {
+    private JavaModel build(LocType type, int shape, SequenceAnimator animator, boolean turned, boolean scaled) {
         var index = ClientLocReader.shapes(type).indexOf(shape);
         if (index == -1 || type.models[index].length == 0) {
             return null;
@@ -180,6 +207,9 @@ public final class ClientLocReader {
 
         if (turned) {
             model.k(LocPlacing.EIGHTH_TURN);
+        }
+        if (scaled && (type.resizex != FULL_SCALE || type.resizey != FULL_SCALE || type.resizez != FULL_SCALE)) {
+            model.O(type.resizex, type.resizey, type.resizez);
         }
         if (animator != null) {
             animator.animate(model, 0);

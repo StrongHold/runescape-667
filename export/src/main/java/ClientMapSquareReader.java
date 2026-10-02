@@ -615,7 +615,8 @@ public final class ClientMapSquareReader {
 
         var floor = LocGround.floor(underwater, virtualLevel);
         var ceiling = LocGround.ceiling(underwater, virtualLevel);
-        var placed = LocPlacing.place(asset.get(), type, shape, rotation, floor, ceiling, x, y, z, turned);
+        var scaled = ClientLocReader.scaledInAsset(type);
+        var placed = LocPlacing.place(asset.get(), type, shape, rotation, floor, ceiling, x, y, z, turned, scaled);
         if (!LocPlacing.sameVertices(placed, built, 0)) {
             return Check.DIFFERS;
         }
@@ -628,7 +629,8 @@ public final class ClientMapSquareReader {
                 var clientPosed = pooled == null ? null : (JavaModel) pooled.copy((byte) 0, ClientLocReader.EVERY_FUNCTION, true);
                 animator.show(0);
                 var assetPosed = locs.poser(type, shape, turned).posed(animator);
-                var placedPosed = LocPlacing.place(assetPosed, type, shape, rotation, floor, ceiling, x, y, z, turned);
+                var placedPosed = LocPlacing.place(assetPosed, type, shape, rotation, floor, ceiling, x, y, z, turned,
+                    scaled);
                 if (clientPosed == null || !LocPlacing.sameVertices(placedPosed, clientPosed, POSED_TOLERANCE)) {
                     return Check.DIFFERS_POSED;
                 }

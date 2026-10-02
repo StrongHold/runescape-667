@@ -67,14 +67,30 @@ public final class ModelToGltf {
     private final Map<PrimitiveKey, Primitive> primitives = new LinkedHashMap<>();
     private final Map<String, Integer> skipped = new TreeMap<>();
     private final boolean colourPosed;
+    private final int[] jointOfVertex;
 
-    private ModelToGltf(JavaModel model, List<Pose> poses, GltfBuilder gltf, GltfMaterials materials) {
+    /**
+     * @param jointOfVertex the joint each client vertex is bound to, where the poses are played
+     *     by bones and the morph targets hold only colours, or null where the morph targets hold
+     *     the poses.
+     */
+    private ModelToGltf(JavaModel model, List<Pose> poses, int[] jointOfVertex, GltfBuilder gltf,
+                        GltfMaterials materials) {
         this.model = model;
         this.source = materials.source();
         this.poses = poses;
+        this.jointOfVertex = jointOfVertex;
         this.gltf = gltf;
         this.materials = materials;
         this.colourPosed = poses.stream().anyMatch(this::changesColour);
+    }
+
+    /**
+     * Whether the mesh has any morph target: every pose where they hold the poses, and only the
+     * colours of the poses where bones play them, so none where no pose changes a colour.
+     */
+    public boolean hasTargets() {
+        return !poses.isEmpty() && (jointOfVertex == null || colourPosed);
     }
 
     /**
@@ -97,7 +113,17 @@ public final class ModelToGltf {
      *     in the order the targets are numbered.
      */
     public static Result convert(JavaModel model, GltfBuilder gltf, GltfMaterials materials, List<Pose> poses) {
-        return new ModelToGltf(model, poses, gltf, materials).convert();
+        return new ModelToGltf(model, poses, null, gltf, materials).convert();
+    }
+
+    /**
+     * Turns the model into the one mesh of a new document, with its poses played by bones.
+     *
+     * @param jointOfVertex the joint each client vertex is bound to.
+     */
+    public static Result convertSkinned(JavaModel model, GltfBuilder gltf, GltfMaterials materials, List<Pose> poses,
+                                        int[] jointOfVertex) {
+        return new ModelToGltf(model, poses, jointOfVertex, gltf, materials).convert();
     }
 
     /**
@@ -113,13 +139,23 @@ public final class ModelToGltf {
      *     of every primitive, in the order the targets are numbered.
      */
     public static Result convertInto(GltfBuilder gltf, GltfMaterials materials, JavaModel model, List<Pose> poses) {
-        return new ModelToGltf(model, poses, gltf, materials).convert();
+        return new ModelToGltf(model, poses, null, gltf, materials).convert();
     }
 
     /**
-     * The finished document, and how many faces were left out for each reason.
+     * Adds the model's primitives to the mesh a document is building, with its poses played by
+     * bones.
      */
-    public record Result(GltfBuilder gltf, int faces, Map<String, Integer> skipped, int primitives) {
+    public static Result convertSkinnedInto(GltfBuilder gltf, GltfMaterials materials, JavaModel model,
+                                            List<Pose> poses, int[] jointOfVertex) {
+        return new ModelToGltf(model, poses, jointOfVertex, gltf, materials).convert();
+    }
+
+    /**
+     * The finished document, how many faces were left out for each reason, and whether the mesh
+     * has morph targets.
+     */
+    public record Result(GltfBuilder gltf, int faces, Map<String, Integer> skipped, int primitives, boolean targets) {
     }
 
     private Result convert() {
@@ -140,7 +176,8 @@ public final class ModelToGltf {
         for (var entry : primitives.entrySet()) {
             writePrimitive(entry.getKey(), entry.getValue());
         }
-        return new Result(gltf, written, Collections.unmodifiableMap(new TreeMap<>(skipped)), primitives.size());
+        return new Result(gltf, written, Collections.unmodifiableMap(new TreeMap<>(skipped)), primitives.size(),
+            hasTargets());
     }
 
     /**
@@ -242,12 +279,23 @@ public final class ModelToGltf {
         primitive.positions.add(-model.vertexY[vertex] / UNITS_PER_METRE);
         primitive.positions.add(-model.vertexZ[vertex] / UNITS_PER_METRE);
 
-        for (var target = 0; target < poses.size(); target++) {
-            var pose = poses.get(target);
-            var moved = primitive.targets.get(target);
-            moved.add((pose.x()[vertex] - model.vertexX[vertex]) / UNITS_PER_METRE);
-            moved.add(-(pose.y()[vertex] - model.vertexY[vertex]) / UNITS_PER_METRE);
-            moved.add(-(pose.z()[vertex] - model.vertexZ[vertex]) / UNITS_PER_METRE);
+        if (jointOfVertex == null) {
+            for (var target = 0; target < poses.size(); target++) {
+                var pose = poses.get(target);
+                var moved = primitive.targets.get(target);
+                moved.add((pose.x()[vertex] - model.vertexX[vertex]) / UNITS_PER_METRE);
+                moved.add(-(pose.y()[vertex] - model.vertexY[vertex]) / UNITS_PER_METRE);
+                moved.add(-(pose.z()[vertex] - model.vertexZ[vertex]) / UNITS_PER_METRE);
+            }
+        } else {
+            primitive.joints.add(jointOfVertex[vertex]);
+            primitive.joints.add(0);
+            primitive.joints.add(0);
+            primitive.joints.add(0);
+            primitive.weights.add(1.0F);
+            primitive.weights.add(0.0F);
+            primitive.weights.add(0.0F);
+            primitive.weights.add(0.0F);
         }
 
         primitive.normals.add(normal[0]);
@@ -430,15 +478,24 @@ public final class ModelToGltf {
         if (primitive.textured) {
             attributes.put("TEXCOORD_0", gltf.attribute(primitive.uvs.toArray(), 2, "VEC2", false));
         }
+        if (jointOfVertex != null) {
+            var joints = primitive.joints.stream().mapToInt(Integer::intValue).toArray();
+            attributes.put("JOINTS_0", gltf.wholeAttribute(joints, 4, "VEC4"));
+            attributes.put("WEIGHTS_0", gltf.attribute(primitive.weights.toArray(), 4, "VEC4", false));
+        }
 
         var targets = new ArrayList<Map<String, Integer>>();
-        for (var target = 0; target < primitive.targets.size(); target++) {
-            var moved = new LinkedHashMap<String, Integer>();
-            moved.put("POSITION", gltf.attribute(primitive.targets.get(target).toArray(), 3, "VEC3", true));
-            if (colourPosed) {
-                moved.put("COLOR_0", gltf.attribute(primitive.colourTargets.get(target).toArray(), 4, "VEC4", false));
+        if (hasTargets()) {
+            for (var target = 0; target < poses.size(); target++) {
+                var moved = new LinkedHashMap<String, Integer>();
+                if (jointOfVertex == null) {
+                    moved.put("POSITION", gltf.attribute(primitive.targets.get(target).toArray(), 3, "VEC3", true));
+                }
+                if (colourPosed) {
+                    moved.put("COLOR_0", gltf.attribute(primitive.colourTargets.get(target).toArray(), 4, "VEC4", false));
+                }
+                targets.add(moved);
             }
-            targets.add(moved);
         }
 
         var indices = primitive.indices.stream().mapToInt(Integer::intValue).toArray();
@@ -493,6 +550,8 @@ public final class ModelToGltf {
         private final FloatList uvs = new FloatList();
         private final List<FloatList> targets = new ArrayList<>();
         private final List<FloatList> colourTargets = new ArrayList<>();
+        private final List<Integer> joints = new ArrayList<>();
+        private final FloatList weights = new FloatList();
         private final Map<Corner, Integer> numbers = new HashMap<>();
         private final List<Integer> indices = new ArrayList<>();
 

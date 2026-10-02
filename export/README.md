@@ -83,10 +83,26 @@ name, size and base animation set in its `extras`.
 The base animation set names the sequences the NPC stands, idles, turns, walks, runs and crawls
 with. Every frame of each of them is posed by the client's own animation code: the sequence is
 given to `getModel` as the NPC's movement animator, held at the start of the frame, and the
-vertices are read back from the model it returns. Each distinct frame becomes one morph target,
-which holds how far each corner has moved from the model with no sequence playing, so frames that
-several sequences share are written once. The targets are named after the frameset and frame
-they come from.
+vertices are read back from the model it returns.
+
+The frames are written as bones. The client animates a model label by label: every vertex carries
+one label, a frame lists transforms, and each names the labels it moves, as a pivot, a move, a
+turn about the pivot or a scale about it. Each is affine, so what a frame does to a label is one
+affine transform, and `Skinning` works it out by following the frame's transforms on the vertices
+as the client does. Every label a vertex carries becomes a joint, and every vertex is bound to
+the joint of its label alone. A joint holds a move, a turn and a scale, and a label that a frame
+turns and then scales unevenly cannot be held so, so such a label gets a chain of three nodes: a
+move and a turn, a scale, and a turn again, which holds any affine transform by its singular
+value decomposition. Each key of an animation sets every joint, and a joint that stands still
+through a sequence gets no channel for it.
+
+The client works in integers, a sixteenth of a unit at a time, and the bones are floating
+point, so a vertex the bones place lands within about a unit of where the client puts it, and
+`exportNpc` prints the worst. Where it would land more than 2.5 units off, the frames are kept
+as morph targets instead, each holding how far every corner has moved, which is exact and large.
+A frame that changes the colour or alpha of faces keeps a morph target for that in either case,
+holding only the colours. The client scales an NPC after it has posed it, so the frames are
+followed on the unscaled model and each label's transform is taken into the scaled one.
 
 Each sequence becomes one animation, named after what the set uses it for and the sequence's id,
 such as `stand 808` or `walk 819`. A sequence used for two things, such as one sequence for both
@@ -195,8 +211,10 @@ where the type says so, and recoloured and retextured. The client turns, scales,
 the model after that, and all of it depends on the placement, so none of it is in the mesh. The
 file's `extras` carry what that needs: the type's `resize`, `offset`, `translate`, `hillchange` and
 `hillskew`, whether the mesh is `mirrored`, and the `sequences` the location plays, their weights
-and whether the client starts at a random frame. A location that animates has a morph target for
-every frame and an animation for every sequence, as an NPC has. A wall decoration that animates
+and whether the client starts at a random frame. A location that animates has bones and an
+animation for every sequence, as an NPC has, and is scaled in its asset, because the client
+scales a location before it poses it and a frame's move is not scaled with it; its `extras` then
+say `resize` is 128 and name the scale in `scaledInAsset`. A wall decoration that animates
 has a second mesh, `shape 4 turned`, for a diagonal placement: the client turns such a decoration
 45 degrees before the frames of its sequence move it, and the frames are not turned with it, so
 that mesh is turned already and an importer does not turn it again.
