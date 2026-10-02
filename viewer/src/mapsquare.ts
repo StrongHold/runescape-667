@@ -34,6 +34,7 @@ import { placeBounds, placementMatrix, placeVertices, standingMatrix, usesTurned
  */
 export interface LoadedMapSquare {
     readonly root: Object3D;
+    readonly description: MapSquareDescription;
     /** One clip for each placement that animates, with the tracks bound to its own copy. */
     readonly clips: readonly AnimationClip[];
     readonly placements: number;
@@ -83,7 +84,7 @@ export async function loadMapSquare(url: string, loader: GLTFLoader): Promise<Lo
         }
     }
 
-    return { root, clips, placements: placed.children.length, kinds: locs.size, missing };
+    return { root, description, clips, placements: placed.children.length, kinds: locs.size, missing };
 }
 
 async function loadLocs(directory: string, description: MapSquareDescription,

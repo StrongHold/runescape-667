@@ -32,7 +32,12 @@ its animations are bound to the copy's own bones, so each placement plays on its
 vertex for vertex, with what the client builds, and all but four clocks match to within a unit,
 and those four were wrong in the comparison's reference rather than here. A map square is 64
 tiles across, so it is seen from high over its south edge, and the sun's shadow is fitted to it
-with a larger shadow map than a single model gets. Its own ground takes the
+with a larger shadow map than a single model gets. A map square is lit as its description says:
+the sun comes from the client's direction in the client's colour, scaled against the viewer's
+own sun so that a map square looks about as bright as a model, the sky light takes the ambient
+factor the same way, the fog takes the file's colour over the last part of the view, and the
+lights the ground file carries are placed as point lights by the loader. A model or an NPC is lit
+by the viewer's own sun. Its own ground takes the
 shadows in place of the plane a model stands on. The grid of a map square has a line for every tile
 and is drawn at the map square's lowest point, and as the ground is seldom flat it starts hidden. A
 map square is known by what its root node carries, so one dropped on the page is shown the same way.

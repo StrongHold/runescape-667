@@ -6,10 +6,20 @@ import { DirectionalLight, HemisphereLight, Scene, Vector3 } from 'three';
  */
 const SUN_DIRECTION = new Vector3(1.5, 3, 2).normalize();
 
+/** A direction the sun's light comes from, in the viewer's frame, and how strong and what colour it is. */
+export interface Sun {
+    readonly direction: Vector3;
+    readonly colour: number;
+    readonly intensity: number;
+}
+
 /**
- * The sun, whose shadow is fitted to whatever is open.
+ * The sun and the sky light, whose shadow is fitted to whatever is open.
  */
 export interface Lighting {
+    /** Lights the scene as a map square's file says, or as the viewer does by default. */
+    readonly setSun: (sun: Sun, ambient: number) => void;
+    readonly resetSun: () => void;
     /**
      * Puts the sun up the sky from what is open, and fits its shadow camera to a box around it.
      *
@@ -20,22 +30,42 @@ export interface Lighting {
     readonly castShadow: (centre: Vector3, reach: number, extent: number, size: number) => void;
 }
 
+/** The viewer's own light, for a model or an NPC, which no file lights. */
+const DEFAULT_SUN: Sun = { direction: SUN_DIRECTION, colour: 0xffffff, intensity: 1.8 };
+const DEFAULT_AMBIENT = 1.6;
+
 export function createLighting(scene: Scene): Lighting {
-    scene.add(new HemisphereLight(0xffffff, 0x445566, 1.6));
+    const sky = new HemisphereLight(0xffffff, 0x445566, DEFAULT_AMBIENT);
+    scene.add(sky);
     const sun = new DirectionalLight(0xffffff, 1.8);
     sun.castShadow = true;
     sun.shadow.bias = -0.0005;
     scene.add(sun, sun.target);
+    let direction = SUN_DIRECTION.clone();
+    let centre = new Vector3();
+    let reach = 1;
+
+    const setSun = (given: Sun, ambient: number): void => {
+        direction = given.direction.clone().normalize();
+        sun.color.set(given.colour);
+        sun.intensity = given.intensity;
+        sky.intensity = ambient;
+        sun.position.copy(centre).addScaledVector(direction, reach * 2);
+    };
 
     return {
-        castShadow: (centre, reach, extent, size) => {
+        setSun,
+        resetSun: () => setSun(DEFAULT_SUN, DEFAULT_AMBIENT),
+        castShadow: (at, far, extent, size) => {
+            centre = at.clone();
+            reach = far;
             if (sun.shadow.mapSize.x !== size) {
                 sun.shadow.mapSize.set(size, size);
                 sun.shadow.map?.dispose();
                 sun.shadow.map = null;
             }
 
-            sun.position.copy(centre).addScaledVector(SUN_DIRECTION, reach * 2);
+            sun.position.copy(centre).addScaledVector(direction, reach * 2);
             sun.target.position.copy(centre);
             const shadow = sun.shadow.camera;
             shadow.left = -extent;

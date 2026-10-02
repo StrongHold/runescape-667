@@ -17,7 +17,33 @@ export interface MapSquareDescription {
     readonly locs: string;
     readonly textures: string;
     readonly heights: Heights;
+    readonly environment: Environment;
+    readonly lights: readonly MapLight[];
     readonly placements: readonly Placement[];
+}
+
+/**
+ * How the map square is lit, as the client's file gives it. The sun is the direction its light
+ * comes from, in the client's frame with y down. The colours are packed sRGB.
+ */
+export interface Environment {
+    readonly sun: readonly [number, number, number];
+    readonly sunColour: number;
+    readonly sunIntensity: number;
+    readonly reverseSunIntensity: number;
+    readonly ambient: number;
+    readonly fogColour: number;
+    readonly fogRange: number;
+}
+
+/** One light placed on the map square, in the client's units from its south west corner. */
+export interface MapLight {
+    readonly level: number;
+    readonly x: number;
+    readonly y: number;
+    readonly z: number;
+    readonly radius: number;
+    readonly colour: number;
 }
 
 /**

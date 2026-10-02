@@ -1,6 +1,8 @@
 import com.jagex.core.constants.LocShapes;
 import com.jagex.core.io.Packet;
+import com.jagex.core.constants.ModeGame;
 import com.jagex.game.collision.CollisionMap;
+import com.jagex.game.runetek6.config.lighttype.LightTypeList;
 import com.jagex.game.runetek6.config.loctype.LocType;
 import com.jagex.game.runetek6.config.loctype.LocTypeList;
 import com.jagex.game.runetek6.config.vartype.TimedVarDomain;
@@ -86,6 +88,7 @@ public final class ClientMapSquareReader {
     private final ClientModelReader models;
     private final js5 maps;
     private final Path keys;
+    private final LightTypeList lightTypes;
 
     /**
      * How far a posed vertex may be from the client's, in the client's units. The client turns a
@@ -106,6 +109,7 @@ public final class ClientMapSquareReader {
         this.models = locs.models();
         this.maps = Cache.js5(cache, Js5Archive.MAPS);
         this.keys = keys;
+        this.lightTypes = new LightTypeList(ModeGame.RUNESCAPE, 0, Cache.js5(cache, Js5Archive.CONFIG));
         ClientOptions.instance = highDetailOptions();
     }
 
@@ -128,9 +132,10 @@ public final class ClientMapSquareReader {
      * @param placements every location of the map square, on land and under the water, and where
      *     the client draws it.
      * @param locations whether the map square's locations on land were placed.
+     * @param environment how the map square is lit, its fog and sky, and the lights on it.
      */
     public record MapSquare(int x, int z, List<JavaGround> grounds, int[][][] heights, List<Placement> placements,
-                            Placing locations, Underwater underwater) {
+                            Placing locations, Underwater underwater, EnvironmentDecoder.Environment environment) {
     }
 
     /**
@@ -227,7 +232,7 @@ public final class ClientMapSquareReader {
         var underwater = hasUnderwater(mapSquareX, mapSquareZ);
         var collisionMaps = scene(toolkit, underwater);
         var region = new MapRegion(LEVELS, REGION_TILES, REGION_TILES, false);
-        decodeTiles(region, collisionMaps, "m", mapSquareX, mapSquareZ);
+        var environment = decodeTiles(region, collisionMaps, "m", mapSquareX, mapSquareZ);
 
         MapRegion bed = null;
         if (underwater) {
@@ -278,7 +283,7 @@ public final class ClientMapSquareReader {
             heights[level] = heights(Static706.floor[level]);
         }
         return new MapSquare(mapSquareX, mapSquareZ, List.copyOf(grounds), heights, List.copyOf(placements), locations,
-            underwaterWorld);
+            underwaterWorld, environment);
     }
 
     /**
@@ -346,16 +351,20 @@ public final class ClientMapSquareReader {
     }
 
     /**
-     * Reads every tile of the region's squares as {@code Static73.decodeStaticArea} does. A square
-     * the cache holds no tiles for is the sea, and is given the flat heights the client gives it.
+     * Reads every tile of the region's map squares as {@code Static73.decodeStaticArea} does. A
+     * map square the cache holds no tiles for is the sea, and is given the flat heights the client
+     * gives it. The environment that follows the middle map square's tiles in its file is read as
+     * well, and a map square the cache holds nothing for gets the client's default.
      *
      * @param prefix what the client names the map squares' groups by: {@code m} for the land and
      *     {@code um} for the world under its water.
      */
-    private void decodeTiles(MapRegion region, CollisionMap[] collisionMaps, String prefix, int mapSquareX, int mapSquareZ) {
+    private EnvironmentDecoder.Environment decodeTiles(MapRegion region, CollisionMap[] collisionMaps, String prefix,
+                                                       int mapSquareX, int mapSquareZ) {
         var baseX = (mapSquareX - 1) * TILES_ACROSS;
         var baseZ = (mapSquareZ - 1) * TILES_ACROSS;
         var missing = new ArrayList<int[]>();
+        var tail = new Packet(new byte[0]);
 
         for (var across = 0; across < 3; across++) {
             for (var up = 0; up < 3; up++) {
@@ -366,7 +375,11 @@ public final class ClientMapSquareReader {
                 if (data == null) {
                     missing.add(new int[] {x, z});
                 } else {
-                    region.decodeMapSquare(new Packet(data), collisionMaps, x, z, baseX, baseZ);
+                    var packet = new Packet(data);
+                    region.decodeMapSquare(packet, collisionMaps, x, z, baseX, baseZ);
+                    if (across == 1 && up == 1) {
+                        tail = packet;
+                    }
                 }
             }
         }
@@ -374,6 +387,7 @@ public final class ClientMapSquareReader {
         for (var square : missing) {
             region.setMapSquareHeights(square[0], square[1]);
         }
+        return EnvironmentDecoder.decode(tail, lightTypes, region.tileHeights, ORIGIN, ORIGIN);
     }
 
     /**

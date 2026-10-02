@@ -220,6 +220,33 @@ has a second mesh, `shape 4 turned`, for a diagonal placement: the client turns 
 that mesh is turned already and an importer does not turn it again.
 
 
+### The environment
+
+After its tiles, a map square's file says how the map square is lit and what lights stand on
+it. On the software toolkit the client throws most of that away, so the export reads the bytes
+again as the client reads them, and the reading must end exactly where the file does or the
+export fails: an unread field was planted and failed the export at once.
+
+The description's `environment` holds the sun's direction in the client's frame, where its
+light comes from with y down, its colour and its two strengths, for faces that look at it and
+away from it, the ambient factor every face gets, the fog's colour and range, the bloom
+settings of the hardware toolkits, and the sky box and reflection cube map where the file
+names them. A map square whose file says nothing gets the client's defaults, which are a sun
+from (-50, -60, -50) at 0.7, an ambient of 1.15 and a fog of 13156520. The hardware toolkits
+start the fog `(fogRange + 256) * 4` units before the far plane.
+
+Its `lights` list every light placed on the map square: its level and whether it lights the
+levels above and below, where it stands in the client's units from the map square's corner,
+with its height as the client places it, the ground's height at its tile less the height the
+file gives, how many tiles it reaches and which tiles of each row it lights, its colour, and
+its flicker. The flicker is one of the client's presets, or a light type from the config where
+the preset is 31, and either way it is written resolved as the least the light falls to, the
+pattern it follows, and how far and how fast it swings, out of 2048. The same lights are in
+the ground file as `KHR_lights_punctual` point lights, one node each, so that an engine that
+reads the extension places them without reading the description. Each reaches its radius of
+tiles and half a tile more, at the strength of 1 the client gives every light before its
+flicker, with its level and flicker in the node's `extras`.
+
 ### The description
 
 The description names the ground file and the library, and lists every placement in the client's

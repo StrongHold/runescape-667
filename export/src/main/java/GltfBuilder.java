@@ -47,6 +47,7 @@ public final class GltfBuilder {
     private final List<Object> nodes = new ArrayList<>();
     private final List<Object> animations = new ArrayList<>();
     private final List<Object> skins = new ArrayList<>();
+    private final List<Object> punctualLights = new ArrayList<>();
     private List<Object> primitives = new ArrayList<>();
     private List<String> targetNames = List.of();
 
@@ -135,6 +136,38 @@ public final class GltfBuilder {
         skin.put("inverseBindMatrices", inverseBindMatrices);
         skins.add(skin);
         return skins.size() - 1;
+    }
+
+    /**
+     * Adds a point light of the KHR_lights_punctual extension, which a node wears through
+     * {@link #lightNode}.
+     *
+     * @param colour the light's colour in linear light.
+     * @param range how far it reaches, in metres.
+     */
+    public int punctualLight(String name, float[] colour, float intensity, float range) {
+        var light = new LinkedHashMap<String, Object>();
+        light.put("name", name);
+        light.put("type", "point");
+        light.put("color", List.of(colour[0], colour[1], colour[2]));
+        light.put("intensity", intensity);
+        light.put("range", range);
+        punctualLights.add(light);
+        return punctualLights.size() - 1;
+    }
+
+    /**
+     * Adds a node that wears a point light.
+     */
+    public int lightNode(String name, int light, List<Float> translation, Map<String, Object> extras) {
+        var node = new LinkedHashMap<String, Object>();
+        node.put("name", name);
+        node.put("translation", translation);
+        node.put("extensions", Map.of("KHR_lights_punctual", Map.of("light", light)));
+        if (!extras.isEmpty()) {
+            node.put("extras", extras);
+        }
+        return node(node);
     }
 
     /**
@@ -337,6 +370,10 @@ public final class GltfBuilder {
         putIfAny(document, "meshes", meshes);
         putIfAny(document, "animations", animations);
         putIfAny(document, "skins", skins);
+        if (!punctualLights.isEmpty()) {
+            document.put("extensionsUsed", List.of("KHR_lights_punctual"));
+            document.put("extensions", Map.of("KHR_lights_punctual", Map.of("lights", punctualLights)));
+        }
         putIfAny(document, "materials", materials);
         putIfAny(document, "textures", textures);
         putIfAny(document, "samplers", samplers);

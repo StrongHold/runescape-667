@@ -3,8 +3,10 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { createAnimationPlayer } from './animation.ts';
 import { bindBackdrop } from './backdrop.ts';
 import { bindDrop } from './drop.ts';
+import { applyEnvironment, clearEnvironment } from './environment.ts';
 import { bindFocus } from './focus.ts';
 import { fetchExported, listExported, shortName, SINGULAR, type ExportedFile } from './exported.ts';
+import type { MapSquareDescription } from './description.ts';
 import { describe, isMapSquare } from './extras.ts';
 import { loadMapSquare } from './mapsquare.ts';
 import { frame, frameFrom, SIDES } from './framing.ts';
@@ -28,7 +30,8 @@ let current: Object3D | null = null;
 /**
  * Shows an object that was loaded, in place of what was open before.
  */
-function show(object: Object3D, animations: readonly AnimationClip[], label: string, contents: string): void {
+function show(object: Object3D, animations: readonly AnimationClip[], label: string, contents: string,
+              description: MapSquareDescription | null): void {
     if (current !== null) {
         stage.scene.remove(current);
     }
@@ -44,6 +47,11 @@ function show(object: Object3D, animations: readonly AnimationClip[], label: str
 
     const box = baseBox(current);
     frame(stage.camera, stage.controls, lighting, box, mapSquare);
+    if (description === null) {
+        clearEnvironment(stage.scene, lighting);
+    } else {
+        applyEnvironment(stage.scene, lighting, description.environment, stage.camera.far);
+    }
     if (mapSquare) {
         page.grid.checked = false;
     }
@@ -69,7 +77,7 @@ async function open(data: ArrayBuffer, label: string, path: string): Promise<voi
     try {
         const gltf = await loader.parseAsync(data, path);
         completeMorphTargets(gltf.scene);
-        show(gltf.scene, gltf.animations, label, `${gltf.animations.length} animations`);
+        show(gltf.scene, gltf.animations, label, `${gltf.animations.length} animations`, null);
     } catch (failure) {
         failed(label, failure);
     }
@@ -83,7 +91,7 @@ async function openMapSquare(url: string, label: string): Promise<void> {
         const loaded = await loadMapSquare(url, loader);
         const contents = `${loaded.placements} locations of ${loaded.kinds} kinds`
             + (loaded.missing.length > 0 ? `, ${loaded.missing.length} placements missing` : '');
-        show(loaded.root, loaded.clips, label, contents);
+        show(loaded.root, loaded.clips, label, contents, loaded.description);
     } catch (failure) {
         failed(label, failure);
     }

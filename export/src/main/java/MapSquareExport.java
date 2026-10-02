@@ -33,6 +33,15 @@ public final class MapSquareExport {
      * every placement is measured from so that it stands on the ground as written.
      */
     private static final int MAP_SQUARE_UNITS = ClientMapSquareReader.ORIGIN * 512;
+    private static final float UNITS_PER_METRE = 512.0F;
+
+    /**
+     * The strength a map light is written with, in candela, which is what the client gives every
+     * light before its flicker. The client's lights reach a radius of whole tiles and half a tile
+     * more.
+     */
+    private static final float LIGHT_INTENSITY = 1.0F;
+    private static final float HALF_TILE = 0.5F;
 
     public static final class Args implements Arguments {
 
@@ -104,6 +113,7 @@ public final class MapSquareExport {
             report("locations under the water", bed.locations());
         }
         report("locations", square.locations());
+        children.addAll(lights(gltf, square.environment()));
 
         var root = new LinkedHashMap<String, Object>();
         root.put("name", "mapsquare " + name);
@@ -200,8 +210,11 @@ public final class MapSquareExport {
         description.put("locs", TextureLibrary.relativeUri(ground, assets.directory()));
         description.put("textures", TextureLibrary.relativeUri(ground, args.textures.library(null).directory()));
         description.put("heights", heights);
+        description.put("environment", environment(square.environment()));
+        description.put("lights", square.environment().lights().stream().map(MapSquareExport::light).toList());
         description.put("placements", placements);
 
+        System.out.println("  " + describe(square.environment()));
         System.out.println("  " + placements.size() + " locations placed, of " + written.size() + " kinds in "
             + assets.directory().toAbsolutePath().normalize());
         parts.forEach((part, count) -> System.out.println("    " + count + " " + part));
@@ -210,6 +223,85 @@ public final class MapSquareExport {
                 + "placements are left out: " + missing);
         }
         return description;
+    }
+
+    /**
+     * How the map square is lit, as the file gives it, in the client's frame and units. The sun's
+     * direction is where its light comes from, with y down.
+     */
+    private static Map<String, Object> environment(EnvironmentDecoder.Environment environment) {
+        var description = new LinkedHashMap<String, Object>();
+        description.put("sun", List.of(environment.sun()[0], environment.sun()[1], environment.sun()[2]));
+        description.put("sunColour", environment.sunColour());
+        description.put("sunIntensity", environment.sunIntensity());
+        description.put("reverseSunIntensity", environment.reverseSunIntensity());
+        description.put("ambient", environment.ambient());
+        description.put("fogColour", environment.fogColour());
+        description.put("fogRange", environment.fogRange());
+        description.put("bloom", List.of(environment.bloom()[0], environment.bloom()[1], environment.bloom()[2]));
+        environment.skyBox().ifPresent(skyBox -> description.put("skyBox", Map.of(
+            "id", skyBox.id(), "sphereOffset", List.of(skyBox.sphereOffsetX(), skyBox.sphereOffsetY(), skyBox.sphereOffsetZ()),
+            "rotation", skyBox.rotation())));
+        environment.cubeMap().ifPresent(textures -> description.put("cubeMap",
+            java.util.Arrays.stream(textures).boxed().toList()));
+        return description;
+    }
+
+    private static Map<String, Object> light(EnvironmentDecoder.Light light) {
+        var description = new LinkedHashMap<String, Object>();
+        description.put("level", light.level());
+        description.put("spansLevelsAbove", light.spansLevelsAbove());
+        description.put("spansLevelsBelow", light.spansLevelsBelow());
+        description.put("x", light.x());
+        description.put("y", light.y());
+        description.put("z", light.z());
+        description.put("radius", light.radius());
+        description.put("rowSpans", java.util.Arrays.stream(light.rowSpans()).boxed().toList());
+        description.put("colour", light.colour());
+        description.put("phase", light.phase());
+        description.put("preset", light.preset());
+        if (light.lightType() != -1) {
+            description.put("lightType", light.lightType());
+        }
+        description.put("flickerAmbient", light.ambient());
+        description.put("flickerPattern", light.pattern());
+        description.put("flickerAmplitude", light.amplitude());
+        description.put("flickerFrequency", light.frequency());
+        return description;
+    }
+
+    /**
+     * The map square's lights as nodes of the ground file, through KHR_lights_punctual, so that an
+     * engine that reads the extension places them without reading the description. Each reaches
+     * as far as its radius of tiles, and its node's extras carry the level and the flicker.
+     */
+    private static List<Integer> lights(GltfBuilder gltf, EnvironmentDecoder.Environment environment) {
+        var nodes = new ArrayList<Integer>();
+        var number = 0;
+        for (var light : environment.lights()) {
+            var colour = new float[] {Srgb.toLinear(light.colour() >> 16 & 0xFF), Srgb.toLinear(light.colour() >> 8 & 0xFF),
+                Srgb.toLinear(light.colour() & 0xFF)};
+            var name = "light " + number++;
+            var punctual = gltf.punctualLight(name, colour, LIGHT_INTENSITY, light.radius() + HALF_TILE);
+            var extras = new LinkedHashMap<String, Object>();
+            extras.put("level", light.level());
+            extras.put("flickerAmbient", light.ambient());
+            extras.put("flickerPattern", light.pattern());
+            extras.put("flickerAmplitude", light.amplitude());
+            extras.put("flickerFrequency", light.frequency());
+            extras.put("phase", light.phase());
+            nodes.add(gltf.lightNode(name, punctual, List.of(light.x() / UNITS_PER_METRE, -light.y() / UNITS_PER_METRE,
+                -light.z() / UNITS_PER_METRE), extras));
+        }
+        return nodes;
+    }
+
+    private static String describe(EnvironmentDecoder.Environment environment) {
+        return "sun from " + java.util.Arrays.toString(environment.sun()) + " colour " + Integer.toHexString(environment.sunColour())
+            + " intensity " + environment.sunIntensity() + "/" + environment.reverseSunIntensity() + ", ambient "
+            + environment.ambient() + ", fog " + Integer.toHexString(environment.fogColour()) + " range " + environment.fogRange()
+            + ", sky box " + environment.skyBox().map(EnvironmentDecoder.SkyBox::id).map(String::valueOf).orElse("none")
+            + ", " + environment.lights().size() + " lights";
     }
 
     private static Map<String, Object> placementDescription(ClientMapSquareReader.Placement placement) {
