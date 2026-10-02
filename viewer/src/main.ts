@@ -5,6 +5,9 @@ import {
     Box3,
     Clock,
     DirectionalLight,
+    PCFSoftShadowMap,
+    PlaneGeometry,
+    ShadowMaterial,
     GridHelper,
     HemisphereLight,
     Mesh,
@@ -33,10 +36,13 @@ const picker = element<HTMLSelectElement>('animation');
 const play = element<HTMLButtonElement>('play');
 const wire = element<HTMLInputElement>('wire');
 const gridToggle = element<HTMLInputElement>('grid');
+const backdrop = element<HTMLSelectElement>('backdrop');
 const status = element<HTMLElement>('status');
 
 const renderer = new WebGLRenderer({ antialias: true, alpha: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = PCFSoftShadowMap;
 stage.appendChild(renderer.domElement);
 
 const scene = new Scene();
@@ -46,14 +52,29 @@ controls.enableDamping = true;
 
 scene.add(new HemisphereLight(0xffffff, 0x445566, 1.6));
 const sun = new DirectionalLight(0xffffff, 1.8);
-sun.position.set(3, 5, 4);
-scene.add(sun);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.bias = -0.0005;
+scene.add(sun, sun.target);
+
+/**
+ * The game's own ground is y = 0: a model stands on it as it was authored, and the exporter keeps
+ * that. So the grid and the ground that catches shadows sit there, not under the lowest vertex.
+ */
+const GROUND = 0;
 
 /** One square of the grid is one tile, which the exporter makes one metre. */
 const grid = new GridHelper(10, 10, 0x8899aa, 0x8899aa);
 grid.material.transparent = true;
 grid.material.opacity = 0.35;
+grid.position.y = GROUND;
 scene.add(grid);
+
+const ground = new Mesh(new PlaneGeometry(40, 40), new ShadowMaterial({ opacity: 0.3 }));
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = GROUND;
+ground.receiveShadow = true;
+scene.add(ground);
 
 const loader = new GLTFLoader();
 const clock = new Clock();
@@ -93,8 +114,26 @@ function setWireframe(on: boolean): void {
     }
 }
 
+/**
+ * The box the model fills in its base pose. three.js widens a box for morph targets by adding the
+ * largest change of any vertex to the extreme of every other, which for an animated NPC reaches far
+ * below its feet, so the box is taken from the base positions alone.
+ */
+function baseBox(object: Object3D): Box3 {
+    object.updateMatrixWorld(true);
+    const box = new Box3();
+    const point = new Vector3();
+    for (const mesh of meshesOf(object)) {
+        const positions = mesh.geometry.attributes.position;
+        for (let at = 0; at < positions.count; at++) {
+            box.expandByPoint(point.fromBufferAttribute(positions, at).applyMatrix4(mesh.matrixWorld));
+        }
+    }
+    return box;
+}
+
 function frame(object: Object3D): void {
-    const box = new Box3().setFromObject(object);
+    const box = baseBox(object);
     const size = box.getSize(new Vector3());
     const centre = box.getCenter(new Vector3());
     const largest = Math.max(size.x, size.y, size.z);
@@ -104,7 +143,17 @@ function frame(object: Object3D): void {
     camera.near = reach / 500;
     camera.far = reach * 50;
     camera.updateProjectionMatrix();
-    grid.position.y = box.min.y;
+
+    sun.position.set(centre.x + reach * 1.5, centre.y + reach * 3, centre.z + reach * 2);
+    sun.target.position.copy(centre);
+    const shadow = sun.shadow.camera;
+    shadow.left = -reach * 1.5;
+    shadow.right = reach * 1.5;
+    shadow.top = reach * 1.5;
+    shadow.bottom = -reach * 1.5;
+    shadow.near = reach * 0.1;
+    shadow.far = reach * 10;
+    shadow.updateProjectionMatrix();
 }
 
 function choose(index: number): void {
@@ -142,6 +191,9 @@ async function open(data: ArrayBuffer, label: string): Promise<void> {
             scene.remove(current);
         }
         current = gltf.scene;
+        for (const mesh of meshesOf(current)) {
+            mesh.castShadow = true;
+        }
         scene.add(current);
         mixer = new AnimationMixer(current);
         listAnimations(gltf.animations);
@@ -203,6 +255,30 @@ async function listExported(): Promise<void> {
 
     await first?.();
 }
+
+/** The viewer's choice of backdrop, kept in this browser between visits where it may be. */
+const BACKDROP_KEY = 'viewer.backdrop';
+
+function setBackdrop(name: string): void {
+    stage.dataset.backdrop = name;
+    backdrop.value = name;
+    try {
+        localStorage.setItem(BACKDROP_KEY, name);
+    } catch {
+        /* empty */
+    }
+}
+
+function rememberedBackdrop(): string {
+    try {
+        return localStorage.getItem(BACKDROP_KEY) ?? 'theme';
+    } catch {
+        return 'theme';
+    }
+}
+
+backdrop.addEventListener('change', () => setBackdrop(backdrop.value));
+setBackdrop(rememberedBackdrop());
 
 picker.addEventListener('change', () => choose(Number(picker.value)));
 play.addEventListener('click', () => {

@@ -127,6 +127,18 @@ code {
     overflow: hidden;
 }
 
+.stage[data-backdrop="dark"] {
+    background: #0e1116;
+}
+
+.stage[data-backdrop="grey"] {
+    background: #7d858e;
+}
+
+.stage[data-backdrop="light"] {
+    background: #f4f6f8;
+}
+
 .stage.dropping {
     outline: 2px dashed var(--accent);
 }
