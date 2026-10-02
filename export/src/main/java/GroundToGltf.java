@@ -36,10 +36,13 @@ import java.util.TreeMap;
  * side of it, and lights a point within a tile by blending its four corners. The same slope gives
  * each corner a normal here, and a point within a tile blends the normals of its four corners.
  *
- * <p>Textures off. When the player turns textures off, the client builds the tiles with no
- * textures at all, and a tile shows the colour that tints its texture here, so a textured face
- * carries no other colour for that: {@code COLOR_0} serves. The material says whether its
- * texture is {@code disableable}, and water and the like stay textured.
+ * <p>Colours. A vertex has two. {@code COLOR_0} is the colour the GL toolkit gives the vertex
+ * ({@code Ground_Sub2}), which tints the texture: the overlay's blend colour where the floor
+ * type has one, which the tile keeps per face as {@code faceBlendedColours}, else the tile's own
+ * colour. {@code COLOR_1} is the tile's own colour, lit and lerped to the water as the software
+ * toolkit holds it in {@code vertexColours}, which is what the client shows with textures off,
+ * when it builds the tiles without textures. The material says whether its texture is
+ * {@code disableable}, and water and the like stay textured.
  */
 public final class GroundToGltf {
 
@@ -220,8 +223,9 @@ public final class GroundToGltf {
             var u = texture == -1 ? 0.0F : textureCoordinate(originX, localX, size);
             var v = texture == -1 ? 0.0F : textureCoordinate(originZ, localZ, size);
 
+            var plainRgb = tile.vertexColours[vertex] & 0xFFFFFF;
             var described = new Corner(localX, tile.verticesY[vertex], localZ, normal[0], normal[1], normal[2],
-                tile.vertexColours[vertex] & 0xFFFFFF, opacity * weights[corner], u, v);
+                tintRgb(tile, a / 3, plainRgb), plainRgb, opacity * weights[corner], u, v);
             var known = primitive.numbers.get(described);
             if (known != null) {
                 primitive.indices.add(known);
@@ -275,6 +279,18 @@ public final class GroundToGltf {
     }
 
     /**
+     * The colour the GL toolkit tints a face's vertices with: the overlay's blend colour, which
+     * {@code JavaGround} keeps per face as the first corner's, else the tile's own colour.
+     */
+    private static int tintRgb(JavaGenericBlendedTile tile, int face, int plainRgb) {
+        var blended = tile.faceBlendedColours;
+        if (blended == null || blended[face] == 0 || blended[face] == -1) {
+            return plainRgb;
+        }
+        return blended[face] & 0xFFFFFF;
+    }
+
+    /**
      * The normal at a point within a tile, in the client's frame, blended from the normals of the
      * tile's four corners as the client blends their light.
      */
@@ -319,6 +335,7 @@ public final class GroundToGltf {
         attributes.put("POSITION", gltf.attribute(primitive.positions.toArray(), 3, "VEC3", true));
         attributes.put("NORMAL", gltf.attribute(primitive.normals.toArray(), 3, "VEC3", false));
         attributes.put("COLOR_0", gltf.attribute(primitive.colours.toArray(), 4, "VEC4", false));
+        attributes.put("COLOR_1", gltf.attribute(primitive.plainColours.toArray(), 3, "VEC3", false));
         if (primitive.textured) {
             attributes.put("TEXCOORD_0", gltf.attribute(primitive.uvs.toArray(), 2, "VEC2", false));
         }
@@ -343,7 +360,7 @@ public final class GroundToGltf {
      * surface.
      */
     private record Corner(int x, int y, int z, float normalX, float normalY, float normalZ, int rgb,
-                          float opacity, float u, float v) {
+                          int plainRgb, float opacity, float u, float v) {
     }
 
     private static final class Primitive {
@@ -352,6 +369,7 @@ public final class GroundToGltf {
         private final FloatList positions = new FloatList();
         private final FloatList normals = new FloatList();
         private final FloatList colours = new FloatList();
+        private final FloatList plainColours = new FloatList();
         private final FloatList uvs = new FloatList();
         private final Map<Corner, Integer> numbers = new HashMap<>();
         private final List<Integer> indices = new ArrayList<>();
@@ -376,6 +394,10 @@ public final class GroundToGltf {
             colours.add(Srgb.toLinear(corner.rgb() >> 8 & 0xFF));
             colours.add(Srgb.toLinear(corner.rgb() & 0xFF));
             colours.add(corner.opacity());
+
+            plainColours.add(Srgb.toLinear(corner.plainRgb() >> 16 & 0xFF));
+            plainColours.add(Srgb.toLinear(corner.plainRgb() >> 8 & 0xFF));
+            plainColours.add(Srgb.toLinear(corner.plainRgb() & 0xFF));
 
             if (textured) {
                 uvs.add(corner.u());
