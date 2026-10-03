@@ -211,6 +211,7 @@ public final class MapSquareExport {
         description.put("textures", TextureLibrary.relativeUri(ground, args.textures.library(null).directory()));
         description.put("heights", heights);
         description.put("flags", nested(square.flags()));
+        description.put("cameraHeights", cameraHeights(square.environment()));
         description.put("environment", environment(square.environment()));
         description.put("lights", square.environment().lights().stream().map(MapSquareExport::light).toList());
         description.put("placements", placements);
@@ -224,6 +225,15 @@ public final class MapSquareExport {
                 + "placements are left out: " + missing);
         }
         return description;
+    }
+
+    /** For each level, the camera heights as a 16 by 16 grid of ints, or an empty list where the file gives none. */
+    private static List<Object> cameraHeights(EnvironmentDecoder.Environment environment) {
+        var levels = new ArrayList<Object>();
+        for (var level : environment.cameraHeights()) {
+            levels.add(level == null ? List.of() : nested(level));
+        }
+        return levels;
     }
 
     /**

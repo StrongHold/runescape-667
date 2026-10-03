@@ -380,6 +380,15 @@ at a tile only when the tile is a bridge on level 0, or when it is not hidden an
 level is the player's: 0 for a tile flagged 8, one less for a tile above a bridge, and L
 otherwise (`Static696.isTileVisibleFrom`, `Static705.method9198`).
 
+The description holds `cameraHeights`: for each level, `[]` or a 16 by 16 grid, `[x][z]`, of
+one value for each four tiles square of the map square, in steps of 32 of the client's units.
+The client reads them from the environment that follows the tiles (`MapRegion`, code 129) and
+its camera keeps its pitch above whatever stands around the point it looks at by them
+(`Static723.method9451`): the least pitch is raised by the greatest of a tile's ground plus
+its camera height over the ground at the point, across the nine by nine tiles about it. A
+level the file leaves out counts as 0 everywhere, and a level the file says to copy takes the
+level below.
+
 The description also holds `heights`: the height of every tile corner of each level, and of the
 bed under the water where there is one, from eight tiles before the map square to eight tiles
 after, which is what a location is bent against. A large location on the edge of the map square

@@ -31,6 +31,9 @@ public final class EnvironmentDecoder {
 
     private static final int LEVELS = 4;
     private static final int CAMERA_HEIGHT_STEPS = 16;
+    private static final int CAMERA_HEIGHTS_CLEARED = 0;
+    private static final int CAMERA_HEIGHTS_GIVEN = 1;
+    private static final int CAMERA_HEIGHTS_AS_BELOW = 2;
     private static final int LIGHT_SHIFT = 2;
     private static final int TILE_SHIFT = 9;
     private static final int LIGHT_TYPE_PRESET = 31;
@@ -59,10 +62,15 @@ public final class EnvironmentDecoder {
      * @param bloom the hardware toolkits' bloom: its brightness, its threshold and its intensity.
      * @param skyBox the sky box, where the file names one.
      * @param cubeMap the six textures of the reflection cube map, where the file names them.
+     * @param cameraHeights for each level, what the camera is kept above across the map square,
+     *     as a 16 by 16 grid of one value for each four tiles square, in steps of 32 of the
+     *     client's units, or null for a level the file gives none, which the client takes as 0.
+     *     The client reads it in {@code MapRegion.decodeStaticEnvironment} and its camera keeps
+     *     its pitch above what stands around its focus by it ({@code Static723.method9451}).
      */
     public record Environment(int[] sun, int sunColour, float sunIntensity, float reverseSunIntensity, float ambient,
                               int fogColour, int fogRange, float[] bloom, Optional<SkyBox> skyBox, Optional<int[]> cubeMap,
-                              List<Light> lights) {
+                              List<Light> lights, int[][][] cameraHeights) {
     }
 
     public record SkyBox(int id, int sphereOffsetX, int sphereOffsetY, int sphereOffsetZ, int rotation) {
@@ -111,6 +119,7 @@ public final class EnvironmentDecoder {
         Optional<SkyBox> skyBox = Optional.empty();
         Optional<int[]> cubeMap = Optional.empty();
         var lights = new ArrayList<Light>();
+        var cameraHeights = new int[LEVELS][][];
 
         while (packet.pos < packet.data.length) {
             var code = packet.g1();
@@ -144,8 +153,15 @@ public final class EnvironmentDecoder {
             } else if (code == CAMERA_HEIGHTS) {
                 for (var level = 0; level < LEVELS; level++) {
                     var mode = packet.g1b();
-                    if (mode == 1) {
-                        packet.pos += CAMERA_HEIGHT_STEPS * CAMERA_HEIGHT_STEPS;
+                    if (mode == CAMERA_HEIGHTS_CLEARED) {
+                        cameraHeights[level] = null;
+                    } else if (mode == CAMERA_HEIGHTS_GIVEN) {
+                        cameraHeights[level] = cameraHeightGrid(packet);
+                    } else if (mode == CAMERA_HEIGHTS_AS_BELOW) {
+                        cameraHeights[level] = level == 0 || cameraHeights[level - 1] == null ? null
+                            : cameraHeights[level - 1].clone();
+                    } else {
+                        throw new IllegalStateException("The camera heights have a mode the client does not read: " + mode);
                     }
                 }
             } else {
@@ -158,7 +174,18 @@ public final class EnvironmentDecoder {
                 + " bytes past the end of the map square's file");
         }
         return new Environment(sun, sunColour, sunIntensity, reverseSunIntensity, ambient, fogColour, fogRange, bloom,
-            skyBox, cubeMap, List.copyOf(lights));
+            skyBox, cubeMap, List.copyOf(lights), cameraHeights);
+    }
+
+    /** One level's camera heights as the file packs them: a value for each four tiles square, x then z, unsigned. */
+    private static int[][] cameraHeightGrid(Packet packet) {
+        var grid = new int[CAMERA_HEIGHT_STEPS][CAMERA_HEIGHT_STEPS];
+        for (var x = 0; x < CAMERA_HEIGHT_STEPS; x++) {
+            for (var z = 0; z < CAMERA_HEIGHT_STEPS; z++) {
+                grid[x][z] = packet.g1b() & 0xFF;
+            }
+        }
+        return grid;
     }
 
     private static Light light(Packet packet, LightTypeList lightTypes, int[][][] tileHeights, int originX, int originZ) {
