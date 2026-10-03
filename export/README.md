@@ -257,7 +257,11 @@ width and length before any turn, and whether it casts a `shadow`: when the clie
 square it darkens the ground's tile corners under each location that does, by the location's
 radius over four up to 30 for one that stands on its tiles, and by 50 for the two corners of a
 straight wall and the one corner of a corner wall (`MapRegion.loadLocation`, `Ground.ka`). An
-engine reads the placements and does the same, since a location spawned later casts no less. A location that animates has bones and an
+engine reads the placements and does the same, since a location spawned later casts no less.
+They also say whether it casts a `hardShadow`, the GL toolkit's shadow of the model's faces
+projected along the sun onto the ground (`Model_Sub2.method4987`, `Class170`), which walls and
+locations cast and decorations do not, 32 units a texel, darkening the ground by 68 of 255 with
+a one texel rim at a quarter of that for each covered neighbour. A location that animates has bones and an
 animation for every sequence, as an NPC has, and is scaled in its asset, because the client
 scales a location before it poses it and a frame's move is not scaled with it; its `extras` then
 say `resize` is 128 and name the scale in `scaledInAsset`. A wall decoration that animates
