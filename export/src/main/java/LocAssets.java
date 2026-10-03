@@ -129,7 +129,18 @@ public final class LocAssets {
                 var node = new LinkedHashMap<String, Object>();
                 node.put("name", variant.name());
                 node.put("mesh", mesh);
-                node.put("extras", Map.of("shape", shape, "turned", variant.turned(), "minY", still.fa(), "maxY", still.EA()));
+                var shapeExtras = new java.util.LinkedHashMap<String, Object>();
+                shapeExtras.put("shape", shape);
+                shapeExtras.put("turned", variant.turned());
+                shapeExtras.put("minY", still.fa());
+                shapeExtras.put("maxY", still.EA());
+                if (still.emitters != null) {
+                    shapeExtras.put("emitters", ParticleSources.emitters(still));
+                }
+                if (still.effectors != null) {
+                    shapeExtras.put("effectors", ParticleSources.effectors(still));
+                }
+                node.put("extras", shapeExtras);
                 var skin = bones.map(held -> SkinWriter.write(gltf, held.joints(), baker.skinning().orElseThrow()));
                 skin.ifPresent(held -> {
                     node.put("skin", held.number());

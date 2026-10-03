@@ -73,6 +73,13 @@ depth, from the fog's start to a fog range further, where the fog for the water 
 and a half before the far plane and ends a range before it (`GlToolkit.method6995`). What shows
 through is the bed, drawn before it in the underwater pass, described with the ground below.
 
+Under `particle/`, `emitters.json` and `effectors.json` hold the client's particle emitter and
+effector types, each list indexed by the type's id with null where the cache has none: every
+public field of the client's `ParticleEmitterType` and `ParticleEffectorType` by its name, with
+the values the client derives after decoding, such as the colour ranges, fade steps and
+durations, so an engine can run the client's own emitter and particle arithmetic
+(`ParticleEmitter`, `MovingParticle`) without reading the cache.
+
 Under `light/`, `flicker.json` holds the 2048 values of noise the client's lights flicker by
 (`EnvironmentLight.generateNoise` at a persistence of 0.4), out of 4096. A light whose flicker
 pattern is 3 reads it at its phase; the other patterns are a sine, a sawtooth, a square and a
@@ -288,7 +295,12 @@ textures.
 The file holds a mesh for each shape the location's type has a model for, as a node named
 `shape <n>`, and most types have one. Each mesh's `extras` carry the client's own top and bottom
 of the model, `minY` and `maxY`, which the bend measures the model by: the client takes them over
-every vertex, and the mesh holds only the faces the client draws. Of 59,434 types with a model, 55,604 have one shape, and the
+every vertex, and the mesh holds only the faces the client draws. Where the model has particles,
+the `extras` also carry its `emitters`, each with its `type`, the draw `priority` of its
+particles, and the three corners `a`, `b` and `c` of the face it spawns them over, and its
+`effectors`, each with its `type` and the vertex it stands `at`. The points are the client's
+vertices, in its units and frame before the file's turn, so an engine places them as it places
+the model's vertices. The types are in the texture library, under `particle/`. Of 59,434 types with a model, 55,604 have one shape, and the
 rest, such as walls and fences, name a different mesh for each shape. Each mesh is the part of what
 the client builds that is the same wherever the location stands: the shape's meshes merged, mirrored
 where the type says so, and recoloured and retextured. The client turns, scales, moves and bends

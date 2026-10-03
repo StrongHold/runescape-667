@@ -1,4 +1,5 @@
 import com.beust.jcommander.Parameter;
+import com.jagex.js5.Js5Archive;
 import com.beust.jcommander.ParametersDelegate;
 
 /**
@@ -41,6 +42,10 @@ public final class TextureExport {
         System.out.println("wrote the water's ripple frames to " + library.directory().resolve("water").toAbsolutePath().normalize());
         FlickerNoise.write(library.directory());
         System.out.println("wrote the lights' flicker noise to " + library.directory().resolve("light").toAbsolutePath().normalize());
+        var particles = Cache.js5(args.where.cache(), Js5Archive.CONFIG_PARTICLE);
+        ParticleTypes.write(particles, library.directory());
+        System.out.println("wrote " + ParticleTypes.count(particles, true) + " particle emitter types and "
+            + ParticleTypes.count(particles, false) + " effector types to " + library.directory().resolve("particle").toAbsolutePath().normalize());
     }
 
     private TextureExport() {
