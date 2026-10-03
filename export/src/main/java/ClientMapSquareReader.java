@@ -129,12 +129,16 @@ public final class ClientMapSquareReader {
      * @param heights the height of every tile corner of each level, from one tile before the
      *     map square to one tile after, as [level][x][z], in the client's units.
      * @param underwater the bed under the region's water, where it has one.
+     * @param flags the client's flags for every tile of each level, as [level][x][z]: 1 blocks
+     *     movement, 2 is a bridge, 4 has its roof removed when the player is under it, 8 counts
+     *     as level 0 whatever level it is on, 16 is never drawn, 128 is water ({@code TileFlag}).
      * @param placements every location of the map square, on land and under the water, and where
      *     the client draws it.
      * @param locations whether the map square's locations on land were placed.
      * @param environment how the map square is lit, its fog and sky, and the lights on it.
      */
-    public record MapSquare(int x, int z, List<JavaGround> grounds, int[][][] heights, List<Placement> placements,
+    public record MapSquare(int x, int z, List<JavaGround> grounds, int[][][] heights, int[][][] flags,
+                            List<Placement> placements,
                             Placing locations, Underwater underwater, EnvironmentDecoder.Environment environment) {
     }
 
@@ -278,12 +282,28 @@ public final class ClientMapSquareReader {
 
         var grounds = new ArrayList<JavaGround>();
         var heights = new int[LEVELS][][];
+        var flags = new int[LEVELS][][];
         for (var level = 0; level < LEVELS; level++) {
             grounds.add((JavaGround) Static706.floor[level]);
             heights[level] = heights(Static706.floor[level]);
+            flags[level] = flags(level);
         }
-        return new MapSquare(mapSquareX, mapSquareZ, List.copyOf(grounds), heights, List.copyOf(placements), locations,
-            underwaterWorld, environment);
+        return new MapSquare(mapSquareX, mapSquareZ, List.copyOf(grounds), heights, flags, List.copyOf(placements),
+            locations, underwaterWorld, environment);
+    }
+
+    /**
+     * The client's flags for every tile of the map square on one level, as {@code Terrain.decodeMapSquare}
+     * read them into {@code Static280.tileFlags}, which the scene reads to hide levels and roofs.
+     */
+    private static int[][] flags(int level) {
+        var flags = new int[TILES_ACROSS][TILES_ACROSS];
+        for (var x = 0; x < TILES_ACROSS; x++) {
+            for (var z = 0; z < TILES_ACROSS; z++) {
+                flags[x][z] = Static280.tileFlags[level][ORIGIN + x][ORIGIN + z] & 0xFF;
+            }
+        }
+        return flags;
     }
 
     /**

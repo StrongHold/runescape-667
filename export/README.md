@@ -268,6 +268,15 @@ the look of another by a variable is named as the look it has taken, with every 
 which is how the client stands before the server sends any, and `sequencesOf` names the location
 whose sequences it plays where that is not the same one.
 
+The description holds `flags`: the client's flags for every tile of each level, as
+`[level][x][z]` over the map square, which decide what the client shows from where the player
+stands. 1 blocks movement, 2 marks a bridge, 4 marks a tile whose roof is removed when the
+player is under it, 8 marks a tile whose contents count as level 0 whatever level they are on,
+16 marks a tile that is never drawn, and 128 marks water. The client loads a location on level L
+at a tile only when the tile is a bridge on level 0, or when it is not hidden and its effective
+level is the player's: 0 for a tile flagged 8, one less for a tile above a bridge, and L
+otherwise (`Static696.isTileVisibleFrom`, `Static705.method9198`).
+
 The description also holds `heights`: the height of every tile corner of each level, and of the
 bed under the water where there is one, from eight tiles before the map square to eight tiles
 after, which is what a location is bent against. A large location on the edge of the map square
