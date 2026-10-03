@@ -1,3 +1,6 @@
+import com.jagex.AnimBase;
+import com.jagex.AnimFrame;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -74,9 +77,12 @@ public final class SkinWriter {
     /**
      * Adds the nodes of every joint, and a skin that binds the mesh to them. A chain is three
      * nodes, one under the next: the outer one is moved and turned, the middle one scaled, and
-     * the inner one turned again, and the inner one is the joint the skin binds.
+     * the inner one turned again, and the inner one is the joint the skin binds. The skin's
+     * extras say which label each joint carries, where the label's vertices are centred and how
+     * many there are, and the scale the client applies after posing, which is what an engine
+     * needs to follow a frame's transforms itself.
      */
-    public static Skin write(GltfBuilder gltf, Joints joints) {
+    public static Skin write(GltfBuilder gltf, Joints joints, Skinning skinning) {
         var jointNodes = new ArrayList<Integer>();
         var childNodes = new ArrayList<Integer>();
         for (var joint = 0; joint < joints.count(); joint++) {
@@ -105,7 +111,25 @@ public final class SkinWriter {
             identity[joint * 16 + 15] = 1;
         }
         var inverseBindMatrices = gltf.animationData(identity, "MAT4", 16, false);
-        return new Skin(gltf.skin(jointNodes, inverseBindMatrices), List.copyOf(jointNodes), List.copyOf(childNodes));
+        return new Skin(gltf.skin(jointNodes, inverseBindMatrices, labelExtras(joints, skinning)), List.copyOf(jointNodes),
+            List.copyOf(childNodes));
+    }
+
+    private static Map<String, Object> labelExtras(Joints joints, Skinning skinning) {
+        var centres = new ArrayList<List<Float>>();
+        var counts = new ArrayList<Integer>();
+        for (var label : joints.labels()) {
+            var centre = label == -1 ? new double[3] : skinning.labelCentre(label);
+            centres.add(List.of((float) centre[0], (float) centre[1], (float) centre[2]));
+            counts.add(label == -1 ? 0 : skinning.labelCount(label));
+        }
+        var scale = skinning.poseScale();
+        var extras = new LinkedHashMap<String, Object>();
+        extras.put("labels", joints.labels());
+        extras.put("labelCentres", centres);
+        extras.put("labelCounts", counts);
+        extras.put("poseScale", List.of((float) scale[0], (float) scale[1], (float) scale[2]));
+        return extras;
     }
 
     private static Map<String, Object> named(String name) {
@@ -126,11 +150,13 @@ public final class SkinWriter {
      *
      * @param framePoses the transform of each label in each target, in the order the targets are
      *     numbered.
+     * @param frames the client's frame behind each target, in the same order, whose transforms
+     *     the animation's extras carry so that an engine can tween them as the client does.
      * @param colourTargets how many morph targets the mesh keeps for the colours of its frames,
      *     whose weights the animation sets as well, or 0 where it keeps none.
      */
     public static void writeClip(GltfBuilder gltf, String name, PoseBaker.Clip clip, Joints joints,
-                                 List<Skinning.FramePose> framePoses, Skin skin, int meshNode,
+                                 List<Skinning.FramePose> framePoses, List<AnimFrame> frames, Skin skin, int meshNode,
                                  int colourTargets, Map<String, Object> extras) {
         var keys = clip.keys();
         var times = AnimationWriter.keyTimes(clip);
@@ -168,7 +194,33 @@ public final class SkinWriter {
             }
         }
 
-        gltf.animation(name, samplers, channels, AnimationWriter.sequenceExtras(clip, extras));
+        gltf.animation(name, samplers, channels, AnimationWriter.sequenceExtras(clip, frameExtras(clip, frames, extras)));
+    }
+
+    /**
+     * The frames of a clip as the client reads them, one list of raw transforms per key, with
+     * the groups of the base they share, so that an engine can replay and tween them itself.
+     * Every frame of a sequence the client tweens shares one base, since the client drops the
+     * next frame when its base differs.
+     */
+    private static Map<String, Object> frameExtras(PoseBaker.Clip clip, List<AnimFrame> frames, Map<String, Object> given) {
+        var keys = clip.keys();
+        var raw = new ArrayList<List<Integer>>();
+        AnimBase base = null;
+        for (var key : keys) {
+            var frame = frames.get(key.target());
+            if (base == null) {
+                base = frame.base;
+            } else if (base != frame.base) {
+                throw new IllegalStateException("Sequence " + clip.sequence().id + " has frames of two bases, which is not supported.");
+            }
+            raw.add(Skinning.rawTransforms(frame));
+        }
+        var extras = new LinkedHashMap<String, Object>(given);
+        extras.put("frames", raw);
+        extras.put("groupTypes", base == null ? List.of() : Skinning.groupTypes(base));
+        extras.put("groupLabels", base == null ? List.of() : Skinning.groupLabels(base));
+        return extras;
     }
 
     private static final float[] IDENTITY_MOVE = {0, 0, 0};

@@ -130,10 +130,11 @@ public final class GltfBuilder {
      * @param inverseBindMatrices the accessor of one matrix for each joint, which takes the mesh
      *     into the joint's frame at bind time.
      */
-    public int skin(List<Integer> joints, int inverseBindMatrices) {
+    public int skin(List<Integer> joints, int inverseBindMatrices, Map<String, Object> extras) {
         var skin = new LinkedHashMap<String, Object>();
         skin.put("joints", joints);
         skin.put("inverseBindMatrices", inverseBindMatrices);
+        skin.put("extras", extras);
         skins.add(skin);
         return skins.size() - 1;
     }

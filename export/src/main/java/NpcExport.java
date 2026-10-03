@@ -94,7 +94,7 @@ public final class NpcExport {
         node.put("name", name);
         node.put("mesh", gltf.mesh(name));
         node.put("extras", extras(args.npc, type));
-        var skin = bones.map(held -> SkinWriter.write(gltf, held.joints()));
+        var skin = bones.map(held -> SkinWriter.write(gltf, held.joints(), baker.skinning().orElseThrow()));
         skin.ifPresent(held -> {
             node.put("skin", held.number());
             node.put("children", held.childNodes());
@@ -106,7 +106,8 @@ public final class NpcExport {
                 var extras = Map.<String, Object>of("role", animation.movement().role());
                 if (bones.isPresent()) {
                     SkinWriter.writeClip(gltf, animation.name(), animation.clip(), bones.get().joints(),
-                        baker.framePoses(), skin.orElseThrow(), nodeNumber, result.targets() ? poses.size() : 0, extras);
+                        baker.framePoses(), baker.frames(), skin.orElseThrow(), nodeNumber,
+                        result.targets() ? poses.size() : 0, extras);
                 } else {
                     AnimationWriter.write(gltf, animation.name(), animation.clip(), poses.size(), List.of(nodeNumber),
                         extras);

@@ -81,6 +81,7 @@ public final class AnimationWriter {
         var extras = new LinkedHashMap<String, Object>(given);
         extras.put("sequence", sequence.id);
         extras.put("tweened", sequence.tweened);
+        extras.put("loopOffset", sequence.loopOffset);
 
         if (sequence.loopOffset > 0 && sequence.loopOffset <= sequence.frames.length) {
             var loopStart = sequence.frames.length - sequence.loopOffset;

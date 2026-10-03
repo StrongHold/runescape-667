@@ -105,6 +105,23 @@ move and a turn, a scale, and a turn again, which holds any affine transform by 
 value decomposition. Each key of an animation sets every joint, and a joint that stands still
 through a sequence gets no channel for it.
 
+The frames are also written as the client reads them, for an engine that would rather follow the
+client's transforms itself, as it must to tween them. The skin's `extras` hold, for each joint,
+the `labels` it carries (-1 for the joint of no label), where the label's vertices are centred in
+the still model before any scale (`labelCentres`, in the client's units and frame), how many
+there are (`labelCounts`), which a pivot over several labels is weighed by, and the `poseScale`
+the client applies after posing. Each animation's `extras` hold `frames`, one list per key of the
+frame's transforms in order, six numbers each: the group, its x, y and z values, the pivot group
+the client applies first or -1, and the tween bits, where 1 means the client does not tween into
+the transform and 2 that it does not tween out of it; `groupTypes` and `groupLabels` are the
+frames' base, the kind of transform each group holds (0 a pivot, 1 a move, 2 a turn, 3 a scale)
+and the labels it names; `loopOffset` is how many frames from the end the sequence loops back to,
+or -1 for one that plays once; and `tweened` says whether the client tweens the sequence. The
+client tweens by moving each group's values part way towards the next frame's, by the share of
+the current frame's cycles that have passed (`Model.applyFrame`): a turn goes the short way round
+its 16384 units, and a transform either frame's bits hold is not tweened. Past the last frame it
+tweens towards the frame the sequence loops back to, and not at all when it plays once.
+
 The client works in integers, a sixteenth of a unit at a time, and the bones are floating
 point, so a vertex the bones place lands within about a unit of where the client puts it, and
 `exportNpc` prints the worst. Where it would land more than 2.5 units off, the frames are kept
@@ -122,10 +139,10 @@ frame of no cycles is never shown, and is left out. Its `extras` hold the role, 
 whether the client tweens it, and, for a sequence that loops over only its last frames, the time
 the loop starts at.
 
-Some of this is not what the client does. The animation jumps from frame to frame, where the
+Some of this is not what the client does. The glTF animation jumps from frame to frame, where the
 client tweens a sequence that asks for it, moving each part a little further towards the next
 frame every cycle. Most stand and walk sequences ask for that, so they move more smoothly in the
-client. The normals are those of the model with no sequence playing, because the software
+client. An engine that wants that follows the `frames` in the extras instead of the channels. The normals are those of the model with no sequence playing, because the software
 toolkit lights a model once, before it poses it, and never turns the normals as the model moves.
 The hardware toolkits do turn them with the parts when a sequence asks them to, and that is not
 written.

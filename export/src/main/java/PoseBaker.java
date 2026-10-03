@@ -1,3 +1,4 @@
+import com.jagex.AnimFrame;
 import com.jagex.game.runetek6.config.seqtype.SeqType;
 
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ public final class PoseBaker {
     private final Map<Integer, Integer> targets = new LinkedHashMap<>();
     private final List<Pose> poses = new ArrayList<>();
     private final List<Skinning.FramePose> framePoses = new ArrayList<>();
+    private final List<AnimFrame> frames = new ArrayList<>();
     private final List<String> names = new ArrayList<>();
     private Skinning skinning;
     private double worstDeviation;
@@ -37,6 +39,11 @@ public final class PoseBaker {
 
     public List<Skinning.FramePose> framePoses() {
         return List.copyOf(framePoses);
+    }
+
+    /** The frame of the sequence each pose was made from, as the client reads it, in the same order. */
+    public List<AnimFrame> frames() {
+        return List.copyOf(frames);
     }
 
     /**
@@ -99,18 +106,13 @@ public final class PoseBaker {
                 skinning = new Skinning(poser.unscaledStill(), poser.scale(),
                     posed.vertexLabels == null ? new int[0][] : posed.vertexLabels);
             }
-            if (named == 91684916 && java.nio.file.Files.exists(java.nio.file.Path.of("/tmp/debug-skin"))) {
-                try { java.nio.file.Files.writeString(java.nio.file.Path.of("/tmp/debug-skin-ops"), ""); } catch (java.io.IOException e) { throw new RuntimeException(e); }
-            }
-            var framePose = skinning.pose(animator.frame());
-            try { java.nio.file.Files.deleteIfExists(java.nio.file.Path.of("/tmp/debug-skin-ops")); } catch (java.io.IOException e) { throw new RuntimeException(e); }
+            var read = animator.frame();
+            var framePose = skinning.pose(read);
             var deviation = skinning.deviation(framePose, pose);
-            if (deviation > 2 && java.nio.file.Files.exists(java.nio.file.Path.of("/tmp/debug-skin"))) {
-                System.out.println("DEBUG frame " + named + " deviation " + deviation + " secondary " + (animator.sequence().secondaryFrames != null) + " transforms " + animator.frame().transformCount + " " + skinning.describeWorst(framePose, pose));
-            }
             worstDeviation = Math.max(worstDeviation, deviation);
             poses.add(pose);
             framePoses.add(framePose);
+            frames.add(read);
             names.add("frameset " + (named >>> 16) + " frame " + (named & 0xFFFF));
             targets.put(named, poses.size() - 1);
             return poses.size() - 1;

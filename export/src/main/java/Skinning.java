@@ -1,3 +1,4 @@
+import com.jagex.AnimBase;
 import com.jagex.AnimFrame;
 
 import java.util.ArrayList;
@@ -151,6 +152,85 @@ public final class Skinning {
         return labelOfVertex.clone();
     }
 
+    /**
+     * The middle of a label's vertices in the still model, before any scale the client applies
+     * after posing, in the client's units: what a pivot on the label starts from. A label with
+     * no vertex is at the origin.
+     */
+    public double[] labelCentre(int label) {
+        var vertices = label < vertexLabels.length ? vertexLabels[label] : new int[0];
+        var sum = new double[3];
+        var count = 0;
+        for (var vertex : vertices) {
+            if (vertex < labelOfVertex.length) {
+                sum[0] += x[vertex];
+                sum[1] += y[vertex];
+                sum[2] += z[vertex];
+                count++;
+            }
+        }
+        return count == 0 ? sum : new double[] {sum[0] / count, sum[1] / count, sum[2] / count};
+    }
+
+    /** How many vertices carry a label, which is the label's weight in a pivot over several. */
+    public int labelCount(int label) {
+        var count = 0;
+        if (label < vertexLabels.length) {
+            for (var vertex : vertexLabels[label]) {
+                if (vertex < labelOfVertex.length) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    /** The scale the client applies after posing, along each axis. */
+    public double[] poseScale() {
+        return scale.clone();
+    }
+
+    /**
+     * A frame's transforms as the client reads them, six numbers each in the frame's order: the
+     * group, its x, y and z values, the pivot group it applies first or -1, and its tween bits,
+     * where 1 means the client does not tween into the transform and 2 that it does not tween
+     * out of it.
+     */
+    public static List<Integer> rawTransforms(AnimFrame frame) {
+        var raw = new ArrayList<Integer>(frame.transformCount * 6);
+        for (var index = 0; index < frame.transformCount; index++) {
+            raw.add((int) frame.groups[index]);
+            raw.add((int) frame.xValues[index]);
+            raw.add((int) frame.yValues[index]);
+            raw.add((int) frame.zValues[index]);
+            raw.add((int) frame.origins[index]);
+            raw.add((int) frame.tweenFlags[index]);
+        }
+        return raw;
+    }
+
+    /** The kind of transform each group of a base holds: 0 a pivot, 1 a move, 2 a turn, 3 a scale, and others the engine leaves alone. */
+    public static List<Integer> groupTypes(AnimBase base) {
+        var types = new ArrayList<Integer>(base.transformCount);
+        for (var group = 0; group < base.transformCount; group++) {
+            types.add(base.transformTypes[group]);
+        }
+        return types;
+    }
+
+    /** The labels each group of a base names. */
+    public static List<List<Integer>> groupLabels(AnimBase base) {
+        var groups = new ArrayList<List<Integer>>(base.transformCount);
+        for (var group = 0; group < base.transformCount; group++) {
+            var labels = new ArrayList<Integer>();
+            for (var label : base.transformLabels[group]) {
+                labels.add(label);
+            }
+            groups.add(labels);
+        }
+        return groups;
+    }
+
     public int labels() {
         return vertexLabels.length;
     }
@@ -179,9 +259,6 @@ public final class Skinning {
             var fx = frame.xValues[index];
             var fy = frame.yValues[index];
             var fz = frame.zValues[index];
-            if (java.nio.file.Files.exists(java.nio.file.Path.of("/tmp/debug-skin-ops"))) {
-                System.out.println("DEBUG op " + index + " group " + group + " origin " + origin + " type " + type + " mask " + base.originMasks[group] + (origin == -1 ? "" : " originMask " + base.originMasks[origin]) + " values " + fx + "," + fy + "," + fz);
-            }
             if (type == PIVOT) {
                 pivot = pivotOf(labels, px, py, pz, fx, fy, fz);
             } else if (type == MOVE || type == TURN || type == SCALE) {

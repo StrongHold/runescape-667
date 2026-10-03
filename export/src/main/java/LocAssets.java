@@ -130,7 +130,7 @@ public final class LocAssets {
                 node.put("name", variant.name());
                 node.put("mesh", mesh);
                 node.put("extras", Map.of("shape", shape, "turned", variant.turned(), "minY", still.fa(), "maxY", still.EA()));
-                var skin = bones.map(held -> SkinWriter.write(gltf, held.joints()));
+                var skin = bones.map(held -> SkinWriter.write(gltf, held.joints(), baker.skinning().orElseThrow()));
                 skin.ifPresent(held -> {
                     node.put("skin", held.number());
                     node.put("children", held.childNodes());
@@ -149,7 +149,7 @@ public final class LocAssets {
                         var extras = Map.<String, Object>of("shape", shape);
                         if (bones.isPresent()) {
                             SkinWriter.writeClip(gltf, name, clip.baked(), bones.get().joints(), baker.framePoses(),
-                                skin.orElseThrow(), number, result.targets() ? poses.size() : 0, extras);
+                                baker.frames(), skin.orElseThrow(), number, result.targets() ? poses.size() : 0, extras);
                         } else {
                             AnimationWriter.write(gltf, name, clip.baked(), poses.size(), List.of(number), extras);
                         }
