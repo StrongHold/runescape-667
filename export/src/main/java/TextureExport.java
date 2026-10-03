@@ -31,12 +31,14 @@ public final class TextureExport {
         }
     }
 
-    private static void export(Args args) {
+    private static void export(Args args) throws java.io.IOException {
         var reader = new ClientModelReader(args.where.cache());
         var library = args.textures.library(reader.textures());
         var written = library.writeAll();
         System.out.println("wrote " + written + " textures to " + library.directory().toAbsolutePath().normalize()
             + ", of " + library.count() + " the cache holds");
+        WaterTextures.write(library.directory());
+        System.out.println("wrote the water's ripple frames and turbulence to " + library.directory().resolve("water").toAbsolutePath().normalize());
     }
 
     private TextureExport() {

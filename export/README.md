@@ -37,8 +37,8 @@ face's colour is the colour the GL toolkit gives its vertices before its lights 
 0.7 comes after the scaling, so the result is not the palette colour dimmed. It is written as a
 vertex colour in linear light. A textured face is tinted as the GL toolkit tints it: that colour
 pulled towards a grey of the ambient alone by the texture's `alpha`, out of 256, and brightened
-by its `brightness`, which the material's `extras` carry with its `effectType` for an engine
-that lights a texture itself. Most textures have an alpha of 0 and keep the face's colour. A
+by its `brightness`, which the material's `extras` carry with its `effectType`, `effectParam1` and
+`effectParam2`, for an engine that lights a texture itself or draws the texture's effect. Most textures have an alpha of 0 and keep the face's colour. A
 textured face refers to its texture in the shared texture library below. Faces are grouped into one primitive for each texture and way of
 blending, so a face that is drawn through what is behind it, or a texture with holes in it, gets
 a material that blends or cuts out. Normals are the client's own: a smooth face takes the normals
@@ -49,6 +49,18 @@ of the faces it meets at each corner, and a flat face takes its own.
 
     ./gradlew :export:exportTextures
     ./gradlew :export:exportModel --args="--model 8 --textures /path/to/textures"
+
+The library also holds what the GL toolkit's turbulent water effect draws with, under `water/`:
+`ripple.png`, the sixteen 128 by 128 frames of rippling noise the client bakes
+(`GlRippleNoiseTexture`), one below the other with the luminance in each colour channel and the
+alpha as the client's, which the effect adds to the water over four seconds; and
+`turbulence.json`, the two tables of 256 rows by 64 columns, `x` and `y` in 4096ths
+(`Static490.method6551` at the effect's amplitude), that the effect offsets the water's texture
+coordinates by. A water texture is one whose `effectType` is 4, 8 or 9, and the GL toolkit draws
+it opaque with that effect when the water plane is not active: the texel at the offset
+coordinate times the vertex's colour and the ambient light alone, plus the ripple frame at an
+eighth of the coordinate, with `effectParam1`'s low two bits picking the turbulence and its
+bit 0x40 whether the ambient is left out (`TurbulentWaterEffect`).
 
 Every file written here refers to its textures by a relative path, such as `../textures/128.png`,
 and carries no copy of them. The textures live in one directory, `export/build/textures` unless

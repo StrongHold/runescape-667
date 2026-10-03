@@ -88,6 +88,8 @@ public final class GltfMaterials {
             extras.put("alpha", metrics.alpha & 0xFF);
             extras.put("brightness", metrics.brightness & 0xFF);
             extras.put("effectType", (int) metrics.effectType);
+            extras.put("effectParam1", metrics.effectParam1 & 0xFF);
+            extras.put("effectParam2", metrics.effectParam2);
             material.put("extras", extras);
         }
 
