@@ -197,6 +197,8 @@ public final class LocAssets {
         extras.put("translate", List.of(type.translateX, type.translateY, type.translateZ));
         extras.put("hillchange", (int) type.hillchange);
         extras.put("hillskew", type.hillskew);
+        extras.put("size", List.of(type.width, type.length));
+        extras.put("shadow", type.shadow);
         if (type.hasAnimations()) {
             var sequences = new ArrayList<Integer>();
             var weights = new ArrayList<Integer>();

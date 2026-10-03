@@ -220,7 +220,12 @@ where the type says so, and recoloured and retextured. The client turns, scales,
 the model after that, and all of it depends on the placement, so none of it is in the mesh. The
 file's `extras` carry what that needs: the type's `resize`, `offset`, `translate`, `hillchange` and
 `hillskew`, whether the mesh is `mirrored`, and the `sequences` the location plays, their weights
-and whether the client starts at a random frame. A location that animates has bones and an
+and whether the client starts at a random frame. They also carry the type's `size` in tiles, as
+width and length before any turn, and whether it casts a `shadow`: when the client builds a map
+square it darkens the ground's tile corners under each location that does, by the location's
+radius over four up to 30 for one that stands on its tiles, and by 50 for the two corners of a
+straight wall and the one corner of a corner wall (`MapRegion.loadLocation`, `Ground.ka`). An
+engine reads the placements and does the same, since a location spawned later casts no less. A location that animates has bones and an
 animation for every sequence, as an NPC has, and is scaled in its asset, because the client
 scales a location before it poses it and a frame's move is not scaled with it; its `extras` then
 say `resize` is 128 and name the scale in `scaledInAsset`. A wall decoration that animates
