@@ -73,6 +73,11 @@ depth, from the fog's start to a fog range further, where the fog for the water 
 and a half before the far plane and ends a range before it (`GlToolkit.method6995`). What shows
 through is the bed, drawn before it in the underwater pass, described with the ground below.
 
+Under `light/`, `flicker.json` holds the 2048 values of noise the client's lights flicker by
+(`EnvironmentLight.generateNoise` at a persistence of 0.4), out of 4096. A light whose flicker
+pattern is 3 reads it at its phase; the other patterns are a sine, a sawtooth, a square and a
+triangle, and need no table.
+
 Every file written here refers to its textures by a relative path, such as `../textures/128.png`,
 and carries no copy of them. The textures live in one directory, `export/build/textures` unless
 `--textures` names another, as one PNG for each texture id. An engine then loads each texture

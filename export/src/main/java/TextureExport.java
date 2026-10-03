@@ -38,7 +38,9 @@ public final class TextureExport {
         System.out.println("wrote " + written + " textures to " + library.directory().toAbsolutePath().normalize()
             + ", of " + library.count() + " the cache holds");
         WaterTextures.write(library.directory());
-        System.out.println("wrote the water's ripple frames and turbulence to " + library.directory().resolve("water").toAbsolutePath().normalize());
+        System.out.println("wrote the water's ripple frames to " + library.directory().resolve("water").toAbsolutePath().normalize());
+        FlickerNoise.write(library.directory());
+        System.out.println("wrote the lights' flicker noise to " + library.directory().resolve("light").toAbsolutePath().normalize());
     }
 
     private TextureExport() {
