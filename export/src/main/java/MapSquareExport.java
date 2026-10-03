@@ -105,11 +105,11 @@ public final class MapSquareExport {
 
         var children = new ArrayList<Integer>();
         for (var level = 0; level < ClientMapSquareReader.LEVELS; level++) {
-            terrain(gltf, materials, square, square.grounds().get(level), "terrain level " + level, level)
-                .ifPresent(children::add);
+            terrain(gltf, materials, square, square.grounds().get(level), square.colours().get(level),
+                "terrain level " + level, level).ifPresent(children::add);
         }
         if (square.underwater() instanceof ClientMapSquareReader.Underwater.Bed bed) {
-            terrain(gltf, materials, square, bed.ground(), "underwater bed", 0).ifPresent(children::add);
+            terrain(gltf, materials, square, bed.ground(), bed.colours(), "underwater bed", 0).ifPresent(children::add);
             report("locations under the water", bed.locations());
         }
         report("locations", square.locations());
@@ -147,9 +147,9 @@ public final class MapSquareExport {
      * One node wearing the ground of one level, or nothing where the map square has no tile on it.
      */
     private static Optional<Integer> terrain(GltfBuilder gltf, GltfMaterials materials,
-                                             ClientMapSquareReader.MapSquare square, JavaGround ground, String name,
-                                             int level) {
-        var result = GroundToGltf.convertInto(gltf, materials, ground, ClientMapSquareReader.ORIGIN,
+                                             ClientMapSquareReader.MapSquare square, JavaGround ground,
+                                             RecordingGround colours, String name, int level) {
+        var result = GroundToGltf.convertInto(gltf, materials, ground, colours, ClientMapSquareReader.ORIGIN,
             square.x() * ClientMapSquareReader.TILES_ACROSS, square.z() * ClientMapSquareReader.TILES_ACROSS);
         if (gltf.empty()) {
             return Optional.empty();

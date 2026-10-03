@@ -58,6 +58,7 @@ public final class GroundToGltf {
     private final int origin;
     private final int originX;
     private final int originZ;
+    private final RecordingGround colours;
     private final GltfBuilder gltf;
     private final GltfMaterials materials;
     private final Map<PrimitiveKey, Primitive> primitives = new LinkedHashMap<>();
@@ -65,9 +66,10 @@ public final class GroundToGltf {
     private final Map<String, Integer> approximated = new TreeMap<>();
     private final Map<Integer, Integer> layered = new TreeMap<>();
 
-    private GroundToGltf(JavaGround ground, int origin, int worldX, int worldZ, GltfBuilder gltf,
-                         GltfMaterials materials) {
+    private GroundToGltf(JavaGround ground, RecordingGround colours, int origin, int worldX, int worldZ,
+                         GltfBuilder gltf, GltfMaterials materials) {
         this.ground = ground;
+        this.colours = colours;
         this.origin = origin;
         this.originX = worldX;
         this.originZ = worldZ;
@@ -96,8 +98,8 @@ public final class GroundToGltf {
      * @param worldX where the map square starts in the world, in tiles, which places its textures.
      */
     public static Result convertInto(GltfBuilder gltf, GltfMaterials materials, JavaGround ground,
-                                     int origin, int worldX, int worldZ) {
-        return new GroundToGltf(ground, origin, worldX, worldZ, gltf, materials).convert();
+                                     RecordingGround colours, int origin, int worldX, int worldZ) {
+        return new GroundToGltf(ground, colours, origin, worldX, worldZ, gltf, materials).convert();
     }
 
     private Result convert() {
@@ -215,6 +217,11 @@ public final class GroundToGltf {
         var key = new PrimitiveKey(texture, mode);
         var primitive = primitives.computeIfAbsent(key, ignored -> new Primitive(texture != -1));
         var opacity = opacity(metrics(texture), mode, alpha);
+        var hsls = colours.hsl(x, z);
+        if (hsls == null || hsls.length != tile.vertexCount) {
+            throw new IllegalStateException("Tile " + x + "," + z + " has no HSL colour for each of its " + tile.vertexCount
+                + " vertices.");
+        }
 
         for (var corner = 0; corner < weights.length; corner++) {
             var vertex = a + corner;
@@ -225,7 +232,7 @@ public final class GroundToGltf {
             var v = texture == -1 ? 0.0F : textureCoordinate(originZ, localZ, size);
 
             var described = new Corner(localX, tile.verticesY[vertex], localZ, normal[0], normal[1], normal[2],
-                tile.vertexColours[vertex] & 0xFFFFFF, opacity * weights[corner], u, v);
+                tile.vertexColours[vertex] & 0xFFFFFF, hsls[vertex] & 0xFFFF, opacity * weights[corner], u, v);
             var known = primitive.numbers.get(described);
             if (known != null) {
                 primitive.indices.add(known);
@@ -323,6 +330,7 @@ public final class GroundToGltf {
         attributes.put("POSITION", gltf.attribute(primitive.positions.toArray(), 3, "VEC3", true));
         attributes.put("NORMAL", gltf.attribute(primitive.normals.toArray(), 3, "VEC3", false));
         attributes.put("COLOR_0", gltf.attribute(primitive.colours.toArray(), 4, "VEC4", false));
+        attributes.put("_HSL", gltf.wholeAttribute(primitive.hsls.stream().mapToInt(Integer::intValue).toArray(), 4, "VEC4"));
         if (primitive.textured) {
             attributes.put("TEXCOORD_0", gltf.attribute(primitive.uvs.toArray(), 2, "VEC2", false));
         }
@@ -346,7 +354,7 @@ public final class GroundToGltf {
      * corners that agree on all of it share a vertex, which is what joins the tiles into one
      * surface.
      */
-    private record Corner(int x, int y, int z, float normalX, float normalY, float normalZ, int rgb,
+    private record Corner(int x, int y, int z, float normalX, float normalY, float normalZ, int rgb, int hsl,
                           float opacity, float u, float v) {
     }
 
@@ -357,6 +365,7 @@ public final class GroundToGltf {
         private final FloatList normals = new FloatList();
         private final FloatList colours = new FloatList();
         private final FloatList uvs = new FloatList();
+        private final List<Integer> hsls = new ArrayList<>();
         private final Map<Corner, Integer> numbers = new HashMap<>();
         private final List<Integer> indices = new ArrayList<>();
 
@@ -375,6 +384,11 @@ public final class GroundToGltf {
             normals.add(corner.normalX());
             normals.add(-corner.normalY());
             normals.add(-corner.normalZ());
+
+            hsls.add(corner.hsl() >> 10 & 0x3F);
+            hsls.add(corner.hsl() >> 7 & 0x7);
+            hsls.add(corner.hsl() & 0x7F);
+            hsls.add(0);
 
             colours.add(Srgb.toLinear(corner.rgb() >> 16 & 0xFF));
             colours.add(Srgb.toLinear(corner.rgb() >> 8 & 0xFF));

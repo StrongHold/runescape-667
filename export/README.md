@@ -31,9 +31,15 @@ draws are the front faces in glTF too.
 
 Two face corners share a vertex only where they agree on the client's vertex, the normal, the
 colour, the opacity and the texture coordinate, so each face keeps its own colour exactly. A
-face's colour comes from the client's palette and is written as a vertex colour in linear light.
-A textured face is tinted the way the client tints it, and refers to its texture in the shared
-texture library below. Faces are grouped into one primitive for each texture and way of
+face's colour is the colour the GL toolkit gives its vertices before its lights fall on them
+(`Model_Sub2.method4985`): the face's HSL colour with its lightness scaled by the model's ambient,
+64 plus the type's own, out of 128, and then taken through the client's palette, whose gamma of
+0.7 comes after the scaling, so the result is not the palette colour dimmed. It is written as a
+vertex colour in linear light. A textured face is tinted as the GL toolkit tints it: that colour
+pulled towards a grey of the ambient alone by the texture's `alpha`, out of 256, and brightened
+by its `brightness`, which the material's `extras` carry with its `effectType` for an engine
+that lights a texture itself. Most textures have an alpha of 0 and keep the face's colour. A
+textured face refers to its texture in the shared texture library below. Faces are grouped into one primitive for each texture and way of
 blending, so a face that is drawn through what is behind it, or a texture with holes in it, gets
 a material that blends or cuts out. Normals are the client's own: a smooth face takes the normals
 of the faces it meets at each corner, and a flat face takes its own.
@@ -198,7 +204,16 @@ on it stands on it. Tiles meet corner to corner, and a corner that two tiles sha
 
 The client lights the ground as it builds it, from the slope of each corner and the toolkit's sun,
 and that light is turned up to full here, so the colours written are the ground's own, as a
-model's are. Each corner is given a normal from the same slope the client lights it by, and a
+model's are. `COLOR_0` is that colour as the software toolkit holds it. The GL toolkit colours a
+ground vertex another way (`Ground_Sub2`, `Node_Sub39.method5863`): it takes the vertex's HSL
+colour, scales its lightness by the light on the tile, 74 less the shadow the locations cast on
+the corner, out of 128, holds it between 2 and 126, and takes it through the palette, whose
+gamma comes after the scaling; a textured vertex is then pulled towards a grey of that light, two
+steps a step, by its texture's `alpha`, and brightened by its `brightness`. Since the shadow
+depends on the locations an engine places, the HSL is written too, as `_HSL`, four unsigned
+bytes a vertex: the hue of 64, the saturation of 8, the lightness of 128, and a spare. A
+`RecordingGround` keeps it as the terrain hands each tile over, before the software ground turns
+it into RGB in place. Each corner is given a normal from the same slope the client lights it by, and a
 point within a tile blends the normals of its corners as the client blends their light. The
 texture coordinates are the client's too: where a corner is in the world over the size the floor
 type gives its texture, so a texture runs on from tile to tile, and from one map square to the next.

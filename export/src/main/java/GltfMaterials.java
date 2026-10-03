@@ -85,6 +85,9 @@ public final class GltfMaterials {
             var extras = new LinkedHashMap<String, Object>();
             extras.put("disableable", metrics.disableable);
             extras.put("colourOp", metrics.colorOp);
+            extras.put("alpha", metrics.alpha & 0xFF);
+            extras.put("brightness", metrics.brightness & 0xFF);
+            extras.put("effectType", (int) metrics.effectType);
             material.put("extras", extras);
         }
 

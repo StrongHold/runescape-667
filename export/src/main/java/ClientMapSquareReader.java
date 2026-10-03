@@ -137,8 +137,8 @@ public final class ClientMapSquareReader {
      * @param locations whether the map square's locations on land were placed.
      * @param environment how the map square is lit, its fog and sky, and the lights on it.
      */
-    public record MapSquare(int x, int z, List<JavaGround> grounds, int[][][] heights, int[][][] flags,
-                            List<Placement> placements,
+    public record MapSquare(int x, int z, List<JavaGround> grounds, List<RecordingGround> colours, int[][][] heights,
+                            int[][][] flags, List<Placement> placements,
                             Placing locations, Underwater underwater, EnvironmentDecoder.Environment environment) {
     }
 
@@ -174,7 +174,7 @@ public final class ClientMapSquareReader {
          * @param heights the height of every tile corner of the bed, as the land's are read.
          * @param locations whether the locations on the map square's bed were placed.
          */
-        record Bed(JavaGround ground, int[][] heights, Placing locations) implements Underwater {
+        record Bed(JavaGround ground, RecordingGround colours, int[][] heights, Placing locations) implements Underwater {
         }
     }
 
@@ -259,7 +259,9 @@ public final class ClientMapSquareReader {
         if (bed != null) {
             unlit((JavaGround) Static693.underwaterGround[0]);
         }
+        var colours = recordColours(Static706.floor);
         region.load(toolkit, bed == null ? null : Static693.underwaterGround[0], null);
+        restoreGrounds(Static706.floor, colours);
 
         var placements = new ArrayList<Placement>();
         if (locations instanceof Placing.Placed) {
@@ -270,13 +272,15 @@ public final class ClientMapSquareReader {
         if (bed != null) {
             switchScene(true);
             var bedLocations = withLocations ? placeBedLocations(bed, mapSquareX, mapSquareZ) : new Placing.NotPlaced(NOT_ASKED);
+            var bedColours = recordColours(Static693.underwaterGround);
             bed.load(toolkit, null, Static706.floor[0]);
+            restoreGrounds(Static693.underwaterGround, bedColours);
             switchScene(false);
 
             if (bedLocations instanceof Placing.Placed) {
                 placements.addAll(placements(toolkit, Static420.aTileArrayArrayArray2, true));
             }
-            underwaterWorld = new Underwater.Bed((JavaGround) Static693.underwaterGround[0],
+            underwaterWorld = new Underwater.Bed((JavaGround) Static693.underwaterGround[0], bedColours.getFirst(),
                 heights(Static693.underwaterGround[0]), bedLocations);
         }
 
@@ -288,8 +292,29 @@ public final class ClientMapSquareReader {
             heights[level] = heights(Static706.floor[level]);
             flags[level] = flags(level);
         }
-        return new MapSquare(mapSquareX, mapSquareZ, List.copyOf(grounds), heights, flags, List.copyOf(placements),
-            locations, underwaterWorld, environment);
+        return new MapSquare(mapSquareX, mapSquareZ, List.copyOf(grounds), colours, heights, flags,
+            List.copyOf(placements), locations, underwaterWorld, environment);
+    }
+
+    /**
+     * Puts a recording ground in front of each of the client's grounds, so that the terrain's
+     * colours are kept as it hands them over.
+     */
+    private static List<RecordingGround> recordColours(Ground[] grounds) {
+        var recordings = new ArrayList<RecordingGround>();
+        for (var level = 0; level < grounds.length; level++) {
+            var recording = new RecordingGround(grounds[level]);
+            recordings.add(recording);
+            grounds[level] = recording;
+        }
+        return List.copyOf(recordings);
+    }
+
+    /** Puts the client's own grounds back, so that everything after the load sees them. */
+    private static void restoreGrounds(Ground[] grounds, List<RecordingGround> recordings) {
+        for (var level = 0; level < grounds.length; level++) {
+            grounds[level] = recordings.get(level).real();
+        }
     }
 
     /**

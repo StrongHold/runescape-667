@@ -359,7 +359,7 @@ public final class ModelToGltf {
         if (texture == -1) {
             return untexturedRgb(face, hsl);
         } else {
-            return model.shadeTexturedRgb(hsl, (short) texture, FULL_LIGHT);
+            return GlTint.textured(untexturedRgb(face, hsl), model.WA(), materials.source().getMetrics(texture));
         }
     }
 
@@ -387,7 +387,7 @@ public final class ModelToGltf {
         if (shading(face) == BLACK) {
             return 0;
         } else {
-            return ColourUtils.HSL_TO_RGB[hsl];
+            return GlTint.untextured(hsl, model.WA());
         }
     }
 
