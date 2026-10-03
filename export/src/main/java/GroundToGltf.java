@@ -59,6 +59,7 @@ public final class GroundToGltf {
     private final int originX;
     private final int originZ;
     private final RecordingGround colours;
+    private final boolean underwater;
     private final GltfBuilder gltf;
     private final GltfMaterials materials;
     private final Map<PrimitiveKey, Primitive> primitives = new LinkedHashMap<>();
@@ -66,10 +67,11 @@ public final class GroundToGltf {
     private final Map<String, Integer> approximated = new TreeMap<>();
     private final Map<Integer, Integer> layered = new TreeMap<>();
 
-    private GroundToGltf(JavaGround ground, RecordingGround colours, int origin, int worldX, int worldZ,
-                         GltfBuilder gltf, GltfMaterials materials) {
+    private GroundToGltf(JavaGround ground, RecordingGround colours, boolean underwater, int origin, int worldX,
+                         int worldZ, GltfBuilder gltf, GltfMaterials materials) {
         this.ground = ground;
         this.colours = colours;
+        this.underwater = underwater;
         this.origin = origin;
         this.originX = worldX;
         this.originZ = worldZ;
@@ -98,8 +100,8 @@ public final class GroundToGltf {
      * @param worldX where the map square starts in the world, in tiles, which places its textures.
      */
     public static Result convertInto(GltfBuilder gltf, GltfMaterials materials, JavaGround ground,
-                                     RecordingGround colours, int origin, int worldX, int worldZ) {
-        return new GroundToGltf(ground, colours, origin, worldX, worldZ, gltf, materials).convert();
+                                     RecordingGround colours, boolean underwater, int origin, int worldX, int worldZ) {
+        return new GroundToGltf(ground, colours, underwater, origin, worldX, worldZ, gltf, materials).convert();
     }
 
     private Result convert() {
@@ -214,9 +216,11 @@ public final class GroundToGltf {
      */
     private void addLayer(int x, int z, JavaGenericBlendedTile tile, int a, int texture, int size,
                           GltfMaterials.AlphaMode mode, float[] weights, int alpha) {
-        var key = new PrimitiveKey(texture, mode);
+        var water = underwater ? colours.water(x, z) : RecordingGround.Water.NONE;
+        var key = new PrimitiveKey(texture, mode, water);
         var primitive = primitives.computeIfAbsent(key, ignored -> new Primitive(texture != -1));
         var opacity = opacity(metrics(texture), mode, alpha);
+        var depths = colours.waterDepths(x, z);
         var hsls = colours.hsl(x, z);
         if (hsls == null || hsls.length != tile.vertexCount) {
             throw new IllegalStateException("Tile " + x + "," + z + " has no HSL colour for each of its " + tile.vertexCount
@@ -231,8 +235,9 @@ public final class GroundToGltf {
             var u = texture == -1 ? 0.0F : textureCoordinate(originX, localX, size);
             var v = texture == -1 ? 0.0F : textureCoordinate(originZ, localZ, size);
 
+            var depth = depths == null ? 0 : depths[vertex];
             var described = new Corner(localX, tile.verticesY[vertex], localZ, normal[0], normal[1], normal[2],
-                tile.vertexColours[vertex] & 0xFFFFFF, hsls[vertex] & 0xFFFF, opacity * weights[corner], u, v);
+                tile.vertexColours[vertex] & 0xFFFFFF, hsls[vertex] & 0xFFFF, depth, opacity * weights[corner], u, v);
             var known = primitive.numbers.get(described);
             if (known != null) {
                 primitive.indices.add(known);
@@ -331,16 +336,17 @@ public final class GroundToGltf {
         attributes.put("NORMAL", gltf.attribute(primitive.normals.toArray(), 3, "VEC3", false));
         attributes.put("COLOR_0", gltf.attribute(primitive.colours.toArray(), 4, "VEC4", false));
         attributes.put("_HSL", gltf.wholeAttribute(primitive.hsls.stream().mapToInt(Integer::intValue).toArray(), 4, "VEC4"));
+        attributes.put("_WATER", gltf.attribute(primitive.waterDepths.toArray(), 1, "SCALAR", false));
         if (primitive.textured) {
             attributes.put("TEXCOORD_0", gltf.attribute(primitive.uvs.toArray(), 2, "VEC2", false));
         }
 
         var indices = primitive.indices.stream().mapToInt(Integer::intValue).toArray();
         gltf.primitive(attributes, gltf.indices(indices, primitive.numbers.size()),
-            materials.material(key.texture(), key.mode()), List.of());
+            materials.material(key.texture(), key.mode(), key.water()), List.of());
     }
 
-    private record PrimitiveKey(int texture, GltfMaterials.AlphaMode mode) {
+    private record PrimitiveKey(int texture, GltfMaterials.AlphaMode mode, RecordingGround.Water water) {
     }
 
     /**
@@ -355,7 +361,7 @@ public final class GroundToGltf {
      * surface.
      */
     private record Corner(int x, int y, int z, float normalX, float normalY, float normalZ, int rgb, int hsl,
-                          float opacity, float u, float v) {
+                          int waterDepth, float opacity, float u, float v) {
     }
 
     private static final class Primitive {
@@ -366,6 +372,7 @@ public final class GroundToGltf {
         private final FloatList colours = new FloatList();
         private final FloatList uvs = new FloatList();
         private final List<Integer> hsls = new ArrayList<>();
+        private final FloatList waterDepths = new FloatList();
         private final Map<Corner, Integer> numbers = new HashMap<>();
         private final List<Integer> indices = new ArrayList<>();
 
@@ -389,6 +396,7 @@ public final class GroundToGltf {
             hsls.add(corner.hsl() >> 7 & 0x7);
             hsls.add(corner.hsl() & 0x7F);
             hsls.add(0);
+            waterDepths.add(corner.waterDepth());
 
             colours.add(Srgb.toLinear(corner.rgb() >> 16 & 0xFF));
             colours.add(Srgb.toLinear(corner.rgb() >> 8 & 0xFF));

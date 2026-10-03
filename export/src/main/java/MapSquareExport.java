@@ -106,10 +106,10 @@ public final class MapSquareExport {
         var children = new ArrayList<Integer>();
         for (var level = 0; level < ClientMapSquareReader.LEVELS; level++) {
             terrain(gltf, materials, square, square.grounds().get(level), square.colours().get(level),
-                "terrain level " + level, level).ifPresent(children::add);
+                "terrain level " + level, level, false).ifPresent(children::add);
         }
         if (square.underwater() instanceof ClientMapSquareReader.Underwater.Bed bed) {
-            terrain(gltf, materials, square, bed.ground(), bed.colours(), "underwater bed", 0).ifPresent(children::add);
+            terrain(gltf, materials, square, bed.ground(), bed.colours(), "underwater bed", 0, true).ifPresent(children::add);
             report("locations under the water", bed.locations());
         }
         report("locations", square.locations());
@@ -148,8 +148,8 @@ public final class MapSquareExport {
      */
     private static Optional<Integer> terrain(GltfBuilder gltf, GltfMaterials materials,
                                              ClientMapSquareReader.MapSquare square, JavaGround ground,
-                                             RecordingGround colours, String name, int level) {
-        var result = GroundToGltf.convertInto(gltf, materials, ground, colours, ClientMapSquareReader.ORIGIN,
+                                             RecordingGround colours, String name, int level, boolean underwater) {
+        var result = GroundToGltf.convertInto(gltf, materials, ground, colours, underwater, ClientMapSquareReader.ORIGIN,
             square.x() * ClientMapSquareReader.TILES_ACROSS, square.z() * ClientMapSquareReader.TILES_ACROSS);
         if (gltf.empty()) {
             return Optional.empty();
@@ -158,7 +158,7 @@ public final class MapSquareExport {
         var node = new LinkedHashMap<String, Object>();
         node.put("name", name);
         node.put("mesh", gltf.mesh(name));
-        node.put("extras", Map.of("level", level, "tiles", result.tiles()));
+        node.put("extras", Map.of("level", level, "tiles", result.tiles(), "underwater", underwater));
 
         System.out.println("  " + name + ": " + result.tiles() + " tiles, " + result.faces() + " faces in "
             + result.primitives() + " primitives");

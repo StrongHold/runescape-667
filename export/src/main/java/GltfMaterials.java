@@ -59,7 +59,16 @@ public final class GltfMaterials {
      * and 4 takes a dot product ({@code GlToolkit.method6991}).
      */
     public int material(int texture, AlphaMode mode) {
-        var key = new MaterialKey(texture, mode);
+        return material(texture, mode, RecordingGround.Water.NONE);
+    }
+
+    /**
+     * The material for faces of a texture under water, which also carries in its {@code extras}
+     * the {@code waterColour} the GL toolkit tints the faces towards, the {@code waterDepth} at
+     * which that tint is whole, and the {@code waterBias} on it, out of 255.
+     */
+    public int material(int texture, AlphaMode mode, RecordingGround.Water water) {
+        var key = new MaterialKey(texture, mode, water);
         var held = materials.get(key);
         if (held != null) {
             return held;
@@ -80,9 +89,14 @@ public final class GltfMaterials {
         if (mode == AlphaMode.MASK) {
             material.put("alphaCutoff", MASK_CUTOFF);
         }
+        var extras = new LinkedHashMap<String, Object>();
+        if (!water.equals(RecordingGround.Water.NONE)) {
+            extras.put("waterColour", water.colour());
+            extras.put("waterDepth", water.depth());
+            extras.put("waterBias", water.bias());
+        }
         if (texture != -1) {
             var metrics = source.getMetrics(texture);
-            var extras = new LinkedHashMap<String, Object>();
             extras.put("disableable", metrics.disableable);
             extras.put("colourOp", metrics.colorOp);
             extras.put("alpha", metrics.alpha & 0xFF);
@@ -90,6 +104,8 @@ public final class GltfMaterials {
             extras.put("effectType", (int) metrics.effectType);
             extras.put("effectParam1", metrics.effectParam1 & 0xFF);
             extras.put("effectParam2", metrics.effectParam2);
+        }
+        if (!extras.isEmpty()) {
             material.put("extras", extras);
         }
 
@@ -115,6 +131,6 @@ public final class GltfMaterials {
         return texture;
     }
 
-    private record MaterialKey(int texture, AlphaMode mode) {
+    private record MaterialKey(int texture, AlphaMode mode, RecordingGround.Water water) {
     }
 }

@@ -18,6 +18,18 @@ public final class RecordingGround extends Ground {
 
     private final Ground real;
     private final Map<Long, int[]> hslByTile = new HashMap<>();
+    private final Map<Long, int[]> depthsByTile = new HashMap<>();
+    private final Map<Long, Water> waterByTile = new HashMap<>();
+
+    /**
+     * What the terrain says about the water over a tile: the colour the GL toolkit tints what
+     * lies under it towards, how deep the water is for that tint to be whole, in the client's
+     * units, and a bias on it out of 255 (`FloorOverlayType`, `Static295.setWaterParams`).
+     */
+    public record Water(int colour, int depth, int bias) {
+
+        public static final Water NONE = new Water(0, 0, 0);
+    }
 
     public RecordingGround(Ground real) {
         super(real.sizeX, real.sizeZ, real.tileSize, real.tileHeights);
@@ -36,6 +48,19 @@ public final class RecordingGround extends Ground {
         return hslByTile.get(key(x, z));
     }
 
+    /**
+     * How far under the water's surface each vertex of a tile lies, in the client's units, in the
+     * ground's order, or nothing for a tile the terrain gave no depths.
+     */
+    public int[] waterDepths(int x, int z) {
+        return depthsByTile.get(key(x, z));
+    }
+
+    /** The water over a tile, or none. */
+    public Water water(int x, int z) {
+        return waterByTile.getOrDefault(key(x, z), Water.NONE);
+    }
+
     private static long key(int x, int z) {
         return (long) x << 32 | (z & 0xFFFFFFFFL);
     }
@@ -45,6 +70,10 @@ public final class RecordingGround extends Ground {
                   int[] blendedColours, int[] overlayBlendColours, int[] blendedTextures, int[] blendedSizes,
                   int waterColour, int waterDepth, int waterBias, boolean allowShadow) {
         hslByTile.put(key(x, z), blendedColours.clone());
+        if (waterDepths != null) {
+            depthsByTile.put(key(x, z), waterDepths.clone());
+        }
+        waterByTile.put(key(x, z), new Water(waterColour, waterDepth, waterBias));
         real.U(x, z, offsetX, offsetLevel, offsetY, waterDepths, blendedColours, overlayBlendColours, blendedTextures,
             blendedSizes, waterColour, waterDepth, waterBias, allowShadow);
     }

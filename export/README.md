@@ -50,17 +50,20 @@ of the faces it meets at each corner, and a flat face takes its own.
     ./gradlew :export:exportTextures
     ./gradlew :export:exportModel --args="--model 8 --textures /path/to/textures"
 
-The library also holds what the GL toolkit's turbulent water effect draws with, under `water/`:
+The library also holds what the GL toolkit's water effect draws with, under `water/`:
 `ripple.png`, the sixteen 128 by 128 frames of rippling noise the client bakes
 (`GlRippleNoiseTexture`), one below the other with the luminance in each colour channel and the
-alpha as the client's, which the effect adds to the water over four seconds; and
-`turbulence.json`, the two tables of 256 rows by 64 columns, `x` and `y` in 4096ths
-(`Static490.method6551` at the effect's amplitude), that the effect offsets the water's texture
-coordinates by. A water texture is one whose `effectType` is 4, 8 or 9, and the GL toolkit draws
-it opaque with that effect when the water plane is not active: the texel at the offset
-coordinate times the vertex's colour and the ambient light alone, plus the ripple frame at an
-eighth of the coordinate, with `effectParam1`'s low two bits picking the turbulence and its
-bit 0x40 whether the ambient is left out (`TurbulentWaterEffect`).
+alpha as the client's, both of them the noise times three over 32, so at most 23 of 255. A water
+texture is one whose `effectType` is 4, 8 or 9. On a player's GL client with high water detail,
+whose toolkit supports the water plane, the surface is drawn in the normal pass by the fixed
+function water effect (`FixedFunctionWaterEffect`): the texture is never bound, and in its place
+the ripple frame of the moment, the sixteen frames over four seconds at a quarter of the texture
+coordinate, is added to the lit vertex colour and the sum doubled (`GL_RGB_SCALE` 2), with the
+vertex's alpha, which the GL ground writes as opaque, times the frame's alpha, so the surface
+is nearly see-through; a second unit adds an alpha that fades the surface to opaque with eye
+depth, from the fog's start to a fog range further, where the fog for the water starts a range
+and a half before the far plane and ends a range before it (`GlToolkit.method6995`). What shows
+through is the bed, drawn before it in the underwater pass, described with the ground below.
 
 Every file written here refers to its textures by a relative path, such as `../textures/128.png`,
 and carries no copy of them. The textures live in one directory, `export/build/textures` unless
@@ -244,6 +247,21 @@ Where the region has a world under its water, the client reads it as a region of
 builds it beneath the land, against the land's heights. Its ground is written as the node
 `underwater bed`, and its locations, which the client reads without a key, with the rest.
 
+Each ground node's `extras` give its `level`, how many `tiles` it holds, and whether it is
+`underwater`. The GL toolkit draws the bed in a pass of its own (`UnderwaterEffect`), tinting
+each vertex towards the water's colour by how deep under the surface it lies, and the bed carries
+what that needs. Each bed vertex has `_WATER`, a float: how far under the water's surface it
+lies, in the client's units, as the terrain hands it to the ground, which writes one less into
+the vertex. Each bed material's `extras` give the water over its tiles, from the overlay's
+`FloorOverlayType`: `waterColour`, packed 0xRRGGBB, `waterDepth`, the depth in the client's
+units at which the tint is whole, and `waterBias`, a bias on it out of 255. A bed tile is
+batched by them, as the GL ground batches its tiles. The tint is the lit, textured colour mixed
+towards `waterColour` by a two texel alpha ramp, read linearly and clamped, at the greater of two
+terms held to one: the depth over `waterDepth` plus the bias over 255, and that times how far
+past a quarter of the view before the far plane the vertex is, over 512 units. From an eighth
+of the view before the far plane the vertex also rises to the surface, by its whole depth over
+256 units of eye depth. A land tile's material carries no water.
+
 
 ### The location library
 
@@ -372,9 +390,9 @@ desert's 44.
 Some of this is not what the client draws. The particles, billboards and sounds of a location are
 not written, and nor are the NPCs and items the server puts on the map square. The light the
 client bakes into the ground and the shadows locations cast on it are left out, as the ground is
-lit where it is shown. So are the map square's sun, fog, point lights and sky box, the water's
-moving textures, and the way the client darkens what it sees through water by its depth. Every
-roof is written, where the client hides those above the player. A bridge keeps the level its tiles
+lit where it is shown. So are the map square's sun, fog, point lights and sky box, and the
+water's moving textures; the water's tint on the bed is given as data, above, for the importer
+to draw. Every roof is written, where the client hides those above the player. A bridge keeps the level its tiles
 are given in the map, where the client draws it with the level below.
 
 The tool prints how many tiles and faces each level has, how many faces are written as layers or
