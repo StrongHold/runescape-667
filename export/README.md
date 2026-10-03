@@ -300,7 +300,14 @@ the `extras` also carry its `emitters`, each with its `type`, the draw `priority
 particles, and the three corners `a`, `b` and `c` of the face it spawns them over, and its
 `effectors`, each with its `type` and the vertex it stands `at`. The points are the client's
 vertices, in its units and frame before the file's turn, so an engine places them as it places
-the model's vertices. The types are in the texture library, under `particle/`. Of 59,434 types with a model, 55,604 have one shape, and the
+the model's vertices. The types are in the texture library, under `particle/`. Where the model has
+billboards, the sprites the client draws on a face, the `extras` carry them too, each resolved
+from its type: the `centre` of its face in the same frame, the `distance` it is pulled towards
+the camera in the client's units, its half `width` and `height` in those units, its `texture`,
+its `blendMode` (1 by alpha, 2 added, 128 multiplied in), the face's `colour` from the palette,
+and its `alpha` out of 255. The GL toolkit draws each as a square facing the camera at that
+size, in that colour, unlit, blended that way (`Model_Sub2.method4984`); the face under a
+billboard whose type hides it is left out of the mesh. Of 59,434 types with a model, 55,604 have one shape, and the
 rest, such as walls and fences, name a different mesh for each shape. Each mesh is the part of what
 the client builds that is the same wherever the location stands: the shape's meshes merged, mirrored
 where the type says so, and recoloured and retextured. The client turns, scales, moves and bends

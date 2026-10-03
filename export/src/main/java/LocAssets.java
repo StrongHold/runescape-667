@@ -140,6 +140,9 @@ public final class LocAssets {
                 if (still.effectors != null) {
                     shapeExtras.put("effectors", ParticleSources.effectors(still));
                 }
+                if (still.billboardFaces != null) {
+                    shapeExtras.put("billboards", BillboardSources.billboards(still));
+                }
                 node.put("extras", shapeExtras);
                 var skin = bones.map(held -> SkinWriter.write(gltf, held.joints(), baker.skinning().orElseThrow()));
                 skin.ifPresent(held -> {
