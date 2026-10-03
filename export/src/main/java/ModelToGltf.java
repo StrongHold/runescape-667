@@ -255,9 +255,10 @@ public final class ModelToGltf {
         for (var corner = 0; corner < corners.length; corner++) {
             var vertex = corners[corner];
             var normal = normal(face, vertex);
+            var shade = shade(face, vertex);
             var u = primitive.textured ? us[corner] : 0.0F;
             var v = primitive.textured ? vs[corner] : 0.0F;
-            var described = new Corner(vertex, normal[0], normal[1], normal[2], rgb, plainRgb, opacity, u, v);
+            var described = new Corner(vertex, normal[0], normal[1], normal[2], shade, rgb, plainRgb, opacity, u, v);
 
             var known = primitive.numbers.get(described);
             if (known != null) {
@@ -265,7 +266,7 @@ public final class ModelToGltf {
             } else {
                 primitive.numbers.put(described, primitive.numbers.size());
                 primitive.indices.add(primitive.numbers.size() - 1);
-                addCorner(primitive, face, vertex, normal, rgb, plainRgb, opacity, u, v);
+                addCorner(primitive, face, vertex, normal, shade, rgb, plainRgb, opacity, u, v);
             }
         }
     }
@@ -274,8 +275,8 @@ public final class ModelToGltf {
      * Writes one vertex of a primitive: where it is and how it is coloured, in the base pose and
      * in every pose, and the colour it takes when its texture is off.
      */
-    private void addCorner(Primitive primitive, int face, int vertex, float[] normal, int rgb, int plainRgb,
-                           float opacity, float u, float v) {
+    private void addCorner(Primitive primitive, int face, int vertex, float[] normal, float shade, int rgb,
+                           int plainRgb, float opacity, float u, float v) {
         primitive.positions.add(model.vertexX[vertex] / UNITS_PER_METRE);
         primitive.positions.add(-model.vertexY[vertex] / UNITS_PER_METRE);
         primitive.positions.add(-model.vertexZ[vertex] / UNITS_PER_METRE);
@@ -302,6 +303,7 @@ public final class ModelToGltf {
         primitive.normals.add(normal[0]);
         primitive.normals.add(-normal[1]);
         primitive.normals.add(-normal[2]);
+        primitive.shades.add(shade);
 
         addColour(primitive.colours, rgb, opacity);
         if (colourPosed) {
@@ -470,6 +472,38 @@ public final class ModelToGltf {
         return x != 0.0F || y != 0.0F || z != 0.0F;
     }
 
+    /** The normal a face or a vertex sum has in the client, 256 long for one face. */
+    private static final float NORMAL_SCALE = 256.0F;
+    /** The GL toolkit scales a summed normal by 3 over the contrast and the count, and a flat one by 2 over the contrast. */
+    private static final float SUMMED_NORMAL_GAIN = 3.0F;
+    private static final float FLAT_NORMAL_GAIN = 2.0F;
+
+    /**
+     * How strongly the sun lights one corner of a face, out of 1: the length of the normal the GL
+     * toolkit hands the hardware, which it never normalises ({@code Model_Sub2}, its vertex buffer).
+     * A smooth corner's normal is the sum of the normals of the faces at the vertex, each 256
+     * long, times 3 over the model's contrast and the count of faces summed, so faces that face
+     * away from each other, as the two sides of a blade of grass do, cancel and leave the vertex
+     * in the ambient alone. A flat face's normal is its own, 256 long, times 2 over the contrast.
+     * The count is kept in a byte, so 256 faces count as none.
+     */
+    private float shade(int face, int vertex) {
+        var contrast = (float) model.contrast;
+        if (shading(face) == SMOOTH) {
+            var summed = model.vertexNormals[vertex];
+            var count = summed.magnitude & 0xFF;
+            var gain = count == 0 ? FLAT_NORMAL_GAIN / contrast : SUMMED_NORMAL_GAIN / (contrast * count);
+            return length(summed.x, summed.y, summed.z) * gain;
+        } else {
+            var flat = model.faceNormals == null ? null : model.faceNormals[face];
+            return flat == null ? 0.0F : length(flat.x, flat.y, flat.z) * FLAT_NORMAL_GAIN / contrast;
+        }
+    }
+
+    private static float length(float x, float y, float z) {
+        return (float) Math.sqrt(x * x + y * y + z * z);
+    }
+
     private static float[] unit(float x, float y, float z) {
         var length = (float) Math.sqrt(x * x + y * y + z * z);
         return new float[] {x / length, y / length, z / length};
@@ -479,6 +513,7 @@ public final class ModelToGltf {
         var attributes = new LinkedHashMap<String, Integer>();
         attributes.put("POSITION", gltf.attribute(primitive.positions.toArray(), 3, "VEC3", true));
         attributes.put("NORMAL", gltf.attribute(primitive.normals.toArray(), 3, "VEC3", false));
+        attributes.put("_SHADE", gltf.attribute(primitive.shades.toArray(), 1, "SCALAR", false));
         attributes.put("COLOR_0", gltf.attribute(primitive.colours.toArray(), 4, "VEC4", false));
         if (primitive.textured) {
             attributes.put("COLOR_1", gltf.attribute(primitive.plainColours.toArray(), 3, "VEC3", false));
@@ -540,8 +575,8 @@ public final class ModelToGltf {
      * a vertex. The client's own vertex number is part of it, because two vertices in one place
      * can move apart when the model is posed.
      */
-    private record Corner(int vertex, float normalX, float normalY, float normalZ, int rgb, int plainRgb,
-                          float opacity, float u, float v) {
+    private record Corner(int vertex, float normalX, float normalY, float normalZ, float shade, int rgb,
+                          int plainRgb, float opacity, float u, float v) {
     }
 
     /**
@@ -552,6 +587,7 @@ public final class ModelToGltf {
         private final boolean textured;
         private final FloatList positions = new FloatList();
         private final FloatList normals = new FloatList();
+        private final FloatList shades = new FloatList();
         private final FloatList colours = new FloatList();
         private final FloatList plainColours = new FloatList();
         private final FloatList uvs = new FloatList();

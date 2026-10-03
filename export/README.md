@@ -42,7 +42,15 @@ by its `brightness`, which the material's `extras` carry with its `effectType`, 
 textured face refers to its texture in the shared texture library below. Faces are grouped into one primitive for each texture and way of
 blending, so a face that is drawn through what is behind it, or a texture with holes in it, gets
 a material that blends or cuts out. Normals are the client's own: a smooth face takes the normals
-of the faces it meets at each corner, and a flat face takes its own.
+of the faces it meets at each corner, and a flat face takes its own. They are written unit, as
+glTF asks, and each vertex also carries `_SHADE`, a float: how strongly the sun lights it, out
+of 1. The GL toolkit never normalises a normal (`Model_Sub2`): a smooth corner's is the sum of
+the normals of the faces at the vertex, each 256 long, times 3 over the model's contrast (768
+plus the type's own) and the count of faces summed, and a flat face's is its own, 256 long,
+times 2 over the contrast. So a vertex whose faces face away from each other, as the two sides
+of a blade of grass do, sums to almost nothing and stays in the ambient, and `_SHADE` is the
+length of that normal, which an engine multiplies the unit normal by before the sun's dot
+product. The ground's vertices have no `_SHADE`: the GL ground's normals are unit.
 
 
 ## The texture library
