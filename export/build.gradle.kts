@@ -37,3 +37,9 @@ tasks.register<JavaExec>("exportMapSquare") {
     environment("SW3D_LOCATION_KEYS",
         providers.environmentVariable("SW3D_LOCATION_KEYS").getOrElse(""))
 }
+
+tasks.register<JavaExec>("exportSprites") {
+    description = "Writes every sprite out of the cache as a PNG atlas with a TexturePacker JSON hash, and checks each one against the client."
+    mainClass = "SpriteExport"
+    classpath = sourceSets["main"].runtimeClasspath
+}
