@@ -49,3 +49,9 @@ tasks.register<JavaExec>("exportFonts") {
     mainClass = "FontExport"
     classpath = sourceSets["main"].runtimeClasspath
 }
+
+tasks.register<JavaExec>("exportMiniMenu") {
+    description = "Writes the colours and sprites the client's scripts style the mini menu with, and the scripts that switch it back to the plain menu."
+    mainClass = "MiniMenuExport"
+    classpath = sourceSets["main"].runtimeClasspath
+}

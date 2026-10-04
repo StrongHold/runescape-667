@@ -1,13 +1,13 @@
 # export
 
-Writes models, NPCs, map squares, sprites and fonts out of the game's cache in a form that other
-engines can import. Every file is a standard text format where one exists, so that it can be read
+Writes models, NPCs, map squares, sprites, fonts and the mini menu's style out of the game's cache
+in a form that other engines can import. Every file is a standard text format where one exists, so that it can be read
 and compared as text. A model, an NPC or a map square is written as glTF, a `.gltf` JSON file with
 its vertex data in a `.bin` file beside it, which the JSON names by a relative path. Godot 4,
 Blender, three.js and most other tools read it as it is. Only the vertex data and the images
 (PNG) are binary, because no text format holds them. The sprites the client draws its
-interfaces with are written as one PNG for each frame, and its fonts as BDF text files, both
-described below.
+interfaces with are written as one PNG for each frame, its fonts as BDF text files, and the mini
+menu's style as JSON, all described below.
 
     ./gradlew :export:exportModel --args="--model 32421"
     ./gradlew :export:exportModel --args="--model 8 --out /tmp/hood.gltf"
@@ -532,6 +532,36 @@ size at the toolkit's margins, must match it too. A sprite that differs fails th
 planted dropped left margin fails 4,053 of the 14,904 frames, and a planted swap of the red and
 blue channels fails 7,820.
 
+
+## Writing the mini menu's style
+
+    ./gradlew :export:exportMiniMenu
+
+The client draws its mini menu in one of two ways. By default it draws a plain frame in fixed
+colours (`MiniMenu.drawWithoutSprites`). A script can switch it to a frame built from sprites,
+in colours the script chooses, with the command `FORMATMINIMENU`, and back again with
+`DEFAULTMINIMENU` (`ScriptRunner`). The task decodes every script in the cache with the client's
+own decoder (`ClientScript.decode`) and writes what those commands are given to
+`export/build/minimenu.json`. `--out` names another file, and `--cache` works as it does for a
+model.
+
+`formats` is an object from the id of each script that calls `FORMATMINIMENU` to the eleven
+numbers it gives, under the names of the client's fields that keep them. `topColour` and
+`topOpacity` fill the band behind "Choose Option" and the body below it; `spriteBodyColour` and
+`spriteBodyOpacity` fill the band behind the entry under the pointer. An opacity is how far the
+fill lets what is behind it show, out of 255, so 0 is opaque. `separatorSpriteId` is tiled along
+the top, between the two corners of `topCornerSpriteId`, whose right corner is the sprite flipped.
+`horizontalBorderSpriteId` is tiled along the bottom, `verticalBorderSpriteId` down the left side,
+and flipped down the right, and `bottomCornerSpriteId` makes the bottom corners the same way
+(`MiniMenu.drawTop`, `drawBorder`). `textColour` is the colour of the entries, and
+`spriteHighlightColour` is the colour of the entry under the pointer. Each sprite id is a sprite
+that the sprite export writes. `defaults` lists the scripts that call `DEFAULTMINIMENU`.
+
+A script pushes the command's arguments as constants just before it calls it. Where an argument
+is not a constant, the style is known only while the game runs, so the task names the script and
+writes nothing. A planted check that takes a local variable for a constant fails on the one call
+there is. In this cache, script 51 is the only script that calls `FORMATMINIMENU`, scripts 1299
+and 1433 call script 51, and no script calls `DEFAULTMINIMENU`.
 
 ## Writing the fonts
 
