@@ -1,3 +1,4 @@
+import com.jagex.game.runetek6.config.loctype.LocInteractivity;
 import com.jagex.game.runetek6.config.loctype.LocType;
 
 import java.io.IOException;
@@ -27,6 +28,11 @@ import java.util.Optional;
  * library is left as it is, so the library is written once and read by every map square after.
  */
 public final class LocAssets {
+
+    /**
+     * How many options a location type offers on the mini menu (`LocType.ops`).
+     */
+    private static final int OPTION_SLOTS = 5;
 
     private static final int SOLE_WEIGHT = 65535;
     private static final int FULL_SCALE = 128;
@@ -214,6 +220,8 @@ public final class LocAssets {
         extras.put("size", List.of(type.width, type.length));
         extras.put("shadow", type.shadow);
         extras.put("hardShadow", type.hardshadow);
+        extras.put("interactive", type.active != LocInteractivity.NONINTERACTIVE);
+        extras.put("ops", options(type));
         if (type.hasAnimations()) {
             var sequences = new ArrayList<Integer>();
             var weights = new ArrayList<Integer>();
@@ -230,6 +238,19 @@ public final class LocAssets {
             extras.put("randomStartFrame", type.randomanimframe);
         }
         return extras;
+    }
+
+    /**
+     * The five options the type offers on the mini menu, in the client's order, with an empty
+     * string for a slot the type leaves empty.
+     */
+    private static List<String> options(LocType type) {
+        var options = new ArrayList<String>();
+        for (var slot = 0; slot < OPTION_SLOTS; slot++) {
+            var option = type.ops == null ? null : type.ops[slot];
+            options.add(option == null ? "" : option);
+        }
+        return options;
     }
 
     private record Clip(int sequence, PoseBaker.Clip baked) {

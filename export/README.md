@@ -324,7 +324,12 @@ engine reads the placements and does the same, since a location spawned later ca
 They also say whether it casts a `hardShadow`, the GL toolkit's shadow of the model's faces
 projected along the sun onto the ground (`Model_Sub2.method4987`, `Class170`), which walls and
 locations cast and decorations do not, 32 units a texel, darkening the ground by 68 of 255 with
-a one texel rim at a quarter of that for each covered neighbour. A location that animates has bones and an
+a one texel rim at a quarter of that for each covered neighbour. They say whether the location
+is `interactive`, which the client decides once it reads the type (`LocType.postDecode`): as the
+type says, or, where it says nothing, when the type offers an option or its only shape is 10. The
+client lets the mouse pick only an interactive location, and never one under water. They also
+carry the type's five `ops`, the options it offers on the mini menu in the client's order, with
+an empty string for an empty slot. A location that animates has bones and an
 animation for every sequence, as an NPC has, and is scaled in its asset, because the client
 scales a location before it poses it and a frame's move is not scaled with it; its `extras` then
 say `resize` is 128 and name the scale in `scaledInAsset`. A wall decoration that animates
