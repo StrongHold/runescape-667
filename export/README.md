@@ -193,7 +193,9 @@ frame's transforms in order, six numbers each: the group, its x, y and z values,
 the client applies first or -1, and the tween bits, where 1 means the client does not tween into
 the transform and 2 that it does not tween out of it; `groupTypes` and `groupLabels` are the
 frames' base, the kind of transform each group holds (0 a pivot, 1 a move, 2 a turn, 3 a scale)
-and the labels it names; `loopOffset` is how many frames from the end the sequence loops back to,
+and the labels it names; `groupShadowed` says whether each group also moves the entity's spot
+shadow, which the client moves as a whole by those groups' transforms about its middle
+(`Model.animateShadow`); `loopOffset` is how many frames from the end the sequence loops back to,
 or -1 for one that plays once; and `tweened` says whether the client tweens the sequence. The
 client tweens by moving each group's values part way towards the next frame's, by the share of
 the current frame's cycles that have passed (`Model.applyFrame`): a turn goes the short way round

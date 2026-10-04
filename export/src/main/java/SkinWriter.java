@@ -220,6 +220,7 @@ public final class SkinWriter {
         extras.put("frames", raw);
         extras.put("groupTypes", base == null ? List.of() : Skinning.groupTypes(base));
         extras.put("groupLabels", base == null ? List.of() : Skinning.groupLabels(base));
+        extras.put("groupShadowed", base == null ? List.of() : Skinning.groupShadowed(base));
         return extras;
     }
 

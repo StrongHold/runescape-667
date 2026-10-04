@@ -218,6 +218,18 @@ public final class Skinning {
         return types;
     }
 
+    /**
+     * Whether each group of a base also moves an entity's spot shadow, as the client's
+     * `Model.animateShadow` moves the whole shadow by the transforms of those groups.
+     */
+    public static List<Boolean> groupShadowed(AnimBase base) {
+        var shadowed = new ArrayList<Boolean>(base.transformCount);
+        for (var group = 0; group < base.transformCount; group++) {
+            shadowed.add(base.shadowed[group]);
+        }
+        return shadowed;
+    }
+
     /** The labels each group of a base names. */
     public static List<List<Integer>> groupLabels(AnimBase base) {
         var groups = new ArrayList<List<Integer>>(base.transformCount);
