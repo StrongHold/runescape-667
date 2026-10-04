@@ -2,7 +2,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Writes a tree of maps, lists, strings, numbers and booleans as JSON.
+ * Writes a tree of maps, lists, strings, numbers, booleans and nulls as JSON.
  *
  * A glTF file needs only this much JSON, and none of it is ever read back, so a library for it
  * would be more than the job asks for.
@@ -17,6 +17,7 @@ public final class Json {
 
     private static void write(Object value, StringBuilder out) {
         switch (value) {
+            case null -> out.append("null");
             case Map<?, ?> map -> writeObject(map, out);
             case List<?> list -> writeArray(list, out);
             case String text -> writeString(text, out);

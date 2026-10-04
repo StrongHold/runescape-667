@@ -31,7 +31,8 @@ import java.util.Optional;
 public final class LocAssets {
 
     /**
-     * How many options a location type offers on the mini menu (`LocType.ops`).
+     * How many of the options on the mini menu a type's data can set (`LocType.decode`, opcodes 30
+     * to 34 and 150 to 154).
      */
     private static final int OPTION_SLOTS = 5;
 

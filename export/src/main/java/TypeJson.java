@@ -3,6 +3,7 @@ import com.jagex.core.datastruct.key.IterableHashTable;
 import com.jagex.core.datastruct.key.StringNode;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,16 +82,12 @@ final class TypeJson {
     }
 
     /**
-     * The options the type offers on the mini menu, in the client's order, with an empty string
-     * for a slot the type leaves empty.
+     * The options the type offers on the mini menu, in the client's order, with null for a slot
+     * the type leaves empty: the slots the type's data can set. The client's type list adds one
+     * more, Examine, to every type, which the type's data cannot change, so it is not written.
      */
     static List<String> options(String[] ops, int slots) {
-        var list = new ArrayList<String>();
-        for (var slot = 0; slot < slots; slot++) {
-            var option = ops == null ? null : ops[slot];
-            list.add(option == null ? "" : option);
-        }
-        return list;
+        return Arrays.asList(ops).subList(0, slots);
     }
 
     private TypeJson() {

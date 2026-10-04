@@ -134,8 +134,9 @@ each one as its base animation set says, merges them, swaps the NPC's colours an
 scales and poses the result. The model is then written as a model is, so everything above about
 coordinates, colours, textures and faces holds for an NPC too. The NPC type's own data is
 beside the mesh file as `<npc>.json`: its `npc` id, `name`, `size` in tiles and base animation set
-`bas`; whether the mouse can pick it, `interactive`; its five `ops`, the options it offers on the
-mini menu in the client's order with an empty string for an empty slot; and how the client picks
+`bas`; whether the mouse can pick it, `interactive`; its five `ops`, the options its data sets on
+the mini menu in the client's order, with null for an empty slot (the client's type list adds a
+sixth, Examine, to every type, and the data cannot change it, so it is not written); and how the client picks
 it (`NPCEntity.picked`): `pickSizeShift`, by which it grows the picking cylinder and the model's
 box, and `quickPick`, which is 1 for a pick by the box on the screen alone, 0 for a pick by the
 model's triangles, and -1 for the default, the box for an NPC one tile across and the triangles
@@ -367,8 +368,8 @@ a one texel rim at a quarter of that for each covered neighbour. They say whethe
 is `interactive`, which the client decides once it reads the type (`LocType.postDecode`): as the
 type says, or, where it says nothing, when the type offers an option or its only shape is 10. The
 client lets the mouse pick only an interactive location, and never one under water. They also
-carry the type's five `ops`, the options it offers on the mini menu in the client's order, with
-an empty string for an empty slot. The JSON file holds every other field of the type too, under
+carry the type's five `ops`, the options its data sets on the mini menu in the client's order,
+with null for an empty slot; the client adds Examine as a sixth to every type, as for an NPC. The JSON file holds every other field of the type too, under
 the name the client gives it, as an NPC's does: the `models` of each shape in `modelShapes`, the
 swaps, `ambient`, `contrast` and `tint` already applied to the meshes, and the rest, such as how
 the location blocks movement and sight, its sounds, its map icon and its `params`, for an engine
