@@ -1,7 +1,8 @@
 /**
- * Lets a file be dropped on an element, and hands over what it holds.
+ * Lets files be dropped on an element, and hands them over: a glTF file with the buffer and any
+ * textures dropped with it.
  */
-export function bindDrop(target: HTMLElement, onDropped: (data: ArrayBuffer, name: string) => void): void {
+export function bindDrop(target: HTMLElement, onDropped: (files: readonly File[]) => void): void {
     target.addEventListener('dragover', event => {
         event.preventDefault();
         target.classList.add('dropping');
@@ -10,9 +11,9 @@ export function bindDrop(target: HTMLElement, onDropped: (data: ArrayBuffer, nam
     target.addEventListener('drop', event => {
         event.preventDefault();
         target.classList.remove('dropping');
-        const dropped = event.dataTransfer?.files[0];
-        if (dropped !== undefined) {
-            void dropped.arrayBuffer().then(data => onDropped(data, dropped.name));
+        const dropped = [...event.dataTransfer?.files ?? []];
+        if (dropped.length > 0) {
+            onDropped(dropped);
         }
     });
 }

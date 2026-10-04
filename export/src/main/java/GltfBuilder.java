@@ -15,8 +15,8 @@ import java.util.Map;
  * the strictest alignment any accessor here asks for.
  *
  * Primitives are added to the mesh being built, which {@link #mesh} closes. A document of one
- * mesh worn by one node is written by {@link #json(String)}, and a document of many by
- * {@link #json(List)}, from the nodes added with {@link #node}.
+ * mesh worn by one node is written by {@link #document(String)}, and a document of many by
+ * {@link #document(List)}, from the nodes added with {@link #node}.
  */
 public final class GltfBuilder {
 
@@ -325,35 +325,35 @@ public final class GltfBuilder {
     /**
      * The document, holding one scene of one node that wears the one mesh.
      */
-    public String json(String name) {
-        return json(name, Map.of());
+    public Map<String, Object> document(String name) {
+        return document(name, Map.of());
     }
 
     /**
      * @param extras what the node carries beyond glTF's own properties.
      */
-    public String json(String name, Map<String, Object> extras) {
+    public Map<String, Object> document(String name, Map<String, Object> extras) {
         var node = new LinkedHashMap<String, Object>();
         node.put("name", name);
         node.put("mesh", mesh(name));
         if (!extras.isEmpty()) {
             node.put("extras", extras);
         }
-        return json(List.of(node(node)));
+        return document(List.of(node(node)));
     }
 
     /**
      * The document, holding one scene of the nodes named, which the other nodes hang from.
      */
-    public String json(List<Integer> roots) {
-        return json(roots, null, Map.of());
+    public Map<String, Object> document(List<Integer> roots) {
+        return document(roots, null, Map.of());
     }
 
     /**
      * @param name what the scene is called, or null for no name.
      * @param extras what the scene carries beyond glTF's own properties.
      */
-    public String json(List<Integer> roots, String name, Map<String, Object> extras) {
+    public Map<String, Object> document(List<Integer> roots, String name, Map<String, Object> extras) {
         var scene = new LinkedHashMap<String, Object>();
         scene.put("nodes", roots);
         if (name != null) {
@@ -384,7 +384,7 @@ public final class GltfBuilder {
         if (bin.size() > 0) {
             document.put("buffers", List.of(Map.of("byteLength", bin.size())));
         }
-        return Json.write(document);
+        return document;
     }
 
     public byte[] bin() {
@@ -396,7 +396,7 @@ public final class GltfBuilder {
      */
     private int bufferView(byte[] bytes, int target) {
         var offset = bin.size();
-        bin.writeBytes(Glb.pad(bytes, (byte) 0));
+        bin.writeBytes(GltfFile.pad(bytes, (byte) 0));
 
         var view = new LinkedHashMap<String, Object>();
         view.put("buffer", 0);

@@ -13,25 +13,25 @@ tasks.register<JavaExec>("exportTextures") {
 }
 
 tasks.register<JavaExec>("exportModel") {
-    description = "Writes one model out of the cache as a binary glTF file."
+    description = "Writes one model out of the cache as a glTF file with its buffer beside it."
     mainClass = "ModelExport"
     classpath = sourceSets["main"].runtimeClasspath
 }
 
 tasks.register<JavaExec>("exportNpc") {
-    description = "Writes one NPC out of the cache as a binary glTF file, with its stand, turn and walk sequences as animations."
+    description = "Writes one NPC out of the cache as a glTF file with its buffer beside it, with its stand, turn and walk sequences as animations."
     mainClass = "NpcExport"
     classpath = sourceSets["main"].runtimeClasspath
 }
 
 tasks.register<JavaExec>("exportLoc") {
-    description = "Writes one location type out of the cache as a binary glTF file, into the library the map squares refer to."
+    description = "Writes one location type out of the cache as a glTF file with its buffer beside it, into the library the map squares refer to."
     mainClass = "LocExport"
     classpath = sourceSets["main"].runtimeClasspath
 }
 
 tasks.register<JavaExec>("exportMapSquare") {
-    description = "Writes one map square out of the cache as a binary glTF file: its ground on every level and the locations standing on it."
+    description = "Writes one map square out of the cache as a glTF file with its buffer beside it: its ground on every level and the locations standing on it."
     mainClass = "MapSquareExport"
     classpath = sourceSets["main"].runtimeClasspath
     environment("SW3D_LOCATION_KEYS",

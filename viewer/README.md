@@ -4,11 +4,12 @@ Shows the models, NPCs and map squares that the `export` module writes, in a bro
 
     ./gradlew :viewer:dev
 
-This serves the viewer and opens it. It lists every `.glb` under `export/build/models`,
+This serves the viewer and opens it. It lists every `.gltf` under `export/build/models`,
 `export/build/npcs` and `export/build/mapsquares`, read afresh on each reload, so a file exported
 while the viewer is open shows up when the page is reloaded, and it serves the textures under
-`export/build/textures` that those files refer to. Any other `.glb` can be dropped on the page,
-and is given a place beside the exported files so that it finds the same textures.
+`export/build/textures` that those files refer to. Any other `.gltf` can be dropped on the page
+with its `.bin`, and is given a place beside the exported files so that it finds the same
+textures.
 
 The model can be turned with the mouse and zoomed with the wheel. One map square of the grid is one
 tile, up is +y and north is -z, as the exporter writes them. A file with animations, such as an

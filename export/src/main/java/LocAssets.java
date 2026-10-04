@@ -65,7 +65,7 @@ public final class LocAssets {
      * the type has no model the client can build.
      */
     public Optional<Path> file(int id) {
-        var file = directory.resolve(id + ".glb");
+        var file = directory.resolve(id + ".gltf");
         if (Files.exists(file) && Files.exists(typeFile(file))) {
             return Optional.of(file);
         } else {
@@ -184,9 +184,9 @@ public final class LocAssets {
             return Optional.empty();
         }
 
-        var document = gltf.json(shapeNodes, label(type), Map.of());
+        var document = gltf.document(shapeNodes, label(type), Map.of());
         try {
-            Glb.write(file, document, gltf.bin());
+            GltfFile.write(file, document, gltf.bin());
             Files.writeString(typeFile(file), Json.write(extras(type)), StandardCharsets.UTF_8);
         } catch (IOException failure) {
             throw new UncheckedIOException("Could not write location " + id + " to " + file, failure);
@@ -198,7 +198,7 @@ public final class LocAssets {
      * Where the type's own data is written: beside the mesh file, as JSON.
      */
     private static Path typeFile(Path file) {
-        return file.resolveSibling(file.getFileName().toString().replaceFirst("\\.glb$", "") + ".json");
+        return GltfFile.sibling(file, ".json");
     }
 
     public static String label(LocType type) {

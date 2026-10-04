@@ -3,12 +3,12 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { validateBytes, type ValidationMessage } from 'gltf-validator';
 
 /**
- * Checks every .glb the export module has written against the Khronos glTF validator, or those
+ * Checks every .gltf the export module has written against the Khronos glTF validator, or those
  * named on the command line, and fails on any error or warning.
  *
  * The validator has no command line of its own, so it is driven here. A file refers to its
- * textures by paths relative to itself, and the validator is handed each one it asks for, so a
- * missing texture or a broken one is an error too. Every issue is counted by its code, and the
+ * buffer and its textures by paths relative to itself, and the validator is handed each one it
+ * asks for, so a missing buffer or texture, or a broken one, is an error too. Every issue is counted by its code, and the
  * first few errors are printed in full with the part of the file they point at.
  */
 
@@ -49,7 +49,7 @@ process.exitCode = failed ? 1 : 0;
 async function exportedFiles(directory: string): Promise<string[]> {
     const entries = await readdir(directory, { withFileTypes: true, recursive: true }).catch(() => []);
     return entries
-        .filter(entry => entry.isFile() && entry.name.endsWith('.glb'))
+        .filter(entry => entry.isFile() && entry.name.endsWith('.gltf'))
         .map(entry => join(entry.parentPath, entry.name))
         .sort();
 }

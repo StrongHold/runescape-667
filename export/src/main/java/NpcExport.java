@@ -14,11 +14,11 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Writes one NPC out of the cache as a binary glTF file: its model as the client builds it, with
+ * Writes one NPC out of the cache as a glTF file with its buffer beside it: its model as the client builds it, with
  * a morph target for every frame of the sequences it stands, turns and moves with, and one
  * animation for each of those sequences, as {@link AnimationWriter} writes them. Every field of
  * the NPC's type goes in a JSON file beside it, and the model of its head, which the client shows
- * only while the NPC talks, goes in a binary glTF file of its own.
+ * only while the NPC talks, goes in a glTF file of its own.
  */
 public final class NpcExport {
 
@@ -94,7 +94,7 @@ public final class NpcExport {
 
         var base = poser.still();
         var poses = baker.poses();
-        var out = args.out == null ? Path.of("build", "npcs", args.npc + ".glb") : args.out;
+        var out = args.out == null ? Path.of("build", "npcs", args.npc + ".gltf") : args.out;
         var gltf = new GltfBuilder();
         var materials = new GltfMaterials(gltf, reader.textures(), args.textures.library(reader.textures()), out);
         var bones = Bones.of(baker);
@@ -138,8 +138,8 @@ public final class NpcExport {
             }
         }
 
-        Glb.write(out, gltf.json(roots), gltf.bin());
-        var typeFile = out.resolveSibling(out.getFileName().toString().replaceFirst("\\.glb$", "") + ".json");
+        GltfFile.write(out, gltf.document(roots), gltf.bin());
+        var typeFile = GltfFile.sibling(out, ".json");
         Files.writeString(typeFile, Json.write(typeData(type, reader.bas(type))), StandardCharsets.UTF_8);
 
         System.out.println("wrote " + out.toAbsolutePath().normalize());
@@ -186,17 +186,17 @@ public final class NpcExport {
     }
 
     /**
-     * Writes the head model to `<npc>.head.glb` beside the NPC's own file, as one mesh that is not
+     * Writes the head model to `<npc>.head.gltf` beside the NPC's own file, as one mesh that is not
      * posed.
      */
     private static void writeHead(Args args, ClientNpcReader reader, NPCType type, JavaModel head, Path out)
         throws Exception {
-        var file = out.resolveSibling(out.getFileName().toString().replaceFirst("\\.glb$", "") + ".head.glb");
+        var file = GltfFile.sibling(out, ".head.gltf");
         var gltf = new GltfBuilder();
         var materials = new GltfMaterials(gltf, reader.textures(), args.textures.library(reader.textures()), file);
         var result = ModelToGltf.convert(head, gltf, materials, List.of());
         var name = type.name + " head (npc " + type.id + ")";
-        Glb.write(file, gltf.json(name), gltf.bin());
+        GltfFile.write(file, gltf.document(name), gltf.bin());
         System.out.println("wrote " + file.toAbsolutePath().normalize());
         System.out.println("  " + name + ", " + head.vertexCount + " vertices, " + result.faces() + " faces");
     }

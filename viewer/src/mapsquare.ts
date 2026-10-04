@@ -94,7 +94,7 @@ async function loadLocs(directory: string, description: MapSquareDescription,
     const locs = new Map<number, GLTF>();
     for (let from = 0; from < ids.length; from += FETCHED_AT_ONCE) {
         const batch = ids.slice(from, from + FETCHED_AT_ONCE);
-        const loaded = await Promise.all(batch.map(id => loader.loadAsync(`${directory}${id}.glb`)));
+        const loaded = await Promise.all(batch.map(id => loader.loadAsync(`${directory}${id}.gltf`)));
         const types = await Promise.all(batch.map(id => fetchType(`${directory}${id}.json`)));
         batch.forEach((id, index) => {
             completeMorphTargets(loaded[index].scene);

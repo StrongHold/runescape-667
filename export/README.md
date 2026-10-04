@@ -1,19 +1,22 @@
 # export
 
 Writes models, NPCs, map squares, sprites and fonts out of the game's cache in a form that other
-engines can import. A model, an NPC or a map square is written as binary glTF (`.glb`), which
-Godot 4, Blender, three.js and most other tools read as it is. The sprites the client draws its
+engines can import. Every file is a standard text format where one exists, so that it can be read
+and compared as text. A model, an NPC or a map square is written as glTF, a `.gltf` JSON file with
+its vertex data in a `.bin` file beside it, which the JSON names by a relative path. Godot 4,
+Blender, three.js and most other tools read it as it is. Only the vertex data and the images
+(PNG) are binary, because no text format holds them. The sprites the client draws its
 interfaces with are written as one PNG for each frame, and its fonts as BDF text files, both
 described below.
 
     ./gradlew :export:exportModel --args="--model 32421"
-    ./gradlew :export:exportModel --args="--model 8 --out /tmp/hood.glb"
+    ./gradlew :export:exportModel --args="--model 8 --out /tmp/hood.gltf"
     ./gradlew :export:exportModel --args="--model 8 --cache /path/to/another/cache"
 
 A model is named by its group in the models archive. Without `--out` it is written to
-`export/build/models/<model>.glb`, and a relative `--out` is taken from the `export` directory,
-because that is where Gradle runs the tool. The cache is read from where the client keeps it
-unless `--cache` names another.
+`export/build/models/<model>.gltf` with `<model>.bin`, and a relative `--out` is taken from the
+`export` directory, because that is where Gradle runs the tool. The cache is read from where the
+client keeps it unless `--cache` names another.
 
 The tool prints how many faces it wrote and how many it left out, and why.
 
@@ -117,9 +120,9 @@ interpolates, 3 adds them and 4 takes a dot product.
 ## Writing an NPC
 
     ./gradlew :export:exportNpc --args="--npc 9"
-    ./gradlew :export:exportNpc --args="--npc 81 --out /tmp/cow.glb"
+    ./gradlew :export:exportNpc --args="--npc 81 --out /tmp/cow.gltf"
 
-An NPC is named by its id. Without `--out` it is written to `export/build/npcs/<npc>.glb`, and
+An NPC is named by its id. Without `--out` it is written to `export/build/npcs/<npc>.gltf`, and
 `--out` and `--cache` work as they do for a model. The tool prints the NPC's name, how many
 vertices and faces it has, and each animation it wrote with how many frames it has and how long
 each frame is shown. An NPC that takes the look of another NPC by a variable is refused, and the
@@ -160,7 +163,7 @@ blended and without writing depth, so the NPC covers it, and only where the base
 (`Animator.method9105`), and that is not written.
 
 Where the type has a head, the model the client shows while the NPC talks, the head is written
-as a file of its own, `<npc>.head.glb`, built by the client's `NPCType.headModel` with the same
+as a file of its own, `<npc>.head.gltf`, built by the client's `NPCType.headModel` with the same
 colour and texture swaps, as one mesh that is not posed. It is not in the NPC's own file, because
 an engine needs one without the other: most NPCs are never talked to.
 
@@ -237,13 +240,13 @@ NPC plays when the game tells it to, such as an attack.
 ## Writing a map square
 
     ./gradlew :export:exportMapSquare --args="--x 50 --z 50"
-    ./gradlew :export:exportMapSquare --args="--x 52 --z 47 --out /tmp/desert.glb"
+    ./gradlew :export:exportMapSquare --args="--x 52 --z 47 --out /tmp/desert.gltf"
     ./gradlew :export:exportMapSquare --args="--x 50 --z 50 --no-locations"
 
 A map square is 64 tiles by 64, named by where it is in map squares: map square 50_50 holds tiles
-3200,3200 to 3263,3263, which is Lumbridge. It is written as two files: its ground, as binary glTF,
+3200,3200 to 3263,3263, which is Lumbridge. It is written as two files: its ground, as glTF,
 and a description of where each of its locations stands, as JSON beside it. Without `--out` they
-are `export/build/mapsquares/<x>_<z>.glb` and `<x>_<z>.json`, and `--out`, `--cache` and
+are `export/build/mapsquares/<x>_<z>.gltf` and `<x>_<z>.json`, and `--out`, `--cache` and
 `--textures` work as they do for a model. The locations of a map square are locked with a key,
 which is read from `--keys`, or else as the `cache` module's census reads it. A map square with no
 key that opens it is written with its ground alone, and the tool says why. `--no-locations` writes
@@ -321,7 +324,7 @@ of the view before the far plane the vertex also rises to the surface, by its wh
 
     ./gradlew :export:exportLoc --args="--loc 33799"
 
-A location is written once, as `export/build/locs/<id>.glb` with its type's data beside it as
+A location is written once, as `export/build/locs/<id>.gltf` with its type's data beside it as
 `<id>.json`, unless `--locs` names another directory, and every map square that places it refers to it by its id. A map square writes any
 location it names that the library lacks, and leaves one that is there as it is, as it does with
 textures.

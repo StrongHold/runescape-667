@@ -4,7 +4,7 @@ import com.beust.jcommander.ParametersDelegate;
 import java.nio.file.Path;
 
 /**
- * Writes one location type out of the cache as a binary glTF file, into the library that every
+ * Writes one location type out of the cache as a glTF file with its buffer beside it, into the library that every
  * map square refers to.
  */
 public final class LocExport {
@@ -46,7 +46,7 @@ public final class LocExport {
     private static void export(Args args) {
         var reader = new ClientLocReader(args.where.cache());
         var assets = new LocAssets(reader, args.textures.library(reader.textures()), LocAssets.defaultDirectory());
-        var out = args.out == null ? assets.directory().resolve(args.loc + ".glb") : args.out;
+        var out = args.out == null ? assets.directory().resolve(args.loc + ".gltf") : args.out;
         var written = assets.write(args.loc, out)
             .orElseThrow(() -> new IllegalStateException("Location " + args.loc + " has no model the client builds."));
 

@@ -97,6 +97,19 @@ async function openMapSquare(url: string, label: string): Promise<void> {
     }
 }
 
+/**
+ * Opens a dropped glTF file. The files dropped with it, such as its buffer, are handed to the
+ * loader where the file asks for them beside itself, and the rest is fetched from the server.
+ */
+async function openDropped(files: readonly File[]): Promise<void> {
+    const model = files.find(file => /\.(gltf|glb)$/.test(file.name)) ?? files[0];
+    const beside = new Map(files.filter(file => file !== model).map(file => [DROPPED_PATH + file.name, URL.createObjectURL(file)]));
+    loader.manager.setURLModifier(url => beside.get(url) ?? url);
+    await open(await model.arrayBuffer(), model.name, DROPPED_PATH);
+    loader.manager.setURLModifier(undefined);
+    beside.forEach(url => URL.revokeObjectURL(url));
+}
+
 function servedFrom(path: string): string {
     return path.slice(0, path.lastIndexOf('/') + 1);
 }
@@ -118,7 +131,7 @@ async function openExported(file: ExportedFile): Promise<void> {
  * "NPC 9, Guard", or the label given where there is none.
  */
 async function npcLabel(path: string, label: string): Promise<string> {
-    const response = await fetch(path.replace(/\.glb$/, '.json'));
+    const response = await fetch(path.replace(/\.gltf$/, '.json'));
     if (!response.ok) {
         return label;
     }
@@ -134,7 +147,7 @@ async function start(): Promise<void> {
 }
 
 bindBackdrop(page.stage, page.backdrop);
-bindDrop(page.stage, (data, name) => void open(data, name, DROPPED_PATH));
+bindDrop(page.stage, files => void openDropped(files));
 bindFocus(page.focus, () => current,
     (node, again) => {
         const side = SIDES[again % SIDES.length];

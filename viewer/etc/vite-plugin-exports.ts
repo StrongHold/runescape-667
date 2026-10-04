@@ -12,7 +12,8 @@ const KINDS: readonly ExportKind[] = ['models', 'npcs', 'mapsquares'];
 
 /** What is served from the export directory: the files, the textures and the locations they refer to. */
 const SERVED_TYPES: Readonly<Record<string, string>> = {
-    '.glb': 'model/gltf-binary',
+    '.gltf': 'model/gltf+json',
+    '.bin': 'application/octet-stream',
     '.png': 'image/png',
     '.json': 'application/json'
 };

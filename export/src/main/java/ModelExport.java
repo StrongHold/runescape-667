@@ -5,7 +5,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 /**
- * Writes one model out of the cache as a binary glTF file, which Godot, Blender, three.js and most
+ * Writes one model out of the cache as a glTF file with its buffer beside it, which Godot, Blender, three.js and most
  * other engines and tools import as it is.
  */
 public final class ModelExport {
@@ -49,7 +49,7 @@ public final class ModelExport {
         var model = reader.read(args.model)
             .orElseThrow(() -> new IllegalStateException("The cache holds no model " + args.model + "."));
 
-        var out = args.out == null ? Path.of("build", "models", args.model + ".glb") : args.out;
+        var out = args.out == null ? Path.of("build", "models", args.model + ".gltf") : args.out;
         var gltf = new GltfBuilder();
         var materials = new GltfMaterials(gltf, reader.textures(), args.textures.library(reader.textures()), out);
         var result = ModelToGltf.convert(model, gltf, materials, List.of());
@@ -58,7 +58,7 @@ public final class ModelExport {
         }
 
         var name = "model " + args.model;
-        Glb.write(out, gltf.json(name), gltf.bin());
+        GltfFile.write(out, gltf.document(name), gltf.bin());
 
         System.out.println("wrote " + out.toAbsolutePath().normalize());
         System.out.println("  " + result.faces() + " faces in " + result.primitives() + " primitives");

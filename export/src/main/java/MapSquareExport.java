@@ -13,7 +13,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
- * Writes one map square: its ground as a binary glTF file, and its locations as a description of
+ * Writes one map square: its ground as a glTF file with its buffer beside it, and its locations as a description of
  * where each stands, which refers to the location library by id.
  *
  * <p>The ground file has one root node for the map square, named for it, whose south west corner
@@ -93,7 +93,7 @@ public final class MapSquareExport {
         var reader = new ClientMapSquareReader(args.where.cache(), args.keys);
         var square = reader.read(args.x, args.z, !args.noLocations);
         var name = args.x + "_" + args.z;
-        var out = args.out == null ? Path.of("build", "mapsquares", name + ".glb") : args.out;
+        var out = args.out == null ? Path.of("build", "mapsquares", name + ".gltf") : args.out;
         var textures = args.textures.library(reader.textures());
         var assets = new LocAssets(reader.locs(), textures, args.locs);
         var gltf = new GltfBuilder();
@@ -120,7 +120,7 @@ public final class MapSquareExport {
         root.put("children", children);
         root.put("extras", Map.of("mapSquareX", args.x, "mapSquareZ", args.z,
             "tileX", args.x * ClientMapSquareReader.TILES_ACROSS, "tileZ", args.z * ClientMapSquareReader.TILES_ACROSS));
-        Glb.write(out, gltf.json(List.of(gltf.node(root))), gltf.bin());
+        GltfFile.write(out, gltf.document(List.of(gltf.node(root))), gltf.bin());
         System.out.println("wrote " + out.toAbsolutePath().normalize());
 
         var description = describe(args, square, out, assets);
