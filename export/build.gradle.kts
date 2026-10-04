@@ -55,3 +55,9 @@ tasks.register<JavaExec>("exportMiniMenu") {
     mainClass = "MiniMenuExport"
     classpath = sourceSets["main"].runtimeClasspath
 }
+
+tasks.register<JavaExec>("exportHitmarks") {
+    description = "Writes every hitmark type and the graphics defaults the client draws hit splats with."
+    mainClass = "HitmarkExport"
+    classpath = sourceSets["main"].runtimeClasspath
+}

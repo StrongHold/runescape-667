@@ -1,13 +1,13 @@
 # export
 
-Writes models, NPCs, map squares, sprites, fonts and the mini menu's style out of the game's cache
+Writes models, NPCs, map squares, sprites, fonts, the mini menu's style and the hit splats out of the game's cache
 in a form that other engines can import. Every file is a standard text format where one exists, so that it can be read
 and compared as text. A model, an NPC or a map square is written as glTF, a `.gltf` JSON file with
 its vertex data in a `.bin` file beside it, which the JSON names by a relative path. Godot 4,
 Blender, three.js and most other tools read it as it is. Only the vertex data and the images
 (PNG) are binary, because no text format holds them. The sprites the client draws its
 interfaces with are written as one PNG for each frame, its fonts as BDF text files, and the mini
-menu's style as JSON, all described below.
+menu's style and the hit splats as JSON, all described below.
 
     ./gradlew :export:exportModel --args="--model 32421"
     ./gradlew :export:exportModel --args="--model 8 --out /tmp/hood.gltf"
@@ -562,6 +562,49 @@ is not a constant, the style is known only while the game runs, so the task name
 writes nothing. A planted check that takes a local variable for a constant fails on the one call
 there is. In this cache, script 51 is the only script that calls `FORMATMINIMENU`, scripts 1299
 and 1433 call script 51, and no script calls `DEFAULTMINIMENU`.
+
+## Writing the hit splats
+
+    ./gradlew :export:exportHitmarks
+
+The client draws a hit splat over an entity that takes a hit, from a hitmark type the server names
+(`OverlayManager.render`). The task decodes every hitmark type with the client's own type list
+(`HitmarkTypeList.list`), and the graphics defaults with the client's own decoder
+(`GraphicsDefaults`), and writes both to `export/build/hitmarks.json`. `--out` names another file,
+and `--cache` works as it does for a model.
+
+`types` is an object from each hitmark type's id to its fields, under the client's names, with null
+where the client keeps -1 to name nothing. A splat is a row of sprites with the amount written over
+it. `icon` is drawn first, at the left. `left` follows it, then `inner`, repeated as many times as
+it takes to be wider than the amount, then `right`. Each is a sprite that the sprite export writes.
+A type with a second hit, a soak, draws the soak type's row after the first, 2 pixels to the right.
+The client writes the amount in the font `font`, or in `p11_full` where the type names none, in
+`textColour`, centred over the run of `inner`, on a baseline 15 pixels below the top of the row and
+`anInt7178` pixels lower still. Its text is `amountString` with each `%1` in it replaced by the
+amount in decimal, with a minus sign when it is negative (`HitmarkType.method6457`). A type with an
+empty `amountString` writes no text.
+
+A splat lasts `duration` client cycles of 20 milliseconds. Over that time it moves steadily from
+where it starts to `offsetX` pixels to the right and `offsetY` pixels up. Where `fadeTime` is not
+null, the splat is opaque for its first `fadeTime` cycles and then fades out: its alpha is the time
+left, times 256, over `duration` less `fadeTime`. `comparisonType` says what a new splat does when
+every place for one is in use (`PathingEntity.hit`): with null it is not shown, with 0 it takes the
+place of the splat that ends first, and with 1 it takes the place of the splat with the smallest
+amount, if its own amount is larger.
+
+`defaults` holds every field of the graphics defaults. `maxhitmarks` is how many splats an entity
+shows at once. Splat number i stands `hitmarkpos_x[i]` pixels right and `hitmarkpos_y[i]` pixels
+down from the point the client projects at half the entity's height. The middle of the row stands at
+that point across, and its top 12 pixels above it. `npcShouldDisplayChat` and
+`playerShouldDisplayChat` say whether NPCs and players show overhead chat, and `npcChatTimeout` and
+`playerChatTimeout` are numbers the client keeps for how long it stays up. `profilingModel`,
+`login_interface` and `lobby_interface` name a model and two interfaces, and `recol_s` and `recol_d`
+are the tables of colours the client recolours players' kit with, null where the cache gives none.
+
+Every sprite and font a type names must be in the cache, or the task names each one that is not and
+writes nothing. A planted check that looks for each sprite under an id 100,000 higher fails on all
+97 of the sprites the types name. In this cache there are 28 types, which draw with the fonts 307
+(`tutorial_font`) and 591 (`menu_font_small`), and an entity shows 6 splats at once.
 
 ## Writing the fonts
 
