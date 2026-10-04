@@ -143,9 +143,20 @@ unset is empty, and its `params` are an object keyed by the parameter's id. The 
 `recolours` and `retextures` as pairs of the value in the mesh and the value it becomes,
 `recolourPalette`, `translations`, `scaleH`, `scaleV`, `ambient`, `diffusion` and `tint` (hue,
 saturation, lightness and scale) are already applied to the mesh, and are listed so that a
-reader can see what the mesh is made of. The shadow the client draws under the NPC is described
-by `hasShadow`, `shadowInnerColour`, `shadowOuterColour`, `shadowInnerAlpha` and
-`shadowOuterAlpha`.
+reader can see what the mesh is made of. Where the type names a base animation set, every
+field of that set is in `basType`, under the names the client gives them.
+
+Where the type casts a shadow (`hasShadow`), the file holds a second mesh beside the NPC's, on a
+root node named `spot shadow` whose `extras` say `spotShadow`. It is the disc the client draws
+under the NPC when its spot shadows option is on (`ShadowList.model`): three rings about a middle
+vertex, each ring one colour and one alpha between the type's `shadowInnerColour` and
+`shadowOuterColour` and its `shadowInnerAlpha` and `shadowOuterAlpha`, with more sides for a
+larger NPC, stretched to the NPC's still model across and along and moved to its middle. The
+node stands 15 units above the NPC's origin, because the client draws the NPC 5 units above the
+ground and the shadow 20 units above it (`NPCEntity.render`). The client draws the shadow first,
+blended and without writing depth, so the NPC covers it, and only where the base animation set's
+`animateShadow` is true. The client also poses the disc with the NPC's sequence
+(`Animator.method9105`), and that is not written.
 
 Where the type has a head, the model the client shows while the NPC talks, the head is written
 as a file of its own, `<npc>.head.glb`, built by the client's `NPCType.headModel` with the same

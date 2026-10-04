@@ -1,5 +1,6 @@
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
+import com.jagex.game.runetek6.config.bastype.BASType;
 import com.jagex.game.runetek6.config.npctype.NPCType;
 
 import java.nio.charset.StandardCharsets;
@@ -10,6 +11,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Writes one NPC out of the cache as a binary glTF file: its model as the client builds it, with
@@ -24,6 +26,15 @@ public final class NpcExport {
      * How many options an NPC type offers on the mini menu (`NPCType.op`).
      */
     private static final int OPTION_SLOTS = 5;
+
+    private static final String SHADOW_NODE = "spot shadow";
+
+    /**
+     * How far above the NPC's origin the client draws its spot shadow, in its units.
+     */
+    private static final float SHADOW_ABOVE_NPC = 15.0F;
+
+    private static final float UNITS_PER_METRE = 512.0F;
 
     public static final class Args implements Arguments {
 
@@ -107,6 +118,11 @@ public final class NpcExport {
             node.put("children", held.childNodes());
         });
         var nodeNumber = gltf.node(node);
+        var roots = new ArrayList<Integer>(List.of(nodeNumber));
+        var shadow = SpotShadow.of(type, base, reader.toolkit());
+        if (shadow.isPresent()) {
+            roots.add(shadowNode(gltf, materials, shadow.get()));
+        }
 
         for (var animation : baked) {
             if (!animation.clip().keys().isEmpty()) {
@@ -122,9 +138,9 @@ public final class NpcExport {
             }
         }
 
-        Glb.write(out, gltf.json(List.of(nodeNumber)), gltf.bin());
+        Glb.write(out, gltf.json(roots), gltf.bin());
         var typeFile = out.resolveSibling(out.getFileName().toString().replaceFirst("\\.glb$", "") + ".json");
-        Files.writeString(typeFile, Json.write(typeData(type)), StandardCharsets.UTF_8);
+        Files.writeString(typeFile, Json.write(typeData(type, reader.bas(type))), StandardCharsets.UTF_8);
 
         System.out.println("wrote " + out.toAbsolutePath().normalize());
         System.out.println("  " + name + ", " + base.vertexCount + " vertices, " + result.faces() + " faces in "
@@ -155,6 +171,21 @@ public final class NpcExport {
     }
 
     /**
+     * Adds the spot shadow's mesh and its node, which stands where the client draws the shadow
+     * against the NPC: 20 units above the ground, where the NPC itself is drawn 5 units above it
+     * (`NPCEntity.render`), so 15 units above the NPC's origin.
+     */
+    private static int shadowNode(GltfBuilder gltf, GltfMaterials materials, JavaModel shadow) {
+        ModelToGltf.convertInto(gltf, materials, shadow);
+        var node = new LinkedHashMap<String, Object>();
+        node.put("name", SHADOW_NODE);
+        node.put("mesh", gltf.mesh(SHADOW_NODE));
+        node.put("translation", List.of(0.0F, SHADOW_ABOVE_NPC / UNITS_PER_METRE, 0.0F));
+        node.put("extras", Map.of("spotShadow", true));
+        return gltf.node(node);
+    }
+
+    /**
      * Writes the head model to `<npc>.head.glb` beside the NPC's own file, as one mesh that is not
      * posed.
      */
@@ -175,7 +206,7 @@ public final class NpcExport {
      * texture swaps, the translations, the scales, the lighting and the tint are already applied to
      * the mesh, and are listed so that a reader can see what the mesh is made of.
      */
-    private static Map<String, Object> typeData(NPCType type) {
+    private static Map<String, Object> typeData(NPCType type, Optional<BASType> bas) {
         var data = new LinkedHashMap<String, Object>();
         data.put("npc", type.id);
         data.put("name", type.name);
@@ -240,6 +271,61 @@ public final class NpcExport {
         data.put("multinpcs", TypeJson.ints(type.multinpcs));
         data.put("quests", TypeJson.ints(type.quests));
         data.put("params", TypeJson.params(type.params));
+        bas.ifPresent(set -> data.put("basType", basData(set)));
+        return data;
+    }
+
+    /**
+     * Every field of the NPC's base animation set, under the name the client gives it. The
+     * sequences it names are the animations in the mesh file, and `animateShadow` says whether
+     * the client draws the shadow under the NPC at all.
+     */
+    private static Map<String, Object> basData(BASType set) {
+        var data = new LinkedHashMap<String, Object>();
+        data.put("ready", set.ready);
+        data.put("readyTurnCw", set.readyTurnCw);
+        data.put("readyTurnCcw", set.readyTurnCcw);
+        data.put("readyAnimations", TypeJson.ints(set.readyAnimations));
+        data.put("readyAnimationWeights", TypeJson.ints(set.readyAnimationWeights));
+        data.put("walk", set.walk);
+        data.put("walkTurnCw", set.walkTurnCw);
+        data.put("walkTurnCcw", set.walkTurnCcw);
+        data.put("walkFollowTurn180", set.walkFollowTurn180);
+        data.put("walkFollowTurnCw", set.walkFollowTurnCw);
+        data.put("walkFollowTurnCcw", set.walkFollowTurnCcw);
+        data.put("run", set.run);
+        data.put("runTurnCw", set.runTurnCw);
+        data.put("runTurnCcw", set.runTurnCcw);
+        data.put("runFollowTurn180", set.runFollowTurn180);
+        data.put("runFollowTurnCw", set.runFollowTurnCw);
+        data.put("runFollowTurnCcw", set.runFollowTurnCcw);
+        data.put("crawl", set.crawl);
+        data.put("crawlTurnCw", set.crawlTurnCw);
+        data.put("crawlTurnCcw", set.crawlTurnCcw);
+        data.put("crawlFollowTurn180", set.crawlFollowTurn180);
+        data.put("crawlFollowTurnCw", set.crawlFollowTurnCw);
+        data.put("crawlFollowTurnCcw", set.crawlFollowTurnCcw);
+        data.put("animateShadow", set.animateShadow);
+        data.put("hillWidth", set.hillWidth);
+        data.put("hillHeight", set.hillHeight);
+        data.put("hillMaxAngleX", set.hillMaxAngleX);
+        data.put("hillMaxAngleY", set.hillMaxAngleY);
+        data.put("yawAcceleration", set.yawAcceleration);
+        data.put("yawMaxSpeed", set.yawMaxSpeed);
+        data.put("rollAcceleration", set.rollAcceleration);
+        data.put("rollMaxSpeed", set.rollMaxSpeed);
+        data.put("rollTargetAngle", set.rollTargetAngle);
+        data.put("pitchAcceleration", set.pitchAcceleration);
+        data.put("pitchMaxSpeed", set.pitchMaxSpeed);
+        data.put("pitchTargetAngle", set.pitchTargetAngle);
+        data.put("movementAcceleration", set.movementAcceleration);
+        data.put("characterHeight", set.characterHeight);
+        data.put("hitbarSprite", set.hitbarSprite);
+        data.put("timerbarSprite", set.timerbarSprite);
+        data.put("wornTransformations", TypeJson.slots(set.wornTransformations));
+        data.put("maxWornRotation", TypeJson.ints(set.maxWornRotation));
+        data.put("graphicOffsets", TypeJson.slots(set.graphicOffsets));
+        data.put("invObjSlots", TypeJson.ints(set.invObjSlots));
         return data;
     }
 

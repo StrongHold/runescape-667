@@ -1,5 +1,6 @@
 import com.jagex.core.constants.ModeGame;
 import com.jagex.game.Animator;
+import com.jagex.game.runetek6.config.bastype.BASType;
 import com.jagex.game.runetek6.config.bastype.BASTypeList;
 import com.jagex.game.runetek6.config.defaults.WearposDefaults;
 import com.jagex.game.runetek6.config.npctype.NPCType;
@@ -64,6 +65,10 @@ public final class ClientNpcReader {
 
     public Js5TextureSource textures() {
         return models.textures();
+    }
+
+    public JavaToolkit toolkit() {
+        return models.toolkit();
     }
 
     /**
@@ -135,6 +140,13 @@ public final class ClientNpcReader {
      * One sequence of a base animation set, and what the set uses it for.
      */
     public record Movement(String role, int sequence) {
+    }
+
+    /**
+     * The NPC's base animation set, or nothing where the type names none.
+     */
+    public Optional<BASType> bas(NPCType type) {
+        return type.basId == -1 ? Optional.empty() : Optional.of(bases.list(type.basId));
     }
 
     /**

@@ -35,6 +35,20 @@ final class TypeJson {
     }
 
     /**
+     * A list for each slot of a table the type fills slot by slot, with an empty list for a slot
+     * it leaves empty, and no slots where it fills none.
+     */
+    static List<List<Integer>> slots(int[][] values) {
+        var list = new ArrayList<List<Integer>>();
+        if (values != null) {
+            for (var slot : values) {
+                list.add(ints(slot));
+            }
+        }
+        return list;
+    }
+
+    /**
      * Each value the type swaps, as a pair of the value in the mesh and the value it becomes, as
      * the client's `recol_s` and `recol_d` or `retex_s` and `retex_d` hold them.
      */
