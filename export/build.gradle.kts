@@ -43,3 +43,9 @@ tasks.register<JavaExec>("exportSprites") {
     mainClass = "SpriteExport"
     classpath = sourceSets["main"].runtimeClasspath
 }
+
+tasks.register<JavaExec>("exportFonts") {
+    description = "Writes every font out of the cache as an AngelCode BMFont: a text descriptor and a PNG atlas, with an index of them all."
+    mainClass = "FontExport"
+    classpath = sourceSets["main"].runtimeClasspath
+}
