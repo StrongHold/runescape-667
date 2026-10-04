@@ -10,6 +10,7 @@ import com.jagex.js5.Js5Archive;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Builds NPCs out of the cache the way the client builds one it is about to draw.
@@ -134,6 +135,22 @@ public final class ClientNpcReader {
      * One sequence of a base animation set, and what the set uses it for.
      */
     public record Movement(String role, int sequence) {
+    }
+
+    /**
+     * The model the client shows of the NPC's head when it talks (`NPCType.headModel`), with the
+     * NPC's colours and textures swapped as on its body, or nothing when the type has no head.
+     */
+    public Optional<JavaModel> head(NPCType type) {
+        if (type.headModels == null) {
+            return Optional.empty();
+        } else {
+            var model = type.headModel(KEEP_UNLIT, null, null, models.toolkit(), null);
+            if (model == null) {
+                throw new IllegalStateException("NPC " + type.id + " has a head mesh the cache does not hold.");
+            }
+            return Optional.of((JavaModel) model);
+        }
     }
 
     private JavaModel model(NPCType type, SequenceAnimator animator) {

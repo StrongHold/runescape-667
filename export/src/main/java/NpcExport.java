@@ -2,9 +2,10 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 import com.jagex.game.runetek6.config.npctype.NPCType;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -13,9 +14,16 @@ import java.util.Map;
 /**
  * Writes one NPC out of the cache as a binary glTF file: its model as the client builds it, with
  * a morph target for every frame of the sequences it stands, turns and moves with, and one
- * animation for each of those sequences, as {@link AnimationWriter} writes them.
+ * animation for each of those sequences, as {@link AnimationWriter} writes them. Every field of
+ * the NPC's type goes in a JSON file beside it, and the model of its head, which the client shows
+ * only while the NPC talks, goes in a binary glTF file of its own.
  */
 public final class NpcExport {
+
+    /**
+     * How many options an NPC type offers on the mini menu (`NPCType.op`).
+     */
+    private static final int OPTION_SLOTS = 5;
 
     public static final class Args implements Arguments {
 
@@ -93,7 +101,6 @@ public final class NpcExport {
         var node = new LinkedHashMap<String, Object>();
         node.put("name", name);
         node.put("mesh", gltf.mesh(name));
-        node.put("extras", extras(args.npc, type));
         var skin = bones.map(held -> SkinWriter.write(gltf, held.joints(), baker.skinning().orElseThrow()));
         skin.ifPresent(held -> {
             node.put("skin", held.number());
@@ -116,6 +123,8 @@ public final class NpcExport {
         }
 
         Glb.write(out, gltf.json(List.of(nodeNumber)), gltf.bin());
+        var typeFile = out.resolveSibling(out.getFileName().toString().replaceFirst("\\.glb$", "") + ".json");
+        Files.writeString(typeFile, Json.write(typeData(type)), StandardCharsets.UTF_8);
 
         System.out.println("wrote " + out.toAbsolutePath().normalize());
         System.out.println("  " + name + ", " + base.vertexCount + " vertices, " + result.faces() + " faces in "
@@ -126,6 +135,11 @@ public final class NpcExport {
         }
         for (var animation : baked) {
             System.out.println("  " + AnimationWriter.describe(animation.name(), animation.clip()));
+        }
+
+        var head = reader.head(type);
+        if (head.isPresent()) {
+            writeHead(args, reader, type, head.get(), out);
         }
     }
 
@@ -140,15 +154,106 @@ public final class NpcExport {
         }
     }
 
-    private static Map<String, Object> extras(int id, NPCType type) {
-        var extras = new LinkedHashMap<String, Object>();
-        extras.put("npc", id);
-        extras.put("name", type.name);
-        extras.put("size", type.size);
+    /**
+     * Writes the head model to `<npc>.head.glb` beside the NPC's own file, as one mesh that is not
+     * posed.
+     */
+    private static void writeHead(Args args, ClientNpcReader reader, NPCType type, JavaModel head, Path out)
+        throws Exception {
+        var file = out.resolveSibling(out.getFileName().toString().replaceFirst("\\.glb$", "") + ".head.glb");
+        var gltf = new GltfBuilder();
+        var materials = new GltfMaterials(gltf, reader.textures(), args.textures.library(reader.textures()), file);
+        var result = ModelToGltf.convert(head, gltf, materials, List.of());
+        var name = type.name + " head (npc " + type.id + ")";
+        Glb.write(file, gltf.json(name), gltf.bin());
+        System.out.println("wrote " + file.toAbsolutePath().normalize());
+        System.out.println("  " + name + ", " + head.vertexCount + " vertices, " + result.faces() + " faces");
+    }
+
+    /**
+     * Every field of the NPC type, under the name the client gives it. The models, the colour and
+     * texture swaps, the translations, the scales, the lighting and the tint are already applied to
+     * the mesh, and are listed so that a reader can see what the mesh is made of.
+     */
+    private static Map<String, Object> typeData(NPCType type) {
+        var data = new LinkedHashMap<String, Object>();
+        data.put("npc", type.id);
+        data.put("name", type.name);
+        data.put("size", type.size);
         if (type.basId != -1) {
-            extras.put("bas", type.basId);
+            data.put("bas", type.basId);
         }
-        return extras;
+        data.put("interactive", type.interactive);
+        data.put("ops", TypeJson.options(type.op, OPTION_SLOTS));
+        data.put("pickSizeShift", type.pickSizeShift);
+        data.put("quickPick", type.quickPick);
+        data.put("models", TypeJson.ints(type.models));
+        data.put("headModels", TypeJson.ints(type.headModels));
+        data.put("recolours", TypeJson.swaps(type.recol_s, type.recol_d));
+        data.put("recolourPalette", TypeJson.bytes(type.recol_d_palette));
+        data.put("retextures", TypeJson.swaps(type.retex_s, type.retex_d));
+        data.put("translations", translations(type));
+        data.put("scaleH", type.scaleH);
+        data.put("scaleV", type.scaleV);
+        data.put("ambient", type.ambient);
+        data.put("diffusion", type.diffusion);
+        data.put("tint", List.of((int) type.colourHue, (int) type.colourSaturation, (int) type.colourLightness,
+            type.colourScale & 0xFF));
+        data.put("hasShadow", type.hasShadow);
+        data.put("shadowInnerColour", type.shadowInnerColour & 0xFFFF);
+        data.put("shadowOuterColour", type.shadowOuterColour & 0xFFFF);
+        data.put("shadowInnerAlpha", (int) type.shadowInnerAlpha);
+        data.put("shadowOuterAlpha", (int) type.shadowOuterAlpha);
+        data.put("height", type.height);
+        data.put("spawnDirection", (int) type.spawnDirection);
+        data.put("yawSpeed", type.yawSpeed);
+        data.put("crawl", type.crawl);
+        data.put("movementCapabilities", (int) type.movementCapabilities);
+        data.put("combatLevel", type.combatLevel);
+        data.put("displayOnMiniMap", type.displayOnMiniMap);
+        data.put("mapElement", type.mapElement);
+        data.put("headIcon", type.headIcon);
+        data.put("healthBarSprite", type.healthBarSprite);
+        data.put("timerbarSprite", type.timerbarSprite);
+        data.put("mobilisingArmiesIcon", type.mobilisingArmiesIcon);
+        data.put("renderHighPriority", type.renderHighPriority);
+        data.put("renderLowPriority", type.renderLowPriority);
+        data.put("lowPriorityAttackOps", (int) type.lowPriorityAttackOps);
+        data.put("isFollower", type.isFollower);
+        data.put("cursor1Op", type.cursor1Op);
+        data.put("cursor1", type.cursor1);
+        data.put("cursor2Op", type.cursor2Op);
+        data.put("cursor2", type.cursor2);
+        data.put("attackCursor", type.attackCursor);
+        data.put("readySound", type.readySound);
+        data.put("crawlSound", type.crawlSound);
+        data.put("walkSound", type.walkSound);
+        data.put("runSound", type.runSound);
+        data.put("soundRangeMin", type.soundRangeMin);
+        data.put("soundRangeMax", type.soundRangeMax);
+        data.put("soundVolume", type.soundVolume);
+        data.put("soundRateMin", type.soundRateMin);
+        data.put("soundRateMax", type.soundRateMax);
+        data.put("vorbis", type.vorbis);
+        data.put("multinpcVarbit", type.multinpcVarbit);
+        data.put("multinpcVarp", type.multinpcVarp);
+        data.put("multinpcs", TypeJson.ints(type.multinpcs));
+        data.put("quests", TypeJson.ints(type.quests));
+        data.put("params", TypeJson.params(type.params));
+        return data;
+    }
+
+    /**
+     * How far the type moves each of its models before it merges them, one `[x, y, z]` for each
+     * model, `[0, 0, 0]` for a model it leaves in place.
+     */
+    private static List<List<Integer>> translations(NPCType type) {
+        var list = new ArrayList<List<Integer>>();
+        for (var model = 0; model < type.models.length; model++) {
+            var moved = type.translations == null ? null : type.translations[model];
+            list.add(moved == null ? List.of(0, 0, 0) : TypeJson.ints(moved));
+        }
+        return list;
     }
 
     private NpcExport() {

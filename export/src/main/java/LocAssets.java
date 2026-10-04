@@ -66,7 +66,7 @@ public final class LocAssets {
      */
     public Optional<Path> file(int id) {
         var file = directory.resolve(id + ".glb");
-        if (Files.exists(file) && Files.exists(typeFile(id))) {
+        if (Files.exists(file) && Files.exists(typeFile(file))) {
             return Optional.of(file);
         } else {
             return write(id, file).map(ignored -> file);
@@ -187,7 +187,7 @@ public final class LocAssets {
         var document = gltf.json(shapeNodes, label(type), Map.of());
         try {
             Glb.write(file, document, gltf.bin());
-            Files.writeString(typeFile(id), Json.write(extras(type)), StandardCharsets.UTF_8);
+            Files.writeString(typeFile(file), Json.write(extras(type)), StandardCharsets.UTF_8);
         } catch (IOException failure) {
             throw new UncheckedIOException("Could not write location " + id + " to " + file, failure);
         }
@@ -197,8 +197,8 @@ public final class LocAssets {
     /**
      * Where the type's own data is written: beside the mesh file, as JSON.
      */
-    private Path typeFile(int id) {
-        return directory.resolve(id + ".json");
+    private static Path typeFile(Path file) {
+        return file.resolveSibling(file.getFileName().toString().replaceFirst("\\.glb$", "") + ".json");
     }
 
     public static String label(LocType type) {
@@ -208,7 +208,9 @@ public final class LocAssets {
 
     /**
      * What an importer needs to place the location, in the client's units, as
-     * {@link LocPlacing} uses them.
+     * {@link LocPlacing} uses them, followed by every other field of the type under the name the
+     * client gives it. The models, colour and texture swaps, lighting and tint are already applied
+     * to the meshes, and are listed so that a reader can see what the meshes are made of.
      */
     private static Map<String, Object> extras(LocType type) {
         var extras = new LinkedHashMap<String, Object>();
@@ -230,7 +232,7 @@ public final class LocAssets {
         extras.put("shadow", type.shadow);
         extras.put("hardShadow", type.hardshadow);
         extras.put("interactive", type.active != LocInteractivity.NONINTERACTIVE);
-        extras.put("ops", options(type));
+        extras.put("ops", TypeJson.options(type.ops, OPTION_SLOTS));
         if (type.hasAnimations()) {
             var sequences = new ArrayList<Integer>();
             var weights = new ArrayList<Integer>();
@@ -246,20 +248,71 @@ public final class LocAssets {
             }
             extras.put("randomStartFrame", type.randomanimframe);
         }
+        extras.put("models", models(type));
+        extras.put("modelShapes", TypeJson.bytes(type.modelShapes));
+        extras.put("recolours", TypeJson.swaps(type.recol_s, type.recol_d));
+        extras.put("recolourPalette", TypeJson.bytes(type.recol_d_palette));
+        extras.put("retextures", TypeJson.swaps(type.retex_s, type.retex_d));
+        extras.put("ambient", type.ambient);
+        extras.put("contrast", type.contrast);
+        extras.put("tint", List.of((int) type.targetHue, (int) type.targetSaturation, (int) type.targetLightness,
+            (int) type.colourShiftPercentage));
+        extras.put("sharelight", type.sharelight);
+        extras.put("offsetY", type.offsetY);
+        extras.put("walloff", type.walloff);
+        extras.put("blockwalk", type.blockwalk);
+        extras.put("blockrange", type.blockrange);
+        extras.put("breakroutefinding", type.breakroutefinding);
+        extras.put("forceapproach", type.forceapproach);
+        extras.put("forcedecor", type.forcedecor);
+        extras.put("raiseobject", type.raiseobject);
+        extras.put("occlude", type.occlude);
+        extras.put("occlusionHeight", type.occlusionHeight);
+        extras.put("occlusionOffset", type.occlusionOffset);
+        extras.put("istexture", type.istexture);
+        extras.put("dynamic", type.dynamic);
+        extras.put("animated", type.animated);
+        extras.put("members", type.members);
+        extras.put("mapelement", type.mapelement);
+        extras.put("msi", type.msi);
+        extras.put("msiflip", type.msiflip);
+        extras.put("msirotate", type.msirotate);
+        extras.put("msiRotateOffset", type.msiRotateOffset);
+        extras.put("cursor1Op", type.cursor1Op);
+        extras.put("cursor1", type.cursor1);
+        extras.put("cursor2Op", type.cursor2Op);
+        extras.put("cursor2", type.cursor2);
+        extras.put("sound", type.sound);
+        extras.put("soundRange", type.soundRange);
+        extras.put("soundSize", type.soundSize);
+        extras.put("soundVolume", type.soundVolume);
+        extras.put("soundDelayMin", type.soundDelayMin);
+        extras.put("soundDelayMax", type.soundDelayMax);
+        extras.put("soundRateMin", type.soundRateMin);
+        extras.put("soundRateMax", type.soundRateMax);
+        extras.put("randomsound", type.randomsound);
+        extras.put("randomSoundIds", TypeJson.ints(type.randomSoundIds));
+        extras.put("vorbis", type.vorbis);
+        extras.put("multivarbit", type.multivarbit);
+        extras.put("multivarp", type.multivarp);
+        extras.put("multiloc", TypeJson.ints(type.multiloc));
+        extras.put("quests", TypeJson.ints(type.quests));
+        extras.put("params", TypeJson.params(type.params));
         return extras;
     }
 
     /**
-     * The five options the type offers on the mini menu, in the client's order, with an empty
-     * string for a slot the type leaves empty.
+     * The meshes of each shape the type lists in `modelShapes`, by id, as the client's `models`
+     * holds them.
      */
-    private static List<String> options(LocType type) {
-        var options = new ArrayList<String>();
-        for (var slot = 0; slot < OPTION_SLOTS; slot++) {
-            var option = type.ops == null ? null : type.ops[slot];
-            options.add(option == null ? "" : option);
+    private static List<List<Integer>> models(LocType type) {
+        var list = new ArrayList<List<Integer>>();
+        if (type.models != null) {
+            for (var shape : type.models) {
+                list.add(TypeJson.ints(shape));
+            }
         }
-        return options;
+        return list;
     }
 
     private record Clip(int sequence, PoseBaker.Clip baked) {

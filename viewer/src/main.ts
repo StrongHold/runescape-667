@@ -108,8 +108,22 @@ async function openExported(file: ExportedFile): Promise<void> {
         await openMapSquare(file.path, label);
     } else {
         const response = await fetch(file.path);
-        await open(await response.arrayBuffer(), label, servedFrom(file.path));
+        const named = file.kind === 'npcs' ? await npcLabel(file.path, label) : label;
+        await open(await response.arrayBuffer(), named, servedFrom(file.path));
     }
+}
+
+/**
+ * What an exported NPC is called, from the type data the export writes beside its file, such as
+ * "NPC 9, Guard", or the label given where there is none.
+ */
+async function npcLabel(path: string, label: string): Promise<string> {
+    const response = await fetch(path.replace(/\.glb$/, '.json'));
+    if (!response.ok) {
+        return label;
+    }
+    const type = await response.json() as { readonly npc?: unknown; readonly name?: unknown };
+    return typeof type.npc === 'number' && typeof type.name === 'string' ? `NPC ${type.npc}, ${type.name}` : label;
 }
 
 async function start(): Promise<void> {

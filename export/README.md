@@ -128,8 +128,29 @@ The NPC is built by the client's own `NPCType.getModel`, on type lists read from
 with the same software toolkit as a model. That method reads each mesh the NPC is made of, moves
 each one as its base animation set says, merges them, swaps the NPC's colours and textures, and
 scales and poses the result. The model is then written as a model is, so everything above about
-coordinates, colours, textures and faces holds for an NPC too. The node carries the NPC's id,
-name, size and base animation set in its `extras`.
+coordinates, colours, textures and faces holds for an NPC too. The NPC type's own data is
+beside the mesh file as `<npc>.json`: its `npc` id, `name`, `size` in tiles and base animation set
+`bas`; whether the mouse can pick it, `interactive`; its five `ops`, the options it offers on the
+mini menu in the client's order with an empty string for an empty slot; and how the client picks
+it (`NPCEntity.picked`): `pickSizeShift`, by which it grows the picking cylinder and the model's
+box, and `quickPick`, which is 1 for a pick by the box on the screen alone, 0 for a pick by the
+model's triangles, and -1 for the default, the box for an NPC one tile across and the triangles
+for a larger one, which a `pickSizeShift` above 0 also makes the box.
+
+The JSON file holds every other field of the type too, under the name the client gives it, so
+that nothing the client decodes is lost: an id the type leaves unset is -1, a list it leaves
+unset is empty, and its `params` are an object keyed by the parameter's id. The `models`,
+`recolours` and `retextures` as pairs of the value in the mesh and the value it becomes,
+`recolourPalette`, `translations`, `scaleH`, `scaleV`, `ambient`, `diffusion` and `tint` (hue,
+saturation, lightness and scale) are already applied to the mesh, and are listed so that a
+reader can see what the mesh is made of. The shadow the client draws under the NPC is described
+by `hasShadow`, `shadowInnerColour`, `shadowOuterColour`, `shadowInnerAlpha` and
+`shadowOuterAlpha`.
+
+Where the type has a head, the model the client shows while the NPC talks, the head is written
+as a file of its own, `<npc>.head.glb`, built by the client's `NPCType.headModel` with the same
+colour and texture swaps, as one mesh that is not posed. It is not in the NPC's own file, because
+an engine needs one without the other: most NPCs are never talked to.
 
 The base animation set names the sequences the NPC stands, idles, turns, walks, runs and crawls
 with. Every frame of each of them is posed by the client's own animation code: the sequence is
@@ -196,9 +217,9 @@ and a face that any frame makes see-through is put in a material that blends, so
 A face the mesh itself makes invisible is kept where a frame fades it in. A frame can also move a
 billboard, and that is not written. A sequence is written in full and loops as a whole, where the client
 plays the frames before a sequence's loop once, stops a sequence after its greatest number of
-loops, and picks between idle sequences at random by their weights. The NPC's head model, the
-sounds a sequence plays, its particles and its billboards are not written, and nor are the
-action sequences an NPC plays when the game tells it to, such as an attack.
+loops, and picks between idle sequences at random by their weights. The sounds a sequence
+plays, its particles and its billboards are not written, and nor are the action sequences an
+NPC plays when the game tells it to, such as an attack.
 
 
 ## Writing a map square
@@ -330,7 +351,11 @@ is `interactive`, which the client decides once it reads the type (`LocType.post
 type says, or, where it says nothing, when the type offers an option or its only shape is 10. The
 client lets the mouse pick only an interactive location, and never one under water. They also
 carry the type's five `ops`, the options it offers on the mini menu in the client's order, with
-an empty string for an empty slot. A location that animates has bones and an
+an empty string for an empty slot. The JSON file holds every other field of the type too, under
+the name the client gives it, as an NPC's does: the `models` of each shape in `modelShapes`, the
+swaps, `ambient`, `contrast` and `tint` already applied to the meshes, and the rest, such as how
+the location blocks movement and sight, its sounds, its map icon and its `params`, for an engine
+that needs them. A location that animates has bones and an
 animation for every sequence, as an NPC has, and is scaled in its asset, because the client
 scales a location before it poses it and a frame's move is not scaled with it; its JSON then
 says `resize` is 128 and names the scale in `scaledInAsset`. A wall decoration that animates
