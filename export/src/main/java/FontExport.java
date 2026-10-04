@@ -7,14 +7,9 @@ import com.jagex.js5.Js5Archive;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.TreeMap;
-
-import javax.imageio.ImageIO;
 
 /**
- * Writes every font out of the cache as an AngelCode BMFont, with an index of them all.
+ * Writes every font out of the cache as a BDF file, and checks that each draws as the client draws it.
  */
 public final class FontExport {
 
@@ -54,7 +49,7 @@ public final class FontExport {
         var check = new FontCheck();
 
         Files.createDirectories(args.out);
-        var index = new TreeMap<String, Object>(Comparator.comparingInt(Integer::parseInt));
+        var written = 0;
         var differ = 0;
 
         for (var id : Cache.groupsOf(Cache.index(cache, Js5Archive.FONTMETRICS))) {
@@ -64,32 +59,20 @@ public final class FontExport {
                 System.out.println("font " + id + " has no " + (metrics == null ? "metrics" : "glyphs") + ", left out");
             } else {
                 var name = FontNames.name(spritesIndex, id);
-                var base = Integer.toString(id);
-                var font = BmFont.of(base, base + ".png", metrics, glyphs);
-                var descriptor = args.out.resolve(base + ".fnt");
-                var page = args.out.resolve(base + ".png");
-                Files.writeString(descriptor, font.descriptor());
-                ImageIO.write(font.page(), "png", page.toFile());
+                var file = args.out.resolve(id + ".bdf");
+                Files.writeString(file, BdfFont.of(name.orElse(Integer.toString(id)), metrics, glyphs));
 
-                var differences = check.differences(descriptor, metrics, glyphs);
+                var differences = check.differences(file, metrics, glyphs);
                 differ += differences > 0 ? 1 : 0;
-
-                var antialiased = font.antialiased();
-                var kerned = metrics.glyphSpacing != null;
-                var entry = new LinkedHashMap<String, Object>();
-                name.ifPresent(known -> entry.put("name", known));
-                entry.put("descent", metrics.paddingBottom);
-                index.put(base, entry);
+                written++;
 
                 System.out.println("font " + id + " " + name.orElse("(unnamed)") + ": line height " + metrics.verticalSpacing
                     + ", ascent " + metrics.paddingTop + ", descent " + metrics.paddingBottom
-                    + (antialiased ? ", antialiased" : "") + (kerned ? ", kerned" : "")
                     + (differences > 0 ? ", " + differences + " texels differ from the client" : ", drawn as the client draws it"));
             }
         }
 
-        Files.writeString(args.out.resolve("fonts.json"), Json.write(index));
-        System.out.println("wrote " + index.size() + " fonts to " + args.out.toAbsolutePath().normalize());
+        System.out.println("wrote " + written + " fonts to " + args.out.toAbsolutePath().normalize());
 
         if (differ > 0) {
             throw new IllegalStateException(differ + " fonts draw differently from the client");

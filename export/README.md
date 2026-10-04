@@ -3,8 +3,8 @@
 Writes models, NPCs, map squares, sprites and fonts out of the game's cache in a form that other
 engines can import. A model, an NPC or a map square is written as binary glTF (`.glb`), which
 Godot 4, Blender, three.js and most other tools read as it is. The sprites the client draws its
-interfaces with are written as one PNG for each frame, and its fonts as BMFonts, both described
-below.
+interfaces with are written as one PNG for each frame, and its fonts as BDF text files, both
+described below.
 
     ./gradlew :export:exportModel --args="--model 32421"
     ./gradlew :export:exportModel --args="--model 8 --out /tmp/hood.glb"
@@ -532,9 +532,10 @@ blue channels fails 7,820.
     ./gradlew :export:exportFonts
     ./gradlew :export:exportFonts --args="--out /path/to/fonts"
 
-Every font the cache holds is written as an AngelCode BMFont, in the text format that most
-engines and font libraries read: a `.fnt` descriptor and one PNG page beside it. Without `--out`
-the fonts go to `export/build/fonts`, and `--cache` works as it does for a model.
+Every font the cache holds is written as `<id>.bdf`, in the Glyph Bitmap Distribution Format
+(BDF 2.1), a text file that holds each glyph's bitmap with the font's metrics, which FreeType,
+X11, Pillow and many font tools read. Without `--out` the fonts go to `export/build/fonts`, and
+`--cache` works as it does for a model.
 
 The client keeps a font as two halves under one id. The sprite archive holds 256 glyph images,
 one for each byte of code page 1252, and the font metrics archive holds the advance of each
@@ -542,52 +543,45 @@ glyph, the line spacing, and how far the text reaches above and below its baseli
 every group of the metrics archive, with the sprite group of the same id, and both halves are
 read with the client's own readers (`FontMetrics`, `IndexedImage.load`).
 
-A font is written as `<id>.fnt` and `<id>.png`, named by its sprite group, as a sprite is. The
-descriptor holds the line height, the ascent, whether the font is antialiased (`aa`) and its
-kernings, so nothing else repeats them. `fonts.json` holds only what a BMFont cannot: an object
-from each font's id to its `descent`, and its `name` where it is known. The archive keeps only a
-hash of each name, so a name is given where a known name hashes to the group's hash. The client
-asks for `p11_full`, `p12_full` and `b12_full` by name (`Fonts.load`). The other names were found
-by hashing candidate names, so one may be a chance match: `palatino_linotype_18pt_regular` holds
+`FONT` is the font's name where it is known, and otherwise its id. The archive keeps only a hash
+of each name, so a name is given where a known name hashes to the group's hash. The client asks
+for `p11_full`, `p12_full` and `b12_full` by name (`Fonts.load`). The other names were found by
+hashing candidate names, so one may be a chance match: `palatino_linotype_18pt_regular` holds
 nearly the glyphs of `verdana_15pt_regular`. The cache holds two fonts twice: 5631 is `q8_full`
 again.
 
-The descriptor's characters are Unicode. The client turns each character of a string into a byte
-of code page 1252 (`Cp1252.encode`) and draws the glyph of that byte, so each glyph is written
-under the lowest character that reaches it. A character with no byte becomes a question mark, so
-byte 0 and the five bytes code page 1252 leaves undefined are never drawn and are not written.
-The client draws text from its baseline. It draws a glyph at the baseline less the line spacing,
-plus the offset its image carries (`Font.render`). A BMFont reader measures from the top of the
-line, which the client puts at the baseline less the ascent (`Font.renderLines`). So `base` is
-the ascent, `lineHeight` is the line spacing, and a glyph's `yoffset` is its own offset less the
-line spacing plus the ascent. `xoffset` is the image's own offset, and `xadvance` is the advance
-from the metrics. The space glyph has no size, because the client only moves on by its advance.
-Most of the client's text puts lines one line spacing apart and leaves the ascent above the
-first and the descent below the last. The descent has no place in the BMFont format, so it is in
-`fonts.json`. `info size` repeats the line spacing, and `info face` is the font's id.
+`SIZE` is the client's line spacing, the distance from one line's baseline to the next, at 72
+dots an inch, where a point is a pixel. `FONT_ASCENT` and `FONT_DESCENT` are how far the text
+reaches above and below the baseline: the client puts the top of a line at the baseline less
+the ascent (`Font.renderLines`), and most of its text leaves the ascent above the first line and
+the descent below the last. `DEFAULT_CHAR` is the question mark, which the client draws for a
+character it has no byte for. `GLYPH_COLOUR` is the one colour of every glyph, as hex RGB, which
+a component that asks for the glyphs' own colours draws them in; otherwise the client draws them
+in the text's colour. Every glyph in this cache is white or nearly white, with no channel below
+253.
 
-A font with a kerning table gets a `kernings` block: the amount the client adds to the pen
-between two glyphs (`FontMetrics.glyphSpacing`). No font in this cache has one, and no font has
-glyphs with their own alpha, but the export writes both if a cache has them.
+The characters are Unicode. The client turns each character of a string into a byte of code page
+1252 (`Cp1252.encode`) and draws the glyph of that byte, so each glyph is written under the
+lowest character that reaches it. A character with no byte becomes a question mark, so byte 0
+and the five bytes code page 1252 leaves undefined are never drawn and are not written. The
+client draws a glyph at the baseline less the line spacing, plus the offset its image carries
+(`Font.render`). BDF places a glyph's bitmap by its bottom left corner from the pen on the
+baseline, upwards, so a glyph's `BBX` offset across is the image's own offset, and its offset
+up is the line spacing less the image's offset and its height. `DWIDTH` is the advance from the
+metrics, and `SWIDTH` is the same in thousandths of the size, which BDF asks for. The space glyph
+has no bitmap, because the client only moves on by its advance. A pixel is set wherever the glyph
+image is not 0.
 
-The page lays the glyphs out as the GL toolkit lays them out in its texture (`Font_Sub2`), sixteen
-to a row in cells as large as the largest glyph, with one more texel between cells. Every byte
-has a cell, a byte that is never drawn too. Each texel holds the palette colour of the glyph
-image, and an alpha that is the glyph's own alpha where it has one and otherwise opaque wherever
-the image is not 0. The client draws a font in one of two ways. Mostly it draws every covered
-texel in the text's colour and uses the alpha alone. A component can instead ask for the glyphs'
-own colours, and then the RGB is drawn as it is. Every glyph in this cache is white or nearly
-white, with no channel below 253, so the two give almost the same picture for white text. An
-antialiased glyph is blended by its alpha out of 256 (`JavaMonoAlphaFont`). Any other glyph
-overwrites what is under it wherever it covers at all.
+BDF holds one bit a pixel, no colour of each pixel and no kerning. No font in this cache has a
+kerning table or glyphs with their own alpha, and every glyph of a font has the one colour, so
+nothing is lost. A font that does not fit is refused, and the export fails.
 
-Every font is checked as it is written. The `.fnt` and the PNG are read back as any BMFont reader
-reads them, and a line of every glyph and a line of ordinary text are drawn with them by the
-BMFont rules. The client's software toolkit draws the same text with its own fonts, built from
-the cache as the client builds them, and the two pictures are compared texel by texel. A font that
-differs fails the export. All 27 fonts match, in the text's colour and in the glyphs' own. A
-planted advance one too wide on `e` failed all 27, and so did a planted `base` one too low.
-
+Every font is checked as it is written. The BDF file is read back as a BDF reader reads it, and a
+line of every glyph and a line of ordinary text are drawn with it by the BDF rules. The client's
+software toolkit draws the same text with its own fonts, built from the cache as the client
+builds them, and the two pictures are compared texel by texel, in the text's colour and in the
+glyphs' own. A font that differs fails the export. All 27 fonts match. A planted offset of one
+pixel up in every glyph fails all 27, and so does a planted advance one pixel too wide.
 
 ## Looking at a model
 
