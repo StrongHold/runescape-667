@@ -95,12 +95,26 @@ async function loadLocs(directory: string, description: MapSquareDescription,
     for (let from = 0; from < ids.length; from += FETCHED_AT_ONCE) {
         const batch = ids.slice(from, from + FETCHED_AT_ONCE);
         const loaded = await Promise.all(batch.map(id => loader.loadAsync(`${directory}${id}.glb`)));
+        const types = await Promise.all(batch.map(id => fetchType(`${directory}${id}.json`)));
         batch.forEach((id, index) => {
             completeMorphTargets(loaded[index].scene);
+            loaded[index].scene.userData = types[index];
             locs.set(id, loaded[index]);
         });
     }
     return locs;
+}
+
+/**
+ * A location type's data, which the export writes beside its mesh file. The viewer hangs it on
+ * the file's scene, where the placing reads it.
+ */
+async function fetchType(url: string): Promise<Record<string, unknown>> {
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`${url} could not be fetched: ${response.status}.`);
+    }
+    return await response.json() as Record<string, unknown>;
 }
 
 interface Built {
@@ -145,7 +159,7 @@ function place(loc: GLTF, placement: Placement, description: MapSquareDescriptio
 }
 
 /**
- * The location's extras, which its file carries on its scene.
+ * The location's type data, which the export writes beside its file and the viewer hangs on its scene.
  */
 function locExtras(loc: GLTF): LocExtras | null {
     return isLocExtras(loc.scene.userData) ? loc.scene.userData : null;

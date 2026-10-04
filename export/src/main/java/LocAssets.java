@@ -3,6 +3,7 @@ import com.jagex.game.runetek6.config.loctype.LocType;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -15,10 +16,10 @@ import java.util.Optional;
  * The locations every map square shares, one glTF file for each location type in one directory.
  *
  * A location is written once, under its id, and holds a mesh for each shape its type has a model
- * for, which for most types is one, each as a root of the file's one scene, and the scene carries
- * the location's name and extras. A skinned mesh is best left a root, as its own transform is
+ * for, which for most types is one, each as a root of the file's one scene. The type's own data,
+ * its name and what an importer needs to place it, goes in a JSON file of the same id beside it. A skinned mesh is best left a root, as its own transform is
  * ignored in favour of its joints'. Each mesh is the location's asset as {@link ClientLocReader}
- * builds it, and the file's extras carry what an importer needs to place it as {@link LocPlacing}
+ * builds it, and the JSON carries what an importer needs to place it as {@link LocPlacing}
  * describes. A wall decoration that animates has a second mesh for a diagonal placement, turned
  * already, as {@link ClientLocReader#poser} explains. Each mesh's extras carry the client's own
  * top and bottom of the model, {@code minY} and {@code maxY}, which the bend measures the model
@@ -65,7 +66,7 @@ public final class LocAssets {
      */
     public Optional<Path> file(int id) {
         var file = directory.resolve(id + ".glb");
-        if (Files.exists(file)) {
+        if (Files.exists(file) && Files.exists(typeFile(id))) {
             return Optional.of(file);
         } else {
             return write(id, file).map(ignored -> file);
@@ -183,13 +184,21 @@ public final class LocAssets {
             return Optional.empty();
         }
 
-        var document = gltf.json(shapeNodes, label(type), extras(type));
+        var document = gltf.json(shapeNodes, label(type), Map.of());
         try {
             Glb.write(file, document, gltf.bin());
+            Files.writeString(typeFile(id), Json.write(extras(type)), StandardCharsets.UTF_8);
         } catch (IOException failure) {
             throw new UncheckedIOException("Could not write location " + id + " to " + file, failure);
         }
         return Optional.of(new Written(shapeNodes.size(), faces, targets, List.copyOf(animations)));
+    }
+
+    /**
+     * Where the type's own data is written: beside the mesh file, as JSON.
+     */
+    private Path typeFile(int id) {
+        return directory.resolve(id + ".json");
     }
 
     public static String label(LocType type) {

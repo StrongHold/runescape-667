@@ -288,8 +288,8 @@ of the view before the far plane the vertex also rises to the surface, by its wh
 
     ./gradlew :export:exportLoc --args="--loc 33799"
 
-A location is written once, as `export/build/locs/<id>.glb` unless `--locs` names another
-directory, and every map square that places it refers to it by its id. A map square writes any
+A location is written once, as `export/build/locs/<id>.glb` with its type's data beside it as
+`<id>.json`, unless `--locs` names another directory, and every map square that places it refers to it by its id. A map square writes any
 location it names that the library lacks, and leaves one that is there as it is, as it does with
 textures.
 
@@ -313,7 +313,8 @@ rest, such as walls and fences, name a different mesh for each shape. Each mesh 
 the client builds that is the same wherever the location stands: the shape's meshes merged, mirrored
 where the type says so, and recoloured and retextured. The client turns, scales, moves and bends
 the model after that, and all of it depends on the placement, so none of it is in the mesh. The
-file's `extras` carry what that needs: the type's `resize`, `offset`, `translate`, `hillchange` and
+type's data is in the JSON file beside the mesh, which carries what that needs, along with the
+type's `loc` id, its `name` and its `shapes`: the type's `resize`, `offset`, `translate`, `hillchange` and
 `hillskew`, whether the mesh is `mirrored`, and the `sequences` the location plays, their weights
 and whether the client starts at a random frame. They also carry the type's `size` in tiles, as
 width and length before any turn, and whether it casts a `shadow`: when the client builds a map
@@ -331,8 +332,8 @@ client lets the mouse pick only an interactive location, and never one under wat
 carry the type's five `ops`, the options it offers on the mini menu in the client's order, with
 an empty string for an empty slot. A location that animates has bones and an
 animation for every sequence, as an NPC has, and is scaled in its asset, because the client
-scales a location before it poses it and a frame's move is not scaled with it; its `extras` then
-say `resize` is 128 and name the scale in `scaledInAsset`. A wall decoration that animates
+scales a location before it poses it and a frame's move is not scaled with it; its JSON then
+says `resize` is 128 and names the scale in `scaledInAsset`. A wall decoration that animates
 has a second mesh, `shape 4 turned`, for a diagonal placement: the client turns such a decoration
 45 degrees before the frames of its sequence move it, and the frames are not turned with it, so
 that mesh is turned already and an importer does not turn it again.
