@@ -9,10 +9,17 @@
  * The pixels are the rectangle's, a row at a time from the top, as straight (not premultiplied)
  * ARGB.
  */
-public record SpriteFrame(int x, int y, int width, int height, int canvasWidth, int canvasHeight, boolean alpha, int[] pixels) {
+public record SpriteFrame(int x, int y, int width, int height, int canvasWidth, int canvasHeight, int[] pixels) {
 
-    /** Whether the client's rectangle is smaller than its canvas, so that the frame has margins. */
-    public boolean trimmed() {
-        return x != 0 || y != 0 || width != canvasWidth || height != canvasHeight;
+    /**
+     * The frame laid on its whole canvas, clear outside its rectangle, a row at a time from the
+     * top: what the client draws at a point, with the canvas's top left corner there.
+     */
+    public int[] canvas() {
+        var laid = new int[canvasWidth * canvasHeight];
+        for (var line = 0; line < height; line++) {
+            System.arraycopy(pixels, line * width, laid, (y + line) * canvasWidth + x, width);
+        }
+        return laid;
     }
 }

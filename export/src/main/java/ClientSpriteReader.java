@@ -97,7 +97,7 @@ public final class ClientSpriteReader {
         for (var i = 0; i < pixels.length; i++) {
             pixels[i] = colour(image, i);
         }
-        return new SpriteFrame(image.offX1, image.offY1, image.width, image.height, image.offsetX(), image.offsetY(), image.alpha != null, pixels);
+        return new SpriteFrame(image.offX1, image.offY1, image.width, image.height, image.offsetX(), image.offsetY(), pixels);
     }
 
     private static int colour(IndexedImage image, int pixel) {

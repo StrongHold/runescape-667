@@ -6,18 +6,15 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Checks each written sprite against the client, frame by frame.
  *
- * Two things are compared with what the files say. The first is the frame on its whole canvas as
- * the client lays it out ({@code IndexedImage.method9383}): the written frame is cut from the
- * written PNG by its {@code frame}, put on a clear canvas of its {@code sourceSize} at its
- * {@code spriteSourceSize}, and every pixel of the canvas must match. The second is the sprite the
- * software toolkit builds from the same image ({@code JavaToolkit.createSprite}): its pixels must
- * match the frame's, its margins must be the ones the frame's position and canvas leave, and its
- * canvas must be the frame's.
+ * Each frame's PNG, read back as it was written, is compared with two things. The first is the
+ * frame on its whole canvas as the client lays it out ({@code IndexedImage.method9383}), pixel by
+ * pixel. The second is the sprite the software toolkit builds from the same image
+ * ({@code JavaToolkit.createSprite}), laid on a clear canvas of the toolkit's size at the toolkit's
+ * margins: that must be the same picture, so the margins and the canvas are checked too.
  */
 public final class SpriteCheck {
 
@@ -36,57 +33,42 @@ public final class SpriteCheck {
         this.toolkit = new JavaToolkit(null);
     }
 
-    @SuppressWarnings("unchecked")
-    public void compare(int id, Map<String, Object> document, BufferedImage png) {
+    public void compare(int id, List<BufferedImage> written) {
         var images = IndexedImage.load(archive, id, SPRITE_FILE);
-        var written = (Map<String, Object>) document.get("frames");
         if (written.size() != images.length) {
             failures.add("sprite " + id + " has " + images.length + " frames in the client and " + written.size() + " written");
         } else {
             for (var index = 0; index < images.length; index++) {
-                var frame = (Map<String, Object>) written.get(SpriteExport.frameName(id, index));
                 var before = failures.size();
-                compare(id, index, images[index], frame, png);
+                compare("sprite " + id + " frame " + index, images[index], written.get(index));
                 frames++;
                 differing += failures.size() > before ? 1 : 0;
             }
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private void compare(int id, int index, IndexedImage image, Map<String, Object> frame, BufferedImage png) {
-        var where = (Map<String, Integer>) frame.get("frame");
-        var placed = (Map<String, Integer>) frame.get("spriteSourceSize");
-        var canvas = (Map<String, Integer>) frame.get("sourceSize");
-        var width = where.get("w");
-        var height = where.get("h");
-        var rectangle = new int[width * height];
-        if (width > 0 && height > 0) {
-            png.getRGB(where.get("x"), where.get("y"), width, height, rectangle, 0, width);
-        }
-
-        var laid = new int[canvas.get("w") * canvas.get("h")];
-        for (var y = 0; y < height; y++) {
-            System.arraycopy(rectangle, y * width, laid, (placed.get("y") + y) * canvas.get("w") + placed.get("x"), width);
-        }
-        var name = "sprite " + id + " frame " + index;
-        if (!Arrays.equals(laid, image.method9383())) {
+    private void compare(String name, IndexedImage image, BufferedImage png) {
+        var pixels = png.getRGB(0, 0, png.getWidth(), png.getHeight(), null, 0, png.getWidth());
+        if (!Arrays.equals(pixels, onCanvas(image.offsetX(), image.offsetY(), image.method9383()))) {
             failures.add(name + " differs from the client's canvas");
         }
 
         var sprite = toolkit.createSprite(image, false);
         var margins = new int[4];
         sprite.projectOffsets(margins);
-        var expected = new int[] {placed.get("x"), placed.get("y"), canvas.get("w") - width - placed.get("x"), canvas.get("h") - height - placed.get("y")};
-        if (!Arrays.equals(margins, expected)) {
-            failures.add(name + " has margins " + Arrays.toString(margins) + " in the toolkit and " + Arrays.toString(expected) + " written");
+        var width = sprite.scaleWidth() - margins[0] - margins[2];
+        var height = sprite.scaleHeight() - margins[1] - margins[3];
+        var frame = new SpriteFrame(margins[0], margins[1], width, height, sprite.scaleWidth(), sprite.scaleHeight(), pixels(sprite));
+        if (!Arrays.equals(pixels, onCanvas(frame.canvasWidth(), frame.canvasHeight(), frame.canvas()))) {
+            failures.add(name + " differs from the toolkit's sprite on its canvas");
         }
-        if (sprite.scaleWidth() != canvas.get("w") || sprite.scaleHeight() != canvas.get("h")) {
-            failures.add(name + " has a canvas of " + sprite.scaleWidth() + " by " + sprite.scaleHeight() + " in the toolkit");
-        }
-        if (!Arrays.equals(pixels(sprite), rectangle)) {
-            failures.add(name + " differs from the toolkit's sprite");
-        }
+    }
+
+    /**
+     * A canvas as the PNG holds it, which is one clear pixel where the canvas has none.
+     */
+    private static int[] onCanvas(int width, int height, int[] canvas) {
+        return width > 0 && height > 0 ? canvas : new int[1];
     }
 
     private static int[] pixels(Sprite sprite) {

@@ -39,7 +39,7 @@ tasks.register<JavaExec>("exportMapSquare") {
 }
 
 tasks.register<JavaExec>("exportSprites") {
-    description = "Writes every sprite out of the cache as a PNG atlas with a TexturePacker JSON hash, and checks each one against the client."
+    description = "Writes every frame of every sprite out of the cache as a PNG of its whole canvas, with the names the client asks for sprites by, and checks each one against the client."
     mainClass = "SpriteExport"
     classpath = sourceSets["main"].runtimeClasspath
 }

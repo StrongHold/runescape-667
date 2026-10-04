@@ -3,7 +3,8 @@
 Writes models, NPCs, map squares, sprites and fonts out of the game's cache in a form that other
 engines can import. A model, an NPC or a map square is written as binary glTF (`.glb`), which
 Godot 4, Blender, three.js and most other tools read as it is. The sprites the client draws its
-interfaces with are written as PNG atlases, and its fonts as BMFonts, both described below.
+interfaces with are written as one PNG for each frame, and its fonts as BMFonts, both described
+below.
 
     ./gradlew :export:exportModel --args="--model 32421"
     ./gradlew :export:exportModel --args="--model 8 --out /tmp/hood.glb"
@@ -494,52 +495,36 @@ draws its interfaces, icons, cursors, map furniture and fonts with. Without `--o
 is written to `export/build/sprites`, and `--cache` works as it does for a model. `--sprite`
 writes only the sprites it names, and can be given more than once.
 
-Each sprite is written as two files: `<id>.png`, an atlas that holds every frame of the sprite,
-and `<id>.json`, which says where each frame is, in the JSON hash format that TexturePacker
-writes and most engines read. The directory also holds `index.json`, which lists every sprite
-as its `id`, its `name` where it has one, how many `frames` it has, and its `image` and `data`
-files. A run with `--sprite` writes no index.
-
-The client reads a sprite with `IndexedImage.load`, which gives one paletted image for each
-frame. All the frames of a sprite share one canvas, and each frame keeps only the rectangle of
-it that the client draws, with its left and top margins on the canvas. The client draws a frame
-at a point by putting the canvas's top left corner there, so the rectangle lands at the point
-plus its margins. The JSON carries that exactly. A frame's `spriteSourceSize` is its rectangle
-on the canvas, its `x` and `y` being the margins, and its `sourceSize` is the canvas. `trimmed`
-is true where the rectangle is smaller than the canvas, and `frame` is where the rectangle is in
-the atlas. Frames are never rotated in the atlas, and the export trims nothing that the client
-keeps, so a rectangle can have clear pixels at its edges. A frame of no pixels, such as the space
-of a font, has a `frame` of no size at the origin and still has its canvas. A sprite whose frames all have
-no pixels gets an atlas of one clear pixel, as a PNG cannot be smaller. The frames are packed in
-rows with a clear pixel between them.
-
-A frame is keyed `<id>_<n>`, where `n` is its place in the sprite from 0, which is the index the
-client uses. The `meta` holds the atlas's `image`, its `size`, the `format`, which is always
-`RGBA8888`, a `scale` of 1, the `sprite` id and its `name` where it has one.
+Each frame of a sprite is written as `<id>/<n>.png`, where `n` is its place in the sprite from
+0, which is the index the client uses. The PNG is the frame on its whole canvas, so it holds
+everything the client needs to draw it, and no other file describes it. The client stores only
+the rectangle of a frame that it draws, with its left and top margins on a canvas that all the
+frames of a sprite share (`IndexedImage.load`), and draws a frame at a point by putting the
+canvas's top left corner there. The PNG holds the canvas with the rectangle at its margins and
+clear pixels around it, so an engine draws the PNG's top left corner at the point. A frame whose
+canvas has no pixels is one clear pixel, as a PNG cannot be smaller.
 
 The colours are the ones both toolkits make from the palette (`JavaToolkit.createSprite`,
 `GlToolkit.createSprite`). A frame that carries no alpha shows its palette entry 0 as a clear
 pixel and every other entry opaque. A frame that carries alpha takes each pixel's alpha as it is,
-whatever its palette entry. Each frame's JSON also says whether it carries `alpha`, a field
-TexturePacker does not write, so an engine knows to blend the frame rather than cut it out. The PNG holds straight alpha, which is not multiplied into the colour, as
-the client blends it. The client turns a palette colour of 0 into 1 as it reads the palette, so
-that only entry 0 is ever clear, and so a black pixel of an opaque frame is 0x000001.
+whatever its palette entry. Blending a pixel whose alpha is 0 or 255 gives what cutting it out
+gives, so an engine blends every frame. The PNG holds straight alpha, which is not multiplied into
+the colour, as the client blends it. The client turns a palette colour of 0 into 1 as it reads the
+palette, so that only entry 0 is ever clear, and so a black pixel of an opaque frame is 0x000001.
 
 The client asks for a few sprites by name, by the hash of the name that the archive's index
-keeps for each group (`Sprites.init`, `Fonts.init`). Those names are the only ones written, and
-each is written only where the hash finds a group: `compass`, `mapflag`, `scrollbar`, the head
-icons, hit bars, map dots and the three fonts `p11_full`, `p12_full` and `b12_full`, among
-others. Every other sprite the client finds by an id that a config type or an interface holds,
-and has no name here.
+keeps for each group (`Sprites.init`, `Fonts.init`). Those names are in `names.json`, an object
+from each name to the sprite's id, and each is written only where the hash finds a group:
+`compass`, `mapflag`, `scrollbar`, the head icons, hit bars, map dots and the three fonts
+`p11_full`, `p12_full` and `b12_full`, among others. Every other sprite the client finds by an id
+that a config type or an interface holds. A run with `--sprite` writes no names.
 
-Every frame is checked against the client as it is written. The frame is cut from the written
-PNG by its `frame`, put on a clear canvas of its `sourceSize` at its `spriteSourceSize`, and must
-match pixel for pixel the canvas the client lays out from the same image (`IndexedImage.method9383`).
-The sprite the software toolkit builds from the image must also have the same pixels, the
-margins that the frame's position and canvas leave, and the same canvas. A sprite that differs
-fails the export. A planted dropped left margin fails 4,053 of the 14,904 frames, a planted swap
-of two palette entries fails 7,701, and a planted loss of alpha fails 1,344 of the 1,363 frames
-that carry alpha.
+Every frame is checked against the client as it is written. The PNG is read back and must match
+pixel for pixel the canvas the client lays out from the same image (`IndexedImage.method9383`).
+The sprite the software toolkit builds from the image, laid on a clear canvas of the toolkit's
+size at the toolkit's margins, must match it too. A sprite that differs fails the export. A
+planted dropped left margin fails 4,053 of the 14,904 frames, and a planted swap of the red and
+blue channels fails 7,820.
 
 
 ## Writing the fonts
