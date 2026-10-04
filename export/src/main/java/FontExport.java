@@ -7,8 +7,9 @@ import com.jagex.js5.Js5Archive;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.TreeMap;
 
 import javax.imageio.ImageIO;
 
@@ -53,7 +54,7 @@ public final class FontExport {
         var check = new FontCheck();
 
         Files.createDirectories(args.out);
-        var index = new ArrayList<Object>();
+        var index = new TreeMap<String, Object>(Comparator.comparingInt(Integer::parseInt));
         var differ = 0;
 
         for (var id : Cache.groupsOf(Cache.index(cache, Js5Archive.FONTMETRICS))) {
@@ -63,7 +64,7 @@ public final class FontExport {
                 System.out.println("font " + id + " has no " + (metrics == null ? "metrics" : "glyphs") + ", left out");
             } else {
                 var name = FontNames.name(spritesIndex, id);
-                var base = name.orElse(Integer.toString(id));
+                var base = Integer.toString(id);
                 var font = BmFont.of(base, base + ".png", metrics, glyphs);
                 var descriptor = args.out.resolve(base + ".fnt");
                 var page = args.out.resolve(base + ".png");
@@ -76,16 +77,9 @@ public final class FontExport {
                 var antialiased = font.antialiased();
                 var kerned = metrics.glyphSpacing != null;
                 var entry = new LinkedHashMap<String, Object>();
-                entry.put("id", id);
                 name.ifPresent(known -> entry.put("name", known));
-                entry.put("fnt", base + ".fnt");
-                entry.put("png", base + ".png");
-                entry.put("lineHeight", metrics.verticalSpacing);
-                entry.put("ascent", metrics.paddingTop);
                 entry.put("descent", metrics.paddingBottom);
-                entry.put("antialiased", antialiased);
-                entry.put("kerned", kerned);
-                index.add(entry);
+                index.put(base, entry);
 
                 System.out.println("font " + id + " " + name.orElse("(unnamed)") + ": line height " + metrics.verticalSpacing
                     + ", ascent " + metrics.paddingTop + ", descent " + metrics.paddingBottom

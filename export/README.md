@@ -542,16 +542,15 @@ glyph, the line spacing, and how far the text reaches above and below its baseli
 every group of the metrics archive, with the sprite group of the same id, and both halves are
 read with the client's own readers (`FontMetrics`, `IndexedImage.load`).
 
-A file is named after the font's sprite group. The archive keeps only a hash of each name, so a
-name is given where a known name hashes to the group's hash. The client asks for `p11_full`,
-`p12_full` and `b12_full` by name (`Fonts.load`). The other names were found by hashing candidate
-names, so one may be a chance match: `palatino_linotype_18pt_regular` holds nearly the glyphs
-of `verdana_15pt_regular`. A font with no known name is written under its id. The cache
-holds two fonts twice: 5631 is `q8_full` again.
-
-`fonts.json` lists the fonts in the order of their ids. Each entry has the font's `id`, its `name`
-where it is known, its `fnt` and `png` files, its `lineHeight`, its `ascent` and `descent`,
-whether it is `antialiased` and whether it is `kerned`.
+A font is written as `<id>.fnt` and `<id>.png`, named by its sprite group, as a sprite is. The
+descriptor holds the line height, the ascent, whether the font is antialiased (`aa`) and its
+kernings, so nothing else repeats them. `fonts.json` holds only what a BMFont cannot: an object
+from each font's id to its `descent`, and its `name` where it is known. The archive keeps only a
+hash of each name, so a name is given where a known name hashes to the group's hash. The client
+asks for `p11_full`, `p12_full` and `b12_full` by name (`Fonts.load`). The other names were found
+by hashing candidate names, so one may be a chance match: `palatino_linotype_18pt_regular` holds
+nearly the glyphs of `verdana_15pt_regular`. The cache holds two fonts twice: 5631 is `q8_full`
+again.
 
 The descriptor's characters are Unicode. The client turns each character of a string into a byte
 of code page 1252 (`Cp1252.encode`) and draws the glyph of that byte, so each glyph is written
@@ -565,7 +564,7 @@ line spacing plus the ascent. `xoffset` is the image's own offset, and `xadvance
 from the metrics. The space glyph has no size, because the client only moves on by its advance.
 Most of the client's text puts lines one line spacing apart and leaves the ascent above the
 first and the descent below the last. The descent has no place in the BMFont format, so it is in
-the index. `info size` repeats the line spacing.
+`fonts.json`. `info size` repeats the line spacing, and `info face` is the font's id.
 
 A font with a kerning table gets a `kernings` block: the amount the client adds to the pen
 between two glyphs (`FontMetrics.glyphSpacing`). No font in this cache has one, and no font has
