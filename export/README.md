@@ -715,19 +715,23 @@ none. A part that a set does not have is left out.
   draws a black line around the box and around the open list, writes the chosen option 5 pixels in
   from the left and centred down, and lays the list out one option every 15 pixels, scrolled by
   script 31. Script 1348 opens the list and turns the arrow upside down, and script 1349 closes it.
-- `frames` are the boxes of the interfaces drawn as a frame: a sprite component at each corner,
-  one along each side and, where there is one, one over the middle, each of a layer's own
-  components. The task lays a layer's components out at two sizes with the client's rules
+- `frames` are the boxes of the interfaces drawn as a frame: sprite components at its corners,
+  along its sides and, where it has them, over its middle, each of a layer's own components. The
+  task lays a layer's components out at two sizes with the client's rules
   (`InterfaceManager.resize`, `reposition`): a component that keeps its size and its place
   against two sides is a corner, one that grows along a side is an edge, and one that grows both
-  ways is the fill. A layer with a corner or an edge missing, or with two components in one place,
-  is not written. Each piece has its `sprite`, `mirrored` where it is drawn mirrored left to right
-  (`Component.verticalFlip`), `flipped` where it is drawn upside down (`horizontalFlip`), and
-  `tiled` where the sprite is tiled over it rather than stretched. `topLeft`, `topRight`,
-  `bottomLeft` and `bottomRight` are each `x` and `y` from their two sides, `width` wide and
-  `height` high. `top`, `bottom`, `left` and `right` each run from `start` after the first end of
-  their side to `end` before the other, `inset` in from the side, `thickness` thick. `centre`
-  keeps `left`, `top`, `right` and `bottom` from the sides.
+  ways is a fill. A component the player can use, one with a hook or an option such as a close
+  button in a corner, is not part of the frame, and a component in none of these places, such as
+  one centred on a side, is passed over. A layer without a corner at each corner and an edge along
+  each side is not written. A frame is its `parts`, in the order the client draws them, so an
+  ornate frame may have several in one place. Each part has its `place`, its `sprite`,
+  `mirrored` where it is drawn mirrored left to right (`Component.verticalFlip`), `flipped` where
+  it is drawn upside down (`horizontalFlip`), and `tiled` where the sprite is tiled over it rather
+  than stretched. A part at `topLeft`, `topRight`, `bottomLeft` or `bottomRight` is `x` and `y`
+  from its two sides, `width` wide and `height` high. A part at `top`, `bottom`, `left` or
+  `right` runs from `start` after the first end of its side to `end` before the other, `inset` in
+  from the side, `thickness` thick. A part at `centre` keeps `left`, `top`, `right` and `bottom`
+  from the sides.
 - `hoverFrames` are the frames that scripts 4155 and 4158 build over a component, in the same
   form, read by playing back the components the script creates with the sprites each call gives
   it. Their pieces are clear until the pointer moves over the component, when script 4160 makes
@@ -739,7 +743,7 @@ sprites does not hide them. A call whose sprites are known only while the game r
 and not written. Each script that holds its sprites as constants is read by its shape, and the
 task stops where a script no longer has the shape it reads. In this cache there are ten
 scrollbars, four plate buttons, 107 sprite buttons, two checkboxes, one set of radio buttons,
-one dropdown, 70 frames and two hover frames,
+one dropdown, 105 frames and two hover frames,
 and six calls of the scrollbar script are known only while the game runs. A planted check that
 stops reading passed-on arguments leaves seven such calls, one more than the task finds, and a
 planted check that expects five sprites in script 2975 stops the task.

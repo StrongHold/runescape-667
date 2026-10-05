@@ -11,12 +11,14 @@ import java.util.Map;
 import java.util.TreeSet;
 
 /**
- * The frames of the interfaces: boxes drawn as four corners, an edge along each side and a fill,
- * each a sprite component that stays at its corner or stretches with the box. A box's pieces are
- * found by laying its components out at two sizes with the client's own rules ({@code
+ * The frames of the interfaces: boxes drawn as corners, edges along the sides and fills, each a
+ * sprite component that stays at its corner or stretches with the box. A box's pieces are found by
+ * laying its components out at two sizes with the client's own rules ({@code
  * InterfaceManager.resize}, {@code reposition}): a piece that keeps its size is a corner, one that
- * grows along one side is an edge, and one that grows both ways is the fill. A box with a piece of a
- * frame missing, or two pieces in one place, is not a frame.
+ * grows along one side is an edge, and one that grows both ways is a fill. A frame may have several
+ * pieces in one place, as an ornate frame does, and they are kept in the order the client draws
+ * them. A component the player can use, one with a hook or an option, is not part of a frame, and a
+ * box without a corner at each corner and an edge along each side is not a frame.
  */
 final class WidgetFrames {
 
@@ -88,7 +90,7 @@ final class WidgetFrames {
                 for (var file : Cache.split(data, index, group).values()) {
                     var component = new Component();
                     component.decode(new Packet(file));
-                    if (component.type == Component.TYPE_GRAPHIC && component.graphic >= 0) {
+                    if (component.type == Component.TYPE_GRAPHIC && component.graphic >= 0 && !isUsable(component)) {
                         boxes.computeIfAbsent(component.layer, layer -> new ArrayList<>()).add(pieceOf(component));
                     }
                 }
@@ -112,6 +114,18 @@ final class WidgetFrames {
             }
         }
         return found;
+    }
+
+    /**
+     * Whether the player can use a component: it has a hook or an option.
+     */
+    private static boolean isUsable(Component component) throws IllegalAccessException {
+        for (var field : Component.class.getFields()) {
+            if (field.getType() == Object[].class && field.getName().startsWith("on") && field.get(component) != null) {
+                return true;
+            }
+        }
+        return component.ops != null && java.util.Arrays.stream(component.ops).anyMatch(op -> op != null);
     }
 
     private static Piece pieceOf(Component component) {
@@ -183,10 +197,12 @@ final class WidgetFrames {
     }
 
     /**
-     * Adds a box's pieces as a frame, where they make one.
+     * Adds a box's pieces as a frame, where they make one, each in its place, in the order the box
+     * holds them. A piece in none of a frame's places, such as one centred on a side, is passed over.
      */
     private void add(List<Piece> pieces, Integer script, Integer interfaceId) {
-        var placed = new LinkedHashMap<String, Map<String, Object>>();
+        var parts = new ArrayList<Map<String, Object>>();
+        var places = new java.util.HashSet<String>();
         for (var piece : pieces) {
             var small = rect(piece.layout(), WIDTH, HEIGHT);
             var large = rect(piece.layout(), WIDER, HIGHER);
@@ -194,22 +210,16 @@ final class WidgetFrames {
             var down = side(small.y(), small.height(), HEIGHT, large.y(), large.height(), HIGHER);
             if (across != NEITHER && down != NEITHER) {
                 var place = PLACES[across][down];
-                if (placed.containsKey(place)) {
-                    return;
-                }
-                placed.put(place, written(piece, place, large));
+                places.add(place);
+                parts.add(written(piece, place, large));
             }
         }
-        if (!placed.keySet().containsAll(EDGES)) {
+        if (!places.containsAll(EDGES)) {
             return;
         }
 
         var frame = new LinkedHashMap<String, Object>();
-        for (var place : List.of("topLeft", "top", "topRight", "left", "centre", "right", "bottomLeft", "bottom", "bottomRight")) {
-            if (placed.containsKey(place)) {
-                frame.put(place, placed.get(place));
-            }
-        }
+        frame.put("parts", parts);
         var key = Json.write(frame);
         frames.putIfAbsent(key, frame);
         if (script != null) {
@@ -269,13 +279,14 @@ final class WidgetFrames {
     }
 
     /**
-     * A piece as the file holds it: its sprite, how it is drawn, and where it stands in the larger
+     * A piece as the file holds it: its place, its sprite, how it is drawn, and where it stands in the larger
      * box, measured from the sides it keeps to. A corner is measured from its two sides and has its
      * size; an edge runs from a distance after one corner to a distance before the other, a distance
      * in from its side, as thick as it is; the fill keeps a distance from each side.
      */
     private static Map<String, Object> written(Piece piece, String place, Rect rect) {
         var written = new LinkedHashMap<String, Object>();
+        written.put("place", place);
         written.put("sprite", piece.sprite());
         if (piece.mirrored()) {
             written.put("mirrored", true);
