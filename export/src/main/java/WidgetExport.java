@@ -3,6 +3,7 @@ import com.beust.jcommander.ParametersDelegate;
 import com.jagex.core.constants.ClientScriptOpCode;
 import com.jagex.js5.Js5Archive;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -133,7 +134,7 @@ public final class WidgetExport {
 
         WidgetReaders.plateButtons(scripts, hooks, sets.get("plateButtons"));
         WidgetReaders.spriteButtons(scripts, hooks, sets.computeIfAbsent("spriteButtons", name -> new WidgetSets(List.of("sprite", "hover", "pressed"))));
-        WidgetReaders.radioButtons(scripts, hooks, sets.computeIfAbsent("radioButtons", name -> new WidgetSets(List.of("sprite", "selected"))));
+        WidgetReaders.radioButtons(scripts, hooks, sets.computeIfAbsent("radioButtons", name -> new WidgetSets(List.of("sprite", "selected"))), spriteSizes(cache));
 
         var file = new LinkedHashMap<String, Object>();
         for (var entry : sets.entrySet()) {
@@ -143,6 +144,9 @@ public final class WidgetExport {
         var dropdowns = WidgetReaders.dropdowns(calls, sprites);
         file.put("dropdowns", dropdowns);
         report.add(dropdowns.size() + " dropdowns");
+        var sliders = WidgetSliders.read(cache);
+        file.put("sliders", sliders.written());
+        report.add(sliders.size() + " sliders");
         file.put("frames", frames.written());
         file.put("hoverFrames", hoverFrames.written());
         report.add(frames.size() + " frames");
@@ -160,6 +164,23 @@ public final class WidgetExport {
      * The calls of each script in the cache, with the arguments a caller passes on read from the
      * calls of that caller, kept once found.
      */
+    /**
+     * The size of each sprite's first frame in the cache, its canvas with the margins around its
+     * picture, as {width, height}.
+     */
+    private static Map<Integer, int[]> spriteSizes(File cache) throws Exception {
+        var sprites = Cache.js5(cache, Js5Archive.SPRITES);
+        var sizes = new HashMap<Integer, int[]>();
+        for (var id : Cache.groupsOf(Cache.index(cache, Js5Archive.SPRITES))) {
+            var images = com.jagex.IndexedImage.load(sprites, id, 0);
+            if (images != null && images.length > 0) {
+                var image = images[0];
+                sizes.put(id, new int[] {image.offX1 + image.width + image.offX2, image.offY1 + image.height + image.offY2});
+            }
+        }
+        return sizes;
+    }
+
     /**
      * Reads the arguments of every call of a script, each null where it is not known.
      */

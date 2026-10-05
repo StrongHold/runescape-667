@@ -127,7 +127,14 @@ final class WidgetReaders {
         }
     }
 
-    static void radioButtons(Map<Integer, ClientScript> scripts, WidgetHooks hooks, WidgetSets sets) {
+    /**
+     * The fewest scripts that must select between two sprites, and never the other way round, for
+     * them to be taken for a radio button.
+     */
+    private static final int RADIO_SCRIPTS = 2;
+
+    static void radioButtons(Map<Integer, ClientScript> scripts, WidgetHooks hooks, WidgetSets sets, Map<Integer, int[]> sizes) {
+        selectedPairs(scripts, sizes, sets);
         for (var script : RADIO_GROUPS) {
             var graphics = graphicsOf(scripts.get(script));
             var selected = graphics.isEmpty() ? null : graphics.get(0);
@@ -176,6 +183,85 @@ final class WidgetReaders {
             }
         }
         return new ArrayList<>(found.values());
+    }
+
+    /**
+     * Adds the radio buttons that scripts select as a group: a script that sets one sprite on
+     * several components, the plain sprite, and then another on one of them, the selected sprite.
+     * Two sprites are taken for a radio button where they are the same square size, at least two
+     * scripts select between them that way, and none the other way, which marks them apart from
+     * the tabs and plates scripts swap.
+     */
+    private static void selectedPairs(Map<Integer, ClientScript> scripts, Map<Integer, int[]> sizes, WidgetSets sets) {
+        var found = new java.util.TreeMap<List<Integer>, List<Integer>>(java.util.Comparator.comparing(Object::toString));
+        for (var script : scripts.entrySet()) {
+            var pair = selectedPairOf(script.getValue());
+            if (pair != null) {
+                found.computeIfAbsent(pair, key -> new ArrayList<>()).add(script.getKey());
+            }
+        }
+        for (var pair : found.entrySet()) {
+            var plain = pair.getKey().get(0);
+            var selected = pair.getKey().get(1);
+            var reversed = found.containsKey(List.of(selected, plain));
+            var plainSize = sizes.get(plain);
+            var selectedSize = sizes.get(selected);
+            var square = plainSize != null && selectedSize != null && Arrays.equals(plainSize, selectedSize) && plainSize[0] == plainSize[1];
+            if (pair.getValue().size() >= RADIO_SCRIPTS && !reversed && square) {
+                for (var script : pair.getValue()) {
+                    sets.add(Arrays.asList(plain, selected), script, null);
+                }
+            }
+        }
+    }
+
+    /**
+     * The plain and selected sprites a script selects between, or null where it does not: the first
+     * sprite it sets on two components or more in a row, and the one other sprite it sets on any of
+     * them after.
+     */
+    private static List<Integer> selectedPairOf(ClientScript script) {
+        var targets = new ArrayList<String>();
+        var sprites = new ArrayList<Integer>();
+        for (var at = 2; at < script.opcodes.length; at++) {
+            var target = targetOf(script, at - 1);
+            if (script.opcodes[at] == IF_SETGRAPHIC && script.opcodes[at - 2] == ClientScriptOpCode.PUSH_CONSTANT_INT && target != null) {
+                targets.add(target);
+                sprites.add(script.intOperands[at - 2]);
+            }
+        }
+        for (var start = 0; start < sprites.size(); start++) {
+            var end = start;
+            var plainTargets = new java.util.HashSet<String>();
+            while (end < sprites.size() && sprites.get(end).equals(sprites.get(start))) {
+                plainTargets.add(targets.get(end));
+                end++;
+            }
+            if (plainTargets.size() >= 2) {
+                var selected = new java.util.TreeSet<Integer>();
+                for (var at = end; at < sprites.size(); at++) {
+                    if (!sprites.get(at).equals(sprites.get(start)) && plainTargets.contains(targets.get(at))) {
+                        selected.add(sprites.get(at));
+                    }
+                }
+                return selected.size() == 1 && sprites.get(start) >= 0 ? List.of(sprites.get(start), selected.first()) : null;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * The component an instruction pushes for a command, as text: an argument of the script by its
+     * number, or a component named by a constant, or null where it is neither.
+     */
+    private static String targetOf(ClientScript script, int at) {
+        if (script.opcodes[at] == ClientScriptOpCode.PUSH_INT_LOCAL) {
+            return "argument " + script.intOperands[at];
+        } else if (script.opcodes[at] == ClientScriptOpCode.PUSH_CONSTANT_INT) {
+            return "component " + script.intOperands[at];
+        } else {
+            return null;
+        }
     }
 
     /**

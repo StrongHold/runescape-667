@@ -703,8 +703,18 @@ none. A part that a set does not have is left out.
   the pointer and `pressedBox` over it while it is held down. Script 4519 gives the checkbox a
   tick and script 4520 leaves it empty, so a box that the player ticks is drawn from the set of
   the first and an empty one from the set of the second.
-- `radioButtons` are the sets that scripts 1422 and 1423 hold as constants: the first component
-  they are given, the one clicked, takes `selected`, and the others take `sprite`.
+- `radioButtons` are the radio buttons that scripts select as a group, each a `sprite` and the
+  `selected` sprite. Scripts 1422 and 1423 hold theirs as constants: the first component they are
+  given, the one clicked, takes `selected`, and the others take `sprite`. Other scripts set one
+  sprite on several components and then another on one of them; two sprites are taken for a
+  radio button where they are the same square size, at least two scripts select between them that
+  way, and none the other way, which marks them apart from the tabs and plates that scripts swap.
+- `sliders` are the sliders of the interfaces: a `knob`, `knobWidth` by `knobHeight`, that the
+  player drags along a box `width` by `height`, over its `track`. Scripts 1764 and 1215 move a
+  knob whose drag hook runs them: they keep it inside the box it stands in, and take as far along
+  the box as it is, out of the box's width less the knob's, for the value. The track is the sprite
+  components of the box's layer that lie within its height and cross it, left to right, each a
+  `sprite`, `tiled` where it is tiled, `x` and `y` from the box's corner, `width` and `height`.
 - `dropdowns` are the dropdowns that calls of script 1436 build, each once, where the call gives
   all of it as constants: `background`, tiled over the box, `arrow`, a 16 pixel wide button at
   its right, stretched to its height, `hoverArrow` in its place under the pointer, and
@@ -742,7 +752,7 @@ arguments, the task reads the calls of that script in turn, so a script that onl
 sprites does not hide them. A call whose sprites are known only while the game runs is counted
 and not written. Each script that holds its sprites as constants is read by its shape, and the
 task stops where a script no longer has the shape it reads. In this cache there are ten
-scrollbars, four plate buttons, 107 sprite buttons, two checkboxes, one set of radio buttons,
+scrollbars, four plate buttons, 107 sprite buttons, two checkboxes, three sets of radio buttons, two sliders,
 one dropdown, 105 frames and two hover frames,
 and six calls of the scrollbar script are known only while the game runs. A planted check that
 stops reading passed-on arguments leaves seven such calls, one more than the task finds, and a
