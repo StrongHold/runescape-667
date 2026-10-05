@@ -157,6 +157,9 @@ public final class WidgetExport {
         var sliders = WidgetSliders.read(cache);
         file.put("sliders", sliders.written());
         report.add(sliders.size() + " sliders");
+        var windows = WidgetWindows.read(cache);
+        file.put("windows", windows.written());
+        report.add(windows.size() + " windows");
         file.put("frames", frames.written());
         file.put("hoverFrames", hoverFrames.written());
         report.add(frames.size() + " frames");
