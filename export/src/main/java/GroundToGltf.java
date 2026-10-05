@@ -1,4 +1,5 @@
 import com.jagex.graphics.TextureMetrics;
+import com.jagex.math.ColourUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,6 +52,10 @@ public final class GroundToGltf {
     private static final int TILE = 512;
 
     private static final int OPAQUE_ALPHA = 0xFF;
+    /**
+     * The alpha the software ground gives a vertex of a water texture ({@code JavaGround.U}).
+     */
+    private static final int WATER_EFFECT_ALPHA = 0x9B;
 
     private static final float[] ALL_CORNERS = {1.0F, 1.0F, 1.0F};
 
@@ -108,14 +113,17 @@ public final class GroundToGltf {
         var tiles = 0;
         var faces = 0;
 
-        if (ground.genericBlendedTiles != null) {
-            for (var x = origin; x < origin + ClientMapSquareReader.TILES_ACROSS; x++) {
-                for (var z = origin; z < origin + ClientMapSquareReader.TILES_ACROSS; z++) {
-                    var tile = ground.genericBlendedTiles[x][z];
-                    if (tile != null) {
-                        tiles++;
-                        faces += addTile(x, z, tile);
-                    }
+        for (var x = origin; x < origin + ClientMapSquareReader.TILES_ACROSS; x++) {
+            for (var z = origin; z < origin + ClientMapSquareReader.TILES_ACROSS; z++) {
+                var blended = ground.genericBlendedTiles == null ? null : ground.genericBlendedTiles[x][z];
+                var unblended = colours.unblended(x, z);
+                if (blended != null) {
+                    tiles++;
+                    faces += addTile(x, z, blended);
+                } else if (unblended != null) {
+                    var written = addUnblendedTile(x, z, unblended);
+                    tiles += written > 0 ? 1 : 0;
+                    faces += written;
                 }
             }
         }
@@ -141,6 +149,63 @@ public final class GroundToGltf {
         }
 
         return written;
+    }
+
+    /**
+     * Writes the faces of a tile built with ground blending off, each in its one colour: the
+     * floor's colour, or where it has none, its blend colour, as the software ground keeps a face
+     * that has either. A face with neither is left out, as the ground leaves it out.
+     */
+    private int addUnblendedTile(int x, int z, RecordingGround.UnblendedTile tile) {
+        var written = 0;
+        for (var face = 0; face < tile.colours().length; face++) {
+            var hsl = tile.colours()[face] >= 0 ? tile.colours()[face]
+                : tile.blendedColours() == null ? -1 : tile.blendedColours()[face];
+            if (hsl < 0) {
+                skipped.merge("no colour of its own or to blend", 1, Integer::sum);
+            } else {
+                addUnblendedFace(x, z, tile, face, hsl);
+                written++;
+            }
+        }
+        return written;
+    }
+
+    /**
+     * Writes one face of an unblended tile with its texture, or in its colour alone where the
+     * toolkit holds no such texture. Each corner's colour is the face's, made RGB as the software
+     * ground makes a blended vertex's ({@code JavaGround.U}): through the palette, at the full light
+     * the export builds every ground with, and towards the water's colour as deep as the corner
+     * lies under it.
+     */
+    private void addUnblendedFace(int x, int z, RecordingGround.UnblendedTile tile, int face, int hsl) {
+        var texture = drawable(tile.textures()[face]) ? tile.textures()[face] : -1;
+        var size = tile.sizes()[face];
+        var metrics = metrics(texture);
+        var waterEffect = metrics != null && ground.isWaterEffect(metrics.effectType);
+        var alpha = waterEffect ? WATER_EFFECT_ALPHA : OPAQUE_ALPHA;
+        var mode = alphaMode(metrics, alpha);
+        var water = underwater ? tile.water() : RecordingGround.Water.NONE;
+        var primitive = primitives.computeIfAbsent(new PrimitiveKey(texture, mode, water), ignored -> new Primitive(texture != -1));
+        var opacity = opacity(metrics, mode, alpha);
+        var paletteRgb = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(hsl) & 0xFFFF];
+
+        for (var vertex : new int[] {tile.faceA()[face], tile.faceB()[face], tile.faceC()[face]}) {
+            var withinX = tile.offsetX()[vertex];
+            var withinZ = tile.offsetY()[vertex];
+            var localX = (x - origin) * TILE + withinX;
+            var localZ = (z - origin) * TILE + withinZ;
+            var lift = tile.offsetLevel() == null ? 0 : tile.offsetLevel()[vertex];
+            var height = ground.averageHeight((x << ground.tileSizeShift) + withinX, (z << ground.tileSizeShift) + withinZ) + lift;
+            var depth = tile.depths() == null ? 0 : tile.depths()[vertex];
+            var towardsWater = tile.water().depth() == 0 ? 0 : Math.clamp(depth * 255L / tile.water().depth(), 0, 255);
+            var rgb = Static572.lerpRgb(tile.water().colour(), Static732.scaleRgb(paletteRgb, ClientMapSquareReader.FULL_LIGHT), towardsWater);
+            var normal = normal(x, z, withinX, withinZ);
+            var u = texture == -1 ? 0.0F : textureCoordinate(originX, localX, size);
+            var v = texture == -1 ? 0.0F : textureCoordinate(originZ, localZ, size);
+            addCorner(primitive, new Corner(localX, height, localZ, normal[0], normal[1], normal[2], rgb & 0xFFFFFF,
+                hsl & 0xFFFF, depth, opacity, u, v));
+        }
     }
 
     /**
@@ -238,14 +303,22 @@ public final class GroundToGltf {
             var depth = depths == null ? 0 : depths[vertex];
             var described = new Corner(localX, tile.verticesY[vertex], localZ, normal[0], normal[1], normal[2],
                 tile.vertexColours[vertex] & 0xFFFFFF, hsls[vertex] & 0xFFFF, depth, opacity * weights[corner], u, v);
-            var known = primitive.numbers.get(described);
-            if (known != null) {
-                primitive.indices.add(known);
-            } else {
-                primitive.numbers.put(described, primitive.numbers.size());
-                primitive.indices.add(primitive.numbers.size() - 1);
-                primitive.add(described);
-            }
+            addCorner(primitive, described);
+        }
+    }
+
+    /**
+     * Adds a corner to a primitive, sharing the vertex of a corner already written that agrees
+     * with it on everything.
+     */
+    private static void addCorner(Primitive primitive, Corner corner) {
+        var known = primitive.numbers.get(corner);
+        if (known != null) {
+            primitive.indices.add(known);
+        } else {
+            primitive.numbers.put(corner, primitive.numbers.size());
+            primitive.indices.add(primitive.numbers.size() - 1);
+            primitive.add(corner);
         }
     }
 

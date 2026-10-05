@@ -20,6 +20,7 @@ public final class RecordingGround extends Ground {
     private final Map<Long, int[]> hslByTile = new HashMap<>();
     private final Map<Long, int[]> depthsByTile = new HashMap<>();
     private final Map<Long, Water> waterByTile = new HashMap<>();
+    private final Map<Long, UnblendedTile> unblendedByTile = new HashMap<>();
 
     /**
      * What the terrain says about the water over a tile: the colour the GL toolkit tints what
@@ -29,6 +30,17 @@ public final class RecordingGround extends Ground {
     public record Water(int colour, int depth, int bias) {
 
         public static final Water NONE = new Water(0, 0, 0);
+    }
+
+    /**
+     * A tile as the terrain hands it over with ground blending off ({@code Terrain.loadUnblended}):
+     * where each vertex lies within the tile and above or below the ground, how far under the
+     * water, the three vertices of each face, and each face's HSL colour, blend colour, texture
+     * and texture size, a whole face in one colour; and the water over it.
+     */
+    public record UnblendedTile(int[] offsetX, int[] offsetY, int[] offsetLevel, int[] depths, int[] faceA,
+                                int[] faceB, int[] faceC, int[] colours, int[] blendedColours, int[] textures,
+                                int[] sizes, Water water) {
     }
 
     public RecordingGround(Ground real) {
@@ -61,6 +73,11 @@ public final class RecordingGround extends Ground {
         return waterByTile.getOrDefault(key(x, z), Water.NONE);
     }
 
+    /** A tile as the terrain handed it over with ground blending off, or nothing. */
+    public UnblendedTile unblended(int x, int z) {
+        return unblendedByTile.get(key(x, z));
+    }
+
     private static long key(int x, int z) {
         return (long) x << 32 | (z & 0xFFFFFFFFL);
     }
@@ -82,6 +99,9 @@ public final class RecordingGround extends Ground {
     public void addTile(int x, int z, int[] offsetX, int[] offsetLevel, int[] offsetY, int[] depths, int[] faceA,
                         int[] faceB, int[] faceC, int[] colours, int[] blendedColours, int[] textures, int[] sizes,
                         int waterColour, int waterDepth, int waterBias) {
+        unblendedByTile.put(key(x, z), new UnblendedTile(offsetX.clone(), offsetY.clone(), copy(offsetLevel),
+            copy(depths), faceA.clone(), faceB.clone(), faceC.clone(), colours.clone(), copy(blendedColours),
+            textures.clone(), sizes.clone(), new Water(waterColour, waterDepth, waterBias)));
         real.addTile(x, z, offsetX, offsetLevel, offsetY, depths, faceA, faceB, faceC, colours, blendedColours,
             textures, sizes, waterColour, waterDepth, waterBias);
     }
@@ -139,5 +159,9 @@ public final class RecordingGround extends Ground {
     @Override
     public void renderTilesAtDepth(int arg0, int arg1, int arg2, boolean[][] arg3, boolean arg4, int arg5, int arg6) {
         real.renderTilesAtDepth(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
+    }
+
+    private static int[] copy(int[] values) {
+        return values == null ? null : values.clone();
     }
 }

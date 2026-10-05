@@ -91,7 +91,8 @@ public final class MapSquareExport {
 
     private static void export(Args args) throws Exception {
         var reader = new ClientMapSquareReader(args.where.cache(), args.keys);
-        var square = reader.read(args.x, args.z, !args.noLocations);
+        var square = reader.read(args.x, args.z, !args.noLocations, true);
+        var unblended = reader.read(args.x, args.z, !args.noLocations, false);
         var name = args.x + "_" + args.z;
         var out = args.out == null ? Path.of("build", "mapsquares", name + ".gltf") : args.out;
         var textures = args.textures.library(reader.textures());
@@ -104,12 +105,9 @@ public final class MapSquareExport {
             + "," + ((args.z + 1) * ClientMapSquareReader.TILES_ACROSS - 1));
 
         var children = new ArrayList<Integer>();
-        for (var level = 0; level < ClientMapSquareReader.LEVELS; level++) {
-            terrain(gltf, materials, square, square.grounds().get(level), square.colours().get(level),
-                "terrain level " + level, level, false).ifPresent(children::add);
-        }
+        children.addAll(grounds(gltf, materials, square, true));
+        children.addAll(grounds(gltf, materials, unblended, false));
         if (square.underwater() instanceof ClientMapSquareReader.Underwater.Bed bed) {
-            terrain(gltf, materials, square, bed.ground(), bed.colours(), "underwater bed", 0, true).ifPresent(children::add);
             report("locations under the water", bed.locations());
         }
         report("locations", square.locations());
@@ -144,11 +142,32 @@ public final class MapSquareExport {
     }
 
     /**
-     * One node wearing the ground of one level, or nothing where the map square has no tile on it.
+     * The nodes of a map square's ground as it was built, blended or not: one a level, and the
+     * bed under its water where it has one. The unblended ground's nodes are named for it.
+     */
+    private static List<Integer> grounds(GltfBuilder gltf, GltfMaterials materials,
+                                         ClientMapSquareReader.MapSquare square, boolean blended) {
+        var suffix = blended ? "" : " unblended";
+        var nodes = new ArrayList<Integer>();
+        for (var level = 0; level < ClientMapSquareReader.LEVELS; level++) {
+            terrain(gltf, materials, square, square.grounds().get(level), square.colours().get(level),
+                "terrain level " + level + suffix, level, false, blended).ifPresent(nodes::add);
+        }
+        if (square.underwater() instanceof ClientMapSquareReader.Underwater.Bed bed) {
+            terrain(gltf, materials, square, bed.ground(), bed.colours(), "underwater bed" + suffix, 0, true, blended)
+                .ifPresent(nodes::add);
+        }
+        return List.copyOf(nodes);
+    }
+
+    /**
+     * One node wearing the ground of one level, or nothing where the map square has no tile on it,
+     * marked as blended or not, so that a reader draws one or the other.
      */
     private static Optional<Integer> terrain(GltfBuilder gltf, GltfMaterials materials,
                                              ClientMapSquareReader.MapSquare square, JavaGround ground,
-                                             RecordingGround colours, String name, int level, boolean underwater) {
+                                             RecordingGround colours, String name, int level, boolean underwater,
+                                             boolean blended) {
         var result = GroundToGltf.convertInto(gltf, materials, ground, colours, underwater, ClientMapSquareReader.ORIGIN,
             square.x() * ClientMapSquareReader.TILES_ACROSS, square.z() * ClientMapSquareReader.TILES_ACROSS);
         if (gltf.empty()) {
@@ -158,7 +177,7 @@ public final class MapSquareExport {
         var node = new LinkedHashMap<String, Object>();
         node.put("name", name);
         node.put("mesh", gltf.mesh(name));
-        node.put("extras", Map.of("level", level, "tiles", result.tiles(), "underwater", underwater));
+        node.put("extras", Map.of("level", level, "tiles", result.tiles(), "underwater", underwater, "blended", blended));
 
         System.out.println("  " + name + ": " + result.tiles() + " tiles, " + result.faces() + " faces in "
             + result.primitives() + " primitives");

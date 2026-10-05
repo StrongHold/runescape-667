@@ -62,7 +62,7 @@ public final class ClientMapSquareReader {
      * The light a tile is coloured under, as near to full as the ground's light levels go. A light
      * of 128 leaves a colour as it is, and the levels are kept in a signed byte.
      */
-    private static final byte FULL_LIGHT = 127;
+    static final byte FULL_LIGHT = 127;
 
     /**
      * Asks the toolkit for a model that it has not lit, which keeps each face's colour, shading
@@ -230,11 +230,14 @@ public final class ClientMapSquareReader {
      * one level, raises it by the heights of the land, and gives the land the heights of the bed
      * to light its water by. The bed is built after the land, against the land's ground, which
      * lifts the bed's overlays to the surface of the water.
+     *
+     * The ground is built blended, as the client builds it with ground blending on, or with each
+     * tile in a colour of its own ({@code Terrain.loadUnblended}), as with it off.
      */
-    public MapSquare read(int mapSquareX, int mapSquareZ, boolean withLocations) throws IOException {
+    public MapSquare read(int mapSquareX, int mapSquareZ, boolean withLocations, boolean groundBlending) throws IOException {
         var toolkit = models.toolkit();
         var underwater = hasUnderwater(mapSquareX, mapSquareZ);
-        var collisionMaps = scene(toolkit, underwater);
+        var collisionMaps = scene(toolkit, underwater, groundBlending);
         var region = new MapRegion(LEVELS, REGION_TILES, REGION_TILES, false);
         var environment = decodeTiles(region, collisionMaps, "m", mapSquareX, mapSquareZ);
 
@@ -370,9 +373,10 @@ public final class ClientMapSquareReader {
     /**
      * Sets up the scene the way the client does before it builds a region: the size of the map,
      * its tile flags and collision maps, the arrays of tiles that walls and locations are kept in,
-     * and the detail settings that decide how the ground is built.
+     * and the detail settings that decide how the ground is built, its tiles blended into each
+     * other or each in a colour of its own, as the player's ground blending option says.
      */
-    private static CollisionMap[] scene(JavaToolkit toolkit, boolean underwater) {
+    private static CollisionMap[] scene(JavaToolkit toolkit, boolean underwater, boolean groundBlending) {
         Static720.mapWidth = REGION_TILES;
         Static501.mapLength = REGION_TILES;
         Static708.resetTileFlags(REGION_TILES, REGION_TILES);
@@ -390,7 +394,7 @@ public final class ClientMapSquareReader {
         Static305.highLightDetail = false;
         Static404.renderShadows = false;
         AnimatedBackground.level = -1;
-        Static718.groundBlending = true;
+        Static718.groundBlending = groundBlending;
         Static196.textures = true;
         return collisionMaps;
     }

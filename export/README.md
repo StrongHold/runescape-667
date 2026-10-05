@@ -313,8 +313,22 @@ Where the region has a world under its water, the client reads it as a region of
 builds it beneath the land, against the land's heights. Its ground is written as the node
 `underwater bed`, and its locations, which the client reads without a key, with the rest.
 
-Each ground node's `extras` give its `level`, how many `tiles` it holds, and whether it is
-`underwater`. The GL toolkit draws the bed in a pass of its own (`UnderwaterEffect`), tinting
+Each ground node's `extras` give its `level`, how many `tiles` it holds, whether it is
+`underwater`, and whether it is `blended`.
+
+### The ground with ground blending off
+
+The player's ground blending option (`ClientOptions.groundBlending`) decides how `Terrain.load`
+hands the tiles over. With it on, as above, each corner of a tile takes its colour from the tiles
+around it, so colours and textures fade from tile to tile (`Terrain.loadBlended`). With it off,
+each face of a tile is in one colour, the tile's own smoothed underlay colour or its overlay's
+colour, and its texture stops at the tile's edge (`Terrain.loadUnblended`), which gives the hard
+edged tiles of the original look. The map square is read a second time with the option off, and
+that ground is written beside the blended one, in nodes named as the blended ones with
+` unblended` after the name, whose `extras` have `blended` false. An engine draws the blended
+nodes or the unblended ones, never both. Every vertex of an unblended face has the face's HSL as
+`_HSL`, and as `COLOR_0` that HSL through the palette at full light, mixed towards the water's
+colour as deep as the vertex lies, as the software ground makes a blended vertex's colour. The GL toolkit draws the bed in a pass of its own (`UnderwaterEffect`), tinting
 each vertex towards the water's colour by how deep under the surface it lies, and the bed carries
 what that needs. Each bed vertex has `_WATER`, a float: how far under the water's surface it
 lies, in the client's units, as the terrain hands it to the ground, which writes one less into
