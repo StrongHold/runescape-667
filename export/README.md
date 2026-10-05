@@ -665,3 +665,32 @@ pixel up in every glyph fails all 27, and so does a planted advance one pixel to
 ## Looking at a model
 
 The `viewer` subproject shows everything written here, map squares too. See its README.
+
+## Writing the widgets' sprites
+
+    ./gradlew :export:exportWidgets
+
+The client has no scrollbar, button or checkbox of its own. Its scripts build each one from sprite
+components, with a script that other scripts call with the sprites to draw it in: script 31 builds
+a scrollbar, script 3077 a button and script 4521 a checkbox. The task decodes every script in the
+cache with the client's own decoder (`ClientScript.decode`) and writes, for each widget, every
+set of sprites that a call gives it to `export/build/widgets.json`. `--out` names another file,
+and `--cache` works as it does for a model.
+
+Each set lists its sprites under the names of their parts, and `scripts`, the scripts that call
+the widget's script with that set. A scrollbar is 16 pixels wide: `upArrow` and `downArrow` are
+16 by 16 at its ends, `track` is tiled down between them, and the dragger is `draggerTop` and
+`draggerBottom`, 5 pixels high, with `draggerMiddle` tiled between them. A button is 32 pixels
+high: `edge` at the left, the same sprite flipped at the right, and `middle` between
+them; `hoverEdge` and `hoverMiddle` take their place under the pointer. A checkbox is `box`, with
+`hoverBox` over it under the pointer and `pressedBox` over it while it is held down. Script 4519
+gives the checkbox a tick and script 4520 leaves it empty, so a box that the player ticks is drawn
+from the set of the first and an empty one from the set of the second.
+
+A script pushes a call's arguments just before it calls. Where it passes on an argument that it
+was given, the task reads the calls of that script in turn, so a script that only forwards the
+sprites does not hide them. A call whose sprites are known only while the game runs is counted
+and not written. In this cache there are ten scrollbars, two buttons and two checkboxes, and six
+calls of the scrollbar script are known only while the game runs. A planted check that stops
+reading passed-on arguments leaves seven such calls, one more than the task finds.
+
