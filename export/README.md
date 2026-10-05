@@ -773,7 +773,7 @@ arguments, the task reads the calls of that script in turn, so a script that onl
 sprites does not hide them. A call whose sprites are known only while the game runs is counted and
 not written. Each script that holds its sprites as constants is read by its shape, and the task
 stops where a script no longer has the shape it reads. In this cache there are ten scrollbars, seven
-plate buttons, 110 sprite buttons, two tabs, five checkboxes, two sets of radio buttons, two
+plate buttons, 110 sprite buttons, two tabs, five checkboxes, two sets of radio buttons, four
 sliders, one dropdown, 105 frames and two hover frames, and six calls of the scrollbar script are
 known only while the game runs. A planted check that stops reading passed-on arguments leaves seven
 such calls, one more than the task finds, and a planted check that expects five sprites in script
