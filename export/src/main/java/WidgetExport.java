@@ -62,13 +62,11 @@ public final class WidgetExport {
     /**
      * The scrollbar takes the scrollbar's layer and the scrolled layer, then the track, the top,
      * middle and bottom of the dragger, and the up and down arrows. The button takes its layer,
-     * then the edge and middle of its plate, and the edge and middle under the pointer. The
-     * checkbox takes its layer, then the box, the box under the pointer, and the box held down.
+     * then the edge and middle of its plate, and the edge and middle under the pointer.
      */
     private static final List<Widget> WIDGETS = List.of(
         new Widget("scrollbars", 31, 2, List.of("track", "draggerTop", "draggerMiddle", "draggerBottom", "upArrow", "downArrow")),
-        new Widget("plateButtons", 3077, 1, List.of("edge", "middle", "hoverEdge", "hoverMiddle")),
-        new Widget("checkboxes", 4521, 1, List.of("box", "hoverBox", "pressedBox"))
+        new Widget("plateButtons", 3077, 1, List.of("edge", "middle", "hoverEdge", "hoverMiddle"))
     );
 
     /**
@@ -142,12 +140,16 @@ public final class WidgetExport {
             sets.get("plateButtons")
         );
         WidgetReaders.radioButtons(scripts, hooks, sets.computeIfAbsent("radioButtons", name -> new WidgetSets(List.of("sprite", "selected"))), spriteSizes(cache));
+        var checkboxes = WidgetCheckboxes.read(scripts, calls, sets.get("radioButtons").keys(), spriteSizes(cache));
 
+        var sizes = spriteSizes(cache);
         var file = new LinkedHashMap<String, Object>();
         for (var entry : sets.entrySet()) {
             file.put(entry.getKey(), entry.getValue().written(entry.getKey(), sprites));
             report.add(entry.getValue().size() + " " + entry.getKey());
         }
+        file.put("checkboxes", checkboxes);
+        report.add(checkboxes.size() + " checkboxes");
         var dropdowns = WidgetReaders.dropdowns(calls, sprites);
         file.put("dropdowns", dropdowns);
         report.add(dropdowns.size() + " dropdowns");
@@ -193,6 +195,11 @@ public final class WidgetExport {
      */
     interface CallReader {
         List<Integer[]> argumentsOf(int script);
+
+        /**
+         * The script that makes each call of a script, in the order of {@link #argumentsOf}.
+         */
+        List<Integer> callersOf(int script);
     }
 
     private static final class Calls implements CallReader {
@@ -212,6 +219,11 @@ public final class WidgetExport {
         @Override
         public List<Integer[]> argumentsOf(int script) {
             return of(script).stream().map(Call::arguments).toList();
+        }
+
+        @Override
+        public List<Integer> callersOf(int script) {
+            return of(script).stream().map(Call::caller).toList();
         }
 
         private List<Call> of(int callee, Set<Integer> reading) {

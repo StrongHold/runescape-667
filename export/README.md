@@ -710,14 +710,18 @@ none. A part that a set does not have is left out.
   another component of the same interface at its very place, in a layer that the client draws
   after the tab's. That component covers every tab, so its sprite is `sprite`; the game hides it
   over the tab the player chooses, which shows the tab's own sprite as `selected`.
-- `checkboxes` are the sets that scripts give script 4521: `box`, with `hoverBox` over it under
-  the pointer and `pressedBox` over it while it is held down. Script 4519 gives the checkbox a
-  tick and script 4520 leaves it empty, so a box that the player ticks is drawn from the set of
-  the first and an empty one from the set of the second.
+- `checkboxes` are the checkboxes of the interfaces, each a `ticked` state and an `empty` state,
+  with the scripts that set them. Script 4521 builds a checkbox in one state, `box` with
+  `hoverBox` over it under the pointer and `pressedBox` over it while it is held down, from the
+  sprites its callers give it: script 4519 gives the ticked state and script 4520 the empty one.
+  Other scripts tick a box by setting one sprite on it where a test holds and another where it
+  does not, in the two arms of the test; their states have a `box` alone. Two sprites are taken
+  for a checkbox where they are the same square size, at least three scripts set them that way,
+  they are not a radio button, and the empty one is not the ticked one of another checkbox.
 - `radioButtons` are the radio buttons that scripts select as a group, each a `sprite` and the
   `selected` sprite. Scripts 1422 and 1423 hold theirs as constants: the first component they are
   given, the one clicked, takes `selected`, and the others take `sprite`. Other scripts set one
-  sprite on several components and then another on one of them; two sprites are taken for a
+  sprite on three components or more in a row and then another on one of them; two sprites are taken for a
   radio button where they are the same square size, at least two scripts select between them that
   way, and none the other way, which marks them apart from the tabs and plates that scripts swap.
 - `sliders` are the sliders of the interfaces: a `knob`, `knobWidth` by `knobHeight`, that the
@@ -763,8 +767,8 @@ arguments, the task reads the calls of that script in turn, so a script that onl
 sprites does not hide them. A call whose sprites are known only while the game runs is counted and
 not written. Each script that holds its sprites as constants is read by its shape, and the task
 stops where a script no longer has the shape it reads. In this cache there are ten scrollbars, seven
-plate buttons, 110 sprite buttons, one tab, two checkboxes, three sets of radio buttons, two
-sliders, one dropdown, 105 frames and two hover frames, and six calls of the scrollbar script are
-known only while the game runs. A planted check that stops reading passed-on arguments leaves seven
-such calls, one more than the task finds, and a planted check that expects five sprites in script
-2975 stops the task.
+plate buttons, 110 sprite buttons, one tab, five checkboxes, two sets of radio buttons, two sliders,
+one dropdown, 105 frames and two hover frames, and six calls of the scrollbar script are known only
+while the game runs. A planted check that stops reading passed-on arguments leaves seven such calls,
+one more than the task finds, and a planted check that expects five sprites in script 2975 stops the
+task.

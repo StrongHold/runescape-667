@@ -44,6 +44,13 @@ final class WidgetSets {
     }
 
     /**
+     * Each set found, as its sprites in the order of its parts.
+     */
+    Set<List<Integer>> keys() {
+        return sets.keySet();
+    }
+
+    /**
      * The sets as the file holds them. A sprite that is not in the cache stops the export, since the
      * widget could not be drawn.
      */

@@ -133,6 +133,13 @@ final class WidgetReaders {
      */
     private static final int RADIO_SCRIPTS = 2;
 
+    /**
+     * The fewest components a script must set the plain sprite on in a row for the sprite it then
+     * sets on one of them to be taken for a radio button's selected sprite, which marks a group
+     * apart from a mark set on one or two.
+     */
+    private static final int RADIO_GROUP = 3;
+
     static void radioButtons(Map<Integer, ClientScript> scripts, WidgetHooks hooks, WidgetSets sets, Map<Integer, int[]> sizes) {
         selectedPairs(scripts, sizes, sets);
         for (var script : RADIO_GROUPS) {
@@ -186,11 +193,11 @@ final class WidgetReaders {
     }
 
     /**
-     * Adds the radio buttons that scripts select as a group: a script that sets one sprite on
-     * several components, the plain sprite, and then another on one of them, the selected sprite.
+     * Adds the radio buttons that scripts select as a group: a script that sets one sprite on three
+     * components or more, the plain sprite, and then another on one of them, the selected sprite.
      * Two sprites are taken for a radio button where they are the same square size, at least two
-     * scripts select between them that way, and none the other way, which marks them apart from
-     * the tabs and plates scripts swap.
+     * scripts select between them that way, and none the other way, which marks them apart from the
+     * tabs and plates scripts swap.
      */
     private static void selectedPairs(Map<Integer, ClientScript> scripts, Map<Integer, int[]> sizes, WidgetSets sets) {
         var found = new java.util.TreeMap<List<Integer>, List<Integer>>(java.util.Comparator.comparing(Object::toString));
@@ -237,7 +244,7 @@ final class WidgetReaders {
                 plainTargets.add(targets.get(end));
                 end++;
             }
-            if (plainTargets.size() >= 2) {
+            if (plainTargets.size() >= RADIO_GROUP) {
                 var selected = new java.util.TreeSet<Integer>();
                 for (var at = end; at < sprites.size(); at++) {
                     if (!sprites.get(at).equals(sprites.get(start)) && plainTargets.contains(targets.get(at))) {
