@@ -709,7 +709,11 @@ none. A part that a set does not have is left out.
   tabs of the game's frame. A tab is a component that shows a hover setter's plain sprite, with
   another component of the same interface at its very place, in a layer that the client draws
   after the tab's, whose sprite is `selected`: the game's scripts hide each such component but the
-  one over the chosen tab.
+  one over the chosen tab. Where the script that sets the selected sprite goes on to set more
+  sprites by constant in the same arm, as script 1387 sets a glow and a frame, those are
+  `selectedParts`, drawn in that order over the selected tab, each a `sprite` `x` and `y` from the
+  tab's corner, `width` by `height`, worked out by laying out the components through their layers
+  in a window of 765 by 503.
 - `checkboxes` are the checkboxes of the interfaces, each a `ticked` state and an `empty` state,
   with the scripts that set them. Script 4521 builds a checkbox in one state, `box` with
   `hoverBox` over it under the pointer and `pressedBox` over it while it is held down, from the
@@ -767,8 +771,8 @@ arguments, the task reads the calls of that script in turn, so a script that onl
 sprites does not hide them. A call whose sprites are known only while the game runs is counted and
 not written. Each script that holds its sprites as constants is read by its shape, and the task
 stops where a script no longer has the shape it reads. In this cache there are ten scrollbars, seven
-plate buttons, 110 sprite buttons, one tab, five checkboxes, two sets of radio buttons, two sliders,
-one dropdown, 105 frames and two hover frames, and six calls of the scrollbar script are known only
-while the game runs. A planted check that stops reading passed-on arguments leaves seven such calls,
-one more than the task finds, and a planted check that expects five sprites in script 2975 stops the
-task.
+plate buttons, 110 sprite buttons, two tabs, five checkboxes, two sets of radio buttons, two
+sliders, one dropdown, 105 frames and two hover frames, and six calls of the scrollbar script are
+known only while the game runs. A planted check that stops reading passed-on arguments leaves seven
+such calls, one more than the task finds, and a planted check that expects five sprites in script
+2975 stops the task.

@@ -45,7 +45,17 @@ final class WidgetTabs {
     private record Placed(int id, Component component) {
     }
 
-    static void read(File cache, Map<Integer, ClientScript> scripts, WidgetSets tabs, WidgetSets spriteButtons, WidgetSets plateButtons) throws Exception {
+    /**
+     * The size of the game's window that a tab's place is worked out in, as the client's fixed
+     * window is ({@code GameShell} frame of 765 by 503).
+     */
+    private static final int SCREEN_WIDTH = 765;
+    private static final int SCREEN_HEIGHT = 503;
+
+    private record Box(int x, int y, int width, int height) {
+    }
+
+    static List<Map<String, Object>> read(File cache, Map<Integer, ClientScript> scripts, WidgetSets spriteButtons, WidgetSets plateButtons) throws Exception {
         var setters = hoverSetters(scripts);
         for (var setter : setters.entrySet()) {
             spriteButtons.add(Arrays.asList(setter.getValue()[0], setter.getValue()[1], null), setter.getKey(), null);
@@ -73,10 +83,61 @@ final class WidgetTabs {
         }
 
         var swapped = constantSwaps(scripts, hoverScripts);
+        var decorations = decorationsBySelected(scripts);
+        var tabs = new LinkedHashMap<String, Map<String, Object>>();
+        var tabInterfaces = new LinkedHashMap<String, java.util.TreeSet<Integer>>();
         for (var entry : interfaces.entrySet()) {
-            addTabs(entry.getKey(), entry.getValue(), plainToHover, tabs);
+            addTabs(entry.getKey(), entry.getValue(), plainToHover, decorations, tabs, tabInterfaces);
             addHoverPlates(entry.getKey(), entry.getValue(), swapped, plateButtons);
         }
+
+        var written = new ArrayList<Map<String, Object>>();
+        for (var tab : tabs.entrySet()) {
+            var entry = new LinkedHashMap<String, Object>(tab.getValue());
+            entry.put("interfaces", new ArrayList<>(tabInterfaces.get(tab.getKey())));
+            written.add(entry);
+        }
+        return written;
+    }
+
+    /**
+     * The sprites a script sets by constant right after it sets a sprite on a component, in the same
+     * arm, before its next jump, by the component and the sprite first set: what it decorates a
+     * selected tab with, as script 1387 sets a glow and a frame over the tab it selects. A sprite of
+     * -1, which another script sets to take the decoration off, is passed over.
+     */
+    private static Map<List<Integer>, List<int[]>> decorationsBySelected(Map<Integer, ClientScript> scripts) {
+        var decorations = new HashMap<List<Integer>, List<int[]>>();
+        for (var script : scripts.values()) {
+            for (var at = 2; at < script.opcodes.length; at++) {
+                var set = constantSetAt(script, at);
+                var key = set == null ? null : List.of(set[0], set[1]);
+                if (key != null && !decorations.containsKey(key)) {
+                    var following = new ArrayList<int[]>();
+                    for (var next = at + 1; next < script.opcodes.length && script.opcodes[next] != ClientScriptOpCode.BRANCH; next++) {
+                        var decoration = constantSetAt(script, next);
+                        if (decoration != null && decoration[1] >= 0) {
+                            following.add(decoration);
+                        }
+                    }
+                    if (!following.isEmpty()) {
+                        decorations.put(key, following);
+                    }
+                }
+            }
+        }
+        return decorations;
+    }
+
+    /**
+     * The component and the sprite an instruction sets where both are pushed as constants, as
+     * {component, sprite}, or null where it sets none so.
+     */
+    private static int[] constantSetAt(ClientScript script, int at) {
+        var set = script.opcodes[at] == IF_SETGRAPHIC
+            && script.opcodes[at - 2] == ClientScriptOpCode.PUSH_CONSTANT_INT
+            && script.opcodes[at - 1] == ClientScriptOpCode.PUSH_CONSTANT_INT;
+        return set ? new int[] {script.intOperands[at - 1], script.intOperands[at - 2]} : null;
     }
 
     /**
@@ -148,19 +209,109 @@ final class WidgetTabs {
     /**
      * Adds each tab of an interface: a component that shows a hover setter's plain sprite, with the
      * sprite of the component over it, at its very place in a layer drawn after it, as its selected
-     * sprite.
+     * sprite, and the sprites a script sets right after it selects the tab as what the selected tab
+     * is decorated with.
      */
-    private static void addTabs(int interfaceId, List<Placed> placed, Map<Integer, Integer> plainToHover, WidgetSets tabs) {
+    private static void addTabs(
+        int interfaceId,
+        List<Placed> placed,
+        Map<Integer, Integer> plainToHover,
+        Map<List<Integer>, List<int[]>> decorations,
+        Map<String, Map<String, Object>> tabs,
+        Map<String, java.util.TreeSet<Integer>> tabInterfaces
+    ) {
+        var byId = new HashMap<Integer, Component>();
+        for (var piece : placed) {
+            byId.put(piece.id(), piece.component());
+        }
         for (var tab : placed) {
             var hover = plainToHover.get(tab.component().graphic);
             if (hover != null) {
                 for (var other : placed) {
                     if (isOverlay(other.component(), tab.component(), hover)) {
-                        tabs.add(Arrays.asList(tab.component().graphic, hover, other.component().graphic), null, interfaceId);
+                        var written = new LinkedHashMap<String, Object>();
+                        written.put("sprite", tab.component().graphic);
+                        written.put("hover", hover);
+                        written.put("selected", other.component().graphic);
+                        var parts = decorationParts(decorations.getOrDefault(List.of(other.id(), other.component().graphic), List.of()), tab.id(), byId);
+                        if (!parts.isEmpty()) {
+                            written.put("selectedParts", parts);
+                        }
+                        var key = Json.write(written);
+                        tabs.putIfAbsent(key, written);
+                        tabInterfaces.computeIfAbsent(key, k -> new java.util.TreeSet<>()).add(interfaceId);
                     }
                 }
             }
         }
+    }
+
+    /**
+     * The sprites a selected tab is decorated with, each where it stands from the tab's corner and
+     * its size, laid out through their layers in the game's window, where each is a component of the
+     * tab's own interface.
+     */
+    private static List<Map<String, Object>> decorationParts(List<int[]> decorations, int tabId, Map<Integer, Component> byId) {
+        var parts = new ArrayList<Map<String, Object>>();
+        var tabBox = boxOf(tabId, byId);
+        for (var decoration : decorations) {
+            var box = byId.containsKey(decoration[0]) ? boxOf(decoration[0], byId) : null;
+            if (box != null && tabBox != null && decoration[1] >= 0) {
+                var part = new LinkedHashMap<String, Object>();
+                part.put("sprite", decoration[1]);
+                part.put("x", box.x() - tabBox.x());
+                part.put("y", box.y() - tabBox.y());
+                part.put("width", box.width());
+                part.put("height", box.height());
+                parts.add(part);
+            }
+        }
+        return parts;
+    }
+
+    /**
+     * Where a component stands in the game's window and its size, laid out through each layer it
+     * is in, which it names by the layer's number in the low half of its id as decoded, with the
+     * client's rules ({@code InterfaceManager.resize}, {@code reposition}), or null
+     * where a layer it is in is not of its interface or a rule is one the export does not take.
+     */
+    private static Box boxOf(int id, Map<Integer, Component> byId) {
+        var component = byId.get(id);
+        if (component == null) {
+            return null;
+        }
+        var parentId = (id & ~CHILD_MASK) | (component.layer & CHILD_MASK);
+        var parent = component.layer == -1 ? new Box(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT) : boxOf(parentId, byId);
+        if (parent == null) {
+            return null;
+        }
+        var width = length(component.resizeModeX, component.originalWidth, parent.width());
+        var height = length(component.resizeModeY, component.originalHeight, parent.height());
+        var x = place(component.reposModeX, component.originalX, width, parent.width());
+        var y = place(component.reposModeY, component.originalY, height, parent.height());
+        if (width == Integer.MIN_VALUE || height == Integer.MIN_VALUE || x == Integer.MIN_VALUE || y == Integer.MIN_VALUE) {
+            return null;
+        }
+        return new Box(parent.x() + x, parent.y() + y, width, height);
+    }
+
+    private static int length(int mode, int value, int box) {
+        return switch (mode) {
+            case 0 -> value;
+            case 1 -> box - value;
+            case 2 -> (value * box) >> 14;
+            default -> Integer.MIN_VALUE;
+        };
+    }
+
+    private static int place(int mode, int value, int length, int box) {
+        return switch (mode) {
+            case 0 -> value;
+            case 1 -> value + (box - length) / 2;
+            case 2 -> box - length - value;
+            case 3 -> (value * box) >> 14;
+            default -> Integer.MIN_VALUE;
+        };
     }
 
     /**

@@ -132,10 +132,9 @@ public final class WidgetExport {
 
         WidgetReaders.plateButtons(scripts, hooks, sets.get("plateButtons"));
         WidgetReaders.spriteButtons(scripts, hooks, sets.computeIfAbsent("spriteButtons", name -> new WidgetSets(List.of("sprite", "hover", "pressed"))));
-        WidgetTabs.read(
+        var tabs = WidgetTabs.read(
             cache,
             scripts,
-            sets.computeIfAbsent("tabs", name -> new WidgetSets(List.of("sprite", "hover", "selected"))),
             sets.computeIfAbsent("spriteButtons", name -> new WidgetSets(List.of("sprite", "hover", "pressed"))),
             sets.get("plateButtons")
         );
@@ -148,6 +147,8 @@ public final class WidgetExport {
             file.put(entry.getKey(), entry.getValue().written(entry.getKey(), sprites));
             report.add(entry.getValue().size() + " " + entry.getKey());
         }
+        file.put("tabs", tabs);
+        report.add(tabs.size() + " tabs");
         file.put("checkboxes", checkboxes);
         report.add(checkboxes.size() + " checkboxes");
         var dropdowns = WidgetReaders.dropdowns(calls, sprites);
