@@ -705,13 +705,31 @@ none. A part that a set does not have is left out.
   the first and an empty one from the set of the second.
 - `radioButtons` are the sets that scripts 1422 and 1423 hold as constants: the first component
   they are given, the one clicked, takes `selected`, and the others take `sprite`.
+- `frames` are the boxes of the interfaces drawn as a frame: a sprite component at each corner,
+  one along each side and, where there is one, one over the middle, each of a layer's own
+  components. The task lays a layer's components out at two sizes with the client's rules
+  (`InterfaceManager.resize`, `reposition`): a component that keeps its size and its place
+  against two sides is a corner, one that grows along a side is an edge, and one that grows both
+  ways is the fill. A layer with a corner or an edge missing, or with two components in one place,
+  is not written. Each piece has its `sprite`, `mirrored` where it is drawn mirrored left to right
+  (`Component.verticalFlip`), `flipped` where it is drawn upside down (`horizontalFlip`), and
+  `tiled` where the sprite is tiled over it rather than stretched. `topLeft`, `topRight`,
+  `bottomLeft` and `bottomRight` are each `x` and `y` from their two sides, `width` wide and
+  `height` high. `top`, `bottom`, `left` and `right` each run from `start` after the first end of
+  their side to `end` before the other, `inset` in from the side, `thickness` thick. `centre`
+  keeps `left`, `top`, `right` and `bottom` from the sides.
+- `hoverFrames` are the frames that scripts 4155 and 4158 build over a component, in the same
+  form, read by playing back the components the script creates with the sprites each call gives
+  it. Their pieces are clear until the pointer moves over the component, when script 4160 makes
+  them opaque by 22 of 255 a client tick.
 
 A script pushes a call's arguments just before it calls. Where it passes on one of its own
 arguments, the task reads the calls of that script in turn, so a script that only forwards the
 sprites does not hide them. A call whose sprites are known only while the game runs is counted
 and not written. Each script that holds its sprites as constants is read by its shape, and the
 task stops where a script no longer has the shape it reads. In this cache there are ten
-scrollbars, four plate buttons, 107 sprite buttons, two checkboxes and one set of radio buttons,
+scrollbars, four plate buttons, 107 sprite buttons, two checkboxes, one set of radio buttons,
+70 frames and two hover frames,
 and six calls of the scrollbar script are known only while the game runs. A planted check that
 stops reading passed-on arguments leaves seven such calls, one more than the task finds, and a
 planted check that expects five sprites in script 2975 stops the task.

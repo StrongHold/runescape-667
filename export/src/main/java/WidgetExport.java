@@ -113,6 +113,8 @@ public final class WidgetExport {
 
         var hooks = WidgetHooks.read(cache);
         var calls = new Calls(scripts);
+        var frames = WidgetFrames.ofInterfaces(cache);
+        var hoverFrames = WidgetFrames.hoverFrames(scripts, calls);
         var report = new ArrayList<String>();
         var sets = new LinkedHashMap<String, WidgetSets>();
         for (var widget : WIDGETS) {
@@ -138,6 +140,10 @@ public final class WidgetExport {
             file.put(entry.getKey(), entry.getValue().written(entry.getKey(), sprites));
             report.add(entry.getValue().size() + " " + entry.getKey());
         }
+        file.put("frames", frames.written());
+        file.put("hoverFrames", hoverFrames.written());
+        report.add(frames.size() + " frames");
+        report.add(hoverFrames.size() + " hoverFrames");
 
         if (args.out.getParent() != null) {
             Files.createDirectories(args.out.getParent());
@@ -151,7 +157,14 @@ public final class WidgetExport {
      * The calls of each script in the cache, with the arguments a caller passes on read from the
      * calls of that caller, kept once found.
      */
-    private static final class Calls {
+    /**
+     * Reads the arguments of every call of a script, each null where it is not known.
+     */
+    interface CallReader {
+        List<Integer[]> argumentsOf(int script);
+    }
+
+    private static final class Calls implements CallReader {
 
         private final Map<Integer, ClientScript> scripts;
 
@@ -163,6 +176,11 @@ public final class WidgetExport {
 
         List<Call> of(int callee) {
             return of(callee, new HashSet<>());
+        }
+
+        @Override
+        public List<Integer[]> argumentsOf(int script) {
+            return of(script).stream().map(Call::arguments).toList();
         }
 
         private List<Call> of(int callee, Set<Integer> reading) {
