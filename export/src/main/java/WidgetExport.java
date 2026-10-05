@@ -134,6 +134,13 @@ public final class WidgetExport {
 
         WidgetReaders.plateButtons(scripts, hooks, sets.get("plateButtons"));
         WidgetReaders.spriteButtons(scripts, hooks, sets.computeIfAbsent("spriteButtons", name -> new WidgetSets(List.of("sprite", "hover", "pressed"))));
+        WidgetTabs.read(
+            cache,
+            scripts,
+            sets.computeIfAbsent("tabs", name -> new WidgetSets(List.of("sprite", "hover", "selected"))),
+            sets.computeIfAbsent("spriteButtons", name -> new WidgetSets(List.of("sprite", "hover", "pressed"))),
+            sets.get("plateButtons")
+        );
         WidgetReaders.radioButtons(scripts, hooks, sets.computeIfAbsent("radioButtons", name -> new WidgetSets(List.of("sprite", "selected"))), spriteSizes(cache));
 
         var file = new LinkedHashMap<String, Object>();

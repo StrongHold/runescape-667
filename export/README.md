@@ -691,14 +691,24 @@ none. A part that a set does not have is left out.
   pointer. Scripts give script 3077 its sets; script 2975 holds its set as constants and sets it
   as its hooks say the pointer moves over the button and off it; and the hooks that run script
   4588 give the three pieces of a row, the sprites under the pointer on `onMouseOver` and the
-  others on `onMouseLeave`.
+  others on `onMouseLeave`. A layer built as a plate, an edge at its left, a middle that stretches
+  across and the same edge at its right, is a plate button too where a script that the hover hooks
+  of its interface run sets each piece to one other sprite by constant, as scripts 4003, 4004 and
+  4010 do.
 - `spriteButtons` are buttons that are one sprite, swapped for another: `sprite`, `hover` under
   the pointer and `pressed` while held, where it has them. The hooks of a component that run
   script 44 give the sprite it shows on `onMouseLeave` or `onRelease`, or its own sprite, the one
   under the pointer on `onMouseOver` or `onMouseRepeat`, and the one held on `onClick`, `onHold` or
   `onClickRepeat`. The hooks that run script 4587 do the same for a component they name, and script
-  4782 holds the plain sprite and the sprite under the pointer of four tabs as constants. A hook
+  4782 holds the plain sprite and the sprite under the pointer of four tabs as constants. A hover
+  setter, as `tabs` describes, gives a plain sprite and the sprite under the pointer too. A hook
   that gives -1 gives no sprite.
+- `tabs` are the tabs of the interfaces: `sprite`, `hover` under the pointer, and `selected`. A
+  hover setter is a script that sets one sprite on the component it is given where its second
+  argument says the pointer is over it, and another where it is not, as script 2462 does for the
+  tabs of the game's frame. A tab is a component that shows a hover setter's plain sprite, with
+  another component of the same interface at its very place, in a layer of its own, whose sprite
+  is the selected one, shown when the game unhides it.
 - `checkboxes` are the sets that scripts give script 4521: `box`, with `hoverBox` over it under
   the pointer and `pressedBox` over it while it is held down. Script 4519 gives the checkbox a
   tick and script 4520 leaves it empty, so a box that the player ticks is drawn from the set of
@@ -749,11 +759,11 @@ none. A part that a set does not have is left out.
 
 A script pushes a call's arguments just before it calls. Where it passes on one of its own
 arguments, the task reads the calls of that script in turn, so a script that only forwards the
-sprites does not hide them. A call whose sprites are known only while the game runs is counted
-and not written. Each script that holds its sprites as constants is read by its shape, and the
-task stops where a script no longer has the shape it reads. In this cache there are ten
-scrollbars, four plate buttons, 107 sprite buttons, two checkboxes, three sets of radio buttons, two sliders,
-one dropdown, 105 frames and two hover frames,
-and six calls of the scrollbar script are known only while the game runs. A planted check that
-stops reading passed-on arguments leaves seven such calls, one more than the task finds, and a
-planted check that expects five sprites in script 2975 stops the task.
+sprites does not hide them. A call whose sprites are known only while the game runs is counted and
+not written. Each script that holds its sprites as constants is read by its shape, and the task
+stops where a script no longer has the shape it reads. In this cache there are ten scrollbars, seven
+plate buttons, 110 sprite buttons, one tab, two checkboxes, three sets of radio buttons, two
+sliders, one dropdown, 105 frames and two hover frames, and six calls of the scrollbar script are
+known only while the game runs. A planted check that stops reading passed-on arguments leaves seven
+such calls, one more than the task finds, and a planted check that expects five sprites in script
+2975 stops the task.

@@ -63,7 +63,7 @@ tasks.register<JavaExec>("exportHitmarks") {
 }
 
 tasks.register<JavaExec>("exportWidgets") {
-    description = "Writes the sprites the client's scripts and interfaces build their scrollbars, buttons, checkboxes, radio buttons, sliders, dropdowns and frames from."
+    description = "Writes the sprites the client's scripts and interfaces build their scrollbars, buttons, checkboxes, radio buttons, tabs, sliders, dropdowns and frames from."
     mainClass = "WidgetExport"
     classpath = sourceSets["main"].runtimeClasspath
 }
