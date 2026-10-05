@@ -19,9 +19,8 @@ import java.util.Set;
  * argument says the pointer is over it, and another where it is not, as script 2462 does for the
  * tabs of the game's frame. A tab is a component that shows the plain sprite of a hover setter,
  * with another component of the same interface at its very place, in a layer the client draws
- * after the tab's. That component covers the tab, so its sprite is the one every tab shows; the
- * game hides it over the tab the player chooses, which shows the tab's own sprite as the selected
- * one.
+ * after the tab's, that shows its selected sprite: the game's scripts hide each such component but
+ * the one over the chosen tab.
  *
  * A hover plate is a layer of an interface built as a button on a plate, an edge at its left, a
  * middle that stretches and an edge at its right, whose pieces a script that the hover hooks of
@@ -147,9 +146,9 @@ final class WidgetTabs {
     }
 
     /**
-     * Adds each tab of an interface: a component that shows a hover setter's plain sprite, under a
-     * component at its very place in a layer drawn after it, whose sprite every tab shows until the
-     * game hides it to show the tab's own sprite as selected.
+     * Adds each tab of an interface: a component that shows a hover setter's plain sprite, with the
+     * sprite of the component over it, at its very place in a layer drawn after it, as its selected
+     * sprite.
      */
     private static void addTabs(int interfaceId, List<Placed> placed, Map<Integer, Integer> plainToHover, WidgetSets tabs) {
         for (var tab : placed) {
@@ -157,7 +156,7 @@ final class WidgetTabs {
             if (hover != null) {
                 for (var other : placed) {
                     if (isOverlay(other.component(), tab.component(), hover)) {
-                        tabs.add(Arrays.asList(other.component().graphic, hover, tab.component().graphic), null, interfaceId);
+                        tabs.add(Arrays.asList(tab.component().graphic, hover, other.component().graphic), null, interfaceId);
                     }
                 }
             }
