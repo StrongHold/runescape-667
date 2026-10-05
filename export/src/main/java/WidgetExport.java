@@ -140,6 +140,9 @@ public final class WidgetExport {
             file.put(entry.getKey(), entry.getValue().written(entry.getKey(), sprites));
             report.add(entry.getValue().size() + " " + entry.getKey());
         }
+        var dropdowns = WidgetReaders.dropdowns(calls, sprites);
+        file.put("dropdowns", dropdowns);
+        report.add(dropdowns.size() + " dropdowns");
         file.put("frames", frames.written());
         file.put("hoverFrames", hoverFrames.written());
         report.add(frames.size() + " frames");

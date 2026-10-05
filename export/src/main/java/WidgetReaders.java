@@ -43,6 +43,26 @@ final class WidgetReaders {
      */
     private static final List<Integer> RADIO_GROUPS = List.of(1422, 1423);
 
+    /**
+     * Script 1436 builds a dropdown: its background, its arrow and the arrow under the pointer, the
+     * background of its open list, the colours of its text, plain, for the other options and under
+     * the pointer, its font, and the sprites of the scrollbar of its list, in that order from its
+     * eighth argument.
+     */
+    private static final int DROPDOWN = 1436;
+    private static final int DROPDOWN_FIRST_SPRITE = 7;
+    private static final List<String> DROPDOWN_FIELDS = List.of(
+        "background",
+        "arrow",
+        "hoverArrow",
+        "listBackground",
+        "textColour",
+        "otherTextColour",
+        "hoverTextColour",
+        "font"
+    );
+    private static final List<String> SCROLLBAR_FIELDS = List.of("track", "draggerTop", "draggerMiddle", "draggerBottom", "upArrow", "downArrow");
+
     private static final String OVER = "onMouseOver";
     private static final String LEAVE = "onMouseLeave";
 
@@ -123,6 +143,39 @@ final class WidgetReaders {
                 sets.add(set, script, calling.component().interfaceId());
             }
         }
+    }
+
+    /**
+     * Each dropdown that a call of script 1436 builds, once, where the call gives all of it as
+     * constants. The colour of the other options is written only where it differs from the plain
+     * colour.
+     */
+    static List<Map<String, Object>> dropdowns(WidgetExport.CallReader calls, java.util.Set<Integer> cached) {
+        var found = new java.util.LinkedHashMap<String, Map<String, Object>>();
+        for (var given : calls.argumentsOf(DROPDOWN)) {
+            var named = Arrays.asList(given).subList(DROPDOWN_FIRST_SPRITE, DROPDOWN_FIRST_SPRITE + DROPDOWN_FIELDS.size() + SCROLLBAR_FIELDS.size());
+            if (!named.contains(null)) {
+                var dropdown = new java.util.LinkedHashMap<String, Object>();
+                for (var at = 0; at < DROPDOWN_FIELDS.size(); at++) {
+                    dropdown.put(DROPDOWN_FIELDS.get(at), named.get(at));
+                }
+                if (dropdown.get("otherTextColour").equals(dropdown.get("textColour"))) {
+                    dropdown.remove("otherTextColour");
+                }
+                var scrollbar = new java.util.LinkedHashMap<String, Object>();
+                for (var at = 0; at < SCROLLBAR_FIELDS.size(); at++) {
+                    scrollbar.put(SCROLLBAR_FIELDS.get(at), named.get(DROPDOWN_FIELDS.size() + at));
+                }
+                dropdown.put("scrollbar", scrollbar);
+                for (var sprite : List.of("background", "arrow", "hoverArrow", "listBackground")) {
+                    if (!cached.contains((Integer) dropdown.get(sprite))) {
+                        stop(DROPDOWN, "give its dropdown sprites that are in the cache");
+                    }
+                }
+                found.putIfAbsent(Json.write(dropdown), dropdown);
+            }
+        }
+        return new ArrayList<>(found.values());
     }
 
     /**

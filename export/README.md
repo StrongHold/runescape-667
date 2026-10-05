@@ -705,6 +705,16 @@ none. A part that a set does not have is left out.
   the first and an empty one from the set of the second.
 - `radioButtons` are the sets that scripts 1422 and 1423 hold as constants: the first component
   they are given, the one clicked, takes `selected`, and the others take `sprite`.
+- `dropdowns` are the dropdowns that calls of script 1436 build, each once, where the call gives
+  all of it as constants: `background`, tiled over the box, `arrow`, a 16 pixel wide button at
+  its right, stretched to its height, `hoverArrow` in its place under the pointer, and
+  `listBackground`, tiled over the open list; the colours of the text, `textColour`, with
+  `otherTextColour` where the script colours some options apart from the others, and
+  `hoverTextColour` under the pointer, as 0xRRGGBB; `font`, the font of the text by its id; and
+  `scrollbar`, the sprites of the list's scrollbar under the names of `scrollbars`. The script
+  draws a black line around the box and around the open list, writes the chosen option 5 pixels in
+  from the left and centred down, and lays the list out one option every 15 pixels, scrolled by
+  script 31. Script 1348 opens the list and turns the arrow upside down, and script 1349 closes it.
 - `frames` are the boxes of the interfaces drawn as a frame: a sprite component at each corner,
   one along each side and, where there is one, one over the middle, each of a layer's own
   components. The task lays a layer's components out at two sizes with the client's rules
@@ -729,7 +739,7 @@ sprites does not hide them. A call whose sprites are known only while the game r
 and not written. Each script that holds its sprites as constants is read by its shape, and the
 task stops where a script no longer has the shape it reads. In this cache there are ten
 scrollbars, four plate buttons, 107 sprite buttons, two checkboxes, one set of radio buttons,
-70 frames and two hover frames,
+one dropdown, 70 frames and two hover frames,
 and six calls of the scrollbar script are known only while the game runs. A planted check that
 stops reading passed-on arguments leaves seven such calls, one more than the task finds, and a
 planted check that expects five sprites in script 2975 stops the task.
