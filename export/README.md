@@ -525,6 +525,11 @@ from each name to the sprite's id, and each is written only where the hash finds
 `p11_full`, `p12_full` and `b12_full`, among others. Every other sprite the client finds by an id
 that a config type or an interface holds. A run with `--sprite` writes no names.
 
+A sprite's files cannot say how many of them there are, so `frames.json` says it: an object from
+the id of each sprite with more than one frame to its number of frames. A sprite it does not name
+has one frame, so an engine fetches each frame there is and asks for none that is not. A run with
+`--sprite` writes no `frames.json` either.
+
 Every frame is checked against the client as it is written. The PNG is read back and must match
 pixel for pixel the canvas the client lays out from the same image (`IndexedImage.method9383`).
 The sprite the software toolkit builds from the image, laid on a clear canvas of the toolkit's
