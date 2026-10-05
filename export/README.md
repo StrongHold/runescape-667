@@ -706,9 +706,10 @@ none. A part that a set does not have is left out.
 - `tabs` are the tabs of the interfaces: `sprite`, `hover` under the pointer, and `selected`. A
   hover setter is a script that sets one sprite on the component it is given where its second
   argument says the pointer is over it, and another where it is not, as script 2462 does for the
-  tabs of the game's frame. A tab is a component that shows a hover setter's plain sprite, with
-  another component of the same interface at its very place, in a layer of its own, whose sprite
-  is the selected one, shown when the game unhides it.
+  tabs of the game's frame. A tab is a component that shows a hover setter's plain sprite, under
+  another component of the same interface at its very place, in a layer that the client draws
+  after the tab's. That component covers every tab, so its sprite is `sprite`; the game hides it
+  over the tab the player chooses, which shows the tab's own sprite as `selected`.
 - `checkboxes` are the sets that scripts give script 4521: `box`, with `hoverBox` over it under
   the pointer and `pressedBox` over it while it is held down. Script 4519 gives the checkbox a
   tick and script 4520 leaves it empty, so a box that the player ticks is drawn from the set of

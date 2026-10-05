@@ -18,8 +18,10 @@ import java.util.Set;
  * A hover setter is a script that sets one sprite on the component it is given where its second
  * argument says the pointer is over it, and another where it is not, as script 2462 does for the
  * tabs of the game's frame. A tab is a component that shows the plain sprite of a hover setter,
- * with another component of the same interface at its very place, in a layer of its own, that
- * shows its selected sprite when the game unhides it.
+ * with another component of the same interface at its very place, in a layer the client draws
+ * after the tab's. That component covers the tab, so its sprite is the one every tab shows; the
+ * game hides it over the tab the player chooses, which shows the tab's own sprite as the selected
+ * one.
  *
  * A hover plate is a layer of an interface built as a button on a plate, an edge at its left, a
  * middle that stretches and an edge at its right, whose pieces a script that the hover hooks of
@@ -145,8 +147,9 @@ final class WidgetTabs {
     }
 
     /**
-     * Adds each tab of an interface: a component that shows a hover setter's plain sprite, with the
-     * sprite of the component at its very place in another layer as its selected sprite.
+     * Adds each tab of an interface: a component that shows a hover setter's plain sprite, under a
+     * component at its very place in a layer drawn after it, whose sprite every tab shows until the
+     * game hides it to show the tab's own sprite as selected.
      */
     private static void addTabs(int interfaceId, List<Placed> placed, Map<Integer, Integer> plainToHover, WidgetSets tabs) {
         for (var tab : placed) {
@@ -154,16 +157,21 @@ final class WidgetTabs {
             if (hover != null) {
                 for (var other : placed) {
                     if (isOverlay(other.component(), tab.component(), hover)) {
-                        tabs.add(Arrays.asList(tab.component().graphic, hover, other.component().graphic), null, interfaceId);
+                        tabs.add(Arrays.asList(other.component().graphic, hover, tab.component().graphic), null, interfaceId);
                     }
                 }
             }
         }
     }
 
+    /**
+     * Whether a component covers a tab: it shows another sprite at the tab's very place, in a layer
+     * the client draws after the tab's, as the layers of an interface are drawn in the order of
+     * their numbers.
+     */
     private static boolean isOverlay(Component other, Component tab, int hover) {
         var shown = other != tab && other.type == Component.TYPE_GRAPHIC && other.graphic >= 0;
-        var another = other.graphic != tab.graphic && other.graphic != hover && other.layer != tab.layer;
+        var another = other.graphic != tab.graphic && other.graphic != hover && other.layer > tab.layer;
         var samePlace = other.originalX == tab.originalX && other.originalY == tab.originalY
             && other.originalWidth == tab.originalWidth && other.originalHeight == tab.originalHeight
             && other.reposModeX == tab.reposModeX && other.reposModeY == tab.reposModeY;
