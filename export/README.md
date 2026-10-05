@@ -70,10 +70,16 @@ alpha as the client's, both of them the noise times three over 32, so at most 23
 texture is one whose `effectType` is 4, 8 or 9. On a player's GL client with high water detail,
 whose toolkit supports the water plane, the surface is drawn in the normal pass by the fixed
 function water effect (`FixedFunctionWaterEffect`): the texture is never bound, and in its place
-the ripple frame of the moment, the sixteen frames over four seconds at a quarter of the texture
-coordinate, is added to the lit vertex colour and the sum doubled (`GL_RGB_SCALE` 2), with the
+the ripple of the moment, at a quarter of the texture coordinate, is added to the lit vertex
+colour and the sum doubled (`GL_RGB_SCALE` 2), with the
 vertex's alpha, which the GL ground writes as opaque, times the frame's alpha, so the surface
-is nearly see-through; a second unit adds an alpha that fades the surface to opaque with eye
+is nearly see-through. Where the GL driver has 3D textures (`GL_EXT_texture3D`, which the
+client turns off only for some old ATI drivers), the sixteen frames are the slices of one volume
+(`Class93_Sub3`), filtered linearly and repeating on every axis, and the third coordinate is the
+part of four seconds gone (`anInt7987 % 4000 / 4000`), so each frame blends smoothly into the
+next and the last into the first. Without 3D textures the client binds the frame of the moment
+alone, a new one every quarter second, which looks choppy; an importer should take the volume.
+A second unit adds an alpha that fades the surface to opaque with eye
 depth, from the fog's start to a fog range further, where the fog for the water starts a range
 and a half before the far plane and ends a range before it (`GlToolkit.method6995`). What shows
 through is the bed, drawn before it in the underwater pass, described with the ground below.
