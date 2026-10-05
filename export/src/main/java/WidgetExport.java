@@ -18,14 +18,16 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
- * Writes the sprites the client's scripts build their widgets from: the scrollbar, the button and
- * the checkbox, each a script that other scripts call with the sprites to draw it in.
+ * Writes the sprites the client's scripts and interfaces build their widgets from: the scrollbar,
+ * the plate button, the sprite button, the checkbox and the radio button.
  *
  * Each script in the cache is decoded with the client's own decoder, and each call of a widget's
  * script is read back from the instructions before it, which push its arguments. Where a caller
  * passes on an argument it was given, the calls of that caller are read in turn. A call whose
- * sprites are known only while the game runs is counted and not written. A sprite that a widget
- * names must be in the cache, or the export stops, since the widget could not be drawn.
+ * sprites are known only while the game runs is counted and not written. The widgets whose sprites
+ * are given by the hooks of interface components, or held as constants in a script, are read by
+ * {@link WidgetReaders}. A sprite that a widget names must be in the cache, or the export stops,
+ * since the widget could not be drawn.
  */
 public final class WidgetExport {
 
@@ -64,7 +66,7 @@ public final class WidgetExport {
      */
     private static final List<Widget> WIDGETS = List.of(
         new Widget("scrollbars", 31, 2, List.of("track", "draggerTop", "draggerMiddle", "draggerBottom", "upArrow", "downArrow")),
-        new Widget("buttons", 3077, 1, List.of("edge", "middle", "hoverEdge", "hoverMiddle")),
+        new Widget("plateButtons", 3077, 1, List.of("edge", "middle", "hoverEdge", "hoverMiddle")),
         new Widget("checkboxes", 4521, 1, List.of("box", "hoverBox", "pressedBox"))
     );
 
@@ -109,45 +111,40 @@ public final class WidgetExport {
             sprites.add(id);
         }
 
+        var hooks = WidgetHooks.read(cache);
         var calls = new Calls(scripts);
-        var file = new LinkedHashMap<String, Object>();
         var report = new ArrayList<String>();
+        var sets = new LinkedHashMap<String, WidgetSets>();
         for (var widget : WIDGETS) {
-            var skins = new LinkedHashMap<List<Integer>, TreeSet<Integer>>();
+            var found = sets.computeIfAbsent(widget.name(), name -> new WidgetSets(widget.fields()));
             var unknown = 0;
             for (var call : calls.of(widget.script())) {
                 var named = Arrays.asList(call.arguments()).subList(widget.firstSprite(), widget.firstSprite() + widget.fields().size());
                 if (named.contains(null)) {
                     unknown++;
                 } else {
-                    skins.computeIfAbsent(named, key -> new TreeSet<>()).add(call.caller());
+                    found.add(named, call.caller(), null);
                 }
             }
+            report.add(unknown + " calls of script " + widget.script() + " known only while the game runs");
+        }
 
-            var written = new ArrayList<Map<String, Object>>();
-            for (var skin : skins.entrySet()) {
-                var entry = new LinkedHashMap<String, Object>();
-                for (var at = 0; at < widget.fields().size(); at++) {
-                    var sprite = skin.getKey().get(at);
-                    if (!sprites.contains(sprite)) {
-                        System.out.println(widget.name() + " name sprite " + sprite + ", which is not in the cache");
-                        System.exit(1);
-                    }
-                    entry.put(widget.fields().get(at), sprite);
-                }
-                entry.put("scripts", new ArrayList<>(skin.getValue()));
-                written.add(entry);
-            }
-            file.put(widget.name(), written);
-            report.add(widget.name() + ": " + written.size() + " (" + unknown + " calls known only while the game runs)");
+        WidgetReaders.plateButtons(scripts, hooks, sets.get("plateButtons"));
+        WidgetReaders.spriteButtons(scripts, hooks, sets.computeIfAbsent("spriteButtons", name -> new WidgetSets(List.of("sprite", "hover", "pressed"))));
+        WidgetReaders.radioButtons(scripts, hooks, sets.computeIfAbsent("radioButtons", name -> new WidgetSets(List.of("sprite", "selected"))));
+
+        var file = new LinkedHashMap<String, Object>();
+        for (var entry : sets.entrySet()) {
+            file.put(entry.getKey(), entry.getValue().written(entry.getKey(), sprites));
+            report.add(entry.getValue().size() + " " + entry.getKey());
         }
 
         if (args.out.getParent() != null) {
             Files.createDirectories(args.out.getParent());
         }
         Files.writeString(args.out, Json.write(file), StandardCharsets.UTF_8);
-        System.out.println("read " + scripts.size() + " scripts: " + String.join(", ", report) + ", written to "
-            + args.out.toAbsolutePath().normalize());
+        System.out.println("read " + scripts.size() + " scripts and " + hooks.size() + " components with hooks: "
+            + String.join(", ", report) + ", written to " + args.out.toAbsolutePath().normalize());
     }
 
     /**

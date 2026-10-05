@@ -671,26 +671,47 @@ The `viewer` subproject shows everything written here, map squares too. See its 
     ./gradlew :export:exportWidgets
 
 The client has no scrollbar, button or checkbox of its own. Its scripts build each one from sprite
-components, with a script that other scripts call with the sprites to draw it in: script 31 builds
-a scrollbar, script 3077 a button and script 4521 a checkbox. The task decodes every script in the
-cache with the client's own decoder (`ClientScript.decode`) and writes, for each widget, every
-set of sprites that a call gives it to `export/build/widgets.json`. `--out` names another file,
-and `--cache` works as it does for a model.
+components, and the hooks of interface components change those sprites as the pointer moves over
+them. The task decodes every script in the cache with the client's own decoder
+(`ClientScript.decode`) and every interface component with the client's own decoder
+(`Component.decode`), and writes each set of sprites that a widget is drawn in to
+`export/build/widgets.json`. `--out` names another file, and `--cache` works as it does for a
+model.
 
-Each set lists its sprites under the names of their parts, and `scripts`, the scripts that call
-the widget's script with that set. A scrollbar is 16 pixels wide: `upArrow` and `downArrow` are
-16 by 16 at its ends, `track` is tiled down between them, and the dragger is `draggerTop` and
-`draggerBottom`, 5 pixels high, with `draggerMiddle` tiled between them. A button is 32 pixels
-high: `edge` at the left, the same sprite flipped at the right, and `middle` between
-them; `hoverEdge` and `hoverMiddle` take their place under the pointer. A checkbox is `box`, with
-`hoverBox` over it under the pointer and `pressedBox` over it while it is held down. Script 4519
-gives the checkbox a tick and script 4520 leaves it empty, so a box that the player ticks is drawn
-from the set of the first and an empty one from the set of the second.
+Each set lists its sprites under the names of their parts, `scripts`, the scripts that give it,
+and `interfaces`, the interfaces whose components give it; either is left out where there are
+none. A part that a set does not have is left out.
 
-A script pushes a call's arguments just before it calls. Where it passes on an argument that it
-was given, the task reads the calls of that script in turn, so a script that only forwards the
+- `scrollbars` are the sets that scripts give script 31. A scrollbar is 16 pixels wide:
+  `upArrow` and `downArrow` are 16 by 16 at its ends, `track` is tiled down between them, and
+  the dragger is `draggerTop` and `draggerBottom`, 5 pixels high, with `draggerMiddle` tiled
+  between them.
+- `plateButtons` are buttons on a plate: `edge` at the left, the same sprite flipped at the
+  right, and `middle` between, with `hoverEdge` and `hoverMiddle` in their place under the
+  pointer. Scripts give script 3077 its sets; script 2975 holds its set as constants and sets it
+  as its hooks say the pointer moves over the button and off it; and the hooks that run script
+  4588 give the three pieces of a row, the sprites under the pointer on `onMouseOver` and the
+  others on `onMouseLeave`.
+- `spriteButtons` are buttons that are one sprite, swapped for another: `sprite`, `hover` under
+  the pointer and `pressed` while held, where it has them. The hooks of a component that run
+  script 44 give the sprite it shows on `onMouseLeave` or `onRelease`, or its own sprite, the one
+  under the pointer on `onMouseOver` or `onMouseRepeat`, and the one held on `onClick`, `onHold` or
+  `onClickRepeat`. The hooks that run script 4587 do the same for a component they name, and script
+  4782 holds the plain sprite and the sprite under the pointer of four tabs as constants. A hook
+  that gives -1 gives no sprite.
+- `checkboxes` are the sets that scripts give script 4521: `box`, with `hoverBox` over it under
+  the pointer and `pressedBox` over it while it is held down. Script 4519 gives the checkbox a
+  tick and script 4520 leaves it empty, so a box that the player ticks is drawn from the set of
+  the first and an empty one from the set of the second.
+- `radioButtons` are the sets that scripts 1422 and 1423 hold as constants: the first component
+  they are given, the one clicked, takes `selected`, and the others take `sprite`.
+
+A script pushes a call's arguments just before it calls. Where it passes on one of its own
+arguments, the task reads the calls of that script in turn, so a script that only forwards the
 sprites does not hide them. A call whose sprites are known only while the game runs is counted
-and not written. In this cache there are ten scrollbars, two buttons and two checkboxes, and six
-calls of the scrollbar script are known only while the game runs. A planted check that stops
-reading passed-on arguments leaves seven such calls, one more than the task finds.
-
+and not written. Each script that holds its sprites as constants is read by its shape, and the
+task stops where a script no longer has the shape it reads. In this cache there are ten
+scrollbars, four plate buttons, 107 sprite buttons, two checkboxes and one set of radio buttons,
+and six calls of the scrollbar script are known only while the game runs. A planted check that
+stops reading passed-on arguments leaves seven such calls, one more than the task finds, and a
+planted check that expects five sprites in script 2975 stops the task.
