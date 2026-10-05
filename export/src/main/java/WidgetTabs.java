@@ -45,16 +45,6 @@ final class WidgetTabs {
     private record Placed(int id, Component component) {
     }
 
-    /**
-     * The size of the game's window that a tab's place is worked out in, as the client's fixed
-     * window is ({@code GameShell} frame of 765 by 503).
-     */
-    private static final int SCREEN_WIDTH = 765;
-    private static final int SCREEN_HEIGHT = 503;
-
-    private record Box(int x, int y, int width, int height) {
-    }
-
     static List<Map<String, Object>> read(File cache, Map<Integer, ClientScript> scripts, WidgetSets spriteButtons, WidgetSets plateButtons) throws Exception {
         var setters = hoverSetters(scripts);
         for (var setter : setters.entrySet()) {
@@ -253,9 +243,10 @@ final class WidgetTabs {
      */
     private static List<Map<String, Object>> decorationParts(List<int[]> decorations, int tabId, Map<Integer, Component> byId) {
         var parts = new ArrayList<Map<String, Object>>();
-        var tabBox = boxOf(tabId, byId);
+        var layout = new WidgetLayout(byId);
+        var tabBox = layout.boxOf(tabId);
         for (var decoration : decorations) {
-            var box = byId.containsKey(decoration[0]) ? boxOf(decoration[0], byId) : null;
+            var box = byId.containsKey(decoration[0]) ? layout.boxOf(decoration[0]) : null;
             if (box != null && tabBox != null && decoration[1] >= 0) {
                 var part = new LinkedHashMap<String, Object>();
                 part.put("sprite", decoration[1]);
@@ -269,50 +260,6 @@ final class WidgetTabs {
         return parts;
     }
 
-    /**
-     * Where a component stands in the game's window and its size, laid out through each layer it
-     * is in, which it names by the layer's number in the low half of its id as decoded, with the
-     * client's rules ({@code InterfaceManager.resize}, {@code reposition}), or null
-     * where a layer it is in is not of its interface or a rule is one the export does not take.
-     */
-    private static Box boxOf(int id, Map<Integer, Component> byId) {
-        var component = byId.get(id);
-        if (component == null) {
-            return null;
-        }
-        var parentId = (id & ~CHILD_MASK) | (component.layer & CHILD_MASK);
-        var parent = component.layer == -1 ? new Box(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT) : boxOf(parentId, byId);
-        if (parent == null) {
-            return null;
-        }
-        var width = length(component.resizeModeX, component.originalWidth, parent.width());
-        var height = length(component.resizeModeY, component.originalHeight, parent.height());
-        var x = place(component.reposModeX, component.originalX, width, parent.width());
-        var y = place(component.reposModeY, component.originalY, height, parent.height());
-        if (width == Integer.MIN_VALUE || height == Integer.MIN_VALUE || x == Integer.MIN_VALUE || y == Integer.MIN_VALUE) {
-            return null;
-        }
-        return new Box(parent.x() + x, parent.y() + y, width, height);
-    }
-
-    private static int length(int mode, int value, int box) {
-        return switch (mode) {
-            case 0 -> value;
-            case 1 -> box - value;
-            case 2 -> (value * box) >> 14;
-            default -> Integer.MIN_VALUE;
-        };
-    }
-
-    private static int place(int mode, int value, int length, int box) {
-        return switch (mode) {
-            case 0 -> value;
-            case 1 -> value + (box - length) / 2;
-            case 2 -> box - length - value;
-            case 3 -> (value * box) >> 14;
-            default -> Integer.MIN_VALUE;
-        };
-    }
 
     /**
      * Whether a component covers a tab: it shows another sprite at the tab's very place, in a layer

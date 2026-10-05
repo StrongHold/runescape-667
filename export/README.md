@@ -730,10 +730,12 @@ none. A part that a set does not have is left out.
   way, and none the other way, which marks them apart from the tabs and plates that scripts swap.
 - `sliders` are the sliders of the interfaces: a `knob`, `knobWidth` by `knobHeight`, that the
   player drags along a box `width` by `height`, over its `track`. Scripts 1764 and 1215 move a
-  knob whose drag hook runs them: they keep it inside the box it stands in, and take as far along
-  the box as it is, out of the box's width less the knob's, for the value. The track is the sprite
-  components of the box's layer that lie within its height and cross it, left to right, each a
-  `sprite`, `tiled` where it is tiled, `x` and `y` from the box's corner, `width` and `height`.
+  knob whose drag hook runs them: they keep it inside the layer it stands in, its box, and take as
+  far along the box as it is, out of the box's width less the knob's, for the value. The knob's
+  sprite is its own, or where the knob is a layer, the one sprite in it. The track is every other
+  sprite of the interface whose place, laid out through its layers in a window of 765 by 503,
+  lies within the box's height and crosses it, left to right, each a `sprite`, `tiled` where it
+  is tiled, `x` and `y` from the box's corner, `width` and `height`.
 - `dropdowns` are the dropdowns that calls of script 1436 build, each once, where the call gives
   all of it as constants: `background`, tiled over the box, `arrow`, a 16 pixel wide button at
   its right, stretched to its height, `hoverArrow` in its place under the pointer, and

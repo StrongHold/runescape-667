@@ -12,9 +12,10 @@ import java.util.TreeSet;
 /**
  * The sliders of the interfaces: a knob the player drags along a box, over the sprites of a track.
  * The client's scripts 1764 and 1215 move a knob whose drag hook runs them: they keep the knob
- * inside the box it stands in, and take as far along the box as it is, out of the box's width less
- * the knob's, for the value. The track is the sprite components beside that box, of the same
- * layer, that lie within its height and cross it.
+ * inside the layer it stands in, its box, and take as far along the box as it is, out of the box's
+ * width less the knob's, for the value. The knob's sprite is its own, or where the knob is a layer,
+ * the one sprite in it. The track is every other sprite of the interface whose place, laid out
+ * through its layers, lies within the box's height and crosses it.
  */
 final class WidgetSliders {
 
@@ -22,10 +23,7 @@ final class WidgetSliders {
 
     private static final String DRAG_HOOK = "onDragComplete";
 
-    /**
-     * The components of an interface stand under their interface's number in the high half of
-     * their id, and their own number in the low half ({@code Component.id}).
-     */
+    private static final int INTERFACE_SHIFT = 16;
     private static final int CHILD_MASK = 0xFFFF;
 
     private final Map<String, Map<String, Object>> sliders = new LinkedHashMap<>();
@@ -41,77 +39,107 @@ final class WidgetSliders {
                 for (var file : Cache.split(data, index, group).entrySet()) {
                     var component = new Component();
                     component.decode(new Packet(file.getValue()));
-                    components.put(file.getKey(), component);
+                    components.put((group << INTERFACE_SHIFT) | file.getKey(), component);
                 }
-                for (var knob : components.values()) {
-                    found.addIfSlider(knob, components, group);
+                var layout = new WidgetLayout(components);
+                for (var knob : components.entrySet()) {
+                    found.addIfSlider(knob.getKey(), knob.getValue(), components, layout, group);
                 }
             }
         }
         return found;
     }
 
-    private void addIfSlider(Component knob, Map<Integer, Component> components, int interfaceId) throws Exception {
+    private void addIfSlider(int knobId, Component knob, Map<Integer, Component> components, WidgetLayout layout, int interfaceId) throws Exception {
         var hook = (Object[]) Component.class.getField(DRAG_HOOK).get(knob);
         var drags = hook != null && hook.length > 0 && hook[0] instanceof Integer script && SLIDER_SCRIPTS.contains(script);
-        var box = knob.layer == -1 ? null : components.get(knob.layer & CHILD_MASK);
-        if (!drags || knob.graphic < 0 || box == null || !isFixed(box)) {
+        if (!drags) {
             return;
         }
 
-        var track = new ArrayList<Component>();
-        for (var component : components.values()) {
-            var beside = component.layer == box.layer && component != box && component.type == Component.TYPE_GRAPHIC;
-            if (beside && component.graphic >= 0 && isFixed(component) && liesOn(component, box)) {
-                track.add(component);
+        var knobSpriteId = knob.graphic >= 0 ? Integer.valueOf(knobId) : onlySpriteIn(knobId, components, layout);
+        var boxId = layout.parentOf(knobId);
+        var box = boxId == -1 ? null : layout.boxOf(boxId);
+        var knobBox = layout.boxOf(knobId);
+        if (knobSpriteId == null || box == null || knobBox == null) {
+            return;
+        }
+
+        var track = new ArrayList<Map<String, Object>>();
+        var pieces = new ArrayList<Integer>(components.keySet());
+        pieces.sort(Comparator.comparingInt(id -> {
+            var placed = layout.boxOf(id);
+            return placed == null ? 0 : placed.x();
+        }));
+        for (var id : pieces) {
+            var component = components.get(id);
+            var placed = layout.boxOf(id);
+            var piece = component.type == Component.TYPE_GRAPHIC && component.graphic >= 0 && id != knobSpriteId;
+            if (piece && placed != null && liesOn(placed, box) && !isInside(id, knobId, layout)) {
+                var written = new LinkedHashMap<String, Object>();
+                written.put("sprite", component.graphic);
+                if (component.tiling) {
+                    written.put("tiled", true);
+                }
+                written.put("x", placed.x() - box.x());
+                written.put("y", placed.y() - box.y());
+                written.put("width", placed.width());
+                written.put("height", placed.height());
+                track.add(written);
             }
         }
         if (track.isEmpty()) {
             return;
         }
-        track.sort(Comparator.comparingInt(component -> component.originalX));
-
-        var pieces = new ArrayList<Map<String, Object>>();
-        for (var piece : track) {
-            var written = new LinkedHashMap<String, Object>();
-            written.put("sprite", piece.graphic);
-            if (piece.tiling) {
-                written.put("tiled", true);
-            }
-            written.put("x", piece.originalX - box.originalX);
-            written.put("y", piece.originalY - box.originalY);
-            written.put("width", piece.originalWidth);
-            written.put("height", piece.originalHeight);
-            pieces.add(written);
-        }
 
         var slider = new LinkedHashMap<String, Object>();
-        slider.put("knob", knob.graphic);
-        slider.put("knobWidth", knob.originalWidth);
-        slider.put("knobHeight", knob.originalHeight);
-        slider.put("width", box.originalWidth);
-        slider.put("height", box.originalHeight);
-        slider.put("track", pieces);
+        slider.put("knob", components.get(knobSpriteId).graphic);
+        slider.put("knobWidth", knobBox.width());
+        slider.put("knobHeight", knobBox.height());
+        slider.put("width", box.width());
+        slider.put("height", box.height());
+        slider.put("track", track);
         var key = Json.write(slider);
         sliders.putIfAbsent(key, slider);
         interfaces.computeIfAbsent(key, k -> new TreeSet<>()).add(interfaceId);
     }
 
     /**
-     * Whether a component stands where its numbers say and is the size they say, as most do.
+     * The one sprite component in a layer, or null where it holds none or more than one.
      */
-    private static boolean isFixed(Component component) {
-        return component.reposModeX == 0 && component.reposModeY == 0 && component.resizeModeX == 0 && component.resizeModeY == 0;
+    private static Integer onlySpriteIn(int layerId, Map<Integer, Component> components, WidgetLayout layout) {
+        Integer found = null;
+        var count = 0;
+        for (var entry : components.entrySet()) {
+            var component = entry.getValue();
+            if (layout.parentOf(entry.getKey()) == layerId && component.type == Component.TYPE_GRAPHIC && component.graphic >= 0) {
+                found = entry.getKey();
+                count++;
+            }
+        }
+        return count == 1 ? found : null;
     }
 
     /**
-     * Whether a component lies within the box's height and crosses it.
+     * Whether a component is the layer or within it, at any depth.
      */
-    private static boolean liesOn(Component component, Component box) {
-        var within = component.originalY >= box.originalY
-            && component.originalY + component.originalHeight <= box.originalY + box.originalHeight;
-        var crosses = component.originalX < box.originalX + box.originalWidth
-            && component.originalX + component.originalWidth > box.originalX;
+    private static boolean isInside(int id, int layerId, WidgetLayout layout) {
+        var at = id;
+        while (at != -1) {
+            if (at == layerId) {
+                return true;
+            }
+            at = layout.parentOf(at);
+        }
+        return false;
+    }
+
+    /**
+     * Whether a place lies within the box's height and crosses it.
+     */
+    private static boolean liesOn(WidgetLayout.Box placed, WidgetLayout.Box box) {
+        var within = placed.y() >= box.y() && placed.y() + placed.height() <= box.y() + box.height();
+        var crosses = placed.x() < box.x() + box.width() && placed.x() + placed.width() > box.x();
         return within && crosses;
     }
 
