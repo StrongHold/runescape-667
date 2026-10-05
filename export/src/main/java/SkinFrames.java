@@ -20,7 +20,7 @@ import java.util.TreeSet;
  * them. A component the player can use, one with a hook or an option, is not part of a frame, and a
  * box without a corner at each corner and an edge along each side is not a frame.
  */
-final class WidgetFrames {
+final class SkinFrames {
 
     /**
      * The two sizes a box is laid out at, wide enough that no piece of a frame meets the middle.
@@ -80,8 +80,8 @@ final class WidgetFrames {
     private final Map<String, TreeSet<Integer>> scripts = new LinkedHashMap<>();
     private final Map<String, TreeSet<Integer>> interfaces = new LinkedHashMap<>();
 
-    static WidgetFrames ofInterfaces(File cache) throws Exception {
-        var found = new WidgetFrames();
+    static SkinFrames ofInterfaces(File cache) throws Exception {
+        var found = new SkinFrames();
         var index = Cache.index(cache, Js5Archive.INTERFACES);
         for (var group : Cache.groupsOf(index)) {
             var data = Cache.group(cache, Js5Archive.INTERFACES, group);
@@ -106,8 +106,8 @@ final class WidgetFrames {
      * The hover frames that scripts 4155 and 4158 build, with the sprites each call gives them. A
      * call whose sprites are known only while the game runs builds no frame.
      */
-    static WidgetFrames hoverFrames(Map<Integer, ClientScript> scripts, WidgetExport.CallReader calls) {
-        var found = new WidgetFrames();
+    static SkinFrames hoverFrames(Map<Integer, ClientScript> scripts, SkinExport.CallReader calls) {
+        var found = new SkinFrames();
         for (var id : HOVER_FRAME_SCRIPTS) {
             for (var given : calls.argumentsOf(id)) {
                 found.add(builtBy(scripts.get(id), Arrays.asList(given)), id, null);

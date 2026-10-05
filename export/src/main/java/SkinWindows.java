@@ -19,7 +19,7 @@ import java.util.TreeSet;
  * button a sprite the hover hooks of the layer swap near its top right. The frame is written as
  * the frames are, measured from the sides of the box, so it can take any size.
  */
-final class WidgetWindows {
+final class SkinWindows {
 
     /**
      * How far from the side of its place a piece of a frame may stand, as the corners of the
@@ -58,8 +58,8 @@ final class WidgetWindows {
         }
     }
 
-    static WidgetWindows read(File cache) throws Exception {
-        var found = new WidgetWindows();
+    static SkinWindows read(File cache) throws Exception {
+        var found = new SkinWindows();
         var index = Cache.index(cache, Js5Archive.INTERFACES);
         for (var group : Cache.groupsOf(index)) {
             var data = Cache.group(cache, Js5Archive.INTERFACES, group);

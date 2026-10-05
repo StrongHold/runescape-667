@@ -19,18 +19,18 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
- * Writes the sprites the client's scripts and interfaces build their widgets from: the scrollbar,
+ * Writes the sprites the client's scripts and interfaces build their components from: the scrollbar,
  * the plate button, the sprite button, the checkbox and the radio button.
  *
- * Each script in the cache is decoded with the client's own decoder, and each call of a widget's
+ * Each script in the cache is decoded with the client's own decoder, and each call of a component's
  * script is read back from the instructions before it, which push its arguments. Where a caller
  * passes on an argument it was given, the calls of that caller are read in turn. A call whose
- * sprites are known only while the game runs is counted and not written. The widgets whose sprites
+ * sprites are known only while the game runs is counted and not written. The components whose sprites
  * are given by the hooks of interface components, or held as constants in a script, are read by
- * {@link WidgetReaders}. A sprite that a widget names must be in the cache, or the export stops,
- * since the widget could not be drawn.
+ * {@link SkinReaders}. A sprite that a component names must be in the cache, or the export stops,
+ * since the component could not be drawn.
  */
-public final class WidgetExport {
+public final class SkinExport {
 
     public static final class Args implements Arguments {
 
@@ -41,7 +41,7 @@ public final class WidgetExport {
             names = "--out",
             description = "The file to write, relative to the export module when not absolute"
         )
-        private Path out = Path.of("build", "widgets.json");
+        private Path out = Path.of("build", "skins.json");
 
         @Parameter(names = "--help", help = true, description = "Print this message")
         private boolean help;
@@ -53,10 +53,10 @@ public final class WidgetExport {
     }
 
     /**
-     * A widget's script, the argument its sprites start at, and the names of its sprites in the
+     * A component's script, the argument its sprites start at, and the names of its sprites in the
      * order the script takes them.
      */
-    private record Widget(String name, int script, int firstSprite, List<String> fields) {
+    private record Skinned(String name, int script, int firstSprite, List<String> fields) {
     }
 
     /**
@@ -64,9 +64,9 @@ public final class WidgetExport {
      * middle and bottom of the dragger, and the up and down arrows. The button takes its layer,
      * then the edge and middle of its plate, and the edge and middle under the pointer.
      */
-    private static final List<Widget> WIDGETS = List.of(
-        new Widget("scrollbars", 31, 2, List.of("track", "draggerTop", "draggerMiddle", "draggerBottom", "upArrow", "downArrow")),
-        new Widget("plateButtons", 3077, 1, List.of("edge", "middle", "hoverEdge", "hoverMiddle"))
+    private static final List<Skinned> SKINNED = List.of(
+        new Skinned("scrollbars", 31, 2, List.of("track", "draggerTop", "draggerMiddle", "draggerBottom", "upArrow", "downArrow")),
+        new Skinned("plateButtons", 3077, 1, List.of("edge", "middle", "hoverEdge", "hoverMiddle"))
     );
 
     /**
@@ -87,7 +87,7 @@ public final class WidgetExport {
     }
 
     public static void main(String[] arguments) throws Exception {
-        var parsed = CommandLine.parse("exportWidgets", new Args(), arguments);
+        var parsed = CommandLine.parse("exportSkins", new Args(), arguments);
 
         if (parsed.isPresent()) {
             export(parsed.get());
@@ -110,36 +110,36 @@ public final class WidgetExport {
             sprites.add(id);
         }
 
-        var hooks = WidgetHooks.read(cache);
+        var hooks = ComponentHooks.read(cache);
         var calls = new Calls(scripts);
-        var frames = WidgetFrames.ofInterfaces(cache);
-        var hoverFrames = WidgetFrames.hoverFrames(scripts, calls);
+        var frames = SkinFrames.ofInterfaces(cache);
+        var hoverFrames = SkinFrames.hoverFrames(scripts, calls);
         var report = new ArrayList<String>();
-        var sets = new LinkedHashMap<String, WidgetSets>();
-        for (var widget : WIDGETS) {
-            var found = sets.computeIfAbsent(widget.name(), name -> new WidgetSets(widget.fields()));
+        var sets = new LinkedHashMap<String, SkinSets>();
+        for (var skinned : SKINNED) {
+            var found = sets.computeIfAbsent(skinned.name(), name -> new SkinSets(skinned.fields()));
             var unknown = 0;
-            for (var call : calls.of(widget.script())) {
-                var named = Arrays.asList(call.arguments()).subList(widget.firstSprite(), widget.firstSprite() + widget.fields().size());
+            for (var call : calls.of(skinned.script())) {
+                var named = Arrays.asList(call.arguments()).subList(skinned.firstSprite(), skinned.firstSprite() + skinned.fields().size());
                 if (named.contains(null)) {
                     unknown++;
                 } else {
                     found.add(named, call.caller(), null);
                 }
             }
-            report.add(unknown + " calls of script " + widget.script() + " known only while the game runs");
+            report.add(unknown + " calls of script " + skinned.script() + " known only while the game runs");
         }
 
-        WidgetReaders.plateButtons(scripts, hooks, sets.get("plateButtons"));
-        WidgetReaders.spriteButtons(scripts, hooks, sets.computeIfAbsent("spriteButtons", name -> new WidgetSets(List.of("sprite", "hover", "pressed"))));
-        var tabs = WidgetTabs.read(
+        SkinReaders.plateButtons(scripts, hooks, sets.get("plateButtons"));
+        SkinReaders.spriteButtons(scripts, hooks, sets.computeIfAbsent("spriteButtons", name -> new SkinSets(List.of("sprite", "hover", "pressed"))));
+        var tabs = SkinTabs.read(
             cache,
             scripts,
-            sets.computeIfAbsent("spriteButtons", name -> new WidgetSets(List.of("sprite", "hover", "pressed"))),
+            sets.computeIfAbsent("spriteButtons", name -> new SkinSets(List.of("sprite", "hover", "pressed"))),
             sets.get("plateButtons")
         );
-        WidgetReaders.radioButtons(scripts, hooks, sets.computeIfAbsent("radioButtons", name -> new WidgetSets(List.of("sprite", "selected"))), spriteSizes(cache));
-        var checkboxes = WidgetCheckboxes.read(scripts, calls, sets.get("radioButtons").keys(), spriteSizes(cache));
+        SkinReaders.radioButtons(scripts, hooks, sets.computeIfAbsent("radioButtons", name -> new SkinSets(List.of("sprite", "selected"))), spriteSizes(cache));
+        var checkboxes = SkinCheckboxes.read(scripts, calls, sets.get("radioButtons").keys(), spriteSizes(cache));
 
         var sizes = spriteSizes(cache);
         var file = new LinkedHashMap<String, Object>();
@@ -151,13 +151,13 @@ public final class WidgetExport {
         report.add(tabs.size() + " tabs");
         file.put("checkboxes", checkboxes);
         report.add(checkboxes.size() + " checkboxes");
-        var dropdowns = WidgetReaders.dropdowns(calls, sprites);
+        var dropdowns = SkinReaders.dropdowns(calls, sprites);
         file.put("dropdowns", dropdowns);
         report.add(dropdowns.size() + " dropdowns");
-        var sliders = WidgetSliders.read(cache);
+        var sliders = SkinSliders.read(cache);
         file.put("sliders", sliders.written());
         report.add(sliders.size() + " sliders");
-        var windows = WidgetWindows.read(cache);
+        var windows = SkinWindows.read(cache);
         file.put("windows", windows.written());
         report.add(windows.size() + " windows");
         file.put("frames", frames.written());
@@ -305,7 +305,7 @@ public final class WidgetExport {
         }
     }
 
-    private WidgetExport() {
+    private SkinExport() {
         /* empty */
     }
 }

@@ -26,7 +26,7 @@ import java.util.Set;
  * middle that stretches and an edge at its right, whose pieces a script that the hover hooks of
  * the interface run sets to other sprites by constant, as scripts 4003, 4004 and 4010 do.
  */
-final class WidgetTabs {
+final class SkinTabs {
 
     private static final int IF_SETGRAPHIC = ClientScriptOpCode.CC_IF_SETGRAPHIC + 1000;
 
@@ -45,7 +45,7 @@ final class WidgetTabs {
     private record Placed(int id, Component component) {
     }
 
-    static List<Map<String, Object>> read(File cache, Map<Integer, ClientScript> scripts, WidgetSets spriteButtons, WidgetSets plateButtons) throws Exception {
+    static List<Map<String, Object>> read(File cache, Map<Integer, ClientScript> scripts, SkinSets spriteButtons, SkinSets plateButtons) throws Exception {
         var setters = hoverSetters(scripts);
         for (var setter : setters.entrySet()) {
             spriteButtons.add(Arrays.asList(setter.getValue()[0], setter.getValue()[1], null), setter.getKey(), null);
@@ -243,7 +243,7 @@ final class WidgetTabs {
      */
     private static List<Map<String, Object>> decorationParts(List<int[]> decorations, int tabId, Map<Integer, Component> byId) {
         var parts = new ArrayList<Map<String, Object>>();
-        var layout = new WidgetLayout(byId);
+        var layout = new ComponentLayout(byId);
         var tabBox = layout.boxOf(tabId);
         for (var decoration : decorations) {
             var box = byId.containsKey(decoration[0]) ? layout.boxOf(decoration[0]) : null;
@@ -280,7 +280,7 @@ final class WidgetTabs {
      * stretches across and an edge at its right, each of whose pieces a hover script sets to one
      * other sprite.
      */
-    private static void addHoverPlates(int interfaceId, List<Placed> placed, Map<Integer, Set<Integer>> swapped, WidgetSets plateButtons) {
+    private static void addHoverPlates(int interfaceId, List<Placed> placed, Map<Integer, Set<Integer>> swapped, SkinSets plateButtons) {
         var layers = new LinkedHashMap<Integer, List<Placed>>();
         for (var piece : placed) {
             if (piece.component().type == Component.TYPE_GRAPHIC && piece.component().graphic >= 0) {
@@ -321,7 +321,7 @@ final class WidgetTabs {
         return others.size() == 1 ? others.iterator().next() : null;
     }
 
-    private WidgetTabs() {
+    private SkinTabs() {
         /* empty */
     }
 }

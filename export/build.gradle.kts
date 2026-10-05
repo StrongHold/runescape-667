@@ -62,8 +62,8 @@ tasks.register<JavaExec>("exportHitmarks") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("exportWidgets") {
+tasks.register<JavaExec>("exportSkins") {
     description = "Writes the sprites the client's scripts and interfaces build their scrollbars, buttons, checkboxes, radio buttons, tabs, sliders, dropdowns, frames and windows from."
-    mainClass = "WidgetExport"
+    mainClass = "SkinExport"
     classpath = sourceSets["main"].runtimeClasspath
 }

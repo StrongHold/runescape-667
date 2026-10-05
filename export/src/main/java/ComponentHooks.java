@@ -11,7 +11,7 @@ import java.util.Map;
  * The script hooks of every component of every interface in the cache, decoded with the client's
  * own decoder ({@code Component.decode}): which script each hook runs, and with what arguments.
  */
-final class WidgetHooks {
+final class ComponentHooks {
 
     /**
      * A component with hooks: its interface, its sprite, or -1 for none, and each hook by the name
@@ -22,11 +22,11 @@ final class WidgetHooks {
 
     private final List<Hooked> components;
 
-    private WidgetHooks(List<Hooked> components) {
+    private ComponentHooks(List<Hooked> components) {
         this.components = components;
     }
 
-    static WidgetHooks read(File cache) throws Exception {
+    static ComponentHooks read(File cache) throws Exception {
         var index = Cache.index(cache, Js5Archive.INTERFACES);
         var components = new ArrayList<Hooked>();
         for (var group : Cache.groupsOf(index)) {
@@ -42,7 +42,7 @@ final class WidgetHooks {
                 }
             }
         }
-        return new WidgetHooks(components);
+        return new ComponentHooks(components);
     }
 
     private static Map<String, Object[]> hooksOf(Component component) throws IllegalAccessException {

@@ -7,10 +7,10 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * The sets of sprites found for one widget: each set once, under the names of its parts, with the
+ * The sets of sprites found for one kind of component: each set once, under the names of its parts, with the
  * scripts and the interfaces that give it. A part a set does not have is null and is not written.
  */
-final class WidgetSets {
+final class SkinSets {
 
     /**
      * Where a set was found: the scripts that give it, and the interfaces whose components do.
@@ -22,7 +22,7 @@ final class WidgetSets {
 
     private final Map<List<Integer>, Found> sets = new LinkedHashMap<>();
 
-    WidgetSets(List<String> fields) {
+    SkinSets(List<String> fields) {
         this.fields = fields;
     }
 
@@ -52,9 +52,9 @@ final class WidgetSets {
 
     /**
      * The sets as the file holds them. A sprite that is not in the cache stops the export, since the
-     * widget could not be drawn.
+     * component could not be drawn.
      */
-    List<Map<String, Object>> written(String widget, Set<Integer> cached) {
+    List<Map<String, Object>> written(String kind, Set<Integer> cached) {
         var written = new ArrayList<Map<String, Object>>();
         for (var set : sets.entrySet()) {
             var entry = new LinkedHashMap<String, Object>();
@@ -62,7 +62,7 @@ final class WidgetSets {
                 var sprite = set.getKey().get(at);
                 if (sprite != null) {
                     if (!cached.contains(sprite)) {
-                        System.out.println(widget + " name sprite " + sprite + ", which is not in the cache");
+                        System.out.println(kind + " name sprite " + sprite + ", which is not in the cache");
                         System.exit(1);
                     }
                     entry.put(fields.get(at), sprite);

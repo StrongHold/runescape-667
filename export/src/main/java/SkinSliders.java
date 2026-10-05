@@ -17,7 +17,7 @@ import java.util.TreeSet;
  * the one sprite in it. The track is every other sprite of the interface whose place, laid out
  * through its layers, lies within the box's height and crosses it.
  */
-final class WidgetSliders {
+final class SkinSliders {
 
     private static final List<Integer> SLIDER_SCRIPTS = List.of(1764, 1215);
 
@@ -29,8 +29,8 @@ final class WidgetSliders {
     private final Map<String, Map<String, Object>> sliders = new LinkedHashMap<>();
     private final Map<String, TreeSet<Integer>> interfaces = new LinkedHashMap<>();
 
-    static WidgetSliders read(File cache) throws Exception {
-        var found = new WidgetSliders();
+    static SkinSliders read(File cache) throws Exception {
+        var found = new SkinSliders();
         var index = Cache.index(cache, Js5Archive.INTERFACES);
         for (var group : Cache.groupsOf(index)) {
             var data = Cache.group(cache, Js5Archive.INTERFACES, group);
@@ -41,7 +41,7 @@ final class WidgetSliders {
                     component.decode(new Packet(file.getValue()));
                     components.put((group << INTERFACE_SHIFT) | file.getKey(), component);
                 }
-                var layout = new WidgetLayout(components);
+                var layout = new ComponentLayout(components);
                 for (var knob : components.entrySet()) {
                     found.addIfSlider(knob.getKey(), knob.getValue(), components, layout, group);
                 }
@@ -50,7 +50,7 @@ final class WidgetSliders {
         return found;
     }
 
-    private void addIfSlider(int knobId, Component knob, Map<Integer, Component> components, WidgetLayout layout, int interfaceId) throws Exception {
+    private void addIfSlider(int knobId, Component knob, Map<Integer, Component> components, ComponentLayout layout, int interfaceId) throws Exception {
         var hook = (Object[]) Component.class.getField(DRAG_HOOK).get(knob);
         var drags = hook != null && hook.length > 0 && hook[0] instanceof Integer script && SLIDER_SCRIPTS.contains(script);
         if (!drags) {
@@ -107,7 +107,7 @@ final class WidgetSliders {
     /**
      * The one sprite component in a layer, or null where it holds none or more than one.
      */
-    private static Integer onlySpriteIn(int layerId, Map<Integer, Component> components, WidgetLayout layout) {
+    private static Integer onlySpriteIn(int layerId, Map<Integer, Component> components, ComponentLayout layout) {
         Integer found = null;
         var count = 0;
         for (var entry : components.entrySet()) {
@@ -123,7 +123,7 @@ final class WidgetSliders {
     /**
      * Whether a component is the layer or within it, at any depth.
      */
-    private static boolean isInside(int id, int layerId, WidgetLayout layout) {
+    private static boolean isInside(int id, int layerId, ComponentLayout layout) {
         var at = id;
         while (at != -1) {
             if (at == layerId) {
@@ -137,7 +137,7 @@ final class WidgetSliders {
     /**
      * Whether a place lies within the box's height and crosses it.
      */
-    private static boolean liesOn(WidgetLayout.Box placed, WidgetLayout.Box box) {
+    private static boolean liesOn(ComponentLayout.Box placed, ComponentLayout.Box box) {
         var within = placed.y() >= box.y() && placed.y() + placed.height() <= box.y() + box.height();
         var crosses = placed.x() < box.x() + box.width() && placed.x() + placed.width() > box.x();
         return within && crosses;

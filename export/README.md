@@ -666,16 +666,16 @@ pixel up in every glyph fails all 27, and so does a planted advance one pixel to
 
 The `viewer` subproject shows everything written here, map squares too. See its README.
 
-## Writing the widgets' sprites
+## Writing the sprites of the interface components
 
-    ./gradlew :export:exportWidgets
+    ./gradlew :export:exportSkins
 
 The client has no scrollbar, button or checkbox of its own. Its scripts build each one from sprite
 components, and the hooks of interface components change those sprites as the pointer moves over
 them. The task decodes every script in the cache with the client's own decoder
 (`ClientScript.decode`) and every interface component with the client's own decoder
-(`Component.decode`), and writes each set of sprites that a widget is drawn in to
-`export/build/widgets.json`. `--out` names another file, and `--cache` works as it does for a
+(`Component.decode`), and writes each set of sprites that a component is drawn in to
+`export/build/skins.json`. `--out` names another file, and `--cache` works as it does for a
 model.
 
 Each set lists its sprites under the names of their parts, `scripts`, the scripts that give it,

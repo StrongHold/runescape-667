@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The widgets whose sprites are given by interface hooks or held in a script's own instructions,
- * rather than passed to a widget script by its callers. Each reader checks that its script still
+ * The components whose sprites are given by interface hooks or held in a script's own instructions,
+ * rather than passed to a component's script by its callers. Each reader checks that its script still
  * has the shape it reads, and stops the export where it does not.
  */
-final class WidgetReaders {
+final class SkinReaders {
 
     /**
      * The client runs an interface command on a component it is given, rather than the one a hook
@@ -74,7 +74,7 @@ final class WidgetReaders {
     private static final List<String> HOVER_HOOKS = List.of(OVER, "onMouseRepeat");
     private static final List<String> PRESSED_HOOKS = List.of("onClick", "onHold", "onClickRepeat");
 
-    static void plateButtons(Map<Integer, ClientScript> scripts, WidgetHooks hooks, WidgetSets sets) {
+    static void plateButtons(Map<Integer, ClientScript> scripts, ComponentHooks hooks, SkinSets sets) {
         var graphics = graphicsOf(scripts.get(HOVER_PLATE));
         if (graphics.size() != 6 || !targets(graphics.subList(0, 3), 0, 2, 1) || !targets(graphics.subList(3, 6), 0, 2, 1)
             || !graphics.get(0)[1].equals(graphics.get(1)[1]) || !graphics.get(3)[1].equals(graphics.get(4)[1])) {
@@ -95,7 +95,7 @@ final class WidgetReaders {
         }
     }
 
-    static void spriteButtons(Map<Integer, ClientScript> scripts, WidgetHooks hooks, WidgetSets sets) {
+    static void spriteButtons(Map<Integer, ClientScript> scripts, ComponentHooks hooks, SkinSets sets) {
         for (var calling : hooks.calling(SWAP_SPRITE)) {
             var own = calling.component().graphic();
             var sprite = first(calling, NORMAL_HOOKS, 1);
@@ -140,7 +140,7 @@ final class WidgetReaders {
      */
     private static final int RADIO_GROUP = 3;
 
-    static void radioButtons(Map<Integer, ClientScript> scripts, WidgetHooks hooks, WidgetSets sets, Map<Integer, int[]> sizes) {
+    static void radioButtons(Map<Integer, ClientScript> scripts, ComponentHooks hooks, SkinSets sets, Map<Integer, int[]> sizes) {
         selectedPairs(scripts, sizes, sets);
         for (var script : RADIO_GROUPS) {
             var graphics = graphicsOf(scripts.get(script));
@@ -164,7 +164,7 @@ final class WidgetReaders {
      * constants. The colour of the other options is written only where it differs from the plain
      * colour.
      */
-    static List<Map<String, Object>> dropdowns(WidgetExport.CallReader calls, java.util.Set<Integer> cached) {
+    static List<Map<String, Object>> dropdowns(SkinExport.CallReader calls, java.util.Set<Integer> cached) {
         var found = new java.util.LinkedHashMap<String, Map<String, Object>>();
         for (var given : calls.argumentsOf(DROPDOWN)) {
             var named = Arrays.asList(given).subList(DROPDOWN_FIRST_SPRITE, DROPDOWN_FIRST_SPRITE + DROPDOWN_FIELDS.size() + SCROLLBAR_FIELDS.size());
@@ -199,7 +199,7 @@ final class WidgetReaders {
      * scripts select between them that way, and none the other way, which marks them apart from the
      * tabs and plates scripts swap.
      */
-    private static void selectedPairs(Map<Integer, ClientScript> scripts, Map<Integer, int[]> sizes, WidgetSets sets) {
+    private static void selectedPairs(Map<Integer, ClientScript> scripts, Map<Integer, int[]> sizes, SkinSets sets) {
         var found = new java.util.TreeMap<List<Integer>, List<Integer>>(java.util.Comparator.comparing(Object::toString));
         for (var script : scripts.entrySet()) {
             var pair = selectedPairOf(script.getValue());
@@ -299,14 +299,14 @@ final class WidgetReaders {
     /**
      * The edge and the middle a row's hook gives, where it gives the same edge to both ends.
      */
-    private static Integer[] rowOf(WidgetHooks.Calling calling, String hook) {
+    private static Integer[] rowOf(ComponentHooks.Calling calling, String hook) {
         var edge = calling.sprite(hook, 1);
         var middle = calling.sprite(hook, 3);
         var otherEdge = calling.sprite(hook, 5);
         return edge != null && middle != null && edge.equals(otherEdge) ? new Integer[] {edge, middle} : null;
     }
 
-    private static Integer first(WidgetHooks.Calling calling, List<String> hooks, int at) {
+    private static Integer first(ComponentHooks.Calling calling, List<String> hooks, int at) {
         for (var hook : hooks) {
             var value = calling.sprite(hook, at);
             if (value != null) {
@@ -343,7 +343,7 @@ final class WidgetReaders {
         System.exit(1);
     }
 
-    private WidgetReaders() {
+    private SkinReaders() {
         /* empty */
     }
 }

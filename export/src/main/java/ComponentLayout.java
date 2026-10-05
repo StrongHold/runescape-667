@@ -6,7 +6,7 @@ import java.util.Map;
  * A component names its layer by the layer's number in the low half of its id as decoded; the
  * client fills the interface's number in when it loads the interface.
  */
-final class WidgetLayout {
+final class ComponentLayout {
 
     /**
      * The size of the game's window the components are laid out in, the client's fixed window.
@@ -27,7 +27,7 @@ final class WidgetLayout {
     /**
      * The layout of an interface's components, by their ids.
      */
-    WidgetLayout(Map<Integer, Component> components) {
+    ComponentLayout(Map<Integer, Component> components) {
         this.components = components;
     }
 

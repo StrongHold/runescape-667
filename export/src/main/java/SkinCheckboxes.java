@@ -23,7 +23,7 @@ import java.util.TreeSet;
  * empty one is not the ticked one of another checkbox, which marks them apart from the other marks
  * scripts swap.
  */
-final class WidgetCheckboxes {
+final class SkinCheckboxes {
 
     private static final int BOX_SCRIPT = 4521;
     private static final int TICKED_SCRIPT = 4519;
@@ -53,7 +53,7 @@ final class WidgetCheckboxes {
 
     static List<Map<String, Object>> read(
         Map<Integer, ClientScript> scripts,
-        WidgetExport.CallReader calls,
+        SkinExport.CallReader calls,
         Set<List<Integer>> radios,
         Map<Integer, int[]> sizes
     ) {
@@ -100,7 +100,7 @@ final class WidgetCheckboxes {
      * The state of a checkbox that a script gives script 4521, or null where it gives none as
      * constants.
      */
-    private static Map<String, Object> boxOf(WidgetExport.CallReader calls, int caller) {
+    private static Map<String, Object> boxOf(SkinExport.CallReader calls, int caller) {
         var arguments = calls.argumentsOf(BOX_SCRIPT);
         var callers = calls.callersOf(BOX_SCRIPT);
         for (var at = 0; at < arguments.size(); at++) {
@@ -160,7 +160,7 @@ final class WidgetCheckboxes {
         }
     }
 
-    private WidgetCheckboxes() {
+    private SkinCheckboxes() {
         /* empty */
     }
 }
