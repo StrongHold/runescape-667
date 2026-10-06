@@ -26,8 +26,8 @@ final class SkinFrames {
     /**
      * The two sizes a box is laid out at, wide enough that no piece of a frame meets the middle.
      */
-    private static final int WIDTH = 400;
-    private static final int HEIGHT = 300;
+    static final int WIDTH = 400;
+    static final int HEIGHT = 300;
     static final int WIDER = 500;
     static final int HIGHER = 400;
 
@@ -133,7 +133,8 @@ final class SkinFrames {
     }
 
     /**
-     * Whether the player can use a component: it has a hook or an option.
+     * Whether the player can use a component: it has a hook or an option with a name, as one without
+     * is not offered (`InterfaceManager`, the trimmed name of an option).
      */
     private static boolean isUsable(Component component) throws IllegalAccessException {
         for (var field : Component.class.getFields()) {
@@ -141,7 +142,7 @@ final class SkinFrames {
                 return true;
             }
         }
-        return component.ops != null && java.util.Arrays.stream(component.ops).anyMatch(op -> op != null);
+        return component.ops != null && java.util.Arrays.stream(component.ops).anyMatch(op -> op != null && !op.isBlank());
     }
 
     static Piece pieceOf(Component component) {

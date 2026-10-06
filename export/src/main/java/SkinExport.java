@@ -162,6 +162,9 @@ public final class SkinExport {
         report.add(windows.size() + " windows");
         file.put("frames", frames.written());
         file.put("hoverFrames", hoverFrames.written());
+        var frameButtons = SkinFrameButtons.read(scripts);
+        file.put("frameButtons", frameButtons);
+        report.add(frameButtons.size() + " frameButtons");
         report.add(frames.size() + " frames");
         report.add(hoverFrames.size() + " hoverFrames");
 

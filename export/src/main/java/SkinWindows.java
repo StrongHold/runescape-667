@@ -331,7 +331,7 @@ final class SkinWindows {
                 return true;
             }
         }
-        return component.ops != null && java.util.Arrays.stream(component.ops).anyMatch(op -> op != null);
+        return component.ops != null && java.util.Arrays.stream(component.ops).anyMatch(op -> op != null && !op.isBlank());
     }
 
     private static boolean isFixed(Component component) {

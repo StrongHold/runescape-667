@@ -772,7 +772,8 @@ none. A part that a set does not have is left out.
   (`InterfaceManager.resize`, `reposition`): a component that keeps its size and its place
   against two sides is a corner, one that grows along a side is an edge, and one that grows both
   ways is a fill. A component the player can use, one with a hook or an option such as a close
-  button in a corner, is not part of the frame, and a component in none of these places, such as
+  button in a corner, is not part of the frame (an option whose name is blank is not one, as the
+  client offers none for it, `InterfaceManager.getOp`), and a component in none of these places, such as
   one centred on a side, is passed over. A layer without a corner at each corner and an edge along
   each side is not written. A frame is its `parts`, in the order the client draws them, so an
   ornate frame may have several in one place. Each part has its `place`, its `sprite`,
@@ -799,6 +800,13 @@ none. A part that a set does not have is left out.
   laid out as the frames are, at two sizes with the client's rules, so a place may have several
   parts and a fill may be of one colour; its title and close button are measured where they stand
   in the larger of the two sizes.
+- `frameButtons` are the buttons a script builds as a frame: the stone button that 151 components
+  have (script 92, proc 679, and under the pointer script 94, proc 1360) and the bevelled button
+  of the question that accepts a graphics setting, interface 883 (procs 1151 and 1166). Each has
+  its `frame` and its `hoverFrame`, in the form of `frames`, and its two `scripts`. The task plays
+  each script back for a button of two sizes, following its constants, locals, sums, calls and the
+  components it creates, and lays the components out as the frames are; it stops where a script
+  uses an instruction the playback does not play.
 - `hoverFrames` are the frames that scripts 4155 and 4158 build over a component, in the same
   form, read by playing back the components the script creates with the sprites each call gives
   it. Their pieces are clear until the pointer moves over the component, when script 4160 makes
@@ -810,7 +818,7 @@ sprites does not hide them. A call whose sprites are known only while the game r
 not written. Each script that holds its sprites as constants is read by its shape, and the task
 stops where a script no longer has the shape it reads. In this cache there are ten scrollbars, seven
 plate buttons, 110 sprite buttons, two tabs, five checkboxes, two sets of radio buttons, four
-sliders, one dropdown, 106 frames, 55 windows and two hover frames, and six calls of the scrollbar
+sliders, one dropdown, 159 frames, 85 windows, two frame buttons and two hover frames, and six calls of the scrollbar
 script are known only while the game runs. A planted check that stops reading passed-on arguments
 leaves seven such calls, one more than the task finds, and a planted check that expects five sprites
 in script 2975 stops the task.
