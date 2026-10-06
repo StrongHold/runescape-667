@@ -168,6 +168,17 @@ public final class SkinExport {
         report.add(frames.size() + " frames");
         report.add(hoverFrames.size() + " hoverFrames");
 
+        var edges = SkinEdges.read(cache);
+        for (var key : List.of("frames", "hoverFrames", "windows")) {
+            for (var frame : (List<?>) file.get(key)) {
+                edges.addSeen((List<?>) ((Map<?, ?>) frame).get("parts"));
+            }
+        }
+        for (var button : frameButtons) {
+            edges.addSeen((List<?>) ((Map<?, ?>) button.get("frame")).get("parts"));
+            edges.addSeen((List<?>) ((Map<?, ?>) button.get("hoverFrame")).get("parts"));
+        }
+
         if (args.out.getParent() != null) {
             Files.createDirectories(args.out.getParent());
         }

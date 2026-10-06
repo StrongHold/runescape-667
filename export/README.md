@@ -782,7 +782,10 @@ none. A part that a set does not have is left out.
   than stretched. A part at `topLeft`, `topRight`, `bottomLeft` or `bottomRight` is `x` and `y`
   from its two sides, `width` wide and `height` high. A part at `top`, `bottom`, `left` or
   `right` runs from `start` after the first end of its side to `end` before the other, `inset` in
-  from the side, `thickness` thick. A part at `centre` keeps `left`, `top`, `right` and `bottom`
+  from the side, `thickness` thick, and is `seen` from its side as far as the part of its sprite the
+  cache holds pixels for reaches, the canvas less the sprite's offsets (`IndexedImage.offX1`,
+  `offX2`, `offY1`, `offY2`), mirrored or flipped as it is drawn: what the frame holds stands
+  inside that. A part at `centre` keeps `left`, `top`, `right` and `bottom`
   from the sides. A filled rectangle component that grows both ways is a fill of one colour: in
   place of a `sprite` it has its `colour` as 0xRRGGBB and, where it is not solid, its
   `transparency`, 0 solid to 255 unseen (`Component.transparency`).
