@@ -162,6 +162,9 @@ public final class SkinExport {
         report.add(windows.size() + " windows");
         file.put("frames", frames.written());
         file.put("hoverFrames", hoverFrames.written());
+        var radioTiles = SkinTiles.read(cache, scripts);
+        file.put("radioTiles", radioTiles);
+        report.add(radioTiles.size() + " radioTiles");
         var frameButtons = SkinFrameButtons.read(scripts);
         file.put("frameButtons", frameButtons);
         report.add(frameButtons.size() + " frameButtons");

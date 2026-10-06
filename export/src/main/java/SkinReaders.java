@@ -275,7 +275,7 @@ final class SkinReaders {
      * The sprites a script sets on the components it is given, in the order of its instructions:
      * each the argument it is set on and the sprite, pushed as a constant just before.
      */
-    private static List<Integer[]> graphicsOf(ClientScript script) {
+    static List<Integer[]> graphicsOf(ClientScript script) {
         var graphics = new ArrayList<Integer[]>();
         for (var at = 2; at < script.opcodes.length; at++) {
             if (script.opcodes[at] == IF_SETGRAPHIC
@@ -338,7 +338,7 @@ final class SkinReaders {
         return tabs;
     }
 
-    private static void stop(int script, String shape) {
+    static void stop(int script, String shape) {
         System.out.println("script " + script + " no longer has the shape the export reads: it does not " + shape);
         System.exit(1);
     }
