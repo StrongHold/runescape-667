@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.IntStream;
 
 /**
  * Turns the tiles of one level of a map square, as the client's software toolkit holds them, into
@@ -209,6 +210,18 @@ public final class GroundToGltf {
     }
 
     /**
+     * The texture and size a vertex names. A texture of size 0 is drawn by neither toolkit: the
+     * software one divides the vertex's place by the size and the GL one scales the texture by its
+     * inverse ({@code JavaGround.renderTile}, {@code Node_Sub39}), each infinite, so the vertex
+     * is written untextured, in its colour alone.
+     */
+    private static Surface surface(JavaGenericBlendedTile tile, int vertex) {
+        var texture = tile.vertexTextures[vertex];
+        var size = tile.vertexSizes[vertex];
+        return texture != -1 && size == 0 ? new Surface(-1, size) : new Surface(texture, size);
+    }
+
+    /**
      * Writes one face as the rasteriser draws it.
      *
      * <p>A face whose corners agree on a texture and its size is drawn with it, or in colour alone
@@ -223,10 +236,10 @@ public final class GroundToGltf {
      * of the second, which is close but not exact.
      */
     private void addFace(int x, int z, JavaGenericBlendedTile tile, int a) {
-        var corners = List.of(
-            new Surface(tile.vertexTextures[a], tile.vertexSizes[a]),
-            new Surface(tile.vertexTextures[a + 1], tile.vertexSizes[a + 1]),
-            new Surface(tile.vertexTextures[a + 2], tile.vertexSizes[a + 2]));
+        var corners = List.of(surface(tile, a), surface(tile, a + 1), surface(tile, a + 2));
+        if (hasSizelessTexture(tile, a)) {
+            approximated.merge("a corner names a texture of size 0, drawn untextured there", 1, Integer::sum);
+        }
         var first = corners.getFirst();
         var alpha = tile.vertexColours[a] >>> 24;
         var distinct = corners.stream().distinct().toList();
@@ -425,6 +438,10 @@ public final class GroundToGltf {
     /**
      * What a corner of a face is made of: a texture, and the size the floor type gives it.
      */
+    private static boolean hasSizelessTexture(JavaGenericBlendedTile tile, int a) {
+        return IntStream.range(a, a + 3).anyMatch(vertex -> tile.vertexTextures[vertex] != -1 && tile.vertexSizes[vertex] == 0);
+    }
+
     private record Surface(int texture, int size) {
     }
 

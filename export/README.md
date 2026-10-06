@@ -306,7 +306,10 @@ the first corner's texture, and over it each other texture, blended in by an alp
 the corners that name it and 0 at the others. Where two textures meet on a face that is exactly
 what the rasteriser does. Where three meet, the last layer also covers part of the second, which
 is close but not exact. A face of several textures where one of them is water, which blends by its
-own alpha, is drawn with its first corner's texture. On high water detail the toolkit makes water
+own alpha, is drawn with its first corner's texture. A corner whose texture has a size of 0, as a
+few floor types give in the map squares that have sky boxes, is drawn by neither toolkit: each
+divides by the size. It is written untextured, in its colour alone, and the task counts such faces.
+On high water detail the toolkit makes water
 see-through, and it is written as a face that blends by the alpha the toolkit gives it.
 
 Where the region has a world under its water, the client reads it as a region of its own and
