@@ -29,7 +29,9 @@ public final class ClientSpriteReader {
 
     /**
      * The names the client asks the sprites archive for, by the hash of the name the archive's
-     * index keeps for each group ({@code Sprites.init}, {@code Fonts.init}).
+     * index keeps for each group ({@code Sprites.init}, {@code Fonts.init}). The fonts' names that
+     * {@code FontNames} found by their hashes are given as well, so that every named font can be
+     * asked for by its name.
      */
     private static final List<String> NAMES = List.of(
         "hitbar_default",
@@ -58,7 +60,7 @@ public final class ClientSpriteReader {
     public ClientSpriteReader(File cache) {
         this.sprites = Cache.js5(cache, Js5Archive.SPRITES);
         this.names = new HashMap<>();
-        for (var name : NAMES) {
+        for (var name : java.util.stream.Stream.concat(NAMES.stream(), FontNames.KNOWN.stream()).distinct().toList()) {
             var id = sprites.getgroupid(name);
             if (id != -1) {
                 names.put(id, name);

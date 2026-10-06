@@ -542,7 +542,8 @@ The client asks for a few sprites by name, by the hash of the name that the arch
 keeps for each group (`Sprites.init`, `Fonts.init`). Those names are in `names.json`, an object
 from each name to the sprite's id, and each is written only where the hash finds a group:
 `compass`, `mapflag`, `scrollbar`, the head icons, hit bars, map dots and the three fonts
-`p11_full`, `p12_full` and `b12_full`, among others. Every other sprite the client finds by an id
+`p11_full`, `p12_full` and `b12_full`, among others. The names of the other fonts that `FontNames`
+finds by their hashes, such as `q8_full` and the lobby's `verdana_13pt_regular`, are there as well. Every other sprite the client finds by an id
 that a config type or an interface holds. A run with `--sprite` writes no names.
 
 Every frame is checked against the client as it is written. The PNG is read back and must match

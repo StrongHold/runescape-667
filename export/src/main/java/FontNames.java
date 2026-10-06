@@ -17,7 +17,7 @@ public final class FontNames {
      * The client asks for {@code p11_full}, {@code p12_full} and {@code b12_full} by name
      * ({@code Fonts.load}). The rest were found by hashing candidate names.
      */
-    private static final List<String> KNOWN = List.of(
+    static final List<String> KNOWN = List.of(
         "p11_full",
         "p12_full",
         "b12_full",
