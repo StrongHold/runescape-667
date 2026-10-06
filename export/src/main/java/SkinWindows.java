@@ -18,6 +18,11 @@ import java.util.TreeSet;
  * for the fill. Its title is a centred line of text the layer holds near its top, and its close
  * button a sprite the hover hooks of the layer swap near its top right. The frame is written as
  * the frames are, measured from the sides of the box, so it can take any size.
+ *
+ * A window whose pieces follow the size of its layer, as the graphics options window's do, is laid
+ * out as the frames are, at two sizes with the client's own rules ({@code SkinFrames}), so that a
+ * place may hold several pieces; its title and close button are found where they stand in the
+ * larger of the two.
  */
 final class SkinWindows {
 
@@ -79,12 +84,46 @@ final class SkinWindows {
     }
 
     private void addIfWindow(List<Component> layer, int interfaceId) throws Exception {
-        var pieces = new ArrayList<Component>();
+        var graphics = new ArrayList<Component>();
         for (var component : layer) {
-            if (component.type == Component.TYPE_GRAPHIC && component.graphic >= 0 && !isUsable(component) && isFixed(component)) {
-                pieces.add(component);
+            if (component.type == Component.TYPE_GRAPHIC && component.graphic >= 0 && !isUsable(component)) {
+                graphics.add(component);
             }
         }
+        if (graphics.stream().allMatch(SkinWindows::isFixed)) {
+            addIfFixedWindow(layer, graphics, interfaceId);
+        } else {
+            addIfResizingWindow(layer, interfaceId);
+        }
+    }
+
+    /**
+     * Adds a layer whose pieces follow its size as a window, where they make a frame and the layer
+     * holds a title and a close button, each measured where it stands in the larger box.
+     */
+    private void addIfResizingWindow(List<Component> layer, int interfaceId) throws Exception {
+        var pieces = new ArrayList<SkinFrames.Piece>();
+        for (var component : layer) {
+            if (SkinFrames.isPiece(component)) {
+                pieces.add(SkinFrames.pieceOf(component));
+            }
+        }
+        var parts = SkinFrames.partsOf(pieces);
+        if (parts == null) {
+            return;
+        }
+
+        var box = new Box(0, 0, SkinFrames.WIDER, SkinFrames.HIGHER);
+        var laidOut = new LinkedHashMap<Component, Box>();
+        for (var component : layer) {
+            var rect = SkinFrames.rect(SkinFrames.pieceOf(component).layout(), box.width(), box.height());
+            laidOut.put(component, new Box(rect.x(), rect.y(), rect.width(), rect.height()));
+        }
+        add(parts, titleOf(laidOut, box), closeOf(laidOut, box), interfaceId);
+    }
+
+    private void addIfFixedWindow(List<Component> layer, List<Component> graphics, int interfaceId) throws Exception {
+        var pieces = graphics;
         if (pieces.size() < EDGES.size()) {
             return;
         }
@@ -102,9 +141,7 @@ final class SkinWindows {
                 fill = piece;
             }
         }
-        var title = titleOf(layer, box);
-        var close = closeOf(layer, box);
-        if (!placed.keySet().containsAll(EDGES) || title == null || close == null) {
+        if (!placed.keySet().containsAll(EDGES)) {
             return;
         }
 
@@ -118,6 +155,23 @@ final class SkinWindows {
                     parts.add(partOf(piece, place.getKey(), box));
                 }
             }
+        }
+
+        var fixed = new LinkedHashMap<Component, Box>();
+        for (var component : layer) {
+            if (isFixed(component)) {
+                fixed.put(component, new Box(component.originalX, component.originalY, component.originalWidth, component.originalHeight));
+            }
+        }
+        add(parts, titleOf(fixed, box), closeOf(fixed, box), interfaceId);
+    }
+
+    /**
+     * Adds a window of these parts, title and close button, where it has a title and a close button.
+     */
+    private void add(List<Map<String, Object>> parts, Map<String, Object> title, Map<String, Object> close, int interfaceId) {
+        if (title == null || close == null) {
+            return;
         }
 
         var window = new LinkedHashMap<String, Object>();
@@ -173,20 +227,22 @@ final class SkinWindows {
      * The title of a window: a centred line of text near the top of the frame, as its colour, font,
      * whether it has a shadow, and its place from the sides and the top of the box.
      */
-    private static Map<String, Object> titleOf(List<Component> layer, Box box) {
-        for (var component : layer) {
-            var nearTop = component.originalY >= box.y() && component.originalY < box.y() + TOP_BAND;
-            if (component.type == Component.TYPE_TEXT && isFixed(component) && component.textAlignX == CENTRED && nearTop) {
+    private static Map<String, Object> titleOf(Map<Component, Box> laidOut, Box box) {
+        for (var entry : laidOut.entrySet()) {
+            var component = entry.getKey();
+            var at = entry.getValue();
+            var nearTop = at.y() >= box.y() && at.y() < box.y() + TOP_BAND;
+            if (component.type == Component.TYPE_TEXT && component.textAlignX == CENTRED && nearTop) {
                 var title = new LinkedHashMap<String, Object>();
                 title.put("colour", component.colour);
                 title.put("font", component.fontGraphic);
                 if (component.textShadow) {
                     title.put("shadow", true);
                 }
-                title.put("left", component.originalX - box.x());
-                title.put("right", box.right() - component.originalX - component.originalWidth);
-                title.put("top", component.originalY - box.y());
-                title.put("height", component.originalHeight);
+                title.put("left", at.x() - box.x());
+                title.put("right", box.right() - at.right());
+                title.put("top", at.y() - box.y());
+                title.put("height", at.height());
                 return title;
             }
         }
@@ -198,20 +254,22 @@ final class SkinWindows {
      * swap under the pointer, as its sprite, the sprite under the pointer, and its place from the
      * right and the top of the box.
      */
-    private static Map<String, Object> closeOf(List<Component> layer, Box box) throws Exception {
-        for (var component : layer) {
+    private static Map<String, Object> closeOf(Map<Component, Box> laidOut, Box box) throws Exception {
+        for (var entry : laidOut.entrySet()) {
+            var component = entry.getKey();
+            var at = entry.getValue();
             var over = (Object[]) Component.class.getField("onMouseOver").get(component);
             var swaps = over != null && over.length > 2 && Integer.valueOf(SWAP_SPRITE).equals(over[0]) && over[2] instanceof Integer;
-            var nearTop = component.originalY >= box.y() && component.originalY < box.y() + TOP_BAND;
-            var nearRight = component.originalX > box.x() + box.width() / 2;
-            if (component.type == Component.TYPE_GRAPHIC && component.graphic >= 0 && swaps && nearTop && nearRight && isFixed(component)) {
+            var nearTop = at.y() >= box.y() && at.y() < box.y() + TOP_BAND;
+            var nearRight = at.x() > box.x() + box.width() / 2;
+            if (component.type == Component.TYPE_GRAPHIC && component.graphic >= 0 && swaps && nearTop && nearRight) {
                 var close = new LinkedHashMap<String, Object>();
                 close.put("sprite", component.graphic);
                 close.put("hover", over[2]);
-                close.put("right", box.right() - component.originalX - component.originalWidth);
-                close.put("top", component.originalY - box.y());
-                close.put("width", component.originalWidth);
-                close.put("height", component.originalHeight);
+                close.put("right", box.right() - at.right());
+                close.put("top", at.y() - box.y());
+                close.put("width", at.width());
+                close.put("height", at.height());
                 return close;
             }
         }

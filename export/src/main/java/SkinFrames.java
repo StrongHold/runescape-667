@@ -17,8 +17,9 @@ import java.util.TreeSet;
  * InterfaceManager.resize}, {@code reposition}): a piece that keeps its size is a corner, one that
  * grows along one side is an edge, and one that grows both ways is a fill. A frame may have several
  * pieces in one place, as an ornate frame does, and they are kept in the order the client draws
- * them. A component the player can use, one with a hook or an option, is not part of a frame, and a
- * box without a corner at each corner and an edge along each side is not a frame.
+ * them. A filled rectangle that grows both ways is a fill of one colour. A component the player can
+ * use, one with a hook or an option, is not part of a frame, and a box without a corner at each
+ * corner and an edge along each side is not a frame.
  */
 final class SkinFrames {
 
@@ -27,8 +28,8 @@ final class SkinFrames {
      */
     private static final int WIDTH = 400;
     private static final int HEIGHT = 300;
-    private static final int WIDER = 500;
-    private static final int HIGHER = 400;
+    static final int WIDER = 500;
+    static final int HIGHER = 400;
 
     /**
      * Where a piece stands along one side of the box: at its start, across it, at its end, or none
@@ -64,13 +65,18 @@ final class SkinFrames {
     }
 
     /**
-     * A sprite component of a box: its sprite, whether it is drawn mirrored left to right, flipped
-     * top to bottom, and tiled rather than stretched, and how it is laid out.
+     * A sprite component of a box, or a filled rectangle: its sprite, or none and the rectangle's
+     * colour and transparency, whether it is drawn mirrored left to right, flipped top to bottom, and
+     * tiled rather than stretched, and how it is laid out.
      */
-    record Piece(int sprite, boolean mirrored, boolean flipped, boolean tiled, Layout layout) {
+    record Piece(int sprite, int colour, int transparency, boolean mirrored, boolean flipped, boolean tiled, Layout layout) {
+
+        boolean isFill() {
+            return sprite < 0;
+        }
     }
 
-    private record Rect(int x, int y, int width, int height) {
+    record Rect(int x, int y, int width, int height) {
     }
 
     /**
@@ -90,7 +96,7 @@ final class SkinFrames {
                 for (var file : Cache.split(data, index, group).values()) {
                     var component = new Component();
                     component.decode(new Packet(file));
-                    if (component.type == Component.TYPE_GRAPHIC && component.graphic >= 0 && !isUsable(component)) {
+                    if (isPiece(component)) {
                         boxes.computeIfAbsent(component.layer, layer -> new ArrayList<>()).add(pieceOf(component));
                     }
                 }
@@ -117,6 +123,16 @@ final class SkinFrames {
     }
 
     /**
+     * Whether a component may be a piece of a frame: a sprite or a filled rectangle the player
+     * cannot use.
+     */
+    static boolean isPiece(Component component) throws IllegalAccessException {
+        var sprite = component.type == Component.TYPE_GRAPHIC && component.graphic >= 0;
+        var fill = component.type == Component.TYPE_RECTANGLE && component.filled;
+        return (sprite || fill) && !isUsable(component);
+    }
+
+    /**
      * Whether the player can use a component: it has a hook or an option.
      */
     private static boolean isUsable(Component component) throws IllegalAccessException {
@@ -128,7 +144,7 @@ final class SkinFrames {
         return component.ops != null && java.util.Arrays.stream(component.ops).anyMatch(op -> op != null);
     }
 
-    private static Piece pieceOf(Component component) {
+    static Piece pieceOf(Component component) {
         var layout = new Layout(
             component.originalWidth,
             component.originalHeight,
@@ -139,7 +155,8 @@ final class SkinFrames {
             component.reposModeX,
             component.reposModeY
         );
-        return new Piece(component.graphic, component.verticalFlip, component.horizontalFlip, component.tiling, layout);
+        var sprite = component.type == Component.TYPE_GRAPHIC ? component.graphic : -1;
+        return new Piece(sprite, component.colour, component.transparency, component.verticalFlip, component.horizontalFlip, component.tiling, layout);
     }
 
     /**
@@ -158,7 +175,7 @@ final class SkinFrames {
             var opcode = script.opcodes[at];
             if (opcode == ClientScriptOpCode.CC_CREATE || opcode == ClientScriptOpCode.RETURN) {
                 if (building && sprite >= 0) {
-                    pieces.add(new Piece(sprite, mirrored, flipped, tiled, new Layout(layout[4], layout[5], layout[6], layout[7], layout[0], layout[1], layout[2], layout[3])));
+                    pieces.add(new Piece(sprite, 0, 0, mirrored, flipped, tiled, new Layout(layout[4], layout[5], layout[6], layout[7], layout[0], layout[1], layout[2], layout[3])));
                 }
                 building = opcode == ClientScriptOpCode.CC_CREATE;
                 sprite = -1;
@@ -197,24 +214,11 @@ final class SkinFrames {
     }
 
     /**
-     * Adds a box's pieces as a frame, where they make one, each in its place, in the order the box
-     * holds them. A piece in none of a frame's places, such as one centred on a side, is passed over.
+     * Adds a box's pieces as a frame, where they make one.
      */
     private void add(List<Piece> pieces, Integer script, Integer interfaceId) {
-        var parts = new ArrayList<Map<String, Object>>();
-        var places = new java.util.HashSet<String>();
-        for (var piece : pieces) {
-            var small = rect(piece.layout(), WIDTH, HEIGHT);
-            var large = rect(piece.layout(), WIDER, HIGHER);
-            var across = side(small.x(), small.width(), WIDTH, large.x(), large.width(), WIDER);
-            var down = side(small.y(), small.height(), HEIGHT, large.y(), large.height(), HIGHER);
-            if (across != NEITHER && down != NEITHER) {
-                var place = PLACES[across][down];
-                places.add(place);
-                parts.add(written(piece, place, large));
-            }
-        }
-        if (!places.containsAll(EDGES)) {
+        var parts = partsOf(pieces);
+        if (parts == null) {
             return;
         }
 
@@ -233,7 +237,7 @@ final class SkinFrames {
     /**
      * A component's size and position in a box of a size, as the client lays it out.
      */
-    private static Rect rect(Layout layout, int boxWidth, int boxHeight) {
+    static Rect rect(Layout layout, int boxWidth, int boxHeight) {
         var width = length(layout.resizeX(), layout.width(), boxWidth);
         var height = length(layout.resizeY(), layout.height(), boxHeight);
         var x = place(layout.reposX(), layout.x(), width, boxWidth);
@@ -287,7 +291,14 @@ final class SkinFrames {
     private static Map<String, Object> written(Piece piece, String place, Rect rect) {
         var written = new LinkedHashMap<String, Object>();
         written.put("place", place);
-        written.put("sprite", piece.sprite());
+        if (piece.isFill()) {
+            written.put("colour", piece.colour());
+            if (piece.transparency() > 0) {
+                written.put("transparency", piece.transparency());
+            }
+        } else {
+            written.put("sprite", piece.sprite());
+        }
         if (piece.mirrored()) {
             written.put("mirrored", true);
         }
@@ -328,6 +339,28 @@ final class SkinFrames {
             }
         }
         return written;
+    }
+
+    /**
+     * A box's pieces as the parts of a frame, each in its place, in the order the box holds them,
+     * measured in the larger box; null where they make no frame. A piece in none of a frame's
+     * places, such as one centred on a side, is passed over.
+     */
+    static List<Map<String, Object>> partsOf(List<Piece> pieces) {
+        var parts = new ArrayList<Map<String, Object>>();
+        var places = new java.util.HashSet<String>();
+        for (var piece : pieces) {
+            var small = rect(piece.layout(), WIDTH, HEIGHT);
+            var large = rect(piece.layout(), WIDER, HIGHER);
+            var across = side(small.x(), small.width(), WIDTH, large.x(), large.width(), WIDER);
+            var down = side(small.y(), small.height(), HEIGHT, large.y(), large.height(), HIGHER);
+            var place = across == NEITHER || down == NEITHER ? null : PLACES[across][down];
+            if (place != null && (!piece.isFill() || place.equals("centre"))) {
+                places.add(place);
+                parts.add(written(piece, place, large));
+            }
+        }
+        return places.containsAll(EDGES) ? parts : null;
     }
 
     int size() {

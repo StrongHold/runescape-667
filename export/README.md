@@ -782,7 +782,9 @@ none. A part that a set does not have is left out.
   from its two sides, `width` wide and `height` high. A part at `top`, `bottom`, `left` or
   `right` runs from `start` after the first end of its side to `end` before the other, `inset` in
   from the side, `thickness` thick. A part at `centre` keeps `left`, `top`, `right` and `bottom`
-  from the sides.
+  from the sides. A filled rectangle component that grows both ways is a fill of one colour: in
+  place of a `sprite` it has its `colour` as 0xRRGGBB and, where it is not solid, its
+  `transparency`, 0 solid to 255 unseen (`Component.transparency`).
 - `windows` are the windows of the interfaces: a frame of sprites with a title across its top and
   a button that closes it, laid out at a fixed size in a layer, the ones the most interfaces use
   first. The frame is the layer's sprite components the player cannot use, each placed by the
@@ -792,7 +794,11 @@ none. A part that a set does not have is left out.
   the centred line of text near the top, as its `colour`, `font` by id, `shadow`, and its place,
   `left` and `right` from the sides, `top` from the top and `height`. Its `close` button is the
   sprite near the top right whose hover hook runs script 44, as its `sprite`, `hover` under the
-  pointer, its place `right` and `top` from the box's sides, `width` and `height`.
+  pointer, its place `right` and `top` from the box's sides, `width` and `height`. A window whose
+  sprites follow the size of their layer, as the graphics options window's do (interface 742), is
+  laid out as the frames are, at two sizes with the client's rules, so a place may have several
+  parts and a fill may be of one colour; its title and close button are measured where they stand
+  in the larger of the two sizes.
 - `hoverFrames` are the frames that scripts 4155 and 4158 build over a component, in the same
   form, read by playing back the components the script creates with the sprites each call gives
   it. Their pieces are clear until the pointer moves over the component, when script 4160 makes
@@ -804,7 +810,7 @@ sprites does not hide them. A call whose sprites are known only while the game r
 not written. Each script that holds its sprites as constants is read by its shape, and the task
 stops where a script no longer has the shape it reads. In this cache there are ten scrollbars, seven
 plate buttons, 110 sprite buttons, two tabs, five checkboxes, two sets of radio buttons, four
-sliders, one dropdown, 105 frames, 38 windows and two hover frames, and six calls of the scrollbar
+sliders, one dropdown, 106 frames, 55 windows and two hover frames, and six calls of the scrollbar
 script are known only while the game runs. A planted check that stops reading passed-on arguments
 leaves seven such calls, one more than the task finds, and a planted check that expects five sprites
 in script 2975 stops the task.
