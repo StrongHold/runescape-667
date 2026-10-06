@@ -158,8 +158,10 @@ public final class SkinExport {
         file.put("sliders", sliders.written());
         report.add(sliders.size() + " sliders");
         var windows = SkinWindows.read(cache);
-        file.put("windows", windows.written());
+        var writtenWindows = windows.written();
+        file.put("windows", writtenWindows);
         report.add(windows.size() + " windows");
+        frames.leaveOut(writtenWindows);
         file.put("frames", frames.written());
         file.put("hoverFrames", hoverFrames.written());
         var radioTiles = SkinTiles.read(cache, scripts);

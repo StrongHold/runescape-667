@@ -16,10 +16,20 @@ import java.util.TreeSet;
  * laying its components out at two sizes with the client's own rules ({@code
  * InterfaceManager.resize}, {@code reposition}): a piece that keeps its size is a corner, one that
  * grows along one side is an edge, and one that grows both ways is a fill. A frame may have several
- * pieces in one place, as an ornate frame does, and they are kept in the order the client draws
- * them. A filled rectangle that grows both ways is a fill of one colour. A component the player can
+ * pieces in one place, as an ornate frame does, and pieces that cover each other are kept in the
+ * order the client draws them. A filled rectangle that grows both ways is a fill of one colour. A component the player can
  * use, one with a hook or an option, is not part of a frame, and a box without a corner at each
  * corner and an edge along each side is not a frame.
+ *
+ * A box holds more than its frame: icons, rows of slots, banners and pictures stay at a corner as
+ * a frame's corners do, and dividers and rules stretch along a side as its edges do. A frame's
+ * corners are drawn in pairs, the two corners of a side alike, so a piece at a corner is taken for
+ * a corner only where the corner across from it holds a piece of its size near the same place. An
+ * edge runs along the side between its corners, so it is taken only where it stands no further in
+ * than they reach, and a fill of one colour only where it fills what the corners hold between them.
+ *
+ * A box whose pieces take a share of its size ({@code Component.resizeModeX} 2) has no one shape
+ * at every size, so it is measured at the size its layer has in the client's fixed window.
  */
 final class SkinFrames {
 
@@ -28,8 +38,32 @@ final class SkinFrames {
      */
     static final int WIDTH = 400;
     static final int HEIGHT = 300;
-    static final int WIDER = 500;
-    static final int HIGHER = 400;
+    private static final int GROWTH = 100;
+    static final int WIDER = WIDTH + GROWTH;
+    static final int HIGHER = HEIGHT + GROWTH;
+
+    /**
+     * The size of box a frame is measured in where its pieces take no share of its size.
+     */
+    private static final Size MEASURING = new Size(WIDTH, HEIGHT);
+
+    /**
+     * How far apart the two corners of a pair may stand, each measured from its own sides, as the
+     * corners of the stone frame stand 13 and 12 pixels in from theirs.
+     */
+    private static final int PAIR_SLACK = 8;
+
+    /**
+     * The resize mode of a piece that takes a share of the box, in 16384ths ({@code
+     * InterfaceManager.resize}).
+     */
+    private static final int SHARE = 2;
+
+    /**
+     * The components of an interface stand under their interface's number in the high half of
+     * their id, and their own number in the low half ({@code Component.id}).
+     */
+    private static final int INTERFACE_SHIFT = 16;
 
     /**
      * Where a piece stands along one side of the box: at its start, across it, at its end, or none
@@ -50,6 +84,16 @@ final class SkinFrames {
     };
 
     private static final List<String> EDGES = List.of("topLeft", "top", "topRight", "left", "right", "bottomLeft", "bottom", "bottomRight");
+
+    /**
+     * The corner across the box from each corner, the other corner of its side.
+     */
+    private static final Map<String, String> ACROSS_FROM = Map.of(
+        "topLeft", "topRight",
+        "topRight", "topLeft",
+        "bottomLeft", "bottomRight",
+        "bottomRight", "bottomLeft"
+    );
 
     /**
      * Scripts 4155 and 4158 build a frame over the component their hooks run on, its pieces clear
@@ -77,6 +121,13 @@ final class SkinFrames {
     }
 
     record Rect(int x, int y, int width, int height) {
+
+        boolean overlaps(Rect other) {
+            return x < other.x + other.width && other.x < x + width && y < other.y + other.height && other.y < y + height;
+        }
+    }
+
+    record Size(int width, int height) {
     }
 
     /**
@@ -92,16 +143,29 @@ final class SkinFrames {
         for (var group : Cache.groupsOf(index)) {
             var data = Cache.group(cache, Js5Archive.INTERFACES, group);
             if (data != null) {
-                var boxes = new LinkedHashMap<Integer, List<Piece>>();
-                for (var file : Cache.split(data, index, group).values()) {
+                var components = new LinkedHashMap<Integer, Component>();
+                for (var file : Cache.split(data, index, group).entrySet()) {
                     var component = new Component();
-                    component.decode(new Packet(file));
-                    if (isPiece(component)) {
-                        boxes.computeIfAbsent(component.layer, layer -> new ArrayList<>()).add(pieceOf(component));
+                    component.decode(new Packet(file.getValue()));
+                    components.put((group << INTERFACE_SHIFT) | file.getKey(), component);
+                }
+                var layout = new ComponentLayout(components);
+                var boxes = new LinkedHashMap<Integer, List<Piece>>();
+                var layers = new LinkedHashMap<Integer, ComponentLayout.Box>();
+                for (var component : components.entrySet()) {
+                    if (isPiece(component.getValue())) {
+                        var layer = component.getValue().layer;
+                        boxes.computeIfAbsent(layer, key -> new ArrayList<>()).add(pieceOf(component.getValue()));
+                        if (!layers.containsKey(layer)) {
+                            layers.put(layer, layout.layerBoxOf(component.getKey()));
+                        }
                     }
                 }
-                for (var box : boxes.values()) {
-                    found.add(box, null, group);
+                for (var box : boxes.entrySet()) {
+                    var size = sizeOf(box.getValue(), layers.get(box.getKey()));
+                    if (size != null) {
+                        found.add(box.getValue(), size, null, group);
+                    }
                 }
             }
         }
@@ -116,10 +180,29 @@ final class SkinFrames {
         var found = new SkinFrames();
         for (var id : HOVER_FRAME_SCRIPTS) {
             for (var given : calls.argumentsOf(id)) {
-                found.add(builtBy(scripts.get(id), Arrays.asList(given)), id, null);
+                var pieces = builtBy(scripts.get(id), Arrays.asList(given));
+                var size = sizeOf(pieces, null);
+                if (size != null) {
+                    found.add(pieces, size, id, null);
+                }
             }
         }
         return found;
+    }
+
+    /**
+     * The size of box a box's pieces are measured in: any size where none takes a share of the box,
+     * or the size of their layer, or null where that size is not known.
+     */
+    private static Size sizeOf(List<Piece> pieces, ComponentLayout.Box layer) {
+        var shared = pieces.stream().anyMatch(piece -> piece.layout().resizeX() == SHARE || piece.layout().resizeY() == SHARE);
+        if (!shared) {
+            return MEASURING;
+        } else if (layer == null) {
+            return null;
+        } else {
+            return new Size(layer.width(), layer.height());
+        }
     }
 
     /**
@@ -217,8 +300,8 @@ final class SkinFrames {
     /**
      * Adds a box's pieces as a frame, where they make one.
      */
-    private void add(List<Piece> pieces, Integer script, Integer interfaceId) {
-        var parts = partsOf(pieces);
+    private void add(List<Piece> pieces, Size size, Integer script, Integer interfaceId) {
+        var parts = partsOf(pieces, size);
         if (parts == null) {
             return;
         }
@@ -284,12 +367,12 @@ final class SkinFrames {
     }
 
     /**
-     * A piece as the file holds it: its place, its sprite, how it is drawn, and where it stands in the larger
-     * box, measured from the sides it keeps to. A corner is measured from its two sides and has its
+     * A piece as the file holds it: its place, its sprite, how it is drawn, and where it stands in a
+     * box of a size, measured from the sides it keeps to. A corner is measured from its two sides and has its
      * size; an edge runs from a distance after one corner to a distance before the other, a distance
      * in from its side, as thick as it is; the fill keeps a distance from each side.
      */
-    private static Map<String, Object> written(Piece piece, String place, Rect rect) {
+    private static Map<String, Object> written(Piece piece, String place, Rect rect, Size box) {
         var written = new LinkedHashMap<String, Object>();
         written.put("place", place);
         if (piece.isFill()) {
@@ -311,8 +394,8 @@ final class SkinFrames {
         }
         var left = rect.x();
         var top = rect.y();
-        var right = WIDER - rect.x() - rect.width();
-        var bottom = HIGHER - rect.y() - rect.height();
+        var right = box.width() - rect.x() - rect.width();
+        var bottom = box.height() - rect.y() - rect.height();
         switch (place) {
             case "top", "bottom" -> {
                 written.put("start", left);
@@ -343,25 +426,176 @@ final class SkinFrames {
     }
 
     /**
-     * A box's pieces as the parts of a frame, each in its place, in the order the box holds them,
-     * measured in the larger box; null where they make no frame. A piece in none of a frame's
-     * places, such as one centred on a side, is passed over.
+     * A box's pieces as the parts of a frame, each in its place, measured in a box of the size the
+     * frames are measured in; null where they make no frame.
      */
     static List<Map<String, Object>> partsOf(List<Piece> pieces) {
-        var parts = new ArrayList<Map<String, Object>>();
-        var places = new java.util.HashSet<String>();
+        return partsOf(pieces, MEASURING);
+    }
+
+    /**
+     * A box's pieces as the parts of a frame, each in its place, measured in a box of a size, in the
+     * order {@link #inOrder} gives; null where they make no frame. The pieces are laid out in that
+     * box and in one larger each way to tell where each stands. A piece in none of a frame's places,
+     * such as one centred on a side, is passed over, and so is a corner without its pair, an edge
+     * further in than the corners of its side reach, and a fill of one colour that leaves a gap
+     * between itself and the corners.
+     */
+    static List<Map<String, Object>> partsOf(List<Piece> pieces, Size box) {
+        var placed = new ArrayList<Map<String, Object>>();
         for (var piece : pieces) {
-            var small = rect(piece.layout(), WIDTH, HEIGHT);
-            var large = rect(piece.layout(), WIDER, HIGHER);
-            var across = side(small.x(), small.width(), WIDTH, large.x(), large.width(), WIDER);
-            var down = side(small.y(), small.height(), HEIGHT, large.y(), large.height(), HIGHER);
+            var small = rect(piece.layout(), box.width(), box.height());
+            var large = rect(piece.layout(), box.width() + GROWTH, box.height() + GROWTH);
+            var across = side(small.x(), small.width(), box.width(), large.x(), large.width(), box.width() + GROWTH);
+            var down = side(small.y(), small.height(), box.height(), large.y(), large.height(), box.height() + GROWTH);
             var place = across == NEITHER || down == NEITHER ? null : PLACES[across][down];
             if (place != null && (!piece.isFill() || place.equals("centre"))) {
-                places.add(place);
-                parts.add(written(piece, place, large));
+                placed.add(written(piece, place, small, box));
             }
         }
-        return places.containsAll(EDGES) ? parts : null;
+
+        var corners = placed.stream().filter(part -> isCorner(part) && isPaired(part, placed)).toList();
+        var parts = new ArrayList<Map<String, Object>>();
+        var places = new java.util.HashSet<String>();
+        for (var part : placed) {
+            var kept = isCorner(part) ? corners.stream().anyMatch(corner -> corner == part) : isBetween(part, corners);
+            if (kept) {
+                parts.add(part);
+                places.add((String) part.get("place"));
+            }
+        }
+        return places.containsAll(EDGES) ? inOrder(parts, box) : null;
+    }
+
+    private static boolean isCorner(Map<String, Object> part) {
+        return ACROSS_FROM.containsKey((String) part.get("place"));
+    }
+
+    /**
+     * Whether the corner across the box from a corner holds a part of its size within a few pixels
+     * of its place, each measured from its own sides, as the corners of a frame are drawn in pairs
+     * and an icon or a picture at one corner has none.
+     */
+    private static boolean isPaired(Map<String, Object> corner, List<Map<String, Object>> parts) {
+        var across = ACROSS_FROM.get((String) corner.get("place"));
+        return parts.stream().anyMatch(other -> other.get("place").equals(across)
+            && other.get("width").equals(corner.get("width"))
+            && other.get("height").equals(corner.get("height"))
+            && Math.abs((Integer) other.get("x") - (Integer) corner.get("x")) <= PAIR_SLACK
+            && Math.abs((Integer) other.get("y") - (Integer) corner.get("y")) <= PAIR_SLACK);
+    }
+
+    /**
+     * Whether an edge or a fill stands between these corners: an edge where it stands less far in
+     * from its side than the corners of that side reach, as a divider or a rule further in is not
+     * part of the frame, and a fill of one colour where it comes out to within each side's reach,
+     * as one that leaves a gap fills a panel inside the box, not the frame. A fill of sprites is
+     * kept.
+     */
+    private static boolean isBetween(Map<String, Object> part, List<Map<String, Object>> corners) {
+        var place = (String) part.get("place");
+        if (!place.equals("centre")) {
+            return (Integer) part.get("inset") < reachOf(place, corners);
+        } else if (part.containsKey("colour")) {
+            return (Integer) part.get("left") <= reachOf("left", corners)
+                && (Integer) part.get("top") <= reachOf("top", corners)
+                && (Integer) part.get("right") <= reachOf("right", corners)
+                && (Integer) part.get("bottom") <= reachOf("bottom", corners);
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * How far in from a side the corners on that side reach, the furthest of them, or 0 where it
+     * has none.
+     */
+    private static int reachOf(String side, List<Map<String, Object>> corners) {
+        var reach = 0;
+        for (var corner : corners) {
+            var place = (String) corner.get("place");
+            var onSide = switch (side) {
+                case "top", "bottom" -> place.startsWith(side);
+                default -> place.toLowerCase().endsWith(side);
+            };
+            var down = side.equals("top") || side.equals("bottom");
+            if (onSide) {
+                reach = Math.max(reach, down ? (Integer) corner.get("y") + (Integer) corner.get("height") : (Integer) corner.get("x") + (Integer) corner.get("width"));
+            }
+        }
+        return reach;
+    }
+
+    /**
+     * Parts of a frame in one order whatever order the box holds them in, so that a frame is found
+     * once: the parts that cover each other keep the order the client draws them in, and the others
+     * are put in the order of how the file writes them. Each time, the first part by how it is
+     * written that no part before it in the box covers is taken next.
+     */
+    static List<Map<String, Object>> inOrder(List<Map<String, Object>> parts, Size box) {
+        var left = new ArrayList<>(parts);
+        var ordered = new ArrayList<Map<String, Object>>();
+        while (!left.isEmpty()) {
+            Map<String, Object> next = null;
+            for (var at = 0; at < left.size(); at++) {
+                var part = left.get(at);
+                var area = areaOf(part, box);
+                var free = left.subList(0, at).stream().noneMatch(before -> areaOf(before, box).overlaps(area));
+                if (free && (next == null || Json.write(part).compareTo(Json.write(next)) < 0)) {
+                    next = part;
+                }
+            }
+            ordered.add(next);
+            left.remove(next);
+        }
+        return ordered;
+    }
+
+    /**
+     * Where a part as the file holds it stands in a box of a size.
+     */
+    private static Rect areaOf(Map<String, Object> part, Size box) {
+        var place = (String) part.get("place");
+        return switch (place) {
+            case "top", "bottom" -> {
+                var thickness = (Integer) part.get("thickness");
+                var inset = (Integer) part.get("inset");
+                var start = (Integer) part.get("start");
+                var y = place.equals("top") ? inset : box.height() - inset - thickness;
+                yield new Rect(start, y, box.width() - start - (Integer) part.get("end"), thickness);
+            }
+            case "left", "right" -> {
+                var thickness = (Integer) part.get("thickness");
+                var inset = (Integer) part.get("inset");
+                var start = (Integer) part.get("start");
+                var x = place.equals("left") ? inset : box.width() - inset - thickness;
+                yield new Rect(x, start, thickness, box.height() - start - (Integer) part.get("end"));
+            }
+            case "centre" -> {
+                var left = (Integer) part.get("left");
+                var top = (Integer) part.get("top");
+                yield new Rect(left, top, box.width() - left - (Integer) part.get("right"), box.height() - top - (Integer) part.get("bottom"));
+            }
+            default -> {
+                var width = (Integer) part.get("width");
+                var height = (Integer) part.get("height");
+                var x = place.endsWith("Left") ? (Integer) part.get("x") : box.width() - (Integer) part.get("x") - width;
+                var y = place.startsWith("top") ? (Integer) part.get("y") : box.height() - (Integer) part.get("y") - height;
+                yield new Rect(x, y, width, height);
+            }
+        };
+    }
+
+    /**
+     * Leaves out each frame that is the frame of one of these windows, as the window holds it.
+     */
+    @SuppressWarnings("unchecked")
+    void leaveOut(List<Map<String, Object>> windows) {
+        var framesOfWindows = new java.util.HashSet<String>();
+        for (var window : windows) {
+            framesOfWindows.add(Json.write(inOrder((List<Map<String, Object>>) window.get("parts"), MEASURING)));
+        }
+        frames.entrySet().removeIf(frame -> framesOfWindows.contains(Json.write(inOrder((List<Map<String, Object>>) frame.getValue().get("parts"), MEASURING))));
     }
 
     int size() {

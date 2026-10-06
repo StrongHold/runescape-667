@@ -40,7 +40,7 @@ final class ComponentLayout {
         if (component == null) {
             return null;
         }
-        var parent = component.layer == -1 ? new Box(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT) : boxOf(parentOf(id));
+        var parent = layerBoxOf(id);
         if (parent == null) {
             return null;
         }
@@ -52,6 +52,18 @@ final class ComponentLayout {
             return null;
         }
         return new Box(parent.x() + x, parent.y() + y, width, height);
+    }
+
+    /**
+     * Where the layer a component is in stands and its size, the whole window for a component in no
+     * layer, or null where {@link #boxOf} gives none for the layer.
+     */
+    Box layerBoxOf(int id) {
+        var component = components.get(id);
+        if (component == null) {
+            return null;
+        }
+        return component.layer == -1 ? new Box(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT) : boxOf(parentOf(id));
     }
 
     /**
