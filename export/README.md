@@ -584,6 +584,29 @@ writes nothing. A planted check that takes a local variable for a constant fails
 there is. In this cache, script 51 is the only script that calls `FORMATMINIMENU`, scripts 1299
 and 1433 call script 51, and no script calls `DEFAULTMINIMENU`.
 
+## Writing the sky boxes
+
+    ./gradlew :export:exportSkyBoxes
+
+A map square's environment can name a sky box, which the client draws behind its scene
+(`Environment.decodeSkyBox`, `SkyBox.renderLayer`); the map square's description gives it as
+`environment.skyBox`, with its `rotation` and `sphereOffset`. The task decodes every sky box type
+with the client's own type lists (`SkyBoxTypeList.list`, `SkyBoxSphereTypeList.list`) and writes
+them to `export/build/skyboxes.json`. `--out` names another file, and `--cache` works as it does for
+a model.
+
+`types` is an object from each sky box type's id to its fields, under the client's names, with null
+where the client keeps -1 to name nothing. `texture` is the panorama, a texture that the texture
+export writes, which the client draws without a mesh, and `tileMode` says how: 1 repeats it across
+and fills above and below it with its top and bottom pixels, 0 repeats it both ways. `meshId` is a
+model that the hardware toolkits draw instead, with a camera that turns but does not move, where
+the sky detail option is on; the model export writes it. `lightSphereIndex` and `spheres` are the
+suns and moons drawn over it, each sphere written in full inside its sky box, as only sky boxes use
+them. A texture or a model that a type names must be in the cache, or the task stops; a planted check
+that looks for each texture 100000 ids on stops it. In this cache there are two sky boxes, each a
+panorama and a mesh (models 43756 and 43748) and no spheres, and 488 map squares name one, between
+map squares 61 and 92 across and 60 and 77 up.
+
 ## Writing the combat styles
 
     ./gradlew :export:exportCombatStyles

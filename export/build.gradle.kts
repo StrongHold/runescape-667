@@ -68,6 +68,12 @@ tasks.register<JavaExec>("exportCombatStyles") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
+tasks.register<JavaExec>("exportSkyBoxes") {
+    description = "Writes every sky box type: the panorama, the mesh and the spheres the client draws behind the scene of a map square that names one."
+    mainClass = "SkyBoxExport"
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
 tasks.register<JavaExec>("exportSkins") {
     description = "Writes the sprites the client's scripts and interfaces build their scrollbars, buttons, checkboxes, radio buttons, radio tiles, tabs, sliders, dropdowns, frames and windows from."
     mainClass = "SkinExport"
