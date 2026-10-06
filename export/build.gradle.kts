@@ -62,6 +62,12 @@ tasks.register<JavaExec>("exportHitmarks") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
+tasks.register<JavaExec>("exportCombatStyles") {
+    description = "Writes the combat styles the combat styles tab offers for each category of weapon: each style's label, icon and tooltip."
+    mainClass = "CombatStyleExport"
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
 tasks.register<JavaExec>("exportSkins") {
     description = "Writes the sprites the client's scripts and interfaces build their scrollbars, buttons, checkboxes, radio buttons, radio tiles, tabs, sliders, dropdowns, frames and windows from."
     mainClass = "SkinExport"

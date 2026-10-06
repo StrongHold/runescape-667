@@ -584,6 +584,26 @@ writes nothing. A planted check that takes a local variable for a constant fails
 there is. In this cache, script 51 is the only script that calls `FORMATMINIMENU`, scripts 1299
 and 1433 call script 51, and no script calls `DEFAULTMINIMENU`.
 
+## Writing the combat styles
+
+    ./gradlew :export:exportCombatStyles
+
+The combat styles tab (interface 884) shows two to four tiles, one for each way to fight with the
+weapon the player wears. Script 1142 runs as the tab loads and as the worn items change. With no
+weapon worn, or a members' weapon on a free world, it offers the unarmed styles. Otherwise it
+switches on the weapon's category, its param 686, and each case calls script 1143 with four styles,
+each a label, an icon and a tooltip, pushed as constants just before the call, with the tooltip
+joined from its lines. The task works the calls out from the script's instructions and writes them
+to `export/build/combatstyles.json`. `--out` names another file, and `--cache` works as it does for
+a model.
+
+`unarmed` is the list of unarmed styles, and `categories` is a list of each category the switch
+names, as `category` and its `styles`. A style is its `label`, its `icon`, a sprite that the sprite
+export writes, and its `tooltip`, in the client's text markup. A style with an empty label is a tile
+the tab hides, and is not written. The tiles stand in the order of the list, two to a row. The task
+stops where the script no longer has this shape; a planted check that looks for calls of script 1144
+stops it. In this cache, 27 categories have styles.
+
 ## Writing the hit splats
 
     ./gradlew :export:exportHitmarks
