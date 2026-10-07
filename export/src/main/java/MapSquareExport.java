@@ -96,6 +96,7 @@ public final class MapSquareExport {
         var name = args.x + "_" + args.z;
         var out = args.out == null ? Path.of("build", "mapsquares", name + ".gltf") : args.out;
         var textures = args.textures.library(reader.textures());
+        textures.writeMetrics();
         var assets = new LocAssets(reader.locs(), textures, args.locs);
         var gltf = new GltfBuilder();
         var materials = new GltfMaterials(gltf, reader.textures(), textures, out);

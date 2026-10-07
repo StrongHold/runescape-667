@@ -36,6 +36,7 @@ public final class TextureExport {
         var reader = new ClientModelReader(args.where.cache());
         var library = args.textures.library(reader.textures());
         var written = library.writeAll();
+        library.writeMetrics();
         System.out.println("wrote " + written + " textures to " + library.directory().toAbsolutePath().normalize()
             + ", of " + library.count() + " the cache holds");
         WaterTextures.write(library.directory());

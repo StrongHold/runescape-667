@@ -5,14 +5,11 @@ import com.jagex.game.runetek6.config.emittertype.ParticleEmitterTypeList;
 import com.jagex.js5.js5;
 
 import java.io.IOException;
-import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Writes the client's particle emitter and effector types beside the textures, each as the
@@ -33,12 +30,12 @@ public final class ParticleTypes {
         var emitters = new ArrayList<Object>();
         for (var id : ids(particles, EMITTER_GROUP)) {
             pad(emitters, id);
-            emitters.add(fields(ParticleEmitterTypeList.get(id)));
+            emitters.add(PublicFields.of(ParticleEmitterTypeList.get(id)));
         }
         var effectors = new ArrayList<Object>();
         for (var id : ids(particles, EFFECTOR_GROUP)) {
             pad(effectors, id);
-            effectors.add(fields(ParticleEffectorTypeList.get(id)));
+            effectors.add(PublicFields.of(ParticleEffectorTypeList.get(id)));
         }
         Files.writeString(directory.resolve("emitters.json"), Json.write(emitters));
         Files.writeString(directory.resolve("effectors.json"), Json.write(effectors));
@@ -59,29 +56,6 @@ public final class ParticleTypes {
         while (list.size() < id) {
             list.add(null);
         }
-    }
-
-    /** A type's public instance fields by name: numbers, flags and lists of numbers. */
-    private static Map<String, Object> fields(Object type) {
-        var values = new LinkedHashMap<String, Object>();
-        var fields = type.getClass().getFields();
-        Arrays.sort(fields, (a, b) -> a.getName().compareTo(b.getName()));
-        for (var field : fields) {
-            if (Modifier.isStatic(field.getModifiers())) {
-                continue;
-            }
-            try {
-                var value = field.get(type);
-                if (value instanceof int[] numbers) {
-                    values.put(field.getName(), Arrays.stream(numbers).boxed().toList());
-                } else if (value instanceof Number || value instanceof Boolean) {
-                    values.put(field.getName(), value);
-                }
-            } catch (IllegalAccessException e) {
-                throw new IllegalStateException(e);
-            }
-        }
-        return values;
     }
 
     private ParticleTypes() {

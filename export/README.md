@@ -96,6 +96,14 @@ Under `light/`, `flicker.json` holds the 2048 values of noise the client's light
 pattern is 3 reads it at its phase; the other patterns are a sine, a sawtooth, a square and a
 triangle, and need no table.
 
+`metrics.json` holds the metrics of every texture, a list indexed by the texture's id with null
+where the cache has none: every public field of the client's `TextureMetrics` by its name, as the
+client holds it (a byte such as `alpha` or `brightness` is signed, so -1 is 255), and whether the
+texture source can draw the texture, as `available`. An engine that builds a type's model from the
+model library reads from it how each texture blends, how it tints its faces and whether it skips
+them, for a texture a type retextures a face to as for any other. Every export writes it where the
+library lacks it.
+
 Every file written here refers to its textures by a relative path, such as `../textures/128.png`,
 and carries no copy of them. The textures live in one directory, `export/build/textures` unless
 `--textures` names another, as one PNG for each texture id. An engine then loads each texture

@@ -2,8 +2,11 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Optional;
 
 import javax.imageio.ImageIO;
@@ -23,6 +26,8 @@ public final class TextureLibrary {
      * The gamma both toolkits ask the texture source to draw a texture with.
      */
     private static final float TEXTURE_GAMMA = 0.7F;
+
+    private static final String METRICS = "metrics.json";
 
     private static final int TEXTURE_SIZE = 128;
     private static final int SMALL_TEXTURE_SIZE = 64;
@@ -78,6 +83,37 @@ public final class TextureLibrary {
             }
         }
         return written;
+    }
+
+    /**
+     * Writes the metrics of every texture the cache holds into {@code metrics.json}, unless the
+     * library holds them already: a list indexed by the texture's id, null where the cache has no
+     * texture of that id, each every public field of the client's {@code TextureMetrics} by its
+     * name, and whether the texture source can draw it, as {@code available}. An engine that builds
+     * a type's model reads from them how each texture blends, tints its faces and whether it skips
+     * them, for a texture a type retextures a face to as for any other.
+     */
+    public void writeMetrics() {
+        var file = directory.resolve(METRICS);
+        if (!Files.exists(file)) {
+            var list = new ArrayList<Object>();
+            for (var id = 0; id < source.textureCount(); id++) {
+                var metrics = source.getMetrics(id);
+                if (metrics == null) {
+                    list.add(null);
+                } else {
+                    var fields = new LinkedHashMap<String, Object>(PublicFields.of(metrics));
+                    fields.put("available", source.textureAvailable(id));
+                    list.add(fields);
+                }
+            }
+            try {
+                Files.createDirectories(directory);
+                Files.writeString(file, Json.write(list), StandardCharsets.UTF_8);
+            } catch (IOException failure) {
+                throw new UncheckedIOException("Could not write the texture metrics to " + file, failure);
+            }
+        }
     }
 
     /**
