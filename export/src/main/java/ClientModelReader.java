@@ -30,6 +30,12 @@ public final class ClientModelReader {
     private static final int NO_FUNCTIONS = 0;
 
     /**
+     * Asks the toolkit to keep the labels of the vertices (0x20) and of the faces (0x180), which
+     * the frames of a sequence move and recolour by.
+     */
+    private static final int LABELS = 0x20 | 0x180;
+
+    /**
      * Leaves textures on. Feature 0x40 is the low detail setting that drops every texture the
      * metrics mark as one that can be turned off.
      */
@@ -72,6 +78,24 @@ public final class ClientModelReader {
             }
 
             return Optional.of((JavaModel) toolkit.createModel(mesh, NO_FUNCTIONS, TEXTURES_ON, AMBIENT, CONTRAST));
+        }
+    }
+
+    /**
+     * The model as {@link #read} builds it, with the labels of its vertices and faces kept, or
+     * nothing where the cache holds no such mesh.
+     */
+    public Optional<JavaModel> readLabelled(int id) {
+        var mesh = Mesh.load(id, models);
+
+        if (mesh == null) {
+            return Optional.empty();
+        } else {
+            if (mesh.version < FIRST_FULL_SCALE_VERSION) {
+                mesh.upscale();
+            }
+
+            return Optional.of((JavaModel) toolkit.createModel(mesh, LABELS, TEXTURES_ON, AMBIENT, CONTRAST));
         }
     }
 

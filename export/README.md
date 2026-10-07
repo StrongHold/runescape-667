@@ -123,6 +123,94 @@ combines a texel with the lit vertex colour: 0 multiplies them, 1 shows the texe
 interpolates, 3 adds them and 4 takes a dot product.
 
 
+## The model library
+
+`exportModel` writes a model into the model library, `export/build/models`, as one file of its
+own, and every map square writes there each model that a location it places names, unless the
+library holds it already. A type names its models by id, as the client's types do, so a model
+that many types use is held once, and an engine builds a type's model from its models as the
+client does (`LocType.model`, `NPCType.getModel`): it merges them, mirrors, recolours,
+retextures, tints, lights and scales the result. The file's `asset.extras.version` is the
+version of its format, 1 now.
+
+The model is built as above, with the ambient of 64 and the contrast of 768 most models are built
+with, and its standard attributes (`POSITION`, `NORMAL`, `COLOR_0`, `TEXCOORD_0` for a textured
+primitive) show it as the client draws it then, so a tool shows it as it is. The attributes whose
+names start with an underscore are the client's own, each a float that holds a whole number
+exactly, as glTF asks that each element of a vertex attribute start on four bytes:
+
+- `_HSL`: the face's colour as the client holds it, which a type recolours and tints, and which
+  the palette turns into a colour under the type's ambient, as for `COLOR_0` above.
+- `_ALPHA`: the face's alpha, 0 opaque and 255 invisible.
+- `_SHADING`: 0 smooth, 1 flat, 3 black.
+- `_FACE_LABEL`: the face's label, which the colour and alpha transforms of a frame act on, or -1.
+- `_VERTEX`: the client's vertex.
+- `_NORMAL_SUM` and `_NORMAL_COUNT`: for a smooth face, the sum of the normals of the smooth faces
+  at the vertex and how many there are, in the file's frame; for any other face, its own normal
+  and 0. The client merges meshes by joining every vertex at one position (`Mesh(Mesh[], int)`),
+  so the normal at a joined vertex is the sum of the sums of the vertices joined, and the light
+  on it follows from that sum and the type's contrast, as above.
+
+Each vertex is bound wholly to a joint for its label, a node named `label <n>`, with the first
+joint, `unlabelled`, for the vertices of no label, so a sequence from the sequence library moves
+the model by its labels. The node's `extras` carry the client's `minY` and `maxY` over every
+vertex, and the model's `emitters`, `effectors` and `billboards`, as a location's shape does.
+Faces the client never draws whatever the type are left out: one hidden at a join that no frame
+can show, one smeared, one of a shading the client has no case for, and one a billboard hides. A
+face whose texture skips its faces is kept, as a type can retexture it.
+
+
+## The sequence library
+
+Every map square writes into `export/build/sequences` each sequence that a location it places
+plays, as one glTF file a sequence, unless the library holds it already. The file holds a node for
+each label the sequence's frames move, named `label <n>` as a model's joints are, and one
+animation that carries the extension `RS_client_frames`:
+
+```json
+{
+  "base": {
+    "labels": [[0, 1], [2, 0, 3], [2, 0, 3]],
+    "shadowed": [false, false, false],
+    "types": [0, 2, 2]
+  },
+  "keys": [
+    {
+      "cycles": 6,
+      "transforms": [[0, 0, -236, 0, -1, 0]]
+    },
+    {
+      "cycles": 6,
+      "transforms": [[0, 0, -236, 0, -1, 0], [1, 0, 0, 128, -1, 0], [2, 0, 0, 112, -1, 0]]
+    }
+  ],
+  "loopOffset": 8,
+  "sequence": 3511,
+  "tweened": true,
+  "version": 1
+}
+```
+
+(the first two of the eight keys of sequence 3511)
+
+That is what the client plays. `keys` are the frames it shows, for one cycle or more, each with
+its transforms as the client reads them, six numbers each: the group of the base, x, y and z, the
+pivot group it applies first or -1, and its tween bits, where 1 means the client does not tween
+into the transform and 2 that it does not tween out of it. `base` gives the kind of transform of
+each group (0 a pivot, 1 a move, 2 a turn, 3 a scale, 5 an alpha, 7 a colour), the labels it
+names, and whether it also moves an entity's spot shadow. `tweened` says whether the client
+tweens the sequence, and `loopOffset` how many frames from the end it loops back to, -1 for
+none. An engine replays the frames on the model, as the client does.
+
+The animation's own channels move each label's node by steps, one key a frame, for a tool that
+knows nothing of the extension. A frame turns and scales a label about the centre of the vertices
+it names in the posed model, so no node's transform is right for every model: the channels are
+worked out on the model the sequence is first written for, and are exact for that model alone. A
+sequence that moves no vertex has one channel that holds its first node still, as glTF asks every
+animation for a channel. A map square's description names both libraries by `models` and
+`sequences`, relative to it, as it names `locs`.
+
+
 ## Writing an NPC
 
     ./gradlew :export:exportNpc --args="--npc 9"

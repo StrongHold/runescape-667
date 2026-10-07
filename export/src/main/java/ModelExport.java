@@ -2,11 +2,10 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 
 import java.nio.file.Path;
-import java.util.List;
 
 /**
- * Writes one model out of the cache as a glTF file with its buffer beside it, which Godot, Blender, three.js and most
- * other engines and tools import as it is.
+ * Writes one model out of the cache into the model library, as a glTF file with its buffer beside it, which Godot,
+ * Blender, three.js and most other engines and tools import as it is. An existing file is written again.
  */
 public final class ModelExport {
 
@@ -46,22 +45,15 @@ public final class ModelExport {
 
     private static void export(Args args) throws Exception {
         var reader = new ClientModelReader(args.where.cache());
-        var model = reader.read(args.model)
-            .orElseThrow(() -> new IllegalStateException("The cache holds no model " + args.model + "."));
-
-        var out = args.out == null ? Path.of("build", "models", args.model + ".gltf") : args.out;
-        var gltf = new GltfBuilder();
-        var materials = new GltfMaterials(gltf, reader.textures(), args.textures.library(reader.textures()), out);
-        var result = ModelToGltf.convert(model, gltf, materials, List.of());
-        if (gltf.empty()) {
-            throw new IllegalStateException("Model " + args.model + " has no face the client draws.");
-        }
-
-        var name = "model " + args.model;
-        GltfFile.write(out, gltf.document(name), gltf.bin());
+        var out = args.out == null ? ModelLibrary.defaultDirectory().resolve(args.model + ".gltf") : args.out;
+        var library = new ModelLibrary(reader, args.textures.library(reader.textures()), out.getParent());
+        var result = library.write(args.model, out)
+            .orElseThrow(() -> new IllegalStateException("The cache holds no model " + args.model
+                + ", or the client draws none of its faces."));
 
         System.out.println("wrote " + out.toAbsolutePath().normalize());
-        System.out.println("  " + result.faces() + " faces in " + result.primitives() + " primitives");
+        System.out.println("  " + result.faces() + " faces in " + result.primitives() + " primitives, "
+            + (result.labels().size() - 1) + " labels");
         for (var skip : result.skipped().entrySet()) {
             System.out.println("  " + skip.getValue() + " faces left out, " + skip.getKey());
         }

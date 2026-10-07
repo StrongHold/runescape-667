@@ -42,11 +42,19 @@ public final class LocAssets {
     private final ClientLocReader reader;
     private final TextureLibrary textures;
     private final Path directory;
+    private final ModelLibrary models;
+    private final SequenceLibrary sequences;
 
+    /**
+     * @param directory where the locations are kept, beside which the models and sequences they
+     *     name are kept, in {@code models} and {@code sequences}.
+     */
     public LocAssets(ClientLocReader reader, TextureLibrary textures, Path directory) {
         this.reader = reader;
         this.textures = textures;
         this.directory = directory;
+        this.models = new ModelLibrary(reader.models(), textures, directory.resolveSibling("models"));
+        this.sequences = new SequenceLibrary(directory.resolveSibling("sequences"));
     }
 
     /**
@@ -67,11 +75,51 @@ public final class LocAssets {
      */
     public Optional<Path> file(int id) {
         var file = directory.resolve(id + ".gltf");
+        var type = reader.type(id);
         if (Files.exists(file) && Files.exists(typeFile(file))) {
+            writeShared(type);
             return Optional.of(file);
         } else {
-            return write(id, file).map(ignored -> file);
+            var written = write(id, file).map(ignored -> file);
+            written.ifPresent(ignored -> writeShared(type));
+            return written;
         }
+    }
+
+    /**
+     * Writes the models a type names and the sequences it plays into their libraries, where they
+     * lack them. Each sequence's channels are worked out on the type's first shape.
+     */
+    private void writeShared(LocType type) {
+        if (type.models != null) {
+            for (var shape : type.models) {
+                for (var model : shape) {
+                    models.file(model & 0xFFFF);
+                }
+            }
+        }
+        if (type.hasAnimations()) {
+            var poser = reader.poser(type, ClientLocReader.shapes(type).getFirst(), false);
+            for (var sequence : type.anim) {
+                if (sequence != -1) {
+                    sequences.ensure(sequence, poser);
+                }
+            }
+        }
+    }
+
+    /**
+     * The directory of the models the locations name.
+     */
+    public Path modelDirectory() {
+        return directory.resolveSibling("models");
+    }
+
+    /**
+     * The directory of the sequences the locations play.
+     */
+    public Path sequenceDirectory() {
+        return directory.resolveSibling("sequences");
     }
 
     /**

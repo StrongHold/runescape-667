@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Collects the parts of a glTF document and the one buffer they all point into.
@@ -50,6 +52,8 @@ public final class GltfBuilder {
     private final List<Object> punctualLights = new ArrayList<>();
     private List<Object> primitives = new ArrayList<>();
     private List<String> targetNames = List.of();
+    private Map<String, Object> assetExtras = Map.of();
+    private final Set<String> extensionsUsed = new TreeSet<>();
 
     /**
      * Adds a vertex attribute of floats, {@code components} to a vertex.
@@ -125,6 +129,14 @@ public final class GltfBuilder {
     }
 
     /**
+     * Says in the document's {@code asset} which version of its format the file is written in, so
+     * that a reader can turn an older file into the newest or refuse a newer one.
+     */
+    public void formatVersion(int version) {
+        assetExtras = Map.of("version", version);
+    }
+
+    /**
      * Adds a skin: the joints a mesh is bound to, in the order its vertices number them.
      *
      * @param inverseBindMatrices the accessor of one matrix for each joint, which takes the mesh
@@ -134,7 +146,9 @@ public final class GltfBuilder {
         var skin = new LinkedHashMap<String, Object>();
         skin.put("joints", joints);
         skin.put("inverseBindMatrices", inverseBindMatrices);
-        skin.put("extras", extras);
+        if (!extras.isEmpty()) {
+            skin.put("extras", extras);
+        }
         skins.add(skin);
         return skins.size() - 1;
     }
@@ -176,11 +190,26 @@ public final class GltfBuilder {
      */
     public void animation(String name, List<Map<String, Object>> samplers, List<Map<String, Object>> channels,
                           Map<String, Object> extras) {
+        animation(name, samplers, channels, extras, Map.of());
+    }
+
+    /**
+     * @param extensions the extensions the animation carries, by name, each of which the document
+     *     then names as used.
+     */
+    public void animation(String name, List<Map<String, Object>> samplers, List<Map<String, Object>> channels,
+                          Map<String, Object> extras, Map<String, Object> extensions) {
         var animation = new LinkedHashMap<String, Object>();
         animation.put("name", name);
         animation.put("samplers", samplers);
         animation.put("channels", channels);
-        animation.put("extras", extras);
+        if (!extras.isEmpty()) {
+            animation.put("extras", extras);
+        }
+        if (!extensions.isEmpty()) {
+            animation.put("extensions", extensions);
+            extensionsUsed.addAll(extensions.keySet());
+        }
         animations.add(animation);
     }
 
@@ -364,7 +393,13 @@ public final class GltfBuilder {
         }
 
         var document = new LinkedHashMap<String, Object>();
-        document.put("asset", Map.of("version", "2.0", "generator", "runescape-667 export"));
+        var asset = new LinkedHashMap<String, Object>();
+        asset.put("version", "2.0");
+        asset.put("generator", "runescape-667 export");
+        if (!assetExtras.isEmpty()) {
+            asset.put("extras", assetExtras);
+        }
+        document.put("asset", asset);
         document.put("scene", 0);
         document.put("scenes", List.of(scene));
         document.put("nodes", nodes);
@@ -372,8 +407,11 @@ public final class GltfBuilder {
         putIfAny(document, "animations", animations);
         putIfAny(document, "skins", skins);
         if (!punctualLights.isEmpty()) {
-            document.put("extensionsUsed", List.of("KHR_lights_punctual"));
+            extensionsUsed.add("KHR_lights_punctual");
             document.put("extensions", Map.of("KHR_lights_punctual", Map.of("lights", punctualLights)));
+        }
+        if (!extensionsUsed.isEmpty()) {
+            document.put("extensionsUsed", List.copyOf(extensionsUsed));
         }
         putIfAny(document, "materials", materials);
         putIfAny(document, "textures", textures);

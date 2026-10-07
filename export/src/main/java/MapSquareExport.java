@@ -227,6 +227,8 @@ public final class MapSquareExport {
         description.put("unitsPerTile", 512);
         description.put("ground", ground.getFileName().toString());
         description.put("locs", TextureLibrary.relativeUri(ground, assets.directory()));
+        description.put("models", TextureLibrary.relativeUri(ground, assets.modelDirectory()));
+        description.put("sequences", TextureLibrary.relativeUri(ground, assets.sequenceDirectory()));
         description.put("textures", TextureLibrary.relativeUri(ground, args.textures.library(null).directory()));
         description.put("heights", heights);
         description.put("flags", nested(square.flags()));
