@@ -112,8 +112,9 @@ public final class SkinExport {
 
         var hooks = ComponentHooks.read(cache);
         var calls = new Calls(scripts);
-        var frames = SkinFrames.ofInterfaces(cache);
-        var hoverFrames = SkinFrames.hoverFrames(scripts, calls);
+        var edges = SkinEdges.read(cache);
+        var frames = SkinFrames.ofInterfaces(cache, edges);
+        var hoverFrames = SkinFrames.hoverFrames(scripts, calls, edges);
         var report = new ArrayList<String>();
         var sets = new LinkedHashMap<String, SkinSets>();
         for (var skinned : SKINNED) {
@@ -157,7 +158,7 @@ public final class SkinExport {
         var sliders = SkinSliders.read(cache);
         file.put("sliders", sliders.written());
         report.add(sliders.size() + " sliders");
-        var windows = SkinWindows.read(cache);
+        var windows = SkinWindows.read(cache, edges);
         var writtenWindows = windows.written();
         file.put("windows", writtenWindows);
         report.add(windows.size() + " windows");
@@ -167,13 +168,12 @@ public final class SkinExport {
         var radioTiles = SkinTiles.read(cache, scripts);
         file.put("radioTiles", radioTiles);
         report.add(radioTiles.size() + " radioTiles");
-        var frameButtons = SkinFrameButtons.read(scripts);
+        var frameButtons = SkinFrameButtons.read(scripts, edges);
         file.put("frameButtons", frameButtons);
         report.add(frameButtons.size() + " frameButtons");
         report.add(frames.size() + " frames");
         report.add(hoverFrames.size() + " hoverFrames");
 
-        var edges = SkinEdges.read(cache);
         for (var key : List.of("frames", "hoverFrames", "windows")) {
             for (var frame : (List<?>) file.get(key)) {
                 edges.addSeen((List<?>) ((Map<?, ?>) frame).get("parts"));

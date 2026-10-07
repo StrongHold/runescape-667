@@ -57,6 +57,19 @@ final class SkinEdges {
         }
     }
 
+    /**
+     * How far in from its side an edge is seen, or how far in it is drawn where its sprite is not
+     * in the cache.
+     */
+    int seenOf(Map<String, Object> edge) {
+        var sprite = edge.get("sprite");
+        if (sprite instanceof Integer id && bounds.containsKey(id)) {
+            return seenOf(edge, (String) edge.get("place"), bounds.get(id));
+        } else {
+            return (Integer) edge.get("inset") + (Integer) edge.get("thickness");
+        }
+    }
+
     private static int seenOf(Map<String, Object> part, String place, Bounds sprite) {
         var across = place.equals("left") || place.equals("right");
         var size = across ? sprite.width() : sprite.height();

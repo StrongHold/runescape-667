@@ -29,19 +29,19 @@ final class SkinFrameButtons {
     private SkinFrameButtons() {
     }
 
-    static List<Map<String, Object>> read(Map<Integer, ClientScript> scripts) {
+    static List<Map<String, Object>> read(Map<Integer, ClientScript> scripts, SkinEdges edges) {
         var written = new ArrayList<Map<String, Object>>();
         for (var pair : PAIRS) {
             var button = new LinkedHashMap<String, Object>();
-            button.put("frame", frameOf(scripts, pair.plain()));
-            button.put("hoverFrame", frameOf(scripts, pair.hover()));
+            button.put("frame", frameOf(scripts, pair.plain(), edges));
+            button.put("hoverFrame", frameOf(scripts, pair.hover(), edges));
             button.put("scripts", List.of(pair.plain(), pair.hover()));
             written.add(button);
         }
         return written;
     }
 
-    private static Map<String, Object> frameOf(Map<Integer, ClientScript> scripts, int script) {
+    private static Map<String, Object> frameOf(Map<Integer, ClientScript> scripts, int script, SkinEdges edges) {
         var small = ScriptReplay.run(scripts, script, SkinFrames.WIDTH, SkinFrames.HEIGHT);
         var large = ScriptReplay.run(scripts, script, SkinFrames.WIDER, SkinFrames.HIGHER);
         var pieces = new ArrayList<SkinFrames.Piece>();
@@ -51,7 +51,7 @@ final class SkinFrameButtons {
                 pieces.add(piece);
             }
         }
-        var parts = SkinFrames.partsOf(pieces);
+        var parts = SkinFrames.partsOf(pieces, edges);
         if (small.size() != large.size() || parts == null) {
             System.out.println("script " + script + " no longer builds a frame");
             System.exit(1);

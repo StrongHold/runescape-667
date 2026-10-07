@@ -833,17 +833,32 @@ none. A part that a set does not have is left out.
   banners and pictures stay at a corner as a corner does, and dividers and rules stretch along a
   side as an edge does. So a component at a corner is a corner only where the corner across from
   it (top left and top right, bottom left and bottom right) has a component of the same width and
-  height within 8 pixels of the same place, each measured from its own sides. An edge is kept only
-  where its `inset` is less than the furthest that the corners of its side reach in from that
-  side, and a fill of one colour only where it comes out to within that reach on each side. A
-  layer without a corner at each corner and an edge along each side is then not written. A layer
-  whose components take a share of its size (`Component.resizeModeX` or `resizeModeY` 2, a share in
-  16384ths) has no one shape at every size, so the task measures it at the size its layer has when
-  the interface is laid out through its layers in a window of 765 by 503, and does not write it
-  where that size is not known. A frame is its `parts`, so an ornate frame may have several in one
-  place. Parts that cover each other keep the order the client draws them in, and the others are
-  put in the order of how the file writes them, so a frame that a layer holds in another order is
-  written once. A frame that is the frame of one of the `windows` is not written again here.
+  height within 8 pixels of the same place, each measured from its own sides. Some layers were
+  drawn by hand at one size, as the client never resizes them: a book (937) and a picture with
+  pillars at its sides (27) keep their lower pieces against the top. Where the size of the layer is
+  known, a sprite that keeps to the start of a side but stands in its far half (or to the end but
+  stands in its near half), inside the layer, is such a piece, and a corner is not a corner where
+  a piece of its size stands so at the other end of one of its sides, the same distance in from
+  that side. An edge is kept only where its `inset` is less than the furthest that the corners of
+  its side reach in from that side, where it starts and ends within 8 pixels of what the corners at
+  each end reach along the side, and where it lies against its side: the outermost edge of a side,
+  then each edge no further in than the edges outside it are `seen`, or one that each of the other
+  sides has an edge as far in as, to within 8 pixels, as a gold line round the inside of a frame
+  (935) has. A rule under the heading of a table (1004, 1121) and a divider under a title (405)
+  are on one side only, with a gap outside them, and are left out. A fill, of sprites or of one
+  colour, is kept only where it comes out on each side to within 8 pixels of the furthest that
+  the corners or the edges of that side reach, as the page of the book and a dark bar in the middle
+  of a box (1099) do not. A layer without a corner at each corner and an edge along each side is
+  then not written. A layer whose components take a share of its size (`Component.resizeModeX` or
+  `resizeModeY` 2, a share in 16384ths) has no one shape at every size, so the task measures it at
+  the size its layer has when the interface is laid out through its layers in a window of 765 by
+  503, and does not write it where that size is not known. A frame of a layer is measured from the
+  box its corners stand in: where the outermost corners on a side stand in from it, as a frame in
+  the middle of a larger layer does (902), each part is moved out by that much. A frame is its
+  `parts`, so an ornate frame may have several in one place. Parts that cover each other keep the
+  order the client draws them in, and the others are put in the order of how the file writes them,
+  so a frame that a layer holds in another order is written once. A frame that is the frame of one
+  of the `windows`, both measured from the box their corners stand in, is not written again here.
   Each part has its `place`, its `sprite`,
   `mirrored` where it is drawn mirrored left to right (`Component.verticalFlip`), `flipped` where
   it is drawn upside down (`horizontalFlip`), and `tiled` where the sprite is tiled over it rather
@@ -857,12 +872,19 @@ none. A part that a set does not have is left out.
   from the sides. A filled rectangle component that grows both ways is a fill of one colour: in
   place of a `sprite` it has its `colour` as 0xRRGGBB and, where it is not solid, its
   `transparency`, 0 solid to 255 unseen (`Component.transparency`). A planted defect in each
-  of these rules changes the file: with no pairing of corners, 130 frames are written and 100
-  parts come back, such as the row of icons in 933 and the grid in 1052; with no reach for edges, 24
-  dividers and rules come back, such as those of 84 and 1121; with no rule for fills, 5 fills of
-  one colour come back in 948 and 949; when each layer is measured at one size, the edges of 993
-  stop short of their corners again; with the parts in the order of the layer, 126 frames are
-  written, 4 of them twice; and with the frames of windows kept, 147 frames are written.
+  of these rules changes the file: with no pairing of corners, 125 frames are written and 98 parts
+  come back, such as the row of icons in 933 and the grid in 1052; with no pieces laid out by hand,
+  the pillars of 27 and the top corners of the stone frame round the book come back; with edges
+  that need not meet their corners, 121 frames are written and the page of the book and a strip at
+  the bottom of 19 that never meets its corners come back; with no reach for edges, 4 edges come
+  back; with edges that need not lie against their side, the rules of the tables of 1004 and 1121
+  come back; with no rings, the gold line of 935 is lost; with fills that need not fill, the page
+  of the book and the dark bar of 1099 come back; with each layer measured at one size, 115 frames
+  are written and the strip at the bottom of 19 comes back; with a frame measured from the layer's
+  sides, the frame of 902 stands 60 pixels in again; with a piece outside the layer taken as laid
+  out by hand, a frame of 994 is lost; with the parts in the order of the layer, 122 frames are
+  written, 3 of them twice; with windows compared in the layer they were found in, 122 frames are
+  written; and with the frames of windows kept, 142 frames are written.
 - `windows` are the windows of the interfaces: a frame of sprites with a title across its top and
   a button that closes it, laid out at a fixed size in a layer, the ones the most interfaces use
   first. The frame is the layer's sprite components the player cannot use, each placed by the
@@ -895,7 +917,7 @@ sprites does not hide them. A call whose sprites are known only while the game r
 not written. Each script that holds its sprites as constants is read by its shape, and the task
 stops where a script no longer has the shape it reads. In this cache there are ten scrollbars, seven
 plate buttons, 110 sprite buttons, two tabs, five checkboxes, two sets of radio buttons, one
-radio tile, four sliders, one dropdown, 122 frames, 85 windows, two frame buttons and two hover frames, and six calls of the scrollbar
+radio tile, four sliders, one dropdown, 118 frames, 85 windows, two frame buttons and two hover frames, and six calls of the scrollbar
 script are known only while the game runs. A planted check that stops reading passed-on arguments
 leaves seven such calls, one more than the task finds, and a planted check that expects five sprites
 in script 2975 stops the task.

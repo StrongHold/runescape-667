@@ -51,6 +51,11 @@ final class SkinWindows {
 
     private final Map<String, Map<String, Object>> windows = new LinkedHashMap<>();
     private final Map<String, TreeSet<Integer>> interfaces = new LinkedHashMap<>();
+    private final SkinEdges edges;
+
+    private SkinWindows(SkinEdges edges) {
+        this.edges = edges;
+    }
 
     private record Box(int x, int y, int width, int height) {
 
@@ -63,8 +68,8 @@ final class SkinWindows {
         }
     }
 
-    static SkinWindows read(File cache) throws Exception {
-        var found = new SkinWindows();
+    static SkinWindows read(File cache, SkinEdges edges) throws Exception {
+        var found = new SkinWindows(edges);
         var index = Cache.index(cache, Js5Archive.INTERFACES);
         for (var group : Cache.groupsOf(index)) {
             var data = Cache.group(cache, Js5Archive.INTERFACES, group);
@@ -108,7 +113,7 @@ final class SkinWindows {
                 pieces.add(SkinFrames.pieceOf(component));
             }
         }
-        var parts = SkinFrames.partsOf(pieces);
+        var parts = SkinFrames.partsOf(pieces, edges);
         if (parts == null) {
             return;
         }
