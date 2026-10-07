@@ -845,13 +845,19 @@ none. A part that a set does not have is left out.
   known, a sprite that keeps to the start of a side but stands in its far half (or to the end but
   stands in its near half), inside the layer, is such a piece, and a corner is not a corner where
   a piece of its size stands so at the other end of one of its sides, the same distance in from
-  that side. An edge is kept only where its `inset` is less than the furthest that the corners of
+  that side. Such a piece tells this only along the side it keeps to the wrong end of: the cap of
+  the divider of 87, which keeps to the right of its layer while it stands at the left, says
+  nothing of the corners below it. An edge is kept only where its `inset` is less than the furthest that the corners of
   its side reach in from that side, where it starts and ends within 8 pixels of what the corners at
   each end reach along the side, and where it lies against its side: the outermost edge of a side,
   then each edge no further in than the edges outside it are `seen`, or one that each of the other
   sides has an edge as far in as, to within 8 pixels, as a gold line round the inside of a frame
   (935) has. A rule under the heading of a table (1004, 1121) and a divider under a title (405)
-  are on one side only, with a gap outside them, and are left out. A fill, of sprites or of one
+  are on one side only, with a gap outside them, and are left out. A divider with a cap at each
+  end is kept: at both of its ends a corner stands beside it, over at least half of how thick it
+  is, further in from the side than the outermost corners at that end, as the line under the title
+  of a stone window (828) ends in two caps (829 and 830) that cover the frame's sides where it
+  meets them. A fill, of sprites or of one
   colour, is kept only where it comes out on each side to within 8 pixels of the furthest that
   the corners or the edges of that side reach, as the page of the book and a dark bar in the middle
   of a box (1099) do not. A filled rectangle that grows along a side is an edge of one colour, and
@@ -865,7 +871,16 @@ none. A part that a set does not have is left out.
   which the client cuts to the layer, runs the length of the side and past both ends by as much, as
   the 428 pixel bottom edge of 924 does in a box 334 wide. The task places a piece by all the
   client's position modes (`InterfaceManager.reposition`, 0 to 5), and a piece it cannot place,
-  in a layer or not, has no place. A layer without a corner at each corner and an edge along each side is
+  in a layer or not, has no place. Where the size of the layer is known, a piece the client lays
+  out to no width or no height at that size is not drawn and is not part of the frame, as the
+  sides of the stone panels of 913 and 914 are 144 pixels less than the height of their box, in
+  boxes 110 and 122 high; those sides are also the wrong way round, which no player saw. An edge
+  that leaves a gap between itself and the corners at an end is run on to them where, at that
+  size, other pieces cover each gap across the band the edge covers, as the bottom of 104 is
+  drawn in two pieces round a joint (839) and the line under its title in two pieces round
+  another (842); it runs on as far as the corners reach, or as far as a piece of its own sprite
+  in the gap reaches where that is further. An edge across the band of an edge of its side that
+  already meets its corners is not run on, as an ornament over a side is not a side. A layer without a corner at each corner and an edge along each side is
   then not written. A layer whose components take a share of its size (`Component.resizeModeX` or
   `resizeModeY` 2, a share in 16384ths) has no one shape at every size, so the task measures it at
   the size its layer has when the interface is laid out through its layers in a window of 765 by
@@ -891,7 +906,10 @@ none. A part that a set does not have is left out.
   from the side, `thickness` thick, and is `seen` from its side as far as the part of its sprite the
   cache holds pixels for reaches, the canvas less the sprite's offsets (`IndexedImage.offX1`,
   `offX2`, `offY1`, `offY2`), mirrored, flipped or turned as it is drawn: what the frame holds
-  stands inside that. An edge of one colour has its `colour` and `transparency` in place of a
+  stands inside that. A stretched edge is seen as far as that part reaches scaled to how thick it
+  is; a tiled one is not scaled, as the client repeats the sprite at its own size from the top
+  left of the edge and cuts the last copy (`Sprite.renderTiled`), so an edge thinner than its
+  sprite shows the first rows or columns of the sprite whichever side it lies on. An edge of one colour has its `colour` and `transparency` in place of a
   `sprite` and is `seen` as far as it reaches. A part at `centre` keeps `left`, `top`, `right` and `bottom`
   from the sides. A filled rectangle component that grows both ways is a fill of one colour: in
   place of a `sprite` it has its `colour` as 0xRRGGBB and, where it is not solid, its
@@ -957,18 +975,30 @@ none. A part that a set does not have is left out.
   written, as 897 and 1079 are written apart, and with that defect as well, 102.
 - `windows` are the windows of the interfaces: a frame of sprites with a title across its top and
   a button that closes it, laid out at a fixed size in a layer, the ones the most interfaces use
-  first. The frame is the layer's sprite components the player cannot use, each placed by the
-  thirds of the box they cover that its middle stands in, across and down, within 16 pixels of the
-  sides of its place, or the largest in the middle for the fill; its `parts` are written as a
-  frame's are, measured from the sides of the box, so the window takes any size. Its `title` is
-  the centred line of text near the top, as its `colour`, `font` by id, `shadow`, and its place,
-  `left` and `right` from the sides, `top` from the top and `height`. Its `close` button is the
-  sprite near the top right whose hover hook runs script 44, as its `sprite`, `hover` under the
-  pointer, its place `right` and `top` from the box's sides, `width` and `height`. A window whose
-  sprites follow the size of their layer, as the graphics options window's do (interface 742), is
-  laid out as the frames are, at two sizes with the client's rules, so a place may have several
-  parts and a fill may be of one colour; its title and close button are measured where they stand
-  in the larger of the two sizes.
+  first. The frame is the layer's sprite components the player cannot use, in the box they
+  cover. The window is drawn at that one size, so each sprite is read as one that keeps to the
+  sides it is nearest: by the third of the box its middle stands in, across and down, it keeps its
+  distance from the start of the side, from its end, or in the middle third from both, growing
+  with the box. A sprite in the left or right third that stands more than 16 pixels in from that
+  side is read as centred across the box, as the corners of a frame and the caps of its dividers
+  keep to its sides and an icon beside the title (327) or a joint of the rules of a table does not.
+  The frame's rules of `frames` then read the sprites at that size, with the corners of a pair as
+  much as 16 pixels apart, as the top corners of 327 stand 13 and 3 pixels in from the sides of a
+  box whose right edge is thinner than its left; and the outermost corners must stand within 16
+  pixels of each side of the box, as a layer whose sprites reach further out than its frame (267,
+  438) holds more than a window. Its `parts` are written as a frame's are, measured from the sides
+  of the box, so the window takes any size. Its `title` is the centred line of text near the top,
+  as its `colour`, `font` by id, `shadow`, and its place, `left` and `right` from the sides, `top`
+  from the top and `height`. Its `close` button is the sprite near the top right whose hover hook
+  runs script 44, the nearest the top right corner where there are several (913, 915 and 979 have
+  a help button beside it), as its `sprite`, `hover` under the pointer, its place `right` and
+  `top` from the box's sides, `width` and `height`. A window whose sprites follow the size of their
+  layer, as the graphics options window's do (interface 742), is laid out as the frames are, at
+  two sizes with the client's rules, so a place may have several parts and a fill may be of one
+  colour, and the rules that need the layer's real size read it where the layer is laid out in the
+  client's window, as the bottom edge of 924 runs past both ends of its side; its title and close
+  button are measured where they stand in the larger of the two sizes. A component that names
+  itself as its layer is laid out nowhere.
   A frame of `frames` with a close button over it is a window as well, as the ornate windows are
   (20, 554, 555, 1099, 1102, 1111, 1122 and others), which hold their frame, their title and their
   close button each in a layer of its own. Its title is the frame's title, found as `frames` tells,
@@ -987,6 +1017,30 @@ none. A part that a set does not have is left out.
   each of its rows; with buttons that may stand outside the frame, 6 more windows are written from
   those buttons of 1097; and with the boxes of the windows above read again, 16 windows are written
   twice.
+  The rules of dividers, of edges run on over a gap, of pieces of no size and of tiled edges, and
+  the reading of a window drawn at one size by the frame's rules, make 113 windows and 98 frames
+  of 110 and 102. The windows of the stone frames gain the line under their title and its caps (52
+  windows, 104, 109, 332 and 382 among them), 104 its whole bottom edge, 301 its line in place of a
+  fill of the line's sprite, 924 its bottom edge, and 913, 915 and 979 their close button in place
+  of a help button; 913 and 914 lose the window of their small panel, whose sides the client never
+  draws, and 596, 906, 994 and 1097 lose a frame so; 935 gets the bottom of its gold line, and 993
+  the dark line under its heading. 626, 655, 862, 931, 979 and 985 are new windows. A planted
+  defect in each of these rules changes the file: with no caps, 52 windows lose their divider; with
+  no edges run on, 104 is no window and 935 loses the bottom of its gold line; with edges run on
+  across an edge that meets its corners, 115 windows and 99 frames are written, as the rows of 643
+  and 626 and the pages of the book (937) are run on into lines; with edges run on only to the
+  corners, the line under the title of 104 stops short of its cap; with caps beside any part of
+  the band, 110 takes a picture's rules as dividers; with pieces of no size drawn, 116 windows and
+  102 frames are written, 913 and 914 with their sides the wrong way round; with windows not read
+  at the real size of their layer, 924 loses its bottom edge and 913 and 914 come back; with the
+  first close button and not the nearest, 915 and 979 take their help button; with the corners of
+  a pair of a window drawn at one size no further apart than a frame's, 97 windows are written and
+  the most used stone window (327) is lost; with sprites that stand in from their side kept to it,
+  the icons of 327 and the column joints of 643 become corners; with the outermost corners
+  anywhere, 267 and 438 come back with their frame inside a larger box; with a piece laid out by
+  hand telling of corners on any side, 87 is lost; with tiled edges seen as stretched, 57 windows
+  and 10 frames change how far in their edges are seen; and with a component that names itself as
+  its layer laid out, the task does not end.
 - `frameButtons` are the buttons a script builds as a frame: the stone button that 151 components
   have (script 92, proc 679, and under the pointer script 94, proc 1360) and the bevelled button
   of the question that accepts a graphics setting, interface 883 (procs 1151 and 1166). Each has
@@ -1005,7 +1059,7 @@ sprites does not hide them. A call whose sprites are known only while the game r
 not written. Each script that holds its sprites as constants is read by its shape, and the task
 stops where a script no longer has the shape it reads. In this cache there are ten scrollbars, seven
 plate buttons, 110 sprite buttons, two tabs, five checkboxes, two sets of radio buttons, one
-radio tile, four sliders, one dropdown, 102 frames, 110 windows, two frame buttons and two hover frames, and six calls of the scrollbar
+radio tile, four sliders, one dropdown, 98 frames, 113 windows, two frame buttons and two hover frames, and six calls of the scrollbar
 script are known only while the game runs. A planted check that stops reading passed-on arguments
 leaves seven such calls, one more than the task finds, and a planted check that expects five sprites
 in script 2975 stops the task.

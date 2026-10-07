@@ -15,17 +15,19 @@ import java.util.TreeSet;
  * The windows of the interfaces: a frame of sprites with a title written across its top and a
  * button that closes it, laid out at a fixed size in a layer.
  *
- * A window's frame is the layer's sprite components the player cannot use, each placed by where it
- * stands in the box they cover: in the left, middle or right third across, and the top, middle or
- * bottom third down, within a few pixels of the sides of its place, or the largest in the middle
- * for the fill. Its title is a centred line of text the layer holds near its top, and its close
- * button a sprite the hover hooks of the layer swap near its top right. The frame is written as
- * the frames are, measured from the sides of the box, so it can take any size.
+ * A window's frame is the layer's sprite components the player cannot use. A window drawn at one
+ * size has each sprite read as one that keeps to the sides it is nearest, by the third of the box
+ * it stands in, and the frame's rules ({@code SkinFrames}) then read them at that size, so its
+ * dividers and the caps at their ends are found as a frame's are. Its title is a centred line of
+ * text the layer holds near its top, and its close button the sprite nearest its top right that
+ * the hover hooks of the layer swap. The frame is written as the frames are, measured from the
+ * sides of the box, so it can take any size.
  *
  * A window whose pieces follow the size of its layer, as the graphics options window's do, is laid
  * out as the frames are, at two sizes with the client's own rules ({@code SkinFrames}), so that a
- * place may hold several pieces; its title and close button are found where they stand in the
- * larger of the two.
+ * place may hold several pieces, and the rules that need the layer's real size read it where the
+ * layer is laid out in the client's window; its title and close button are found where they stand
+ * in the larger of the two.
  *
  * A frame that {@code SkinFrames} finds with a close button over it is a window as well, with its
  * title where the interface writes one, unless these rules found a window in a layer that holds its
@@ -34,10 +36,40 @@ import java.util.TreeSet;
 final class SkinWindows {
 
     /**
-     * How far from the side of its place a piece of a frame may stand, as the corners of the
-     * stone window stand 13 pixels in from its side edges.
+     * How far in from a side the outermost corners of a window drawn at one size stand, as the
+     * corners of the stone window stand 13 pixels in from its side edges.
      */
     private static final int NEAR_SIDE = 16;
+
+    /**
+     * How far apart the two corners of a pair may stand in a window drawn by hand at one size, each
+     * measured from its own sides, as the top corners of 327 stand 13 and 3 pixels in from the sides
+     * of a box whose right edge is 9 pixels thinner than its left.
+     */
+    private static final int HAND_PAIR_SLACK = 16;
+
+    /**
+     * The thirds of a box a piece's middle stands in, across or down.
+     */
+    private static final int MIDDLE = 1;
+    private static final int LAST = 2;
+
+    /**
+     * The resize mode of a piece the size of its box less a fixed amount, and the reposition modes
+     * of one centred in its box and of one that keeps its distance from the end of its side ({@code
+     * InterfaceManager.resize}, {@code reposition}).
+     */
+    private static final int FOLLOWS = 1;
+    private static final int CENTRED_IN_BOX = 1;
+    private static final int FROM_END = 2;
+
+    /**
+     * The components of an interface stand under their interface's number in the high half of their
+     * id, and their own number in the low half, which names the layer a component is in ({@code
+     * Component.id}).
+     */
+    private static final int INTERFACE_SHIFT = 16;
+    private static final int CHILD_MASK = 0xFFFF;
 
     /**
      * How far down from the top of the frame the title and the close button may stand.
@@ -47,12 +79,6 @@ final class SkinWindows {
     private static final int SWAP_SPRITE = 44;
 
     private static final int CENTRED = 1;
-
-    private static final String[][] PLACES = {
-        {"topLeft", "left", "bottomLeft"},
-        {"top", "centre", "bottom"},
-        {"topRight", "right", "bottomRight"}
-    };
 
     private static final List<String> EDGES = List.of("topLeft", "top", "topRight", "left", "right", "bottomLeft", "bottom", "bottomRight");
 
@@ -82,21 +108,28 @@ final class SkinWindows {
         for (var group : Cache.groupsOf(index)) {
             var data = Cache.group(cache, Js5Archive.INTERFACES, group);
             if (data != null) {
-                var layers = new LinkedHashMap<Integer, List<Component>>();
-                for (var file : Cache.split(data, index, group).values()) {
+                var components = new LinkedHashMap<Integer, Component>();
+                for (var file : Cache.split(data, index, group).entrySet()) {
                     var component = new Component();
-                    component.decode(new Packet(file));
+                    component.decode(new Packet(file.getValue()));
+                    components.put((group << INTERFACE_SHIFT) | file.getKey(), component);
+                }
+                var layout = new ComponentLayout(components);
+                var layers = new LinkedHashMap<Integer, List<Component>>();
+                for (var component : components.values()) {
                     layers.computeIfAbsent(component.layer, layer -> new ArrayList<>()).add(component);
                 }
                 for (var layer : layers.entrySet()) {
-                    found.addIfWindow(layer.getValue(), group, layer.getKey());
+                    var box = layer.getKey() == -1 ? ComponentLayout.WINDOW : layout.boxOf((group << INTERFACE_SHIFT) | (layer.getKey() & CHILD_MASK));
+                    var real = box == null ? null : new SkinFrames.Size(box.width(), box.height());
+                    found.addIfWindow(layer.getValue(), real, group, layer.getKey());
                 }
             }
         }
         return found;
     }
 
-    private void addIfWindow(List<Component> layer, int interfaceId, int layerId) throws Exception {
+    private void addIfWindow(List<Component> layer, SkinFrames.Size real, int interfaceId, int layerId) throws Exception {
         var graphics = new ArrayList<Component>();
         for (var component : layer) {
             if (component.type == Component.TYPE_GRAPHIC && SkinFrames.isPiece(component)) {
@@ -106,22 +139,24 @@ final class SkinWindows {
         if (graphics.stream().allMatch(SkinWindows::isFixed)) {
             addIfFixedWindow(layer, graphics, interfaceId, layerId);
         } else {
-            addIfResizingWindow(layer, interfaceId, layerId);
+            addIfResizingWindow(layer, real, interfaceId, layerId);
         }
     }
 
     /**
      * Adds a layer whose pieces follow its size as a window, where they make a frame and the layer
-     * holds a title and a close button, each measured where it stands in the larger box.
+     * holds a title and a close button, each measured where it stands in the larger box. The frame's
+     * rules that need the layer's real size read it where the layer is laid out in the client's
+     * window.
      */
-    private void addIfResizingWindow(List<Component> layer, int interfaceId, int layerId) throws Exception {
+    private void addIfResizingWindow(List<Component> layer, SkinFrames.Size real, int interfaceId, int layerId) throws Exception {
         var pieces = new ArrayList<SkinFrames.Piece>();
         for (var component : layer) {
             if (SkinFrames.isPiece(component)) {
                 pieces.add(SkinFrames.pieceOf(component));
             }
         }
-        var parts = SkinFrames.partsOf(pieces, edges);
+        var parts = SkinFrames.partsOf(pieces, real, edges);
         if (parts == null) {
             return;
         }
@@ -142,32 +177,11 @@ final class SkinWindows {
         }
 
         var box = boxAround(pieces);
-        var placed = new LinkedHashMap<String, Component>();
-        Component fill = null;
-        for (var piece : pieces) {
-            var place = placeOf(piece, box);
-            if (place != null && placed.containsKey(place)) {
-                return;
-            } else if (place != null) {
-                placed.put(place, piece);
-            } else if (isInside(piece, box) && (fill == null || areaOf(piece) > areaOf(fill))) {
-                fill = piece;
-            }
-        }
-        if (!placed.keySet().containsAll(EDGES)) {
+        var real = new SkinFrames.Size(box.width(), box.height());
+        var following = pieces.stream().map(piece -> followingIn(piece, box)).toList();
+        var parts = SkinFrames.partsOf(following, real, real, HAND_PAIR_SLACK, edges);
+        if (parts == null || !isAtItsSides(parts)) {
             return;
-        }
-
-        var parts = new ArrayList<Map<String, Object>>();
-        for (var piece : pieces) {
-            if (piece == fill) {
-                parts.add(partOf(piece, "centre", box));
-            }
-            for (var place : placed.entrySet()) {
-                if (place.getValue() == piece) {
-                    parts.add(partOf(piece, place.getKey(), box));
-                }
-            }
         }
 
         var fixed = new LinkedHashMap<Component, Box>();
@@ -227,36 +241,8 @@ final class SkinWindows {
         interfaces.computeIfAbsent(key, k -> new TreeSet<>()).add(interfaceId);
     }
 
-    /**
-     * The place of a piece of the frame, by the thirds of the box its middle stands in, where it
-     * stands within a few pixels of the sides of that place; null for one in the middle or one that
-     * stands in from its sides.
-     */
-    private static String placeOf(Component piece, Box box) {
-        var across = third(piece.originalX + piece.originalWidth / 2 - box.x(), box.width());
-        var down = third(piece.originalY + piece.originalHeight / 2 - box.y(), box.height());
-        var nearAcross = across == 1 || nearSide(across, piece.originalX - box.x(), box.right() - piece.originalX - piece.originalWidth);
-        var nearDown = down == 1 || nearSide(down, piece.originalY - box.y(), box.bottom() - piece.originalY - piece.originalHeight);
-        var middle = across == 1 && down == 1;
-        return !middle && nearAcross && nearDown ? PLACES[across][down] : null;
-    }
-
     private static int third(int at, int length) {
         return at * 3 < length ? 0 : at * 3 > length * 2 ? 2 : 1;
-    }
-
-    private static boolean nearSide(int third, int fromStart, int fromEnd) {
-        return third == 0 ? fromStart <= NEAR_SIDE : fromEnd <= NEAR_SIDE;
-    }
-
-    private static boolean isInside(Component piece, Box box) {
-        var x = piece.originalX - box.x();
-        var y = piece.originalY - box.y();
-        return x > 0 && y > 0 && x + piece.originalWidth < box.width() && y + piece.originalHeight < box.height();
-    }
-
-    private static int areaOf(Component piece) {
-        return piece.originalWidth * piece.originalHeight;
     }
 
     private static Box boxAround(List<Component> pieces) {
@@ -299,6 +285,7 @@ final class SkinWindows {
      * right and the top of the box.
      */
     private static Map<String, Object> closeOf(Map<Component, Box> laidOut, Box box) throws Exception {
+        Map<String, Object> nearest = null;
         for (var entry : laidOut.entrySet()) {
             var component = entry.getKey();
             var at = entry.getValue();
@@ -314,63 +301,85 @@ final class SkinWindows {
                 close.put("top", at.y() - box.y());
                 close.put("width", at.width());
                 close.put("height", at.height());
-                return close;
+                if (nearest == null || fromTopRight(close) < fromTopRight(nearest)) {
+                    nearest = close;
+                }
             }
         }
-        return null;
+        return nearest;
     }
 
     /**
-     * A part of the frame as the frames write theirs, measured from the sides of the box.
+     * Whether the outermost corners of a window drawn at one size stand near each side of the box its
+     * sprites cover, as the frame of a window is the outside of what it draws; a layer whose sprites
+     * reach further out than its frame on a side, as a picture below the frame of 267 does, holds
+     * more than a window.
      */
-    private static Map<String, Object> partOf(Component piece, String place, Box box) {
-        var part = new LinkedHashMap<String, Object>();
-        part.put("place", place);
-        part.put("sprite", piece.graphic);
-        var drawn = SkinFrames.pieceOf(piece);
-        if (drawn.mirrored()) {
-            part.put("mirrored", true);
-        }
-        if (drawn.flipped()) {
-            part.put("flipped", true);
-        }
-        if (drawn.turned()) {
-            part.put("turned", true);
-        }
-        if (piece.tiling) {
-            part.put("tiled", true);
-        }
-        var left = piece.originalX - box.x();
-        var top = piece.originalY - box.y();
-        var right = box.right() - piece.originalX - piece.originalWidth;
-        var bottom = box.bottom() - piece.originalY - piece.originalHeight;
-        switch (place) {
-            case "top", "bottom" -> {
-                part.put("start", left);
-                part.put("end", right);
-                part.put("inset", place.equals("top") ? top : bottom);
-                part.put("thickness", piece.originalHeight);
-            }
-            case "left", "right" -> {
-                part.put("start", top);
-                part.put("end", bottom);
-                part.put("inset", place.equals("left") ? left : right);
-                part.put("thickness", piece.originalWidth);
-            }
-            case "centre" -> {
-                part.put("left", left);
-                part.put("top", top);
-                part.put("right", right);
-                part.put("bottom", bottom);
-            }
-            default -> {
-                part.put("x", place.endsWith("Left") ? left : right);
-                part.put("y", place.startsWith("top") ? top : bottom);
-                part.put("width", piece.originalWidth);
-                part.put("height", piece.originalHeight);
-            }
-        }
-        return part;
+    private static boolean isAtItsSides(List<Map<String, Object>> parts) {
+        var corners = parts.stream().filter(SkinFrames::isCorner).toList();
+        return List.of("Left", "Right").stream().allMatch(side -> SkinFrames.marginOf(side, "x", corners) <= NEAR_SIDE)
+            && List.of("top", "bottom").stream().allMatch(side -> SkinFrames.marginOf(side, "y", corners) <= NEAR_SIDE);
+    }
+
+    /**
+     * How far a button stands from the top right corner of the box, along the top and down the right
+     * side together.
+     */
+    private static int fromTopRight(Map<String, Object> close) {
+        return (Integer) close.get("right") + (Integer) close.get("top");
+    }
+
+    /**
+     * A sprite of a window laid out at one size, as a piece that keeps to the sides of the box it is
+     * nearest and grows with the box where its middle stands in the middle third: in the left third
+     * across it keeps its distance from the left, in the right third from the right, and in the
+     * middle it keeps its distance from both and grows; down likewise. So the frame's rules read a
+     * window drawn at one size as they read one that follows its layer. The corners of a frame and
+     * the caps of its dividers keep to its left and right sides, so a piece in the left or right
+     * third that stands further in from that side, as an icon beside the title of 327 or a joint of
+     * the rules of a table does, is laid out as one centred across the box: it is no part of the
+     * frame, but it still covers what it covers at the size the window is drawn at.
+     */
+    private static SkinFrames.Piece followingIn(Component component, Box box) {
+        var drawn = SkinFrames.pieceOf(component);
+        var x = component.originalX - box.x();
+        var y = component.originalY - box.y();
+        var width = component.originalWidth;
+        var height = component.originalHeight;
+        var across = third(x + width / 2, box.width());
+        var down = third(y + height / 2, box.height());
+        var fromSide = across == LAST ? box.width() - x - width : x;
+        var acrossLayout = across != MIDDLE && fromSide > NEAR_SIDE ? centredAcross(x, width, box.width()) : keptAcross(x, width, box.width(), across);
+        var layout = new SkinFrames.Layout(
+            acrossLayout.width(),
+            down == MIDDLE ? box.height() - height : height,
+            acrossLayout.resizeX(),
+            down == MIDDLE ? FOLLOWS : 0,
+            acrossLayout.x(),
+            down == LAST ? box.height() - y - height : y,
+            acrossLayout.reposX(),
+            down == LAST ? FROM_END : 0
+        );
+        return new SkinFrames.Piece(drawn.sprite(), drawn.colour(), drawn.transparency(), drawn.mirrored(), drawn.flipped(), drawn.turned(), drawn.tiled(), layout, List.of());
+    }
+
+    /**
+     * How a piece is laid out across its box: its width, its resize mode, its place and its
+     * reposition mode.
+     */
+    private record Across(int width, int resizeX, int x, int reposX) {
+    }
+
+    private static Across centredAcross(int x, int width, int boxWidth) {
+        return new Across(width, 0, x - (boxWidth - width) / 2, CENTRED_IN_BOX);
+    }
+
+    private static Across keptAcross(int x, int width, int boxWidth, int across) {
+        return switch (across) {
+            case MIDDLE -> new Across(boxWidth - width, FOLLOWS, x, 0);
+            case LAST -> new Across(width, 0, boxWidth - x - width, FROM_END);
+            default -> new Across(width, 0, x, 0);
+        };
     }
 
     private static boolean isFixed(Component component) {

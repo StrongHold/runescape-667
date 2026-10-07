@@ -9,7 +9,8 @@ import java.util.Map;
  * How far in from its side each edge of a frame is seen: where it stands, and then to the inner
  * side of the part of its sprite the sprite holds pixels for, the canvas less the offsets the cache
  * keeps with it ({@code IndexedImage.offX1}, {@code offX2}, {@code offY1}, {@code offY2}), mirrored,
- * flipped or turned as it is drawn and scaled to how thick it is drawn. What a frame holds stands inside
+ * flipped or turned as it is drawn and scaled to how thick it is drawn, or for a tiled edge repeated
+ * at its own size and cut to how thick it is drawn. What a frame holds stands inside
  * this, so the transparent margin of a sprite holds nothing back.
  */
 final class SkinEdges {
@@ -86,7 +87,31 @@ final class SkinEdges {
         var fromNearSide = fromStart ? start + length : size - start;
         var inset = (Integer) part.get("inset");
         var thickness = (Integer) part.get("thickness");
-        return inset + Math.round((float) fromNearSide * thickness / size);
+        if (Boolean.TRUE.equals(part.get("tiled"))) {
+            return inset + tiledReach(start, length, size, thickness, fromStart);
+        } else {
+            return inset + Math.round((float) fromNearSide * thickness / size);
+        }
+    }
+
+    /**
+     * How far in from its side a tiled edge holds pixels: the client repeats the sprite at its own
+     * size from the top left of the edge ({@code Sprite.renderTiled}) and cuts the last copy to the
+     * edge, so an edge thinner than its sprite shows the sprite's first rows or columns whichever side
+     * it lies on, and is not scaled as a stretched one is.
+     */
+    private static int tiledReach(int start, int length, int size, int thickness, boolean fromStart) {
+        var nearest = thickness;
+        var furthest = 0;
+        for (var copy = 0; copy < thickness; copy += size) {
+            var from = Math.min(copy + start, thickness);
+            var to = Math.min(copy + start + length, thickness);
+            if (from < to) {
+                nearest = Math.min(nearest, from);
+                furthest = Math.max(furthest, to);
+            }
+        }
+        return fromStart ? furthest : thickness - nearest;
     }
 
     /**

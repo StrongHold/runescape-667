@@ -41,11 +41,19 @@ final class ComponentLayout {
      * or a rule is one the export does not take.
      */
     Box boxOf(int id) {
+        return boxOf(id, new java.util.HashSet<>());
+    }
+
+    /**
+     * Where a component stands and its size, or null where it is in a layer it holds itself, as a
+     * component that names itself as its layer is, which the client never draws.
+     */
+    private Box boxOf(int id, java.util.Set<Integer> within) {
         var component = components.get(id);
-        if (component == null) {
+        if (component == null || !within.add(id)) {
             return null;
         }
-        var parent = layerBoxOf(id);
+        var parent = component.layer == -1 ? WINDOW : boxOf(parentOf(id), within);
         if (parent == null) {
             return null;
         }

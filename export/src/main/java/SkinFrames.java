@@ -108,6 +108,12 @@ final class SkinFrames {
     private static final int NEITHER = -1;
 
     /**
+     * Whether a piece laid out by hand keeps to the wrong end across the box, and down it.
+     */
+    private static final String STUCK_ACROSS = "stuckAcross";
+    private static final String STUCK_DOWN = "stuckDown";
+
+    /**
      * The places of a frame's pieces, by where each stands across and down.
      */
     private static final String[][] PLACES = {
@@ -721,6 +727,14 @@ final class SkinFrames {
     }
 
     /**
+     * A box's pieces as the parts of a frame, measured as {@link #partsOf(List, SkinEdges)} measures
+     * them, with the rules that need the box's real size read at that size where it is known.
+     */
+    static List<Map<String, Object>> partsOf(List<Piece> pieces, Size real, SkinEdges edges) {
+        return partsOf(pieces, MEASURING, real, edges);
+    }
+
+    /**
      * A box's pieces as the parts of a frame, each in its place, measured in a box of a size, in the
      * order {@link #inOrder} gives; null where they make no frame. The pieces are laid out in that
      * box and in one larger each way to tell where each stands. A piece in none of a frame's places,
@@ -728,11 +742,22 @@ final class SkinFrames {
      * a drawing laid out by hand at the box's real size where that size is known, an edge further in
      * than the corners of its side reach, one that leaves a gap between itself and them along its
      * side, one that does not lie against its side, and a fill that leaves a gap between itself and
-     * what the corners and the edges reach.
+     * what the corners and the edges reach. Where the real size is known, a piece of no size there
+     * is passed over, and an edge whose gaps other pieces cover there is run on over them. A divider
+     * with a cap at each end is kept though it does not lie against its side.
      */
     static List<Map<String, Object>> partsOf(List<Piece> given, Size box, Size real, SkinEdges edges) {
-        var pieces = real == null ? given : given.stream().map(piece -> spanning(piece, real)).toList();
+        return partsOf(given, box, real, PAIR_SLACK, edges);
+    }
+
+    /**
+     * A box's pieces as the parts of a frame, as {@link #partsOf(List, Size, Size, SkinEdges)} gives
+     * them, with the two corners of a pair standing as far apart as given.
+     */
+    static List<Map<String, Object>> partsOf(List<Piece> given, Size box, Size real, int pairSlack, SkinEdges edges) {
+        var pieces = real == null ? given : given.stream().map(piece -> spanning(piece, real)).filter(piece -> isDrawnAt(piece, real)).toList();
         var placed = new ArrayList<Map<String, Object>>();
+        var drawn = real == null ? List.<Drawn>of() : pieces.stream().map(piece -> new Drawn(piece.sprite(), rectOf(piece, real.width(), real.height()))).toList();
         for (var piece : pieces) {
             var small = rectOf(piece, box.width(), box.height());
             var large = rectOf(piece, box.width() + GROWTH, box.height() + GROWTH);
@@ -746,13 +771,27 @@ final class SkinFrames {
 
         var laidByHand = real == null ? List.<Map<String, Object>>of() : laidByHandIn(pieces, real);
         var standing = placed.stream().filter(part -> !isCorner(part) || !isLaidByHand(part, laidByHand)).toList();
-        var corners = standing.stream().filter(part -> isCorner(part) && isPaired(part, standing)).toList();
+        var corners = standing.stream().filter(part -> isCorner(part) && isPaired(part, standing, pairSlack)).toList();
         var between = placed.stream().filter(part -> isEdge(part) && isBetween(part, corners) && (part.containsKey("sprite") || isWithin(part, corners))).toList();
         var joined = between.stream().filter(part -> isJoined(part, corners)).toList();
-        var edgesKept = againstTheirSides(joined, between, edges);
+        var mended = new java.util.IdentityHashMap<Map<String, Object>, Map<String, Object>>();
+        if (real != null) {
+            for (var part : between) {
+                if (!holds(joined, part) && !isBesideAJoinedEdge(part, joined)) {
+                    var whole = mendedOver(part, corners, drawn, real);
+                    if (whole != null) {
+                        mended.put(part, whole);
+                    }
+                }
+            }
+        }
+        var joinedOrMended = new ArrayList<>(joined);
+        joinedOrMended.addAll(mended.values());
+        var edgesKept = againstTheirSides(joinedOrMended, between, corners, edges);
         var parts = new ArrayList<Map<String, Object>>();
         var places = new java.util.HashSet<String>();
-        for (var part : placed) {
+        for (var original : placed) {
+            var part = mended.getOrDefault(original, original);
             var kept = holds(corners, part) || holds(edgesKept, part) || part.get("place").equals("centre") && isFilling(part, corners, edgesKept);
             if (kept) {
                 parts.add(part);
@@ -791,7 +830,10 @@ final class SkinFrames {
                 var stuck = stuckAcross != NEITHER || stuckDown != NEITHER;
                 var inside = small.x() >= 0 && small.y() >= 0 && small.x() + small.width() <= real.width() && small.y() + small.height() <= real.height();
                 if (stuck && inside && standsAcross != NEITHER && standsDown != NEITHER) {
-                    found.add(written(piece, PLACES[standsAcross][standsDown], small, real));
+                    var laid = written(piece, PLACES[standsAcross][standsDown], small, real);
+                    laid.put(STUCK_ACROSS, stuckAcross != NEITHER);
+                    laid.put(STUCK_DOWN, stuckDown != NEITHER);
+                    found.add(laid);
                 }
             }
         }
@@ -823,18 +865,26 @@ final class SkinFrames {
      * Whether a corner is the near end of a drawing laid out by hand: a piece of its size laid out by
      * hand stands at the other end of one of its sides, the same distance in from that side, as the
      * bottom corners of a book or the lower half of a pillar keep to the top of a box the client
-     * never resizes. Such a corner does not stay at its corner as the box grows.
+     * never resizes. Such a corner does not stay at its corner as the box grows. The piece shows
+     * this only along the side it keeps to the wrong end of: one that keeps to the top while it
+     * stands at the bottom says nothing of the corners across from it, as the cap of the divider of
+     * 87 that keeps to the right while it stands at the left says nothing of the corners below it.
      */
     private static boolean isLaidByHand(Map<String, Object> corner, List<Map<String, Object>> laidByHand) {
         var place = (String) corner.get("place");
         return laidByHand.stream().anyMatch(other -> {
             var otherPlace = (String) other.get("place");
             var sameSize = other.get("width").equals(corner.get("width")) && other.get("height").equals(corner.get("height"));
-            var sideAcross = place.endsWith("Left") == otherPlace.endsWith("Left") ? "x" : null;
-            var sideDown = place.startsWith("top") == otherPlace.startsWith("top") ? "y" : null;
-            var shared = sideAcross != null ? sideAcross : sideDown;
-            return sameSize && !otherPlace.equals(place) && shared != null && Math.abs((Integer) other.get(shared) - (Integer) corner.get(shared)) <= PAIR_SLACK;
+            var differsAcross = place.endsWith("Left") != otherPlace.endsWith("Left");
+            var differsDown = place.startsWith("top") != otherPlace.startsWith("top");
+            var acrossTheBox = Boolean.TRUE.equals(other.get(STUCK_ACROSS)) && differsAcross && !differsDown && isNear(other, corner, "y");
+            var downTheBox = Boolean.TRUE.equals(other.get(STUCK_DOWN)) && differsDown && !differsAcross && isNear(other, corner, "x");
+            return sameSize && (acrossTheBox || downTheBox);
         });
+    }
+
+    private static boolean isNear(Map<String, Object> one, Map<String, Object> other, String measure) {
+        return Math.abs((Integer) one.get(measure) - (Integer) other.get(measure)) <= PAIR_SLACK;
     }
 
     /**
@@ -878,7 +928,7 @@ final class SkinFrames {
      * it on one side alone is a rule or a divider of what the box holds, as the lines under the
      * heading of a table are.
      */
-    private static List<Map<String, Object>> againstTheirSides(List<Map<String, Object>> edges, List<Map<String, Object>> rings, SkinEdges seen) {
+    private static List<Map<String, Object>> againstTheirSides(List<Map<String, Object>> edges, List<Map<String, Object>> rings, List<Map<String, Object>> corners, SkinEdges seen) {
         var sides = List.of("top", "bottom", "left", "right");
         var kept = new ArrayList<Map<String, Object>>();
         for (var side : sides) {
@@ -888,13 +938,133 @@ final class SkinFrames {
                 .toList();
             Integer reach = null;
             for (var edge : onSide) {
-                if (reach == null || (Integer) edge.get("inset") <= reach || isInRing(edge, rings, sides)) {
+                if (reach == null || (Integer) edge.get("inset") <= reach || isInRing(edge, rings, sides) || isCapped(edge, corners)) {
                     kept.add(edge);
                     reach = reach == null ? seen.seenOf(edge) : Math.max(reach, seen.seenOf(edge));
                 }
             }
         }
         return kept;
+    }
+
+    /**
+     * Whether an edge is a divider with a cap at each end: at both of its ends a corner stands
+     * beside it, across at least half the band the edge covers, further in from the side than the
+     * outermost corners at that end, as the line under the title of a window ends in two caps (829 and 830,
+     * 963 and 964) that cover the frame's sides where it meets them. A rule under the heading of a
+     * table has no caps.
+     */
+    private static boolean isCapped(Map<String, Object> edge, List<Map<String, Object>> corners) {
+        var place = (String) edge.get("place");
+        var down = place.equals("left") || place.equals("right");
+        var first = down ? "top" + capitalised(place) : place + "Left";
+        var last = down ? "bottom" + capitalised(place) : place + "Right";
+        return hasCapAt(first, edge, down, corners) && hasCapAt(last, edge, down, corners);
+    }
+
+    private static boolean hasCapAt(String place, Map<String, Object> edge, boolean down, List<Map<String, Object>> corners) {
+        var across = down ? "x" : "y";
+        var length = down ? "width" : "height";
+        var atPlace = corners.stream().filter(corner -> corner.get("place").equals(place)).toList();
+        var outermost = atPlace.stream().mapToInt(corner -> (Integer) corner.get(across)).min().orElse(0);
+        var from = (Integer) edge.get("inset");
+        var to = from + (Integer) edge.get("thickness");
+        return atPlace.stream().anyMatch(corner -> {
+            var start = (Integer) corner.get(across);
+            var covered = Math.min(to, start + (Integer) corner.get(length)) - Math.max(from, start);
+            return start > outermost && covered * 2 >= to - from;
+        });
+    }
+
+    /**
+     * Whether an edge lies across the band of an edge of its side that already meets its corners, as
+     * an ornament drawn over a side does.
+     */
+    private static boolean isBesideAJoinedEdge(Map<String, Object> edge, List<Map<String, Object>> joined) {
+        var from = (Integer) edge.get("inset");
+        var to = from + (Integer) edge.get("thickness");
+        return joined.stream().anyMatch(other -> other.get("place").equals(edge.get("place"))
+            && (Integer) other.get("inset") < to
+            && from < (Integer) other.get("inset") + (Integer) other.get("thickness"));
+    }
+
+    /**
+     * A piece as the client draws it at the box's real size: its sprite and where it stands.
+     */
+    private record Drawn(int sprite, Rect rect) {
+    }
+
+    /**
+     * An edge that leaves a gap between itself and the corners at an end, run on to them, where at
+     * the box's real size other pieces cover each gap along the band the edge covers, as a side drawn
+     * by hand in several pieces round a joint is one line in the client (the bottom of 104, round
+     * 839); null where a gap is not covered so. It runs on as far as the corners reach, or further
+     * where another piece of its sprite in the gap reaches further, as the second half of the
+     * divider of 104 runs on under the cap at its end.
+     */
+    private static Map<String, Object> mendedOver(Map<String, Object> edge, List<Map<String, Object>> corners, List<Drawn> others, Size real) {
+        var place = (String) edge.get("place");
+        var down = place.equals("left") || place.equals("right");
+        var first = down ? "top" + capitalised(place) : place + "Left";
+        var last = down ? "bottom" + capitalised(place) : place + "Right";
+        var along = down ? "y" : "x";
+        var length = down ? "height" : "width";
+        var side = down ? real.height() : real.width();
+        var breadth = down ? real.width() : real.height();
+        var inset = (Integer) edge.get("inset");
+        var thickness = (Integer) edge.get("thickness");
+        var fromNear = place.equals("top") || place.equals("left");
+        var bandFrom = fromNear ? inset : breadth - inset - thickness;
+        var band = new int[] {bandFrom, bandFrom + thickness};
+        var start = (Integer) edge.get("start");
+        var end = (Integer) edge.get("end");
+        var firstReach = alongReachOf(first, along, length, corners);
+        var lastReach = alongReachOf(last, along, length, corners);
+        var rects = others.stream().map(Drawn::rect).toList();
+        var startCovered = start <= firstReach + PAIR_SLACK || isCovered(firstReach, start, band, down, rects);
+        var endCovered = end <= lastReach + PAIR_SLACK || isCovered(side - end, side - lastReach, band, down, rects);
+        if (!startCovered || !endCovered) {
+            return null;
+        }
+        var alike = others.stream().filter(other -> other.sprite() == (Integer) edge.get("sprite") && crosses(other.rect(), band, down)).map(Drawn::rect).toList();
+        var startReach = alike.stream().filter(rect -> alongOf(rect, down) < start).mapToInt(rect -> alongOf(rect, down)).min().orElse(firstReach);
+        var endReach = alike.stream().filter(rect -> alongOf(rect, down) + lengthOf(rect, down) > side - end).mapToInt(rect -> side - alongOf(rect, down) - lengthOf(rect, down)).min().orElse(lastReach);
+        var mended = new LinkedHashMap<>(edge);
+        mended.put("start", Math.min(start, Math.min(firstReach, Math.max(0, startReach))));
+        mended.put("end", Math.min(end, Math.min(lastReach, Math.max(0, endReach))));
+        return mended;
+    }
+
+    private static int alongOf(Rect rect, boolean down) {
+        return down ? rect.y() : rect.x();
+    }
+
+    private static int lengthOf(Rect rect, boolean down) {
+        return down ? rect.height() : rect.width();
+    }
+
+    private static boolean crosses(Rect rect, int[] band, boolean down) {
+        var bandStart = down ? rect.x() : rect.y();
+        var bandLength = down ? rect.width() : rect.height();
+        return bandStart < band[1] && band[0] < bandStart + bandLength;
+    }
+
+    /**
+     * Whether each pixel along a side from one place to another is covered by one of these
+     * rectangles where it crosses a band.
+     */
+    private static boolean isCovered(int from, int to, int[] band, boolean down, List<Rect> rects) {
+        return java.util.stream.IntStream.range(from, to).allMatch(at -> rects.stream().anyMatch(rect -> alongOf(rect, down) <= at && at < alongOf(rect, down) + lengthOf(rect, down) && crosses(rect, band, down)));
+    }
+
+    /**
+     * Whether the client draws a piece at the box's real size: one laid out to no width or no
+     * height there is not drawn, as the sides of the stone panel of 914, 144 pixels less than the
+     * height of their box, are in its 122 pixel box. A piece of no place is kept, for the rules that pass it over.
+     */
+    private static boolean isDrawnAt(Piece piece, Size real) {
+        var rect = rectOf(piece, real.width(), real.height());
+        return rect.width() == Integer.MIN_VALUE || rect.width() > 0 && rect.height() > 0;
     }
 
     private static boolean isInRing(Map<String, Object> edge, List<Map<String, Object>> edges, List<String> sides) {
@@ -966,13 +1136,13 @@ final class SkinFrames {
      * of its place, each measured from its own sides, as the corners of a frame are drawn in pairs
      * and an icon or a picture at one corner has none.
      */
-    private static boolean isPaired(Map<String, Object> corner, List<Map<String, Object>> parts) {
+    private static boolean isPaired(Map<String, Object> corner, List<Map<String, Object>> parts, int slack) {
         var across = ACROSS_FROM.get((String) corner.get("place"));
         return parts.stream().anyMatch(other -> other.get("place").equals(across)
             && other.get("width").equals(corner.get("width"))
             && other.get("height").equals(corner.get("height"))
-            && Math.abs((Integer) other.get("x") - (Integer) corner.get("x")) <= PAIR_SLACK
-            && Math.abs((Integer) other.get("y") - (Integer) corner.get("y")) <= PAIR_SLACK);
+            && Math.abs((Integer) other.get("x") - (Integer) corner.get("x")) <= slack
+            && Math.abs((Integer) other.get("y") - (Integer) corner.get("y")) <= slack);
     }
 
     /**
