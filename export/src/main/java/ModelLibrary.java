@@ -18,8 +18,9 @@ import java.util.Optional;
  * edited model survives a re-export.
  *
  * <p>The file's one node wears the mesh and the skin of its labels, and its {@code extras} carry
- * the client's own top and bottom of the model, {@code minY} and {@code maxY} over every vertex,
- * which the bend of a location measures it by, and its emitters, effectors and billboards, as
+ * {@code maxVertex}, how many of the client's vertices come before those that only a texture space
+ * or a particle names, the client's own top and bottom of the model, {@code minY} and {@code maxY}
+ * over the vertices before {@code maxVertex}, which the bend of a location measures it by, and its emitters, effectors and billboards, as
  * {@link ParticleSources} and {@link BillboardSources} describe them.
  */
 public final class ModelLibrary {
@@ -113,6 +114,7 @@ public final class ModelLibrary {
 
     private static Map<String, Object> extras(JavaModel model) {
         var extras = new LinkedHashMap<String, Object>();
+        extras.put("maxVertex", model.maxVertex);
         extras.put("minY", model.fa());
         extras.put("maxY", model.EA());
         if (model.emitters != null) {

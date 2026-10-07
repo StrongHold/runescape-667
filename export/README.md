@@ -169,8 +169,11 @@ the positions of the model it builds, as the client does (`JavaModel.calculateNo
 
 Each vertex is bound wholly to a joint for its label, a node named `label <n>`, with the first
 joint, `unlabelled`, for the vertices of no label, so a sequence from the sequence library moves
-the model by its labels. The node's `extras` carry the client's `minY` and `maxY` over every
-vertex, and the model's `emitters`, `effectors` and `billboards`, as a location's shape does.
+the model by its labels. The node's `extras` carry `maxVertex`, how many of the client's vertices
+come before those that only a texture space or a particle names, the client's `minY` and `maxY`
+over the vertices before it (`JavaModel.calculateBounds`), and the model's `emitters`, `effectors`
+and `billboards`, as a location's shape does. A merge makes every vertex it joins one before
+`maxVertex`.
 
 
 ## The sequence library
