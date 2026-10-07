@@ -20,7 +20,9 @@ import java.util.Optional;
  * <p>The file's one node wears the mesh and the skin of its labels, and its {@code extras} carry
  * {@code maxVertex}, how many of the client's vertices come before those that only a texture space
  * or a particle names, the client's own top and bottom of the model, {@code minY} and {@code maxY}
- * over the vertices before {@code maxVertex}, which the bend of a location measures it by, and its emitters, effectors and billboards, as
+ * over the vertices before {@code maxVertex}, which the bend of a location measures it by, the
+ * vertices its texture spaces of the first kind name, {@code textureSpaceVertices}, which a merge
+ * adds after the faces, and its emitters, effectors and billboards, as
  * {@link ParticleSources} and {@link BillboardSources} describe them.
  */
 public final class ModelLibrary {
@@ -101,7 +103,7 @@ public final class ModelLibrary {
         node.put("mesh", gltf.mesh(name));
         node.put("skin", skin);
         node.put("children", joints);
-        node.put("extras", extras(model));
+        node.put("extras", extras(model, reader.textureSpaceVertices(id)));
         var document = gltf.document(List.of(gltf.node(node)), name, Map.of());
 
         try {
@@ -112,9 +114,12 @@ public final class ModelLibrary {
         return Optional.of(result);
     }
 
-    private static Map<String, Object> extras(JavaModel model) {
+    private static Map<String, Object> extras(JavaModel model, List<Integer> textureSpaceVertices) {
         var extras = new LinkedHashMap<String, Object>();
         extras.put("maxVertex", model.maxVertex);
+        if (!textureSpaceVertices.isEmpty()) {
+            extras.put("textureSpaceVertices", textureSpaceVertices);
+        }
         extras.put("minY", model.fa());
         extras.put("maxY", model.EA());
         if (model.emitters != null) {

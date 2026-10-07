@@ -14,11 +14,13 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Writes one NPC out of the cache as a glTF file with its buffer beside it: its model as the client builds it, with
- * a morph target for every frame of the sequences it stands, turns and moves with, and one
- * animation for each of those sequences, as {@link AnimationWriter} writes them. Every field of
- * the NPC's type goes in a JSON file beside it, and the model of its head, which the client shows
- * only while the NPC talks, goes in a glTF file of its own.
+ * Writes one NPC type out of the cache: every field of the type as JSON, which names the models it
+ * is made of and its base animation set, and the models and the sequences of that set into the
+ * model and sequence libraries, from which an engine builds the NPC as the client does
+ * ({@code NPCType.getModel}). With {@code --baked} it also writes the NPC's model baked as the
+ * client builds it, with a morph target or a joint pose for every frame of the sequences it stands,
+ * turns and moves with, and its head in a file of its own, the reference an engine's own building
+ * is checked against.
  */
 public final class NpcExport {
 
@@ -49,10 +51,16 @@ public final class NpcExport {
         private int npc;
 
         @Parameter(
-            names = "--out",
-            description = "The file to write, relative to the export module when not absolute"
+            names = "--npcs",
+            description = "The directory the NPC types are kept in, beside the model and sequence libraries, relative to the export module when not absolute"
         )
-        private Path out;
+        private Path npcs = Path.of("build", "npcs");
+
+        @Parameter(
+            names = "--baked",
+            description = "A glTF file to also write the NPC's model into, baked and posed as the client builds it, with its head beside it, the reference an engine's own building is checked against"
+        )
+        private Path baked;
 
         @Parameter(names = "--help", help = true, description = "Print this message")
         private boolean help;
@@ -85,7 +93,45 @@ public final class NpcExport {
         }
     }
 
+    /**
+     * Writes the NPC's type data, and the models it names and the sequences its base animation set
+     * names into their libraries where they lack them, each sequence's channels worked out on the
+     * NPC.
+     */
     private static void write(Args args, ClientNpcReader reader, NPCType type) throws Exception {
+        var typeFile = args.npcs.resolve(type.id + ".json");
+        Files.createDirectories(args.npcs);
+        Files.writeString(typeFile, Json.write(typeData(type, reader.bas(type))), StandardCharsets.UTF_8);
+        System.out.println("wrote " + typeFile.toAbsolutePath().normalize());
+
+        var textures = args.textures.library(reader.textures());
+        var models = new ModelLibrary(reader.models(), textures, args.npcs.resolveSibling("models"));
+        for (var model : type.models) {
+            if (model != -1) {
+                models.file(model);
+            }
+        }
+        if (type.headModels != null) {
+            for (var model : type.headModels) {
+                models.file(model);
+            }
+        }
+        var poser = reader.poser(type);
+        var sequences = new SequenceLibrary(args.npcs.resolveSibling("sequences"));
+        for (var movement : reader.movements(type)) {
+            sequences.ensure(movement.sequence(), poser);
+        }
+
+        if (args.baked != null) {
+            writeBaked(args, reader, type, args.baked);
+        }
+    }
+
+    /**
+     * Writes the NPC's model baked as the client builds it, posed by every sequence it moves with,
+     * and its head beside it.
+     */
+    private static void writeBaked(Args args, ClientNpcReader reader, NPCType type, Path out) throws Exception {
         var poser = reader.poser(type);
         var baker = new PoseBaker(poser);
         var baked = new ArrayList<Baked>();
@@ -95,7 +141,6 @@ public final class NpcExport {
 
         var base = poser.still();
         var poses = baker.poses();
-        var out = args.out == null ? Path.of("build", "npcs", args.npc + ".gltf") : args.out;
         var gltf = new GltfBuilder();
         var materials = new GltfMaterials(gltf, reader.textures(), args.textures.library(reader.textures()), out);
         var bones = Bones.of(baker);
@@ -140,8 +185,6 @@ public final class NpcExport {
         }
 
         GltfFile.write(out, gltf.document(roots), gltf.bin());
-        var typeFile = GltfFile.sibling(out, ".json");
-        Files.writeString(typeFile, Json.write(typeData(type, reader.bas(type))), StandardCharsets.UTF_8);
 
         System.out.println("wrote " + out.toAbsolutePath().normalize());
         System.out.println("  " + name + ", " + base.vertexCount + " vertices, " + result.faces() + " faces in "

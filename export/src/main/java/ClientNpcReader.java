@@ -67,6 +67,13 @@ public final class ClientNpcReader {
         return models.textures();
     }
 
+    /**
+     * The reader the NPC's own models are built with, alone, for the model library.
+     */
+    public ClientModelReader models() {
+        return models;
+    }
+
     public JavaToolkit toolkit() {
         return models.toolkit();
     }

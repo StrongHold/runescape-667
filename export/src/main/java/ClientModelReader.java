@@ -5,7 +5,9 @@ import com.jagex.js5.Js5Archive;
 import com.jagex.js5.js5;
 
 import java.io.File;
+import java.util.List;
 import java.util.Optional;
+import java.util.LinkedHashSet;
 
 /**
  * Builds models out of the cache the way the client builds one it is about to draw.
@@ -28,6 +30,11 @@ public final class ClientModelReader {
      * transforms a caller means to apply later, and an exported model is never transformed.
      */
     private static final int NO_FUNCTIONS = 0;
+
+    /**
+     * The kind of texture space whose three vertices a merge of meshes adds as vertices of its own.
+     */
+    private static final int PLANAR_SPACE = 0;
 
     /**
      * Asks the toolkit to keep the labels of the vertices (0x20) and of the faces (0x180), which
@@ -97,6 +104,26 @@ public final class ClientModelReader {
 
             return Optional.of((JavaModel) toolkit.createModel(mesh, LABELS, TEXTURES_ON, AMBIENT, CONTRAST));
         }
+    }
+
+    /**
+     * The vertices of a mesh that its texture spaces of the first kind name, which a merge of meshes
+     * adds after their faces (`Mesh(Mesh[], int)`), in the order it adds them, or none where the cache holds no such
+     * mesh.
+     */
+    public List<Integer> textureSpaceVertices(int id) {
+        var mesh = Mesh.load(id, models);
+        var vertices = new LinkedHashSet<Integer>();
+        if (mesh != null && mesh.texMappingType != null) {
+            for (var space = 0; space < mesh.texSpaceCount; space++) {
+                if (mesh.texMappingType[space] == PLANAR_SPACE) {
+                    vertices.add((int) mesh.texSpaceDefA[space]);
+                    vertices.add((int) mesh.texSpaceDefB[space]);
+                    vertices.add((int) mesh.texSpaceDefC[space]);
+                }
+            }
+        }
+        return List.copyOf(vertices);
     }
 
     public Js5TextureSource textures() {

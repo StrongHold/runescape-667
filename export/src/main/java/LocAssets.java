@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -92,11 +93,22 @@ public final class LocAssets {
 
     /**
      * Whether the client builds a model for every shape of a type, as it builds none for a type
-     * that names a mesh the cache does not hold.
+     * that names a mesh the cache does not hold, and draws a face of one of them.
      */
     private boolean buildable(LocType type) {
         var shapes = ClientLocReader.shapes(type);
-        return !shapes.isEmpty() && shapes.stream().allMatch(shape -> reader.poser(type, shape, false).still() != null);
+        var stills = shapes.stream().map(shape -> reader.poser(type, shape, false).still()).toList();
+        return !shapes.isEmpty() && stills.stream().allMatch(Objects::nonNull) && stills.stream().anyMatch(this::draws);
+    }
+
+    /**
+     * Whether the client draws any face of a model.
+     */
+    private boolean draws(JavaModel model) {
+        var gltf = new GltfBuilder();
+        var materials = new GltfMaterials(gltf, reader.textures(), textures, directory.resolve("drawn.gltf"));
+        ModelToGltf.convertInto(gltf, materials, model);
+        return !gltf.empty();
     }
 
     /**

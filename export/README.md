@@ -171,9 +171,11 @@ Each vertex is bound wholly to a joint for its label, a node named `label <n>`, 
 joint, `unlabelled`, for the vertices of no label, so a sequence from the sequence library moves
 the model by its labels. The node's `extras` carry `maxVertex`, how many of the client's vertices
 come before those that only a texture space or a particle names, the client's `minY` and `maxY`
-over the vertices before it (`JavaModel.calculateBounds`), and the model's `emitters`, `effectors`
-and `billboards`, as a location's shape does. A merge makes every vertex it joins one before
-`maxVertex`.
+over the vertices before it (`JavaModel.calculateBounds`), `textureSpaceVertices`, the vertices
+its texture spaces of the first kind name, in the order the client's merge adds them, and the
+model's `emitters`, `effectors` and `billboards`, as a location's shape does. A merge joins the
+vertices each model's faces name, then those its emitters and effectors name, and those come
+before `maxVertex`; once every model's are in, it joins the texture spaces' vertices, after it.
 
 
 ## The sequence library
@@ -230,36 +232,40 @@ animation for a channel. A map square's description names both libraries by `mod
 ## Writing an NPC
 
     ./gradlew :export:exportNpc --args="--npc 9"
-    ./gradlew :export:exportNpc --args="--npc 81 --out /tmp/cow.gltf"
+    ./gradlew :export:exportNpc --args="--npc 81 --baked /tmp/cow.gltf"
 
-An NPC is named by its id. Without `--out` it is written to `export/build/npcs/<npc>.gltf`, and
-`--out` and `--cache` work as they do for a model. The tool prints the NPC's name, how many
-vertices and faces it has, and each animation it wrote with how many frames it has and how long
-each frame is shown. An NPC that takes the look of another NPC by a variable is refused, and the
-tool names the NPCs to write instead.
+An NPC is named by its id. It is written to `export/build/npcs/<npc>.json`, unless `--npcs`
+names another directory, with the models it names (its body's and its head's) in the model library
+and the sequences its base animation set names in the sequence library beside it, each written
+where the library lacks it; `--cache` works as it does for a model. An NPC that takes the look of
+another NPC by a variable is refused, and the tool names the NPCs to write instead.
 
-The NPC is built by the client's own `NPCType.getModel`, on type lists read from the cache and
-with the same software toolkit as a model. That method reads each mesh the NPC is made of, moves
-each one as its base animation set says, merges them, swaps the NPC's colours and textures, and
-scales and poses the result. The model is then written as a model is, so everything above about
-coordinates, colours, textures and faces holds for an NPC too. The NPC type's own data is
-beside the mesh file as `<npc>.json`: its `npc` id, `name`, `size` in tiles and base animation set
-`bas`; whether the mouse can pick it, `interactive`; its five `ops`, the options its data sets on
-the mini menu in the client's order, with null for an empty slot (the client's type list adds a
-sixth, Examine, to every type, and the data cannot change it, so it is not written); and how the client picks
-it (`NPCEntity.picked`): `pickSizeShift`, by which it grows the picking cylinder and the model's
-box, and `quickPick`, which is 1 for a pick by the box on the screen alone, 0 for a pick by the
-model's triangles, and -1 for the default, the box for an NPC one tile across and the triangles
-for a larger one, which a `pickSizeShift` above 0 also makes the box.
+An engine builds the NPC as the client's `NPCType.getModel` does: each model moved by the type's
+`translations`, then turned and moved as the base animation set wears it
+(`basType.wornTransformations`, a move along x, y and z and a turn about x, y and z in eighths of
+the client's units, the turn about z first, then x, then y), all merged where the type names more
+than one, recoloured, retextured and tinted, lit under the type's `ambient` plus 64 and `diffusion`
+plus 850, posed by the set's sequences, and scaled by `scaleH` across and `scaleV` up once posed.
 
-The JSON file holds every other field of the type too, under the name the client gives it, so
-that nothing the client decodes is lost: an id the type leaves unset is -1, a list it leaves
-unset is empty, and its `params` are an object keyed by the parameter's id. The `models`,
-`recolours` and `retextures` as pairs of the value in the mesh and the value it becomes,
-`recolourPalette`, `translations`, `scaleH`, `scaleV`, `ambient`, `diffusion` and `tint` (hue,
-saturation, lightness and scale) are already applied to the mesh, and are listed so that a
-reader can see what the mesh is made of. Where the type names a base animation set, every
-field of that set is in `basType`, under the names the client gives them.
+The JSON file holds every field of the type under the name the client gives it, so that nothing
+the client decodes is lost: its `npc` id, `name`, `size` in tiles and base animation set `bas`;
+whether the mouse can pick it, `interactive`; its five `ops`, the options its data sets on the
+mini menu in the client's order, with null for an empty slot (the client's type list adds a sixth,
+Examine, to every type, and the data cannot change it, so it is not written); and how the client
+picks it (`NPCEntity.picked`): `pickSizeShift`, by which it grows the picking cylinder and the
+model's box, and `quickPick`, which is 1 for a pick by the box on the screen alone, 0 for a pick by
+the model's triangles, and -1 for the default, the box for an NPC one tile across and the triangles
+for a larger one, which a `pickSizeShift` above 0 also makes the box. An id the type leaves unset
+is -1, a list it leaves unset is empty, and its `params` are an object keyed by the parameter's id.
+The `models`, `headModels`, `recolours` and `retextures` as pairs of the value in the mesh and the
+value it becomes, `recolourPalette`, `translations`, `scaleH`, `scaleV`, `ambient`, `diffusion` and
+`tint` (hue, saturation, lightness and scale) are what the model is built from. Where the type
+names a base animation set, every field of that set is in `basType`, under the names the client
+gives them.
+
+`--baked` also writes the NPC's model as the client builds it into a glTF file of its own, with its
+head beside it as `<file>.head.gltf`, the reference an engine's own building is checked against.
+What follows describes what the client builds, which that file holds and an engine builds.
 
 Where the type casts a shadow (`hasShadow`), the file holds a second mesh beside the NPC's, on a
 root node named `spot shadow` whose `extras` say `spotShadow`. It is the disc the client draws
@@ -273,10 +279,10 @@ blended and without writing depth, so the NPC covers it, and only where the base
 `animateShadow` is true. The client also poses the disc with the NPC's sequence
 (`Animator.method9105`), and that is not written.
 
-Where the type has a head, the model the client shows while the NPC talks, the head is written
-as a file of its own, `<npc>.head.gltf`, built by the client's `NPCType.headModel` with the same
-colour and texture swaps, as one mesh that is not posed. It is not in the NPC's own file, because
-an engine needs one without the other: most NPCs are never talked to.
+Where the type has a head, the model the client shows while the NPC talks, its `headModels` are in
+the model library; the client builds it (`NPCType.headModel`) with the same colour and texture
+swaps, as one model that is not posed. It is apart from the NPC's own model, because an engine
+needs one without the other: most NPCs are never talked to.
 
 The base animation set names the sequences the NPC stands, idles, turns, walks, runs and crawls
 with. Every frame of each of them is posed by the client's own animation code: the sequence is
