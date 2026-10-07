@@ -856,7 +856,16 @@ none. A part that a set does not have is left out.
   the corners or the edges of that side reach, as the page of the book and a dark bar in the middle
   of a box (1099) do not. A filled rectangle that grows along a side is an edge of one colour, and
   is kept only where it reaches in no further than the corners of its side, as the dark band under
-  the title of 890 does and a dark panel over 902 does not. A layer without a corner at each corner and an edge along each side is
+  the title of 890 does and a dark panel over 902 does not. Where the size of the layer is known,
+  two more kinds of piece are read as the client draws them at that size. A grid of copies of one
+  sprite at its own size, drawn alike and kept to the top left of their layer, standing edge to
+  edge in full rows and columns, is one tiled fill that keeps the grid's distance from each side of
+  the layer at that size, as 890 covers its middle with fifteen 100 pixel squares of sprite 4079.
+  A piece of a fixed length centred on a side that is at least as long as the side at that size,
+  which the client cuts to the layer, runs the length of the side and past both ends by as much, as
+  the 428 pixel bottom edge of 924 does in a box 334 wide. The task places a piece by all the
+  client's position modes (`InterfaceManager.reposition`, 0 to 5), and a piece it cannot place,
+  in a layer or not, has no place. A layer without a corner at each corner and an edge along each side is
   then not written. A layer whose components take a share of its size (`Component.resizeModeX` or
   `resizeModeY` 2, a share in 16384ths) has no one shape at every size, so the task measures it at
   the size its layer has when the interface is laid out through its layers in a window of 765 by
@@ -911,7 +920,14 @@ none. A part that a set does not have is left out.
   they are in, 119 frames are written and 975 loses its background; with hidden layers drawn as
   part of their layer, 128 frames are written; with layers the player can use drawn as part of
   their layer, 127 frames are written; and with the components in the order the interface holds
-  them, the background of 975 covers its corners and 3 frames change.
+  them, the background of 975 covers its corners and 3 frames change. The rules after those make
+  126 frames of 125: with no grids made one fill, 890 loses the middle it now has; with no pieces
+  that run past the ends of their side, 924 loses its bottom edge; with the position modes 3 to 5
+  not read, 124 frames are written and the shade between the bands of 72, 924 and others is lost;
+  and with those modes not read and a piece of no place moved by its layer as well, 7 frames take a
+  fill measured from a number of no place, as they did before these rules. No grid in this cache
+  has copies of another size than their sprite's, or a gap between them, so the checks for those
+  change nothing here.
 - `windows` are the windows of the interfaces: a frame of sprites with a title across its top and
   a button that closes it, laid out at a fixed size in a layer, the ones the most interfaces use
   first. The frame is the layer's sprite components the player cannot use, each placed by the
@@ -944,7 +960,7 @@ sprites does not hide them. A call whose sprites are known only while the game r
 not written. Each script that holds its sprites as constants is read by its shape, and the task
 stops where a script no longer has the shape it reads. In this cache there are ten scrollbars, seven
 plate buttons, 110 sprite buttons, two tabs, five checkboxes, two sets of radio buttons, one
-radio tile, four sliders, one dropdown, 125 frames, 85 windows, two frame buttons and two hover frames, and six calls of the scrollbar
+radio tile, four sliders, one dropdown, 126 frames, 85 windows, two frame buttons and two hover frames, and six calls of the scrollbar
 script are known only while the game runs. A planted check that stops reading passed-on arguments
 leaves seven such calls, one more than the task finds, and a planted check that expects five sprites
 in script 2975 stops the task.

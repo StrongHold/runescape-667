@@ -42,6 +42,14 @@ final class SkinEdges {
     }
 
     /**
+     * Whether a sprite's canvas in the cache is of a size.
+     */
+    boolean isSize(int sprite, int width, int height) {
+        var canvas = bounds.get(sprite);
+        return canvas != null && canvas.width() == width && canvas.height() == height;
+    }
+
+    /**
      * Writes into each edge of these parts how far in from its side it is seen, as `seen`.
      */
     @SuppressWarnings("unchecked")

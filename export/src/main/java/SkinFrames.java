@@ -38,7 +38,9 @@ import java.util.TreeSet;
  * box its corners stand in.
  *
  * A box whose pieces take a share of its size ({@code Component.resizeModeX} 2) has no one shape
- * at every size, so it is measured at the size its layer has in the client's fixed window.
+ * at every size, so it is measured at the size its layer has in the client's fixed window. Where
+ * that size is known, a grid of one sprite laid by hand over the middle is a tiled fill, and a piece
+ * centred on a side and longer than it, which the client cuts to the layer, runs along the side.
  */
 final class SkinFrames {
 
@@ -73,6 +75,11 @@ final class SkinFrames {
      * InterfaceManager.resize}).
      */
     private static final int FOLLOWS = 1;
+
+    /**
+     * The reposition mode of a component centred in its layer ({@code InterfaceManager.reposition}).
+     */
+    private static final int CENTRED = 1;
 
     /**
      * The client turns a sprite component by its angle in 65536ths of a whole turn ({@code
@@ -213,7 +220,8 @@ final class SkinFrames {
                     var size = sizeOf(box.getValue(), layer);
                     if (size != null) {
                         var real = layer == null ? null : new Size(layer.width(), layer.height());
-                        var parts = partsOf(box.getValue(), size, real, edges);
+                        var pieces = real == null ? box.getValue() : withGridsTiled(box.getValue(), real, edges);
+                        var parts = partsOf(pieces, size, real, edges);
                         found.add(parts == null ? null : inOrder(inItsBox(parts), size), null, group);
                     }
                 }
@@ -445,11 +453,144 @@ final class SkinFrames {
     static Rect rectOf(Piece piece, int boxWidth, int boxHeight) {
         var box = new Rect(0, 0, boxWidth, boxHeight);
         for (var layer : piece.layers()) {
-            var inner = rect(layer, box.width(), box.height());
-            box = new Rect(box.x() + inner.x(), box.y() + inner.y(), inner.width(), inner.height());
+            box = within(box, rect(layer, box.width(), box.height()));
         }
-        var rect = rect(piece.layout(), box.width(), box.height());
+        return within(box, rect(piece.layout(), box.width(), box.height()));
+    }
+
+    /**
+     * A rectangle laid out in a box, moved to where the box stands, or one of no place where either
+     * has none.
+     */
+    private static Rect within(Rect box, Rect rect) {
+        var placed = List.of(box.x(), box.y(), box.width(), box.height(), rect.x(), rect.y(), rect.width(), rect.height());
+        if (placed.contains(Integer.MIN_VALUE)) {
+            return new Rect(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
+        }
         return new Rect(box.x() + rect.x(), box.y() + rect.y(), rect.width(), rect.height());
+    }
+
+    /**
+     * The pieces of a box with each grid of one sprite laid by hand made one tiled piece: copies of a
+     * sprite at its own size, drawn alike, kept to the top left of their layer, that stand edge to
+     * edge in full rows and columns. The client draws such a grid at the box's real size only, as
+     * 890 covers its middle with fifteen 100 pixel squares of sprite 4079; the tiled piece keeps the
+     * grid's distance from each side of the layer at that size, so it fills the box at any size as
+     * the grid fills it at that one. It takes the place of the first copy the client draws.
+     */
+    private static List<Piece> withGridsTiled(List<Piece> pieces, Size real, SkinEdges edges) {
+        var grids = new LinkedHashMap<Piece, List<Piece>>();
+        for (var piece : pieces) {
+            if (isLaidAtItsSize(piece, edges)) {
+                grids.computeIfAbsent(gridKeyOf(piece), key -> new ArrayList<>()).add(piece);
+            }
+        }
+        var tiled = new java.util.IdentityHashMap<Piece, Piece>();
+        var merged = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<Piece, Boolean>());
+        for (var grid : grids.values()) {
+            var whole = tiledOver(grid, real);
+            if (whole != null) {
+                tiled.put(grid.getFirst(), whole);
+                merged.addAll(grid);
+            }
+        }
+        var result = new ArrayList<Piece>();
+        for (var piece : pieces) {
+            if (tiled.containsKey(piece)) {
+                result.add(tiled.get(piece));
+            } else if (!merged.contains(piece)) {
+                result.add(piece);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Whether a piece is a sprite drawn at its own size, kept to the top left of its layer.
+     */
+    private static boolean isLaidAtItsSize(Piece piece, SkinEdges edges) {
+        var layout = piece.layout();
+        var fixed = layout.resizeX() == 0 && layout.resizeY() == 0 && layout.reposX() == 0 && layout.reposY() == 0;
+        return !piece.isFill() && fixed && edges.isSize(piece.sprite(), layout.width(), layout.height());
+    }
+
+    /**
+     * A piece with its place taken away, the same for every copy in one grid.
+     */
+    private static Piece gridKeyOf(Piece piece) {
+        var layout = piece.layout();
+        var size = new Layout(layout.width(), layout.height(), 0, 0, 0, 0, 0, 0);
+        return new Piece(piece.sprite(), 0, 0, piece.mirrored(), piece.flipped(), piece.turned(), piece.tiled(), size, piece.layers());
+    }
+
+    /**
+     * One piece tiled over a grid of copies, or null where they are not one grid of two or more
+     * that stand edge to edge in full rows and columns.
+     */
+    private static Piece tiledOver(List<Piece> grid, Size real) {
+        var first = grid.getFirst();
+        var width = first.layout().width();
+        var height = first.layout().height();
+        var left = grid.stream().mapToInt(piece -> piece.layout().x()).min().orElseThrow();
+        var top = grid.stream().mapToInt(piece -> piece.layout().y()).min().orElseThrow();
+        var right = grid.stream().mapToInt(piece -> piece.layout().x()).max().orElseThrow();
+        var bottom = grid.stream().mapToInt(piece -> piece.layout().y()).max().orElseThrow();
+        var cells = new java.util.HashSet<List<Integer>>();
+        for (var piece : grid) {
+            var x = piece.layout().x() - left;
+            var y = piece.layout().y() - top;
+            if (width <= 0 || height <= 0 || x % width != 0 || y % height != 0) {
+                return null;
+            }
+            cells.add(List.of(x / width, y / height));
+        }
+        var across = (right - left) / width + 1;
+        var down = (bottom - top) / height + 1;
+        var layer = new Rect(0, 0, real.width(), real.height());
+        for (var outer : first.layers()) {
+            layer = within(layer, rect(outer, layer.width(), layer.height()));
+        }
+        if (grid.size() < 2 || cells.size() != grid.size() || cells.size() != across * down || layer.width() == Integer.MIN_VALUE) {
+            return null;
+        }
+        var layout = new Layout(layer.width() - across * width, layer.height() - down * height, FOLLOWS, FOLLOWS, left, top, 0, 0);
+        return new Piece(first.sprite(), first.colour(), first.transparency(), first.mirrored(), first.flipped(), first.turned(), true, layout, first.layers());
+    }
+
+    /**
+     * A piece that is centred on a side of the layer it is in and, at the box's real size, at least
+     * as long as that side, laid out as one that runs the length of the side and past both ends by
+     * as much. The client cuts it to the layer, so it covers the side at that size, as the bottom
+     * edge of 924 does, 428 pixels long in a box 334 wide.
+     */
+    private static Piece spanning(Piece piece, Size real) {
+        var layer = new Rect(0, 0, real.width(), real.height());
+        for (var outer : piece.layers()) {
+            layer = within(layer, rect(outer, layer.width(), layer.height()));
+        }
+        var layout = piece.layout();
+        var acrossBy = overrun(layout.resizeX(), layout.reposX(), layout.width(), layer.width());
+        var downBy = overrun(layout.resizeY(), layout.reposY(), layout.height(), layer.height());
+        var spanned = new Layout(
+            acrossBy == null ? layout.width() : -acrossBy,
+            downBy == null ? layout.height() : -downBy,
+            acrossBy == null ? layout.resizeX() : FOLLOWS,
+            downBy == null ? layout.resizeY() : FOLLOWS,
+            layout.x(),
+            layout.y(),
+            layout.reposX(),
+            layout.reposY()
+        );
+        return new Piece(piece.sprite(), piece.colour(), piece.transparency(), piece.mirrored(), piece.flipped(), piece.turned(), piece.tiled(), spanned, piece.layers());
+    }
+
+    /**
+     * How much longer than its side a piece of a fixed length centred on the side is, or null where
+     * it is not such a piece or is shorter than the side.
+     */
+    private static Integer overrun(int resizeMode, int reposMode, int length, int side) {
+        var fixed = resizeMode == 0 && reposMode == CENTRED;
+        return fixed && side != Integer.MIN_VALUE && length >= side ? length - side : null;
     }
 
     private static int length(int mode, int value, int box) {
@@ -462,11 +603,16 @@ final class SkinFrames {
     }
 
     private static int place(int mode, int value, int length, int box) {
+        if (length == Integer.MIN_VALUE) {
+            return Integer.MIN_VALUE;
+        }
         return switch (mode) {
             case 0 -> value;
             case 1 -> value + (box - length) / 2;
             case 2 -> box - length - value;
-            default -> Integer.MIN_VALUE;
+            case 3 -> (value * box) >> 14;
+            case 4 -> (box - length) / 2 + ((box * value) >> 14);
+            default -> box - ((value * box) >> 14) - length;
         };
     }
 
@@ -569,7 +715,8 @@ final class SkinFrames {
      * side, one that does not lie against its side, and a fill that leaves a gap between itself and
      * what the corners and the edges reach.
      */
-    static List<Map<String, Object>> partsOf(List<Piece> pieces, Size box, Size real, SkinEdges edges) {
+    static List<Map<String, Object>> partsOf(List<Piece> given, Size box, Size real, SkinEdges edges) {
+        var pieces = real == null ? given : given.stream().map(piece -> spanning(piece, real)).toList();
         var placed = new ArrayList<Map<String, Object>>();
         for (var piece : pieces) {
             var small = rectOf(piece, box.width(), box.height());
