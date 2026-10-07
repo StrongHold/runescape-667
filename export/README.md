@@ -136,11 +136,13 @@ version of its format, 1 now.
 The model is built as above, with the ambient of 64 and the contrast of 768 most models are built
 with, and its standard attributes (`POSITION`, `NORMAL`, `COLOR_0`, `TEXCOORD_0` for a textured
 primitive) show it as the client draws it then, so a tool shows it as it is. The attributes whose
-names start with an underscore are the client's own, each a float that holds a whole number
-exactly, as glTF asks that each element of a vertex attribute start on four bytes:
+names start with an underscore are the client's own. Each but `_HSL` is a float, which holds a
+whole number exactly, as glTF asks that each element of a vertex attribute start on four bytes:
 
 - `_HSL`: the face's colour as the client holds it, which a type recolours and tints, and which
-  the palette turns into a colour under the type's ambient, as for `COLOR_0` above.
+  the palette turns into a colour under the type's ambient, as for `COLOR_0` above. It is four
+  unsigned bytes, as the ground writes it: the hue of 64, the saturation of 8, the lightness of
+  128, and a spare.
 - `_ALPHA`: the face's alpha, 0 opaque and 255 invisible.
 - `_SHADING`: 0 smooth, 1 flat, 3 black.
 - `_FACE_LABEL`: the face's label, which the colour and alpha transforms of a frame act on, or -1.

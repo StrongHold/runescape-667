@@ -25,7 +25,9 @@ import java.util.TreeSet;
  *
  * <ul>
  *   <li>{@code _HSL}: the face's colour as the client holds it, which a type recolours and tints,
- *       and which the palette turns into a colour under the type's ambient.
+ *       and which the palette turns into a colour under the type's ambient, as four unsigned
+ *       bytes, as the ground writes it: the hue of 64, the saturation of 8, the lightness of 128
+ *       and a spare.
  *   <li>{@code _ALPHA}: the face's alpha, 0 opaque and 255 invisible.
  *   <li>{@code _SHADING}: how the face is shaded, 0 smooth, 1 flat, 3 black.
  *   <li>{@code _FACE_LABEL}: the face's label, which the colour and alpha transforms of a frame
@@ -38,7 +40,7 @@ import java.util.TreeSet;
  *       vertex is the sum of the sums of the vertices joined.
  * </ul>
  *
- * <p>Every one of them is a float, as glTF asks that each element of a vertex attribute starts on
+ * <p>Every other one is a float, as glTF asks that each element of a vertex attribute starts on
  * a four byte boundary, and a float holds each of these whole numbers exactly.
  *
  * <p>Each vertex is bound wholly to the joint of its label, the first joint being for the vertices
@@ -59,6 +61,11 @@ public final class LibraryModelToGltf {
     private static final int HIDDEN_ALPHA = 255;
     private static final int SMEAR_ALPHA = 254;
     private static final int NO_LABEL = -1;
+
+    private static final int HUE_SHIFT = 10;
+    private static final int SATURATION_SHIFT = 7;
+    private static final int SATURATION_MASK = 0x7;
+    private static final int LIGHTNESS_MASK = 0x7F;
 
     /**
      * The count of faces at a vertex is kept in a byte, so 256 faces count as none.
@@ -335,7 +342,7 @@ public final class LibraryModelToGltf {
         var joints = primitive.joints.stream().mapToInt(Integer::intValue).toArray();
         attributes.put("JOINTS_0", gltf.wholeAttribute(joints, 4, "VEC4"));
         attributes.put("WEIGHTS_0", gltf.attribute(primitive.weights.toArray(), 4, "VEC4", false));
-        attributes.put("_HSL", scalar(primitive.hsls));
+        attributes.put("_HSL", gltf.wholeAttribute(hslBytes(primitive.hsls), 4, "VEC4"));
         attributes.put("_ALPHA", scalar(primitive.alphas));
         attributes.put("_SHADING", scalar(primitive.shadings));
         attributes.put("_FACE_LABEL", scalar(primitive.faceLabels));
@@ -346,6 +353,21 @@ public final class LibraryModelToGltf {
         var indices = primitive.indices.stream().mapToInt(Integer::intValue).toArray();
         gltf.primitive(attributes, gltf.indices(indices, primitive.numbers.size()),
             materials.material(key.texture(), key.mode()), List.of());
+    }
+
+    /**
+     * Each colour as the ground writes its own: the hue of 64, the saturation of 8 and the
+     * lightness of 128 the client packs into 16 bits, and a spare byte.
+     */
+    private static int[] hslBytes(List<Integer> hsls) {
+        var bytes = new int[hsls.size() * 4];
+        for (var i = 0; i < hsls.size(); i++) {
+            var hsl = hsls.get(i);
+            bytes[i * 4] = hsl >> HUE_SHIFT;
+            bytes[i * 4 + 1] = hsl >> SATURATION_SHIFT & SATURATION_MASK;
+            bytes[i * 4 + 2] = hsl & LIGHTNESS_MASK;
+        }
+        return bytes;
     }
 
     private int scalar(List<Integer> values) {
