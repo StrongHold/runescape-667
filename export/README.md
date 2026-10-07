@@ -822,13 +822,19 @@ none. A part that a set does not have is left out.
   from the left and centred down, and lays the list out one option every 15 pixels, scrolled by
   script 31. Script 1348 opens the list and turns the arrow upside down, and script 1349 closes it.
 - `frames` are the boxes of the interfaces drawn as a frame: sprite components at its corners,
-  along its sides and, where it has them, over its middle, each of a layer's own components. The
-  task lays a layer's components out at two sizes with the client's rules
+  along its sides and, where it has them, over its middle. A box is a layer with the layers in it
+  that the client draws as part of it: a layer the player cannot use, shown, and the size of the
+  layer it is in less a fixed amount each way (`Component.resizeModeX` and `resizeModeY` 1), so
+  that what it holds keeps its place at every size, as the background of 975 and the inner frame
+  of 1099 stand in layers of their own. Its components are taken in the order the client draws
+  them (`InterfaceManager.draw`): the components of a layer in the order the interface holds them,
+  each layer followed at once by what it holds. The task lays a box's components out at two sizes with the client's rules
   (`InterfaceManager.resize`, `reposition`): a component that keeps its size and its place
   against two sides is a corner, one that grows along a side is an edge, and one that grows both
   ways is a fill. A component the player can use, one with a hook or an option such as a close
   button in a corner, is not part of the frame (an option whose name is blank is not one, as the
-  client offers none for it, `InterfaceManager.getOp`), and a component in none of these places, such as
+  client offers none for it, `InterfaceManager.getOp`), nor is a component hidden until a script
+  shows it (`Component.hidden`), as the highlight under the pointer of 995 is, and a component in none of these places, such as
   one centred on a side, is passed over. A layer holds more than its frame: icons, rows of slots,
   banners and pictures stay at a corner as a corner does, and dividers and rules stretch along a
   side as an edge does. So a component at a corner is a corner only where the corner across from
@@ -848,7 +854,9 @@ none. A part that a set does not have is left out.
   are on one side only, with a gap outside them, and are left out. A fill, of sprites or of one
   colour, is kept only where it comes out on each side to within 8 pixels of the furthest that
   the corners or the edges of that side reach, as the page of the book and a dark bar in the middle
-  of a box (1099) do not. A layer without a corner at each corner and an edge along each side is
+  of a box (1099) do not. A filled rectangle that grows along a side is an edge of one colour, and
+  is kept only where it reaches in no further than the corners of its side, as the dark band under
+  the title of 890 does and a dark panel over 902 does not. A layer without a corner at each corner and an edge along each side is
   then not written. A layer whose components take a share of its size (`Component.resizeModeX` or
   `resizeModeY` 2, a share in 16384ths) has no one shape at every size, so the task measures it at
   the size its layer has when the interface is laid out through its layers in a window of 765 by
@@ -861,14 +869,21 @@ none. A part that a set does not have is left out.
   of the `windows`, both measured from the box their corners stand in, is not written again here.
   Each part has its `place`, its `sprite`,
   `mirrored` where it is drawn mirrored left to right (`Component.verticalFlip`), `flipped` where
-  it is drawn upside down (`horizontalFlip`), and `tiled` where the sprite is tiled over it rather
-  than stretched. A part at `topLeft`, `topRight`, `bottomLeft` or `bottomRight` is `x` and `y`
+  it is drawn upside down (`horizontalFlip`), `turned` where it is then turned a quarter turn
+  anticlockwise about its middle, and `tiled` where the sprite is tiled over it rather than
+  stretched. The client turns a sprite by its angle (`Component.angle2d`, in 65536ths of a turn,
+  `Sprite.renderRotated`) after it mirrors and flips it, as the right corners of the stone panels
+  of 933, 948, 949, 993 and 995 are a left corner turned. A half turn is written as a mirror and a
+  flip, so a part is turned by a quarter turn or not at all. A sprite turned by any other angle, or
+  a tiled sprite turned by a quarter turn, which the client turns tile by tile, is not part of a
+  frame. A part at `topLeft`, `topRight`, `bottomLeft` or `bottomRight` is `x` and `y`
   from its two sides, `width` wide and `height` high. A part at `top`, `bottom`, `left` or
   `right` runs from `start` after the first end of its side to `end` before the other, `inset` in
   from the side, `thickness` thick, and is `seen` from its side as far as the part of its sprite the
   cache holds pixels for reaches, the canvas less the sprite's offsets (`IndexedImage.offX1`,
-  `offX2`, `offY1`, `offY2`), mirrored or flipped as it is drawn: what the frame holds stands
-  inside that. A part at `centre` keeps `left`, `top`, `right` and `bottom`
+  `offX2`, `offY1`, `offY2`), mirrored, flipped or turned as it is drawn: what the frame holds
+  stands inside that. An edge of one colour has its `colour` and `transparency` in place of a
+  `sprite` and is `seen` as far as it reaches. A part at `centre` keeps `left`, `top`, `right` and `bottom`
   from the sides. A filled rectangle component that grows both ways is a fill of one colour: in
   place of a `sprite` it has its `colour` as 0xRRGGBB and, where it is not solid, its
   `transparency`, 0 solid to 255 unseen (`Component.transparency`). A planted defect in each
@@ -884,7 +899,19 @@ none. A part that a set does not have is left out.
   sides, the frame of 902 stands 60 pixels in again; with a piece outside the layer taken as laid
   out by hand, a frame of 994 is lost; with the parts in the order of the layer, 122 frames are
   written, 3 of them twice; with windows compared in the layer they were found in, 122 frames are
-  written; and with the frames of windows kept, 142 frames are written.
+  written; and with the frames of windows kept, 142 frames are written. These counts are of the
+  file before the rules that follow, when it had 118 frames; those rules make it 125. With the
+  angle not read, 12 frames
+  change, the right corners of the stone panels of 933 and 948 among them; with a half turn not
+  written as a mirror and a flip, 10 frames change; with every sprite read as turned by 1092 of
+  65536, no frame and no window is written; with hidden components drawn, 126 frames are written
+  and the highlight of 995 and the fill of 911 come back; with no edges of one colour, the band of
+  890, the dark ring of 680 and a line of 313 are lost; with edges of one colour that may reach
+  past the corners, the dark panel over 902 comes back; with no layers drawn as part of the layer
+  they are in, 119 frames are written and 975 loses its background; with hidden layers drawn as
+  part of their layer, 128 frames are written; with layers the player can use drawn as part of
+  their layer, 127 frames are written; and with the components in the order the interface holds
+  them, the background of 975 covers its corners and 3 frames change.
 - `windows` are the windows of the interfaces: a frame of sprites with a title across its top and
   a button that closes it, laid out at a fixed size in a layer, the ones the most interfaces use
   first. The frame is the layer's sprite components the player cannot use, each placed by the
@@ -917,7 +944,7 @@ sprites does not hide them. A call whose sprites are known only while the game r
 not written. Each script that holds its sprites as constants is read by its shape, and the task
 stops where a script no longer has the shape it reads. In this cache there are ten scrollbars, seven
 plate buttons, 110 sprite buttons, two tabs, five checkboxes, two sets of radio buttons, one
-radio tile, four sliders, one dropdown, 118 frames, 85 windows, two frame buttons and two hover frames, and six calls of the scrollbar
+radio tile, four sliders, one dropdown, 125 frames, 85 windows, two frame buttons and two hover frames, and six calls of the scrollbar
 script are known only while the game runs. A planted check that stops reading passed-on arguments
 leaves seven such calls, one more than the task finds, and a planted check that expects five sprites
 in script 2975 stops the task.

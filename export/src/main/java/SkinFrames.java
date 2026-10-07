@@ -17,9 +17,14 @@ import java.util.TreeSet;
  * InterfaceManager.resize}, {@code reposition}): a piece that keeps its size is a corner, one that
  * grows along one side is an edge, and one that grows both ways is a fill. A frame may have several
  * pieces in one place, as an ornate frame does, and pieces that cover each other are kept in the
- * order the client draws them. A filled rectangle that grows both ways is a fill of one colour. A component the player can
- * use, one with a hook or an option, is not part of a frame, and a box without a corner at each
- * corner and an edge along each side is not a frame.
+ * order the client draws them. A filled rectangle that grows both ways is a fill of one colour, and
+ * one that grows along a side is an edge of one colour. A component the player can use, one with a
+ * hook or an option, is not part of a frame, nor is one hidden until a script shows it, as a
+ * highlight under the pointer is, and a box without a corner at each corner and an edge along each
+ * side is not a frame. A box is a layer with the layers in it that follow its size, as the client
+ * draws them over it, so a background or an inner frame in a layer of its own is part of the frame.
+ * A sprite is drawn mirrored and flipped as its component says, then turned as its angle says
+ * ({@code Component.angle2d}), as the right corners of the stone panels are a left corner turned.
  *
  * A box holds more than its frame: icons, rows of slots, banners and pictures stay at a corner as
  * a frame's corners do, and dividers and rules stretch along a side as its edges do. A frame's
@@ -62,6 +67,20 @@ final class SkinFrames {
      * InterfaceManager.resize}).
      */
     private static final int SHARE = 2;
+
+    /**
+     * The resize mode of a component that is the size of its layer less a fixed amount ({@code
+     * InterfaceManager.resize}).
+     */
+    private static final int FOLLOWS = 1;
+
+    /**
+     * The client turns a sprite component by its angle in 65536ths of a whole turn ({@code
+     * Component.angle2d}, {@code Sprite.renderRotated}).
+     */
+    private static final int WHOLE_TURN = 65536;
+    private static final int QUARTER_TURN = WHOLE_TURN / 4;
+    private static final int HALF_TURN = WHOLE_TURN / 2;
 
     /**
      * The components of an interface stand under their interface's number in the high half of
@@ -114,13 +133,33 @@ final class SkinFrames {
 
     /**
      * A sprite component of a box, or a filled rectangle: its sprite, or none and the rectangle's
-     * colour and transparency, whether it is drawn mirrored left to right, flipped top to bottom, and
-     * tiled rather than stretched, and how it is laid out.
+     * colour and transparency, whether it is drawn mirrored left to right, flipped top to bottom,
+     * then turned a quarter turn anticlockwise, and tiled rather than stretched, how it is laid out,
+     * and the layers it is laid out in within the box, the outermost first.
      */
-    record Piece(int sprite, int colour, int transparency, boolean mirrored, boolean flipped, boolean tiled, Layout layout) {
+    record Piece(int sprite, int colour, int transparency, boolean mirrored, boolean flipped, boolean turned, boolean tiled, Layout layout, List<Layout> layers) {
+
+        Piece(int sprite, int colour, int transparency, boolean mirrored, boolean flipped, boolean tiled, Layout layout) {
+            this(sprite, colour, transparency, mirrored, flipped, false, tiled, layout, List.of());
+        }
 
         boolean isFill() {
             return sprite < 0;
+        }
+
+        /**
+         * The piece turned by an angle the client turns a sprite by, a whole number of quarter
+         * turns: a half turn is a mirror and a flip, and what is left a quarter turn.
+         */
+        Piece turnedBy(int angle) {
+            var halfTurned = angle >= HALF_TURN;
+            return new Piece(sprite, colour, transparency, mirrored != halfTurned, flipped != halfTurned, angle % HALF_TURN != 0, tiled, layout, layers);
+        }
+
+        Piece within(List<Layout> outer) {
+            var all = new ArrayList<>(outer);
+            all.addAll(layers);
+            return new Piece(sprite, colour, transparency, mirrored, flipped, turned, tiled, layout, List.copyOf(all));
         }
     }
 
@@ -155,18 +194,22 @@ final class SkinFrames {
                 }
                 var layout = new ComponentLayout(components);
                 var boxes = new LinkedHashMap<Integer, List<Piece>>();
-                var layers = new LinkedHashMap<Integer, ComponentLayout.Box>();
-                for (var component : components.entrySet()) {
-                    if (isPiece(component.getValue())) {
-                        var layer = component.getValue().layer;
-                        boxes.computeIfAbsent(layer, key -> new ArrayList<>()).add(pieceOf(component.getValue()));
-                        if (!layers.containsKey(layer)) {
-                            layers.put(layer, layout.layerBoxOf(component.getKey()));
+                var firsts = new LinkedHashMap<Integer, Integer>();
+                for (var id : inDrawingOrder(components, layout)) {
+                    var component = components.get(id);
+                    if (isPiece(component)) {
+                        var layers = new ArrayList<Layout>();
+                        var box = layout.parentOf(id);
+                        while (isJoined(components.get(box))) {
+                            layers.add(0, layoutOf(components.get(box)));
+                            box = layout.parentOf(box);
                         }
+                        boxes.computeIfAbsent(box, key -> new ArrayList<>()).add(pieceOf(component).within(layers));
+                        firsts.putIfAbsent(box, id);
                     }
                 }
                 for (var box : boxes.entrySet()) {
-                    var layer = layers.get(box.getKey());
+                    var layer = box.getKey() == -1 ? layout.layerBoxOf(firsts.get(box.getKey())) : layout.boxOf(box.getKey());
                     var size = sizeOf(box.getValue(), layer);
                     if (size != null) {
                         var real = layer == null ? null : new Size(layer.width(), layer.height());
@@ -177,6 +220,42 @@ final class SkinFrames {
             }
         }
         return found;
+    }
+
+    /**
+     * The ids of an interface's components in the order the client draws them ({@code
+     * InterfaceManager.draw}): the components of a layer in the order the interface holds them, each
+     * layer followed at once by what it holds.
+     */
+    private static List<Integer> inDrawingOrder(Map<Integer, Component> components, ComponentLayout layout) {
+        var held = new LinkedHashMap<Integer, List<Integer>>();
+        for (var id : components.keySet()) {
+            held.computeIfAbsent(layout.parentOf(id), parent -> new ArrayList<>()).add(id);
+        }
+        var ordered = new ArrayList<Integer>();
+        var next = new java.util.ArrayDeque<Integer>(held.getOrDefault(-1, List.of()).reversed());
+        while (!next.isEmpty()) {
+            var id = next.pop();
+            ordered.add(id);
+            held.getOrDefault(id, List.of()).reversed().forEach(next::push);
+        }
+        return ordered;
+    }
+
+    /**
+     * Whether a component is a layer that the layer it is in draws as part of itself: one the player
+     * cannot use, shown, and the size of the layer it is in less a fixed amount each way ({@code
+     * Component.resizeModeX} and {@code resizeModeY} 1), so that what it holds keeps its place in
+     * the outer layer at every size, as the background of 975 and the inner frame of 1099 lie in
+     * layers of their own over the box of their frame.
+     */
+    private static boolean isJoined(Component layer) throws IllegalAccessException {
+        return layer != null
+            && layer.type == Component.TYPE_LAYER
+            && !layer.hidden
+            && layer.resizeModeX == FOLLOWS
+            && layer.resizeModeY == FOLLOWS
+            && !isUsable(layer);
     }
 
     /**
@@ -213,13 +292,23 @@ final class SkinFrames {
     }
 
     /**
-     * Whether a component may be a piece of a frame: a sprite or a filled rectangle the player
-     * cannot use.
+     * Whether a component may be a piece of a frame: a sprite or a filled rectangle that is shown and
+     * that the player cannot use. A sprite must be drawn square to the box: turned by no angle but
+     * a whole number of quarter turns, and only when it is drawn whole, as the client turns each
+     * tile of a tiled sprite about its own middle.
      */
     static boolean isPiece(Component component) throws IllegalAccessException {
-        var sprite = component.type == Component.TYPE_GRAPHIC && component.graphic >= 0;
+        var sprite = component.type == Component.TYPE_GRAPHIC && component.graphic >= 0 && isSquare(component);
         var fill = component.type == Component.TYPE_RECTANGLE && component.filled;
-        return (sprite || fill) && !isUsable(component);
+        return (sprite || fill) && !component.hidden && !isUsable(component);
+    }
+
+    private static boolean isSquare(Component sprite) {
+        return isSquare(sprite.angle2d & (WHOLE_TURN - 1), sprite.tiling);
+    }
+
+    private static boolean isSquare(int angle, boolean tiled) {
+        return angle % QUARTER_TURN == 0 && (!tiled || angle % HALF_TURN == 0);
     }
 
     /**
@@ -236,7 +325,17 @@ final class SkinFrames {
     }
 
     static Piece pieceOf(Component component) {
-        var layout = new Layout(
+        var sprite = component.type == Component.TYPE_GRAPHIC ? component.graphic : -1;
+        var angle = sprite < 0 ? 0 : component.angle2d & (WHOLE_TURN - 1);
+        var piece = new Piece(sprite, component.colour, component.transparency, component.verticalFlip, component.horizontalFlip, component.tiling, layoutOf(component));
+        return piece.turnedBy(angle);
+    }
+
+    /**
+     * How the client lays a component out in its layer.
+     */
+    private static Layout layoutOf(Component component) {
+        return new Layout(
             component.originalWidth,
             component.originalHeight,
             component.resizeModeX,
@@ -246,13 +345,12 @@ final class SkinFrames {
             component.reposModeX,
             component.reposModeY
         );
-        var sprite = component.type == Component.TYPE_GRAPHIC ? component.graphic : -1;
-        return new Piece(sprite, component.colour, component.transparency, component.verticalFlip, component.horizontalFlip, component.tiling, layout);
     }
 
     /**
      * The pieces a script builds, replayed from its instructions: each component it creates, laid
-     * out, given a sprite from its arguments, flipped and tiled as the constants it pushes say.
+     * out, given a sprite from its arguments, flipped, turned and tiled as the constants it pushes
+     * say.
      */
     static List<Piece> builtBy(ClientScript script, List<Integer> given) {
         var pieces = new ArrayList<Piece>();
@@ -260,18 +358,21 @@ final class SkinFrames {
         var sprite = -1;
         var mirrored = false;
         var flipped = false;
+        var angle = 0;
         var tiled = false;
         var building = false;
         for (var at = 0; at < script.opcodes.length; at++) {
             var opcode = script.opcodes[at];
             if (opcode == ClientScriptOpCode.CC_CREATE || opcode == ClientScriptOpCode.RETURN) {
-                if (building && sprite >= 0) {
-                    pieces.add(new Piece(sprite, 0, 0, mirrored, flipped, tiled, new Layout(layout[4], layout[5], layout[6], layout[7], layout[0], layout[1], layout[2], layout[3])));
+                if (building && sprite >= 0 && isSquare(angle, tiled)) {
+                    var drawnLayout = new Layout(layout[4], layout[5], layout[6], layout[7], layout[0], layout[1], layout[2], layout[3]);
+                    pieces.add(new Piece(sprite, 0, 0, mirrored, flipped, tiled, drawnLayout).turnedBy(angle));
                 }
                 building = opcode == ClientScriptOpCode.CC_CREATE;
                 sprite = -1;
                 mirrored = false;
                 flipped = false;
+                angle = 0;
                 tiled = false;
             } else if (opcode == ClientScriptOpCode.CC_IF_SETPOSITION) {
                 System.arraycopy(constantsBefore(script, at, 4), 0, layout, 0, 4);
@@ -284,6 +385,8 @@ final class SkinFrames {
                 mirrored = constantsBefore(script, at, 1)[0] == 1;
             } else if (opcode == ClientScriptOpCode.CC_IF_SETHFLIP) {
                 flipped = constantsBefore(script, at, 1)[0] == 1;
+            } else if (opcode == ClientScriptOpCode.CC_IF_SET2DANGLE) {
+                angle = constantsBefore(script, at, 1)[0] & (WHOLE_TURN - 1);
             } else if (opcode == ClientScriptOpCode.CC_IF_SETTILING) {
                 tiled = constantsBefore(script, at, 1)[0] == 1;
             }
@@ -333,6 +436,20 @@ final class SkinFrames {
         var x = place(layout.reposX(), layout.x(), width, boxWidth);
         var y = place(layout.reposY(), layout.y(), height, boxHeight);
         return new Rect(x, y, width, height);
+    }
+
+    /**
+     * A piece's size and position in a box of a size, laid out through the layers it is in within
+     * the box.
+     */
+    static Rect rectOf(Piece piece, int boxWidth, int boxHeight) {
+        var box = new Rect(0, 0, boxWidth, boxHeight);
+        for (var layer : piece.layers()) {
+            var inner = rect(layer, box.width(), box.height());
+            box = new Rect(box.x() + inner.x(), box.y() + inner.y(), inner.width(), inner.height());
+        }
+        var rect = rect(piece.layout(), box.width(), box.height());
+        return new Rect(box.x() + rect.x(), box.y() + rect.y(), rect.width(), rect.height());
     }
 
     private static int length(int mode, int value, int box) {
@@ -395,6 +512,9 @@ final class SkinFrames {
         if (piece.flipped()) {
             written.put("flipped", true);
         }
+        if (piece.turned()) {
+            written.put("turned", true);
+        }
         if (piece.tiled()) {
             written.put("tiled", true);
         }
@@ -452,12 +572,12 @@ final class SkinFrames {
     static List<Map<String, Object>> partsOf(List<Piece> pieces, Size box, Size real, SkinEdges edges) {
         var placed = new ArrayList<Map<String, Object>>();
         for (var piece : pieces) {
-            var small = rect(piece.layout(), box.width(), box.height());
-            var large = rect(piece.layout(), box.width() + GROWTH, box.height() + GROWTH);
+            var small = rectOf(piece, box.width(), box.height());
+            var large = rectOf(piece, box.width() + GROWTH, box.height() + GROWTH);
             var across = side(small.x(), small.width(), box.width(), large.x(), large.width(), box.width() + GROWTH);
             var down = side(small.y(), small.height(), box.height(), large.y(), large.height(), box.height() + GROWTH);
             var place = across == NEITHER || down == NEITHER ? null : PLACES[across][down];
-            if (place != null && (!piece.isFill() || place.equals("centre"))) {
+            if (place != null && (!piece.isFill() || !ACROSS_FROM.containsKey(place))) {
                 placed.add(written(piece, place, small, box));
             }
         }
@@ -465,7 +585,7 @@ final class SkinFrames {
         var laidByHand = real == null ? List.<Map<String, Object>>of() : laidByHandIn(pieces, real);
         var standing = placed.stream().filter(part -> !isCorner(part) || !isLaidByHand(part, laidByHand)).toList();
         var corners = standing.stream().filter(part -> isCorner(part) && isPaired(part, standing)).toList();
-        var between = placed.stream().filter(part -> isEdge(part) && isBetween(part, corners)).toList();
+        var between = placed.stream().filter(part -> isEdge(part) && isBetween(part, corners) && (part.containsKey("sprite") || isWithin(part, corners))).toList();
         var joined = between.stream().filter(part -> isJoined(part, corners)).toList();
         var edgesKept = againstTheirSides(joined, between, edges);
         var parts = new ArrayList<Map<String, Object>>();
@@ -498,8 +618,8 @@ final class SkinFrames {
         var found = new ArrayList<Map<String, Object>>();
         for (var piece : pieces) {
             if (!piece.isFill()) {
-                var small = rect(piece.layout(), real.width(), real.height());
-                var large = rect(piece.layout(), real.width() + GROWTH, real.height() + GROWTH);
+                var small = rectOf(piece, real.width(), real.height());
+                var large = rectOf(piece, real.width() + GROWTH, real.height() + GROWTH);
                 var across = side(small.x(), small.width(), real.width(), large.x(), large.width(), real.width() + GROWTH);
                 var down = side(small.y(), small.height(), real.height(), large.y(), large.height(), real.height() + GROWTH);
                 var stuckAcross = farSide(small.x(), small.width(), real.width(), large.x(), large.width(), real.width() + GROWTH);
@@ -699,6 +819,15 @@ final class SkinFrames {
      */
     private static boolean isBetween(Map<String, Object> edge, List<Map<String, Object>> corners) {
         return (Integer) edge.get("inset") < reachOf((String) edge.get("place"), corners);
+    }
+
+    /**
+     * Whether an edge reaches in from its side no further than the corners of that side reach, as a
+     * band of one colour along a side does under a title (890) and as one that reaches further is a
+     * panel over what the box holds (902).
+     */
+    private static boolean isWithin(Map<String, Object> edge, List<Map<String, Object>> corners) {
+        return (Integer) edge.get("inset") + (Integer) edge.get("thickness") <= reachOf((String) edge.get("place"), corners);
     }
 
     /**

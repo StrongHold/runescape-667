@@ -91,7 +91,7 @@ final class SkinWindows {
     private void addIfWindow(List<Component> layer, int interfaceId) throws Exception {
         var graphics = new ArrayList<Component>();
         for (var component : layer) {
-            if (component.type == Component.TYPE_GRAPHIC && component.graphic >= 0 && !isUsable(component)) {
+            if (component.type == Component.TYPE_GRAPHIC && SkinFrames.isPiece(component)) {
                 graphics.add(component);
             }
         }
@@ -288,11 +288,15 @@ final class SkinWindows {
         var part = new LinkedHashMap<String, Object>();
         part.put("place", place);
         part.put("sprite", piece.graphic);
-        if (piece.verticalFlip) {
+        var drawn = SkinFrames.pieceOf(piece);
+        if (drawn.mirrored()) {
             part.put("mirrored", true);
         }
-        if (piece.horizontalFlip) {
+        if (drawn.flipped()) {
             part.put("flipped", true);
+        }
+        if (drawn.turned()) {
+            part.put("turned", true);
         }
         if (piece.tiling) {
             part.put("tiled", true);
@@ -328,15 +332,6 @@ final class SkinWindows {
             }
         }
         return part;
-    }
-
-    private static boolean isUsable(Component component) throws IllegalAccessException {
-        for (var field : Component.class.getFields()) {
-            if (field.getType() == Object[].class && field.getName().startsWith("on") && field.get(component) != null) {
-                return true;
-            }
-        }
-        return component.ops != null && java.util.Arrays.stream(component.ops).anyMatch(op -> op != null && !op.isBlank());
     }
 
     private static boolean isFixed(Component component) {
