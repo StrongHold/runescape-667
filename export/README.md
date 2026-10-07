@@ -235,14 +235,15 @@ animation for a channel. A map square's description names both libraries by `mod
     ./gradlew :export:exportNpc --args="--npc 81 --baked /tmp/cow.gltf"
 
 An NPC is named by its id. It is written to `export/build/npcs/<npc>.json`, unless `--npcs`
-names another directory, with the models it names (its body's and its head's) in the model library
-and the sequences its base animation set names in the sequence library beside it, each written
-where the library lacks it; `--cache` works as it does for a model. An NPC that takes the look of
+names another directory, with its base animation set in the set library beside it as
+`bas/<id>.json`, the models it names (its body's and its head's) in the model library and the
+sequences its set names in the sequence library, each written where its library lacks it, so a
+set or a model that many NPCs share is held once; `--cache` works as it does for a model. An NPC that takes the look of
 another NPC by a variable is refused, and the tool names the NPCs to write instead.
 
 An engine builds the NPC as the client's `NPCType.getModel` does: each model moved by the type's
 `translations`, then turned and moved as the base animation set wears it
-(`basType.wornTransformations`, a move along x, y and z and a turn about x, y and z in eighths of
+(the set's `wornTransformations`, a move along x, y and z and a turn about x, y and z in eighths of
 the client's units, the turn about z first, then x, then y), all merged where the type names more
 than one, recoloured, retextured and tinted, lit under the type's `ambient` plus 64 and `diffusion`
 plus 850, posed by the set's sequences, and scaled by `scaleH` across and `scaleV` up once posed.
@@ -259,9 +260,8 @@ for a larger one, which a `pickSizeShift` above 0 also makes the box. An id the 
 is -1, a list it leaves unset is empty, and its `params` are an object keyed by the parameter's id.
 The `models`, `headModels`, `recolours` and `retextures` as pairs of the value in the mesh and the
 value it becomes, `recolourPalette`, `translations`, `scaleH`, `scaleV`, `ambient`, `diffusion` and
-`tint` (hue, saturation, lightness and scale) are what the model is built from. Where the type
-names a base animation set, every field of that set is in `basType`, under the names the client
-gives them.
+`tint` (hue, saturation, lightness and scale) are what the model is built from. The type names its base animation set by id, `bas`, and the set's
+file holds every field of the set under the names the client gives them.
 
 `--baked` also writes the NPC's model as the client builds it into a glTF file of its own, with its
 head beside it as `<file>.head.gltf`, the reference an engine's own building is checked against.

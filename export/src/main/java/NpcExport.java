@@ -11,12 +11,13 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+
 
 /**
  * Writes one NPC type out of the cache: every field of the type as JSON, which names the models it
- * is made of and its base animation set, and the models and the sequences of that set into the
- * model and sequence libraries, from which an engine builds the NPC as the client does
+ * is made of and its base animation set, the set into the set library, {@code bas/<id>.json}, and
+ * the models and the sequences of that set into the model and sequence libraries, each where its
+ * library lacks it, from which an engine builds the NPC as the client does
  * ({@code NPCType.getModel}). With {@code --baked} it also writes the NPC's model baked as the
  * client builds it, with a morph target or a joint pose for every frame of the sequences it stands,
  * turns and moves with, and its head in a file of its own, the reference an engine's own building
@@ -101,8 +102,17 @@ public final class NpcExport {
     private static void write(Args args, ClientNpcReader reader, NPCType type) throws Exception {
         var typeFile = args.npcs.resolve(type.id + ".json");
         Files.createDirectories(args.npcs);
-        Files.writeString(typeFile, Json.write(typeData(type, reader.bas(type))), StandardCharsets.UTF_8);
+        Files.writeString(typeFile, Json.write(typeData(type)), StandardCharsets.UTF_8);
         System.out.println("wrote " + typeFile.toAbsolutePath().normalize());
+        var bas = reader.bas(type);
+        if (bas.isPresent()) {
+            var basFile = args.npcs.resolveSibling("bas").resolve(type.basId + ".json");
+            if (!Files.exists(basFile)) {
+                Files.createDirectories(basFile.getParent());
+                Files.writeString(basFile, Json.write(basData(bas.get())), StandardCharsets.UTF_8);
+                System.out.println("wrote " + basFile.toAbsolutePath().normalize());
+            }
+        }
 
         var textures = args.textures.library(reader.textures());
         var models = new ModelLibrary(reader.models(), textures, args.npcs.resolveSibling("models"));
@@ -246,11 +256,11 @@ public final class NpcExport {
     }
 
     /**
-     * Every field of the NPC type, under the name the client gives it. The models, the colour and
-     * texture swaps, the translations, the scales, the lighting and the tint are already applied to
-     * the mesh, and are listed so that a reader can see what the mesh is made of.
+     * Every field of the NPC type, under the name the client gives it: the models it names, the
+     * colour and texture swaps, the translations, the scales, the lighting and the tint its model is
+     * built with, and its base animation set by id, {@code bas}, which the set library holds.
      */
-    private static Map<String, Object> typeData(NPCType type, Optional<BASType> bas) {
+    private static Map<String, Object> typeData(NPCType type) {
         var data = new LinkedHashMap<String, Object>();
         data.put("npc", type.id);
         data.put("name", type.name);
@@ -315,14 +325,14 @@ public final class NpcExport {
         data.put("multinpcs", TypeJson.ints(type.multinpcs));
         data.put("quests", TypeJson.ints(type.quests));
         data.put("params", TypeJson.params(type.params));
-        bas.ifPresent(set -> data.put("basType", basData(set)));
         return data;
     }
 
     /**
-     * Every field of the NPC's base animation set, under the name the client gives it. The
-     * sequences it names are the animations in the mesh file, and `animateShadow` says whether
-     * the client draws the shadow under the NPC at all.
+     * Every field of a base animation set, under the name the client gives it, as the set library
+     * holds it, one file for each set however many NPCs share it: the sequences it names, which are
+     * in the sequence library, and {@code animateShadow}, whether the client draws the shadow under
+     * the NPC at all.
      */
     private static Map<String, Object> basData(BASType set) {
         var data = new LinkedHashMap<String, Object>();
