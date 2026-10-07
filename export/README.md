@@ -453,33 +453,51 @@ of the view before the far plane the vertex also rises to the surface, by its wh
 ### The location library
 
     ./gradlew :export:exportLoc --args="--loc 33799"
+    ./gradlew :export:exportLoc --args="--loc 33799 --baked /tmp/33799.gltf"
 
-A location is written once, as `export/build/locs/<id>.gltf` with its type's data beside it as
-`<id>.json`, unless `--locs` names another directory, and every map square that places it refers to it by its id. A map square writes any
-location it names that the library lacks, and leaves one that is there as it is, as it does with
-textures.
+A location type is written once, as `export/build/locs/<id>.json`, unless `--locs` names another
+directory, and every map square that places it refers to it by its id. The file is the type's data;
+it names the models of each shape, which are in the model library, and the sequences the type plays,
+which are in the sequence library, and a map square writes any of them that its library lacks. A map
+square writes any location it names that the library lacks, and leaves one that is there as it is,
+as it does with textures.
 
-The file holds a mesh for each shape the location's type has a model for, as a node named
-`shape <n>`, and most types have one. Each mesh's `extras` carry the client's own top and bottom
-of the model, `minY` and `maxY`, which the bend measures the model by: the client takes them over
-every vertex, and the mesh holds only the faces the client draws. Where the model has particles,
-the `extras` also carry its `emitters`, each with its `type`, the draw `priority` of its
-particles, and the three corners `a`, `b` and `c` of the face it spawns them over, and its
-`effectors`, each with its `type` and the vertex it stands `at`. The points are the client's
-vertices, in its units and frame before the file's turn, so an engine places them as it places
-the model's vertices. The types are in the texture library, under `particle/`. Where the model has
-billboards, the sprites the client draws on a face, the `extras` carry them too, each resolved
-from its type: the `centre` of its face in the same frame, the `distance` it is pulled towards
-the camera in the client's units, its half `width` and `height` in those units, its `texture`,
-its `blendMode` (1 by alpha, 2 added, 128 multiplied in), the face's `colour` from the palette,
-and its `alpha` out of 255. The GL toolkit draws each as a square facing the camera at that
-size, in that colour, unlit, blended that way (`Model_Sub2.method4984`); the face under a
-billboard whose type hides it is left out of the mesh. Of 59,434 types with a model, 55,604 have one shape, and the
+An engine builds a mesh for each shape the type has a model for, as the client builds a location's
+model (`LocType.model`): the shape's models merged, mirrored where the type says so, recoloured,
+retextured and tinted, and lit under the type's `ambient` plus 64 and `contrast` plus 850. That is
+the part of what the client builds that is the same wherever the location stands; the client turns,
+scales, moves and bends the model after that, and all of it depends on the placement. A type that
+animates is scaled when it is built, by `scaledInAsset`, because the client scales a location before
+it poses it and a frame's move is not scaled with it; its `resize` is then 128. Its mesh is bound to
+a joint for each label and posed by its sequences' frames, and an animated wall decoration has a
+second mesh, turned 45 degrees, for a diagonal placement, as the client turns such a decoration
+before the frames move it. The client's own top and bottom of the model, `minY` and `maxY`, which
+the bend measures it by, are over the merged model's vertices before `maxVertex`.
+
+A model's particles and billboards are in its node's `extras` in the model library. Each emitter has
+its `type`, the draw `priority` of its particles, and the three corners `a`, `b` and `c` of the face
+it spawns them over, and each effector its `type` and the vertex it stands `at`. The points are the
+client's vertices, in its units and frame before the file's turn, so an engine places them as it
+places the model's vertices, through the same merge, mirror, scale and turn. The types are in the
+texture library, under `particle/`. Each billboard, a sprite the client draws on a face, is resolved
+from its type: the `centre` of its face in the same frame, the `distance` it is pulled towards the
+camera in the client's units, its half `width` and `height` in those units, its `texture`, its
+`blendMode` (1 by alpha, 2 added, 128 multiplied in), the face's `colour` from the palette, and its
+`alpha` out of 255. The GL toolkit draws each as a square facing the camera at that size, in that
+colour, unlit, blended that way (`Model_Sub2.method4984`); the face under a billboard whose type
+hides it is never drawn.
+
+`--baked` on `exportLoc`, and `--baked-locs` on `exportMapSquare`, also write each location's meshes
+as the client builds them into a glTF file of their own, a node named `shape <n>` for each shape,
+with the extras above, a skin and an animation for each sequence for one that animates, and its
+colour changes as morph targets. These are the reference an engine's own building is checked against.
+
+Of 59,434 types with a model, 55,604 have one shape, and the
 rest, such as walls and fences, name a different mesh for each shape. Each mesh is the part of what
 the client builds that is the same wherever the location stands: the shape's meshes merged, mirrored
 where the type says so, and recoloured and retextured. The client turns, scales, moves and bends
 the model after that, and all of it depends on the placement, so none of it is in the mesh. The
-type's data is in the JSON file beside the mesh, which carries what that needs, along with the
+type's data in the JSON file carries what that needs, along with the
 type's `loc` id, its `name` and its `shapes`: the type's `resize`, `offset`, `translate`, `hillchange` and
 `hillskew`, whether the mesh is `mirrored`, and the `sequences` the location plays, their weights
 and whether the client starts at a random frame. They also carry the type's `size` in tiles, as
@@ -498,15 +516,10 @@ client lets the mouse pick only an interactive location, and never one under wat
 carry the type's five `ops`, the options its data sets on the mini menu in the client's order,
 with null for an empty slot; the client adds Examine as a sixth to every type, as for an NPC. The JSON file holds every other field of the type too, under
 the name the client gives it, as an NPC's does: the `models` of each shape in `modelShapes`, the
-swaps, `ambient`, `contrast` and `tint` already applied to the meshes, and the rest, such as how
-the location blocks movement and sight, its sounds, its map icon and its `params`, for an engine
-that needs them. A location that animates has bones and an
-animation for every sequence, as an NPC has, and is scaled in its asset, because the client
-scales a location before it poses it and a frame's move is not scaled with it; its JSON then
-says `resize` is 128 and names the scale in `scaledInAsset`. A wall decoration that animates
-has a second mesh, `shape 4 turned`, for a diagonal placement: the client turns such a decoration
-45 degrees before the frames of its sequence move it, and the frames are not turned with it, so
-that mesh is turned already and an importer does not turn it again.
+colour and texture swaps (`recolours` as pairs of the client's colours, signed, `retextures` as
+pairs of texture ids), `ambient`, `contrast` and `tint` that the meshes are built with, and the rest,
+such as how the location blocks movement and sight, its sounds, its map icon and its `params`, for
+an engine that needs them.
 
 
 ### The environment

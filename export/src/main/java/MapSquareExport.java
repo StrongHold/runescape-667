@@ -69,6 +69,12 @@ public final class MapSquareExport {
         @Parameter(names = "--keys", description = "The directory holding the key each map square's locations are locked with, one <name>.txt of four numbers per map square")
         private Path keys = LocationKeys.defaultDirectory();
 
+        @Parameter(
+            names = "--baked-locs",
+            description = "A directory to also write each location's meshes into, baked as the client builds them, the reference an engine's own building is checked against"
+        )
+        private Path bakedLocs;
+
         @Parameter(names = "--no-locations", description = "Write the ground alone")
         private boolean noLocations;
 
@@ -203,6 +209,12 @@ public final class MapSquareExport {
 
         for (var placement : square.placements()) {
             var file = assets.file(placement.id());
+            if (file.isPresent() && args.bakedLocs != null) {
+                var baked = args.bakedLocs.resolve(placement.id() + ".gltf");
+                if (!Files.exists(baked)) {
+                    assets.writeBaked(placement.id(), baked);
+                }
+            }
             if (file.isPresent()) {
                 placements.add(placementDescription(placement));
                 parts.merge(placement.part(), 1, Integer::sum);

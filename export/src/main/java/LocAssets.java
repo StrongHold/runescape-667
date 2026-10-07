@@ -13,20 +13,17 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * The locations every map square shares, one glTF file for each location type in one directory.
+ * The location types every map square shares: one JSON file for each type in one directory, which
+ * names the models of each shape and the sequences the type plays, and the models and sequences
+ * themselves in the model and sequence libraries beside it ({@link ModelLibrary},
+ * {@link SequenceLibrary}). An engine builds each shape's meshes from them, as the client builds a
+ * location's model ({@code LocType.model}), and places them as {@link LocPlacing} describes.
  *
- * A location is written once, under its id, and holds a mesh for each shape its type has a model
- * for, which for most types is one, each as a root of the file's one scene. The type's own data,
- * its name and what an importer needs to place it, goes in a JSON file of the same id beside it. A skinned mesh is best left a root, as its own transform is
- * ignored in favour of its joints'. Each mesh is the location's asset as {@link ClientLocReader}
- * builds it, and the JSON carries what an importer needs to place it as {@link LocPlacing}
- * describes. A wall decoration that animates has a second mesh for a diagonal placement, turned
- * already, as {@link ClientLocReader#poser} explains. Each mesh's extras carry the client's own
- * top and bottom of the model, {@code minY} and {@code maxY}, which the bend measures the model
- * by: the client takes them over every vertex, and the mesh holds only the faces the client draws.
- * A location that the client animates has a morph target for every frame of every sequence it can
- * play and an animation for each sequence, as an NPC has. A location that is already in the
- * library is left as it is, so the library is written once and read by every map square after.
+ * <p>A type is written once, under its id, and one that is already in the library is left as it
+ * is, so the library is written once and read by every map square after. The meshes as the client
+ * builds them can also be baked into a glTF file of their own ({@link #writeBaked}), a mesh for
+ * each shape, each pose of an animated one a morph target, which is the reference an engine's own
+ * building is checked against.
  */
 public final class LocAssets {
 
@@ -70,20 +67,36 @@ public final class LocAssets {
     }
 
     /**
-     * Where a location's file is, written if the library does not hold it yet, or nothing where
-     * the type has no model the client can build.
+     * Where a location type's data is, written with the models it names and the sequences it plays
+     * where the libraries lack them, or nothing where the type has no model the client can build.
      */
     public Optional<Path> file(int id) {
-        var file = directory.resolve(id + ".gltf");
+        var file = directory.resolve(id + ".json");
         var type = reader.type(id);
-        if (Files.exists(file) && Files.exists(typeFile(file))) {
+        if (Files.exists(file)) {
+            writeShared(type);
+            return Optional.of(file);
+        } else if (buildable(type)) {
+            try {
+                Files.createDirectories(directory);
+                Files.writeString(file, Json.write(extras(type)), StandardCharsets.UTF_8);
+            } catch (IOException failure) {
+                throw new UncheckedIOException("Could not write location " + id + " to " + file, failure);
+            }
             writeShared(type);
             return Optional.of(file);
         } else {
-            var written = write(id, file).map(ignored -> file);
-            written.ifPresent(ignored -> writeShared(type));
-            return written;
+            return Optional.empty();
         }
+    }
+
+    /**
+     * Whether the client builds a model for every shape of a type, as it builds none for a type
+     * that names a mesh the cache does not hold.
+     */
+    private boolean buildable(LocType type) {
+        var shapes = ClientLocReader.shapes(type);
+        return !shapes.isEmpty() && shapes.stream().allMatch(shape -> reader.poser(type, shape, false).still() != null);
     }
 
     /**
@@ -133,9 +146,12 @@ public final class LocAssets {
     }
 
     /**
-     * Writes one location's file, or nothing where its type has no model the client can build.
+     * Writes one location's meshes as the client builds them, baked into a glTF file of their own
+     * with every pose, or nothing where its type has no model the client can build. An engine builds
+     * them from the model and sequence libraries instead; this is the reference it is checked
+     * against.
      */
-    public Optional<Written> write(int id, Path file) {
+    public Optional<Written> writeBaked(int id, Path file) {
         var type = reader.type(id);
         var gltf = new GltfBuilder();
         var materials = new GltfMaterials(gltf, reader.textures(), textures, file);
@@ -236,18 +252,10 @@ public final class LocAssets {
         var document = gltf.document(shapeNodes, label(type), Map.of());
         try {
             GltfFile.write(file, document, gltf.bin());
-            Files.writeString(typeFile(file), Json.write(extras(type)), StandardCharsets.UTF_8);
         } catch (IOException failure) {
             throw new UncheckedIOException("Could not write location " + id + " to " + file, failure);
         }
         return Optional.of(new Written(shapeNodes.size(), faces, targets, List.copyOf(animations)));
-    }
-
-    /**
-     * Where the type's own data is written: beside the mesh file, as JSON.
-     */
-    private static Path typeFile(Path file) {
-        return GltfFile.sibling(file, ".json");
     }
 
     public static String label(LocType type) {

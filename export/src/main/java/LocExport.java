@@ -4,8 +4,8 @@ import com.beust.jcommander.ParametersDelegate;
 import java.nio.file.Path;
 
 /**
- * Writes one location type out of the cache as a glTF file with its buffer beside it, into the library that every
- * map square refers to.
+ * Writes one location type out of the cache into the library that every map square refers to: its data as JSON,
+ * and the models it names and the sequences it plays into their libraries.
  */
 public final class LocExport {
 
@@ -21,10 +21,10 @@ public final class LocExport {
         private int loc;
 
         @Parameter(
-            names = "--out",
-            description = "The file to write, relative to the export module when not absolute"
+            names = "--baked",
+            description = "A glTF file to also write the location's meshes into, baked as the client builds them, relative to the export module when not absolute"
         )
-        private Path out;
+        private Path baked;
 
         @Parameter(names = "--help", help = true, description = "Print this message")
         private boolean help;
@@ -46,15 +46,19 @@ public final class LocExport {
     private static void export(Args args) {
         var reader = new ClientLocReader(args.where.cache());
         var assets = new LocAssets(reader, args.textures.library(reader.textures()), LocAssets.defaultDirectory());
-        var out = args.out == null ? assets.directory().resolve(args.loc + ".gltf") : args.out;
-        var written = assets.write(args.loc, out)
+        var file = assets.file(args.loc)
             .orElseThrow(() -> new IllegalStateException("Location " + args.loc + " has no model the client builds."));
+        System.out.println("wrote " + file.toAbsolutePath().normalize());
+        System.out.println("  " + LocAssets.label(reader.type(args.loc)));
 
-        System.out.println("wrote " + out.toAbsolutePath().normalize());
-        System.out.println("  " + LocAssets.label(reader.type(args.loc)) + ", " + written.shapes() + " shapes, "
-            + written.faces() + " faces, " + written.targets() + " morph targets");
-        for (var animation : written.animations()) {
-            System.out.println("  " + animation);
+        if (args.baked != null) {
+            var baked = assets.writeBaked(args.loc, args.baked).orElseThrow();
+            System.out.println("wrote " + args.baked.toAbsolutePath().normalize());
+            System.out.println("  " + baked.shapes() + " shapes, " + baked.faces() + " faces, " + baked.targets()
+                + " morph targets");
+            for (var animation : baked.animations()) {
+                System.out.println("  " + animation);
+            }
         }
     }
 
