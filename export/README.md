@@ -928,6 +928,33 @@ none. A part that a set does not have is left out.
   fill measured from a number of no place, as they did before these rules. No grid in this cache
   has copies of another size than their sprite's, or a gap between them, so the checks for those
   change nothing here.
+  Where an interface writes a title over a frame, the frame has a `heading`: the room it has for a
+  heading above what it holds, `left`, `top` and `right` from the sides of the box its corners stand
+  in, and `height`, measured at the layer's real size as the other parts are. The task lays the
+  interface out through its layers in the client's window and reads what the layer around the box
+  holds over the frame, in the box's own layers or beside them: what is shown, but for the box itself,
+  which a script may show with its frame. A title is a text component, centred across, that stands
+  as far in from the one side of the frame as from the other (to within 8 pixels), starts no more
+  than 8 pixels above the frame, ends within the reach of the frame's top corners, and stands above
+  every other text over the frame. So the title of 890 in the dark band between its stone border and
+  its divider is a title, and so is the title of 405, which has no divider; a label in a column, a
+  message in the middle of a box and a line of text in a thin frame are not. Frames are written as
+  one only where their headings are the same as well. A box in no layer is laid out in the client's
+  window, 765 by 503, as the client lays it out, and not in the layer of its first piece. A frame
+  with a close button over it is a window, as `windows` tells, and is not written here. 15 frames
+  have a heading, among them 890, 1028, 883 and 924. A planted defect in each of these rules changes
+  the file: with titles that need not be centred, the window of 34 takes a title 0 and 20 pixels in
+  from its sides; with titles that may end past the reach of the top corners, 55 frames have a
+  heading and 122 frames are written, as messages, labels and the text of buttons (596, 948, 1144)
+  become headings; with titles that need not stand above the rest, 766, 1004 and 1053 take a
+  heading, and the windows of 1094 and 1122 take a line of text below their title bars as their
+  title; with a hidden box that hides what stands over it, 109, 549 and 1028 lose their headings and
+  1094, 1100 and 1103 are not windows; with only the box read, and not the layer around it, 1122 is
+  not a window and 1100 loses its title; and with a box in no layer laid out in the layer of its
+  first piece, 72 is not a window and the windows of 555, 623, 1123, 1126 and 1141 change. No two
+  boxes in this cache have the same parts and different headings, so frames merged whatever their
+  headings change nothing here; with a heading planted one pixel lower in 1079, 103 frames are
+  written, as 897 and 1079 are written apart, and with that defect as well, 102.
 - `windows` are the windows of the interfaces: a frame of sprites with a title across its top and
   a button that closes it, laid out at a fixed size in a layer, the ones the most interfaces use
   first. The frame is the layer's sprite components the player cannot use, each placed by the
@@ -942,6 +969,24 @@ none. A part that a set does not have is left out.
   laid out as the frames are, at two sizes with the client's rules, so a place may have several
   parts and a fill may be of one colour; its title and close button are measured where they stand
   in the larger of the two sizes.
+  A frame of `frames` with a close button over it is a window as well, as the ornate windows are
+  (20, 554, 555, 1099, 1102, 1111, 1122 and others), which hold their frame, their title and their
+  close button each in a layer of its own. Its title is the frame's title, found as `frames` tells,
+  and is left out where the interface writes none, as 1111 writes none in its title bar. Its close
+  button is the sprite nearest the top right corner of the frame that stands inside the frame, in the
+  right half of its top border (it starts less than 32 pixels down and ends within the reach of the
+  top corners), and that either swaps itself for another sprite by script 44 under the pointer, or
+  is the first of a stack of sprites at one place, one of which has an option. In a stack, another
+  sprite whose hover hook shows it is `hover`, as scripts 4209 and 4214 fade it in, and another whose
+  click hook shows it, where there is one, is `pressed` (script 4207). A box where the rules above
+  found a window, in a layer that holds its pieces, is not read again, so those windows stay as they
+  were. A planted defect in each of these rules changes the file: with no stacks, 12 windows are
+  lost, the ornate windows among them; with the first button found and not the nearest, 1111 takes
+  its zoom button as its close button; with buttons that may end below the top border, 4 more
+  windows are written and the thin frame of 18 interfaces is lost, as 1097 has a button to delete
+  each of its rows; with buttons that may stand outside the frame, 6 more windows are written from
+  those buttons of 1097; and with the boxes of the windows above read again, 16 windows are written
+  twice.
 - `frameButtons` are the buttons a script builds as a frame: the stone button that 151 components
   have (script 92, proc 679, and under the pointer script 94, proc 1360) and the bevelled button
   of the question that accepts a graphics setting, interface 883 (procs 1151 and 1166). Each has
@@ -960,7 +1005,7 @@ sprites does not hide them. A call whose sprites are known only while the game r
 not written. Each script that holds its sprites as constants is read by its shape, and the task
 stops where a script no longer has the shape it reads. In this cache there are ten scrollbars, seven
 plate buttons, 110 sprite buttons, two tabs, five checkboxes, two sets of radio buttons, one
-radio tile, four sliders, one dropdown, 126 frames, 85 windows, two frame buttons and two hover frames, and six calls of the scrollbar
+radio tile, four sliders, one dropdown, 102 frames, 110 windows, two frame buttons and two hover frames, and six calls of the scrollbar
 script are known only while the game runs. A planted check that stops reading passed-on arguments
 leaves seven such calls, one more than the task finds, and a planted check that expects five sprites
 in script 2975 stops the task.

@@ -3,9 +3,12 @@ import com.jagex.js5.Js5Archive;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 /**
@@ -23,6 +26,10 @@ import java.util.TreeSet;
  * out as the frames are, at two sizes with the client's own rules ({@code SkinFrames}), so that a
  * place may hold several pieces; its title and close button are found where they stand in the
  * larger of the two.
+ *
+ * A frame that {@code SkinFrames} finds with a close button over it is a window as well, with its
+ * title where the interface writes one, unless these rules found a window in a layer that holds its
+ * pieces.
  */
 final class SkinWindows {
 
@@ -51,6 +58,7 @@ final class SkinWindows {
 
     private final Map<String, Map<String, Object>> windows = new LinkedHashMap<>();
     private final Map<String, TreeSet<Integer>> interfaces = new LinkedHashMap<>();
+    private final Map<Integer, Set<Integer>> layersWithWindows = new HashMap<>();
     private final SkinEdges edges;
 
     private SkinWindows(SkinEdges edges) {
@@ -80,15 +88,15 @@ final class SkinWindows {
                     component.decode(new Packet(file));
                     layers.computeIfAbsent(component.layer, layer -> new ArrayList<>()).add(component);
                 }
-                for (var layer : layers.values()) {
-                    found.addIfWindow(layer, group);
+                for (var layer : layers.entrySet()) {
+                    found.addIfWindow(layer.getValue(), group, layer.getKey());
                 }
             }
         }
         return found;
     }
 
-    private void addIfWindow(List<Component> layer, int interfaceId) throws Exception {
+    private void addIfWindow(List<Component> layer, int interfaceId, int layerId) throws Exception {
         var graphics = new ArrayList<Component>();
         for (var component : layer) {
             if (component.type == Component.TYPE_GRAPHIC && SkinFrames.isPiece(component)) {
@@ -96,9 +104,9 @@ final class SkinWindows {
             }
         }
         if (graphics.stream().allMatch(SkinWindows::isFixed)) {
-            addIfFixedWindow(layer, graphics, interfaceId);
+            addIfFixedWindow(layer, graphics, interfaceId, layerId);
         } else {
-            addIfResizingWindow(layer, interfaceId);
+            addIfResizingWindow(layer, interfaceId, layerId);
         }
     }
 
@@ -106,7 +114,7 @@ final class SkinWindows {
      * Adds a layer whose pieces follow its size as a window, where they make a frame and the layer
      * holds a title and a close button, each measured where it stands in the larger box.
      */
-    private void addIfResizingWindow(List<Component> layer, int interfaceId) throws Exception {
+    private void addIfResizingWindow(List<Component> layer, int interfaceId, int layerId) throws Exception {
         var pieces = new ArrayList<SkinFrames.Piece>();
         for (var component : layer) {
             if (SkinFrames.isPiece(component)) {
@@ -124,10 +132,10 @@ final class SkinWindows {
             var rect = SkinFrames.rect(SkinFrames.pieceOf(component).layout(), box.width(), box.height());
             laidOut.put(component, new Box(rect.x(), rect.y(), rect.width(), rect.height()));
         }
-        add(parts, titleOf(laidOut, box), closeOf(laidOut, box), interfaceId);
+        add(parts, titleOf(laidOut, box), closeOf(laidOut, box), interfaceId, layerId);
     }
 
-    private void addIfFixedWindow(List<Component> layer, List<Component> graphics, int interfaceId) throws Exception {
+    private void addIfFixedWindow(List<Component> layer, List<Component> graphics, int interfaceId, int layerId) throws Exception {
         var pieces = graphics;
         if (pieces.size() < EDGES.size()) {
             return;
@@ -168,21 +176,52 @@ final class SkinWindows {
                 fixed.put(component, new Box(component.originalX, component.originalY, component.originalWidth, component.originalHeight));
             }
         }
-        add(parts, titleOf(fixed, box), closeOf(fixed, box), interfaceId);
+        add(parts, titleOf(fixed, box), closeOf(fixed, box), interfaceId, layerId);
+    }
+
+    /**
+     * Adds the window of a frame that has a close button over it, and where it has one a title, in
+     * whatever layers hold them, as the ornate windows hold their title in a layer of its own and
+     * their close button in another ({@code SkinTitles}). A window whose interface writes no title
+     * over its frame, as 1111 writes none in its title bar, has none.
+     */
+    void addFramed(List<Map<String, Object>> parts, Map<String, Object> title, Map<String, Object> close, int interfaceId) {
+        var window = new LinkedHashMap<String, Object>();
+        window.put("parts", parts);
+        if (title != null) {
+            window.put("title", title);
+        }
+        window.put("close", close);
+        add(window, interfaceId);
+    }
+
+    /**
+     * Whether a window was found in one of these layers of an interface, by the layer's number in
+     * the interface, so that the frame of the same window is not found again from the box it is in.
+     */
+    boolean hasWindowIn(int interfaceId, Set<Integer> layers) {
+        var found = layersWithWindows.getOrDefault(interfaceId, Set.of());
+        return layers.stream().anyMatch(found::contains);
     }
 
     /**
      * Adds a window of these parts, title and close button, where it has a title and a close button.
      */
-    private void add(List<Map<String, Object>> parts, Map<String, Object> title, Map<String, Object> close, int interfaceId) {
+    private void add(List<Map<String, Object>> parts, Map<String, Object> title, Map<String, Object> close, int interfaceId, int layerId) {
         if (title == null || close == null) {
             return;
         }
+
+        layersWithWindows.computeIfAbsent(interfaceId, id -> new HashSet<>()).add(layerId);
 
         var window = new LinkedHashMap<String, Object>();
         window.put("parts", parts);
         window.put("title", title);
         window.put("close", close);
+        add(window, interfaceId);
+    }
+
+    private void add(Map<String, Object> window, int interfaceId) {
         var key = Json.write(window);
         windows.putIfAbsent(key, window);
         interfaces.computeIfAbsent(key, k -> new TreeSet<>()).add(interfaceId);

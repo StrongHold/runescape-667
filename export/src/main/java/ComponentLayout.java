@@ -17,6 +17,11 @@ final class ComponentLayout {
     private static final int CHILD_MASK = 0xFFFF;
 
     /**
+     * The client's fixed window, which a component in no layer is laid out in.
+     */
+    static final Box WINDOW = new Box(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    /**
      * Where a component stands in the window, and its size.
      */
     record Box(int x, int y, int width, int height) {
@@ -63,7 +68,7 @@ final class ComponentLayout {
         if (component == null) {
             return null;
         }
-        return component.layer == -1 ? new Box(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT) : boxOf(parentOf(id));
+        return component.layer == -1 ? WINDOW : boxOf(parentOf(id));
     }
 
     /**

@@ -113,7 +113,8 @@ public final class SkinExport {
         var hooks = ComponentHooks.read(cache);
         var calls = new Calls(scripts);
         var edges = SkinEdges.read(cache);
-        var frames = SkinFrames.ofInterfaces(cache, edges);
+        var windows = SkinWindows.read(cache, edges);
+        var frames = SkinFrames.ofInterfaces(cache, edges, windows);
         var hoverFrames = SkinFrames.hoverFrames(scripts, calls, edges);
         var report = new ArrayList<String>();
         var sets = new LinkedHashMap<String, SkinSets>();
@@ -158,7 +159,6 @@ public final class SkinExport {
         var sliders = SkinSliders.read(cache);
         file.put("sliders", sliders.written());
         report.add(sliders.size() + " sliders");
-        var windows = SkinWindows.read(cache, edges);
         var writtenWindows = windows.written();
         file.put("windows", writtenWindows);
         report.add(windows.size() + " windows");

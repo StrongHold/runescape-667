@@ -41,6 +41,9 @@ import java.util.TreeSet;
  * at every size, so it is measured at the size its layer has in the client's fixed window. Where
  * that size is known, a grid of one sprite laid by hand over the middle is a tiled fill, and a piece
  * centred on a side and longer than it, which the client cuts to the layer, runs along the side.
+ *
+ * Where the interface writes a title over a frame, the frame has a heading where the title stands,
+ * and where it has a close button over the frame, the frame is a window ({@code SkinTitles}).
  */
 final class SkinFrames {
 
@@ -62,7 +65,7 @@ final class SkinFrames {
      * How far apart the two corners of a pair may stand, each measured from its own sides, as the
      * corners of the stone frame stand 13 and 12 pixels in from theirs.
      */
-    private static final int PAIR_SLACK = 8;
+    static final int PAIR_SLACK = 8;
 
     /**
      * The resize mode of a piece that takes a share of the box, in 16384ths ({@code
@@ -187,7 +190,7 @@ final class SkinFrames {
     private final Map<String, TreeSet<Integer>> scripts = new LinkedHashMap<>();
     private final Map<String, TreeSet<Integer>> interfaces = new LinkedHashMap<>();
 
-    static SkinFrames ofInterfaces(File cache, SkinEdges edges) throws Exception {
+    static SkinFrames ofInterfaces(File cache, SkinEdges edges, SkinWindows windows) throws Exception {
         var found = new SkinFrames();
         var index = Cache.index(cache, Js5Archive.INTERFACES);
         for (var group : Cache.groupsOf(index)) {
@@ -201,7 +204,7 @@ final class SkinFrames {
                 }
                 var layout = new ComponentLayout(components);
                 var boxes = new LinkedHashMap<Integer, List<Piece>>();
-                var firsts = new LinkedHashMap<Integer, Integer>();
+                var holders = new LinkedHashMap<Integer, java.util.Set<Integer>>();
                 for (var id : inDrawingOrder(components, layout)) {
                     var component = components.get(id);
                     if (isPiece(component)) {
@@ -212,17 +215,25 @@ final class SkinFrames {
                             box = layout.parentOf(box);
                         }
                         boxes.computeIfAbsent(box, key -> new ArrayList<>()).add(pieceOf(component).within(layers));
-                        firsts.putIfAbsent(box, id);
+                        holders.computeIfAbsent(box, key -> new java.util.HashSet<>()).add(component.layer);
                     }
                 }
                 for (var box : boxes.entrySet()) {
-                    var layer = box.getKey() == -1 ? layout.layerBoxOf(firsts.get(box.getKey())) : layout.boxOf(box.getKey());
+                    var layer = box.getKey() == -1 ? ComponentLayout.WINDOW : layout.boxOf(box.getKey());
                     var size = sizeOf(box.getValue(), layer);
                     if (size != null) {
                         var real = layer == null ? null : new Size(layer.width(), layer.height());
                         var pieces = real == null ? box.getValue() : withGridsTiled(box.getValue(), real, edges);
                         var parts = partsOf(pieces, size, real, edges);
-                        found.add(parts == null ? null : inOrder(inItsBox(parts), size), null, group);
+                        var titles = parts == null || real == null ? null : SkinTitles.in(components, layout, box.getKey(), layer, parts);
+                        var title = titles == null ? null : titles.title();
+                        var close = titles == null ? null : titles.close();
+                        var framed = parts == null ? null : inOrder(inItsBox(parts), size);
+                        if (close != null && !windows.hasWindowIn(group, holders.get(box.getKey()))) {
+                            windows.addFramed(framed, title, close, group);
+                        } else {
+                            found.add(framed, title == null ? null : SkinTitles.headingOf(title), null, group);
+                        }
                     }
                 }
             }
@@ -235,7 +246,7 @@ final class SkinFrames {
      * InterfaceManager.draw}): the components of a layer in the order the interface holds them, each
      * layer followed at once by what it holds.
      */
-    private static List<Integer> inDrawingOrder(Map<Integer, Component> components, ComponentLayout layout) {
+    static List<Integer> inDrawingOrder(Map<Integer, Component> components, ComponentLayout layout) {
         var held = new LinkedHashMap<Integer, List<Integer>>();
         for (var id : components.keySet()) {
             held.computeIfAbsent(layout.parentOf(id), parent -> new ArrayList<>()).add(id);
@@ -277,7 +288,7 @@ final class SkinFrames {
                 var pieces = builtBy(scripts.get(id), Arrays.asList(given));
                 var size = sizeOf(pieces, null);
                 if (size != null) {
-                    found.add(partsOf(pieces, size, null, edges), id, null);
+                    found.add(partsOf(pieces, size, null, edges), null, id, null);
                 }
             }
         }
@@ -416,15 +427,19 @@ final class SkinFrames {
     }
 
     /**
-     * Adds the parts of a frame, where a box's pieces make one.
+     * Adds the parts of a frame, where a box's pieces make one, with its heading where it has one.
+     * Frames are one frame only where their headings are the same as well.
      */
-    private void add(List<Map<String, Object>> parts, Integer script, Integer interfaceId) {
+    private void add(List<Map<String, Object>> parts, Map<String, Object> heading, Integer script, Integer interfaceId) {
         if (parts == null) {
             return;
         }
 
         var frame = new LinkedHashMap<String, Object>();
         frame.put("parts", parts);
+        if (heading != null) {
+            frame.put("heading", heading);
+        }
         var key = Json.write(frame);
         frames.putIfAbsent(key, frame);
         if (script != null) {
@@ -933,7 +948,7 @@ final class SkinFrames {
      * How far in from a side the outermost corner on that side stands, or 0 where one stands at the
      * side or past it.
      */
-    private static int marginOf(String side, String measure, List<Map<String, Object>> corners) {
+    static int marginOf(String side, String measure, List<Map<String, Object>> corners) {
         var margin = corners.stream()
             .filter(corner -> ((String) corner.get("place")).startsWith(side) || ((String) corner.get("place")).endsWith(side))
             .mapToInt(corner -> (Integer) corner.get(measure))
@@ -942,7 +957,7 @@ final class SkinFrames {
         return Math.max(0, margin);
     }
 
-    private static boolean isCorner(Map<String, Object> part) {
+    static boolean isCorner(Map<String, Object> part) {
         return ACROSS_FROM.containsKey((String) part.get("place"));
     }
 
@@ -1004,7 +1019,7 @@ final class SkinFrames {
      * How far in from a side the corners on that side reach, the furthest of them, or 0 where it
      * has none.
      */
-    private static int reachOf(String side, List<Map<String, Object>> corners) {
+    static int reachOf(String side, List<Map<String, Object>> corners) {
         var reach = 0;
         for (var corner : corners) {
             var place = (String) corner.get("place");
