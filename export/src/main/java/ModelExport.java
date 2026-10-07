@@ -52,10 +52,13 @@ public final class ModelExport {
                 + ", or the client draws none of its faces."));
 
         System.out.println("wrote " + out.toAbsolutePath().normalize());
-        System.out.println("  " + result.faces() + " faces in " + result.primitives() + " primitives, "
+        System.out.println("  " + result.faces() + " faces drawn in " + result.primitives() + " primitives, "
             + (result.labels().size() - 1) + " labels");
-        for (var skip : result.skipped().entrySet()) {
-            System.out.println("  " + skip.getValue() + " faces left out, " + skip.getKey());
+        for (var hidden : result.hidden().entrySet()) {
+            System.out.println("  " + hidden.getValue() + " faces never drawn, " + hidden.getKey());
+        }
+        if (result.unused() > 0) {
+            System.out.println("  " + result.unused() + " vertices no face uses");
         }
     }
 

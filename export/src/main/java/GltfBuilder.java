@@ -32,6 +32,7 @@ public final class GltfBuilder {
     /** The most vertices a primitive may number with unsigned shorts. */
     private static final int MAX_SHORT_VERTICES = 0x10000;
     public static final int TRIANGLES = 4;
+    public static final int POINTS = 0;
 
     public static final int LINEAR = 9729;
     public static final int LINEAR_MIPMAP_LINEAR = 9987;
@@ -272,6 +273,18 @@ public final class GltfBuilder {
         if (!targets.isEmpty()) {
             primitive.put("targets", targets);
         }
+        primitives.add(primitive);
+    }
+
+    /**
+     * Adds a primitive of points, one for each vertex the indices name.
+     */
+    public void points(Map<String, Integer> attributes, int indices, int material) {
+        var primitive = new LinkedHashMap<String, Object>();
+        primitive.put("attributes", attributes);
+        primitive.put("indices", indices);
+        primitive.put("material", material);
+        primitive.put("mode", POINTS);
         primitives.add(primitive);
     }
 

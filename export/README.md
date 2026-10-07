@@ -144,22 +144,25 @@ whole number exactly, as glTF asks that each element of a vertex attribute start
   unsigned bytes, as the ground writes it: the hue of 64, the saturation of 8, the lightness of
   128, and a spare.
 - `_ALPHA`: the face's alpha, 0 opaque and 255 invisible.
-- `_SHADING`: 0 smooth, 1 flat, 3 black.
+- `_SHADING`: 0 smooth, 1 flat, 2 hidden, 3 black, or another the client has no case for.
 - `_FACE_LABEL`: the face's label, which the colour and alpha transforms of a frame act on, or -1.
-- `_VERTEX`: the client's vertex.
-- `_NORMAL_SUM` and `_NORMAL_COUNT`: for a smooth face, the sum of the normals of the smooth faces
-  at the vertex and how many there are, in the file's frame; for any other face, its own normal
-  and 0. The client merges meshes by joining every vertex at one position (`Mesh(Mesh[], int)`),
-  so the normal at a joined vertex is the sum of the sums of the vertices joined, and the light
-  on it follows from that sum and the type's contrast, as above.
+- `_VERTEX`: the client's vertex, which a merge joins with the vertices of the other models at
+  the same position, as the client merges meshes (`Mesh(Mesh[], int)`).
+
+The client works out a model's normals once a type has merged, mirrored, turned and scaled it,
+from every face, and finds the pivot of a frame from every vertex, drawn or not. So the file holds
+every face and every vertex. The faces the client never draws whatever the type, one hidden at a
+join that no frame can show, one smeared, one of a shading the client has no case for, and one a
+billboard hides, are in a primitive of their own whose material, `hidden`, is wholly see-through,
+and a vertex no face uses is a point of a primitive of points in that material. A face whose
+texture skips its faces is drawn by some types, as a type can retexture it, so it is not hidden.
+`NORMAL` is for a tool alone: an engine works out the normals and the light on each vertex from
+the positions of the model it builds, as the client does (`JavaModel.calculateNormals`).
 
 Each vertex is bound wholly to a joint for its label, a node named `label <n>`, with the first
 joint, `unlabelled`, for the vertices of no label, so a sequence from the sequence library moves
 the model by its labels. The node's `extras` carry the client's `minY` and `maxY` over every
 vertex, and the model's `emitters`, `effectors` and `billboards`, as a location's shape does.
-Faces the client never draws whatever the type are left out: one hidden at a join that no frame
-can show, one smeared, one of a shading the client has no case for, and one a billboard hides. A
-face whose texture skips its faces is kept, as a type can retexture it.
 
 
 ## The sequence library

@@ -18,10 +18,11 @@ import java.util.TreeSet;
  * recolours, retextures, tints, lights or scales it.
  *
  * <p>Coordinates are as {@link ModelToGltf} writes them: the client's frame turned half a turn
- * about x, one tile to the metre. The standard attributes make the model look as the client draws
- * it at the ambient and contrast most models are built with, so that a tool shows it as it is. The
- * attributes whose names start with an underscore are the client's own, which an engine builds a
- * type's model from as the client does ({@code LocType.model}, {@code NPCType.getModel}):
+ * about x, one tile to the metre, so a position times 512 is the client's whole number. The
+ * standard attributes make the model look as the client draws it at the ambient and contrast most
+ * models are built with, so that a tool shows it as it is. The attributes whose names start with
+ * an underscore are the client's own, which an engine builds a type's model from as the client
+ * does ({@code LocType.model}, {@code NPCType.getModel}):
  *
  * <ul>
  *   <li>{@code _HSL}: the face's colour as the client holds it, which a type recolours and tints,
@@ -29,25 +30,28 @@ import java.util.TreeSet;
  *       bytes, as the ground writes it: the hue of 64, the saturation of 8, the lightness of 128
  *       and a spare.
  *   <li>{@code _ALPHA}: the face's alpha, 0 opaque and 255 invisible.
- *   <li>{@code _SHADING}: how the face is shaded, 0 smooth, 1 flat, 3 black.
+ *   <li>{@code _SHADING}: how the face is shaded, 0 smooth, 1 flat, 2 hidden, 3 black, or another
+ *       the client has no case for.
  *   <li>{@code _FACE_LABEL}: the face's label, which the colour and alpha transforms of a frame
  *       act on, or -1.
- *   <li>{@code _VERTEX}: the client's vertex, which a merge joins by position.
- *   <li>{@code _NORMAL_SUM} and {@code _NORMAL_COUNT}: for a smooth face, the sum of the normals
- *       of the smooth faces at the vertex and how many there are, as the client keeps them, in
- *       the file's frame; for any other face, its own normal and 0. The client merges meshes by
- *       joining every vertex at one position ({@code Mesh(Mesh[], int)}), so the sum at a merged
- *       vertex is the sum of the sums of the vertices joined.
+ *   <li>{@code _VERTEX}: the client's vertex, which a merge joins with the vertices of the other
+ *       models at the same position ({@code Mesh(Mesh[], int)}).
  * </ul>
  *
- * <p>Every other one is a float, as glTF asks that each element of a vertex attribute starts on
- * a four byte boundary, and a float holds each of these whole numbers exactly.
+ * <p>Every one but {@code _HSL} is a float, as glTF asks that each element of a vertex attribute
+ * start on a four byte boundary, and a float holds each of these whole numbers exactly.
+ *
+ * <p>The client works out a model's normals once a type has merged, mirrored, turned and scaled
+ * it, from every face, and finds the pivot of a frame from every vertex, drawn or not. So every
+ * face and every vertex is written. The faces the client never draws whatever the type, one hidden
+ * at a join that no frame can show, one smeared instead of drawn, one of a shading the client has
+ * no case for, and one a billboard hides, are in a primitive of their own whose material,
+ * {@code hidden}, is wholly see-through, and a vertex no face uses is a point of a primitive of
+ * points in that material. A face whose texture skips its faces is drawn by some types, as a type
+ * can retexture it, so it is not hidden.
  *
  * <p>Each vertex is bound wholly to the joint of its label, the first joint being for the vertices
- * of no label, so a clip moves the model by its labels in any tool. Faces the client never draws
- * whatever the type are left out: one hidden at a join that no frame can show, one smeared
- * instead of drawn, one of a shading the client has no case for, and one a billboard hides. A face
- * whose texture skips its faces is kept, as a type can retexture it.
+ * of no label, so a clip moves the model by its labels in any tool.
  */
 public final class LibraryModelToGltf {
 
@@ -67,11 +71,6 @@ public final class LibraryModelToGltf {
     private static final int SATURATION_MASK = 0x7;
     private static final int LIGHTNESS_MASK = 0x7F;
 
-    /**
-     * The count of faces at a vertex is kept in a byte, so 256 faces count as none.
-     */
-    private static final int COUNT_MASK = 0xFF;
-
     private final JavaModel model;
     private final Js5TextureSource source;
     private final GltfBuilder gltf;
@@ -81,6 +80,7 @@ public final class LibraryModelToGltf {
     private final List<Integer> labels;
     private final int[] jointOfVertex;
     private final Map<PrimitiveKey, Primitive> primitives = new LinkedHashMap<>();
+    private final Primitive hidden = new Primitive(false);
     private final Map<String, Integer> skipped = new TreeMap<>();
 
     private LibraryModelToGltf(JavaModel model, GltfBuilder gltf, GltfMaterials materials) {
@@ -95,10 +95,11 @@ public final class LibraryModelToGltf {
     }
 
     /**
-     * What was written: how many faces, how many were left out for each reason, how many
-     * primitives, and the label each joint carries, -1 for the first.
+     * What was written: how many faces some type draws, how many faces no type draws for each
+     * reason, how many vertices no face uses, how many primitives, and the label each joint
+     * carries, -1 for the first.
      */
-    public record Result(int faces, Map<String, Integer> skipped, int primitives, List<Integer> labels) {
+    public record Result(int faces, Map<String, Integer> hidden, int unused, int primitives, List<Integer> labels) {
     }
 
     /**
@@ -111,23 +112,40 @@ public final class LibraryModelToGltf {
 
     private Result convert() {
         model.calculateNormals();
-        var hidden = billboardHiddenFaces();
-        var written = 0;
+        var billboarded = billboardHiddenFaces();
+        var drawn = 0;
+        var used = new boolean[model.vertexCount];
 
         for (var face = 0; face < model.faceCount; face++) {
-            var reason = hidden.contains(face) ? "hidden by a billboard" : skipReason(face);
+            var reason = billboarded.contains(face) ? "hidden by a billboard" : hiddenReason(face);
             if (reason == null) {
-                addFace(face);
-                written++;
+                addFace(face, primitiveOf(face));
+                drawn++;
             } else {
+                addFace(face, hidden);
                 skipped.merge(reason, 1, Integer::sum);
             }
+            used[model.faceA[face]] = true;
+            used[model.faceB[face]] = true;
+            used[model.faceC[face]] = true;
         }
 
         for (var entry : primitives.entrySet()) {
-            writePrimitive(entry.getKey(), entry.getValue());
+            writeTriangles(entry.getValue(), materials.material(entry.getKey().texture(), entry.getKey().mode()));
         }
-        return new Result(written, Collections.unmodifiableMap(new TreeMap<>(skipped)), primitives.size(), labels);
+        var points = unusedPoints(used);
+        if (!hidden.indices.isEmpty() || !points.indices.isEmpty()) {
+            var hiddenMaterial = hiddenMaterial();
+            if (!hidden.indices.isEmpty()) {
+                writeTriangles(hidden, hiddenMaterial);
+            }
+            if (!points.indices.isEmpty()) {
+                writePoints(points, hiddenMaterial);
+            }
+        }
+        var unused = points.indices.size();
+        var count = primitives.size() + (hidden.indices.isEmpty() ? 0 : 1) + (unused == 0 ? 0 : 1);
+        return new Result(drawn, Collections.unmodifiableMap(new TreeMap<>(skipped)), unused, count, labels);
     }
 
     /**
@@ -135,7 +153,7 @@ public final class LibraryModelToGltf {
      * may draw it. A face hidden at a join is drawn once a frame fades it in, which only a face
      * with a label can be.
      */
-    private String skipReason(int face) {
+    private String hiddenReason(int face) {
         var alpha = alpha(face);
         var shading = shading(face);
         var texture = texture(face);
@@ -154,59 +172,57 @@ public final class LibraryModelToGltf {
     }
 
     private Set<Integer> billboardHiddenFaces() {
-        var hidden = new HashSet<Integer>();
+        var faces = new HashSet<Integer>();
         if (model.billboardFaces != null) {
             for (var billboard : model.billboardFaces) {
                 if (billboard.aBoolean464) {
-                    hidden.add(billboard.anInt6139);
+                    faces.add(billboard.anInt6139);
                 }
             }
         }
-        return hidden;
+        return faces;
     }
 
-    private void addFace(int face) {
-        var texture = texture(face);
-        var drawable = texture != -1 && source.textureAvailable(texture);
-        var metrics = drawable ? source.getMetrics(texture) : null;
-        var key = new PrimitiveKey(drawable ? texture : -1, alphaMode(face, metrics));
-        var primitive = primitives.computeIfAbsent(key, ignored -> new Primitive(key.texture() != -1));
+    private Primitive primitiveOf(int face) {
+        var texture = drawableTexture(face);
+        var metrics = texture == -1 ? null : source.getMetrics(texture);
+        var key = new PrimitiveKey(texture, alphaMode(face, metrics));
+        return primitives.computeIfAbsent(key, ignored -> new Primitive(key.texture() != -1));
+    }
 
+    private void addFace(int face, Primitive primitive) {
+        var texture = drawableTexture(face);
+        var metrics = texture == -1 ? null : source.getMetrics(texture);
         var hsl = model.faceColour[face] & 0xFFFF;
-        var rgb = rgb(face, drawable ? texture : -1, hsl);
-        var opacity = opacity(metrics, alpha(face));
+        var rgb = rgb(face, texture, hsl);
+        var opacity = primitive == hidden ? 0.0F : opacity(metrics, alpha(face));
         var us = primitive.textured ? drawnCoordinates(model.texCoordU[face]) : null;
         var vs = primitive.textured ? drawnCoordinates(model.texCoordV[face]) : null;
         var corners = new int[] {model.faceA[face], model.faceB[face], model.faceC[face]};
 
         for (var corner = 0; corner < corners.length; corner++) {
             var vertex = corners[corner];
-            var sum = normalSum(face, vertex);
+            var normal = unitNormal(face, vertex);
             var u = primitive.textured ? us[corner] : 0.0F;
             var v = primitive.textured ? vs[corner] : 0.0F;
             var described = new Corner(vertex, hsl, alpha(face), shading(face), labelOfFace[face], rgb, opacity,
-                sum[0], sum[1], sum[2], (int) sum[3], u, v);
+                normal[0], normal[1], normal[2], u, v);
             var known = primitive.numbers.get(described);
             if (known != null) {
                 primitive.indices.add(known);
             } else {
                 primitive.numbers.put(described, primitive.numbers.size());
                 primitive.indices.add(primitive.numbers.size() - 1);
-                addCorner(primitive, face, described);
+                addCorner(primitive, described);
             }
         }
     }
 
-    private void addCorner(Primitive primitive, int face, Corner corner) {
-        var vertex = corner.vertex();
-        primitive.positions.add(model.vertexX[vertex] / UNITS_PER_METRE);
-        primitive.positions.add(-model.vertexY[vertex] / UNITS_PER_METRE);
-        primitive.positions.add(-model.vertexZ[vertex] / UNITS_PER_METRE);
-
-        var normal = unitNormal(face, vertex);
-        primitive.normals.add(normal[0]);
-        primitive.normals.add(-normal[1]);
-        primitive.normals.add(-normal[2]);
+    private void addCorner(Primitive primitive, Corner corner) {
+        addVertex(primitive, corner.vertex());
+        primitive.normals.add(corner.normalX());
+        primitive.normals.add(-corner.normalY());
+        primitive.normals.add(-corner.normalZ());
 
         primitive.colours.add(Srgb.toLinear(corner.rgb() >> 16 & 0xFF));
         primitive.colours.add(Srgb.toLinear(corner.rgb() >> 8 & 0xFF));
@@ -218,6 +234,20 @@ public final class LibraryModelToGltf {
             primitive.uvs.add(corner.v());
         }
 
+        primitive.hsls.add(corner.hsl());
+        primitive.alphas.add(corner.alpha());
+        primitive.shadings.add(corner.shading());
+        primitive.faceLabels.add(corner.faceLabel());
+    }
+
+    /**
+     * Writes where a client vertex is, its joint and its number, which every vertex of every
+     * primitive carries.
+     */
+    private void addVertex(Primitive primitive, int vertex) {
+        primitive.positions.add(model.vertexX[vertex] / UNITS_PER_METRE);
+        primitive.positions.add(-model.vertexY[vertex] / UNITS_PER_METRE);
+        primitive.positions.add(-model.vertexZ[vertex] / UNITS_PER_METRE);
         primitive.joints.add(jointOfVertex[vertex]);
         primitive.joints.add(0);
         primitive.joints.add(0);
@@ -226,43 +256,21 @@ public final class LibraryModelToGltf {
         primitive.weights.add(0.0F);
         primitive.weights.add(0.0F);
         primitive.weights.add(0.0F);
-
-        primitive.hsls.add(corner.hsl());
-        primitive.alphas.add(corner.alpha());
-        primitive.shadings.add(corner.shading());
-        primitive.faceLabels.add(corner.faceLabel());
         primitive.vertices.add(vertex);
-        primitive.sums.add(corner.sumX());
-        primitive.sums.add(-corner.sumY());
-        primitive.sums.add(-corner.sumZ());
-        primitive.counts.add(corner.count());
     }
 
     /**
-     * The normal the client keeps for one corner of a face, in its own frame, and the count of
-     * faces summed into it: the vertex's sum for a smooth face, and the face's own normal with a
-     * count of 0 for any other, or nothing where the client keeps none.
-     */
-    private float[] normalSum(int face, int vertex) {
-        if (shading(face) == SMOOTH && model.vertexNormals[vertex] != null) {
-            var summed = model.vertexNormals[vertex];
-            return new float[] {summed.x, summed.y, summed.z, summed.magnitude & COUNT_MASK};
-        } else if (model.faceNormals != null && model.faceNormals[face] != null) {
-            var flat = model.faceNormals[face];
-            return new float[] {flat.x, flat.y, flat.z, 0};
-        } else {
-            return new float[] {0, 0, 0, 0};
-        }
-    }
-
-    /**
-     * A unit normal for one corner of a face in the client's frame, as {@link ModelToGltf} works
-     * it out: from the kept normal where it has a length, else from the face's plane, else up.
+     * A unit normal for one corner of a face in the client's frame, for a tool to light the model
+     * by: the vertex's sum for a smooth face, the face's own for a flat one, else the face's plane,
+     * else up.
      */
     private float[] unitNormal(int face, int vertex) {
-        var sum = normalSum(face, vertex);
-        if (sum[0] != 0.0F || sum[1] != 0.0F || sum[2] != 0.0F) {
-            return unit(sum[0], sum[1], sum[2]);
+        var summed = model.vertexNormals[vertex];
+        var flat = model.faceNormals == null ? null : model.faceNormals[face];
+        if (shading(face) == SMOOTH && summed != null && hasLength(summed.x, summed.y, summed.z)) {
+            return unit(summed.x, summed.y, summed.z);
+        } else if (shading(face) == FLAT && flat != null && hasLength(flat.x, flat.y, flat.z)) {
+            return unit(flat.x, flat.y, flat.z);
         } else {
             return planeNormal(face);
         }
@@ -281,11 +289,15 @@ public final class LibraryModelToGltf {
         var x = abY * acZ - abZ * acY;
         var y = abZ * acX - abX * acZ;
         var z = abX * acY - abY * acX;
-        if (x != 0.0F || y != 0.0F || z != 0.0F) {
+        if (hasLength(x, y, z)) {
             return unit(x, y, z);
         } else {
             return new float[] {0.0F, -1.0F, 0.0F};
         }
+    }
+
+    private static boolean hasLength(float x, float y, float z) {
+        return x != 0.0F || y != 0.0F || z != 0.0F;
     }
 
     private static float[] unit(float x, float y, float z) {
@@ -331,7 +343,22 @@ public final class LibraryModelToGltf {
         }
     }
 
-    private void writePrimitive(PrimitiveKey key, Primitive primitive) {
+    /**
+     * The material of what the client never draws: wholly see-through, so a tool shows nothing.
+     */
+    private int hiddenMaterial() {
+        var pbr = new LinkedHashMap<String, Object>();
+        pbr.put("baseColorFactor", List.of(1.0F, 1.0F, 1.0F, 0.0F));
+        pbr.put("metallicFactor", 0.0F);
+        pbr.put("roughnessFactor", 1.0F);
+        var material = new LinkedHashMap<String, Object>();
+        material.put("name", "hidden");
+        material.put("pbrMetallicRoughness", pbr);
+        material.put("alphaMode", GltfMaterials.AlphaMode.BLEND.name());
+        return gltf.material(material);
+    }
+
+    private void writeTriangles(Primitive primitive, int material) {
         var attributes = new LinkedHashMap<String, Integer>();
         attributes.put("POSITION", gltf.attribute(primitive.positions.toArray(), 3, "VEC3", true));
         attributes.put("NORMAL", gltf.attribute(primitive.normals.toArray(), 3, "VEC3", false));
@@ -339,20 +366,43 @@ public final class LibraryModelToGltf {
         if (primitive.textured) {
             attributes.put("TEXCOORD_0", gltf.attribute(primitive.uvs.toArray(), 2, "VEC2", false));
         }
-        var joints = primitive.joints.stream().mapToInt(Integer::intValue).toArray();
-        attributes.put("JOINTS_0", gltf.wholeAttribute(joints, 4, "VEC4"));
-        attributes.put("WEIGHTS_0", gltf.attribute(primitive.weights.toArray(), 4, "VEC4", false));
+        putVertexAttributes(attributes, primitive);
         attributes.put("_HSL", gltf.wholeAttribute(hslBytes(primitive.hsls), 4, "VEC4"));
         attributes.put("_ALPHA", scalar(primitive.alphas));
         attributes.put("_SHADING", scalar(primitive.shadings));
         attributes.put("_FACE_LABEL", scalar(primitive.faceLabels));
-        attributes.put("_VERTEX", scalar(primitive.vertices));
-        attributes.put("_NORMAL_SUM", gltf.attribute(primitive.sums.toArray(), 3, "VEC3", false));
-        attributes.put("_NORMAL_COUNT", scalar(primitive.counts));
 
         var indices = primitive.indices.stream().mapToInt(Integer::intValue).toArray();
-        gltf.primitive(attributes, gltf.indices(indices, primitive.numbers.size()),
-            materials.material(key.texture(), key.mode()), List.of());
+        gltf.primitive(attributes, gltf.indices(indices, primitive.numbers.size()), material, List.of());
+    }
+
+    /**
+     * Every vertex no face uses, as a point.
+     */
+    private Primitive unusedPoints(boolean[] used) {
+        var points = new Primitive(false);
+        for (var vertex = 0; vertex < used.length; vertex++) {
+            if (!used[vertex]) {
+                addVertex(points, vertex);
+                points.indices.add(points.indices.size());
+            }
+        }
+        return points;
+    }
+
+    private void writePoints(Primitive points, int material) {
+        var attributes = new LinkedHashMap<String, Integer>();
+        attributes.put("POSITION", gltf.attribute(points.positions.toArray(), 3, "VEC3", true));
+        putVertexAttributes(attributes, points);
+        var indices = points.indices.stream().mapToInt(Integer::intValue).toArray();
+        gltf.points(attributes, gltf.indices(indices, indices.length), material);
+    }
+
+    private void putVertexAttributes(Map<String, Integer> attributes, Primitive primitive) {
+        var joints = primitive.joints.stream().mapToInt(Integer::intValue).toArray();
+        attributes.put("JOINTS_0", gltf.wholeAttribute(joints, 4, "VEC4"));
+        attributes.put("WEIGHTS_0", gltf.attribute(primitive.weights.toArray(), 4, "VEC4", false));
+        attributes.put("_VERTEX", scalar(primitive.vertices));
     }
 
     /**
@@ -392,6 +442,14 @@ public final class LibraryModelToGltf {
         } else {
             return model.faceTextures[face] & 0xFFFF;
         }
+    }
+
+    /**
+     * The face's texture where the texture source can draw it, else -1.
+     */
+    private int drawableTexture(int face) {
+        var texture = texture(face);
+        return texture != -1 && source.textureAvailable(texture) ? texture : -1;
     }
 
     /**
@@ -443,7 +501,7 @@ public final class LibraryModelToGltf {
      * a vertex.
      */
     private record Corner(int vertex, int hsl, int alpha, int shading, int faceLabel, int rgb, float opacity,
-                          float sumX, float sumY, float sumZ, int count, float u, float v) {
+                          float normalX, float normalY, float normalZ, float u, float v) {
     }
 
     private static final class Primitive {
@@ -455,13 +513,11 @@ public final class LibraryModelToGltf {
         private final FloatList uvs = new FloatList();
         private final List<Integer> joints = new ArrayList<>();
         private final FloatList weights = new FloatList();
+        private final List<Integer> vertices = new ArrayList<>();
         private final List<Integer> hsls = new ArrayList<>();
         private final List<Integer> alphas = new ArrayList<>();
         private final List<Integer> shadings = new ArrayList<>();
         private final List<Integer> faceLabels = new ArrayList<>();
-        private final List<Integer> vertices = new ArrayList<>();
-        private final FloatList sums = new FloatList();
-        private final List<Integer> counts = new ArrayList<>();
         private final Map<Corner, Integer> numbers = new HashMap<>();
         private final List<Integer> indices = new ArrayList<>();
 
