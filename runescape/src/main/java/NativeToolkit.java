@@ -2116,7 +2116,7 @@ public abstract class NativeToolkit extends Toolkit {
                     local95.method1877(0.0F, (float) (this.anInt9164 % local91 * local60.speedV) / (float) local91, (float) (local60.speedU * (this.anInt9164 % local91)) / (float) local91);
                     this.method8073(Static431.aClass370_5);
                 }
-                local31 = local60.colorOp;
+                local31 = local60.colourOp;
                 if (!this.aBoolean681) {
                     local33 = local60.effectParam1;
                     local43 = local60.effectType;

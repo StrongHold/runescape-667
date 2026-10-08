@@ -71,7 +71,7 @@ public final class HandTextureSource implements TextureSource {
         metrics.mipmap = (byte) (plain & 15);
         metrics.hdr = (plain & 4) != 0;
         metrics.transposed = (plain & 128) != 0;
-        metrics.colorOp = plain;
+        metrics.colourOp = plain;
         return metrics;
     }
 

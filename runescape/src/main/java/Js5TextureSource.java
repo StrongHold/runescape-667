@@ -125,7 +125,7 @@ public final class Js5TextureSource implements TextureSource {
         }
         for (@Pc(595) int i = 0; i < this.textureCount; i++) {
             if (this.textureMetrics[i] != null) {
-                this.textureMetrics[i].colorOp = packet.g1();
+                this.textureMetrics[i].colourOp = packet.g1();
             }
         }
         for (@Pc(627) int i = 0; i < this.textureCount; i++) {

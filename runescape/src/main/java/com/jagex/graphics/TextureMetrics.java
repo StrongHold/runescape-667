@@ -7,7 +7,7 @@ import org.openrs2.deob.annotation.OriginalMember;
 public final class TextureMetrics {
 
     @OriginalMember(owner = "client!fa", name = "r", descriptor = "I")
-    public int colorOp;
+    public int colourOp;
 
     @OriginalMember(owner = "client!fa", name = "j", descriptor = "B")
     public byte speedV;

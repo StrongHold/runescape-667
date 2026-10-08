@@ -2158,7 +2158,7 @@ public final class GlToolkit extends Toolkit {
                     local39 = local69.effectParam2;
                     local37 = local69.effectParam1;
                 }
-                local35 = local69.colorOp;
+                local35 = local69.colourOp;
             }
             this.aClass98_1.method2360(local39, arg2, arg1, local37, local47);
             if (!this.aClass98_1.method2359(local35, local33)) {
