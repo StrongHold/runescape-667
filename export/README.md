@@ -46,7 +46,15 @@ by its `brightness`, which the material's `extras` carry with its `effectType`, 
 `effectParam2`, for an engine that lights a texture itself or draws the texture's effect. Most textures have an alpha of 0 and keep the face's colour. A
 textured face refers to its texture in the shared texture library below. Faces are grouped into one primitive for each texture and way of
 blending, so a face that is drawn through what is behind it, or a texture with holes in it, gets
-a material that blends or cuts out. Normals are the client's own: a smooth face takes the normals
+a material that blends or cuts out. The faces are written in the order the GL toolkit draws them
+(`GlModel`): it sorts them once, as it builds the model, and draws them in that order with depth
+writes on. The opaque faces come first, then the see-through faces (a face with an alpha, or one
+whose texture blends or cuts out) by their draw priority, and within those by the effect of their
+texture, by texture, a face of no texture first, and last in the model's own order. A blended face
+drawn before a blended face behind it hides that face, so an engine draws a model's blended faces
+in the order written. A blended primitive holds one run of faces of its texture in that order, and
+where the order comes back to a texture after another, the run starts a primitive of its own, as
+the toolkit draws a range of faces for each texture it comes to. Normals are the client's own: a smooth face takes the normals
 of the faces it meets at each corner, and a flat face takes its own. They are written unit, as
 glTF asks, and each vertex also carries `_SHADE`, a float: how strongly the sun lights it, out
 of 1. The GL toolkit never normalises a normal (`GlModel`): a smooth corner's is the sum of
@@ -156,6 +164,11 @@ whole number exactly, as glTF asks that each element of a vertex attribute start
 - `_ALPHA`: the face's alpha, 0 opaque and 255 invisible.
 - `_SHADING`: 0 smooth, 1 flat, 2 hidden, 3 black, or another the client has no case for.
 - `_FACE_LABEL`: the face's label, which the colour and alpha transforms of a frame act on, or -1.
+- `_PRIORITY`: the face's draw priority: its own where the model gives each face one, else the one
+  the model gives all its faces, as a merge fills them in. The GL toolkit sorts the faces of the
+  model a type builds as above, the see-through faces by priority first, so an engine sorts the
+  faces of the merged model by it. Within the faces of one texture, a primitive keeps the model's
+  own order.
 - `_VERTEX`: the client's vertex, which a merge joins with the vertices of the other models at
   the same position, as the client merges meshes (`Mesh(Mesh[], int)`).
 

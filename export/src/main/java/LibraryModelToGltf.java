@@ -34,6 +34,9 @@ import java.util.TreeSet;
  *       the client has no case for.
  *   <li>{@code _FACE_LABEL}: the face's label, which the colour and alpha transforms of a frame
  *       act on, or -1.
+ *   <li>{@code _PRIORITY}: the face's draw priority, which the GL toolkit sorts the see-through
+ *       faces of a model by before anything else ({@link GlFaceOrder}), once a type has merged
+ *       the model with others.
  *   <li>{@code _VERTEX}: the client's vertex, which a merge joins with the vertices of the other
  *       models at the same position ({@code Mesh(Mesh[], int)}).
  * </ul>
@@ -79,12 +82,14 @@ public final class LibraryModelToGltf {
     private final int[] labelOfFace;
     private final List<Integer> labels;
     private final int[] jointOfVertex;
+    private final int[] priorities;
     private final Map<PrimitiveKey, Primitive> primitives = new LinkedHashMap<>();
     private final Primitive hidden = new Primitive(false);
     private final Map<String, Integer> skipped = new TreeMap<>();
 
-    private LibraryModelToGltf(JavaModel model, GltfBuilder gltf, GltfMaterials materials) {
+    private LibraryModelToGltf(JavaModel model, int[] priorities, GltfBuilder gltf, GltfMaterials materials) {
         this.model = model;
+        this.priorities = priorities;
         this.source = materials.source();
         this.gltf = gltf;
         this.materials = materials;
@@ -105,9 +110,11 @@ public final class LibraryModelToGltf {
     /**
      * Adds the model's primitives to the mesh the document is building. The caller closes the
      * mesh and writes the skin of the labels the result names.
+     *
+     * @param priorities the draw priority of each face.
      */
-    public static Result convertInto(GltfBuilder gltf, GltfMaterials materials, JavaModel model) {
-        return new LibraryModelToGltf(model, gltf, materials).convert();
+    public static Result convertInto(GltfBuilder gltf, GltfMaterials materials, JavaModel model, int[] priorities) {
+        return new LibraryModelToGltf(model, priorities, gltf, materials).convert();
     }
 
     private Result convert() {
@@ -204,8 +211,8 @@ public final class LibraryModelToGltf {
             var normal = unitNormal(face, vertex);
             var u = primitive.textured ? us[corner] : 0.0F;
             var v = primitive.textured ? vs[corner] : 0.0F;
-            var described = new Corner(vertex, hsl, alpha(face), shading(face), labelOfFace[face], rgb, opacity,
-                normal[0], normal[1], normal[2], u, v);
+            var described = new Corner(vertex, hsl, alpha(face), shading(face), labelOfFace[face], priorities[face],
+                rgb, opacity, normal[0], normal[1], normal[2], u, v);
             var known = primitive.numbers.get(described);
             if (known != null) {
                 primitive.indices.add(known);
@@ -237,6 +244,7 @@ public final class LibraryModelToGltf {
         primitive.alphas.add(corner.alpha());
         primitive.shadings.add(corner.shading());
         primitive.faceLabels.add(corner.faceLabel());
+        primitive.priorities.add(corner.priority());
     }
 
     /**
@@ -371,6 +379,7 @@ public final class LibraryModelToGltf {
         attributes.put("_ALPHA", scalar(primitive.alphas));
         attributes.put("_SHADING", scalar(primitive.shadings));
         attributes.put("_FACE_LABEL", scalar(primitive.faceLabels));
+        attributes.put("_PRIORITY", scalar(primitive.priorities));
 
         var indices = primitive.indices.stream().mapToInt(Integer::intValue).toArray();
         gltf.primitive(attributes, gltf.indices(indices, primitive.numbers.size()), material, List.of());
@@ -500,8 +509,8 @@ public final class LibraryModelToGltf {
      * Everything one corner of a face gives its vertex. Two corners that agree on all of it share
      * a vertex.
      */
-    private record Corner(int vertex, int hsl, int alpha, int shading, int faceLabel, int rgb, float opacity,
-                          float normalX, float normalY, float normalZ, float u, float v) {
+    private record Corner(int vertex, int hsl, int alpha, int shading, int faceLabel, int priority, int rgb,
+                          float opacity, float normalX, float normalY, float normalZ, float u, float v) {
     }
 
     private static final class Primitive {
@@ -518,6 +527,7 @@ public final class LibraryModelToGltf {
         private final List<Integer> alphas = new ArrayList<>();
         private final List<Integer> shadings = new ArrayList<>();
         private final List<Integer> faceLabels = new ArrayList<>();
+        private final List<Integer> priorities = new ArrayList<>();
         private final Map<Corner, Integer> numbers = new HashMap<>();
         private final List<Integer> indices = new ArrayList<>();
 

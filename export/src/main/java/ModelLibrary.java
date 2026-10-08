@@ -80,7 +80,7 @@ public final class ModelLibrary {
         var gltf = new GltfBuilder();
         gltf.formatVersion(VERSION);
         var materials = new GltfMaterials(gltf, reader.textures(), textures, file);
-        var result = LibraryModelToGltf.convertInto(gltf, materials, model);
+        var result = LibraryModelToGltf.convertInto(gltf, materials, model, reader.facePriorities(id));
         if (gltf.empty()) {
             return Optional.empty();
         }

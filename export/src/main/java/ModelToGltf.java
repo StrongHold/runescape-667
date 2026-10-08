@@ -24,7 +24,10 @@ import java.util.TreeMap;
  *
  * <p>Faces. Every corner of every face is written as a vertex of its own, so that each face keeps
  * its own colour, alpha and texture coordinates exactly. Faces are grouped into one primitive for
- * each texture and way of blending.
+ * each texture and way of blending, in the order the GL toolkit draws them ({@link GlFaceOrder}).
+ * The blended faces are drawn in that order, so a blended primitive holds one run of faces of its
+ * texture, and where the order comes back to a texture after another, the run starts a primitive
+ * of its own, as the toolkit draws a range of faces for each texture it comes to.
  *
  * <p>Poses. Each pose the model is given becomes a morph target of every primitive, which holds
  * how far each corner has moved from where the model holds it, turned the same way as the model.
@@ -65,6 +68,8 @@ public final class ModelToGltf {
     private final GltfBuilder gltf;
     private final GltfMaterials materials;
     private final Map<PrimitiveKey, Primitive> primitives = new LinkedHashMap<>();
+    private PrimitiveKey lastBlended;
+    private int blendedRuns;
     private final Map<String, Integer> skipped = new TreeMap<>();
     private final boolean colourPosed;
     private final int[] jointOfVertex;
@@ -163,7 +168,7 @@ public final class ModelToGltf {
         var hidden = billboardHiddenFaces();
         var written = 0;
 
-        for (var face = 0; face < model.faceCount; face++) {
+        for (var face : GlFaceOrder.of(model, source)) {
             var reason = hidden.contains(face) ? "hidden by a billboard" : skipReason(face);
             if (reason == null) {
                 addFace(face);
@@ -242,7 +247,7 @@ public final class ModelToGltf {
         var drawable = texture != -1 && source.textureAvailable(texture);
         var metrics = texture == -1 ? null : source.getMetrics(texture);
         var mode = alphaMode(face, drawable ? metrics : null);
-        var key = new PrimitiveKey(drawable ? texture : -1, mode);
+        var key = primitiveKey(drawable ? texture : -1, mode);
         var primitive = primitives.computeIfAbsent(key, ignored -> new Primitive(key.texture() != -1, poses.size()));
 
         var rgb = rgb(face, texture, colour(face));
@@ -544,6 +549,23 @@ public final class ModelToGltf {
         gltf.primitive(attributes, gltf.indices(indices, primitive.numbers.size()), material(key), targets);
     }
 
+    /**
+     * The primitive a face of a texture and way of blending goes in: the one of its kind, or for a
+     * blended face, the one of the run of blended faces of its kind it is part of.
+     */
+    private PrimitiveKey primitiveKey(int texture, GltfMaterials.AlphaMode mode) {
+        if (mode != GltfMaterials.AlphaMode.BLEND) {
+            return new PrimitiveKey(texture, mode, 0);
+        } else {
+            var key = new PrimitiveKey(texture, mode, blendedRuns);
+            if (!key.equals(lastBlended)) {
+                blendedRuns++;
+                lastBlended = new PrimitiveKey(texture, mode, blendedRuns);
+            }
+            return lastBlended;
+        }
+    }
+
     private int material(PrimitiveKey key) {
         return materials.material(key.texture(), key.mode());
     }
@@ -568,7 +590,7 @@ public final class ModelToGltf {
         return model.faceColour[face] & 0xFFFF;
     }
 
-    private record PrimitiveKey(int texture, GltfMaterials.AlphaMode mode) {
+    private record PrimitiveKey(int texture, GltfMaterials.AlphaMode mode, int run) {
     }
 
     /**

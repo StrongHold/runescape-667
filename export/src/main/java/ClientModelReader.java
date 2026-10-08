@@ -126,6 +126,23 @@ public final class ClientModelReader {
         return List.copyOf(vertices);
     }
 
+    /**
+     * The draw priority of each face of a mesh: the face's own where the mesh gives each face one,
+     * else the one the mesh gives all its faces, as a merge of meshes fills them in
+     * ({@code Mesh(Mesh[], int)}), or none where the cache holds no such mesh.
+     */
+    public int[] facePriorities(int id) {
+        var mesh = Mesh.load(id, models);
+        if (mesh == null) {
+            return new int[0];
+        }
+        var priorities = new int[mesh.faceCount];
+        for (var face = 0; face < mesh.faceCount; face++) {
+            priorities[face] = mesh.facePriority == null ? mesh.globalPriority : mesh.facePriority[face];
+        }
+        return priorities;
+    }
+
     public Js5TextureSource textures() {
         return textures;
     }
