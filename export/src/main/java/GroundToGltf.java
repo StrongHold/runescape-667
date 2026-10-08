@@ -227,13 +227,16 @@ public final class GroundToGltf {
      * <p>A face whose corners agree on a texture and its size is drawn with it, or in colour alone
      * where the toolkit holds no such texture. A face whose corners disagree is drawn by the
      * rasteriser weighting each corner's texture by how near the corner each pixel is, unless one
-     * of them is a texture the toolkit does not hold, and then in colour alone.
+     * of them is a texture the toolkit does not hold, and then in colour alone. The weighting reads
+     * no texel's alpha, so a texture that cuts out where it is drawn alone has no holes here.
      *
      * <p>glTF has no way to weight textures across a face, so such a face is written as layers:
      * the first corner's texture, and over it each other texture, blended in by an alpha that is 1
      * at the corners that name it and 0 at the others. Where two textures meet on a face, that
      * comes to exactly the rasteriser's weighting. Where three do, the last layer also covers part
-     * of the second, which is close but not exact.
+     * of the second, which is close but not exact. A cut-out texture's PNG is clear where its texel
+     * is black, so laid over another it shows the one beneath there, where the rasteriser blends in
+     * black: close, not exact. As the first layer it is opaque, black and all.
      */
     private void addFace(int x, int z, JavaGenericBlendedTile tile, int a) {
         var corners = List.of(surface(tile, a), surface(tile, a + 1), surface(tile, a + 2));
@@ -270,11 +273,19 @@ public final class GroundToGltf {
 
     /**
      * Whether a face of several textures can be written as layers, which needs every one of them
-     * to be opaque, as every texture of the ground is but water's.
+     * to be laid on without blending by its own alpha, as every texture of the ground is but
+     * water's. A texture cut out by its alpha counts: the rasteriser's blend of several textures
+     * never reads a texel's alpha ({@code Rasterizer.drawBlendedTexturedSpan}), so on such a face
+     * a cut-out texture has no holes, and the GL ground fades it in by its vertices' alpha as it
+     * does any other ({@code Ground_Sub2}).
      */
     private boolean layerable(List<Surface> surfaces, int alpha) {
         return alpha == OPAQUE_ALPHA
-            && surfaces.stream().allMatch(surface -> metrics(surface.texture()).alphaBlendMode == 0);
+            && surfaces.stream().noneMatch(surface -> blendsByOwnAlpha(surface.texture()));
+    }
+
+    private boolean blendsByOwnAlpha(int texture) {
+        return metrics(texture).alphaBlendMode == GltfMaterials.ALPHA_BLENDED;
     }
 
     private boolean drawable(int texture) {

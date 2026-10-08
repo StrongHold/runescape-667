@@ -415,8 +415,11 @@ how near its corner a pixel is. glTF has no way to say that, so such a face is w
 the first corner's texture, and over it each other texture, blended in by an alpha that is 1 at
 the corners that name it and 0 at the others. Where two textures meet on a face that is exactly
 what the rasteriser does. Where three meet, the last layer also covers part of the second, which
-is close but not exact. A face of several textures where one of them is water, which blends by its
-own alpha, is drawn with its first corner's texture. A corner whose texture has a size of 0, as a
+is close but not exact. A texture that cuts out by its alpha where it is drawn alone has no holes
+on such a face, as the rasteriser's blend never reads a texel's alpha: the first layer is opaque,
+and a layer over it is clear only where its texel is black, where the rasteriser blends in black. A
+face of several textures where one of them is water, which blends by its own alpha, is drawn with
+its first corner's texture. A corner whose texture has a size of 0, as a
 few floor types give in the map squares that have sky boxes, is drawn by neither toolkit: each
 divides by the size. It is written untextured, in its colour alone, and the task counts such faces.
 On high water detail the toolkit makes water
