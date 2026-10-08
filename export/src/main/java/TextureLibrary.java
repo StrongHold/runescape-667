@@ -32,6 +32,12 @@ public final class TextureLibrary {
     private static final int TEXTURE_SIZE = 128;
     private static final int SMALL_TEXTURE_SIZE = 64;
 
+    /**
+     * The metrics field no Java code of the client reads: the client hands it only to the native
+     * toolkit ({@code oa}), whose use of it is unknown, so it is left out of the metrics file.
+     */
+    private static final String UNREAD_FIELD = "unusedFlag";
+
     public static final int ALPHA_CUTOUT = 1;
     public static final int ALPHA_BLENDED = 2;
 
@@ -103,6 +109,7 @@ public final class TextureLibrary {
                     list.add(null);
                 } else {
                     var fields = new LinkedHashMap<String, Object>(PublicFields.of(metrics));
+                    fields.remove(UNREAD_FIELD);
                     fields.put("available", source.textureAvailable(id));
                     list.add(fields);
                 }

@@ -47,8 +47,9 @@ public final class EnvironmentDecoder {
     private static final int DEFAULT_SUN_Y = -60;
     private static final int DEFAULT_SUN_Z = -50;
     private static final int DEFAULT_FOG_COLOUR = 13156520;
-    private static final float DEFAULT_BLOOM = 1.0F;
-    private static final float DEFAULT_BLOOM_THRESHOLD = 0.25F;
+    private static final float DEFAULT_BLOOM_WHITE_POINT = 1.0F;
+    private static final float DEFAULT_BLOOM_STRENGTH = 0.25F;
+    private static final float DEFAULT_BLOOM_THRESHOLD = 1.0F;
 
     /**
      * How a map square is lit and what surrounds it.
@@ -59,7 +60,7 @@ public final class EnvironmentDecoder {
      * @param ambient how much light every face gets whichever way it looks, as a factor.
      * @param fogRange how far before the far plane the fog starts, in the file's units, which the
      *     hardware toolkits take as {@code (fogRange + 256) * 4} of the client's units.
-     * @param bloom the hardware toolkits' bloom: its brightness, its threshold and its intensity.
+     * @param bloom the GL toolkit's bloom, which the D3D toolkit leaves undrawn.
      * @param skyBox the sky box, where the file names one.
      * @param cubeMap the six textures of the reflection cube map, where the file names them.
      * @param cameraHeights for each level, what the camera is kept above across the map square,
@@ -69,8 +70,20 @@ public final class EnvironmentDecoder {
      *     its pitch above what stands around its focus by it ({@code Static723.method9451}).
      */
     public record Environment(int[] sun, int sunColour, float sunIntensity, float reverseSunIntensity, float ambient,
-                              int fogColour, int fogRange, float[] bloom, Optional<SkyBox> skyBox, Optional<int[]> cubeMap,
+                              int fogColour, int fogRange, Bloom bloom, Optional<SkyBox> skyBox, Optional<int[]> cubeMap,
                               List<Light> lights, int[][][] cameraHeights) {
+    }
+
+    /**
+     * How the GL toolkit makes the bright parts of the scene glow, as {@code Toolkit.method7993}
+     * hands it to its bloom pass ({@code Node_Sub31_Sub1}).
+     *
+     * @param whitePoint the luminance the tone map takes to white: the combining shader scales a
+     *     pixel by {@code l * (1 + l / whitePoint) / (l + 1)} over its luminance {@code l}.
+     * @param strength how much of the blurred glow is added over the scene.
+     * @param threshold the luminance below which a pixel adds nothing to the glow.
+     */
+    public record Bloom(float whitePoint, float strength, float threshold) {
     }
 
     public record SkyBox(int id, int sphereOffsetX, int sphereOffsetY, int sphereOffsetZ, int rotation) {
@@ -115,7 +128,7 @@ public final class EnvironmentDecoder {
         var ambient = DEFAULT_AMBIENT;
         var fogColour = DEFAULT_FOG_COLOUR;
         var fogRange = 0;
-        var bloom = new float[] {DEFAULT_BLOOM, DEFAULT_BLOOM_THRESHOLD, DEFAULT_BLOOM};
+        var bloom = new Bloom(DEFAULT_BLOOM_WHITE_POINT, DEFAULT_BLOOM_STRENGTH, DEFAULT_BLOOM_THRESHOLD);
         Optional<SkyBox> skyBox = Optional.empty();
         Optional<int[]> cubeMap = Optional.empty();
         var lights = new ArrayList<Light>();
@@ -147,7 +160,7 @@ public final class EnvironmentDecoder {
                     lights.add(light(packet, lightTypes, tileHeights, originX, originZ));
                 }
             } else if (code == BLOOM) {
-                bloom = new float[] {packet.g1() * 8 / 255.0F, packet.g1() * 8 / 255.0F, packet.g1() * 8 / 255.0F};
+                bloom = new Bloom(packet.g1() * 8 / 255.0F, packet.g1() * 8 / 255.0F, packet.g1() * 8 / 255.0F);
             } else if (code == SKY_BOX) {
                 skyBox = Optional.of(new SkyBox(packet.g2(), packet.g2s(), packet.g2s(), packet.g2s(), packet.g2()));
             } else if (code == CAMERA_HEIGHTS) {

@@ -283,12 +283,20 @@ public final class MapSquareExport {
         description.put("ambient", environment.ambient());
         description.put("fogColour", environment.fogColour());
         description.put("fogRange", environment.fogRange());
-        description.put("bloom", List.of(environment.bloom()[0], environment.bloom()[1], environment.bloom()[2]));
+        description.put("bloom", bloom(environment.bloom()));
         environment.skyBox().ifPresent(skyBox -> description.put("skyBox", Map.of(
             "id", skyBox.id(), "sphereOffset", List.of(skyBox.sphereOffsetX(), skyBox.sphereOffsetY(), skyBox.sphereOffsetZ()),
             "rotation", skyBox.rotation())));
         environment.cubeMap().ifPresent(textures -> description.put("cubeMap",
             java.util.Arrays.stream(textures).boxed().toList()));
+        return description;
+    }
+
+    private static Map<String, Object> bloom(EnvironmentDecoder.Bloom bloom) {
+        var description = new LinkedHashMap<String, Object>();
+        description.put("whitePoint", bloom.whitePoint());
+        description.put("strength", bloom.strength());
+        description.put("threshold", bloom.threshold());
         return description;
     }
 

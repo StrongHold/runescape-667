@@ -98,7 +98,9 @@ triangle, and need no table.
 
 `metrics.json` holds the metrics of every texture, a list indexed by the texture's id with null
 where the cache has none: every public field of the client's `TextureMetrics` by its name, as the
-client holds it (a byte such as `alpha` or `brightness` is signed, so -1 is 255), and whether the
+client holds it (a byte such as `alpha` or `brightness` is signed, so -1 is 255), but
+`unusedFlag`, which no Java code of the client reads and which it hands only to the native
+toolkit, and whether the
 texture source can draw the texture, as `available`. An engine that builds a type's model from the
 model library reads from it how each texture blends, how it tints its faces and whether it skips
 them, for a texture a type retextures a face to as for any other. Every export writes it where the
@@ -540,10 +542,13 @@ export fails: an unread field was planted and failed the export at once.
 
 The description's `environment` holds the sun's direction in the client's frame, where its
 light comes from with y down, its colour and its two strengths, for faces that look at it and
-away from it, the ambient factor every face gets, the fog's colour and range, the bloom
-settings of the hardware toolkits, and the sky box and reflection cube map where the file
+away from it, the ambient factor every face gets, the fog's colour and range, the GL toolkit's
+`bloom` (its `threshold`, the luminance below which a pixel adds no glow; its `strength`, how much
+of the blurred glow is added; and its `whitePoint`, the luminance its tone map takes to white, as
+`Node_Sub31_Sub1`'s shaders use them), and the sky box and reflection cube map where the file
 names them. A map square whose file says nothing gets the client's defaults, which are a sun
-from (-50, -60, -50) at 0.7, an ambient of 1.15 and a fog of 13156520. The hardware toolkits
+from (-50, -60, -50) at 0.7, an ambient of 1.15, a fog of 13156520 and a bloom of threshold 1,
+strength 0.25 and white point 1. The hardware toolkits
 start the fog `(fogRange + 256) * 4` units before the far plane.
 
 Its `lights` list every light placed on the map square: its level and whether it lights the
