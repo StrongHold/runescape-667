@@ -24,10 +24,10 @@ public final class Static506 {
             Static688.aFloat216 = elapsedFraction * (Static346.activeEnvironment.sunIntensity - Static659.aFloat213) + Static659.aFloat213;
             Static171.anInt2882 = Static679.anInt10273 * remaining + Static346.activeEnvironment.fogRange * elapsed >> 8;
             Static683.aFloat215 = (Static346.activeEnvironment.reverseSunIntensity - Static671.aFloat214) * elapsedFraction + Static671.aFloat214;
-            Static151.aFloat218 = Static600.aFloat179 + (Static346.activeEnvironment.aFloat203 - Static600.aFloat179) * elapsedFraction;
+            Static151.aFloat218 = Static600.aFloat179 + (Static346.activeEnvironment.bloomThreshold - Static600.aFloat179) * elapsedFraction;
             Static251.anInt4037 = (elapsed * (Static346.activeEnvironment.fogColour & 0xFF00FF) + (Static360.anInt5820 & 0xFF00FF) * remaining & 0xFF00FF00) + (remaining * (Static360.anInt5820 & 0xFF00) + (Static346.activeEnvironment.fogColour & 0xFF00) * elapsed & 0xFF0000) >>> 8;
-            Static133.aFloat63 = Static538.aFloat174 + (Static346.activeEnvironment.aFloat201 - Static538.aFloat174) * elapsedFraction;
-            Static57.aFloat29 = elapsedFraction * (Static346.activeEnvironment.aFloat200 - Static203.aFloat69) + Static203.aFloat69;
+            Static133.aFloat63 = Static538.aFloat174 + (Static346.activeEnvironment.bloomWhitePoint - Static538.aFloat174) * elapsedFraction;
+            Static57.aFloat29 = elapsedFraction * (Static346.activeEnvironment.bloomStrength - Static203.aFloat69) + Static203.aFloat69;
             if (Static74.aClass67_3 != Static346.activeEnvironment.cubeMap) {
                 Static425.aClass67_6 = Static425.toolkit.method8007(Static74.aClass67_3, Static346.activeEnvironment.cubeMap, elapsedFraction, Static425.aClass67_6);
             }
@@ -46,15 +46,15 @@ public final class Static506 {
             }
         } else {
             Static448.anInt6801 = Static346.activeEnvironment.sunColour;
-            Static151.aFloat218 = Static346.activeEnvironment.aFloat203;
+            Static151.aFloat218 = Static346.activeEnvironment.bloomThreshold;
             Static318.aFloat210 = Static346.activeEnvironment.ambient;
-            Static133.aFloat63 = Static346.activeEnvironment.aFloat201;
+            Static133.aFloat63 = Static346.activeEnvironment.bloomWhitePoint;
             Static683.aFloat215 = Static346.activeEnvironment.reverseSunIntensity;
             Static425.aClass67_6 = Static346.activeEnvironment.cubeMap;
             Static171.anInt2882 = Static346.activeEnvironment.fogRange;
             Static251.anInt4037 = Static346.activeEnvironment.fogColour;
             Static688.aFloat216 = Static346.activeEnvironment.sunIntensity;
-            Static57.aFloat29 = Static346.activeEnvironment.aFloat200;
+            Static57.aFloat29 = Static346.activeEnvironment.bloomStrength;
             if (Static456.activeSkyBox != null) {
                 Static456.activeSkyBox.method3169();
             }

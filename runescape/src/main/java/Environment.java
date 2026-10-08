@@ -49,13 +49,13 @@ public final class Environment {
     }
 
     @OriginalMember(owner = "client!uc", name = "k", descriptor = "F")
-    public float aFloat201 = 1.0F;
+    public float bloomWhitePoint = 1.0F;
 
     @OriginalMember(owner = "client!uc", name = "m", descriptor = "F")
-    public float aFloat203 = 1.0F;
+    public float bloomThreshold = 1.0F;
 
     @OriginalMember(owner = "client!uc", name = "o", descriptor = "F")
-    public float aFloat200 = 0.25F;
+    public float bloomStrength = 0.25F;
 
     @OriginalMember(owner = "client!uc", name = "e", descriptor = "I")
     public int sunY;
@@ -123,9 +123,9 @@ public final class Environment {
 
     @OriginalMember(owner = "client!uc", name = "a", descriptor = "(Lclient!ge;Z)V")
     public void decodeBloomParams(@OriginalArg(0) Packet packet) {
-        this.aFloat201 = (float) (packet.g1() * 8) / 255.0F;
-        this.aFloat200 = (float) (packet.g1() * 8) / 255.0F;
-        this.aFloat203 = (float) (packet.g1() * 8) / 255.0F;
+        this.bloomWhitePoint = (float) (packet.g1() * 8) / 255.0F;
+        this.bloomStrength = (float) (packet.g1() * 8) / 255.0F;
+        this.bloomThreshold = (float) (packet.g1() * 8) / 255.0F;
     }
 
     @OriginalMember(owner = "client!uc", name = "b", descriptor = "(Lclient!ge;I)V")
@@ -204,6 +204,6 @@ public final class Environment {
 
     @OriginalMember(owner = "client!uc", name = "a", descriptor = "(BLclient!uc;)Z")
     public boolean equalTo(@OriginalArg(1) Environment other) {
-        return this.sunColour == other.sunColour && other.ambient == this.ambient && this.sunIntensity == other.sunIntensity && this.reverseSunIntensity == other.reverseSunIntensity && other.aFloat200 == this.aFloat200 && this.aFloat201 == other.aFloat201 && this.aFloat203 == other.aFloat203 && this.fogColour == other.fogColour && other.fogRange == this.fogRange && other.cubeMap == this.cubeMap && other.skyBox == this.skyBox;
+        return this.sunColour == other.sunColour && other.ambient == this.ambient && this.sunIntensity == other.sunIntensity && this.reverseSunIntensity == other.reverseSunIntensity && other.bloomStrength == this.bloomStrength && this.bloomWhitePoint == other.bloomWhitePoint && this.bloomThreshold == other.bloomThreshold && this.fogColour == other.fogColour && other.fogRange == this.fogRange && other.cubeMap == this.cubeMap && other.skyBox == this.skyBox;
     }
 }
