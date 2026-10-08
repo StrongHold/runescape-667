@@ -127,7 +127,7 @@ public final class HitmarkExport {
         fields.put("amountString", type.amountString);
         fields.put("offsetX", type.offsetX);
         fields.put("offsetY", type.offsetY);
-        fields.put("anInt7178", type.anInt7178);
+        fields.put("textOffsetY", type.textOffsetY);
         fields.put("duration", type.duration);
         fields.put("fadeTime", orNull(type.fadeTime));
         fields.put("comparisonType", orNull(type.comparisonType));

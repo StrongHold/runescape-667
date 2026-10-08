@@ -45,7 +45,7 @@ public final class HitmarkType {
     public int duration = 70;
 
     @OriginalMember(owner = "client!pb", name = "t", descriptor = "I")
-    public int anInt7178 = 0;
+    public int textOffsetY = 0;
 
     @OriginalMember(owner = "client!pb", name = "a", descriptor = "I")
     public int inner = -1;
@@ -158,7 +158,7 @@ public final class HitmarkType {
         } else if (code == 12) {
             this.comparisonType = packet.g1();
         } else if (code == 13) {
-            this.anInt7178 = packet.g2s();
+            this.textOffsetY = packet.g2s();
         } else if (code == 14) {
             this.fadeTime = packet.g2();
         }

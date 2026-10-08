@@ -619,7 +619,7 @@ public final class OverlayManager {
                                 @Pc(1908) int local1908 = hitmarkpos[1] + screenY + local1884 - 12;
                                 @Pc(1910) int local1910 = local1908;
                                 @Pc(1915) int local1915 = local1908 + maxHeight;
-                                @Pc(1922) int local1922 = damageType.anInt7178 + local1908 + 15;
+                                @Pc(1922) int local1922 = damageType.textOffsetY + local1908 + 15;
 
                                 @Pc(1928) int local1928 = local1922 - hitFontMetrics.paddingTop;
                                 if (local1928 < local1908) {
@@ -635,7 +635,7 @@ public final class OverlayManager {
                                 @Pc(1963) int local1963;
                                 @Pc(1969) int local1969;
                                 if (soakType != null) {
-                                    local1949 = soakType.anInt7178 + local1908 + 15;
+                                    local1949 = soakType.textOffsetY + local1908 + 15;
                                     local1963 = local1949 - soakFontMetrics.paddingTop;
                                     local1969 = local1949 + soakFontMetrics.paddingBottom;
                                     if (local1910 > local1963) {

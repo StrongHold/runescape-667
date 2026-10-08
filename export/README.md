@@ -773,7 +773,7 @@ it takes to be wider than the amount, then `right`. Each is a sprite that the sp
 A type with a second hit, a soak, draws the soak type's row after the first, 2 pixels to the right.
 The client writes the amount in the font `font`, or in `p11_full` where the type names none, in
 `textColour`, centred over the run of `inner`, on a baseline 15 pixels below the top of the row and
-`anInt7178` pixels lower still. Its text is `amountString` with each `%1` in it replaced by the
+`textOffsetY` pixels lower still. Its text is `amountString` with each `%1` in it replaced by the
 amount in decimal, with a minus sign when it is negative (`HitmarkType.method6457`). A type with an
 empty `amountString` writes no text.
 
