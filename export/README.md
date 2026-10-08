@@ -584,6 +584,15 @@ at a tile only when the tile is a bridge on level 0, or when it is not hidden an
 level is the player's: 0 for a tile flagged 8, one less for a tile above a bridge, and L
 otherwise (`Static696.isTileVisibleFrom`, `Static705.getMapLevel`).
 
+The description holds `floorShadows`: for every tile of each level, as `[level][x][z]` over the
+map square like `flags`, 1 where the tile's floor casts a hard shadow and 0 where it does not.
+The blended terrain decides it as it builds a tile (`Terrain.loadBlended`): the floor casts one
+where it has an overlay that is not shape 12, has a colour and blocks shadow, or an underlay that
+is not shape 0 and allows shadow. It hands the answer to the ground (`GlGround.U`), and the GL
+toolkit makes a shadow only of the tiles marked so (`GlGround.fa`), casting each one of levels 1
+to 3 onto every level below. With ground blending off the client marks no tile, so no floor
+casts a shadow.
+
 The description holds `cameraHeights`: for each level, `[]` or a 16 by 16 grid, `[x][z]`, of
 one value for each four tiles square of the map square, in steps of 32 of the client's units.
 The client reads them from the environment that follows the tiles (`MapRegion`, code 129) and

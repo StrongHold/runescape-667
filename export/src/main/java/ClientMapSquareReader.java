@@ -132,13 +132,15 @@ public final class ClientMapSquareReader {
      * @param flags the client's flags for every tile of each level, as [level][x][z]: 1 blocks
      *     movement, 2 is a bridge, 4 has its roof removed when the player is under it, 8 counts
      *     as level 0 whatever level it is on, 16 is never drawn, 128 is water ({@code TileFlag}).
+     * @param floorShadows for every tile of each level, as [level][x][z], 1 where its floor casts a
+     *     hard shadow on the levels below and 0 where it does not ({@code Terrain.loadBlended}).
      * @param placements every location of the map square, on land and under the water, and where
      *     the client draws it.
      * @param locations whether the map square's locations on land were placed.
      * @param environment how the map square is lit, its fog and sky, and the lights on it.
      */
     public record MapSquare(int x, int z, List<JavaGround> grounds, List<RecordingGround> colours, int[][][] heights,
-                            int[][][] flags, List<Placement> placements,
+                            int[][][] flags, int[][][] floorShadows, List<Placement> placements,
                             Placing locations, Underwater underwater, EnvironmentDecoder.Environment environment) {
     }
 
@@ -290,12 +292,14 @@ public final class ClientMapSquareReader {
         var grounds = new ArrayList<JavaGround>();
         var heights = new int[LEVELS][][];
         var flags = new int[LEVELS][][];
+        var floorShadows = new int[LEVELS][][];
         for (var level = 0; level < LEVELS; level++) {
             grounds.add((JavaGround) Static706.floor[level]);
             heights[level] = heights(Static706.floor[level]);
             flags[level] = flags(level);
+            floorShadows[level] = floorShadows(colours.get(level));
         }
-        return new MapSquare(mapSquareX, mapSquareZ, List.copyOf(grounds), colours, heights, flags,
+        return new MapSquare(mapSquareX, mapSquareZ, List.copyOf(grounds), colours, heights, flags, floorShadows,
             List.copyOf(placements), locations, underwaterWorld, environment);
     }
 
@@ -332,6 +336,20 @@ public final class ClientMapSquareReader {
             }
         }
         return flags;
+    }
+
+    /**
+     * For every tile of the map square on one level, 1 where its floor casts a hard shadow and 0
+     * where it does not, as the blended terrain handed it to the ground.
+     */
+    private static int[][] floorShadows(RecordingGround ground) {
+        var shadows = new int[TILES_ACROSS][TILES_ACROSS];
+        for (var x = 0; x < TILES_ACROSS; x++) {
+            for (var z = 0; z < TILES_ACROSS; z++) {
+                shadows[x][z] = ground.castsFloorShadow(ORIGIN_TILES + x, ORIGIN_TILES + z) ? 1 : 0;
+            }
+        }
+        return shadows;
     }
 
     /**

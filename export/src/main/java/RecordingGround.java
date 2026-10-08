@@ -3,7 +3,9 @@ import com.jagex.graphics.PointLight;
 import com.jagex.graphics.Shadow;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A ground that stands in for the client's own while the terrain is loaded, and keeps the HSL
@@ -21,6 +23,7 @@ public final class RecordingGround extends Ground {
     private final Map<Long, int[]> depthsByTile = new HashMap<>();
     private final Map<Long, Water> waterByTile = new HashMap<>();
     private final Map<Long, UnblendedTile> unblendedByTile = new HashMap<>();
+    private final Set<Long> floorShadows = new HashSet<>();
 
     /**
      * What the terrain says about the water over a tile: the colour the GL toolkit tints what
@@ -73,6 +76,14 @@ public final class RecordingGround extends Ground {
         return waterByTile.getOrDefault(key(x, z), Water.NONE);
     }
 
+    /**
+     * Whether the floor of a tile casts a hard shadow on the levels below, as the blended terrain
+     * decides it ({@code Terrain.loadBlended}) and {@code GlGround.U} keeps it for {@code GlGround.fa}.
+     */
+    public boolean castsFloorShadow(int x, int z) {
+        return floorShadows.contains(key(x, z));
+    }
+
     /** A tile as the terrain handed it over with ground blending off, or nothing. */
     public UnblendedTile unblended(int x, int z) {
         return unblendedByTile.get(key(x, z));
@@ -91,6 +102,9 @@ public final class RecordingGround extends Ground {
             depthsByTile.put(key(x, z), waterDepths.clone());
         }
         waterByTile.put(key(x, z), new Water(waterColour, waterDepth, waterBias));
+        if (allowShadow) {
+            floorShadows.add(key(x, z));
+        }
         real.U(x, z, offsetX, offsetLevel, offsetY, waterDepths, blendedColours, overlayBlendColours, blendedTextures,
             blendedSizes, waterColour, waterDepth, waterBias, allowShadow);
     }

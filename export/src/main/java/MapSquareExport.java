@@ -245,6 +245,7 @@ public final class MapSquareExport {
         description.put("textures", TextureLibrary.relativeUri(ground, args.textures.library(null).directory()));
         description.put("heights", heights);
         description.put("flags", nested(square.flags()));
+        description.put("floorShadows", nested(square.floorShadows()));
         description.put("cameraHeights", cameraHeights(square.environment()));
         description.put("environment", environment(square.environment()));
         description.put("lights", square.environment().lights().stream().map(MapSquareExport::light).toList());
