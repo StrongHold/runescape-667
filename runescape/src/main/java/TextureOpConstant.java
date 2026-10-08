@@ -32,7 +32,7 @@ public final class TextureOpConstant extends TextureOp {
     @Override
     public void method9416(@OriginalArg(0) boolean arg0, @OriginalArg(1) Packet arg1, @OriginalArg(2) int arg2) {
         if (arg0) {
-            Static379.method5355(false);
+            Static379.setUnderwater(false);
         }
         if (arg2 == 0) {
             this.intensity = (arg1.g1() << 12) / 255;

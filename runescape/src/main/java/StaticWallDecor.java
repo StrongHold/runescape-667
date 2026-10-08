@@ -215,7 +215,7 @@ public final class StaticWallDecor extends WallDecor implements Location {
             return null;
         }
         @Pc(12) Matrix matrix = toolkit.scratchMatrix();
-        matrix.applyTranslation(super.x + super.aShort101, super.y, super.aShort102 + super.z);
+        matrix.applyTranslation(super.x + super.offsetX, super.y, super.offsetZ + super.z);
         @Pc(41) PickableEntity entity = Static642.allocatePickableEntity(this.interactive, 1);
         if (OrthoMode.enabled) {
             this.model.renderOrtho(matrix, entity.pickingCylinders[0], OrthoMode.renderZoom, 0);

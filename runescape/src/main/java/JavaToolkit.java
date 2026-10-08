@@ -1059,7 +1059,7 @@ public final class JavaToolkit extends Toolkit {
 
     @OriginalMember(owner = "client!iaa", name = "d", descriptor = "(II)Lclient!wja;")
     @Override
-    public DepthBuffer method7986(@OriginalArg(0) int width, @OriginalArg(1) int height) {
+    public DepthBuffer createDepthBuffer(@OriginalArg(0) int width, @OriginalArg(1) int height) {
         return new JavaDepthBuffer(width, height);
     }
 
@@ -1579,7 +1579,7 @@ public final class JavaToolkit extends Toolkit {
 
     @OriginalMember(owner = "client!iaa", name = "a", descriptor = "(Lclient!za;)V")
     @Override
-    public void method7938(@OriginalArg(0) MemoryPool arg0) {
+    public void setHeap(@OriginalArg(0) MemoryPool arg0) {
     }
 
     @OriginalMember(owner = "client!iaa", name = "k", descriptor = "(I)V")
@@ -2639,7 +2639,7 @@ public final class JavaToolkit extends Toolkit {
 
     @OriginalMember(owner = "client!iaa", name = "j", descriptor = "()V")
     @Override
-    public void method7950() {
+    public void finish() {
     }
 
     @OriginalMember(owner = "client!iaa", name = "m", descriptor = "()Z")

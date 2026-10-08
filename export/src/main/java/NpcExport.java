@@ -36,9 +36,9 @@ public final class NpcExport {
     /**
      * How far above the NPC's origin the client draws its spot shadow, in its units.
      */
-    private static final float SHADOW_ABOVE_NPC = 15.0F;
+    private static final float SHADOW_ABOVE_NPC_FINE = 15.0F;
 
-    private static final float UNITS_PER_METRE = 512.0F;
+    private static final float FINE_PER_METRE = 512.0F;
 
     public static final class Args implements Arguments {
 
@@ -234,7 +234,7 @@ public final class NpcExport {
         var node = new LinkedHashMap<String, Object>();
         node.put("name", SHADOW_NODE);
         node.put("mesh", gltf.mesh(SHADOW_NODE));
-        node.put("translation", List.of(0.0F, SHADOW_ABOVE_NPC / UNITS_PER_METRE, 0.0F));
+        node.put("translation", List.of(0.0F, SHADOW_ABOVE_NPC_FINE / FINE_PER_METRE, 0.0F));
         node.put("extras", Map.of("spotShadow", true));
         return gltf.node(node);
     }

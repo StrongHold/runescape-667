@@ -30,7 +30,7 @@ public final class Static115 {
             if (local32 == null) {
                 arg0 = -1;
             } else {
-                GameShell.signLink.method8995(GameShell.canvas, local32.method9383(), new Point(local28.hotspotx, local28.hotspoty), local32.offsetX(), local32.offsetY());
+                GameShell.signLink.method8995(GameShell.canvas, local32.toArgb(), new Point(local28.hotspotx, local28.hotspoty), local32.offsetX(), local32.offsetY());
                 Static470.currentCursor = arg0;
             }
         }

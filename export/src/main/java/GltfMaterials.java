@@ -56,7 +56,7 @@ public final class GltfMaterials {
      * off, drawing the face in its {@code COLOR_1} instead. Water and the like are not. It also
      * says the texture's {@code colourOp}, which is how the GL toolkit combines a texel with the
      * lit vertex colour: 0 multiplies them, 1 shows the texel alone, 2 interpolates, 3 adds them,
-     * and 4 takes a dot product ({@code GlToolkit.method6991}).
+     * and 4 takes a dot product ({@code GlToolkit.setColourOp}).
      */
     public int material(int texture, AlphaMode mode) {
         return material(texture, mode, RecordingGround.Water.NONE);

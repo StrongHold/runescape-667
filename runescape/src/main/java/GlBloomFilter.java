@@ -15,10 +15,10 @@ public final class GlBloomFilter extends GlPostProcessFilter {
     public int anInt5098;
 
     @OriginalMember(owner = "client!kca", name = "W", descriptor = "Lclient!wo;")
-    public Class406 aClass406_1;
+    public GlFramebuffer aClass406_1;
 
     @OriginalMember(owner = "client!kca", name = "L", descriptor = "Lclient!wo;")
-    public Class406 aClass406_2;
+    public GlFramebuffer aClass406_2;
 
     @OriginalMember(owner = "client!kca", name = "B", descriptor = "Lclient!iha;")
     public Class179 aClass179_3;
@@ -77,7 +77,7 @@ public final class GlBloomFilter extends GlPostProcessFilter {
         if (!super.aClass19_Sub3_22.aBoolean613 || !super.aClass19_Sub3_22.aBoolean619 || !super.aClass19_Sub3_22.aBoolean603) {
             return false;
         }
-        this.aClass406_1 = new Class406(super.aClass19_Sub3_22);
+        this.aClass406_1 = new GlFramebuffer(super.aClass19_Sub3_22);
         this.aClass93_Sub2_2 = new Class93_Sub2(super.aClass19_Sub3_22, 3553, 34842, 256, 256);
         this.aClass93_Sub2_2.method2946(false, false);
         this.aClass93_Sub2_1 = new Class93_Sub2(super.aClass19_Sub3_22, 3553, 34842, 256, 256);
@@ -276,7 +276,7 @@ public final class GlBloomFilter extends GlPostProcessFilter {
             @Pc(99) int local99 = local28;
             @Pc(101) int local101 = 0;
             if (this.aClass406_2 == null) {
-                this.aClass406_2 = new Class406(super.aClass19_Sub3_22);
+                this.aClass406_2 = new GlFramebuffer(super.aClass19_Sub3_22);
             }
             label54:
             while (true) {

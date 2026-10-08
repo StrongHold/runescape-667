@@ -124,7 +124,7 @@ public final class i extends Model implements SoftwareObject {
     @OriginalMember(owner = "client!i", name = "a", descriptor = "(IILclient!tt;ZII)Z")
     @Override
     public boolean pickedOrtho(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) Matrix matrix, @OriginalArg(3) boolean quick, @OriginalArg(4) int sizeShift, @OriginalArg(5) int angle) {
-        return this.anOa2.method6087().method5(this, x, y, matrix, quick, angle);
+        return this.anOa2.threadResource().method5(this, x, y, matrix, quick, angle);
     }
 
     @OriginalMember(owner = "client!i", name = "a", descriptor = "(B[B)V")
@@ -156,7 +156,7 @@ public final class i extends Model implements SoftwareObject {
     @OriginalMember(owner = "client!i", name = "a", descriptor = "(IILclient!tt;ZI)Z")
     @Override
     public boolean picked(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) Matrix matrix, @OriginalArg(3) boolean quick, @OriginalArg(4) int sizeShift) {
-        return this.anOa2.method6087().method11(this, x, y, matrix, quick);
+        return this.anOa2.threadResource().method11(this, x, y, matrix, quick);
     }
 
     @OriginalMember(owner = "client!i", name = "RA", descriptor = "()I")
@@ -183,7 +183,7 @@ public final class i extends Model implements SoftwareObject {
     @OriginalMember(owner = "client!i", name = "a", descriptor = "(Lclient!tt;)V")
     @Override
     public void apply(@OriginalArg(0) Matrix arg0) {
-        this.method3688(Static445.anIntArray537, arg0);
+        this.transformPoints(Static445.anIntArray537, arg0);
         @Pc(5) int local5 = 0;
         @Pc(10) int local10;
         if (this.aModelParticleEmitterArray3 != null) {
@@ -271,25 +271,25 @@ public final class i extends Model implements SoftwareObject {
     @Override
     public void renderOrtho(@OriginalArg(0) Matrix arg0, @OriginalArg(1) PickingCylinder cylinder, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3) {
         if (cylinder == null) {
-            this.anOa2.method6087().method9(this, arg0, null, arg2, arg3);
+            this.anOa2.threadResource().method9(this, arg0, null, arg2, arg3);
             return;
         }
         Static445.anIntArray542[5] = 0;
-        this.anOa2.method6087().method9(this, arg0, Static445.anIntArray542, arg2, arg3);
-        cylinder.anInt4504 = Static445.anIntArray542[0];
-        cylinder.anInt4505 = Static445.anIntArray542[1];
-        cylinder.anInt4501 = Static445.anIntArray542[2];
-        cylinder.anInt4503 = Static445.anIntArray542[3];
-        cylinder.anInt4502 = Static445.anIntArray542[4];
-        cylinder.aBoolean352 = Static445.anIntArray542[5] != 0;
+        this.anOa2.threadResource().method9(this, arg0, Static445.anIntArray542, arg2, arg3);
+        cylinder.topX = Static445.anIntArray542[0];
+        cylinder.topY = Static445.anIntArray542[1];
+        cylinder.bottomX = Static445.anIntArray542[2];
+        cylinder.bottomY = Static445.anIntArray542[3];
+        cylinder.radiusPixels = Static445.anIntArray542[4];
+        cylinder.visible = Static445.anIntArray542[5] != 0;
     }
 
     @OriginalMember(owner = "client!i", name = "r", descriptor = "()Z")
     public native boolean r();
 
     @OriginalMember(owner = "client!i", name = "a", descriptor = "([ILclient!tt;)V")
-    public void method3688(@OriginalArg(0) int[] arg0, @OriginalArg(1) Matrix arg1) {
-        this.anOa2.method6087().method15(this, arg0, arg1);
+    public void transformPoints(@OriginalArg(0) int[] arg0, @OriginalArg(1) Matrix arg1) {
+        this.anOa2.threadResource().method15(this, arg0, arg1);
     }
 
     @OriginalMember(owner = "client!i", name = "d", descriptor = "()V")
@@ -318,7 +318,7 @@ public final class i extends Model implements SoftwareObject {
     @OriginalMember(owner = "client!i", name = "a", descriptor = "(BIZ)Lclient!ka;")
     @Override
     public Model copy(@OriginalArg(0) byte arg0, @OriginalArg(1) int functionMask, @OriginalArg(2) boolean arg2) {
-        return this.anOa2.method6087().method3(this, arg0, functionMask, arg2);
+        return this.anOa2.threadResource().method3(this, arg0, functionMask, arg2);
     }
 
     @OriginalMember(owner = "client!i", name = "finalize", descriptor = "()V")
@@ -345,17 +345,17 @@ public final class i extends Model implements SoftwareObject {
     @Override
     public void render(@OriginalArg(0) Matrix matrix, @OriginalArg(1) PickingCylinder cylinder, @OriginalArg(2) int flags) {
         if (cylinder == null) {
-            this.anOa2.method6087().method8(this, matrix, null, flags);
+            this.anOa2.threadResource().method8(this, matrix, null, flags);
             return;
         }
         Static445.anIntArray542[5] = 0;
-        this.anOa2.method6087().method8(this, matrix, Static445.anIntArray542, flags);
-        cylinder.anInt4504 = Static445.anIntArray542[0];
-        cylinder.anInt4505 = Static445.anIntArray542[1];
-        cylinder.anInt4501 = Static445.anIntArray542[2];
-        cylinder.anInt4503 = Static445.anIntArray542[3];
-        cylinder.anInt4502 = Static445.anIntArray542[4];
-        cylinder.aBoolean352 = Static445.anIntArray542[5] != 0;
+        this.anOa2.threadResource().method8(this, matrix, Static445.anIntArray542, flags);
+        cylinder.topX = Static445.anIntArray542[0];
+        cylinder.topY = Static445.anIntArray542[1];
+        cylinder.bottomX = Static445.anIntArray542[2];
+        cylinder.bottomY = Static445.anIntArray542[3];
+        cylinder.radiusPixels = Static445.anIntArray542[4];
+        cylinder.visible = Static445.anIntArray542[5] != 0;
     }
 
     @OriginalMember(owner = "client!i", name = "ma", descriptor = "()I")
@@ -373,7 +373,7 @@ public final class i extends Model implements SoftwareObject {
     @OriginalMember(owner = "client!i", name = "a", descriptor = "(Lclient!ka;IIIZ)V")
     @Override
     public void shareLight(@OriginalArg(0) Model arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) boolean arg4) {
-        this.anOa2.method6087().method10(this, arg0, arg1, arg2, arg3, arg4);
+        this.anOa2.threadResource().method10(this, arg0, arg1, arg2, arg3, arg4);
     }
 
     @OriginalMember(owner = "client!i", name = "f", descriptor = "()[Lclient!rv;")

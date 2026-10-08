@@ -91,7 +91,7 @@ public final class Static363 {
                     }
                 }
             }
-            Toolkit.active.method7950();
+            Toolkit.active.finish();
             @Pc(195) long rendersPerSecond = (long) (renderCount * 1000) / (SystemTimer.safetime() - start);
             Toolkit.active.GA(0);
             Toolkit.active.ya();

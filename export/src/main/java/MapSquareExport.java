@@ -32,8 +32,8 @@ public final class MapSquareExport {
      * Where the map square starts in the region it is built in, in the client's units, which
      * every placement is measured from so that it stands on the ground as written.
      */
-    private static final int MAP_SQUARE_UNITS = ClientMapSquareReader.ORIGIN * 512;
-    private static final float UNITS_PER_METRE = 512.0F;
+    private static final int MAP_SQUARE_FINE = ClientMapSquareReader.ORIGIN_TILES * 512;
+    private static final float FINE_PER_METRE = 512.0F;
 
     /**
      * The strength a map light is written with, in candela, which is what the client gives every
@@ -41,7 +41,7 @@ public final class MapSquareExport {
      * more.
      */
     private static final float LIGHT_INTENSITY = 1.0F;
-    private static final float HALF_TILE = 0.5F;
+    private static final float HALF_TILE_METRES = 0.5F;
 
     public static final class Args implements Arguments {
 
@@ -175,7 +175,7 @@ public final class MapSquareExport {
                                              ClientMapSquareReader.MapSquare square, JavaGround ground,
                                              RecordingGround colours, String name, int level, boolean underwater,
                                              boolean blended) {
-        var result = GroundToGltf.convertInto(gltf, materials, ground, colours, underwater, ClientMapSquareReader.ORIGIN,
+        var result = GroundToGltf.convertInto(gltf, materials, ground, colours, underwater, ClientMapSquareReader.ORIGIN_TILES,
             square.x() * ClientMapSquareReader.TILES_ACROSS, square.z() * ClientMapSquareReader.TILES_ACROSS);
         if (gltf.empty()) {
             return Optional.empty();
@@ -225,7 +225,7 @@ public final class MapSquareExport {
         }
 
         var heights = new LinkedHashMap<String, Object>();
-        heights.put("firstTile", -ClientMapSquareReader.HEIGHT_MARGIN);
+        heights.put("firstTile", -ClientMapSquareReader.HEIGHT_MARGIN_TILES);
         heights.put("levels", nested(square.heights()));
         if (square.underwater() instanceof ClientMapSquareReader.Underwater.Bed bed) {
             heights.put("underwater", nested(bed.heights()));
@@ -308,7 +308,7 @@ public final class MapSquareExport {
         description.put("x", light.x());
         description.put("y", light.y());
         description.put("z", light.z());
-        description.put("radius", light.radius());
+        description.put("radiusTiles", light.radiusTiles());
         description.put("rowSpans", java.util.Arrays.stream(light.rowSpans()).boxed().toList());
         description.put("colour", light.colour());
         description.put("phase", light.phase());
@@ -335,7 +335,7 @@ public final class MapSquareExport {
             var colour = new float[] {Srgb.toLinear(light.colour() >> 16 & 0xFF), Srgb.toLinear(light.colour() >> 8 & 0xFF),
                 Srgb.toLinear(light.colour() & 0xFF)};
             var name = "light " + number++;
-            var punctual = gltf.punctualLight(name, colour, LIGHT_INTENSITY, light.radius() + HALF_TILE);
+            var punctual = gltf.punctualLight(name, colour, LIGHT_INTENSITY, light.radiusTiles() + HALF_TILE_METRES);
             var extras = new LinkedHashMap<String, Object>();
             extras.put("level", light.level());
             extras.put("flickerAmbient", light.ambient());
@@ -343,8 +343,8 @@ public final class MapSquareExport {
             extras.put("flickerAmplitude", light.amplitude());
             extras.put("flickerFrequency", light.frequency());
             extras.put("phase", light.phase());
-            nodes.add(gltf.lightNode(name, punctual, List.of(light.x() / UNITS_PER_METRE, -light.y() / UNITS_PER_METRE,
-                -light.z() / UNITS_PER_METRE), extras));
+            nodes.add(gltf.lightNode(name, punctual, List.of(light.x() / FINE_PER_METRE, -light.y() / FINE_PER_METRE,
+                -light.z() / FINE_PER_METRE), extras));
         }
         return nodes;
     }
@@ -365,9 +365,9 @@ public final class MapSquareExport {
         description.put("level", placement.level());
         description.put("virtualLevel", placement.virtualLevel());
         description.put("underwater", placement.underwater());
-        description.put("x", placement.x() - MAP_SQUARE_UNITS);
+        description.put("x", placement.x() - MAP_SQUARE_FINE);
         description.put("y", placement.y());
-        description.put("z", placement.z() - MAP_SQUARE_UNITS);
+        description.put("z", placement.z() - MAP_SQUARE_FINE);
         description.put("part", placement.part());
         if (placement.sequencesOf() != placement.id()) {
             description.put("sequencesOf", placement.sequencesOf());

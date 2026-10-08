@@ -33,19 +33,19 @@ public final class Static21 {
         Static35.anInt813 = renderDistance;
         Static272.aClass13_1 = Static167.method2632();
         Static276.resetOccluders();
-        Static478.aTileArrayArrayArray3 = new Tile[4][Static619.tileMaxX][Static662.tileMaxZ];
+        Static478.floorTiles = new Tile[4][Static619.tileMaxX][Static662.tileMaxZ];
         Static706.floor = new Ground[4];
         if (underwater) {
             Static62.waterColour = new int[Static619.tileMaxX][Static662.tileMaxZ];
             Static421.waterBias = new byte[Static619.tileMaxX][Static662.tileMaxZ];
             Static272.waterDepth = new short[Static619.tileMaxX][Static662.tileMaxZ];
-            Static420.aTileArrayArrayArray2 = new Tile[1][Static619.tileMaxX][Static662.tileMaxZ];
+            Static420.underwaterTiles = new Tile[1][Static619.tileMaxX][Static662.tileMaxZ];
             Static693.underwaterGround = new Ground[1];
         } else {
             Static62.waterColour = null;
             Static421.waterBias = null;
             Static272.waterDepth = null;
-            Static420.aTileArrayArrayArray2 = null;
+            Static420.underwaterTiles = null;
             Static693.underwaterGround = null;
         }
         if (lighting) {
@@ -59,7 +59,7 @@ public final class Static21 {
             Static279.environmentLightApplied = null;
             Static319.environmentLightCount = 0;
         }
-        Static379.method5355(false);
+        Static379.setUnderwater(false);
         Static576.opaqueStationaryEntities = new Entity[2];
         Static398.transparentStationaryEntities = new Entity[2];
         Static468.dynamicEntities = new Entity[2];

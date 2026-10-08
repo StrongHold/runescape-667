@@ -12,8 +12,8 @@ import java.nio.file.Path;
  */
 public final class WaterTextures {
 
-    private static final int WIDTH = 128;
-    private static final int HEIGHT = 128;
+    private static final int WIDTH_TEXELS = 128;
+    private static final int HEIGHT_TEXELS = 128;
     private static final int FRAMES = 16;
     private static final int BYTES_PER_TEXEL = 2;
 
@@ -26,14 +26,14 @@ public final class WaterTextures {
 
     private static BufferedImage rippleStrip() {
         var texels = new GlRippleNoiseTexture().generate();
-        var image = new BufferedImage(WIDTH, HEIGHT * FRAMES, BufferedImage.TYPE_INT_ARGB);
+        var image = new BufferedImage(WIDTH_TEXELS, HEIGHT_TEXELS * FRAMES, BufferedImage.TYPE_INT_ARGB);
         for (var frame = 0; frame < FRAMES; frame++) {
-            for (var y = 0; y < HEIGHT; y++) {
-                for (var x = 0; x < WIDTH; x++) {
-                    var at = ((frame * HEIGHT + y) * WIDTH + x) * BYTES_PER_TEXEL;
+            for (var y = 0; y < HEIGHT_TEXELS; y++) {
+                for (var x = 0; x < WIDTH_TEXELS; x++) {
+                    var at = ((frame * HEIGHT_TEXELS + y) * WIDTH_TEXELS + x) * BYTES_PER_TEXEL;
                     var luminance = texels[at] & 0xFF;
                     var alpha = texels[at + 1] & 0xFF;
-                    image.setRGB(x, frame * HEIGHT + y, alpha << 24 | luminance << 16 | luminance << 8 | luminance);
+                    image.setRGB(x, frame * HEIGHT_TEXELS + y, alpha << 24 | luminance << 16 | luminance << 8 | luminance);
                 }
             }
         }

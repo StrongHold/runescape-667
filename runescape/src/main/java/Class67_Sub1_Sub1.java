@@ -27,7 +27,7 @@ public final class Class67_Sub1_Sub1 extends Class67_Sub1 {
     @OriginalMember(owner = "client!cj", name = "a", descriptor = "(Lclient!ec;Lclient!ec;BF)Z")
     public boolean method1572(@OriginalArg(0) Class93_Sub1 arg0, @OriginalArg(1) Class93_Sub1 arg1, @OriginalArg(3) float arg2) {
         @Pc(7) boolean local7 = true;
-        @Pc(11) Class406 local11 = this.aClass19_Sub3_1.aClass406_7;
+        @Pc(11) GlFramebuffer local11 = this.aClass19_Sub3_1.aClass406_7;
         this.aClass19_Sub3_1.K(Static654.anIntArray760);
         this.aClass19_Sub3_1.la();
         this.aClass19_Sub3_1.method6981();
@@ -48,7 +48,7 @@ public final class Class67_Sub1_Sub1 extends Class67_Sub1 {
         this.aClass19_Sub3_1.method7031(34165, 34165);
         this.aClass19_Sub3_1.method7001(arg0);
         this.aClass19_Sub3_1.method7014(0);
-        this.aClass19_Sub3_1.method6991(1);
+        this.aClass19_Sub3_1.setColourOp(1);
         this.aClass19_Sub3_1.method7001(arg1);
         this.aClass19_Sub3_1.method6967(local11);
         for (@Pc(124) int local124 = 0; local124 < 6; local124++) {

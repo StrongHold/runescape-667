@@ -822,7 +822,7 @@ static uint32_t litCorner(const Ground *ground, int packed, int shade, int x, in
     const TextureMetrics *worn = texture == -1 || !wearsIts ? NULL : textureMetricsFor(texture);
     if (worn != NULL) {
         int towardsGrey = worn->effectType == LEAVES_THE_COLOUR_BE ? 0 : worn->alpha;
-        colour = texturedUnlitColour(colour, reaching, towardsGrey, worn->aByte57);
+        colour = texturedUnlitColour(colour, reaching, towardsGrey, worn->brightness);
     }
 
     float facing[NORMAL_PARTS];

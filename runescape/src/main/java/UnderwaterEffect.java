@@ -84,10 +84,10 @@ public final class UnderwaterEffect extends TextureEffect {
                 this.untexturedBound = false;
             }
             super.toolkit.method7001(texture);
-            super.toolkit.method6991(colourOp);
+            super.toolkit.setColourOp(colourOp);
         } else if (!this.untexturedBound) {
             super.toolkit.method7001(super.toolkit.aClass93_Sub2_5);
-            super.toolkit.method6991(1);
+            super.toolkit.setColourOp(1);
             super.toolkit.method7021(OpenGL.GL_PREVIOUS, OpenGL.GL_SRC_COLOR, 0);
             super.toolkit.method7029(0, OpenGL.GL_PREVIOUS);
             this.untexturedBound = true;

@@ -29,8 +29,8 @@ public final class TextureLibrary {
 
     private static final String METRICS = "metrics.json";
 
-    private static final int TEXTURE_SIZE = 128;
-    private static final int SMALL_TEXTURE_SIZE = 64;
+    private static final int TEXTURE_SIZE_TEXELS = 128;
+    private static final int SMALL_TEXTURE_SIZE_TEXELS = 64;
 
     /**
      * The metrics field no Java code of the client reads: the client hands it only to the native
@@ -143,7 +143,7 @@ public final class TextureLibrary {
 
     private void write(int id, Path file) {
         var metrics = source.getMetrics(id);
-        var size = metrics.small ? SMALL_TEXTURE_SIZE : TEXTURE_SIZE;
+        var size = metrics.small ? SMALL_TEXTURE_SIZE_TEXELS : TEXTURE_SIZE_TEXELS;
         var pixels = source.argbOutput(TEXTURE_GAMMA, id, size, size);
         try {
             Files.createDirectories(directory);

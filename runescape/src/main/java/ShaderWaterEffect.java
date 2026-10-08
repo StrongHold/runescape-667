@@ -51,7 +51,7 @@ public final class ShaderWaterEffect extends TextureEffect {
     public void bindTexture(@OriginalArg(0) Class93 texture, @OriginalArg(1) int colourOp) {
         if (!this.active) {
             super.toolkit.method7001(texture);
-            super.toolkit.method6991(colourOp);
+            super.toolkit.setColourOp(colourOp);
         }
     }
 
@@ -103,7 +103,7 @@ public final class ShaderWaterEffect extends TextureEffect {
             @Pc(36) int breakWaterDepth = effectParam2 & 0xFFFF;
             @Pc(45) float breakWaterOffset = (float) (effectParam2 >> 16 & 0x3) / BREAK_OFFSET_DIVISOR;
             @Pc(49) long handle = this.program.aLong136;
-            OpenGL.glUniform1fARB(OpenGL.glGetUniformLocationARB(handle, "time"), (float) (super.toolkit.lastTickTime * timeScale % ANIMATION_PERIOD) / (float) ANIMATION_PERIOD);
+            OpenGL.glUniform1fARB(OpenGL.glGetUniformLocationARB(handle, "time"), (float) (super.toolkit.lastTickMillis * timeScale % ANIMATION_PERIOD) / (float) ANIMATION_PERIOD);
             OpenGL.glUniform1fARB(OpenGL.glGetUniformLocationARB(handle, "scale"), scale);
             OpenGL.glUniform1fARB(OpenGL.glGetUniformLocationARB(handle, "breakWaterDepth"), (float) breakWaterDepth);
             OpenGL.glUniform1fARB(OpenGL.glGetUniformLocationARB(handle, "breakWaterOffset"), breakWaterOffset);

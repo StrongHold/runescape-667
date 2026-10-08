@@ -6,7 +6,7 @@ import org.openrs2.deob.annotation.OriginalMember;
 import org.openrs2.deob.annotation.Pc;
 
 @OriginalClass("client!wo")
-public final class Class406 implements Interface14 {
+public final class GlFramebuffer implements Interface14 {
 
     @OriginalMember(owner = "client!wo", name = "l", descriptor = "I")
     public int anInt10829;
@@ -33,7 +33,7 @@ public final class Class406 implements Interface14 {
     public final int anInt10832;
 
     @OriginalMember(owner = "client!wo", name = "<init>", descriptor = "(Lclient!qha;)V")
-    public Class406(@OriginalArg(0) GlToolkit arg0) {
+    public GlFramebuffer(@OriginalArg(0) GlToolkit arg0) {
         if (!arg0.aBoolean613) {
             throw new IllegalStateException("");
         }

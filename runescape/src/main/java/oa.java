@@ -267,7 +267,7 @@ public final class oa extends Toolkit implements SoftwareObject {
     @OriginalMember(owner = "client!oa", name = "a", descriptor = "(IIIIIII)V")
     @Override
     public void strongLine(@OriginalArg(0) int x1, @OriginalArg(1) int y1, @OriginalArg(2) int x2, @OriginalArg(3) int y2, @OriginalArg(4) int colour, @OriginalArg(5) int width, @OriginalArg(6) int mode) {
-        this.method6087().method16(this, x1, y1, x2, y2, colour, width, mode);
+        this.threadResource().method16(this, x1, y1, x2, y2, colour, width, mode);
     }
 
     @OriginalMember(owner = "client!oa", name = "k", descriptor = "()Z")
@@ -278,7 +278,7 @@ public final class oa extends Toolkit implements SoftwareObject {
 
     @OriginalMember(owner = "client!oa", name = "a", descriptor = "(Lclient!za;)V")
     @Override
-    public void method7938(@OriginalArg(0) MemoryPool arg0) {
+    public void setHeap(@OriginalArg(0) MemoryPool arg0) {
         this.aYa2 = (ya) arg0;
         this.va(arg0);
     }
@@ -303,7 +303,7 @@ public final class oa extends Toolkit implements SoftwareObject {
 
     @OriginalMember(owner = "client!oa", name = "j", descriptor = "()V")
     @Override
-    public void method7950() {
+    public void finish() {
     }
 
     @OriginalMember(owner = "client!oa", name = "m", descriptor = "()Z")
@@ -591,7 +591,7 @@ public final class oa extends Toolkit implements SoftwareObject {
     public native void ya();
 
     @OriginalMember(owner = "client!oa", name = "C", descriptor = "()Lclient!a;")
-    public a method6087() {
+    public a threadResource() {
         for (@Pc(1) int local1 = 0; local1 < this.anInt6770; local1++) {
             if (this.anAArray1[local1].aRunnable1 == Thread.currentThread()) {
                 return this.anAArray1[local1];
@@ -729,7 +729,7 @@ public final class oa extends Toolkit implements SoftwareObject {
     @Override
     public void renderOrtho(@OriginalArg(0) ParticleList particleList, @OriginalArg(1) int zoom) {
         this.method6085(particleList);
-        this.method6087().method4(this, Static445.anIntArray539, Static445.anIntArray541, Static445.anIntArray538, Static445.aShortArray103, particleList.particles.size());
+        this.threadResource().renderParticles(this, Static445.anIntArray539, Static445.anIntArray541, Static445.anIntArray538, Static445.aShortArray103, particleList.particles.size());
     }
 
     @OriginalMember(owner = "client!oa", name = "T", descriptor = "(IIII)V")
@@ -747,7 +747,7 @@ public final class oa extends Toolkit implements SoftwareObject {
     public void render(@OriginalArg(0) ParticleList particleList) {
         if (particleList.particles.size() != 0) {
             this.method6085(particleList);
-            this.method6087().method4(this, Static445.anIntArray539, Static445.anIntArray541, Static445.anIntArray538, Static445.aShortArray103, particleList.particles.size());
+            this.threadResource().renderParticles(this, Static445.anIntArray539, Static445.anIntArray541, Static445.anIntArray538, Static445.aShortArray103, particleList.particles.size());
         }
     }
 
@@ -833,7 +833,7 @@ public final class oa extends Toolkit implements SoftwareObject {
 
     @OriginalMember(owner = "client!oa", name = "d", descriptor = "(II)Lclient!wja;")
     @Override
-    public DepthBuffer method7986(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) {
+    public DepthBuffer createDepthBuffer(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) {
         return new xa(arg0, arg1);
     }
 

@@ -11,17 +11,17 @@ import org.openrs2.deob.annotation.OriginalMember;
 public abstract class WallDecor extends Entity implements Location {
 
     @OriginalMember(owner = "client!tla", name = "B", descriptor = "S")
-    public short aShort101;
+    public short offsetX;
 
     @OriginalMember(owner = "client!tla", name = "y", descriptor = "S")
-    public short aShort102;
+    public short offsetZ;
 
     @OriginalMember(owner = "client!tla", name = "<init>", descriptor = "(IIIIIII)V")
     protected WallDecor(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int z, @OriginalArg(3) int level, @OriginalArg(4) int virtualLevel, @OriginalArg(5) int arg5, @OriginalArg(6) int arg6) {
         super.level = (byte) level;
-        this.aShort101 = (short) arg5;
+        this.offsetX = (short) arg5;
         super.z = z;
-        this.aShort102 = (short) arg6;
+        this.offsetZ = (short) arg6;
         super.x = x;
         super.virtualLevel = (byte) virtualLevel;
         super.y = y;
@@ -31,7 +31,7 @@ public abstract class WallDecor extends Entity implements Location {
     @Override
     public final boolean method9284(@OriginalArg(0) byte arg0, @OriginalArg(1) Toolkit arg1) {
         if (arg0 != 59) {
-            this.aShort101 = -126;
+            this.offsetX = -126;
         }
         return Static282.method3976(this.getMinY(2), super.virtualLevel, super.x >> EnvironmentLight.tileShift, super.z >> EnvironmentLight.tileShift);
     }

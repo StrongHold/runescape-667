@@ -664,7 +664,7 @@ public final class Ground_Sub1 extends Ground {
 
     @OriginalMember(owner = "client!iga", name = "a", descriptor = "(Lclient!lca;[I)V")
     @Override
-    public void method7868(@OriginalArg(0) PointLight arg0, @OriginalArg(1) int[] arg1) {
+    public void addLight(@OriginalArg(0) PointLight arg0, @OriginalArg(1) int[] arg1) {
         this.aDeque_24.addLast(new Node_Sub32(this.aClass19_Sub1_9, this, arg0, arg1));
     }
 

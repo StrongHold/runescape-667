@@ -44,7 +44,7 @@ public abstract class Ground {
     public abstract void CA(@OriginalArg(0) Shadow arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) boolean arg5);
 
     @OriginalMember(owner = "client!s", name = "a", descriptor = "(Lclient!lca;[I)V")
-    public abstract void method7868(@OriginalArg(0) PointLight arg0, @OriginalArg(1) int[] arg1);
+    public abstract void addLight(@OriginalArg(0) PointLight arg0, @OriginalArg(1) int[] arg1);
 
     @OriginalMember(owner = "client!s", name = "a", descriptor = "(IIB)I")
     public final int getHeight(@OriginalArg(1) int x, @OriginalArg(0) int z) {

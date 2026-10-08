@@ -23,7 +23,7 @@ public final class Class202 {
         if (!this.method4582()) {
             return false;
         }
-        @Pc(14) Class406 local14 = this.aClass19_Sub3_21.aClass406_7;
+        @Pc(14) GlFramebuffer local14 = this.aClass19_Sub3_21.aClass406_7;
         @Pc(25) DoublyLinkedNode_Sub2_Sub19 local25 = new DoublyLinkedNode_Sub2_Sub19(this.aClass19_Sub3_21, 6408, arg1.anInt10410, arg1.anInt10401);
         @Pc(35) boolean local35 = false;
         this.aClass19_Sub3_21.method6967(local14);

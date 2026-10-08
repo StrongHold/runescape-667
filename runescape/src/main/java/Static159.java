@@ -17,12 +17,12 @@ public final class Static159 {
     @OriginalMember(owner = "client!ew", name = "a", descriptor = "(Z)V")
     public static void refreshEnvironment() {
         if (MainLogicStep.isLoggedOut(MainLogicManager.step) || MainLogicStep.isAtLobbyScreen(MainLogicManager.step)) {
-            Static127.method2243(Static412.ENVIRONMENT_FADE_DURATION, Camera.x >> 12, Camera.z >> 12);
+            Static127.method2243(Static412.ENVIRONMENT_FADE_MILLIS, Camera.x >> 12, Camera.z >> 12);
         } else {
             @Pc(20) int local20 = PlayerEntity.self.pathX[0] >> 3;
             @Pc(27) int local27 = PlayerEntity.self.pathZ[0] >> 3;
             if (local20 >= 0 && Static720.mapWidth >> 3 > local20 && local27 >= 0 && Static501.mapLength >> 3 > local27) {
-                Static127.method2243(Static412.ENVIRONMENT_FADE_DURATION, local20, local27);
+                Static127.method2243(Static412.ENVIRONMENT_FADE_MILLIS, local20, local27);
             } else {
                 Static127.method2243(0, Static720.mapWidth >> 4, Static501.mapLength >> 4);
             }

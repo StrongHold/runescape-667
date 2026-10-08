@@ -21,7 +21,7 @@ public final class BillboardSources {
     public static List<Map<String, Object>> billboards(JavaModel model) {
         var written = new ArrayList<Map<String, Object>>();
         for (var billboard : model.billboardFaces) {
-            var face = billboard.anInt6139;
+            var face = billboard.face;
             var a = model.faceA[face];
             var b = model.faceB[face];
             var c = model.faceC[face];
@@ -30,11 +30,11 @@ public final class BillboardSources {
                 middle(model.vertexX[a], model.vertexX[b], model.vertexX[c]),
                 middle(model.vertexY[a], model.vertexY[b], model.vertexY[c]),
                 middle(model.vertexZ[a], model.vertexZ[b], model.vertexZ[c])));
-            entry.put("distance", billboard.anInt6140);
-            entry.put("width", (int) billboard.aShort71);
-            entry.put("height", (int) billboard.aShort73);
-            entry.put("texture", (int) billboard.aShort72);
-            entry.put("blendMode", (int) billboard.aByte97);
+            entry.put("distance", billboard.distance);
+            entry.put("halfWidth", (int) billboard.width);
+            entry.put("halfHeight", (int) billboard.height);
+            entry.put("texture", (int) billboard.texture);
+            entry.put("blendMode", (int) billboard.blendMode);
             entry.put("colour", ColourUtils.HSL_TO_RGB[model.faceColour[face] & 0xFFFF] & 0xFFFFFF);
             entry.put("alpha", WHOLE_ALPHA - (model.faceAlpha == null ? 0 : model.faceAlpha[face] & 0xFF));
             written.add(entry);

@@ -34,8 +34,8 @@ public final class LocPlacing {
     private static final int FULL_SCALE = 128;
     public static final int EIGHTH_TURN = 2048;
     private static final int QUARTER_TURN = 4096;
-    private static final int WALL_DECORATION_TURNED_X = 180;
-    private static final int WALL_DECORATION_TURNED_Z = -180;
+    private static final int WALL_DECORATION_TURNED_X_FINE = 180;
+    private static final int WALL_DECORATION_TURNED_Z_FINE = -180;
 
     /**
      * Places a copy of an asset as the client places it, by the client's own operations.
@@ -58,7 +58,7 @@ public final class LocPlacing {
             if (!turned) {
                 model.k(EIGHTH_TURN);
             }
-            model.H(WALL_DECORATION_TURNED_X, 0, WALL_DECORATION_TURNED_Z);
+            model.H(WALL_DECORATION_TURNED_X_FINE, 0, WALL_DECORATION_TURNED_Z_FINE);
         }
         if ((rotation & 3) != 0) {
             model.k((rotation & 3) * QUARTER_TURN);

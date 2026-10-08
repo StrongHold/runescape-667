@@ -1634,8 +1634,8 @@ public final class GlModel extends Model {
             @Pc(561) int local561 = (int) ((float) local523 * Static409.aFloat118 + ((float) this.aShort63 * Static91.aFloat208 + (Static430.aFloat120 * (float) local514 + Static209.aFloat70)));
             @Pc(580) int local580 = (int) ((float) this.aShort63 * Static188.aFloat65 + (Static24.aFloat20 + (float) local514 * Static289.aFloat84) + Static190.aFloat66 * (float) local523);
             if (local580 >= this.aClass19_Sub3_24.anInt8010) {
-                cylinder.anInt4504 = local542 * this.aClass19_Sub3_24.anInt8001 / local580 + this.aClass19_Sub3_24.anInt8021;
-                cylinder.anInt4505 = this.aClass19_Sub3_24.anInt8025 * local561 / local580 + this.aClass19_Sub3_24.anInt8016;
+                cylinder.topX = local542 * this.aClass19_Sub3_24.anInt8001 / local580 + this.aClass19_Sub3_24.anInt8021;
+                cylinder.topY = this.aClass19_Sub3_24.anInt8025 * local561 / local580 + this.aClass19_Sub3_24.anInt8016;
             } else {
                 local504 = true;
             }
@@ -1643,8 +1643,8 @@ public final class GlModel extends Model {
             @Pc(655) int local655 = (int) (Static91.aFloat208 * (float) this.aShort68 + (Static209.aFloat70 + Static430.aFloat120 * (float) local514) + (float) local523 * Static409.aFloat118);
             @Pc(674) int local674 = (int) (Static24.aFloat20 + Static289.aFloat84 * (float) local514 + (float) this.aShort68 * Static188.aFloat65 + (float) local523 * Static190.aFloat66);
             if (this.aClass19_Sub3_24.anInt8010 <= local674) {
-                cylinder.anInt4503 = this.aClass19_Sub3_24.anInt8025 * local655 / local674 + this.aClass19_Sub3_24.anInt8016;
-                cylinder.anInt4501 = local636 * this.aClass19_Sub3_24.anInt8001 / local674 + this.aClass19_Sub3_24.anInt8021;
+                cylinder.bottomY = this.aClass19_Sub3_24.anInt8025 * local655 / local674 + this.aClass19_Sub3_24.anInt8016;
+                cylinder.bottomX = local636 * this.aClass19_Sub3_24.anInt8001 / local674 + this.aClass19_Sub3_24.anInt8021;
             } else {
                 local504 = true;
             }
@@ -1659,24 +1659,24 @@ public final class GlModel extends Model {
                         local754 = (local674 - this.aClass19_Sub3_24.anInt8010 << 16) / (local674 - local580);
                         local765 = ((local636 - local542) * local754 >> 16) + local636;
                         local776 = local655 + (local754 * (local655 - local561) >> 16);
-                        cylinder.anInt4504 = local765 * this.aClass19_Sub3_24.anInt8001 / this.aClass19_Sub3_24.anInt8010 + this.aClass19_Sub3_24.anInt8021;
-                        cylinder.anInt4505 = this.aClass19_Sub3_24.anInt8016 + this.aClass19_Sub3_24.anInt8025 * local776 / this.aClass19_Sub3_24.anInt8010;
+                        cylinder.topX = local765 * this.aClass19_Sub3_24.anInt8001 / this.aClass19_Sub3_24.anInt8010 + this.aClass19_Sub3_24.anInt8021;
+                        cylinder.topY = this.aClass19_Sub3_24.anInt8016 + this.aClass19_Sub3_24.anInt8025 * local776 / this.aClass19_Sub3_24.anInt8010;
                     } else if (this.aClass19_Sub3_24.anInt8010 > local674) {
                         local754 = (local580 - this.aClass19_Sub3_24.anInt8010 << 16) / (local580 - local674);
                         local765 = (local754 * (local542 - local636) >> 16) + local542;
                         local776 = ((local561 - local655) * local754 >> 16) + local561;
-                        cylinder.anInt4504 = this.aClass19_Sub3_24.anInt8021 + this.aClass19_Sub3_24.anInt8001 * local765 / this.aClass19_Sub3_24.anInt8010;
-                        cylinder.anInt4505 = local776 * this.aClass19_Sub3_24.anInt8025 / this.aClass19_Sub3_24.anInt8010 + this.aClass19_Sub3_24.anInt8016;
+                        cylinder.topX = this.aClass19_Sub3_24.anInt8021 + this.aClass19_Sub3_24.anInt8001 * local765 / this.aClass19_Sub3_24.anInt8010;
+                        cylinder.topY = local776 * this.aClass19_Sub3_24.anInt8025 / this.aClass19_Sub3_24.anInt8010 + this.aClass19_Sub3_24.anInt8016;
                     }
                 }
             }
             if (local506) {
                 if (local580 > local674) {
-                    cylinder.anInt4502 = this.aClass19_Sub3_24.anInt8021 + this.aClass19_Sub3_24.anInt8001 * (this.aShort70 + local542) / local580 - cylinder.anInt4504;
+                    cylinder.radiusPixels = this.aClass19_Sub3_24.anInt8021 + this.aClass19_Sub3_24.anInt8001 * (this.aShort70 + local542) / local580 - cylinder.topX;
                 } else {
-                    cylinder.anInt4502 = this.aClass19_Sub3_24.anInt8021 + (local636 + this.aShort70) * this.aClass19_Sub3_24.anInt8001 / local674 - cylinder.anInt4501;
+                    cylinder.radiusPixels = this.aClass19_Sub3_24.anInt8021 + (local636 + this.aShort70) * this.aClass19_Sub3_24.anInt8001 / local674 - cylinder.bottomX;
                 }
-                cylinder.aBoolean352 = true;
+                cylinder.visible = true;
             }
         }
         this.aClass19_Sub3_24.method7027();
@@ -1994,13 +1994,13 @@ public final class GlModel extends Model {
             @Pc(595) int local595 = (int) (Static376.aFloat113 * (float) local519 + (Static238.aFloat73 * (float) this.aShort68 + (Static9.aFloat1 + Static393.aFloat117 * (float) local511)));
             @Pc(614) int local614 = (int) ((float) this.aShort68 * Static91.aFloat208 + (Static209.aFloat70 + (float) local511 * Static430.aFloat120) + Static409.aFloat118 * (float) local519);
             @Pc(633) int local633 = (int) (Static24.aFloat20 + Static289.aFloat84 * (float) local511 + Static188.aFloat65 * (float) this.aShort68 + (float) local519 * Static190.aFloat66);
-            cylinder.anInt4503 = this.aClass19_Sub3_24.anInt8016 + local614 * this.aClass19_Sub3_24.anInt8025 / arg2;
-            cylinder.anInt4501 = this.aClass19_Sub3_24.anInt8001 * local595 / arg2 + this.aClass19_Sub3_24.anInt8021;
-            cylinder.anInt4504 = this.aClass19_Sub3_24.anInt8021 + this.aClass19_Sub3_24.anInt8001 * local538 / arg2;
-            cylinder.anInt4505 = this.aClass19_Sub3_24.anInt8025 * local557 / arg2 + this.aClass19_Sub3_24.anInt8016;
+            cylinder.bottomY = this.aClass19_Sub3_24.anInt8016 + local614 * this.aClass19_Sub3_24.anInt8025 / arg2;
+            cylinder.bottomX = this.aClass19_Sub3_24.anInt8001 * local595 / arg2 + this.aClass19_Sub3_24.anInt8021;
+            cylinder.topX = this.aClass19_Sub3_24.anInt8021 + this.aClass19_Sub3_24.anInt8001 * local538 / arg2;
+            cylinder.topY = this.aClass19_Sub3_24.anInt8025 * local557 / arg2 + this.aClass19_Sub3_24.anInt8016;
             if (local576 >= this.aClass19_Sub3_24.anInt8010 || local633 >= this.aClass19_Sub3_24.anInt8010) {
-                cylinder.aBoolean352 = true;
-                cylinder.anInt4502 = (local538 + this.aShort70) * this.aClass19_Sub3_24.anInt8001 / arg2 + this.aClass19_Sub3_24.anInt8021 - cylinder.anInt4504;
+                cylinder.visible = true;
+                cylinder.radiusPixels = (local538 + this.aShort70) * this.aClass19_Sub3_24.anInt8001 / arg2 + this.aClass19_Sub3_24.anInt8021 - cylinder.topX;
             }
         }
         this.aClass19_Sub3_24.method6964((float) arg2);

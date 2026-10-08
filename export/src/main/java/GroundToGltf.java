@@ -49,8 +49,8 @@ import java.util.stream.IntStream;
  */
 public final class GroundToGltf {
 
-    private static final float UNITS_PER_METRE = 512.0F;
-    private static final int TILE = 512;
+    private static final float FINE_PER_METRE = 512.0F;
+    private static final int FINE_PER_TILE = 512;
 
     private static final int OPAQUE_ALPHA = 0xFF;
     /**
@@ -61,9 +61,9 @@ public final class GroundToGltf {
     private static final float[] ALL_CORNERS = {1.0F, 1.0F, 1.0F};
 
     private final JavaGround ground;
-    private final int origin;
-    private final int originX;
-    private final int originZ;
+    private final int originTiles;
+    private final int worldXTiles;
+    private final int worldZTiles;
     private final RecordingGround colours;
     private final boolean underwater;
     private final GltfBuilder gltf;
@@ -73,14 +73,14 @@ public final class GroundToGltf {
     private final Map<String, Integer> approximated = new TreeMap<>();
     private final Map<Integer, Integer> layered = new TreeMap<>();
 
-    private GroundToGltf(JavaGround ground, RecordingGround colours, boolean underwater, int origin, int worldX,
-                         int worldZ, GltfBuilder gltf, GltfMaterials materials) {
+    private GroundToGltf(JavaGround ground, RecordingGround colours, boolean underwater, int originTiles, int worldXTiles,
+                         int worldZTiles, GltfBuilder gltf, GltfMaterials materials) {
         this.ground = ground;
         this.colours = colours;
         this.underwater = underwater;
-        this.origin = origin;
-        this.originX = worldX;
-        this.originZ = worldZ;
+        this.originTiles = originTiles;
+        this.worldXTiles = worldXTiles;
+        this.worldZTiles = worldZTiles;
         this.gltf = gltf;
         this.materials = materials;
     }
@@ -102,20 +102,20 @@ public final class GroundToGltf {
      * Adds the primitives of one level's tiles inside a square to the mesh a document is building.
      * The caller closes the mesh.
      *
-     * @param origin where the map square starts in the region the ground covers, in tiles.
-     * @param worldX where the map square starts in the world, in tiles, which places its textures.
+     * @param originTiles where the map square starts in the region the ground covers, in tiles.
+     * @param worldXTiles where the map square starts in the world, in tiles, which places its textures.
      */
     public static Result convertInto(GltfBuilder gltf, GltfMaterials materials, JavaGround ground,
-                                     RecordingGround colours, boolean underwater, int origin, int worldX, int worldZ) {
-        return new GroundToGltf(ground, colours, underwater, origin, worldX, worldZ, gltf, materials).convert();
+                                     RecordingGround colours, boolean underwater, int originTiles, int worldXTiles, int worldZTiles) {
+        return new GroundToGltf(ground, colours, underwater, originTiles, worldXTiles, worldZTiles, gltf, materials).convert();
     }
 
     private Result convert() {
         var tiles = 0;
         var faces = 0;
 
-        for (var x = origin; x < origin + ClientMapSquareReader.TILES_ACROSS; x++) {
-            for (var z = origin; z < origin + ClientMapSquareReader.TILES_ACROSS; z++) {
+        for (var x = originTiles; x < originTiles + ClientMapSquareReader.TILES_ACROSS; x++) {
+            for (var z = originTiles; z < originTiles + ClientMapSquareReader.TILES_ACROSS; z++) {
                 var blended = ground.genericBlendedTiles == null ? null : ground.genericBlendedTiles[x][z];
                 var unblended = colours.unblended(x, z);
                 if (blended != null) {
@@ -194,16 +194,16 @@ public final class GroundToGltf {
         for (var vertex : new int[] {tile.faceA()[face], tile.faceB()[face], tile.faceC()[face]}) {
             var withinX = tile.offsetX()[vertex];
             var withinZ = tile.offsetY()[vertex];
-            var localX = (x - origin) * TILE + withinX;
-            var localZ = (z - origin) * TILE + withinZ;
+            var localX = (x - originTiles) * FINE_PER_TILE + withinX;
+            var localZ = (z - originTiles) * FINE_PER_TILE + withinZ;
             var lift = tile.offsetLevel() == null ? 0 : tile.offsetLevel()[vertex];
             var height = ground.averageHeight((x << ground.tileSizeShift) + withinX, (z << ground.tileSizeShift) + withinZ) + lift;
             var depth = tile.depths() == null ? 0 : tile.depths()[vertex];
             var towardsWater = tile.water().depth() == 0 ? 0 : Math.clamp(depth * 255L / tile.water().depth(), 0, 255);
             var rgb = Static572.lerpRgb(tile.water().colour(), Static732.scaleRgb(paletteRgb, ClientMapSquareReader.FULL_LIGHT), towardsWater);
             var normal = normal(x, z, withinX, withinZ);
-            var u = texture == -1 ? 0.0F : textureCoordinate(originX, localX, size);
-            var v = texture == -1 ? 0.0F : textureCoordinate(originZ, localZ, size);
+            var u = texture == -1 ? 0.0F : textureCoordinate(worldXTiles, localX, size);
+            var v = texture == -1 ? 0.0F : textureCoordinate(worldZTiles, localZ, size);
             addCorner(primitive, new Corner(localX, height, localZ, normal[0], normal[1], normal[2], rgb & 0xFFFFFF,
                 hsl & 0xFFFF, depth, opacity, u, v));
         }
@@ -318,11 +318,11 @@ public final class GroundToGltf {
 
         for (var corner = 0; corner < weights.length; corner++) {
             var vertex = a + corner;
-            var localX = (x - origin) * TILE + tile.verticesX[vertex];
-            var localZ = (z - origin) * TILE + tile.verticesZ[vertex];
+            var localX = (x - originTiles) * FINE_PER_TILE + tile.verticesX[vertex];
+            var localZ = (z - originTiles) * FINE_PER_TILE + tile.verticesZ[vertex];
             var normal = normal(x, z, tile.verticesX[vertex], tile.verticesZ[vertex]);
-            var u = texture == -1 ? 0.0F : textureCoordinate(originX, localX, size);
-            var v = texture == -1 ? 0.0F : textureCoordinate(originZ, localZ, size);
+            var u = texture == -1 ? 0.0F : textureCoordinate(worldXTiles, localX, size);
+            var v = texture == -1 ? 0.0F : textureCoordinate(worldZTiles, localZ, size);
 
             var depth = depths == null ? 0 : depths[vertex];
             var described = new Corner(localX, tile.verticesY[vertex], localZ, normal[0], normal[1], normal[2],
@@ -381,10 +381,10 @@ public final class GroundToGltf {
      * A texture coordinate along one axis: where the vertex is in the world over the texture's
      * size, measured from the last multiple of that size before the map square starts.
      */
-    private static float textureCoordinate(int squareStart, int local, int size) {
-        var start = (long) squareStart * TILE;
-        var from = Math.floorDiv(start, size) * (long) size;
-        return (float) (start - from + local) / size;
+    private static float textureCoordinate(int squareStartTiles, int localFine, int sizeFine) {
+        var start = (long) squareStartTiles * FINE_PER_TILE;
+        var from = Math.floorDiv(start, sizeFine) * (long) sizeFine;
+        return (float) (start - from + localFine) / sizeFine;
     }
 
     /**
@@ -396,8 +396,8 @@ public final class GroundToGltf {
         var se = cornerNormal(x + 1, z);
         var nw = cornerNormal(x, z + 1);
         var ne = cornerNormal(x + 1, z + 1);
-        var east = withinX / (float) TILE;
-        var north = withinZ / (float) TILE;
+        var east = withinX / (float) FINE_PER_TILE;
+        var north = withinZ / (float) FINE_PER_TILE;
 
         var blended = new float[3];
         for (var axis = 0; axis < blended.length; axis++) {
@@ -419,7 +419,7 @@ public final class GroundToGltf {
         var east = heights[Math.min(x + 1, heights.length - 1)][z];
         var south = heights[x][Math.max(z - 1, 0)];
         var north = heights[x][Math.min(z + 1, heights[x].length - 1)];
-        return unit(new float[] {east - west, -2.0F * TILE, north - south});
+        return unit(new float[] {east - west, -2.0F * FINE_PER_TILE, north - south});
     }
 
     private static float[] unit(float[] vector) {
@@ -433,7 +433,7 @@ public final class GroundToGltf {
         attributes.put("NORMAL", gltf.attribute(primitive.normals.toArray(), 3, "VEC3", false));
         attributes.put("COLOR_0", gltf.attribute(primitive.colours.toArray(), 4, "VEC4", false));
         attributes.put("_HSL", gltf.wholeAttribute(primitive.hsls.stream().mapToInt(Integer::intValue).toArray(), 4, "VEC4"));
-        attributes.put("_WATER", gltf.attribute(primitive.waterDepths.toArray(), 1, "SCALAR", false));
+        attributes.put("_WATER_DEPTH", gltf.attribute(primitive.waterDepths.toArray(), 1, "SCALAR", false));
         if (primitive.textured) {
             attributes.put("TEXCOORD_0", gltf.attribute(primitive.uvs.toArray(), 2, "VEC2", false));
         }
@@ -485,9 +485,9 @@ public final class GroundToGltf {
          * Writes one vertex, turned half a turn about x as a model's are.
          */
         private void add(Corner corner) {
-            positions.add(corner.x() / UNITS_PER_METRE);
-            positions.add(-corner.y() / UNITS_PER_METRE);
-            positions.add(-corner.z() / UNITS_PER_METRE);
+            positions.add(corner.x() / FINE_PER_METRE);
+            positions.add(-corner.y() / FINE_PER_METRE);
+            positions.add(-corner.z() / FINE_PER_METRE);
 
             normals.add(corner.normalX());
             normals.add(-corner.normalY());

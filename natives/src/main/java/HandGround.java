@@ -658,8 +658,8 @@ public final class HandGround {
          * ground how strongly each is shining before every frame it draws.
          */
         var middle = TILES * TILE / 2;
-        ground.method7868(
-            new Node_Sub7_Sub1(middle, LIGHT_ABOVE, middle, LIGHT_REACHES, 0, LIGHT_STRENGTH),
+        ground.addLight(
+            new GlPointLight(middle, LIGHT_ABOVE, middle, LIGHT_REACHES, 0, LIGHT_STRENGTH),
             new int[LIGHT_ANSWERS]);
 
         for (var x = 0; x < TILES; x++) {

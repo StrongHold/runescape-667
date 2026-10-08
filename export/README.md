@@ -76,7 +76,7 @@ vertex's alpha, which the GL ground writes as opaque, times the frame's alpha, s
 is nearly see-through. Where the GL driver has 3D textures (`GL_EXT_texture3D`, which the
 client turns off only for some old ATI drivers), the sixteen frames are the slices of one volume
 (`GlVolumeTexture`), filtered linearly and repeating on every axis, and the third coordinate is the
-part of four seconds gone (`lastTickTime % 4000 / 4000`), so each frame blends smoothly into the
+part of four seconds gone (`lastTickMillis % 4000 / 4000`), so each frame blends smoothly into the
 next and the last into the first. Without 3D textures the client binds the frame of the moment
 alone, a new one every quarter second, which looks choppy; an importer should take the volume.
 A second unit adds an alpha that fades the surface to opaque with eye
@@ -336,7 +336,7 @@ target at a time, and shows each frame for as long as the client does: the clien
 animation on by one cycle every 20 ms, and a sequence gives each frame a number of cycles. A
 frame of no cycles is never shown, and is left out. Its `extras` hold the role, the sequence id,
 whether the client tweens it, and, for a sequence that loops over only its last frames, the time
-the loop starts at.
+the loop starts at, `loopStartSeconds`, in seconds.
 
 Some of this is not what the client does. The glTF animation jumps from frame to frame, where the
 client tweens a sequence that asks for it, moving each part a little further towards the next
@@ -448,7 +448,7 @@ nodes or the unblended ones, never both. Every vertex of an unblended face has t
 `_HSL`, and as `COLOR_0` that HSL through the palette at full light, mixed towards the water's
 colour as deep as the vertex lies, as the software ground makes a blended vertex's colour. The GL toolkit draws the bed in a pass of its own (`UnderwaterEffect`), tinting
 each vertex towards the water's colour by how deep under the surface it lies, and the bed carries
-what that needs. Each bed vertex has `_WATER`, a float: how far under the water's surface it
+what that needs. Each bed vertex has `_WATER_DEPTH`, a float: how far under the water's surface it
 lies, in the client's units, as the terrain hands it to the ground, which writes one less into
 the vertex. Each bed material's `extras` give the water over its tiles, from the overlay's
 `FloorOverlayType`: `waterColour`, packed 0xRRGGBB, `waterDepth`, the depth in the client's
@@ -492,7 +492,7 @@ client's vertices, in its units and frame before the file's turn, so an engine p
 places the model's vertices, through the same merge, mirror, scale and turn. The types are in the
 texture library, under `particle/`. Each billboard, a sprite the client draws on a face, is resolved
 from its type: the `centre` of its face in the same frame, the `distance` it is pulled towards the
-camera in the client's units, its half `width` and `height` in those units, its `texture`, its
+camera in the client's units, its `halfWidth` and `halfHeight` in those units, its `texture`, its
 `blendMode` (1 by alpha, 2 added, 128 multiplied in), the face's `colour` from the palette, and its
 `alpha` out of 255. The GL toolkit draws each as a square facing the camera at that size, in that
 colour, unlit, blended that way (`GlModel.renderBillboards`); the face under a billboard whose type
@@ -511,7 +511,7 @@ the model after that, and all of it depends on the placement, so none of it is i
 type's data in the JSON file carries what that needs, along with the
 type's `loc` id, its `name` and its `shapes`: the type's `resize`, `offset`, `translate`, `hillchange` and
 `hillskew`, whether the mesh is `mirrored`, and the `sequences` the location plays, their weights
-and whether the client starts at a random frame. They also carry the type's `size` in tiles, as
+and whether the client starts at a random frame. They also carry the type's `sizeTiles`, its size in tiles as
 width and length before any turn, and whether it casts a `shadow`: when the client builds a map
 square it darkens the ground's tile corners under each location that does, by the location's
 radius over four up to 30 for one that stands on its tiles, and by 50 for the two corners of a
@@ -554,7 +554,7 @@ start the fog `(fogRange + 256) * 4` units before the far plane.
 Its `lights` list every light placed on the map square: its level and whether it lights the
 levels above and below, where it stands in the client's units from the map square's corner,
 with its height as the client places it, the ground's height at its tile less the height the
-file gives, how many tiles it reaches and which tiles of each row it lights, its colour, and
+file gives, how many tiles it reaches, `radiusTiles`, and which tiles of each row it lights, its colour, and
 its flicker. The flicker is one of the client's presets, or a light type from the config where
 the preset is 31, and either way it is written resolved as the least the light falls to, the
 pattern it follows, and how far and how fast it swings, out of 2048. The same lights are in
@@ -681,7 +681,7 @@ finds by their hashes, such as `q8_full` and the lobby's `verdana_13pt_regular`,
 that a config type or an interface holds. A run with `--sprite` writes no names.
 
 Every frame is checked against the client as it is written. The PNG is read back and must match
-pixel for pixel the canvas the client lays out from the same image (`IndexedImage.method9383`).
+pixel for pixel the canvas the client lays out from the same image (`IndexedImage.toArgb`).
 The sprite the software toolkit builds from the image, laid on a clear canvas of the toolkit's
 size at the toolkit's margins, must match it too. A sprite that differs fails the export. A
 planted dropped left margin fails 4,053 of the 14,904 frames, and a planted swap of the red and

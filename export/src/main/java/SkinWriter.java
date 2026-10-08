@@ -16,7 +16,7 @@ import java.util.TreeMap;
  * transform in a frame is the label's transform as {@link Skinning} works it out, written as a
  * move, a turn and a scale, which is all a glTF joint can be given. A frame that scales a label
  * after turning it, or scales it unevenly and then turns it, cannot be written that way exactly,
- * and {@link #worstDeviation} measures what the written joints land each vertex at against the
+ * and {@link #worstDeviationFine} measures what the written joints land each vertex at against the
  * client's own pose.
  */
 public final class SkinWriter {
@@ -61,7 +61,7 @@ public final class SkinWriter {
 
         var chained = new ArrayList<Boolean>();
         for (var label : labels) {
-            chained.add(label != -1 && skinning.deviationOfLabel(label, framePoses, poses, Trs::through) > TOLERANCE);
+            chained.add(label != -1 && skinning.deviationOfLabelFine(label, framePoses, poses, Trs::through) > TOLERANCE_FINE);
         }
         return new Joints(ofVertex, List.copyOf(labels), List.copyOf(chained));
     }
@@ -141,7 +141,7 @@ public final class SkinWriter {
      * kept as morph targets instead, in the client's units. The client's own integer arithmetic
      * accounts for about one unit.
      */
-    public static final double TOLERANCE = 2.5;
+    public static final double TOLERANCE_FINE = 2.5;
 
     /**
      * Adds an animation that moves every joint through the frames of a clip, each frame from the
@@ -259,7 +259,7 @@ public final class SkinWriter {
      * How far, at most, a vertex moved by its written joint lands from where the client put it,
      * over every pose, in the client's units.
      */
-    public static double worstDeviation(Skinning skinning, Joints joints, List<Skinning.FramePose> framePoses,
+    public static double worstDeviationFine(Skinning skinning, Joints joints, List<Skinning.FramePose> framePoses,
                                         List<Pose> poses) {
         var worst = 0.0;
         for (var joint = 1; joint < joints.count(); joint++) {
@@ -267,8 +267,8 @@ public final class SkinWriter {
             java.util.function.UnaryOperator<Skinning.Affine> through = joints.chained().get(joint)
                 ? Chain::through
                 : Trs::through;
-            var deviation = skinning.deviationOfLabel(label, framePoses, poses, through);
-            worst = Math.max(worst, deviation);
+            var deviationFine = skinning.deviationOfLabelFine(label, framePoses, poses, through);
+            worst = Math.max(worst, deviationFine);
         }
         return worst;
     }
@@ -315,7 +315,7 @@ public final class SkinWriter {
      */
     public record Trs(float[] translation, float[] rotation, float[] scale) {
 
-        private static final double UNITS_PER_METRE = 512.0;
+        private static final double FINE_PER_METRE = 512.0;
         private static final double[] FLIP = {1, -1, -1};
 
         public static Trs of(Skinning.Affine affine) {
@@ -366,8 +366,8 @@ public final class SkinWriter {
 
         static float[] gltfTranslation(Skinning.Affine affine) {
             var m = affine.m();
-            return new float[] {(float) (m[9] / UNITS_PER_METRE), (float) (-m[10] / UNITS_PER_METRE),
-                (float) (-m[11] / UNITS_PER_METRE)};
+            return new float[] {(float) (m[9] / FINE_PER_METRE), (float) (-m[10] / FINE_PER_METRE),
+                (float) (-m[11] / FINE_PER_METRE)};
         }
 
         /** A transform in glTF's frame, taken back into the client's frame and units. */
@@ -378,9 +378,9 @@ public final class SkinWriter {
                     m[column * 3 + row] = linear[column * 3 + row] * FLIP[row] * FLIP[column];
                 }
             }
-            m[9] = translation[0] * UNITS_PER_METRE;
-            m[10] = -translation[1] * UNITS_PER_METRE;
-            m[11] = -translation[2] * UNITS_PER_METRE;
+            m[9] = translation[0] * FINE_PER_METRE;
+            m[10] = -translation[1] * FINE_PER_METRE;
+            m[11] = -translation[2] * FINE_PER_METRE;
             return new Skinning.Affine(m);
         }
 

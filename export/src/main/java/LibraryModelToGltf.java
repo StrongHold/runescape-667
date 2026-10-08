@@ -55,7 +55,7 @@ import java.util.TreeSet;
  */
 public final class LibraryModelToGltf {
 
-    private static final float UNITS_PER_METRE = 512.0F;
+    private static final float FINE_PER_METRE = 512.0F;
 
     private static final int SMOOTH = 0;
     private static final int FLAT = 1;
@@ -175,8 +175,8 @@ public final class LibraryModelToGltf {
         var faces = new HashSet<Integer>();
         if (model.billboardFaces != null) {
             for (var billboard : model.billboardFaces) {
-                if (billboard.aBoolean464) {
-                    faces.add(billboard.anInt6139);
+                if (billboard.hideFace) {
+                    faces.add(billboard.face);
                 }
             }
         }
@@ -245,9 +245,9 @@ public final class LibraryModelToGltf {
      * primitive carries.
      */
     private void addVertex(Primitive primitive, int vertex) {
-        primitive.positions.add(model.vertexX[vertex] / UNITS_PER_METRE);
-        primitive.positions.add(-model.vertexY[vertex] / UNITS_PER_METRE);
-        primitive.positions.add(-model.vertexZ[vertex] / UNITS_PER_METRE);
+        primitive.positions.add(model.vertexX[vertex] / FINE_PER_METRE);
+        primitive.positions.add(-model.vertexY[vertex] / FINE_PER_METRE);
+        primitive.positions.add(-model.vertexZ[vertex] / FINE_PER_METRE);
         primitive.joints.add(jointOfVertex[vertex]);
         primitive.joints.add(0);
         primitive.joints.add(0);

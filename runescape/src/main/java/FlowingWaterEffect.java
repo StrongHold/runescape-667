@@ -77,7 +77,7 @@ public final class FlowingWaterEffect extends TextureEffect {
     @Override
     public void bindTexture(@OriginalArg(0) Class93 texture, @OriginalArg(1) int colourOp) {
         super.toolkit.method7001(texture);
-        super.toolkit.method6991(colourOp);
+        super.toolkit.setColourOp(colourOp);
     }
 
     @OriginalMember(owner = "client!ma", name = "a", descriptor = "(I)V")
@@ -123,16 +123,16 @@ public final class FlowingWaterEffect extends TextureEffect {
         Static617.aFloatArray69[2] = 0.0F;
         Static617.aFloatArray69[1] = textureScale;
         Static617.aFloatArray69[0] = 0.0F;
-        Static617.aFloatArray69[3] = (float) super.toolkit.lastTickTime * flowSpeed % 1.0F;
+        Static617.aFloatArray69[3] = (float) super.toolkit.lastTickMillis * flowSpeed % 1.0F;
         OpenGL.glTexGenfv(OpenGL.GL_T, OpenGL.GL_EYE_PLANE, Static617.aFloatArray69, 0);
         if (this.textures.aBoolean655) {
-            Static617.aFloatArray69[3] = (float) super.toolkit.lastTickTime * animationSpeed % 1.0F;
+            Static617.aFloatArray69[3] = (float) super.toolkit.lastTickMillis * animationSpeed % 1.0F;
             Static617.aFloatArray69[0] = 0.0F;
             Static617.aFloatArray69[1] = 0.0F;
             Static617.aFloatArray69[2] = 0.0F;
             OpenGL.glTexGenfv(OpenGL.GL_R, OpenGL.GL_OBJECT_PLANE, Static617.aFloatArray69, 0);
         } else {
-            @Pc(148) int frame = (int) ((float) super.toolkit.lastTickTime * animationSpeed * (float) FRAME_COUNT);
+            @Pc(148) int frame = (int) ((float) super.toolkit.lastTickMillis * animationSpeed * (float) FRAME_COUNT);
             super.toolkit.method7001(this.textures.aClass93_Sub2Array4[frame % FRAME_COUNT]);
         }
         super.toolkit.method7014(0);

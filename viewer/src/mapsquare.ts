@@ -42,7 +42,7 @@ export interface LoadedMapSquare {
     readonly missing: readonly string[];
 }
 
-const UNITS_PER_METRE = 512;
+const FINE_PER_METRE = 512;
 
 /**
  * How many location files are fetched at once. The files of a map square refer to the same few
@@ -206,17 +206,17 @@ function bentGeometry(geometry: BufferGeometry, matrix: Matrix4, bounds: Bounds,
     const held: ClientVertex[] = [];
     for (let at = 0; at < positions.count; at++) {
         held.push({
-            x: Math.round(positions.getX(at) * UNITS_PER_METRE),
-            y: Math.round(-positions.getY(at) * UNITS_PER_METRE),
-            z: Math.round(-positions.getZ(at) * UNITS_PER_METRE)
+            x: Math.round(positions.getX(at) * FINE_PER_METRE),
+            y: Math.round(-positions.getY(at) * FINE_PER_METRE),
+            z: Math.round(-positions.getZ(at) * FINE_PER_METRE)
         });
     }
 
     const vertices = placeVertices(held, extras, placement, turned);
     bend(vertices, bounds, extras.hillchange, extras.hillskew, floor, ceiling, placement.x, placement.y, placement.z);
     for (let at = 0; at < positions.count; at++) {
-        positions.setXYZ(at, vertices[at].x / UNITS_PER_METRE, -vertices[at].y / UNITS_PER_METRE,
-            -vertices[at].z / UNITS_PER_METRE);
+        positions.setXYZ(at, vertices[at].x / FINE_PER_METRE, -vertices[at].y / FINE_PER_METRE,
+            -vertices[at].z / FINE_PER_METRE);
     }
     positions.needsUpdate = true;
 

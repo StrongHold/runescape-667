@@ -2008,7 +2008,7 @@ static void renderModel(void *model, const void *matrix, jint *cylinder, int sma
                         textureMetricsFor((unsigned short) faceTexture[face]);
                     if (metrics != NULL) {
                         unlit = texturedUnlitColour(unlit, modelAmbient(model), metrics->alpha,
-                                                    metrics->aByte57);
+                                                    metrics->brightness);
                     }
                 }
             }

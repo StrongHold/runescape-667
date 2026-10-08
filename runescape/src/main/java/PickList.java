@@ -37,7 +37,7 @@ public final class PickList {
         @Pc(8) boolean unpickable = true;
         @Pc(11) PickingCylinder[] cylinders = pickable.pickingCylinders;
         for (@Pc(13) int index = 0; index < cylinders.length; index++) {
-            if (cylinders[index].aBoolean352) {
+            if (cylinders[index].visible) {
                 unpickable = false;
                 break;
             }

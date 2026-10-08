@@ -26,12 +26,12 @@ public final class PickableEntity extends Node {
         @Pc(10) int local10 = this.aEntity_18.getPickSizeShift();
         if (this.pickingCylinders != null) {
             for (@Pc(15) int local15 = 0; local15 < this.pickingCylinders.length; local15++) {
-                this.pickingCylinders[local15].anInt4502 <<= local10;
+                this.pickingCylinders[local15].radiusPixels <<= local10;
                 if (this.pickingCylinders[local15].method4048(arg2, arg1) && this.aEntity_18.picked(arg1, arg2, false, arg0)) {
-                    this.pickingCylinders[local15].anInt4502 >>= local10;
+                    this.pickingCylinders[local15].radiusPixels >>= local10;
                     return true;
                 }
-                this.pickingCylinders[local15].anInt4502 >>= local10;
+                this.pickingCylinders[local15].radiusPixels >>= local10;
             }
         }
         return false;

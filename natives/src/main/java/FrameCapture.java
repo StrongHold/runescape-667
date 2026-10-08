@@ -116,7 +116,7 @@ public final class FrameCapture {
          */
         toolkit.L(FOG_COLOUR, FOG_RANGE, 0);
 
-        toolkit.method7938(toolkit.createHeap(POOL_SIZE));
+        toolkit.setHeap(toolkit.createHeap(POOL_SIZE));
 
         /*
          * The ground is drawn through a worker, one per thread, which the client asks the toolkit
@@ -188,7 +188,7 @@ public final class FrameCapture {
             }
         }
 
-        toolkit.method7950();
+        toolkit.finish();
         writeManifest(manifest);
         window.dispose();
     }

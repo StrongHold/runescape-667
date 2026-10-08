@@ -962,7 +962,7 @@ public final class JavaModel extends Model {
             for (local21 = 0; local21 < this.billboardCount; local21++) {
                 @Pc(108) JavaBillboardFace local108 = this.billboardFaces[local21];
                 @Pc(113) JavaBillboardAttributes local113 = this.billboardAttributes[local21];
-                local113.anInt6225 = local113.anInt6225 & 0xFF000000 | ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(this.faceColour[local108.anInt6139] & 0xFFFF) & 0xFFFF] & 0xFFFFFF;
+                local113.anInt6225 = local113.anInt6225 & 0xFF000000 | ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(this.faceColour[local108.face] & 0xFFFF) & 0xFFFF] & 0xFFFFFF;
             }
         }
         if (this.lightingState == 2) {
@@ -1263,7 +1263,7 @@ public final class JavaModel extends Model {
                         for (local69 = 0; local69 < this.billboardCount; local69++) {
                             local2482 = this.billboardFaces[local69];
                             local2487 = this.billboardAttributes[local69];
-                            local2487.anInt6225 = local2487.anInt6225 & 0xFFFFFF | 255 - (this.faceAlpha[local2482.anInt6139] & 0xFF) << 24;
+                            local2487.anInt6225 = local2487.anInt6225 & 0xFFFFFF | 255 - (this.faceAlpha[local2482.face] & 0xFF) << 24;
                         }
                     }
                 }
@@ -1344,7 +1344,7 @@ public final class JavaModel extends Model {
                     for (local69 = 0; local69 < this.billboardCount; local69++) {
                         local2482 = this.billboardFaces[local69];
                         local2487 = this.billboardAttributes[local69];
-                        local2487.anInt6225 = local2487.anInt6225 & 0xFF000000 | ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(this.faceColour[local2482.anInt6139] & 0xFFFF) & 0xFFFF] & 0xFFFFFF;
+                        local2487.anInt6225 = local2487.anInt6225 & 0xFF000000 | ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(this.faceColour[local2482.face] & 0xFFFF) & 0xFFFF] & 0xFFFFFF;
                     }
                 }
             }
@@ -1735,7 +1735,7 @@ public final class JavaModel extends Model {
                         for (local14 = 0; local14 < this.billboardCount; local14++) {
                             local508 = this.billboardFaces[local14];
                             local513 = this.billboardAttributes[local14];
-                            local513.anInt6225 = local513.anInt6225 & 0xFFFFFF | 255 - (this.faceAlpha[local508.anInt6139] & 0xFF) << 24;
+                            local513.anInt6225 = local513.anInt6225 & 0xFFFFFF | 255 - (this.faceAlpha[local508.face] & 0xFF) << 24;
                         }
                     }
                 } else if (type == 7) {
@@ -1764,7 +1764,7 @@ public final class JavaModel extends Model {
                         for (local14 = 0; local14 < this.billboardCount; local14++) {
                             local508 = this.billboardFaces[local14];
                             local513 = this.billboardAttributes[local14];
-                            local513.anInt6225 = local513.anInt6225 & 0xFF000000 | ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(this.faceColour[local508.anInt6139] & 0xFFFF) & 0xFFFF] & 0xFFFFFF;
+                            local513.anInt6225 = local513.anInt6225 & 0xFF000000 | ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(this.faceColour[local508.face] & 0xFFFF) & 0xFFFF] & 0xFFFFFF;
                         }
                     }
                 } else {
@@ -1888,7 +1888,7 @@ public final class JavaModel extends Model {
             }
             if (fogged) {
                 local59 = this.faceBillboard[face];
-                if (local59 == -1 || !this.billboardFaces[local59].aBoolean464) {
+                if (local59 == -1 || !this.billboardFaces[local59].hideFace) {
                     this.drawFoggedTriangleArgb(face);
                 }
                 return;
@@ -1897,10 +1897,10 @@ public final class JavaModel extends Model {
             if (local59 != -1) {
                 @Pc(280) JavaBillboardFace local280 = this.billboardFaces[local59];
                 @Pc(285) JavaBillboardAttributes local285 = this.billboardAttributes[local59];
-                if (!local280.aBoolean464) {
+                if (!local280.hideFace) {
                     this.drawTriangleArgb(face);
                 }
-                this.toolkit.drawBillboardArgb(local285.anInt6221, local285.anInt6227, local285.anInt6224, local285.anInt6232, local285.anInt6220, local285.anInt6231, local280.aShort72 & 0xFFFF, local285.anInt6225, local280.aByte98, local280.aByte97);
+                this.toolkit.drawBillboardArgb(local285.anInt6221, local285.anInt6227, local285.anInt6224, local285.anInt6232, local285.anInt6220, local285.anInt6231, local280.texture & 0xFFFF, local285.anInt6225, local280.colourOp, local280.blendMode);
                 return;
             }
             this.drawTriangleArgb(face);
@@ -1963,7 +1963,7 @@ public final class JavaModel extends Model {
             for (@Pc(27) int local27 = 0; local27 < this.billboardCount; local27++) {
                 @Pc(33) JavaBillboardFace local33 = this.billboardFaces[local27];
                 @Pc(38) JavaBillboardAttributes local38 = this.billboardAttributes[local27];
-                local38.anInt6225 = local38.anInt6225 & 0xFF000000 | ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(this.faceColour[local33.anInt6139]) & 0xFFFF] & 0xFFFFFF;
+                local38.anInt6225 = local38.anInt6225 & 0xFF000000 | ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(this.faceColour[local33.face]) & 0xFFFF] & 0xFFFFFF;
             }
         }
         if (this.lightingState == 2) {
@@ -2392,7 +2392,7 @@ public final class JavaModel extends Model {
                         for (local69 = 0; local69 < this.billboardCount; local69++) {
                             local994 = this.billboardFaces[local69];
                             local999 = this.billboardAttributes[local69];
-                            local999.anInt6225 = local999.anInt6225 & 0xFFFFFF | 255 - (this.faceAlpha[local994.anInt6139] & 0xFF) << 24;
+                            local999.anInt6225 = local999.anInt6225 & 0xFFFFFF | 255 - (this.faceAlpha[local994.face] & 0xFF) << 24;
                         }
                     }
                 }
@@ -2471,7 +2471,7 @@ public final class JavaModel extends Model {
                     for (local69 = 0; local69 < this.billboardCount; local69++) {
                         local994 = this.billboardFaces[local69];
                         local999 = this.billboardAttributes[local69];
-                        local999.anInt6225 = local999.anInt6225 & 0xFF000000 | ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(this.faceColour[local994.anInt6139] & 0xFFFF) & 0xFFFF] & 0xFFFFFF;
+                        local999.anInt6225 = local999.anInt6225 & 0xFF000000 | ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(this.faceColour[local994.face] & 0xFFFF) & 0xFFFF] & 0xFFFFFF;
                     }
                 }
             }
@@ -3122,7 +3122,7 @@ public final class JavaModel extends Model {
             i = 0;
             while (i < this.billboardCount) {
                 @Pc(10) JavaBillboardFace billboard = this.billboardFaces[i];
-                this.faceBillboard[billboard.anInt6139] = i++;
+                this.faceBillboard[billboard.face] = i++;
             }
         }
         if (!this.transparent && this.billboardFaces == null) {
@@ -3615,7 +3615,7 @@ public final class JavaModel extends Model {
             }
             if (fogged) {
                 local59 = this.faceBillboard[face];
-                if (local59 == -1 || !this.billboardFaces[local59].aBoolean464) {
+                if (local59 == -1 || !this.billboardFaces[local59].hideFace) {
                     this.drawFoggedTriangleRgb(face);
                 }
                 return;
@@ -3624,10 +3624,10 @@ public final class JavaModel extends Model {
             if (local59 != -1) {
                 @Pc(280) JavaBillboardFace local280 = this.billboardFaces[local59];
                 @Pc(285) JavaBillboardAttributes local285 = this.billboardAttributes[local59];
-                if (!local280.aBoolean464) {
+                if (!local280.hideFace) {
                     this.drawTriangleRgb(face);
                 }
-                this.toolkit.drawBillboardRgb(local285.anInt6221, local285.anInt6227, local285.anInt6224, local285.anInt6232, local285.anInt6220, local285.anInt6231, local280.aShort72 & 0xFFFF, local285.anInt6225, local280.aByte98, local280.aByte97);
+                this.toolkit.drawBillboardRgb(local285.anInt6221, local285.anInt6227, local285.anInt6224, local285.anInt6232, local285.anInt6220, local285.anInt6231, local280.texture & 0xFFFF, local285.anInt6225, local280.colourOp, local280.blendMode);
                 return;
             }
             this.drawTriangleRgb(face);
@@ -4012,9 +4012,9 @@ public final class JavaModel extends Model {
                 for (local942 = 0; local942 < this.billboardCount; local942++) {
                     local948 = this.billboardFaces[local942];
                     local953 = this.billboardAttributes[local942];
-                    local959 = this.faceA[local948.anInt6139];
-                    local965 = this.faceB[local948.anInt6139];
-                    local971 = this.faceC[local948.anInt6139];
+                    local959 = this.faceA[local948.face];
+                    local965 = this.faceB[local948.face];
+                    local971 = this.faceC[local948.face];
                     local762 = (this.vertexX[local959] + this.vertexX[local965] + this.vertexX[local971]) / 3;
                     local767 = (this.vertexY[local959] + this.vertexY[local965] + this.vertexY[local971]) / 3;
                     local772 = (this.vertexZ[local959] + this.vertexZ[local965] + this.vertexZ[local971]) / 3;
@@ -4024,9 +4024,9 @@ public final class JavaModel extends Model {
                     if (local823 > (float) this.toolkit.zNear) {
                         local953.anInt6221 = this.toolkit.projectionCenterX + (int) (local789 * (float) local743 / local823);
                         local953.anInt6227 = this.toolkit.projectionCenterY + (int) (local806 * (float) local747 / local823);
-                        local953.anInt6224 = (int) local823 - local948.anInt6140;
-                        local953.anInt6232 = (int) ((float) (local953.anInt6223 * local948.aShort71 * local743) / (local823 * 128.0F));
-                        local953.anInt6220 = (int) ((float) (local953.anInt6226 * local948.aShort73 * local747) / (local823 * 128.0F));
+                        local953.anInt6224 = (int) local823 - local948.distance;
+                        local953.anInt6232 = (int) ((float) (local953.anInt6223 * local948.width * local743) / (local823 * 128.0F));
+                        local953.anInt6220 = (int) ((float) (local953.anInt6226 * local948.height * local747) / (local823 * 128.0F));
                     } else {
                         local953.anInt6232 = local953.anInt6220 = 0;
                     }
@@ -4056,9 +4056,9 @@ public final class JavaModel extends Model {
                 for (local942 = 0; local942 < this.billboardCount; local942++) {
                     local948 = this.billboardFaces[local942];
                     local953 = this.billboardAttributes[local942];
-                    local959 = this.faceA[local948.anInt6139];
-                    local965 = this.faceB[local948.anInt6139];
-                    local971 = this.faceC[local948.anInt6139];
+                    local959 = this.faceA[local948.face];
+                    local965 = this.faceB[local948.face];
+                    local971 = this.faceC[local948.face];
                     local762 = (this.vertexX[local959] + this.vertexX[local965] + this.vertexX[local971]) / 3;
                     local767 = (this.vertexY[local959] + this.vertexY[local965] + this.vertexY[local971]) / 3;
                     local772 = (this.vertexZ[local959] + this.vertexZ[local965] + this.vertexZ[local971]) / 3;
@@ -4066,9 +4066,9 @@ public final class JavaModel extends Model {
                     local806 = local375 + local509 * (float) local762 + local402 * (float) local767 + local518 * (float) local772;
                     local953.anInt6221 = this.toolkit.projectionCenterX + (int) (local789 * (float) local743 / (float) orthoDepth);
                     local953.anInt6227 = this.toolkit.projectionCenterY + (int) (local806 * (float) local747 / (float) orthoDepth);
-                    local953.anInt6224 = orthoDepth - local948.anInt6140;
-                    local953.anInt6232 = local953.anInt6223 * local948.aShort71 * local743 / (orthoDepth << 7);
-                    local953.anInt6220 = local953.anInt6226 * local948.aShort73 * local747 / (orthoDepth << 7);
+                    local953.anInt6224 = orthoDepth - local948.distance;
+                    local953.anInt6232 = local953.anInt6223 * local948.width * local743 / (orthoDepth << 7);
+                    local953.anInt6220 = local953.anInt6226 * local948.height * local747 / (orthoDepth << 7);
                 }
             }
         }
@@ -4087,8 +4087,8 @@ public final class JavaModel extends Model {
                 if (orthoDepth != -1) {
                     local1627 = orthoDepth;
                 }
-                cylinder.anInt4504 = this.toolkit.projectionCenterX + (int) (local789 * (float) local743 / (float) local1627);
-                cylinder.anInt4505 = this.toolkit.projectionCenterY + (int) (local806 * (float) local747 / (float) local1627);
+                cylinder.topX = this.toolkit.projectionCenterX + (int) (local789 * (float) local743 / (float) local1627);
+                cylinder.topY = this.toolkit.projectionCenterY + (int) (local806 * (float) local747 / (float) local1627);
             } else {
                 local1543 = true;
             }
@@ -4102,8 +4102,8 @@ public final class JavaModel extends Model {
                 if (orthoDepth != -1) {
                     local1729 = orthoDepth;
                 }
-                cylinder.anInt4501 = this.toolkit.projectionCenterX + (int) (local1687 * (float) local743 / (float) local1729);
-                cylinder.anInt4503 = this.toolkit.projectionCenterY + (int) (local1704 * (float) local747 / (float) local1729);
+                cylinder.bottomX = this.toolkit.projectionCenterX + (int) (local1687 * (float) local743 / (float) local1729);
+                cylinder.bottomY = this.toolkit.projectionCenterY + (int) (local1704 * (float) local747 / (float) local1729);
             } else {
                 local1543 = true;
             }
@@ -4123,8 +4123,8 @@ public final class JavaModel extends Model {
                         if (orthoDepth != -1) {
                             local1820 = orthoDepth;
                         }
-                        cylinder.anInt4504 = this.toolkit.projectionCenterX + local1809 * local743 / local1820;
-                        cylinder.anInt4505 = this.toolkit.projectionCenterY + local1818 * local747 / local1820;
+                        cylinder.topX = this.toolkit.projectionCenterX + local1809 * local743 / local1820;
+                        cylinder.topY = this.toolkit.projectionCenterY + local1818 * local747 / local1820;
                     } else if (local1721 < (float) local751) {
                         local1800 = (local823 - (float) local751) / (local823 - local1721);
                         local1809 = (int) (local789 + (local789 - local1687) * local1800);
@@ -4133,8 +4133,8 @@ public final class JavaModel extends Model {
                         if (orthoDepth != -1) {
                             local1820 = orthoDepth;
                         }
-                        cylinder.anInt4504 = this.toolkit.projectionCenterX + local1809 * local743 / local1820;
-                        cylinder.anInt4505 = this.toolkit.projectionCenterY + local1818 * local747 / local1820;
+                        cylinder.topX = this.toolkit.projectionCenterX + local1809 * local743 / local1820;
+                        cylinder.topY = this.toolkit.projectionCenterY + local1818 * local747 / local1820;
                     }
                 }
             }
@@ -4144,15 +4144,15 @@ public final class JavaModel extends Model {
                     if (orthoDepth != -1) {
                         local1729 = orthoDepth;
                     }
-                    cylinder.anInt4502 = this.toolkit.projectionCenterX + (int) ((local789 + (float) this.radius) * (float) local743 / (float) local1729) - cylinder.anInt4504;
+                    cylinder.radiusPixels = this.toolkit.projectionCenterX + (int) ((local789 + (float) this.radius) * (float) local743 / (float) local1729) - cylinder.topX;
                 } else {
                     local1729 = (int) local1721;
                     if (orthoDepth != -1) {
                         local1729 = orthoDepth;
                     }
-                    cylinder.anInt4502 = this.toolkit.projectionCenterX + (int) ((local1687 + (float) this.radius) * (float) local743 / (float) local1729) - cylinder.anInt4501;
+                    cylinder.radiusPixels = this.toolkit.projectionCenterX + (int) ((local1687 + (float) this.radius) * (float) local743 / (float) local1729) - cylinder.bottomX;
                 }
-                cylinder.aBoolean352 = true;
+                cylinder.visible = true;
             }
         }
         this.applyLighting(true);
@@ -4207,7 +4207,7 @@ public final class JavaModel extends Model {
             i = 0;
             while (i < this.billboardCount) {
                 @Pc(10) JavaBillboardFace billboard = this.billboardFaces[i];
-                this.faceBillboard[billboard.anInt6139] = i++;
+                this.faceBillboard[billboard.face] = i++;
             }
         }
         if (!this.transparent && this.billboardFaces == null) {

@@ -16,14 +16,14 @@ import type { LocExtras, Placement, ShapeExtras } from './description.ts';
  * a scale done in floating point lands a vertex a unit away from them.
  */
 
-const UNITS_PER_METRE = 512;
+const FINE_PER_METRE = 512;
 const FULL_SCALE = 128;
 const WALL_L = 2;
 const WALL_DECORATION = 4;
 const CENTREPIECE = 10;
-const EIGHTH_TURN = Math.PI / 4;
-const QUARTER_TURN = Math.PI / 2;
-const WALL_DECORATION_TURNED_MOVE: readonly [number, number, number] = [180, 0, -180];
+const EIGHTH_TURN_RADIANS = Math.PI / 4;
+const QUARTER_TURN_RADIANS = Math.PI / 2;
+const WALL_DECORATION_TURNED_MOVE_FINE: readonly [number, number, number] = [180, 0, -180];
 
 /** Whether a placement uses the asset that is turned 45 degrees already. */
 export function usesTurnedMesh(extras: LocExtras, placement: Placement): boolean {
@@ -44,12 +44,12 @@ export function placementMatrix(extras: LocExtras, placement: Placement, turned:
     }
     if (placement.shape === WALL_DECORATION && rotation > 3) {
         if (!turned) {
-            matrix.premultiply(new Matrix4().makeRotationY(-EIGHTH_TURN));
+            matrix.premultiply(new Matrix4().makeRotationY(-EIGHTH_TURN_RADIANS));
         }
-        matrix.premultiply(translation(WALL_DECORATION_TURNED_MOVE));
+        matrix.premultiply(translation(WALL_DECORATION_TURNED_MOVE_FINE));
     }
     if ((rotation & 3) !== 0) {
-        matrix.premultiply(new Matrix4().makeRotationY(-(rotation & 3) * QUARTER_TURN));
+        matrix.premultiply(new Matrix4().makeRotationY(-(rotation & 3) * QUARTER_TURN_RADIANS));
     }
     const [scaleX, scaleY, scaleZ] = extras.resize;
     if (scaleX !== FULL_SCALE || scaleY !== FULL_SCALE || scaleZ !== FULL_SCALE) {
@@ -59,7 +59,7 @@ export function placementMatrix(extras: LocExtras, placement: Placement, turned:
         matrix.premultiply(translation(extras.offset));
     }
     if (placement.shape === CENTREPIECE && rotation > 3) {
-        matrix.premultiply(new Matrix4().makeRotationY(-EIGHTH_TURN));
+        matrix.premultiply(new Matrix4().makeRotationY(-EIGHTH_TURN_RADIANS));
     }
     return matrix;
 }
@@ -75,7 +75,7 @@ export function standingMatrix(extras: LocExtras, placement: Placement): Matrix4
 /** A move in the client's units, as a transform in the viewer's frame. */
 function translation(move: readonly [number, number, number]): Matrix4 {
     const [x, y, z] = move;
-    return new Matrix4().makeTranslation(x / UNITS_PER_METRE, -y / UNITS_PER_METRE, -z / UNITS_PER_METRE);
+    return new Matrix4().makeTranslation(x / FINE_PER_METRE, -y / FINE_PER_METRE, -z / FINE_PER_METRE);
 }
 
 /**
@@ -102,7 +102,7 @@ export function placeVertices(vertices: readonly ClientVertex[], extras: LocExtr
         if (!turned) {
             placed = placed.map(eighthTurn);
         }
-        const [moveX, moveY, moveZ] = WALL_DECORATION_TURNED_MOVE;
+        const [moveX, moveY, moveZ] = WALL_DECORATION_TURNED_MOVE_FINE;
         placed = placed.map(vertex => ({ x: vertex.x + moveX, y: vertex.y + moveY, z: vertex.z + moveZ }));
     }
     for (let turns = 0; turns < (rotation & 3); turns++) {

@@ -50,13 +50,13 @@ public final class ClientMapSquareReader {
      * The region is three squares across, and the map square wanted starts one square in.
      */
     private static final int REGION_TILES = TILES_ACROSS * 3;
-    public static final int ORIGIN = TILES_ACROSS;
+    public static final int ORIGIN_TILES = TILES_ACROSS;
 
     /**
      * How far the scene keeps track of what is drawn around the camera. Nothing is drawn here, so
      * this only sizes some arrays the scene allocates.
      */
-    private static final int RENDER_DISTANCE = 25;
+    private static final int RENDER_DISTANCE_TILES = 25;
 
     /**
      * The light a tile is coloured under, as near to full as the ground's light levels go. A light
@@ -82,7 +82,7 @@ public final class ClientMapSquareReader {
      * edge is bent against the corners of every tile it covers, and a large one reaches several
      * tiles into the neighbour.
      */
-    public static final int HEIGHT_MARGIN = 8;
+    public static final int HEIGHT_MARGIN_TILES = 8;
 
     private final ClientLocReader locs;
     private final ClientModelReader models;
@@ -96,7 +96,7 @@ public final class ClientMapSquareReader {
      * poses the asset and turns the result, and the two round the same arithmetic differently by
      * at most one unit, which is a five hundred and twelfth of a tile.
      */
-    private static final int POSED_TOLERANCE = 1;
+    private static final int POSED_TOLERANCE_FINE = 1;
 
     /**
      * The asset of each location and shape placed so far, which every placement of it is
@@ -268,7 +268,7 @@ public final class ClientMapSquareReader {
 
         var placements = new ArrayList<Placement>();
         if (locations instanceof Placing.Placed) {
-            placements.addAll(placements(toolkit, Static478.aTileArrayArrayArray3, false));
+            placements.addAll(placements(toolkit, Static478.floorTiles, false));
         }
 
         Underwater underwaterWorld = new Underwater.Dry();
@@ -281,7 +281,7 @@ public final class ClientMapSquareReader {
             switchScene(false);
 
             if (bedLocations instanceof Placing.Placed) {
-                placements.addAll(placements(toolkit, Static420.aTileArrayArrayArray2, true));
+                placements.addAll(placements(toolkit, Static420.underwaterTiles, true));
             }
             underwaterWorld = new Underwater.Bed((JavaGround) Static693.underwaterGround[0], bedColours.getFirst(),
                 heights(Static693.underwaterGround[0]), bedLocations);
@@ -328,7 +328,7 @@ public final class ClientMapSquareReader {
         var flags = new int[TILES_ACROSS][TILES_ACROSS];
         for (var x = 0; x < TILES_ACROSS; x++) {
             for (var z = 0; z < TILES_ACROSS; z++) {
-                flags[x][z] = Static280.tileFlags[level][ORIGIN + x][ORIGIN + z] & 0xFF;
+                flags[x][z] = Static280.tileFlags[level][ORIGIN_TILES + x][ORIGIN_TILES + z] & 0xFF;
             }
         }
         return flags;
@@ -338,11 +338,11 @@ public final class ClientMapSquareReader {
      * The height of every tile corner the map square's locations can be bent against.
      */
     private static int[][] heights(Ground ground) {
-        var across = TILES_ACROSS + 2 * HEIGHT_MARGIN + 1;
+        var across = TILES_ACROSS + 2 * HEIGHT_MARGIN_TILES + 1;
         var heights = new int[across][across];
         for (var x = 0; x < across; x++) {
             for (var z = 0; z < across; z++) {
-                heights[x][z] = ground.tileHeights[ORIGIN - HEIGHT_MARGIN + x][ORIGIN - HEIGHT_MARGIN + z];
+                heights[x][z] = ground.tileHeights[ORIGIN_TILES - HEIGHT_MARGIN_TILES + x][ORIGIN_TILES - HEIGHT_MARGIN_TILES + z];
             }
         }
         return heights;
@@ -353,7 +353,7 @@ public final class ClientMapSquareReader {
      * keeps locations on, and which grounds it builds and places them against.
      */
     private static void switchScene(boolean underwater) {
-        Static379.method5355(underwater);
+        Static379.setUnderwater(underwater);
     }
 
     /**
@@ -386,7 +386,7 @@ public final class ClientMapSquareReader {
             collisionMaps[level] = CollisionMap.create(REGION_TILES, REGION_TILES);
         }
 
-        Static21.initScene(toolkit, 1, REGION_TILES, REGION_TILES, RENDER_DISTANCE, underwater, false);
+        Static21.initScene(toolkit, 1, REGION_TILES, REGION_TILES, RENDER_DISTANCE_TILES, underwater, false);
 
         Static439.hardShadows = OFF;
         Static428.highMemory = true;
@@ -436,7 +436,7 @@ public final class ClientMapSquareReader {
         for (var square : missing) {
             region.setMapSquareHeights(square[0], square[1]);
         }
-        return EnvironmentDecoder.decode(tail, lightTypes, region.tileHeights, ORIGIN, ORIGIN);
+        return EnvironmentDecoder.decode(tail, lightTypes, region.tileHeights, ORIGIN_TILES, ORIGIN_TILES);
     }
 
     /**
@@ -461,7 +461,7 @@ public final class ClientMapSquareReader {
                 : "there is no key for " + name + " under " + keys + ", and it is not stored open");
         }
 
-        region.loadLocations(ORIGIN, ORIGIN, collisionMaps, models.toolkit(), data);
+        region.loadLocations(ORIGIN_TILES, ORIGIN_TILES, collisionMaps, models.toolkit(), data);
         return new Placing.Placed();
     }
 
@@ -475,7 +475,7 @@ public final class ClientMapSquareReader {
             return new Placing.NotPlaced("the cache holds no " + name);
         }
 
-        bed.loadLocations(ORIGIN, ORIGIN, null, models.toolkit(), data);
+        bed.loadLocations(ORIGIN_TILES, ORIGIN_TILES, null, models.toolkit(), data);
         return new Placing.Placed();
     }
 
@@ -520,8 +520,8 @@ public final class ClientMapSquareReader {
         Set<Object> seen = Collections.newSetFromMap(new IdentityHashMap<>());
 
         for (var level = 0; level < tiles.length; level++) {
-            for (var x = ORIGIN; x < ORIGIN + TILES_ACROSS; x++) {
-                for (var z = ORIGIN; z < ORIGIN + TILES_ACROSS; z++) {
+            for (var x = ORIGIN_TILES; x < ORIGIN_TILES + TILES_ACROSS; x++) {
+                for (var z = ORIGIN_TILES; z < ORIGIN_TILES + TILES_ACROSS; z++) {
                     var tile = tiles[level][x][z];
                     if (tile != null) {
                         placementsOn(tile, toolkit, seen).forEach(placement -> placements.add(placement.under(underwater)));
@@ -565,10 +565,10 @@ public final class ClientMapSquareReader {
         return switch (decor) {
             case null -> Optional.empty();
             case StaticWallDecor held -> placement(held.id, held.shape, held.rotation, held.level, held.virtualLevel,
-                part, held.x + held.aShort101, held.y, held.z + held.aShort102, held.underwater,
+                part, held.x + held.offsetX, held.y, held.z + held.offsetZ, held.underwater,
                 model(held.modelAndShadow(toolkit, UNLIT_LOCATION, false)));
             case DynamicWallDecor moving -> dynamic(moving.entity, part,
-                moving.x + moving.aShort101, moving.y, moving.z + moving.aShort102, toolkit);
+                moving.x + moving.offsetX, moving.y, moving.z + moving.offsetZ, toolkit);
             default -> throw new IllegalStateException("A wall decoration of a kind the client never places: "
                 + decor.getClass());
         };
@@ -694,7 +694,7 @@ public final class ClientMapSquareReader {
                 var assetPosed = locs.poser(type, shape, turned).posed(animator);
                 var placedPosed = LocPlacing.place(assetPosed, type, shape, rotation, floor, ceiling, x, y, z, turned,
                     scaled);
-                if (clientPosed == null || !LocPlacing.sameVertices(placedPosed, clientPosed, POSED_TOLERANCE)) {
+                if (clientPosed == null || !LocPlacing.sameVertices(placedPosed, clientPosed, POSED_TOLERANCE_FINE)) {
                     return Check.DIFFERS_POSED;
                 }
             }

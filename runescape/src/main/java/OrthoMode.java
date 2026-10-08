@@ -306,11 +306,11 @@ public final class OrthoMode {
         updateSurfaceSize(height, width);
         if (mode == 0) {
             surface = null;
-            surface = toolkit.createOffscreenSurface(toolkit.method7962(surfaceWidth, surfaceHeight), toolkit.method7986(surfaceWidth, surfaceHeight));
+            surface = toolkit.createOffscreenSurface(toolkit.method7962(surfaceWidth, surfaceHeight), toolkit.createDepthBuffer(surfaceWidth, surfaceHeight));
         } else if (mode == 1 && (tiles == null || oldTilesX != tilesX || oldTilesY != tilesY)) {
             tiles = new OffscreenSurface[tilesX * tilesY];
             for (@Pc(74) int i = 0; i < tiles.length; i++) {
-                tiles[i] = toolkit.createOffscreenSurface(toolkit.method7962(tileWidth, tileHeight), toolkit.method7986(tileWidth, tileHeight));
+                tiles[i] = toolkit.createOffscreenSurface(toolkit.method7962(tileWidth, tileHeight), toolkit.createDepthBuffer(tileWidth, tileHeight));
             }
             stamp = 1;
             tileStamps = new int[tilesX * tilesY];
@@ -358,7 +358,7 @@ public final class OrthoMode {
             for (@Pc(25) int x = 0; x < tilesX; x++) {
                 @Pc(36) int index = Node_Sub1_Sub27.method9118(tileOffsetX + x, tilesX) + rowOffset;
                 if (tileStamps[index] == stamp) {
-                    tiles[index].method9040(0, 0, tileWidth, tileHeight, tileWidth * x, tileHeight * y);
+                    tiles[index].copyToSurface(0, 0, tileWidth, tileHeight, tileWidth * x, tileHeight * y);
                 }
             }
         }
@@ -489,19 +489,19 @@ public final class OrthoMode {
                     @Pc(463) boolean cull = true;
                     for (i = 0; i < cylinders.length; i++) {
                         @Pc(471) PickingCylinder cylinder = cylinders[i];
-                        @Pc(474) int x1 = cylinder.anInt4504;
-                        @Pc(477) int y1 = cylinder.anInt4505;
-                        @Pc(480) int x2 = cylinder.anInt4501;
-                        @Pc(483) int y2 = cylinder.anInt4503;
-                        @Pc(486) int radius = cylinder.anInt4502;
+                        @Pc(474) int x1 = cylinder.topX;
+                        @Pc(477) int y1 = cylinder.topY;
+                        @Pc(480) int x2 = cylinder.bottomX;
+                        @Pc(483) int y2 = cylinder.bottomY;
+                        @Pc(486) int radius = cylinder.radiusPixels;
                         @Pc(493) int newY1;
-                        cylinder.anInt4505 = newY1 = y1 - shiftY;
+                        cylinder.topY = newY1 = y1 - shiftY;
                         @Pc(501) int newY2;
-                        cylinder.anInt4503 = newY2 = y2 - shiftY;
+                        cylinder.bottomY = newY2 = y2 - shiftY;
                         @Pc(509) int newX1;
-                        cylinder.anInt4504 = newX1 = x1 - shiftX;
+                        cylinder.topX = newX1 = x1 - shiftX;
                         @Pc(517) int newX2;
-                        cylinder.anInt4501 = newX2 = x2 - shiftX;
+                        cylinder.bottomX = newX2 = x2 - shiftX;
                         if (cull) {
                             @Pc(537) int left = (newX1 >= newX2 ? newX2 : newX1) - radius;
                             if (surfaceWidth >= left) {
@@ -574,7 +574,7 @@ public final class OrthoMode {
                         for (i = 0; i < tilesX; i++) {
                             @Pc(881) int index = Node_Sub1_Sub27.method9118(i + tileOffsetX, tilesX) + rowOffset;
                             @Pc(936) boolean exposed = tileY >= newRowStart && tileY < newRowStart + newRowCount || keptRowStart <= tileY && tileY < keptRowCount + keptRowStart && i >= newColStart && i < newColCount + newColStart;
-                            tiles[index].method9039(i * tileWidth, tileHeight * tileY, tileWidth, tileHeight, exposed);
+                            tiles[index].copyFromSurface(i * tileWidth, tileHeight * tileY, tileWidth, tileHeight, exposed);
                         }
                     }
                 }
@@ -627,7 +627,7 @@ public final class OrthoMode {
             }
         }
         if (mode == 0) {
-            surface.method9040(drawX, drawY, orthoWidth, orthoHeight, 0, 0);
+            surface.copyToSurface(drawX, drawY, orthoWidth, orthoHeight, 0, 0);
         }
         stamp++;
         translateCameraZ(scrollZ);
@@ -672,7 +672,7 @@ public final class OrthoMode {
             @Pc(33) int rowOffset = tilesX * y;
             for (@Pc(35) int x = 0; x < tilesX; x++) {
                 @Pc(41) int index = x + rowOffset;
-                tiles[index].method9039(x * tileWidth, tileHeight * y, tileWidth, tileHeight, true);
+                tiles[index].copyFromSurface(x * tileWidth, tileHeight * y, tileWidth, tileHeight, true);
             }
         }
     }

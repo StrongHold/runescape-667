@@ -105,7 +105,7 @@ public final class TurbulentWaterEffect extends TextureEffect {
                 super.toolkit.method7001(this.textures.aClass93_Sub3_2);
                 OpenGL.glProgramLocalParameter4fARB(OpenGL.GL_VERTEX_PROGRAM_ARB, TIME_PARAM, this.animationPhase, 0.0F, 0.0F, 1.0F);
             } else {
-                @Pc(64) int frame = super.toolkit.lastTickTime % ANIMATION_PERIOD * FRAME_COUNT / ANIMATION_PERIOD;
+                @Pc(64) int frame = super.toolkit.lastTickMillis % ANIMATION_PERIOD * FRAME_COUNT / ANIMATION_PERIOD;
                 super.toolkit.method7001(this.textures.aClass93_Sub2Array3[frame]);
                 OpenGL.glProgramLocalParameter4fARB(OpenGL.GL_VERTEX_PROGRAM_ARB, TIME_PARAM, 0.0F, 0.0F, 0.0F, 1.0F);
             }
@@ -152,7 +152,7 @@ public final class TurbulentWaterEffect extends TextureEffect {
         OpenGL.glMatrixMode(OpenGL.GL_TEXTURE);
         OpenGL.glLoadIdentity();
         OpenGL.glMatrixMode(OpenGL.GL_MODELVIEW);
-        super.toolkit.method6991(0);
+        super.toolkit.setColourOp(0);
         super.toolkit.method7029(0, OpenGL.GL_TEXTURE);
         super.toolkit.method7014(0);
         OpenGL.glBindProgramARB(OpenGL.GL_VERTEX_PROGRAM_ARB, 0);
@@ -182,18 +182,18 @@ public final class TurbulentWaterEffect extends TextureEffect {
             OpenGL.glLoadMatrixf(super.toolkit.aClass73_Sub3_5.method7146(), 0);
             OpenGL.glMatrixMode(OpenGL.GL_MODELVIEW);
             super.toolkit.method7014(0);
-            if (this.noiseUpdatedAt != super.toolkit.lastTickTime) {
-                @Pc(58) int offset = super.toolkit.lastTickTime % NOISE_PERIOD * NOISE_STRIDE / NOISE_PERIOD;
+            if (this.noiseUpdatedAt != super.toolkit.lastTickMillis) {
+                @Pc(58) int offset = super.toolkit.lastTickMillis % NOISE_PERIOD * NOISE_STRIDE / NOISE_PERIOD;
                 for (@Pc(60) int param = 0; param < NOISE_PARAM_COUNT; param++) {
                     OpenGL.glProgramLocalParameter4fvARB(OpenGL.GL_VERTEX_PROGRAM_ARB, param, this.noise, offset);
                     offset += 2;
                 }
                 if (this.textures.aBoolean655) {
-                    this.animationPhase = (float) (super.toolkit.lastTickTime % ANIMATION_PERIOD) / (float) ANIMATION_PERIOD;
+                    this.animationPhase = (float) (super.toolkit.lastTickMillis % ANIMATION_PERIOD) / (float) ANIMATION_PERIOD;
                 } else {
                     OpenGL.glProgramLocalParameter4fARB(OpenGL.GL_VERTEX_PROGRAM_ARB, TIME_PARAM, 0.0F, 0.0F, 0.0F, 1.0F);
                 }
-                this.noiseUpdatedAt = super.toolkit.lastTickTime;
+                this.noiseUpdatedAt = super.toolkit.lastTickMillis;
             }
         }
     }
@@ -202,7 +202,7 @@ public final class TurbulentWaterEffect extends TextureEffect {
     @Override
     public void bindTexture(@OriginalArg(0) Class93 texture, @OriginalArg(1) int colourOp) {
         super.toolkit.method7001(texture);
-        super.toolkit.method6991(colourOp);
+        super.toolkit.setColourOp(colourOp);
     }
 
     @OriginalMember(owner = "client!wt", name = "a", descriptor = "(IZ)V")

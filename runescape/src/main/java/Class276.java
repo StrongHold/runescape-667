@@ -64,21 +64,21 @@ public final class Class276 {
     public final GlToolkit aClass19_Sub3_32;
 
     @OriginalMember(owner = "client!oia", name = "e", descriptor = "Lclient!wo;")
-    public Class406 aClass406_4;
+    public GlFramebuffer aClass406_4;
 
     @OriginalMember(owner = "client!oia", name = "k", descriptor = "Lclient!wo;")
-    public Class406 aClass406_5;
+    public GlFramebuffer aClass406_5;
 
     @OriginalMember(owner = "client!oia", name = "E", descriptor = "Lclient!wo;")
-    public Class406 aClass406_3;
+    public GlFramebuffer aClass406_3;
 
     @OriginalMember(owner = "client!oia", name = "<init>", descriptor = "(Lclient!qha;)V")
     public Class276(@OriginalArg(0) GlToolkit arg0) {
         this.aClass19_Sub3_32 = arg0;
         if (this.aClass19_Sub3_32.aBoolean613 && this.aClass19_Sub3_32.aBoolean595) {
-            this.aClass406_5 = this.aClass406_4 = new Class406(this.aClass19_Sub3_32);
+            this.aClass406_5 = this.aClass406_4 = new GlFramebuffer(this.aClass19_Sub3_32);
             if (this.aClass19_Sub3_32.anInt7986 > 1 && this.aClass19_Sub3_32.aBoolean602 && this.aClass19_Sub3_32.aBoolean617) {
-                this.aClass406_5 = this.aClass406_3 = new Class406(this.aClass19_Sub3_32);
+                this.aClass406_5 = this.aClass406_3 = new GlFramebuffer(this.aClass19_Sub3_32);
                 return;
             }
         }
@@ -196,7 +196,7 @@ public final class Class276 {
         }
         this.aClass19_Sub3_32.method7018();
         this.aClass19_Sub3_32.setBlendMode(0);
-        this.aClass19_Sub3_32.method6991(1);
+        this.aClass19_Sub3_32.setColourOp(1);
         this.aClass19_Sub3_32.la();
         @Pc(90) int local90 = 0;
         @Pc(99) int local99 = 1;

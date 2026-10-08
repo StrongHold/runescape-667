@@ -42,7 +42,7 @@ export interface MapLight {
     readonly x: number;
     readonly y: number;
     readonly z: number;
-    readonly radius: number;
+    readonly radiusTiles: number;
     readonly colour: number;
 }
 

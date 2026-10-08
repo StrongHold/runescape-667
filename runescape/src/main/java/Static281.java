@@ -11,7 +11,7 @@ public final class Static281 {
         pickable.aEntity_18 = null;
         @Pc(10) int cylinderCount = pickable.pickingCylinders.length;
         for (@Pc(12) int index = 0; index < cylinderCount; index++) {
-            pickable.pickingCylinders[index].aBoolean352 = false;
+            pickable.pickingCylinders[index].visible = false;
         }
         @Pc(25) LinkedList[] lock = PickableEntityPool.FREE_LISTS;
         synchronized (PickableEntityPool.FREE_LISTS) {

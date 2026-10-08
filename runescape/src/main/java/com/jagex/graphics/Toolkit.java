@@ -74,7 +74,7 @@ public abstract class Toolkit {
     public abstract boolean method7937();
 
     @OriginalMember(owner = "client!ha", name = "a", descriptor = "(Lclient!za;)V")
-    public abstract void method7938(@OriginalArg(0) MemoryPool arg0);
+    public abstract void setHeap(@OriginalArg(0) MemoryPool arg0);
 
     /**
      * fillRect
@@ -162,7 +162,7 @@ public abstract class Toolkit {
     public abstract void da(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int[] arg3);
 
     @OriginalMember(owner = "client!ha", name = "j", descriptor = "()V")
-    public abstract void method7950();
+    public abstract void finish();
 
     /**
      * setSubclipping
@@ -326,7 +326,7 @@ public abstract class Toolkit {
     public abstract void Q(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) int width, @OriginalArg(3) int height, @OriginalArg(4) int overlayColour, @OriginalArg(5) int underlayColour, @OriginalArg(6) byte[] shape, @OriginalArg(7) int size, @OriginalArg(8) int mode);
 
     @OriginalMember(owner = "client!ha", name = "d", descriptor = "(II)Lclient!wja;")
-    public abstract DepthBuffer method7986(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1);
+    public abstract DepthBuffer createDepthBuffer(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1);
 
     @OriginalMember(owner = "client!ha", name = "finalize", descriptor = "()V")
     @Override
@@ -403,7 +403,7 @@ public abstract class Toolkit {
 
     @OriginalMember(owner = "client!ha", name = "a", descriptor = "(Lclient!st;I)V")
     public final void method8002(@OriginalArg(0) Sprite arg0) {
-        this.swapSurface(this.createOffscreenSurface(arg0, this.method7986(arg0.getWidth(), arg0.getHeight())));
+        this.swapSurface(this.createOffscreenSurface(arg0, this.createDepthBuffer(arg0.getWidth(), arg0.getHeight())));
     }
 
     @OriginalMember(owner = "client!ha", name = "pa", descriptor = "()V")

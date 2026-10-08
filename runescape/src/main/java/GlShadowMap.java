@@ -106,7 +106,7 @@ public final class GlShadowMap {
         this.aClass19_Sub3_18.method7008(false);
         this.aClass19_Sub3_18.method6972(false);
         this.aClass19_Sub3_18.method7046(-2);
-        this.aClass19_Sub3_18.method6991(1);
+        this.aClass19_Sub3_18.setColourOp(1);
         this.aClass19_Sub3_18.setBlendMode(1);
         @Pc(50) float local50 = 1.0F / (float) (this.aClass19_Sub3_18.shadowScale * 128);
         @Pc(54) int local54;

@@ -68,7 +68,7 @@ public class TextureOpSprite extends TextureOp {
         } else if (this.spriteId >= 0) {
             @Pc(37) IndexedImage image = Static426.anInt940 >= 0 ? IndexedImage.loadFirst(Static582.aJs5_108, Static426.anInt940, this.spriteId) : IndexedImage.loadFirst(Static582.aJs5_108, this.spriteId);
             image.method9389();
-            this.pixels = image.method9383();
+            this.pixels = image.toArgb();
             this.height = image.height;
             this.width = image.width;
             return true;

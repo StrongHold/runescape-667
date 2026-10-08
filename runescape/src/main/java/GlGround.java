@@ -150,7 +150,7 @@ public final class GlGround extends Ground {
 
     @OriginalMember(owner = "client!pn", name = "a", descriptor = "(Lclient!lca;[I)V")
     @Override
-    public void method7868(@OriginalArg(0) PointLight arg0, @OriginalArg(1) int[] arg1) {
+    public void addLight(@OriginalArg(0) PointLight arg0, @OriginalArg(1) int[] arg1) {
         this.aDeque_43.addLast(new GlGroundLight(this.aClass19_Sub3_33, this, arg0, arg1));
     }
 

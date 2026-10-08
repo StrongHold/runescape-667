@@ -2517,14 +2517,14 @@ public final class Model_Sub1 extends Model {
             @Pc(577) int local577 = (int) (Static115.aFloat50 + Static355.aFloat111 * (float) local512 + (float) this.anInt2768 * Static624.aFloat198 + Static382.aFloat114 * (float) local520);
             @Pc(596) int local596 = (int) (Static279.aFloat82 + (float) local512 * Static305.aFloat86 + (float) this.anInt2720 * Static18.aFloat2 + Static53.aFloat28 * (float) local520);
             @Pc(615) int local615 = (int) (Static654.aFloat209 * (float) local520 + ((float) local512 * Static348.aFloat107 + Static706.aFloat217 + Static580.aFloat176 * (float) this.anInt2720));
-            cylinder.anInt4501 = this.aClass19_Sub1_6.anInt9170 + this.aClass19_Sub1_6.anInt9151 * local596 / arg2;
-            cylinder.anInt4503 = this.aClass19_Sub1_6.anInt9163 + local615 * this.aClass19_Sub1_6.anInt9180 / arg2;
-            cylinder.anInt4505 = this.aClass19_Sub1_6.anInt9163 + this.aClass19_Sub1_6.anInt9180 * local558 / arg2;
+            cylinder.bottomX = this.aClass19_Sub1_6.anInt9170 + this.aClass19_Sub1_6.anInt9151 * local596 / arg2;
+            cylinder.bottomY = this.aClass19_Sub1_6.anInt9163 + local615 * this.aClass19_Sub1_6.anInt9180 / arg2;
+            cylinder.topY = this.aClass19_Sub1_6.anInt9163 + this.aClass19_Sub1_6.anInt9180 * local558 / arg2;
             @Pc(675) int local675 = (int) ((float) this.anInt2720 * Static624.aFloat198 + (Static115.aFloat50 + Static355.aFloat111 * (float) local512) + Static382.aFloat114 * (float) local520);
-            cylinder.anInt4504 = local539 * this.aClass19_Sub1_6.anInt9151 / arg2 + this.aClass19_Sub1_6.anInt9170;
+            cylinder.topX = local539 * this.aClass19_Sub1_6.anInt9151 / arg2 + this.aClass19_Sub1_6.anInt9170;
             if (local577 >= this.aClass19_Sub1_6.anInt9181 || this.aClass19_Sub1_6.anInt9181 <= local675) {
-                cylinder.aBoolean352 = true;
-                cylinder.anInt4502 = this.aClass19_Sub1_6.anInt9170 + (this.anInt2701 + local539) * this.aClass19_Sub1_6.anInt9151 / arg2 - cylinder.anInt4504;
+                cylinder.visible = true;
+                cylinder.radiusPixels = this.aClass19_Sub1_6.anInt9170 + (this.anInt2701 + local539) * this.aClass19_Sub1_6.anInt9151 / arg2 - cylinder.topX;
             }
         }
         this.aClass19_Sub1_6.method8046((float) arg2);
@@ -2767,8 +2767,8 @@ public final class Model_Sub1 extends Model {
             @Pc(555) int local555 = (int) ((float) local509 * Static348.aFloat107 + Static706.aFloat217 + Static580.aFloat176 * (float) this.anInt2768 + Static654.aFloat209 * (float) local517);
             @Pc(574) int local574 = (int) (Static382.aFloat114 * (float) local517 + ((float) local509 * Static355.aFloat111 + Static115.aFloat50 + Static624.aFloat198 * (float) this.anInt2768));
             if (this.aClass19_Sub1_6.anInt9181 <= local574) {
-                cylinder.anInt4505 = local555 * this.aClass19_Sub1_6.anInt9180 / local574 + this.aClass19_Sub1_6.anInt9163;
-                cylinder.anInt4504 = this.aClass19_Sub1_6.anInt9170 + this.aClass19_Sub1_6.anInt9151 * local536 / local574;
+                cylinder.topY = local555 * this.aClass19_Sub1_6.anInt9180 / local574 + this.aClass19_Sub1_6.anInt9163;
+                cylinder.topX = this.aClass19_Sub1_6.anInt9170 + this.aClass19_Sub1_6.anInt9151 * local536 / local574;
             } else {
                 local499 = true;
             }
@@ -2776,8 +2776,8 @@ public final class Model_Sub1 extends Model {
             @Pc(654) int local654 = (int) ((float) this.anInt2720 * Static580.aFloat176 + (Static348.aFloat107 * (float) local509 + Static706.aFloat217) + Static654.aFloat209 * (float) local517);
             @Pc(673) int local673 = (int) (Static624.aFloat198 * (float) this.anInt2720 + (Static355.aFloat111 * (float) local509 + Static115.aFloat50) + (float) local517 * Static382.aFloat114);
             if (this.aClass19_Sub1_6.anInt9181 <= local673) {
-                cylinder.anInt4501 = this.aClass19_Sub1_6.anInt9170 + local635 * this.aClass19_Sub1_6.anInt9151 / local673;
-                cylinder.anInt4503 = local654 * this.aClass19_Sub1_6.anInt9180 / local673 + this.aClass19_Sub1_6.anInt9163;
+                cylinder.bottomX = this.aClass19_Sub1_6.anInt9170 + local635 * this.aClass19_Sub1_6.anInt9151 / local673;
+                cylinder.bottomY = local654 * this.aClass19_Sub1_6.anInt9180 / local673 + this.aClass19_Sub1_6.anInt9163;
             } else {
                 local499 = true;
             }
@@ -2792,24 +2792,24 @@ public final class Model_Sub1 extends Model {
                         local770 = (local673 - this.aClass19_Sub1_6.anInt9181 << 16) / (local673 - local574);
                         local781 = local635 + ((local635 - local536) * local770 >> 16);
                         local792 = (local770 * (local654 - local555) >> 16) + local654;
-                        cylinder.anInt4504 = local781 * this.aClass19_Sub1_6.anInt9151 / this.aClass19_Sub1_6.anInt9181 + this.aClass19_Sub1_6.anInt9170;
-                        cylinder.anInt4505 = this.aClass19_Sub1_6.anInt9163 + this.aClass19_Sub1_6.anInt9180 * local792 / this.aClass19_Sub1_6.anInt9181;
+                        cylinder.topX = local781 * this.aClass19_Sub1_6.anInt9151 / this.aClass19_Sub1_6.anInt9181 + this.aClass19_Sub1_6.anInt9170;
+                        cylinder.topY = this.aClass19_Sub1_6.anInt9163 + this.aClass19_Sub1_6.anInt9180 * local792 / this.aClass19_Sub1_6.anInt9181;
                     } else if (this.aClass19_Sub1_6.anInt9181 > local673) {
                         local770 = (local574 - this.aClass19_Sub1_6.anInt9181 << 16) / (local574 - local673);
                         local781 = local536 + (local770 * (local536 - local635) >> 16);
                         local792 = ((local555 - local654) * local770 >> 16) + local555;
-                        cylinder.anInt4504 = this.aClass19_Sub1_6.anInt9170 + local781 * this.aClass19_Sub1_6.anInt9151 / this.aClass19_Sub1_6.anInt9181;
-                        cylinder.anInt4505 = this.aClass19_Sub1_6.anInt9180 * local792 / this.aClass19_Sub1_6.anInt9181 + this.aClass19_Sub1_6.anInt9163;
+                        cylinder.topX = this.aClass19_Sub1_6.anInt9170 + local781 * this.aClass19_Sub1_6.anInt9151 / this.aClass19_Sub1_6.anInt9181;
+                        cylinder.topY = this.aClass19_Sub1_6.anInt9180 * local792 / this.aClass19_Sub1_6.anInt9181 + this.aClass19_Sub1_6.anInt9163;
                     }
                 }
             }
             if (local501) {
                 if (local673 >= local574) {
-                    cylinder.anInt4502 = (this.anInt2701 + local635) * this.aClass19_Sub1_6.anInt9151 / local673 + this.aClass19_Sub1_6.anInt9170 - cylinder.anInt4501;
+                    cylinder.radiusPixels = (this.anInt2701 + local635) * this.aClass19_Sub1_6.anInt9151 / local673 + this.aClass19_Sub1_6.anInt9170 - cylinder.bottomX;
                 } else {
-                    cylinder.anInt4502 = this.aClass19_Sub1_6.anInt9170 + this.aClass19_Sub1_6.anInt9151 * (this.anInt2701 + local536) / local574 - cylinder.anInt4504;
+                    cylinder.radiusPixels = this.aClass19_Sub1_6.anInt9170 + this.aClass19_Sub1_6.anInt9151 * (this.anInt2701 + local536) / local574 - cylinder.topX;
                 }
-                cylinder.aBoolean352 = true;
+                cylinder.visible = true;
             }
         }
         this.aClass19_Sub1_6.method8044();

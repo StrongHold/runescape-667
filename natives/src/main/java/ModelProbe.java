@@ -90,7 +90,7 @@ public final class ModelProbe {
             var toolkit = oa.create(canvas, new HandTextureSource(), Scene.WIDTH, Scene.HEIGHT);
             toolkit.xa(1.0F);
             toolkit.ZA(0xFFFFFF, 0.5F, 0.5F, 20.0F, -50.0F, 30.0F);
-            toolkit.method7938(toolkit.createHeap(POOL_SIZE));
+            toolkit.setHeap(toolkit.createHeap(POOL_SIZE));
             toolkit.allocateThreads(1);
             toolkit.linkThreads(0);
             toolkit.DA(Scene.WIDTH / 2, Scene.HEIGHT / 2, 512, 512);
@@ -372,10 +372,10 @@ public final class ModelProbe {
             matrix.translate(0, 0, depth);
             model.render(matrix, cylinder, 1);
 
-            lines.add("cylinder " + depth + " " + cylinder.aBoolean352
-                + " " + cylinder.anInt4504 + " " + cylinder.anInt4505
-                + " " + cylinder.anInt4501 + " " + cylinder.anInt4503
-                + " " + cylinder.anInt4502);
+            lines.add("cylinder " + depth + " " + cylinder.visible
+                + " " + cylinder.topX + " " + cylinder.topY
+                + " " + cylinder.bottomX + " " + cylinder.bottomY
+                + " " + cylinder.radiusPixels);
         }
     }
 
@@ -575,23 +575,23 @@ public final class ModelProbe {
         var places = new int[PARTICLE_PLACES * 3];
 
         matrix.makeIdentity();
-        model.method3688(places, matrix);
+        model.transformPoints(places, matrix);
         lines.add("particles flat " + Arrays.toString(places));
 
         matrix.makeRotationZ(0x1400);
         matrix.rotateAxisY(0x0900);
         matrix.translate(-40, 700, 250);
-        model.method3688(places, matrix);
+        model.transformPoints(places, matrix);
         lines.add("particles turned " + Arrays.toString(places));
 
         model.a(0x0800);
         model.H(13, -21, 34);
-        model.method3688(places, matrix);
+        model.transformPoints(places, matrix);
         lines.add("particles after the model moved " + Arrays.toString(places));
 
         var plain = (i) build(toolkit);
         Arrays.fill(places, -1);
-        plain.method3688(places, matrix);
+        plain.transformPoints(places, matrix);
         lines.add("particles on a model with none " + Arrays.toString(places));
     }
 

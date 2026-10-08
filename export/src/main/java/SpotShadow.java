@@ -21,7 +21,7 @@ final class SpotShadow {
      * Each ring's radius before the disc is stretched, of which the outer one is the scale the
      * client stretches by: 128 is the NPC's half width.
      */
-    private static final int[] RING_RADII = {64, 96, 128};
+    private static final int[] RING_RADII_FINE = {64, 96, 128};
 
     private static final int FULL_SCALE = 128;
 
@@ -31,7 +31,7 @@ final class SpotShadow {
      */
     private static final int LEAST_SIDES = 9;
     private static final int SIDES_A_TILE = 3;
-    private static final int LARGEST_SIZE = 5;
+    private static final int LARGEST_SIZE_TILES = 5;
 
     /**
      * A turn in the client's angle units, which its sine and cosine tables are indexed by.
@@ -75,15 +75,15 @@ final class SpotShadow {
     }
 
     private static JavaModel disc(NPCType type, JavaModel body, Toolkit toolkit) {
-        var sides = LEAST_SIDES + SIDES_A_TILE * (Math.min(Math.max(type.size, 1), LARGEST_SIZE) - 1);
-        var mesh = new Mesh(sides * RING_RADII.length + 1, sides * (RING_RADII.length * 2 - 1), 0);
+        var sides = LEAST_SIDES + SIDES_A_TILE * (Math.min(Math.max(type.size, 1), LARGEST_SIZE_TILES) - 1);
+        var mesh = new Mesh(sides * RING_RADII_FINE.length + 1, sides * (RING_RADII_FINE.length * 2 - 1), 0);
         var middle = mesh.addVertex(0, 0, 0);
-        var rings = new int[RING_RADII.length][sides];
-        for (var ring = 0; ring < RING_RADII.length; ring++) {
+        var rings = new int[RING_RADII_FINE.length][sides];
+        for (var ring = 0; ring < RING_RADII_FINE.length; ring++) {
             for (var side = 0; side < sides; side++) {
                 var angle = side * TURN / sides;
-                var across = Trig1.COS[angle] * RING_RADII[ring] >> TRIG_SHIFT;
-                var along = Trig1.SIN[angle] * RING_RADII[ring] >> TRIG_SHIFT;
+                var across = Trig1.COS[angle] * RING_RADII_FINE[ring] >> TRIG_SHIFT;
+                var along = Trig1.SIN[angle] * RING_RADII_FINE[ring] >> TRIG_SHIFT;
                 rings[ring][side] = mesh.addVertex(across, 0, along);
             }
         }
@@ -92,8 +92,8 @@ final class SpotShadow {
         var outerAlpha = type.shadowOuterAlpha & 0xFF;
         var innerColour = type.shadowInnerColour & 0xFFFF;
         var outerColour = type.shadowOuterColour & 0xFFFF;
-        for (var ring = 0; ring < RING_RADII.length; ring++) {
-            var inner = (ring * 256 + 128) / RING_RADII.length;
+        for (var ring = 0; ring < RING_RADII_FINE.length; ring++) {
+            var inner = (ring * 256 + 128) / RING_RADII_FINE.length;
             var outer = 256 - inner;
             var alpha = (byte) (innerAlpha * inner + outerAlpha * outer >> 8);
             var colour = (short) (blend(innerColour, outerColour, inner, outer, LIGHTNESS)

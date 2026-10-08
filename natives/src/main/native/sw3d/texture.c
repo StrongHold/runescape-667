@@ -265,10 +265,10 @@ static void layDown(const uint32_t *from, uint32_t *into, int repeatsU, int repe
 
 static TextureMetrics metricsFrom(jshort averageColour, jint alphaBlendMode, jbyte effectType,
                                   jbyte effectParam1, jint effectParam2, jboolean small,
-                                  jbyte alpha, jbyte aByte57, jbyte speedU, jbyte speedV,
-                                  jboolean disableable, jboolean aBoolean234, jboolean aBoolean239,
-                                  jboolean repeatsU, jboolean repeatsV, jbyte aByte53,
-                                  jboolean aBoolean237, jboolean aBoolean238, jint colourOp) {
+                                  jbyte alpha, jbyte brightness, jbyte speedU, jbyte speedV,
+                                  jboolean disableable, jboolean skipFaces, jboolean unusedFlag,
+                                  jboolean repeatsU, jboolean repeatsV, jbyte mipmap,
+                                  jboolean hdr, jboolean transposed, jint colourOp) {
     TextureMetrics metrics;
 
     metrics.averageColour = (unsigned short) averageColour;
@@ -278,17 +278,17 @@ static TextureMetrics metricsFrom(jshort averageColour, jint alphaBlendMode, jby
     metrics.effectParam2 = effectParam2;
     metrics.small = small != JNI_FALSE;
     metrics.alpha = (unsigned char) alpha;
-    metrics.aByte57 = (unsigned char) aByte57;
+    metrics.brightness = (unsigned char) brightness;
     metrics.speedU = (signed char) speedU;
     metrics.speedV = (signed char) speedV;
     metrics.disableable = disableable != JNI_FALSE;
-    metrics.aBoolean234 = aBoolean234 != JNI_FALSE;
-    metrics.aBoolean239 = aBoolean239 != JNI_FALSE;
+    metrics.skipFaces = skipFaces != JNI_FALSE;
+    metrics.unusedFlag = unusedFlag != JNI_FALSE;
     metrics.repeatsU = repeatsU != JNI_FALSE;
     metrics.repeatsV = repeatsV != JNI_FALSE;
-    metrics.aByte53 = (unsigned char) aByte53;
-    metrics.aBoolean237 = aBoolean237 != JNI_FALSE;
-    metrics.aBoolean238 = aBoolean238 != JNI_FALSE;
+    metrics.mipmap = (unsigned char) mipmap;
+    metrics.hdr = hdr != JNI_FALSE;
+    metrics.transposed = transposed != JNI_FALSE;
     metrics.colourOp = colourOp;
     return metrics;
 }
@@ -469,11 +469,11 @@ void textureCacheService(int time) {
 JNIEXPORT void JNICALL Java_oa_AA(JNIEnv *env, jobject self, jshort texture,
                                    jshort averageColour,
                                    jint alphaBlendMode, jbyte effectType, jbyte effectParam1,
-                                   jint effectParam2, jboolean small, jbyte alpha, jbyte aByte57,
+                                   jint effectParam2, jboolean small, jbyte alpha, jbyte brightness,
                                    jbyte speedU, jbyte speedV, jboolean disableable,
-                                   jboolean aBoolean234, jboolean aBoolean239, jboolean repeatsU,
-                                   jboolean repeatsV, jbyte aByte53, jboolean aBoolean237,
-                                   jboolean aBoolean238, jint colourOp) {
+                                   jboolean skipFaces, jboolean unusedFlag, jboolean repeatsU,
+                                   jboolean repeatsV, jbyte mipmap, jboolean hdr,
+                                   jboolean transposed, jint colourOp) {
     (void) env;
     (void) self;
 
@@ -483,8 +483,8 @@ JNIEXPORT void JNICALL Java_oa_AA(JNIEnv *env, jobject self, jshort texture,
 
     int slot = slotFor(&cache.metricsOrder, (unsigned short) texture);
     cache.withoutPixels[slot] = metricsFrom(averageColour, alphaBlendMode, effectType, effectParam1,
-        effectParam2, small, alpha, aByte57, speedU, speedV, disableable, aBoolean234,
-        aBoolean239, repeatsU, repeatsV, aByte53, aBoolean237, aBoolean238, colourOp);
+        effectParam2, small, alpha, brightness, speedU, speedV, disableable, skipFaces,
+        unusedFlag, repeatsU, repeatsV, mipmap, hdr, transposed, colourOp);
 }
 
 /**
@@ -493,10 +493,10 @@ JNIEXPORT void JNICALL Java_oa_AA(JNIEnv *env, jobject self, jshort texture,
 JNIEXPORT void JNICALL Java_oa_CA(JNIEnv *env, jobject self, jshort texture, jintArray given,
                                    jshort averageColour, jint alphaBlendMode, jbyte effectType,
                                    jbyte effectParam1, jint effectParam2, jboolean small,
-                                   jbyte alpha, jbyte aByte57, jbyte speedU, jbyte speedV,
-                                   jboolean disableable, jboolean aBoolean234,
-                                   jboolean aBoolean239, jboolean repeatsU, jboolean repeatsV,
-                                   jbyte aByte53, jboolean aBoolean237, jboolean aBoolean238,
+                                   jbyte alpha, jbyte brightness, jbyte speedU, jbyte speedV,
+                                   jboolean disableable, jboolean skipFaces,
+                                   jboolean unusedFlag, jboolean repeatsU, jboolean repeatsV,
+                                   jbyte mipmap, jboolean hdr, jboolean transposed,
                                    jint colourOp) {
     (void) self;
 
@@ -508,8 +508,8 @@ JNIEXPORT void JNICALL Java_oa_CA(JNIEnv *env, jobject self, jshort texture, jin
     Texture *held = &cache.withPixels[slot];
 
     held->metrics = metricsFrom(averageColour, alphaBlendMode, effectType, effectParam1, effectParam2,
-        small, alpha, aByte57, speedU, speedV, disableable, aBoolean234, aBoolean239, repeatsU,
-        repeatsV, aByte53, aBoolean237, aBoolean238, colourOp);
+        small, alpha, brightness, speedU, speedV, disableable, skipFaces, unusedFlag, repeatsU,
+        repeatsV, mipmap, hdr, transposed, colourOp);
     held->offsetU = 0.0f;
     held->offsetV = 0.0f;
 

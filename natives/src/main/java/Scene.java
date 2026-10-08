@@ -2623,7 +2623,7 @@ public sealed interface Scene {
                 which++;
             }
 
-            ((oa) toolkit).method6087().method4(toolkit, places, colours, sizes, textures, count);
+            ((oa) toolkit).threadResource().renderParticles(toolkit, places, colours, sizes, textures, count);
         }
 
         /** Solid down one side of the grid and half see-through down the other. */
@@ -2797,7 +2797,7 @@ public sealed interface Scene {
 
             var sprite = toolkit.createSprite(SIDE, SIDE, false);
             var surface = toolkit.createOffscreenSurface(sprite,
-                toolkit.method7986(SIDE, SIDE));
+                toolkit.createDepthBuffer(SIDE, SIDE));
 
             toolkit.swapSurface(surface);
 
@@ -2820,7 +2820,7 @@ public sealed interface Scene {
             toolkit.fillRect(0, 0, WIDTH, HEIGHT, CLEAR_COLOUR | 0xFF000000);
             toolkit.fillRect(20, 20, 300, 120, 0xFF2266AA);
 
-            surface.method9040(0, 0, SIDE, SIDE, 280, 150);
+            surface.copyToSurface(0, 0, SIDE, SIDE, 280, 150);
             sprite.render(20, 250);
         }
     }

@@ -729,7 +729,7 @@ public final class GlxToolkit extends NativeToolkit {
 
     @OriginalMember(owner = "client!tca", name = "j", descriptor = "()V")
     @Override
-    public void method7950() {
+    public void finish() {
         OpenGL.glFinish();
     }
 
@@ -1000,7 +1000,7 @@ public final class GlxToolkit extends NativeToolkit {
 
     @OriginalMember(owner = "client!tca", name = "d", descriptor = "(II)Lclient!wja;")
     @Override
-    public DepthBuffer method7986(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) {
+    public DepthBuffer createDepthBuffer(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) {
         return null;
     }
 

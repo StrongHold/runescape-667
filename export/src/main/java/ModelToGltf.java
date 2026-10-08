@@ -36,7 +36,7 @@ public final class ModelToGltf {
     /**
      * How many of the client's units make one tile, which becomes one metre.
      */
-    private static final float UNITS_PER_METRE = 512.0F;
+    private static final float FINE_PER_METRE = 512.0F;
 
     private static final int SMOOTH = 0;
     private static final int FLAT = 1;
@@ -228,8 +228,8 @@ public final class ModelToGltf {
 
         if (model.billboardFaces != null) {
             for (var billboard : model.billboardFaces) {
-                if (billboard.aBoolean464) {
-                    hidden.add(billboard.anInt6139);
+                if (billboard.hideFace) {
+                    hidden.add(billboard.face);
                 }
             }
         }
@@ -277,17 +277,17 @@ public final class ModelToGltf {
      */
     private void addCorner(Primitive primitive, int face, int vertex, float[] normal, float shade, int rgb,
                            int plainRgb, float opacity, float u, float v) {
-        primitive.positions.add(model.vertexX[vertex] / UNITS_PER_METRE);
-        primitive.positions.add(-model.vertexY[vertex] / UNITS_PER_METRE);
-        primitive.positions.add(-model.vertexZ[vertex] / UNITS_PER_METRE);
+        primitive.positions.add(model.vertexX[vertex] / FINE_PER_METRE);
+        primitive.positions.add(-model.vertexY[vertex] / FINE_PER_METRE);
+        primitive.positions.add(-model.vertexZ[vertex] / FINE_PER_METRE);
 
         if (jointOfVertex == null) {
             for (var target = 0; target < poses.size(); target++) {
                 var pose = poses.get(target);
                 var moved = primitive.targets.get(target);
-                moved.add((pose.x()[vertex] - model.vertexX[vertex]) / UNITS_PER_METRE);
-                moved.add(-(pose.y()[vertex] - model.vertexY[vertex]) / UNITS_PER_METRE);
-                moved.add(-(pose.z()[vertex] - model.vertexZ[vertex]) / UNITS_PER_METRE);
+                moved.add((pose.x()[vertex] - model.vertexX[vertex]) / FINE_PER_METRE);
+                moved.add(-(pose.y()[vertex] - model.vertexY[vertex]) / FINE_PER_METRE);
+                moved.add(-(pose.z()[vertex] - model.vertexZ[vertex]) / FINE_PER_METRE);
             }
         } else {
             primitive.joints.add(jointOfVertex[vertex]);

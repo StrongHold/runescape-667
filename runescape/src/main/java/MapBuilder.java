@@ -179,7 +179,7 @@ public final class MapBuilder {
         Static159.refreshEnvironment();
 
         if (underwater) {
-            Static379.method5355(true);
+            Static379.setUnderwater(true);
             Static134.aMapRegion_3 = new MapRegion(1, Static720.mapWidth, Static501.mapLength, true);
             if (Static117.areaMode == AreaMode.STATIC_AREA) {
                 Static73.decodeStaticArea(Static177.aByteArrayArray5, Static134.aMapRegion_3);
@@ -190,7 +190,7 @@ public final class MapBuilder {
             }
             Static134.aMapRegion_3.addHeightOffsets(MapRegion.active.tileHeights[0]);
             Static134.aMapRegion_3.createGrounds(null, Toolkit.active, null);
-            Static379.method5355(false);
+            Static379.setUnderwater(false);
         }
 
         MapRegion.active.createGrounds(underwater ? Static134.aMapRegion_3.tileHeights : null, Toolkit.active, Client.collisionMaps);
@@ -213,7 +213,7 @@ public final class MapBuilder {
         MapRegion.active.buildRoofOccluders(false, Toolkit.active);
         Static314.noTimeout(true);
         if (underwater) {
-            Static379.method5355(true);
+            Static379.setUnderwater(true);
             Static314.noTimeout(true);
             if (Static117.areaMode == AreaMode.STATIC_AREA) {
                 Static338.loadStaticLocations(Static421.aByteArrayArray19, Static134.aMapRegion_3);
@@ -225,7 +225,7 @@ public final class MapBuilder {
             Static134.aMapRegion_3.load(Toolkit.active, null, Static706.floor[0]);
             Static134.aMapRegion_3.buildRoofOccluders(true, Toolkit.active);
             Static314.noTimeout(true);
-            Static379.method5355(false);
+            Static379.setUnderwater(false);
         }
         Static207.method4432();
         @Pc(825) int topLevel = MapRegion.active.minLevel;

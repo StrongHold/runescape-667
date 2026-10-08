@@ -98,7 +98,7 @@ public final class EnvironmentDecoder {
      * @param x where it is, in the client's units from the map square's south west corner.
      * @param y its height, in the client's units with y down, as the client places it: the
      *     ground's height at its tile less the height the file gives it.
-     * @param radius how far it reaches, in tiles.
+     * @param radiusTiles how far it reaches, in tiles.
      * @param rowSpans for each row of tiles across its reach, which tiles it lights, as the file
      *     packs them: the first tile in the high byte and how many in the low.
      * @param colour its colour, as the client's palette gives it.
@@ -107,7 +107,7 @@ public final class EnvironmentDecoder {
      * @param ambient the least of its flicker, and {@code pattern}, {@code amplitude} and
      *     {@code frequency} the rest of it, as the preset or the light type gives them.
      */
-    public record Light(int level, boolean spansLevelsAbove, boolean spansLevelsBelow, int x, int y, int z, int radius,
+    public record Light(int level, boolean spansLevelsAbove, boolean spansLevelsBelow, int x, int y, int z, int radiusTiles,
                         int[] rowSpans, int colour, int phase, int preset, int lightType, int ambient, int pattern,
                         int amplitude, int frequency) {
     }
@@ -117,10 +117,10 @@ public final class EnvironmentDecoder {
      *
      * @param tileHeights the heights of the region's tile corners by level, which a light's
      *     height is measured from.
-     * @param originX where the map square starts in the region, in tiles.
+     * @param originXTiles where the map square starts in the region, in tiles.
      */
-    public static Environment decode(Packet packet, LightTypeList lightTypes, int[][][] tileHeights, int originX,
-                                     int originZ) {
+    public static Environment decode(Packet packet, LightTypeList lightTypes, int[][][] tileHeights, int originXTiles,
+                                     int originZTiles) {
         var sun = new int[] {DEFAULT_SUN_X, DEFAULT_SUN_Y, DEFAULT_SUN_Z};
         var sunColour = DEFAULT_SUN_COLOUR;
         var sunIntensity = DEFAULT_SUN_INTENSITY;
@@ -157,7 +157,7 @@ public final class EnvironmentDecoder {
             } else if (code == LIGHTS) {
                 var count = packet.g1();
                 for (var i = 0; i < count; i++) {
-                    lights.add(light(packet, lightTypes, tileHeights, originX, originZ));
+                    lights.add(light(packet, lightTypes, tileHeights, originXTiles, originZTiles));
                 }
             } else if (code == BLOOM) {
                 bloom = new Bloom(packet.g1() * 8 / 255.0F, packet.g1() * 8 / 255.0F, packet.g1() * 8 / 255.0F);
@@ -201,7 +201,7 @@ public final class EnvironmentDecoder {
         return grid;
     }
 
-    private static Light light(Packet packet, LightTypeList lightTypes, int[][][] tileHeights, int originX, int originZ) {
+    private static Light light(Packet packet, LightTypeList lightTypes, int[][][] tileHeights, int originXTiles, int originZTiles) {
         var packedLevel = packet.g1();
         var spansLevelsBelow = (packedLevel & 0x10) != 0;
         var spansLevelsAbove = (packedLevel & 0x8) != 0;
@@ -209,8 +209,8 @@ public final class EnvironmentDecoder {
         var x = packet.g2() << LIGHT_SHIFT;
         var z = packet.g2() << LIGHT_SHIFT;
         var height = packet.g2() << LIGHT_SHIFT;
-        var radius = packet.g1();
-        var rowSpans = new int[radius * 2 + 1];
+        var radiusTiles = packet.g1();
+        var rowSpans = new int[radiusTiles * 2 + 1];
         for (var row = 0; row < rowSpans.length; row++) {
             rowSpans[row] = packet.g2();
         }
@@ -227,10 +227,10 @@ public final class EnvironmentDecoder {
             flicker = new EnvironmentLightFlicker(type.ambient, type.pattern, type.amplitude, type.frequency);
         }
 
-        var tileX = originX + (x >> TILE_SHIFT);
-        var tileZ = originZ + (z >> TILE_SHIFT);
+        var tileX = originXTiles + (x >> TILE_SHIFT);
+        var tileZ = originZTiles + (z >> TILE_SHIFT);
         var y = tileHeights[level][tileX][tileZ] - height;
-        return new Light(level, spansLevelsAbove, spansLevelsBelow, x, y, z, radius, rowSpans, colour, phase, preset,
+        return new Light(level, spansLevelsAbove, spansLevelsBelow, x, y, z, radiusTiles, rowSpans, colour, phase, preset,
             lightType, flicker.ambient(), flicker.pattern(), flicker.amplitude(), flicker.frequency());
     }
 

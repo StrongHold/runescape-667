@@ -137,7 +137,7 @@ public final class JavaGround extends Ground {
 
     @OriginalMember(owner = "client!qs", name = "a", descriptor = "(Lclient!lca;[I)V")
     @Override
-    public void method7868(@OriginalArg(0) PointLight arg0, @OriginalArg(1) int[] arg1) {
+    public void addLight(@OriginalArg(0) PointLight arg0, @OriginalArg(1) int[] arg1) {
     }
 
     @OriginalMember(owner = "client!qs", name = "a", descriptor = "(Lclient!r;IIIIZ)Z")

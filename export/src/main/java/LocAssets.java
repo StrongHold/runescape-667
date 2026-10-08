@@ -297,7 +297,7 @@ public final class LocAssets {
         extras.put("translate", List.of(type.translateX, type.translateY, type.translateZ));
         extras.put("hillchange", (int) type.hillchange);
         extras.put("hillskew", type.hillskew);
-        extras.put("size", List.of(type.width, type.length));
+        extras.put("sizeTiles", List.of(type.width, type.length));
         extras.put("shadow", type.shadow);
         extras.put("hardShadow", type.hardshadow);
         extras.put("interactive", type.active != LocInteractivity.NONINTERACTIVE);

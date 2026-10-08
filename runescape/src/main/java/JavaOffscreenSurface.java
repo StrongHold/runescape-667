@@ -58,7 +58,7 @@ public final class JavaOffscreenSurface implements OffscreenSurface {
      */
     @OriginalMember(owner = "client!du", name = "a", descriptor = "(IIIIIIZZ)V")
     @Override
-    public void method9039(@OriginalArg(0) int srcX, @OriginalArg(1) int srcY, @OriginalArg(2) int width, @OriginalArg(3) int height, @OriginalArg(6) boolean copyRaster) {
+    public void copyFromSurface(@OriginalArg(0) int srcX, @OriginalArg(1) int srcY, @OriginalArg(2) int width, @OriginalArg(3) int height, @OriginalArg(6) boolean copyRaster) {
         Static22.method588(0, width, this.toolkit.mainDepthBuffer, copyRaster ? this.toolkit.surface.raster : null, this.toolkit.surface.width, this.depthBuffer, this.width, 0, this.raster, height, srcX, srcY);
     }
 
@@ -68,7 +68,7 @@ public final class JavaOffscreenSurface implements OffscreenSurface {
      */
     @OriginalMember(owner = "client!du", name = "b", descriptor = "(IIIIIIZZ)V")
     @Override
-    public void method9040(@OriginalArg(0) int srcX, @OriginalArg(1) int srcY, @OriginalArg(2) int width, @OriginalArg(3) int height, @OriginalArg(4) int dstX, @OriginalArg(5) int dstY) {
+    public void copyToSurface(@OriginalArg(0) int srcX, @OriginalArg(1) int srcY, @OriginalArg(2) int width, @OriginalArg(3) int height, @OriginalArg(4) int dstX, @OriginalArg(5) int dstY) {
         Static22.method588(dstY, width, this.depthBuffer, this.raster, this.width, this.toolkit.mainDepthBuffer, this.toolkit.surface.width, dstX, this.toolkit.surface.raster, height, srcX, srcY);
     }
 }

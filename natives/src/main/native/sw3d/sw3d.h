@@ -562,20 +562,20 @@ typedef struct {
     int effectParam2;
     int small;
     unsigned char alpha;
-    unsigned char aByte57;
+    unsigned char brightness;
 
     /** How far the texture slides each way every hundredth of a second, or nought for still. */
     signed char speedU;
     signed char speedV;
 
     int disableable;
-    int aBoolean234;
-    int aBoolean239;
+    int skipFaces;
+    int unusedFlag;
     int repeatsU;
     int repeatsV;
-    unsigned char aByte53;
-    int aBoolean237;
-    int aBoolean238;
+    unsigned char mipmap;
+    int hdr;
+    int transposed;
     int colourOp;
 } TextureMetrics;
 

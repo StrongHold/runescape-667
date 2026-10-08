@@ -6,8 +6,8 @@ import type { Lighting } from './lighting.ts';
  * How many texels a side the shadow map has: enough for one model, and twice that for a map
  * map square, which is 64 m across and would otherwise cast shadows a hand's width wide.
  */
-const MODEL_SHADOW_SIZE = 2048;
-const MAP_SQUARE_SHADOW_SIZE = 4096;
+const MODEL_SHADOW_SIZE_TEXELS = 2048;
+const MAP_SQUARE_SHADOW_SIZE_TEXELS = 4096;
 
 /**
  * Points the camera at the box what is open fills, and casts the sun's shadow over it. A model is
@@ -21,19 +21,19 @@ export function frame(camera: PerspectiveCamera, controls: OrbitControls, lighti
     controls.target.copy(centre);
 
     if (mapSquare) {
-        const radius = box.getSize(new Vector3()).length() / 2;
-        camera.position.set(centre.x, centre.y + radius * 1.3, centre.z + radius * 1.05);
-        camera.near = radius / 500;
-        camera.far = radius * 40;
-        lighting.castShadow(centre, radius, radius, MAP_SQUARE_SHADOW_SIZE);
+        const radiusMetres = box.getSize(new Vector3()).length() / 2;
+        camera.position.set(centre.x, centre.y + radiusMetres * 1.3, centre.z + radiusMetres * 1.05);
+        camera.near = radiusMetres / 500;
+        camera.far = radiusMetres * 40;
+        lighting.castShadow(centre, radiusMetres, radiusMetres, MAP_SQUARE_SHADOW_SIZE_TEXELS);
     } else {
         const size = box.getSize(new Vector3());
         const largest = Math.max(size.x, size.y, size.z);
-        const reach = largest > 0 ? largest : 1;
-        camera.position.set(centre.x + reach * 1.1, centre.y + reach * 0.6, centre.z + reach * 1.3);
-        camera.near = reach / 500;
-        camera.far = reach * 50;
-        lighting.castShadow(centre, reach, reach * 1.5, MODEL_SHADOW_SIZE);
+        const reachMetres = largest > 0 ? largest : 1;
+        camera.position.set(centre.x + reachMetres * 1.1, centre.y + reachMetres * 0.6, centre.z + reachMetres * 1.3);
+        camera.near = reachMetres / 500;
+        camera.far = reachMetres * 50;
+        lighting.castShadow(centre, reachMetres, reachMetres * 1.5, MODEL_SHADOW_SIZE_TEXELS);
     }
     camera.updateProjectionMatrix();
 }
@@ -58,11 +58,11 @@ export function frameFrom(camera: PerspectiveCamera, controls: OrbitControls, li
     const centre = box.getCenter(new Vector3());
     const size = box.getSize(new Vector3());
     const largest = Math.max(size.x, size.y, size.z);
-    const reach = largest > 0 ? largest : 1;
+    const reachMetres = largest > 0 ? largest : 1;
     controls.target.copy(centre);
-    camera.position.copy(centre).addScaledVector(direction, reach * 1.8);
-    camera.near = reach / 500;
-    camera.far = reach * 50 + 500;
+    camera.position.copy(centre).addScaledVector(direction, reachMetres * 1.8);
+    camera.near = reachMetres / 500;
+    camera.far = reachMetres * 50 + 500;
     camera.updateProjectionMatrix();
-    lighting.castShadow(centre, reach, reach * 1.5, MODEL_SHADOW_SIZE);
+    lighting.castShadow(centre, reachMetres, reachMetres * 1.5, MODEL_SHADOW_SIZE_TEXELS);
 }

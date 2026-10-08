@@ -83,13 +83,13 @@ public final class GlToolkit extends Toolkit {
     public int anInt7956;
 
     @OriginalMember(owner = "client!qha", name = "Gf", descriptor = "I")
-    public int lastTickTime;
+    public int lastTickMillis;
 
     @OriginalMember(owner = "client!qha", name = "lb", descriptor = "Lclient!jaclib/memory/heap/NativeHeap;")
     public NativeHeap lb;
 
     @OriginalMember(owner = "client!qha", name = "zg", descriptor = "Lclient!wo;")
-    public Class406 aClass406_6;
+    public GlFramebuffer aClass406_6;
 
     @OriginalMember(owner = "client!qha", name = "qh", descriptor = "Lclient!jf;")
     public Interface14 anInterface14_1;
@@ -212,7 +212,7 @@ public final class GlToolkit extends Toolkit {
     public Class94 aClass94_16;
 
     @OriginalMember(owner = "client!qha", name = "Ke", descriptor = "Lclient!wo;")
-    public Class406 aClass406_7;
+    public GlFramebuffer aClass406_7;
 
     @OriginalMember(owner = "client!qha", name = "Eb", descriptor = "Z")
     public boolean aBoolean608;
@@ -1214,7 +1214,7 @@ public final class GlToolkit extends Toolkit {
         this.method6972(false);
         this.method7001(null);
         this.method7046(-2);
-        this.method6991(1);
+        this.setColourOp(1);
         this.setBlendMode(0);
         OpenGL.glMatrixMode(OpenGL.GL_PROJECTION);
         OpenGL.glLoadIdentity();
@@ -1403,7 +1403,7 @@ public final class GlToolkit extends Toolkit {
 
     @OriginalMember(owner = "client!qha", name = "d", descriptor = "(II)Lclient!wja;")
     @Override
-    public DepthBuffer method7986(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) {
+    public DepthBuffer createDepthBuffer(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) {
         return null;
     }
 
@@ -1464,7 +1464,7 @@ public final class GlToolkit extends Toolkit {
 
     @OriginalMember(owner = "client!qha", name = "a", descriptor = "(Lclient!za;)V")
     @Override
-    public void method7938(@OriginalArg(0) MemoryPool arg0) {
+    public void setHeap(@OriginalArg(0) MemoryPool arg0) {
         this.lb = ((GlMemoryPool) arg0).heap;
         if (this.anInterface12_7 != null) {
             return;
@@ -1588,7 +1588,7 @@ public final class GlToolkit extends Toolkit {
     }
 
     @OriginalMember(owner = "client!qha", name = "a", descriptor = "(BI)V")
-    public void method6991(@OriginalArg(1) int arg0) {
+    public void setColourOp(@OriginalArg(1) int arg0) {
         if (arg0 == 1) {
             this.method7031(7681, 7681);
         } else if (arg0 == 0) {
@@ -1619,8 +1619,8 @@ public final class GlToolkit extends Toolkit {
             this.aClass114_Sub2Array1[local42] = new GlModel(this);
         }
         if (this.aBoolean613) {
-            this.aClass406_7 = new Class406(this);
-            new Class406(this);
+            this.aClass406_7 = new GlFramebuffer(this);
+            new GlFramebuffer(this);
         }
     }
 
@@ -1859,7 +1859,7 @@ public final class GlToolkit extends Toolkit {
 
     @OriginalMember(owner = "client!qha", name = "j", descriptor = "()V")
     @Override
-    public void method7950() {
+    public void finish() {
         OpenGL.glFinish();
     }
 
@@ -2151,7 +2151,7 @@ public final class GlToolkit extends Toolkit {
                 } else {
                     @Pc(93) int local93 = local69.small ? 64 : 128;
                     @Pc(97) int local97 = local93 * 50;
-                    this.method6970(0.0F, (float) (local69.speedV * (this.lastTickTime % local97)) / (float) local97, (float) (this.lastTickTime % local97 * local69.speedU) / (float) local97);
+                    this.method6970(0.0F, (float) (local69.speedV * (this.lastTickMillis % local97)) / (float) local97, (float) (this.lastTickMillis % local97 * local69.speedU) / (float) local97);
                 }
                 if (!this.aBoolean605) {
                     local47 = local69.effectType;
@@ -2163,7 +2163,7 @@ public final class GlToolkit extends Toolkit {
             this.aClass98_1.method2360(local39, arg2, arg1, local37, local47);
             if (!this.aClass98_1.method2359(local35, local33)) {
                 this.method7001(local33);
-                this.method6991(local35);
+                this.setColourOp(local35);
             }
             this.anInt8019 = arg0;
             this.aBoolean609 = this.aBoolean605;
@@ -2607,7 +2607,7 @@ public final class GlToolkit extends Toolkit {
     @OriginalMember(owner = "client!qha", name = "a", descriptor = "(IIIIIF)Lclient!lca;")
     @Override
     public PointLight method7941(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) float arg5) {
-        return new Node_Sub7_Sub1(arg0, arg1, arg2, arg3, arg4, arg5);
+        return new GlPointLight(arg0, arg1, arg2, arg3, arg4, arg5);
     }
 
     @OriginalMember(owner = "client!qha", name = "HA", descriptor = "(IIII[I)V")
@@ -2755,7 +2755,7 @@ public final class GlToolkit extends Toolkit {
             System.gc();
             this.aLong248 = SystemTimer.safetime();
         }
-        this.lastTickTime = local9;
+        this.lastTickMillis = local9;
     }
 
     @OriginalMember(owner = "client!qha", name = "i", descriptor = "(B)V")
@@ -2770,7 +2770,7 @@ public final class GlToolkit extends Toolkit {
         this.method6972(false);
         this.method7001(null);
         this.method7046(-2);
-        this.method6991(1);
+        this.setColourOp(1);
         this.anInt7997 = 1;
     }
 

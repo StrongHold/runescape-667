@@ -360,7 +360,7 @@ public final class D3DToolkit extends NativeToolkit {
 
     @OriginalMember(owner = "client!kea", name = "j", descriptor = "()V")
     @Override
-    public void method7950() {
+    public void finish() {
         @Pc(3) IDirect3DEventQuery local3 = this.anIDirect3DDevice1.b();
         if (lh.a((byte) 95, local3.Issue())) {
             while (true) {
@@ -494,7 +494,7 @@ public final class D3DToolkit extends NativeToolkit {
 
     @OriginalMember(owner = "client!kea", name = "d", descriptor = "(II)Lclient!wja;")
     @Override
-    public DepthBuffer method7986(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) {
+    public DepthBuffer createDepthBuffer(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) {
         return null;
     }
 

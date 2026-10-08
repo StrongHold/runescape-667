@@ -112,7 +112,7 @@ public final class Static358 {
                     local32++;
                 }
                 Static279.environmentLightApplied[local1] = true;
-                Static246.ground[local16].method7868(local13, local37);
+                Static246.ground[local16].addLight(local13, local37);
             }
         }
     }
@@ -148,9 +148,9 @@ public final class Static358 {
         if (Static112.locationModelsUploaded) {
             return;
         }
-        Static458.uploadLocationModels(Static478.aTileArrayArrayArray3);
-        if (Static420.aTileArrayArrayArray2 != null) {
-            Static458.uploadLocationModels(Static420.aTileArrayArrayArray2);
+        Static458.uploadLocationModels(Static478.floorTiles);
+        if (Static420.underwaterTiles != null) {
+            Static458.uploadLocationModels(Static420.underwaterTiles);
         }
         Static112.locationModelsUploaded = true;
     }

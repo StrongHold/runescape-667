@@ -67,7 +67,7 @@ public final class t extends Ground implements SoftwareObject {
 
     @OriginalMember(owner = "client!t", name = "a", descriptor = "(Lclient!lca;[I)V")
     @Override
-    public void method7868(@OriginalArg(0) PointLight arg0, @OriginalArg(1) int[] arg1) {
+    public void addLight(@OriginalArg(0) PointLight arg0, @OriginalArg(1) int[] arg1) {
         this.aDeque_57.addLast(arg0);
         this.V(arg0.hashCode(), arg0.getX(), arg0.getY(), arg0.getZ(), arg0.getRange(), arg0.method8431(), arg1);
     }
@@ -79,9 +79,9 @@ public final class t extends Ground implements SoftwareObject {
     @Override
     public void renderTile(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1) {
         if (this.anInt8897 < 0) {
-            this.anOa3.method6087().method2(this, arg0, arg1);
+            this.anOa3.threadResource().method2(this, arg0, arg1);
         } else {
-            this.anOa3.method6087().method6(this, arg0, arg1, this.anInt8897);
+            this.anOa3.threadResource().method6(this, arg0, arg1, this.anInt8897);
         }
     }
 
@@ -216,7 +216,7 @@ public final class t extends Ground implements SoftwareObject {
     @OriginalMember(owner = "client!t", name = "a", descriptor = "(IIIIIII[[Z)V")
     @Override
     public void drawMinimap(@OriginalArg(3) int x1, @OriginalArg(4) int y1, @OriginalArg(5) int x2, @OriginalArg(6) int y2, @OriginalArg(7) boolean[][] visibility) {
-        this.anOa3.method6087().method13(this, x1, y1, x2, y2, visibility);
+        this.anOa3.threadResource().method13(this, x1, y1, x2, y2, visibility);
     }
 
     @OriginalMember(owner = "client!t", name = "ga", descriptor = "(Lclient!oa;Lclient!ya;II[[I[[IIII)V")

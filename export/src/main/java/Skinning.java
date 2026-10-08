@@ -19,7 +19,7 @@ import java.util.Map;
  *
  * <p>The client works in integers, a sixteenth of a unit at a time, and this works in doubles, so
  * a vertex moved by the transform lands within a unit or so of where the client puts it.
- * {@link #deviation} measures that against the client's own result.
+ * {@link #deviationFine} measures that against the client's own result.
  *
  * <p>The client turns a label about z, then x, then y when the model's rotation is even, and about
  * x, then z, then y when it is odd. The transforms here are those of the asset, which stands at
@@ -35,7 +35,7 @@ public final class Skinning {
     private static final int MOVE = 1;
     private static final int TURN = 2;
     private static final int SCALE = 3;
-    private static final double TURN_UNITS = 16384.0;
+    private static final double WHOLE_TURN = 16384.0;
     private static final double SCALE_UNITS = 128.0;
 
     /**
@@ -304,7 +304,7 @@ public final class Skinning {
      * How far, at most, a vertex moved by its label's transform lands from where the client put
      * it in the pose, in the client's units.
      */
-    public double deviation(FramePose framePose, Pose pose) {
+    public double deviationFine(FramePose framePose, Pose pose) {
         var worst = 0.0;
         for (var vertex = 0; vertex < labelOfVertex.length; vertex++) {
             var label = labelOfVertex[vertex];
@@ -320,7 +320,7 @@ public final class Skinning {
      * How far, at most, a vertex of one label lands from the client's pose when the label's
      * transform is taken through some way of writing it, over every pose.
      */
-    public double deviationOfLabel(int label, List<FramePose> framePoses, List<Pose> poses,
+    public double deviationOfLabelFine(int label, List<FramePose> framePoses, List<Pose> poses,
                                    java.util.function.UnaryOperator<Affine> through) {
         var worst = 0.0;
         for (var target = 0; target < framePoses.size(); target++) {
@@ -382,7 +382,7 @@ public final class Skinning {
     }
 
     private static double radians(int angle) {
-        return angle * 2.0 * Math.PI / TURN_UNITS;
+        return angle * 2.0 * Math.PI / WHOLE_TURN;
     }
 
     private static double[] toDoubles(int[] values) {

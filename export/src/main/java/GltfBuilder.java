@@ -159,15 +159,15 @@ public final class GltfBuilder {
      * {@link #lightNode}.
      *
      * @param colour the light's colour in linear light.
-     * @param range how far it reaches, in metres.
+     * @param rangeMetres how far it reaches, in metres.
      */
-    public int punctualLight(String name, float[] colour, float intensity, float range) {
+    public int punctualLight(String name, float[] colour, float intensity, float rangeMetres) {
         var light = new LinkedHashMap<String, Object>();
         light.put("name", name);
         light.put("type", "point");
         light.put("color", List.of(colour[0], colour[1], colour[2]));
         light.put("intensity", intensity);
-        light.put("range", range);
+        light.put("range", rangeMetres);
         punctualLights.add(light);
         return punctualLights.size() - 1;
     }

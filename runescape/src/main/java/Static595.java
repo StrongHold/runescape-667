@@ -66,7 +66,7 @@ public final class Static595 {
                         } else {
                             heap = Toolkit.active.createHeap(0x6400000);
                         }
-                        Toolkit.active.method7938(heap);
+                        Toolkit.active.setHeap(heap);
                         unwinding = false;
                     } else {
                         unwinding = false;

@@ -1246,7 +1246,7 @@ public abstract class NativeToolkit extends Toolkit {
 
     @OriginalMember(owner = "client!am", name = "a", descriptor = "(Lclient!za;)V")
     @Override
-    public final void method7938(@OriginalArg(0) MemoryPool arg0) {
+    public final void setHeap(@OriginalArg(0) MemoryPool arg0) {
         this.aNativeHeap5 = ((NativeMemoryPool) arg0).heap;
         this.aNativeHeapBuffer6 = this.aNativeHeap5.a(32768, false);
     }
@@ -2478,7 +2478,7 @@ public abstract class NativeToolkit extends Toolkit {
         }
         this.aClass2_Sub7Array6 = new PointLight[this.anInt9182 - 2];
         this.anInterface17_3 = this.method8067(Static172.aClass92_8, Static702.aClass397_16, 1, 1);
-        this.method7938(new NativeMemoryPool(262144));
+        this.setHeap(new NativeMemoryPool(262144));
         this.aClass244_17 = this.method8148(new Class237[]{new Class237(new Class157[]{Static231.aClass157_1, Static231.aClass157_5})});
         this.aClass244_21 = this.method8148(new Class237[]{new Class237(new Class157[]{Static231.aClass157_1, Static231.aClass157_3})});
         this.aClass244_20 = this.method8148(new Class237[]{new Class237(Static231.aClass157_1), new Class237(Static231.aClass157_3), new Class237(Static231.aClass157_5), new Class237(Static231.aClass157_2)});

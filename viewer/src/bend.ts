@@ -21,7 +21,7 @@ import type { HeightGrid } from './description.ts';
  */
 
 const TILE_SHIFT = 9;
-const TILE = 1 << TILE_SHIFT;
+const FINE_PER_TILE = 1 << TILE_SHIFT;
 
 /** A vertex in the client's units, which the bend changes the y of. */
 export interface ClientVertex {
@@ -62,13 +62,13 @@ export class Ground {
      * weighs them.
      */
     under(x: number, z: number): number {
-        const inX = x & (TILE - 1);
-        const inZ = z & (TILE - 1);
+        const inX = x & (FINE_PER_TILE - 1);
+        const inZ = z & (FINE_PER_TILE - 1);
         const tileX = x >> TILE_SHIFT;
         const tileZ = z >> TILE_SHIFT;
-        const south = (this.at(tileX, tileZ) * (TILE - inX) + this.at(tileX + 1, tileZ) * inX) >> TILE_SHIFT;
-        const north = (this.at(tileX, tileZ + 1) * (TILE - inX) + this.at(tileX + 1, tileZ + 1) * inX) >> TILE_SHIFT;
-        return (south * (TILE - inZ) + north * inZ) >> TILE_SHIFT;
+        const south = (this.at(tileX, tileZ) * (FINE_PER_TILE - inX) + this.at(tileX + 1, tileZ) * inX) >> TILE_SHIFT;
+        const north = (this.at(tileX, tileZ + 1) * (FINE_PER_TILE - inX) + this.at(tileX + 1, tileZ + 1) * inX) >> TILE_SHIFT;
+        return (south * (FINE_PER_TILE - inZ) + north * inZ) >> TILE_SHIFT;
     }
 
     /** Whether the four corners around a point are in the grid. */

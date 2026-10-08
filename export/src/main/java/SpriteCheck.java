@@ -11,7 +11,7 @@ import java.util.List;
  * Checks each written sprite against the client, frame by frame.
  *
  * Each frame's PNG, read back as it was written, is compared with two things. The first is the
- * frame on its whole canvas as the client lays it out ({@code IndexedImage.method9383}), pixel by
+ * frame on its whole canvas as the client lays it out ({@code IndexedImage.toArgb}), pixel by
  * pixel. The second is the sprite the software toolkit builds from the same image
  * ({@code JavaToolkit.createSprite}), laid on a clear canvas of the toolkit's size at the toolkit's
  * margins: that must be the same picture, so the margins and the canvas are checked too.
@@ -49,7 +49,7 @@ public final class SpriteCheck {
 
     private void compare(String name, IndexedImage image, BufferedImage png) {
         var pixels = png.getRGB(0, 0, png.getWidth(), png.getHeight(), null, 0, png.getWidth());
-        if (!Arrays.equals(pixels, onCanvas(image.offsetX(), image.offsetY(), image.method9383()))) {
+        if (!Arrays.equals(pixels, onCanvas(image.offsetX(), image.offsetY(), image.toArgb()))) {
             failures.add(name + " differs from the client's canvas");
         }
 

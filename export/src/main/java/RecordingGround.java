@@ -117,8 +117,8 @@ public final class RecordingGround extends Ground {
     }
 
     @Override
-    public void method7868(PointLight light, int[] arg1) {
-        real.method7868(light, arg1);
+    public void addLight(PointLight light, int[] arg1) {
+        real.addLight(light, arg1);
     }
 
     @Override

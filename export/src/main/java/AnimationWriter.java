@@ -84,12 +84,12 @@ public final class AnimationWriter {
         extras.put("loopOffset", sequence.loopOffset);
 
         if (sequence.loopOffset > 0 && sequence.loopOffset <= sequence.frames.length) {
-            var loopStart = sequence.frames.length - sequence.loopOffset;
+            var loopStartFrame = sequence.frames.length - sequence.loopOffset;
             var cycles = 0;
-            for (var frame = 0; frame < loopStart; frame++) {
+            for (var frame = 0; frame < loopStartFrame; frame++) {
                 cycles += sequence.frameDurations[frame];
             }
-            extras.put("loopStart", cycles * SECONDS_PER_CYCLE);
+            extras.put("loopStartSeconds", cycles * SECONDS_PER_CYCLE);
         }
 
         return extras;

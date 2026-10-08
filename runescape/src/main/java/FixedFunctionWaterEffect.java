@@ -73,13 +73,13 @@ public final class FixedFunctionWaterEffect extends TextureEffect {
         if ((effectParam1 & 0x1) == 1) {
             if (this.textures.aBoolean655) {
                 super.toolkit.method7001(this.textures.aClass93_Sub3_2);
-                Static512.aFloatArray49[3] = (float) (super.toolkit.lastTickTime % ANIMATION_PERIOD) / (float) ANIMATION_PERIOD;
+                Static512.aFloatArray49[3] = (float) (super.toolkit.lastTickMillis % ANIMATION_PERIOD) / (float) ANIMATION_PERIOD;
                 Static512.aFloatArray49[0] = 0.0F;
                 Static512.aFloatArray49[2] = 0.0F;
                 Static512.aFloatArray49[1] = 0.0F;
                 OpenGL.glTexGenfv(OpenGL.GL_R, OpenGL.GL_OBJECT_PLANE, Static512.aFloatArray49, 0);
             } else {
-                @Pc(24) int frame = super.toolkit.lastTickTime % ANIMATION_PERIOD * FRAME_COUNT / ANIMATION_PERIOD;
+                @Pc(24) int frame = super.toolkit.lastTickMillis % ANIMATION_PERIOD * FRAME_COUNT / ANIMATION_PERIOD;
                 super.toolkit.method7001(this.textures.aClass93_Sub2Array3[frame]);
             }
         } else if (this.textures.aBoolean655) {

@@ -55,7 +55,7 @@ public final class DynamicWallDecor extends WallDecor implements Location {
             return null;
         }
         @Pc(22) Matrix local22 = arg0.scratchMatrix();
-        local22.applyTranslation(super.x + super.aShort101, super.y, super.z + super.aShort102);
+        local22.applyTranslation(super.x + super.offsetX, super.y, super.z + super.offsetZ);
         @Pc(42) PickableEntity local42 = Static642.allocatePickableEntity(this.interactive, 1);
         @Pc(55) int local55 = super.x >> 9;
         @Pc(60) int local60 = super.z >> 9;
@@ -107,7 +107,7 @@ public final class DynamicWallDecor extends WallDecor implements Location {
             return false;
         } else {
             @Pc(25) Matrix local25 = toolkit.scratchMatrix();
-            local25.applyTranslation(super.aShort101 + super.x, super.y, super.z + super.aShort102);
+            local25.applyTranslation(super.offsetX + super.x, super.y, super.z + super.offsetZ);
             return OrthoMode.enabled ? local17.pickedOrtho(y, x, local25, false, 0, OrthoMode.renderZoom) : local17.picked(y, x, local25, false, 0);
         }
     }

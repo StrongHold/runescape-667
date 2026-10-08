@@ -126,18 +126,18 @@ public final class SceneRenderer {
                 Static226.aClass46Array7[local90].method1107();
             }
         }
-        if (Static420.aTileArrayArrayArray2 != null) {
+        if (Static420.underwaterTiles != null) {
             if (Static661.aBoolean457) {
                 Static341.method5033(0);
             }
-            Static379.method5355(true);
+            Static379.setUnderwater(true);
             Static665.aToolkit_15.ra(-1, 1583160, 40, 127);
             Static517.renderScenePass(true, roofStamps, levels, roofStamp, orthoZoom, entitySkipFlags, trackOrthoTiles);
             if (Static661.aBoolean457) {
                 Static245.method8630();
             }
             Static665.aToolkit_15.pa();
-            Static379.method5355(false);
+            Static379.setUnderwater(false);
         }
         Static517.renderScenePass(false, roofStamps, levels, roofStamp, orthoZoom, entitySkipFlags, trackOrthoTiles);
         if (Static661.aBoolean457) {

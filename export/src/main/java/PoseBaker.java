@@ -23,7 +23,7 @@ public final class PoseBaker {
     private final List<AnimFrame> frames = new ArrayList<>();
     private final List<String> names = new ArrayList<>();
     private Skinning skinning;
-    private double worstDeviation;
+    private double worstDeviationFine;
 
     public PoseBaker(Poser poser) {
         this.poser = poser;
@@ -50,8 +50,8 @@ public final class PoseBaker {
      * How far, at most, a vertex moved by its label's transform lands from where the client put
      * it, over every pose kept, in the client's units.
      */
-    public double worstDeviation() {
-        return worstDeviation;
+    public double worstDeviationFine() {
+        return worstDeviationFine;
     }
 
     /**
@@ -108,8 +108,8 @@ public final class PoseBaker {
             }
             var read = animator.frame();
             var framePose = skinning.pose(read);
-            var deviation = skinning.deviation(framePose, pose);
-            worstDeviation = Math.max(worstDeviation, deviation);
+            var deviationFine = skinning.deviationFine(framePose, pose);
+            worstDeviationFine = Math.max(worstDeviationFine, deviationFine);
             poses.add(pose);
             framePoses.add(framePose);
             frames.add(read);

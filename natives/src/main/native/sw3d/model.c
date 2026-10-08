@@ -608,7 +608,7 @@ static uint32_t throughTexture(const Model *model, int face, uint32_t unlit) {
         return unlit;
     }
 
-    return texturedUnlitColour(unlit, model->ambient, metrics->alpha, metrics->aByte57);
+    return texturedUnlitColour(unlit, model->ambient, metrics->alpha, metrics->brightness);
 }
 
 /**
@@ -2152,22 +2152,22 @@ JNIEXPORT void JNICALL Java_i_aa(JNIEnv *env, jobject self, jshort from, jshort 
     }
 
     unsigned char fromAlpha = 0;
-    unsigned char fromByte57 = 0;
+    unsigned char fromBrightness = 0;
     if (from != -1) {
         const TextureMetrics *metrics = textureMetricsFor((unsigned short) from);
         if (metrics != NULL) {
             fromAlpha = metrics->alpha;
-            fromByte57 = metrics->aByte57;
+            fromBrightness = metrics->brightness;
         }
     }
 
     unsigned char toAlpha = 0;
-    unsigned char toByte57 = 0;
+    unsigned char toBrightness = 0;
     if (worn != -1 && swapped > 0) {
         const TextureMetrics *metrics = textureMetricsFor((unsigned short) worn);
         if (metrics != NULL) {
             toAlpha = metrics->alpha;
-            toByte57 = metrics->aByte57;
+            toBrightness = metrics->brightness;
 
             if (metrics->speedU != 0 || metrics->speedV != 0) {
                 model->movingTextures = 1;
@@ -2175,7 +2175,7 @@ JNIEXPORT void JNICALL Java_i_aa(JNIEnv *env, jobject self, jshort from, jshort 
         }
     }
 
-    if (toAlpha != fromAlpha || fromByte57 != toByte57) {
+    if (toAlpha != fromAlpha || fromBrightness != toBrightness) {
         unlight(model);
     }
 }

@@ -142,7 +142,7 @@ public final class NormalMapSpecularEffect extends TextureEffect {
     @Override
     public void bindTexture(@OriginalArg(0) Class93 texture, @OriginalArg(1) int colourOp) {
         super.toolkit.method7001(texture);
-        super.toolkit.method6991(colourOp);
+        super.toolkit.setColourOp(colourOp);
     }
 
     @OriginalMember(owner = "client!ej", name = "b", descriptor = "(B)V")

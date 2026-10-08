@@ -10,33 +10,33 @@ public final class Scene {
 
     @OriginalMember(owner = "client!ro", name = "a", descriptor = "()V")
     public static void free() {
-        if (Static478.aTileArrayArrayArray3 != null) {
-            for (@Pc(3) int level = 0; level < Static478.aTileArrayArrayArray3.length; level++) {
+        if (Static478.floorTiles != null) {
+            for (@Pc(3) int level = 0; level < Static478.floorTiles.length; level++) {
                 for (@Pc(6) int x = 0; x < Static619.tileMaxX; x++) {
                     for (@Pc(9) int z = 0; z < Static662.tileMaxZ; z++) {
-                        if (Static478.aTileArrayArrayArray3[level][x][z] != null) {
-                            Static478.aTileArrayArrayArray3[level][x][z].method6550();
+                        if (Static478.floorTiles[level][x][z] != null) {
+                            Static478.floorTiles[level][x][z].method6550();
                         }
-                        Static478.aTileArrayArrayArray3[level][x][z] = null;
+                        Static478.floorTiles[level][x][z] = null;
                     }
                 }
             }
         }
-        Static478.aTileArrayArrayArray3 = null;
+        Static478.floorTiles = null;
         Static706.floor = null;
-        if (Static420.aTileArrayArrayArray2 != null) {
-            for (int level = 0; level < Static420.aTileArrayArrayArray2.length; level++) {
+        if (Static420.underwaterTiles != null) {
+            for (int level = 0; level < Static420.underwaterTiles.length; level++) {
                 for (int x = 0; x < Static619.tileMaxX; x++) {
                     for (int z = 0; z < Static662.tileMaxZ; z++) {
-                        if (Static420.aTileArrayArrayArray2[level][x][z] != null) {
-                            Static420.aTileArrayArrayArray2[level][x][z].method6550();
+                        if (Static420.underwaterTiles[level][x][z] != null) {
+                            Static420.underwaterTiles[level][x][z].method6550();
                         }
-                        Static420.aTileArrayArrayArray2[level][x][z] = null;
+                        Static420.underwaterTiles[level][x][z] = null;
                     }
                 }
             }
         }
-        Static420.aTileArrayArrayArray2 = null;
+        Static420.underwaterTiles = null;
         Static693.underwaterGround = null;
         Static334.activeTiles = null;
         Static246.ground = null;

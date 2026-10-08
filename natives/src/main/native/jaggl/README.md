@@ -3,7 +3,7 @@
 The OpenGL binding. A hundred and eighty natives on `jaggl.OpenGL` and `jaggl.MapBuffer`.
 
 It is not the hardware renderer. The renderer is Java and is already in this repository, about
-sixteen and a half thousand lines across `GlToolkit`, `Class93`, `Class406`, `GlTexture`,
+sixteen and a half thousand lines across `GlToolkit`, `Class93`, `GlFramebuffer`, `GlTexture`,
 `GlUnderwaterPass` and the rest. This carries their calls across to the driver and carries the
 answers back, and that is all it does.
 

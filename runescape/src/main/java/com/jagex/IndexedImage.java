@@ -345,7 +345,7 @@ public final class IndexedImage {
     }
 
     @OriginalMember(owner = "client!wp", name = "b", descriptor = "()[I")
-    public int[] method9383() {
+    public int[] toArgb() {
         @Pc(2) int local2 = this.offsetX();
         @Pc(8) int[] local8 = new int[local2 * this.offsetY()];
         @Pc(13) int local13;

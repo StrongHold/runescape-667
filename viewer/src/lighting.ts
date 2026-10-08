@@ -23,11 +23,11 @@ export interface Lighting {
     /**
      * Puts the sun up the sky from what is open, and fits its shadow camera to a box around it.
      *
-     * @param reach how far what is open stretches from its centre, which the sun stands back from.
-     * @param extent how far the shadow camera reaches either side of the centre.
-     * @param size how many texels a side the shadow map has.
+     * @param reachMetres how far what is open stretches from its centre, which the sun stands back from.
+     * @param extentMetres how far the shadow camera reaches either side of the centre.
+     * @param sizeTexels how many texels a side the shadow map has.
      */
-    readonly castShadow: (centre: Vector3, reach: number, extent: number, size: number) => void;
+    readonly castShadow: (centre: Vector3, reachMetres: number, extentMetres: number, sizeTexels: number) => void;
 }
 
 /** The viewer's own light, for a model or an NPC, which no file lights. */
@@ -43,37 +43,37 @@ export function createLighting(scene: Scene): Lighting {
     scene.add(sun, sun.target);
     let direction = SUN_DIRECTION.clone();
     let centre = new Vector3();
-    let reach = 1;
+    let reachMetres = 1;
 
     const setSun = (given: Sun, ambient: number): void => {
         direction = given.direction.clone().normalize();
         sun.color.set(given.colour);
         sun.intensity = given.intensity;
         sky.intensity = ambient;
-        sun.position.copy(centre).addScaledVector(direction, reach * 2);
+        sun.position.copy(centre).addScaledVector(direction, reachMetres * 2);
     };
 
     return {
         setSun,
         resetSun: () => setSun(DEFAULT_SUN, DEFAULT_AMBIENT),
-        castShadow: (at, far, extent, size) => {
+        castShadow: (at, farMetres, extentMetres, sizeTexels) => {
             centre = at.clone();
-            reach = far;
-            if (sun.shadow.mapSize.x !== size) {
-                sun.shadow.mapSize.set(size, size);
+            reachMetres = farMetres;
+            if (sun.shadow.mapSize.x !== sizeTexels) {
+                sun.shadow.mapSize.set(sizeTexels, sizeTexels);
                 sun.shadow.map?.dispose();
                 sun.shadow.map = null;
             }
 
-            sun.position.copy(centre).addScaledVector(direction, reach * 2);
+            sun.position.copy(centre).addScaledVector(direction, reachMetres * 2);
             sun.target.position.copy(centre);
             const shadow = sun.shadow.camera;
-            shadow.left = -extent;
-            shadow.right = extent;
-            shadow.top = extent;
-            shadow.bottom = -extent;
-            shadow.near = reach * 0.1;
-            shadow.far = reach * 4;
+            shadow.left = -extentMetres;
+            shadow.right = extentMetres;
+            shadow.top = extentMetres;
+            shadow.bottom = -extentMetres;
+            shadow.near = reachMetres * 0.1;
+            shadow.far = reachMetres * 4;
             shadow.updateProjectionMatrix();
         }
     };
