@@ -193,7 +193,7 @@ public abstract class PathingEntity extends PositionEntity {
     public int size;
 
     @OriginalMember(owner = "client!cg", name = "eb", descriptor = "I")
-    public int anInt10743;
+    public int menuClock;
 
     @OriginalMember(owner = "client!cg", name = "K", descriptor = "I")
     protected int anInt10732;
@@ -309,7 +309,7 @@ public abstract class PathingEntity extends PositionEntity {
         this.visible = true;
         this.hitmarkPointer = 0;
         this.size = 1;
-        this.anInt10743 = -1;
+        this.menuClock = -1;
         this.anInt10732 = 0;
         this.hitmarkEndTimes = new int[GraphicsDefaults.instance.maxhitmarks];
         this.ready = false;
@@ -598,7 +598,7 @@ public abstract class PathingEntity extends PositionEntity {
     }
 
     @OriginalMember(owner = "client!cg", name = "e", descriptor = "(I)I")
-    public final int method9303() {
+    public final int rotationTick() {
         @Pc(9) BASType basType = this.getBASType();
         @Pc(13) int yaw = this.yaw.value;
         @Pc(30) boolean local30;

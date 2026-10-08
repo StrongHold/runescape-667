@@ -21,7 +21,7 @@ public abstract class PositionEntity extends Entity {
     public final boolean aBoolean815;
 
     @OriginalMember(owner = "client!qf", name = "I", descriptor = "B")
-    public final byte aByte145;
+    public final byte diagonalAxis;
 
     @OriginalMember(owner = "client!qf", name = "w", descriptor = "S")
     public short x2;
@@ -39,14 +39,14 @@ public abstract class PositionEntity extends Entity {
         super.z = z;
         super.x = x;
         this.aBoolean815 = arg9;
-        this.aByte145 = arg10;
+        this.diagonalAxis = arg10;
         this.x2 = (short) x2;
         this.x1 = (short) x1;
     }
 
     @OriginalMember(owner = "client!qf", name = "a", descriptor = "([Lclient!lca;I)I")
     @Override
-    public final int method9288(@OriginalArg(0) PointLight[] arg0) {
+    public final int findLights(@OriginalArg(0) PointLight[] arg0) {
         @Pc(7) int local7 = 0;
         @Pc(21) int local21;
         @Pc(44) int local44;
@@ -86,14 +86,14 @@ public abstract class PositionEntity extends Entity {
         for (local21 = local7; local21 < 4; local21++) {
             arg0[local21] = null;
         }
-        if (this.aByte145 != 0) {
+        if (this.diagonalAxis != 0) {
             local44 = this.x1 - Static403.anInt6246;
             @Pc(163) int local163 = this.z1 - Static550.anInt8271;
             @Pc(188) int local188;
             @Pc(191) short local191;
             @Pc(183) short local183;
             @Pc(180) int local180;
-            if (this.aByte145 == 1) {
+            if (this.diagonalAxis == 1) {
                 if (local44 >= local163) {
                     local188 = this.z1 + 1;
                     local183 = this.x1;

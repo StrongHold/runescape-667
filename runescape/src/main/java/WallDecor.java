@@ -64,7 +64,7 @@ public abstract class WallDecor extends Entity implements Location {
 
     @OriginalMember(owner = "client!tla", name = "a", descriptor = "([Lclient!lca;I)I")
     @Override
-    public final int method9288(@OriginalArg(0) PointLight[] arg0) {
+    public final int findLights(@OriginalArg(0) PointLight[] arg0) {
         return this.findLightsAt(arg0, super.z >> EnvironmentLight.tileShift, super.x >> EnvironmentLight.tileShift);
     }
 

@@ -23,7 +23,7 @@ import org.openrs2.deob.annotation.OriginalMember;
 import org.openrs2.deob.annotation.Pc;
 
 @OriginalClass("client!kla")
-public final class Model_Sub2 extends Model {
+public final class GlModel extends Model {
 
     @OriginalMember(owner = "client!kla", name = "sc", descriptor = "[I")
     public int[] anIntArray409;
@@ -203,7 +203,7 @@ public final class Model_Sub2 extends Model {
     public Class136 aClass136_1;
 
     @OriginalMember(owner = "client!kla", name = "<init>", descriptor = "(Lclient!qha;)V")
-    public Model_Sub2(@OriginalArg(0) GlToolkit arg0) {
+    public GlModel(@OriginalArg(0) GlToolkit arg0) {
         this.aClass19_Sub3_24 = arg0;
         this.aClass94_8 = new Class94(null, 5126, 3, 0);
         this.aClass94_9 = new Class94(null, 5126, 2, 0);
@@ -213,7 +213,7 @@ public final class Model_Sub2 extends Model {
     }
 
     @OriginalMember(owner = "client!kla", name = "<init>", descriptor = "(Lclient!qha;Lclient!dv;IIII)V")
-    public Model_Sub2(@OriginalArg(0) GlToolkit arg0, @OriginalArg(1) Mesh arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5) {
+    public GlModel(@OriginalArg(0) GlToolkit arg0, @OriginalArg(1) Mesh arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5) {
         this.aClass19_Sub3_24 = arg0;
         this.anInt5520 = arg2;
         this.anInt5529 = arg5;
@@ -808,7 +808,7 @@ public final class Model_Sub2 extends Model {
     @Override
     public int HA() {
         if (!this.aBoolean424) {
-            this.method4982();
+            this.calculateBounds();
         }
         return this.aShort61;
     }
@@ -816,11 +816,11 @@ public final class Model_Sub2 extends Model {
     @OriginalMember(owner = "client!kla", name = "a", descriptor = "(IILclient!tt;ZI)Z")
     @Override
     public boolean picked(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) Matrix matrix, @OriginalArg(3) boolean quick, @OriginalArg(4) int sizeShift) {
-        return this.method4981(matrix, quick, y, x, -1, sizeShift);
+        return this.pick(matrix, quick, y, x, -1, sizeShift);
     }
 
     @OriginalMember(owner = "client!kla", name = "a", descriptor = "(Lclient!tt;ZIIIII)Z")
-    public boolean method4981(@OriginalArg(0) Matrix arg0, @OriginalArg(1) boolean arg1, @OriginalArg(3) int arg2, @OriginalArg(4) int arg3, @OriginalArg(5) int arg4, @OriginalArg(6) int arg5) {
+    public boolean pick(@OriginalArg(0) Matrix arg0, @OriginalArg(1) boolean arg1, @OriginalArg(3) int arg2, @OriginalArg(4) int arg3, @OriginalArg(5) int arg4, @OriginalArg(6) int arg5) {
         @Pc(8) Matrix_Sub3 local8 = (Matrix_Sub3) arg0;
         @Pc(12) Matrix_Sub3 local12 = this.aClass19_Sub3_24.aClass73_Sub3_3;
         @Pc(33) float local33 = local12.aFloat152 + (local8.aFloat158 * local12.aFloat157 + local8.aFloat152 * local12.aFloat153 + local12.aFloat160 * local8.aFloat159);
@@ -843,7 +843,7 @@ public final class Model_Sub2 extends Model {
         @Pc(251) int local251 = this.aClass19_Sub3_24.anInt8001;
         @Pc(255) int local255 = this.aClass19_Sub3_24.anInt8025;
         if (!this.aBoolean424) {
-            this.method4982();
+            this.calculateBounds();
         }
         @Pc(271) int local271 = this.aShort62 - this.aShort66 >> 1;
         @Pc(280) int local280 = this.aShort68 - this.aShort63 >> 1;
@@ -974,7 +974,7 @@ public final class Model_Sub2 extends Model {
     }
 
     @OriginalMember(owner = "client!kla", name = "c", descriptor = "(B)V")
-    public void method4982() {
+    public void calculateBounds() {
         @Pc(7) int local7 = 32767;
         @Pc(9) int local9 = 32767;
         @Pc(11) int local11 = 32767;
@@ -1052,38 +1052,38 @@ public final class Model_Sub2 extends Model {
             return null;
         }
         if (!this.aBoolean424) {
-            this.method4982();
+            this.calculateBounds();
         }
         @Pc(43) int local43;
         @Pc(60) int local60;
-        if (this.aClass19_Sub3_24.anInt8027 > 0) {
-            local43 = this.aShort66 - (this.aShort68 * this.aClass19_Sub3_24.anInt8027 >> 8) >> this.aClass19_Sub3_24.anInt7989;
-            local60 = this.aShort62 - (this.aClass19_Sub3_24.anInt8027 * this.aShort63 >> 8) >> this.aClass19_Sub3_24.anInt7989;
+        if (this.aClass19_Sub3_24.sunSlopeX > 0) {
+            local43 = this.aShort66 - (this.aShort68 * this.aClass19_Sub3_24.sunSlopeX >> 8) >> this.aClass19_Sub3_24.shadowScaleShift;
+            local60 = this.aShort62 - (this.aClass19_Sub3_24.sunSlopeX * this.aShort63 >> 8) >> this.aClass19_Sub3_24.shadowScaleShift;
         } else {
-            local43 = this.aShort66 - (this.aShort63 * this.aClass19_Sub3_24.anInt8027 >> 8) >> this.aClass19_Sub3_24.anInt7989;
-            local60 = this.aShort62 - (this.aClass19_Sub3_24.anInt8027 * this.aShort68 >> 8) >> this.aClass19_Sub3_24.anInt7989;
+            local43 = this.aShort66 - (this.aShort63 * this.aClass19_Sub3_24.sunSlopeX >> 8) >> this.aClass19_Sub3_24.shadowScaleShift;
+            local60 = this.aShort62 - (this.aClass19_Sub3_24.sunSlopeX * this.aShort68 >> 8) >> this.aClass19_Sub3_24.shadowScaleShift;
         }
         @Pc(116) int local116;
         @Pc(132) int local132;
-        if (this.aClass19_Sub3_24.anInt8023 <= 0) {
-            local116 = this.aShort61 - (this.aShort63 * this.aClass19_Sub3_24.anInt8023 >> 8) >> this.aClass19_Sub3_24.anInt7989;
-            local132 = this.aShort69 - (this.aShort68 * this.aClass19_Sub3_24.anInt8023 >> 8) >> this.aClass19_Sub3_24.anInt7989;
+        if (this.aClass19_Sub3_24.sunSlopeZ <= 0) {
+            local116 = this.aShort61 - (this.aShort63 * this.aClass19_Sub3_24.sunSlopeZ >> 8) >> this.aClass19_Sub3_24.shadowScaleShift;
+            local132 = this.aShort69 - (this.aShort68 * this.aClass19_Sub3_24.sunSlopeZ >> 8) >> this.aClass19_Sub3_24.shadowScaleShift;
         } else {
-            local116 = this.aShort61 - (this.aShort68 * this.aClass19_Sub3_24.anInt8023 >> 8) >> this.aClass19_Sub3_24.anInt7989;
-            local132 = this.aShort69 - (this.aClass19_Sub3_24.anInt8023 * this.aShort63 >> 8) >> this.aClass19_Sub3_24.anInt7989;
+            local116 = this.aShort61 - (this.aShort68 * this.aClass19_Sub3_24.sunSlopeZ >> 8) >> this.aClass19_Sub3_24.shadowScaleShift;
+            local132 = this.aShort69 - (this.aClass19_Sub3_24.sunSlopeZ * this.aShort63 >> 8) >> this.aClass19_Sub3_24.shadowScaleShift;
         }
         @Pc(175) int local175 = local60 + 1 - local43;
         @Pc(182) int local182 = local132 + 1 - local116;
-        @Pc(185) DoublyLinkedNode_Sub2_Sub9_ local185 = (DoublyLinkedNode_Sub2_Sub9_) shadow;
-        @Pc(197) DoublyLinkedNode_Sub2_Sub9_ local197;
+        @Pc(185) GlShadow local185 = (GlShadow) shadow;
+        @Pc(197) GlShadow local197;
         if (local185 != null && local185.method6545(local182, local175)) {
             local197 = local185;
             local185.method6546();
         } else {
-            local197 = new DoublyLinkedNode_Sub2_Sub9_(this.aClass19_Sub3_24, local175, local182);
+            local197 = new GlShadow(this.aClass19_Sub3_24, local175, local182);
         }
         local197.method6544(local60, local116, local132, local43);
-        this.method4987(local197);
+        this.drawShadow(local197);
         return local197;
     }
 
@@ -1102,7 +1102,7 @@ public final class Model_Sub2 extends Model {
                     this.aBoolean422 = true;
                 } else {
                     if (!this.aBoolean424) {
-                        this.method4982();
+                        this.calculateBounds();
                     }
                     local37 = true;
                 }
@@ -1113,7 +1113,7 @@ public final class Model_Sub2 extends Model {
                 } else {
                     local39 = true;
                     if (!this.aBoolean424) {
-                        this.method4982();
+                        this.calculateBounds();
                     }
                 }
             }
@@ -1123,7 +1123,7 @@ public final class Model_Sub2 extends Model {
                 } else {
                     local41 = true;
                     if (!this.aBoolean424) {
-                        this.method4982();
+                        this.calculateBounds();
                     }
                 }
             }
@@ -1217,20 +1217,20 @@ public final class Model_Sub2 extends Model {
     @Override
     public Model copy(@OriginalArg(0) byte arg0, @OriginalArg(1) int functionMask, @OriginalArg(2) boolean arg2) {
         @Pc(5) boolean local5 = false;
-        @Pc(25) Model_Sub2 local25;
-        @Pc(24) Model_Sub2 local24;
+        @Pc(25) GlModel local25;
+        @Pc(24) GlModel local24;
         if (arg0 > 0 && arg0 <= 7) {
             local25 = this.aClass19_Sub3_24.aClass114_Sub2Array2[arg0 - 1];
             local5 = true;
             local24 = this.aClass19_Sub3_24.aClass114_Sub2Array1[arg0 - 1];
         } else {
-            local25 = local24 = new Model_Sub2(this.aClass19_Sub3_24);
+            local25 = local24 = new GlModel(this.aClass19_Sub3_24);
         }
         return this.method4992(local24, local5, arg2, functionMask, local25);
     }
 
     @OriginalMember(owner = "client!kla", name = "a", descriptor = "(B)V")
-    public void method4984() {
+    public void renderBillboards() {
         if (this.billboardFaces == null) {
             return;
         }
@@ -1270,7 +1270,7 @@ public final class Model_Sub2 extends Model {
     }
 
     @OriginalMember(owner = "client!kla", name = "a", descriptor = "(ZBIIS)I")
-    public int method4985(@OriginalArg(1) byte arg0, @OriginalArg(2) int arg1, @OriginalArg(3) int arg2, @OriginalArg(4) short arg3) {
+    public int shadeRgba(@OriginalArg(1) byte arg0, @OriginalArg(2) int arg1, @OriginalArg(3) int arg2, @OriginalArg(4) short arg3) {
         @Pc(20) int local20 = ColourUtils.HSL_TO_RGB[Static468.shadeHsl(arg1, arg2)];
         if (arg3 != -1) {
             @Pc(33) TextureMetrics local33 = this.aClass19_Sub3_24.textureSource.getMetrics(arg3 & 0xFFFF);
@@ -1366,7 +1366,7 @@ public final class Model_Sub2 extends Model {
     }
 
     @OriginalMember(owner = "client!kla", name = "a", descriptor = "(Lclient!ph;Z)V")
-    public void method4987(@OriginalArg(0) DoublyLinkedNode_Sub2_Sub9_ arg0) {
+    public void drawShadow(@OriginalArg(0) GlShadow arg0) {
         if (this.anInt5538 > this.aClass19_Sub3_24.anIntArray623.length) {
             this.aClass19_Sub3_24.anIntArray625 = new int[this.anInt5538];
             this.aClass19_Sub3_24.anIntArray623 = new int[this.anInt5538];
@@ -1377,8 +1377,8 @@ public final class Model_Sub2 extends Model {
         @Pc(103) int local103;
         @Pc(112) int local112;
         for (@Pc(36) int local36 = 0; local36 < this.anInt5543; local36++) {
-            local64 = (this.anIntArray410[local36] - (this.anIntArray409[local36] * this.aClass19_Sub3_24.anInt8027 >> 8) >> this.aClass19_Sub3_24.anInt7989) - arg0.anInt7350;
-            @Pc(89) int local89 = (this.anIntArray412[local36] - (this.aClass19_Sub3_24.anInt8023 * this.anIntArray409[local36] >> 8) >> this.aClass19_Sub3_24.anInt7989) - arg0.anInt7353;
+            local64 = (this.anIntArray410[local36] - (this.anIntArray409[local36] * this.aClass19_Sub3_24.sunSlopeX >> 8) >> this.aClass19_Sub3_24.shadowScaleShift) - arg0.anInt7350;
+            @Pc(89) int local89 = (this.anIntArray412[local36] - (this.aClass19_Sub3_24.sunSlopeZ * this.anIntArray409[local36] >> 8) >> this.aClass19_Sub3_24.shadowScaleShift) - arg0.anInt7353;
             @Pc(94) int local94 = this.anIntArray411[local36];
             @Pc(101) int local101 = this.anIntArray411[local36 + 1];
             for (local103 = local94; local103 < local101; local103++) {
@@ -1402,7 +1402,7 @@ public final class Model_Sub2 extends Model {
                 @Pc(216) int local216 = local34[local191];
                 @Pc(220) int local220 = local34[local196];
                 if (-((local208 - local112) * (-local212 + local216)) + (local103 - local112) * (local216 - local220) > 0) {
-                    arg0.method6542(local103, local212, local112, local216, local220, local208);
+                    arg0.fillTriangle(local103, local212, local112, local216, local220, local208);
                 }
             }
         }
@@ -1567,7 +1567,7 @@ public final class Model_Sub2 extends Model {
         @Pc(17) Matrix_Sub3 local17 = this.aClass19_Sub3_24.aClass73_Sub3_3;
         @Pc(20) Matrix_Sub3 local20 = (Matrix_Sub3) matrix;
         if (!this.aBoolean424) {
-            this.method4982();
+            this.calculateBounds();
         }
         Static188.aFloat65 = local17.aFloat155 * local20.aFloat157 + local17.aFloat151 * local20.aFloat156 + local20.aFloat151 * local17.aFloat154;
         Static24.aFloat20 = local17.aFloat159 + (local17.aFloat151 * local20.aFloat158 + local17.aFloat155 * local20.aFloat152 + local20.aFloat159 * local17.aFloat154);
@@ -1683,7 +1683,7 @@ public final class Model_Sub2 extends Model {
         this.aClass19_Sub3_24.method7020(local20);
         this.method4988();
         this.aClass19_Sub3_24.method6996();
-        this.method4984();
+        this.renderBillboards();
     }
 
     @OriginalMember(owner = "client!kla", name = "a", descriptor = "(ZI)V")
@@ -1733,7 +1733,7 @@ public final class Model_Sub2 extends Model {
     @Override
     public int fa() {
         if (!this.aBoolean424) {
-            this.method4982();
+            this.calculateBounds();
         }
         return this.aShort63;
     }
@@ -1741,7 +1741,7 @@ public final class Model_Sub2 extends Model {
     @OriginalMember(owner = "client!kla", name = "a", descriptor = "(Lclient!ka;IIIZ)V")
     @Override
     public void shareLight(@OriginalArg(0) Model arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) boolean arg4) {
-        @Pc(8) Model_Sub2 local8 = (Model_Sub2) arg0;
+        @Pc(8) GlModel local8 = (GlModel) arg0;
         if (this.anInt5560 == 0 || local8.anInt5560 == 0) {
             return;
         }
@@ -1786,7 +1786,7 @@ public final class Model_Sub2 extends Model {
         @Pc(106) int[] local106 = local8.anIntArray411;
         @Pc(109) short[] local109 = local8.aShortArray70;
         if (!local8.aBoolean424) {
-            local8.method4982();
+            local8.calculateBounds();
         }
         @Pc(120) short local120 = local8.aShort63;
         @Pc(123) short local123 = local8.aShort68;
@@ -1900,7 +1900,7 @@ public final class Model_Sub2 extends Model {
     @Override
     public int RA() {
         if (!this.aBoolean424) {
-            this.method4982();
+            this.calculateBounds();
         }
         return this.aShort62;
     }
@@ -1927,7 +1927,7 @@ public final class Model_Sub2 extends Model {
         @Pc(14) Matrix_Sub3 local14 = this.aClass19_Sub3_24.aClass73_Sub3_3;
         @Pc(17) Matrix_Sub3 local17 = (Matrix_Sub3) arg0;
         if (!this.aBoolean424) {
-            this.method4982();
+            this.calculateBounds();
         }
         Static188.aFloat65 = local17.aFloat156 * local14.aFloat151 + local14.aFloat155 * local17.aFloat157 + local14.aFloat154 * local17.aFloat151;
         Static24.aFloat20 = local14.aFloat159 + (local14.aFloat155 * local17.aFloat152 + local17.aFloat158 * local14.aFloat151 + local17.aFloat159 * local14.aFloat154);
@@ -2008,14 +2008,14 @@ public final class Model_Sub2 extends Model {
         this.aClass19_Sub3_24.method7020(local17);
         this.method4988();
         this.aClass19_Sub3_24.method6996();
-        this.method4984();
+        this.renderBillboards();
     }
 
     @OriginalMember(owner = "client!kla", name = "V", descriptor = "()I")
     @Override
     public int V() {
         if (!this.aBoolean424) {
-            this.method4982();
+            this.calculateBounds();
         }
         return this.aShort66;
     }
@@ -2179,7 +2179,7 @@ public final class Model_Sub2 extends Model {
     @Override
     public int G() {
         if (!this.aBoolean424) {
-            this.method4982();
+            this.calculateBounds();
         }
         return this.aShort69;
     }
@@ -2204,7 +2204,7 @@ public final class Model_Sub2 extends Model {
     @Override
     public int na() {
         if (!this.aBoolean424) {
-            this.method4982();
+            this.calculateBounds();
         }
         return this.aShort70;
     }
@@ -2891,7 +2891,7 @@ public final class Model_Sub2 extends Model {
                 @Pc(468) float local468 = this.aClass19_Sub3_24.aFloat129 * 768.0F / (float) this.aShort67;
                 @Pc(478) float local478 = this.aClass19_Sub3_24.aFloat130 * 768.0F / (float) this.aShort67;
                 for (@Pc(480) int local480 = 0; local480 < this.anInt5560; local480++) {
-                    @Pc(500) int local500 = this.method4985(this.aByteArray54[local480], this.aShortArray74[local480], this.aShort64, this.aShortArray75[local480]);
+                    @Pc(500) int local500 = this.shadeRgba(this.aByteArray54[local480], this.aShortArray74[local480], this.aShort64, this.aShortArray75[local480]);
                     @Pc(505) short local505 = this.aShortArray67[local480];
                     local516 = (float) (local500 >> 16 & 0xFF) * this.aClass19_Sub3_24.aFloat143;
                     @Pc(527) float local527 = (float) (local500 >> 8 & 0xFF) * this.aClass19_Sub3_24.aFloat137;
@@ -2991,7 +2991,7 @@ public final class Model_Sub2 extends Model {
                 }
             } else {
                 for (local213 = 0; local213 < this.anInt5560; local213++) {
-                    local222 = this.method4985(this.aByteArray54[local213], this.aShortArray74[local213], this.aShort64, this.aShortArray75[local213]);
+                    local222 = this.shadeRgba(this.aByteArray54[local213], this.aShortArray74[local213], this.aShort64, this.aShortArray75[local213]);
                     local203.pos = local118 * this.aShortArray67[local213] + local122;
                     local203.p4(local222);
                     local203.pos = local118 * this.aShortArray71[local213] + local122;
@@ -3122,7 +3122,7 @@ public final class Model_Sub2 extends Model {
     }
 
     @OriginalMember(owner = "client!kla", name = "a", descriptor = "(Lclient!kla;IZZILclient!kla;)Lclient!ka;")
-    public Model method4992(@OriginalArg(0) Model_Sub2 arg0, @OriginalArg(2) boolean arg1, @OriginalArg(3) boolean arg2, @OriginalArg(4) int arg3, @OriginalArg(5) Model_Sub2 arg4) {
+    public Model method4992(@OriginalArg(0) GlModel arg0, @OriginalArg(2) boolean arg1, @OriginalArg(3) boolean arg2, @OriginalArg(4) int arg3, @OriginalArg(5) GlModel arg4) {
         arg4.anInt5520 = arg3;
         arg4.anInt5538 = this.anInt5538;
         arg4.anInt5506 = this.anInt5506;
@@ -3752,7 +3752,7 @@ public final class Model_Sub2 extends Model {
     @Override
     public void p(@OriginalArg(0) int hillType, @OriginalArg(1) int hillValue, @OriginalArg(2) Ground floor, @OriginalArg(3) Ground ceiling, @OriginalArg(4) int x, @OriginalArg(5) int y, @OriginalArg(6) int z) {
         if (!this.aBoolean424) {
-            this.method4982();
+            this.calculateBounds();
         }
         @Pc(18) int local18 = this.aShort66 + x;
         @Pc(24) int local24 = x + this.aShort62;
@@ -3849,7 +3849,7 @@ public final class Model_Sub2 extends Model {
     @OriginalMember(owner = "client!kla", name = "a", descriptor = "(IILclient!tt;ZII)Z")
     @Override
     public boolean pickedOrtho(@OriginalArg(0) int x, @OriginalArg(1) int y, @OriginalArg(2) Matrix matrix, @OriginalArg(3) boolean quick, @OriginalArg(4) int sizeShift, @OriginalArg(5) int angle) {
-        return this.method4981(matrix, quick, y, x, angle, sizeShift);
+        return this.pick(matrix, quick, y, x, angle, sizeShift);
     }
 
     @OriginalMember(owner = "client!kla", name = "LA", descriptor = "(I)V")
@@ -3868,7 +3868,7 @@ public final class Model_Sub2 extends Model {
     @Override
     public int ma() {
         if (!this.aBoolean424) {
-            this.method4982();
+            this.calculateBounds();
         }
         return this.aShort65;
     }
@@ -3888,7 +3888,7 @@ public final class Model_Sub2 extends Model {
     @Override
     public int EA() {
         if (!this.aBoolean424) {
-            this.method4982();
+            this.calculateBounds();
         }
         return this.aShort68;
     }

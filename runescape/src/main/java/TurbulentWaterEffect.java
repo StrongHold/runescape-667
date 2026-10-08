@@ -52,7 +52,7 @@ public final class TurbulentWaterEffect extends TextureEffect {
     public Class36 displayList;
 
     @OriginalMember(owner = "client!wt", name = "g", descriptor = "Lclient!sa;")
-    public final Class329 textures;
+    public final GlWaterNoiseTextureSet textures;
 
     @OriginalMember(owner = "client!wt", name = "h", descriptor = "Lclient!cn;")
     public Class71 vertexProgram;
@@ -61,7 +61,7 @@ public final class TurbulentWaterEffect extends TextureEffect {
     public float[] noise;
 
     @OriginalMember(owner = "client!wt", name = "<init>", descriptor = "(Lclient!qha;Lclient!sa;)V")
-    public TurbulentWaterEffect(@OriginalArg(0) GlToolkit toolkit, @OriginalArg(1) Class329 textures) {
+    public TurbulentWaterEffect(@OriginalArg(0) GlToolkit toolkit, @OriginalArg(1) GlWaterNoiseTextureSet textures) {
         super(toolkit);
         this.textures = textures;
         if (super.toolkit.aBoolean608 && super.toolkit.anInt8003 >= 2) {
@@ -105,7 +105,7 @@ public final class TurbulentWaterEffect extends TextureEffect {
                 super.toolkit.method7001(this.textures.aClass93_Sub3_2);
                 OpenGL.glProgramLocalParameter4fARB(OpenGL.GL_VERTEX_PROGRAM_ARB, TIME_PARAM, this.animationPhase, 0.0F, 0.0F, 1.0F);
             } else {
-                @Pc(64) int frame = super.toolkit.anInt7987 % ANIMATION_PERIOD * FRAME_COUNT / ANIMATION_PERIOD;
+                @Pc(64) int frame = super.toolkit.lastTickTime % ANIMATION_PERIOD * FRAME_COUNT / ANIMATION_PERIOD;
                 super.toolkit.method7001(this.textures.aClass93_Sub2Array3[frame]);
                 OpenGL.glProgramLocalParameter4fARB(OpenGL.GL_VERTEX_PROGRAM_ARB, TIME_PARAM, 0.0F, 0.0F, 0.0F, 1.0F);
             }
@@ -140,7 +140,7 @@ public final class TurbulentWaterEffect extends TextureEffect {
         this.displayList = new Class36(super.toolkit, DISPLAY_LIST_COUNT);
         this.displayList.method1002(ENABLE_LIST);
         super.toolkit.method7014(1);
-        super.toolkit.method6985(OPAQUE_BLACK);
+        super.toolkit.setTextureEnvColour(OPAQUE_BLACK);
         super.toolkit.method7031(GL_REPLACE, GL_ADD);
         super.toolkit.method7029(0, OpenGL.GL_CONSTANT);
         super.toolkit.method7014(0);
@@ -182,18 +182,18 @@ public final class TurbulentWaterEffect extends TextureEffect {
             OpenGL.glLoadMatrixf(super.toolkit.aClass73_Sub3_5.method7146(), 0);
             OpenGL.glMatrixMode(OpenGL.GL_MODELVIEW);
             super.toolkit.method7014(0);
-            if (this.noiseUpdatedAt != super.toolkit.anInt7987) {
-                @Pc(58) int offset = super.toolkit.anInt7987 % NOISE_PERIOD * NOISE_STRIDE / NOISE_PERIOD;
+            if (this.noiseUpdatedAt != super.toolkit.lastTickTime) {
+                @Pc(58) int offset = super.toolkit.lastTickTime % NOISE_PERIOD * NOISE_STRIDE / NOISE_PERIOD;
                 for (@Pc(60) int param = 0; param < NOISE_PARAM_COUNT; param++) {
                     OpenGL.glProgramLocalParameter4fvARB(OpenGL.GL_VERTEX_PROGRAM_ARB, param, this.noise, offset);
                     offset += 2;
                 }
                 if (this.textures.aBoolean655) {
-                    this.animationPhase = (float) (super.toolkit.anInt7987 % ANIMATION_PERIOD) / (float) ANIMATION_PERIOD;
+                    this.animationPhase = (float) (super.toolkit.lastTickTime % ANIMATION_PERIOD) / (float) ANIMATION_PERIOD;
                 } else {
                     OpenGL.glProgramLocalParameter4fARB(OpenGL.GL_VERTEX_PROGRAM_ARB, TIME_PARAM, 0.0F, 0.0F, 0.0F, 1.0F);
                 }
-                this.noiseUpdatedAt = super.toolkit.anInt7987;
+                this.noiseUpdatedAt = super.toolkit.lastTickTime;
             }
         }
     }

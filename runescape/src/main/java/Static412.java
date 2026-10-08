@@ -7,7 +7,7 @@ public final class Static412 {
     public static int anInt6357;
 
     @OriginalMember(owner = "client!naa", name = "d", descriptor = "I")
-    public static final int anInt6358 = 5000;
+    public static final int ENVIRONMENT_FADE_DURATION = 5000;
 
     @OriginalMember(owner = "client!naa", name = "a", descriptor = "(IIIBIII)V")
     public static void fillAndOutlineCircle(@OriginalArg(0) int lineWidth, @OriginalArg(1) int radius, @OriginalArg(2) int lineColour, @OriginalArg(4) int centreY, @OriginalArg(5) int centreX, @OriginalArg(6) int fillColour) {

@@ -37,7 +37,7 @@ draws are the front faces in glTF too.
 Two face corners share a vertex only where they agree on the client's vertex, the normal, the
 colour, the opacity and the texture coordinate, so each face keeps its own colour exactly. A
 face's colour is the colour the GL toolkit gives its vertices before its lights fall on them
-(`Model_Sub2.method4985`): the face's HSL colour with its lightness scaled by the model's ambient,
+(`GlModel.shadeRgba`): the face's HSL colour with its lightness scaled by the model's ambient,
 64 plus the type's own, out of 128, and then taken through the client's palette, whose gamma of
 0.7 comes after the scaling, so the result is not the palette colour dimmed. It is written as a
 vertex colour in linear light. A textured face is tinted as the GL toolkit tints it: that colour
@@ -49,7 +49,7 @@ blending, so a face that is drawn through what is behind it, or a texture with h
 a material that blends or cuts out. Normals are the client's own: a smooth face takes the normals
 of the faces it meets at each corner, and a flat face takes its own. They are written unit, as
 glTF asks, and each vertex also carries `_SHADE`, a float: how strongly the sun lights it, out
-of 1. The GL toolkit never normalises a normal (`Model_Sub2`): a smooth corner's is the sum of
+of 1. The GL toolkit never normalises a normal (`GlModel`): a smooth corner's is the sum of
 the normals of the faces at the vertex, each 256 long, times 3 over the model's contrast (768
 plus the type's own) and the count of faces summed, and a flat face's is its own, 256 long,
 times 2 over the contrast. So a vertex whose faces face away from each other, as the two sides
@@ -75,13 +75,13 @@ colour and the sum doubled (`GL_RGB_SCALE` 2), with the
 vertex's alpha, which the GL ground writes as opaque, times the frame's alpha, so the surface
 is nearly see-through. Where the GL driver has 3D textures (`GL_EXT_texture3D`, which the
 client turns off only for some old ATI drivers), the sixteen frames are the slices of one volume
-(`Class93_Sub3`), filtered linearly and repeating on every axis, and the third coordinate is the
-part of four seconds gone (`anInt7987 % 4000 / 4000`), so each frame blends smoothly into the
+(`GlVolumeTexture`), filtered linearly and repeating on every axis, and the third coordinate is the
+part of four seconds gone (`lastTickTime % 4000 / 4000`), so each frame blends smoothly into the
 next and the last into the first. Without 3D textures the client binds the frame of the moment
 alone, a new one every quarter second, which looks choppy; an importer should take the volume.
 A second unit adds an alpha that fades the surface to opaque with eye
 depth, from the fog's start to a fog range further, where the fog for the water starts a range
-and a half before the far plane and ends a range before it (`GlToolkit.method6995`). What shows
+and a half before the far plane and ends a range before it (`GlToolkit.adjustFog`). What shows
 through is the bed, drawn before it in the underwater pass, described with the ground below.
 
 Under `particle/`, `emitters.json` and `effectors.json` hold the client's particle emitter and
@@ -279,7 +279,7 @@ node stands 15 units above the NPC's origin, because the client draws the NPC 5 
 ground and the shadow 20 units above it (`NPCEntity.render`). The client draws the shadow first,
 blended and without writing depth, so the NPC covers it, and only where the base animation set's
 `animateShadow` is true. The client also poses the disc with the NPC's sequence
-(`Animator.method9105`), and that is not written.
+(`Animator.animateShadow`), and that is not written.
 
 Where the type has a head, the model the client shows while the NPC talks, its `headModels` are in
 the model library; the client builds it (`NPCType.headModel`) with the same colour and texture
@@ -398,7 +398,7 @@ on it stands on it. Tiles meet corner to corner, and a corner that two tiles sha
 The client lights the ground as it builds it, from the slope of each corner and the toolkit's sun,
 and that light is turned up to full here, so the colours written are the ground's own, as a
 model's are. `COLOR_0` is that colour as the software toolkit holds it. The GL toolkit colours a
-ground vertex another way (`Ground_Sub2`, `Node_Sub39.method5863`): it takes the vertex's HSL
+ground vertex another way (`GlGround`, `GlGroundLayer.setVertexColour`): it takes the vertex's HSL
 colour, scales its lightness by the light on the tile, 74 less the shadow the locations cast on
 the corner, out of 128, holds it between 2 and 126, and takes it through the palette, whose
 gamma comes after the scaling; a textured vertex is then pulled towards a grey of that light, two
@@ -495,7 +495,7 @@ from its type: the `centre` of its face in the same frame, the `distance` it is 
 camera in the client's units, its half `width` and `height` in those units, its `texture`, its
 `blendMode` (1 by alpha, 2 added, 128 multiplied in), the face's `colour` from the palette, and its
 `alpha` out of 255. The GL toolkit draws each as a square facing the camera at that size, in that
-colour, unlit, blended that way (`Model_Sub2.method4984`); the face under a billboard whose type
+colour, unlit, blended that way (`GlModel.renderBillboards`); the face under a billboard whose type
 hides it is never drawn.
 
 `--baked` on `exportLoc`, and `--baked-locs` on `exportMapSquare`, also write each location's meshes
@@ -518,7 +518,7 @@ radius over four up to 30 for one that stands on its tiles, and by 50 for the tw
 straight wall and the one corner of a corner wall (`MapRegion.loadLocation`, `Ground.ka`). An
 engine reads the placements and does the same, since a location spawned later casts no less.
 They also say whether it casts a `hardShadow`, the GL toolkit's shadow of the model's faces
-projected along the sun onto the ground (`Model_Sub2.method4987`, `Class170`), which walls and
+projected along the sun onto the ground (`GlModel.drawShadow`, `GlShadowMap`), which walls and
 locations cast and decorations do not, 32 units a texel, darkening the ground by 68 of 255 with
 a one texel rim at a quarter of that for each covered neighbour. They say whether the location
 is `interactive`, which the client decides once it reads the type (`LocType.postDecode`): as the
@@ -545,7 +545,7 @@ light comes from with y down, its colour and its two strengths, for faces that l
 away from it, the ambient factor every face gets, the fog's colour and range, the GL toolkit's
 `bloom` (its `threshold`, the luminance below which a pixel adds no glow; its `strength`, how much
 of the blurred glow is added; and its `whitePoint`, the luminance its tone map takes to white, as
-`Node_Sub31_Sub1`'s shaders use them), and the sky box and reflection cube map where the file
+`GlBloomFilter`'s shaders use them), and the sky box and reflection cube map where the file
 names them. A map square whose file says nothing gets the client's defaults, which are a sun
 from (-50, -60, -50) at 0.7, an ambient of 1.15, a fog of 13156520 and a bloom of threshold 1,
 strength 0.25 and white point 1. The hardware toolkits
@@ -582,13 +582,13 @@ player is under it, 8 marks a tile whose contents count as level 0 whatever leve
 16 marks a tile that is never drawn, and 128 marks water. The client loads a location on level L
 at a tile only when the tile is a bridge on level 0, or when it is not hidden and its effective
 level is the player's: 0 for a tile flagged 8, one less for a tile above a bridge, and L
-otherwise (`Static696.isTileVisibleFrom`, `Static705.method9198`).
+otherwise (`Static696.isTileVisibleFrom`, `Static705.getMapLevel`).
 
 The description holds `cameraHeights`: for each level, `[]` or a 16 by 16 grid, `[x][z]`, of
 one value for each four tiles square of the map square, in steps of 32 of the client's units.
 The client reads them from the environment that follows the tiles (`MapRegion`, code 129) and
 its camera keeps its pitch above whatever stands around the point it looks at by them
-(`Static723.method9451`): the least pitch is raised by the greatest of a tile's ground plus
+(`Static723.clampPlayerCamera`): the least pitch is raised by the greatest of a tile's ground plus
 its camera height over the ground at the point, across the nine by nine tiles about it. A
 level the file leaves out counts as 0 everywhere, and a level the file says to copy takes the
 level below.
@@ -779,7 +779,7 @@ A type with a second hit, a soak, draws the soak type's row after the first, 2 p
 The client writes the amount in the font `font`, or in `p11_full` where the type names none, in
 `textColour`, centred over the run of `inner`, on a baseline 15 pixels below the top of the row and
 `textOffsetY` pixels lower still. Its text is `amountString` with each `%1` in it replaced by the
-amount in decimal, with a minus sign when it is negative (`HitmarkType.method6457`). A type with an
+amount in decimal, with a minus sign when it is negative (`HitmarkType.getAmountText`). A type with an
 empty `amountString` writes no text.
 
 A splat lasts `duration` client cycles of 20 milliseconds. Over that time it moves steadily from

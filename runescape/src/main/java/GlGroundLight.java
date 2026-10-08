@@ -9,13 +9,13 @@ import org.openrs2.deob.annotation.OriginalMember;
 import org.openrs2.deob.annotation.Pc;
 
 @OriginalClass("client!kia")
-public final class Node_Sub33 extends Node {
+public final class GlGroundLight extends Node {
 
     @OriginalMember(owner = "client!kia", name = "n", descriptor = "I")
     public int anInt5452;
 
     @OriginalMember(owner = "client!kia", name = "F", descriptor = "Lclient!pn;")
-    public final Ground_Sub2 aClass178_Sub2_2;
+    public final GlGround aClass178_Sub2_2;
 
     @OriginalMember(owner = "client!kia", name = "o", descriptor = "Lclient!lca;")
     public final PointLight aClass2_Sub7_2;
@@ -69,7 +69,7 @@ public final class Node_Sub33 extends Node {
     public IterableHashTable aIterableHashTable_26;
 
     @OriginalMember(owner = "client!kia", name = "<init>", descriptor = "(Lclient!qha;Lclient!pn;Lclient!lca;[I)V")
-    public Node_Sub33(@OriginalArg(0) GlToolkit arg0, @OriginalArg(1) Ground_Sub2 arg1, @OriginalArg(2) PointLight arg2, @OriginalArg(3) int[] arg3) {
+    public GlGroundLight(@OriginalArg(0) GlToolkit arg0, @OriginalArg(1) GlGround arg1, @OriginalArg(2) PointLight arg2, @OriginalArg(3) int[] arg3) {
         this.aClass178_Sub2_2 = arg1;
         this.aClass2_Sub7_2 = arg2;
         this.aClass19_Sub3_23 = arg0;
@@ -334,7 +334,7 @@ public final class Node_Sub33 extends Node {
                 @Pc(77) int local77 = local71 - arg0;
                 @Pc(81) int local81 = local66 - arg3;
                 if (local77 > -arg2 && arg2 > local77 && -arg2 < local81 && local81 < arg2 && arg1[local77 + arg2][local81 + arg2]) {
-                    this.aClass19_Sub3_23.method6985((int) (this.aClass2_Sub7_2.getIntensity() * 255.0F) << 24);
+                    this.aClass19_Sub3_23.setTextureEnvColour((int) (this.aClass2_Sub7_2.getIntensity() * 255.0F) << 24);
                     this.aClass19_Sub3_23.method7039(this.aClass94_5, null, this.aClass94_4, null);
                     this.aClass19_Sub3_23.method7034(0, this.anInterface1_2, this.anInt5447);
                     return;

@@ -221,7 +221,7 @@ public class Animator {
     }
 
     @OriginalMember(owner = "client!gu", name = "a", descriptor = "(Lclient!ka;I)V")
-    public final void method9105(@OriginalArg(0) Model model) {
+    public final void animateShadow(@OriginalArg(0) Model model) {
         if (this.resolveSequences()) {
             model.animateShadow(this.primarySequences.frame, this.primarySequences.frameset);
             if (this.runSecondary && this.animation.secondaryFrames != null && this.secondarySequences.resolved) {

@@ -29,7 +29,7 @@ public abstract class Entity extends Node {
     public int y;
 
     @OriginalMember(owner = "client!eo", name = "u", descriptor = "I")
-    public int anInt10692;
+    public int screenX;
 
     @OriginalMember(owner = "client!eo", name = "v", descriptor = "I")
     public int z;
@@ -38,10 +38,10 @@ public abstract class Entity extends Node {
     public Entity nextEntity;
 
     @OriginalMember(owner = "client!eo", name = "i", descriptor = "I")
-    public int anInt10697;
+    public int screenDepth;
 
     @OriginalMember(owner = "client!eo", name = "n", descriptor = "I")
-    public int anInt10698;
+    public int screenY;
 
     @OriginalMember(owner = "client!eo", name = "k", descriptor = "Z")
     public boolean aBoolean813 = false;
@@ -107,7 +107,7 @@ public abstract class Entity extends Node {
     }
 
     @OriginalMember(owner = "client!eo", name = "a", descriptor = "([Lclient!lca;I)I")
-    public abstract int method9288(@OriginalArg(0) PointLight[] arg0);
+    public abstract int findLights(@OriginalArg(0) PointLight[] arg0);
 
     @OriginalMember(owner = "client!eo", name = "d", descriptor = "(Lclient!ha;I)V")
     public abstract void method9289(@OriginalArg(0) Toolkit arg0, @OriginalArg(1) int arg1);

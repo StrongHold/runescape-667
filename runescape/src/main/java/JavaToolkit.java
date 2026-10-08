@@ -2039,7 +2039,7 @@ public final class JavaToolkit extends Toolkit {
 
     @OriginalMember(owner = "client!iaa", name = "a", descriptor = "(FFF)V")
     @Override
-    public void method7993(@OriginalArg(0) float arg0, @OriginalArg(1) float arg1, @OriginalArg(2) float arg2) {
+    public void setBloomParams(@OriginalArg(0) float arg0, @OriginalArg(1) float arg1, @OriginalArg(2) float arg2) {
     }
 
     @OriginalMember(owner = "client!iaa", name = "b", descriptor = "(IIIIIIIIII)V")

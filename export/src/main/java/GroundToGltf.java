@@ -212,7 +212,7 @@ public final class GroundToGltf {
     /**
      * The texture and size a vertex names. A texture of size 0 is drawn by neither toolkit: the
      * software one divides the vertex's place by the size and the GL one scales the texture by its
-     * inverse ({@code JavaGround.renderTile}, {@code Node_Sub39}), each infinite, so the vertex
+     * inverse ({@code JavaGround.renderTile}, {@code GlGroundLayer}), each infinite, so the vertex
      * is written untextured, in its colour alone.
      */
     private static Surface surface(JavaGenericBlendedTile tile, int vertex) {
@@ -277,7 +277,7 @@ public final class GroundToGltf {
      * water's. A texture cut out by its alpha counts: the rasteriser's blend of several textures
      * never reads a texel's alpha ({@code Rasterizer.drawBlendedTexturedSpan}), so on such a face
      * a cut-out texture has no holes, and the GL ground fades it in by its vertices' alpha as it
-     * does any other ({@code Ground_Sub2}).
+     * does any other ({@code GlGround}).
      */
     private boolean layerable(List<Surface> surfaces, int alpha) {
         return alpha == OPAQUE_ALPHA

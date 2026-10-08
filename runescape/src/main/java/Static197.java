@@ -5,13 +5,13 @@ import org.openrs2.deob.annotation.Pc;
 public final class Static197 {
 
     @OriginalMember(owner = "client!gba", name = "a", descriptor = "(Z)V")
-    public static void method2949() {
+    public static void requeueLocChanges() {
         @Pc(8) ChangeLocationRequest local8;
         for (local8 = (ChangeLocationRequest) Static159.changes.first(); local8 != null; local8 = (ChangeLocationRequest) Static159.changes.next()) {
             if (local8.pendingRemoval) {
                 local8.unlink();
             } else {
-                local8.aBoolean310 = true;
+                local8.pendingApply = true;
                 if (local8.x >= 0 && local8.z >= 0 && Static720.mapWidth > local8.x && Static501.mapLength > local8.z) {
                     Static293.snapshotOriginal(local8);
                 }
@@ -21,7 +21,7 @@ public final class Static197 {
             if (local8.pendingRemoval) {
                 local8.unlink();
             } else {
-                local8.aBoolean310 = true;
+                local8.pendingApply = true;
             }
         }
     }

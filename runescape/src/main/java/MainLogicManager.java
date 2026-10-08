@@ -380,7 +380,7 @@ public final class MainLogicManager {
             return;
         }
 
-        Static159.method2575();
+        Static159.refreshEnvironment();
         Static271.processLocChanges();
         AudioRenderer.render();
         ServerConnection.GAME.idleReadTicks++;

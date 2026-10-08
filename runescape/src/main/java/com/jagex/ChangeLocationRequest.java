@@ -45,5 +45,5 @@ public final class ChangeLocationRequest extends Node {
     public boolean pendingRemoval = false;
 
     @OriginalMember(owner = "client!hma", name = "C", descriptor = "Z")
-    public boolean aBoolean310 = true;
+    public boolean pendingApply = true;
 }

@@ -71,24 +71,24 @@ public final class Static294 {
         @Pc(204) int local204;
         if (Camera.mode == CameraMode.MODE_DEFAULT) {
             local169 = (int) Camera.playerCameraPitch;
-            if (Static188.anInt3103 >> 8 > local169) {
-                local169 = Static188.anInt3103 >> 8;
+            if (Static188.cameraPitchFloor >> 8 > local169) {
+                local169 = Static188.cameraPitchFloor >> 8;
             }
             if (Shake.enabled[4] && local169 < Shake.amplitude[4] + 128) {
                 local169 = Shake.amplitude[4] + 128;
             }
             local204 = Static288.anInt4621 + (int) Camera.playerCameraYaw & 0x3FFF;
-            Camera.method4606(local169, (local169 >> 3) * 3 + 600 << 2, viewportHeight, Static494.anInt7409, local204, Static38.anInt920, Static102.averageHeight(Camera.renderingLevel, PlayerEntity.self.x, PlayerEntity.self.z) - 200);
+            Camera.orbit(local169, (local169 >> 3) * 3 + 600 << 2, viewportHeight, Static494.anInt7409, local204, Static38.anInt920, Static102.averageHeight(Camera.renderingLevel, PlayerEntity.self.x, PlayerEntity.self.z) - 200);
         } else if (Camera.mode == CameraMode.MODE_FOLLOWCOORD) {
             local169 = (int) Camera.playerCameraPitch;
-            if (Static188.anInt3103 >> 8 > local169) {
-                local169 = Static188.anInt3103 >> 8;
+            if (Static188.cameraPitchFloor >> 8 > local169) {
+                local169 = Static188.cameraPitchFloor >> 8;
             }
             if (Shake.enabled[4] && Shake.amplitude[4] + 128 > local169) {
                 local169 = Shake.amplitude[4] + 128;
             }
             local204 = (int) Camera.playerCameraYaw & 0x3FFF;
-            Camera.method4606(local169, (local169 >> 3) * 3 + 600 << 2, viewportHeight, Static494.anInt7409, local204, Static38.anInt920, Static102.averageHeight(Camera.renderingLevel, Camera.anInt6262, Camera.anInt4018) - 200);
+            Camera.orbit(local169, (local169 >> 3) * 3 + 600 << 2, viewportHeight, Static494.anInt7409, local204, Static38.anInt920, Static102.averageHeight(Camera.renderingLevel, Camera.anInt6262, Camera.anInt4018) - 200);
         } else if (Camera.mode == CameraMode.MODE_SMOOTH_RESET) {
             Camera.update(viewportHeight);
         }
@@ -156,12 +156,12 @@ public final class Static294 {
         } else {
             Toolkit.active.xa(1.0F);
             Toolkit.active.ZA(0xFFFFFF, 0.0F, 0.0F, 1.0F, 0.0F, 0.0F);
-            Static456.activeSkyBox.method3159(viewportY, Toolkit.active, Camera.yaw, viewportWidth, local375, Camera.roll, viewportHeight, viewportX, Static436.anInt3852 << 3, Camera.pitch);
+            Static456.activeSkyBox.render(viewportY, Toolkit.active, Camera.yaw, viewportWidth, local375, Camera.roll, viewportHeight, viewportX, Static436.anInt3852 << 3, Camera.pitch);
         }
         Static557.updatePcmPlayers();
         Static527.method7081(Static428.anInt6495 << 1, viewportHeight / 2 + viewportY, Static428.anInt6495 << 1, viewportX + viewportWidth / 2);
         Static620.method8324(-Camera.yaw & 0x3FFF, Camera.z, -Camera.roll & 0x3FFF, Camera.y, -Camera.pitch & 0x3FFF, Camera.x);
-        Static159.method2575();
+        Static159.refreshEnvironment();
         @Pc(688) byte roofStamp = ClientOptions.instance.removeRoofsOverride.getValue() == 2 ? (byte) Static198.anInt3276 : 1;
         if (OrthoMode.toolkitActive) {
             Static648.method8483(-Camera.yaw & 0x3FFF, -Camera.roll & 0x3FFF, -Camera.pitch & 0x3FFF);
@@ -174,7 +174,7 @@ public final class Static294 {
             Static205.method3091(viewportWidth, viewportHeight, viewportY, viewportX);
             OverlayManager.render(viewportY, viewportWidth, viewportX, viewportHeight);
             Static233.method3407(viewportWidth, viewportY, viewportX, viewportHeight);
-            Static208.method3105(viewportWidth, viewportX, viewportY, viewportHeight);
+            Static208.drawCross(viewportWidth, viewportX, viewportY, viewportHeight);
         }
         Static712.clearDynamicEntities();
         Camera.z = savedCameraZ;

@@ -19,7 +19,7 @@ public final class Class202 {
     }
 
     @OriginalMember(owner = "client!kaa", name = "a", descriptor = "(BFLclient!vv;Lclient!vv;)Z")
-    public boolean method4580(@OriginalArg(1) float arg0, @OriginalArg(2) Class93_Sub3 arg1, @OriginalArg(3) Class93_Sub3 arg2) {
+    public boolean method4580(@OriginalArg(1) float arg0, @OriginalArg(2) GlVolumeTexture arg1, @OriginalArg(3) GlVolumeTexture arg2) {
         if (!this.method4582()) {
             return false;
         }

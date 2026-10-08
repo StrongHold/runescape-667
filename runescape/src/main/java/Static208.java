@@ -13,7 +13,7 @@ import java.awt.Color;
 public final class Static208 {
 
     @OriginalMember(owner = "client!gha", name = "b", descriptor = "(IIIII)V")
-    public static void method3105(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(3) int arg2, @OriginalArg(4) int arg3) {
+    public static void drawCross(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(3) int arg2, @OriginalArg(4) int arg3) {
         @Pc(5) int x = Static676.crossX;
         @Pc(7) int y = Static305.crossY;
         if (OrthoMode.toolkitActive) {

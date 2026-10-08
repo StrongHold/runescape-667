@@ -51,7 +51,7 @@ public final class Static604 {
         }
         Camera.playerCameraPitch += Camera.angleAxisY * (float) arg0 / 6.0F;
         Camera.playerCameraYaw += (float) arg0 * Camera.angleAxisX / 6.0F;
-        Static723.method9451();
+        Static723.clampPlayerCamera();
     }
 
     @OriginalMember(owner = "client!tb", name = "a", descriptor = "(III)Z")

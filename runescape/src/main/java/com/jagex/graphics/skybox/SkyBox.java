@@ -105,7 +105,7 @@ public final class SkyBox {
     }
 
     @OriginalMember(owner = "client!gm", name = "a", descriptor = "(ZILclient!ha;IIIIIIIIZB)V")
-    public void method3159(@OriginalArg(1) int viewportY, @OriginalArg(2) Toolkit toolkit, @OriginalArg(3) int yaw, @OriginalArg(4) int viewportWidth, @OriginalArg(5) int fillColour, @OriginalArg(6) int roll, @OriginalArg(7) int viewportHeight, @OriginalArg(8) int viewportX, @OriginalArg(9) int yawOffset, @OriginalArg(10) int pitch) {
+    public void render(@OriginalArg(1) int viewportY, @OriginalArg(2) Toolkit toolkit, @OriginalArg(3) int yaw, @OriginalArg(4) int viewportWidth, @OriginalArg(5) int fillColour, @OriginalArg(6) int roll, @OriginalArg(7) int viewportHeight, @OriginalArg(8) int viewportX, @OriginalArg(9) int yawOffset, @OriginalArg(10) int pitch) {
         @Pc(5) int alpha = 0;
         if (this.fading) {
             alpha = this.fadeAlpha;
@@ -200,7 +200,7 @@ public final class SkyBox {
 
     @OriginalMember(owner = "client!gm", name = "a", descriptor = "(IILclient!ha;IIIIIIII)V")
     public void method3162(@OriginalArg(2) Toolkit toolkit, @OriginalArg(3) int viewportY, @OriginalArg(5) int viewportX, @OriginalArg(6) int viewportWidth, @OriginalArg(8) int pitch, @OriginalArg(9) int yaw, @OriginalArg(10) int viewportHeight) {
-        this.method3159(viewportY, toolkit, yaw, viewportWidth, 0, 0, viewportHeight, viewportX, 0, pitch);
+        this.render(viewportY, toolkit, yaw, viewportWidth, 0, 0, viewportHeight, viewportX, 0, pitch);
     }
 
     @OriginalMember(owner = "client!gm", name = "a", descriptor = "(BLclient!gm;)V")

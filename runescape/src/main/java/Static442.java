@@ -14,7 +14,7 @@ public final class Static442 {
     public static boolean occludersDirty = false;
 
     @OriginalMember(owner = "client!nv", name = "a", descriptor = "(Z)V")
-    public static void method5969() {
+    public static void updateFog() {
         Static425.toolkit.L(Static251.anInt4037, ClientOptions.instance.fog.getValue() == 1 ? Static171.anInt2882 + 256 << 2 : -1, 0);
     }
 }

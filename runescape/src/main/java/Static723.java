@@ -7,7 +7,7 @@ public final class Static723 {
     public static int[][] anIntArrayArray266;
 
     @OriginalMember(owner = "client!wu", name = "c", descriptor = "(B)V")
-    public static void method9451() {
+    public static void clampPlayerCamera() {
         @Pc(5) short local5 = 1024;
         @Pc(7) short local7 = 3072;
         if (OrthoMode.enabled) {
@@ -60,10 +60,10 @@ public final class Static723 {
         if (local109 < 262144) {
             local109 = 262144;
         }
-        if (Static188.anInt3103 < local109) {
-            Static188.anInt3103 += (local109 - Static188.anInt3103) / 24;
-        } else if (Static188.anInt3103 > local109) {
-            Static188.anInt3103 += (local109 - Static188.anInt3103) / 80;
+        if (Static188.cameraPitchFloor < local109) {
+            Static188.cameraPitchFloor += (local109 - Static188.cameraPitchFloor) / 24;
+        } else if (Static188.cameraPitchFloor > local109) {
+            Static188.cameraPitchFloor += (local109 - Static188.cameraPitchFloor) / 80;
         }
     }
 }

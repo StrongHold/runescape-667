@@ -10,6 +10,6 @@ public final class Static665 {
     public static Toolkit aToolkit_15;
 
     @OriginalMember(owner = "client!vb", name = "u", descriptor = "[[Lclient!uc;")
-    public static Environment[][] aEnvironmentArrayArray1;
+    public static Environment[][] zoneEnvironments;
 
 }

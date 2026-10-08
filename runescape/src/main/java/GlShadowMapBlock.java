@@ -5,7 +5,7 @@ import org.openrs2.deob.annotation.OriginalMember;
 import org.openrs2.deob.annotation.Pc;
 
 @OriginalClass("client!uga")
-public final class Class373 {
+public final class GlShadowMapBlock {
 
     @OriginalMember(owner = "client!uga", name = "b", descriptor = "I")
     public int anInt9623 = -1;
@@ -20,7 +20,7 @@ public final class Class373 {
     public final int anInt9626;
 
     @OriginalMember(owner = "client!uga", name = "a", descriptor = "Lclient!hn;")
-    public final Class170 aClass170_2;
+    public final GlShadowMap aClass170_2;
 
     @OriginalMember(owner = "client!uga", name = "l", descriptor = "I")
     public final int anInt9629;
@@ -38,7 +38,7 @@ public final class Class373 {
     public Class134_Sub2 aClass134_Sub2_2;
 
     @OriginalMember(owner = "client!uga", name = "<init>", descriptor = "(Lclient!qha;Lclient!hn;Lclient!pn;IIIII)V")
-    public Class373(@OriginalArg(0) GlToolkit arg0, @OriginalArg(1) Class170 arg1, @OriginalArg(2) Ground_Sub2 arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) int arg6, @OriginalArg(7) int arg7) {
+    public GlShadowMapBlock(@OriginalArg(0) GlToolkit arg0, @OriginalArg(1) GlShadowMap arg1, @OriginalArg(2) GlGround arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5, @OriginalArg(6) int arg6, @OriginalArg(7) int arg7) {
         this.aClass19_Sub3_36 = arg0;
         this.anInt9626 = arg7;
         this.aClass170_2 = arg1;
@@ -99,14 +99,14 @@ public final class Class373 {
     @OriginalMember(owner = "client!uga", name = "a", descriptor = "(ZILclient!ar;)V")
     public void method8452(@OriginalArg(1) int arg0, @OriginalArg(2) Interface1 arg1) {
         if (arg0 != 0) {
-            this.method8455();
+            this.updateTexture();
             this.aClass19_Sub3_36.method7001(this.aClass93_Sub2_6);
             this.aClass19_Sub3_36.method7034(0, arg1, arg0);
         }
     }
 
     @OriginalMember(owner = "client!uga", name = "a", descriptor = "(B)V")
-    public void method8455() {
+    public void updateTexture() {
         if (!this.aBoolean738) {
             return;
         }

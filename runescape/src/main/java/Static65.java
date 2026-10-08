@@ -48,7 +48,7 @@ public final class Static65 {
         Static74.aClass67_3 = null;
         Static425.toolkit = null;
         Static226.aClass67_9 = null;
-        Static665.aEnvironmentArrayArray1 = null;
+        Static665.zoneEnvironments = null;
     }
 
 }

@@ -22,13 +22,13 @@ public final class FixedFunctionWaterEffect extends TextureEffect {
     public Class36 displayList;
 
     @OriginalMember(owner = "client!fe", name = "g", descriptor = "Lclient!sa;")
-    public final Class329 textures;
+    public final GlWaterNoiseTextureSet textures;
 
     @OriginalMember(owner = "client!fe", name = "r", descriptor = "Lclient!wu;")
     public final Class93_Sub4 fadeRamp;
 
     @OriginalMember(owner = "client!fe", name = "<init>", descriptor = "(Lclient!qha;Lclient!sa;)V")
-    public FixedFunctionWaterEffect(@OriginalArg(0) GlToolkit toolkit, @OriginalArg(1) Class329 textures) {
+    public FixedFunctionWaterEffect(@OriginalArg(0) GlToolkit toolkit, @OriginalArg(1) GlWaterNoiseTextureSet textures) {
         super(toolkit);
         this.textures = textures;
         this.buildDisplayList();
@@ -56,7 +56,7 @@ public final class FixedFunctionWaterEffect extends TextureEffect {
             OpenGL.glLoadIdentity();
             OpenGL.glTexGenfv(OpenGL.GL_S, OpenGL.GL_EYE_PLANE, Static512.aFloatArray49, 0);
             OpenGL.glPopMatrix();
-            super.toolkit.method6995(0.5F, (float) super.toolkit.anInt8008);
+            super.toolkit.adjustFog(0.5F, (float) super.toolkit.anInt8008);
             super.toolkit.method7001(this.fadeRamp);
             super.toolkit.method7014(0);
         }
@@ -73,13 +73,13 @@ public final class FixedFunctionWaterEffect extends TextureEffect {
         if ((effectParam1 & 0x1) == 1) {
             if (this.textures.aBoolean655) {
                 super.toolkit.method7001(this.textures.aClass93_Sub3_2);
-                Static512.aFloatArray49[3] = (float) (super.toolkit.anInt7987 % ANIMATION_PERIOD) / (float) ANIMATION_PERIOD;
+                Static512.aFloatArray49[3] = (float) (super.toolkit.lastTickTime % ANIMATION_PERIOD) / (float) ANIMATION_PERIOD;
                 Static512.aFloatArray49[0] = 0.0F;
                 Static512.aFloatArray49[2] = 0.0F;
                 Static512.aFloatArray49[1] = 0.0F;
                 OpenGL.glTexGenfv(OpenGL.GL_R, OpenGL.GL_OBJECT_PLANE, Static512.aFloatArray49, 0);
             } else {
-                @Pc(24) int frame = super.toolkit.anInt7987 % ANIMATION_PERIOD * FRAME_COUNT / ANIMATION_PERIOD;
+                @Pc(24) int frame = super.toolkit.lastTickTime % ANIMATION_PERIOD * FRAME_COUNT / ANIMATION_PERIOD;
                 super.toolkit.method7001(this.textures.aClass93_Sub2Array3[frame]);
             }
         } else if (this.textures.aBoolean655) {
@@ -101,7 +101,7 @@ public final class FixedFunctionWaterEffect extends TextureEffect {
         if (super.toolkit.anInt8008 > 0) {
             super.toolkit.method7014(1);
             super.toolkit.method7001(null);
-            super.toolkit.method6995(1.0F, 0.0F);
+            super.toolkit.adjustFog(1.0F, 0.0F);
             super.toolkit.method7014(0);
         }
         super.toolkit.method7031(OpenGL.GL_MODULATE, OpenGL.GL_MODULATE);

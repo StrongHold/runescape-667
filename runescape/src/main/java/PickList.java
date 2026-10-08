@@ -55,7 +55,7 @@ public final class PickList {
             }
         }
         for (existing = (PickableEntity) this.entities.first(); existing != null; existing = (PickableEntity) this.entities.next()) {
-            if (entity.anInt10697 >= existing.aEntity_18.anInt10697) {
+            if (entity.screenDepth >= existing.aEntity_18.screenDepth) {
                 Node.addBefore(existing, pickable);
                 return;
             }

@@ -16,7 +16,7 @@ import org.openrs2.deob.annotation.OriginalMember;
 import org.openrs2.deob.annotation.Pc;
 
 @OriginalClass("client!pn")
-public final class Ground_Sub2 extends Ground {
+public final class GlGround extends Ground {
 
     @OriginalMember(owner = "client!pn", name = "Q", descriptor = "[[[I")
     public int[][][] anIntArrayArrayArray10;
@@ -46,7 +46,7 @@ public final class Ground_Sub2 extends Ground {
     public Class94 aClass94_14;
 
     @OriginalMember(owner = "client!pn", name = "gb", descriptor = "[Lclient!nm;")
-    public Node_Sub39[] aClass2_Sub39Array1;
+    public GlGroundLayer[] aClass2_Sub39Array1;
 
     @OriginalMember(owner = "client!pn", name = "mb", descriptor = "Lclient!jc;")
     public Interface12 anInterface12_5;
@@ -64,7 +64,7 @@ public final class Ground_Sub2 extends Ground {
     public byte[][] aByteArrayArray26;
 
     @OriginalMember(owner = "client!pn", name = "tb", descriptor = "[[[Lclient!nm;")
-    public Node_Sub39[][][] aClass2_Sub39ArrayArrayArray1;
+    public GlGroundLayer[][][] aClass2_Sub39ArrayArrayArray1;
 
     @OriginalMember(owner = "client!pn", name = "T", descriptor = "[[[I")
     public int[][][] anIntArrayArrayArray12;
@@ -106,14 +106,14 @@ public final class Ground_Sub2 extends Ground {
     public IterableHashTable aIterableHashTable_37;
 
     @OriginalMember(owner = "client!pn", name = "xb", descriptor = "Lclient!hn;")
-    public Class170 aClass170_1;
+    public GlShadowMap aClass170_1;
 
     @OriginalMember(owner = "client!pn", name = "<init>", descriptor = "(Lclient!qha;IIII[[I[[II)V")
-    public Ground_Sub2(@OriginalArg(0) GlToolkit arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int[][] arg5, @OriginalArg(6) int[][] arg6, @OriginalArg(7) int arg7) {
+    public GlGround(@OriginalArg(0) GlToolkit arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int[][] arg5, @OriginalArg(6) int[][] arg6, @OriginalArg(7) int arg7) {
         super(arg3, arg4, arg7, arg5);
         this.aClass19_Sub3_33 = arg0;
         this.aByteArrayArray26 = new byte[arg3 + 1][arg4 + 1];
-        this.aClass2_Sub39ArrayArrayArray1 = new Node_Sub39[arg3][arg4][];
+        this.aClass2_Sub39ArrayArrayArray1 = new GlGroundLayer[arg3][arg4][];
         this.anIntArrayArrayArray12 = new int[arg3][arg4][];
         this.anInt7486 = arg2;
         this.aShortArrayArray6 = new short[arg3 * arg4][];
@@ -138,24 +138,24 @@ public final class Ground_Sub2 extends Ground {
         }
         this.aIterableHashTable_37 = new IterableHashTable(128);
         if ((this.anInt7486 & 0x10) != 0) {
-            this.aClass170_1 = new Class170(this.aClass19_Sub3_33, this);
+            this.aClass170_1 = new GlShadowMap(this.aClass19_Sub3_33, this);
         }
     }
 
     @OriginalMember(owner = "client!pn", name = "a", descriptor = "(III[[ZZI)V")
     @Override
     public void renderTiles(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) boolean[][] arg3, @OriginalArg(4) boolean arg4, @OriginalArg(5) int arg5) {
-        this.method6668(arg4, arg3, arg0, -1, arg2, arg1, arg5);
+        this.drawTiles(arg4, arg3, arg0, -1, arg2, arg1, arg5);
     }
 
     @OriginalMember(owner = "client!pn", name = "a", descriptor = "(Lclient!lca;[I)V")
     @Override
     public void method7868(@OriginalArg(0) PointLight arg0, @OriginalArg(1) int[] arg1) {
-        this.aDeque_43.addLast(new Node_Sub33(this.aClass19_Sub3_33, this, arg0, arg1));
+        this.aDeque_43.addLast(new GlGroundLight(this.aClass19_Sub3_33, this, arg0, arg1));
     }
 
     @OriginalMember(owner = "client!pn", name = "a", descriptor = "(Lclient!ph;IBI)V")
-    public void method6667(@OriginalArg(0) DoublyLinkedNode_Sub2_Sub9_ arg0, @OriginalArg(1) int arg1, @OriginalArg(3) int arg2) {
+    public void method6667(@OriginalArg(0) GlShadow arg0, @OriginalArg(1) int arg1, @OriginalArg(3) int arg2) {
         @Pc(12) int[] local12 = this.anIntArrayArrayArray14[arg1][arg2];
         @Pc(19) int[] local19 = this.anIntArrayArrayArray11[arg1][arg2];
         @Pc(27) int local27 = local12.length;
@@ -166,8 +166,8 @@ public final class Ground_Sub2 extends Ground {
         @Pc(53) int[] local53 = this.aClass19_Sub3_33.anIntArray623;
         @Pc(57) int[] local57 = this.aClass19_Sub3_33.anIntArray625;
         for (@Pc(59) int local59 = 0; local59 < local27; local59++) {
-            local53[local59] = local12[local59] >> this.aClass19_Sub3_33.anInt7989;
-            local57[local59] = local19[local59] >> this.aClass19_Sub3_33.anInt7989;
+            local53[local59] = local12[local59] >> this.aClass19_Sub3_33.shadowScaleShift;
+            local57[local59] = local19[local59] >> this.aClass19_Sub3_33.shadowScaleShift;
         }
         @Pc(93) int local93 = 0;
         while (local93 < local27) {
@@ -178,7 +178,7 @@ public final class Ground_Sub2 extends Ground {
             @Pc(119) int local119 = local53[local93];
             @Pc(124) int local124 = local57[local93++];
             if ((local115 - local124) * (local101 - local110) - (local115 - local106) * (-local110 + local119) > 0) {
-                arg0.method6542(local101, local106, local110, local115, local124, local119);
+                arg0.fillTriangle(local101, local106, local110, local115, local124, local119);
             }
         }
     }
@@ -295,9 +295,9 @@ public final class Ground_Sub2 extends Ground {
     @Override
     public void CA(@OriginalArg(0) Shadow arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) boolean arg5) {
         if (this.aClass170_1 != null && arg0 != null) {
-            @Pc(27) int local27 = arg1 - (arg2 * this.aClass19_Sub3_33.anInt8027 >> 8) >> this.aClass19_Sub3_33.anInt7989;
-            @Pc(42) int local42 = arg3 - (arg2 * this.aClass19_Sub3_33.anInt8023 >> 8) >> this.aClass19_Sub3_33.anInt7989;
-            this.aClass170_1.method3541(local27, local42, arg0);
+            @Pc(27) int local27 = arg1 - (arg2 * this.aClass19_Sub3_33.sunSlopeX >> 8) >> this.aClass19_Sub3_33.shadowScaleShift;
+            @Pc(42) int local42 = arg3 - (arg2 * this.aClass19_Sub3_33.sunSlopeZ >> 8) >> this.aClass19_Sub3_33.shadowScaleShift;
+            this.aClass170_1.addShadow(local27, local42, arg0);
         }
     }
 
@@ -314,7 +314,7 @@ public final class Ground_Sub2 extends Ground {
                     local25[local27][local31] = (byte) ((this.aByteArrayArray26[local27][local31] >> 1) + (this.aByteArrayArray26[local27 + 1][local31] >> 3) + (this.aByteArrayArray26[local27 - 1][local31] >> 2) + (this.aByteArrayArray26[local27][local31 + -1] >> 2) + (this.aByteArrayArray26[local27][local31 + 1] >> 3));
                 }
             }
-            this.aClass2_Sub39Array1 = new Node_Sub39[this.aIterableHashTable_37.size()];
+            this.aClass2_Sub39Array1 = new GlGroundLayer[this.aIterableHashTable_37.size()];
             this.aIterableHashTable_37.copyTo(this.aClass2_Sub39Array1);
             for (local31 = 0; local31 < this.aClass2_Sub39Array1.length; local31++) {
                 this.aClass2_Sub39Array1[local31].method5868(this.anInt7508);
@@ -328,18 +328,18 @@ public final class Ground_Sub2 extends Ground {
             }
             @Pc(178) NativeHeapBuffer local178 = this.aClass19_Sub3_33.lb.a(this.anInt7508 * local149, false);
             @Pc(183) Stream local183 = new Stream(local178);
-            @Pc(187) Node_Sub39[] local187 = new Node_Sub39[this.anInt7508];
+            @Pc(187) GlGroundLayer[] local187 = new GlGroundLayer[this.anInt7508];
             @Pc(194) int local194 = SkyBoxSphere.method5587(this.anInt7508 / 4);
             if (local194 < 1) {
                 local194 = 1;
             }
             @Pc(206) IterableHashTable local206 = new IterableHashTable(local194);
-            @Pc(210) Node_Sub39[] local210 = new Node_Sub39[this.anInt7507];
+            @Pc(210) GlGroundLayer[] local210 = new GlGroundLayer[this.anInt7507];
             @Pc(216) int local216;
             for (@Pc(212) int local212 = 0; super.sizeX > local212; local212++) {
                 for (local216 = 0; super.sizeZ > local216; local216++) {
                     if (this.anIntArrayArrayArray15[local212][local216] != null) {
-                        @Pc(234) Node_Sub39[] local234 = this.aClass2_Sub39ArrayArrayArray1[local212][local216];
+                        @Pc(234) GlGroundLayer[] local234 = this.aClass2_Sub39ArrayArrayArray1[local212][local216];
                         @Pc(241) int[] local241 = this.anIntArrayArrayArray14[local212][local216];
                         @Pc(248) int[] local248 = this.anIntArrayArrayArray11[local212][local216];
                         @Pc(255) int[] local255 = this.anIntArrayArrayArray12[local212][local216];
@@ -369,7 +369,7 @@ public final class Ground_Sub2 extends Ground {
                         @Pc(454) int local454;
                         label335:
                         for (@Pc(444) int local444 = 0; local444 < local262.length; local444++) {
-                            @Pc(452) Node_Sub39 local452 = local234[local444];
+                            @Pc(452) GlGroundLayer local452 = local234[local444];
                             for (local454 = 0; local454 < local442; local454++) {
                                 if (local452 == local210[local454]) {
                                     continue label335;
@@ -541,7 +541,7 @@ public final class Ground_Sub2 extends Ground {
                                 }
                             }
                             for (local972 = 0; local972 < local442; local972++) {
-                                local210[local972].method5863(local579, local606, local581, local1293);
+                                local210[local972].setVertexColour(local579, local606, local581, local1293);
                             }
                             this.anInt7491++;
                         }
@@ -549,7 +549,7 @@ public final class Ground_Sub2 extends Ground {
                 }
             }
             for (local216 = 0; local216 < this.anInt7498; local216++) {
-                @Pc(1419) Node_Sub39 local1419 = local187[local216];
+                @Pc(1419) GlGroundLayer local1419 = local187[local216];
                 if (local1419 != null) {
                     local1419.method5866(local216);
                 }
@@ -565,10 +565,10 @@ public final class Ground_Sub2 extends Ground {
                             @Pc(1469) int local1469 = local1454[local1460++] & 0xFFFF;
                             @Pc(1476) int local1476 = local1454[local1460++] & 0xFFFF;
                             @Pc(1483) int local1483 = local1454[local1460++] & 0xFFFF;
-                            @Pc(1487) Node_Sub39 local1487 = local187[local1469];
-                            @Pc(1491) Node_Sub39 local1491 = local187[local1476];
-                            @Pc(1495) Node_Sub39 local1495 = local187[local1483];
-                            @Pc(1497) Node_Sub39 local1497 = null;
+                            @Pc(1487) GlGroundLayer local1487 = local187[local1469];
+                            @Pc(1491) GlGroundLayer local1491 = local187[local1476];
+                            @Pc(1495) GlGroundLayer local1495 = local187[local1483];
+                            @Pc(1497) GlGroundLayer local1497 = null;
                             if (local1487 != null) {
                                 local1487.method5867(local1438, local1458, local1442);
                                 local1497 = local1487;
@@ -619,7 +619,7 @@ public final class Ground_Sub2 extends Ground {
             }
             @Pc(1702) long[] local1702 = new long[this.aClass2_Sub39Array1.length];
             for (local1458 = 0; local1458 < this.aClass2_Sub39Array1.length; local1458++) {
-                @Pc(1713) Node_Sub39 local1713 = this.aClass2_Sub39Array1[local1458];
+                @Pc(1713) GlGroundLayer local1713 = this.aClass2_Sub39Array1[local1458];
                 local1702[local1458] = local1713.key;
                 local1713.method5864(this.anInt7498);
             }
@@ -656,8 +656,8 @@ public final class Ground_Sub2 extends Ground {
     @Override
     public void wa(@OriginalArg(0) Shadow arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) boolean arg5) {
         if (this.aClass170_1 != null && arg0 != null) {
-            @Pc(27) int local27 = arg1 - (arg2 * this.aClass19_Sub3_33.anInt8027 >> 8) >> this.aClass19_Sub3_33.anInt7989;
-            @Pc(42) int local42 = arg3 - (this.aClass19_Sub3_33.anInt8023 * arg2 >> 8) >> this.aClass19_Sub3_33.anInt7989;
+            @Pc(27) int local27 = arg1 - (arg2 * this.aClass19_Sub3_33.sunSlopeX >> 8) >> this.aClass19_Sub3_33.shadowScaleShift;
+            @Pc(42) int local42 = arg3 - (this.aClass19_Sub3_33.sunSlopeZ * arg2 >> 8) >> this.aClass19_Sub3_33.shadowScaleShift;
             this.aClass170_1.method3544(local42, arg0, local27);
         }
     }
@@ -668,8 +668,8 @@ public final class Ground_Sub2 extends Ground {
         if (this.aClass170_1 == null || arg0 == null) {
             return false;
         } else {
-            @Pc(28) int local28 = arg1 - (arg2 * this.aClass19_Sub3_33.anInt8027 >> 8) >> this.aClass19_Sub3_33.anInt7989;
-            @Pc(43) int local43 = arg3 - (arg2 * this.aClass19_Sub3_33.anInt8023 >> 8) >> this.aClass19_Sub3_33.anInt7989;
+            @Pc(28) int local28 = arg1 - (arg2 * this.aClass19_Sub3_33.sunSlopeX >> 8) >> this.aClass19_Sub3_33.shadowScaleShift;
+            @Pc(43) int local43 = arg3 - (arg2 * this.aClass19_Sub3_33.sunSlopeZ >> 8) >> this.aClass19_Sub3_33.shadowScaleShift;
             return this.aClass170_1.method3543(local28, arg0, local43);
         }
     }
@@ -694,7 +694,7 @@ public final class Ground_Sub2 extends Ground {
         if (this.anIntArrayArrayArray13 != null) {
             this.anIntArrayArrayArray13[arg0][arg1] = arg3;
         }
-        @Pc(104) Node_Sub39[] local104 = this.aClass2_Sub39ArrayArrayArray1[arg0][arg1] = new Node_Sub39[arg6.length];
+        @Pc(104) GlGroundLayer[] local104 = this.aClass2_Sub39ArrayArrayArray1[arg0][arg1] = new GlGroundLayer[arg6.length];
         for (@Pc(106) int local106 = 0; local106 < arg6.length; local106++) {
             @Pc(114) int local114 = arg8[local106];
             @Pc(118) int local118 = arg9[local106];
@@ -705,16 +705,16 @@ public final class Ground_Sub2 extends Ground {
             @Pc(164) long local164 = (long) local114 | (long) arg12 << 48 | (long) arg11 << 42 | (long) arg10 << 28 | (long) (local118 << 14);
             @Pc(170) Node local170;
             for (local170 = this.aIterableHashTable_37.get(local164); local170 != null; local170 = this.aIterableHashTable_37.nextWithSameKey()) {
-                @Pc(177) Node_Sub39 local177 = (Node_Sub39) local170;
+                @Pc(177) GlGroundLayer local177 = (GlGroundLayer) local170;
                 if (local177.anInt6592 == local114 && (float) local118 == local177.aFloat121 && arg10 == local177.anInt6593 && local177.anInt6595 == arg11 && local177.anInt6585 == arg12) {
                     break;
                 }
             }
             if (local170 == null) {
-                local104[local106] = new Node_Sub39(this, local114, local118, arg10, arg11, arg12);
+                local104[local106] = new GlGroundLayer(this, local114, local118, arg10, arg11, arg12);
                 this.aIterableHashTable_37.put(local164, local104[local106]);
             } else {
-                local104[local106] = (Node_Sub39) local170;
+                local104[local106] = (GlGroundLayer) local170;
             }
         }
         if (arg13) {
@@ -729,11 +729,11 @@ public final class Ground_Sub2 extends Ground {
     @OriginalMember(owner = "client!pn", name = "a", descriptor = "(III[[ZZII)V")
     @Override
     public void renderTilesAtDepth(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) boolean[][] arg3, @OriginalArg(4) boolean arg4, @OriginalArg(5) int arg5, @OriginalArg(6) int arg6) {
-        this.method6668(arg4, arg3, arg0, arg5, arg2, arg1, arg6);
+        this.drawTiles(arg4, arg3, arg0, arg5, arg2, arg1, arg6);
     }
 
     @OriginalMember(owner = "client!pn", name = "a", descriptor = "(Z[[ZIIIIII)V")
-    public void method6668(@OriginalArg(0) boolean arg0, @OriginalArg(1) boolean[][] arg1, @OriginalArg(3) int arg2, @OriginalArg(4) int arg3, @OriginalArg(5) int arg4, @OriginalArg(6) int arg5, @OriginalArg(7) int arg6) {
+    public void drawTiles(@OriginalArg(0) boolean arg0, @OriginalArg(1) boolean[][] arg1, @OriginalArg(3) int arg2, @OriginalArg(4) int arg3, @OriginalArg(5) int arg4, @OriginalArg(6) int arg5, @OriginalArg(7) int arg6) {
         if (this.aClass2_Sub39Array1 == null) {
             return;
         }
@@ -797,7 +797,7 @@ public final class Ground_Sub2 extends Ground {
             this.aClass19_Sub3_33.method7021(34166, 770, 0);
             this.aClass19_Sub3_33.method7029(0, 34167);
             for (@Pc(312) Node local312 = this.aDeque_43.first(); local312 != null; local312 = this.aDeque_43.next()) {
-                @Pc(317) Node_Sub33 local317 = (Node_Sub33) local312;
+                @Pc(317) GlGroundLight local317 = (GlGroundLight) local312;
                 local317.method4933(arg2, arg1, arg4, arg5);
             }
             this.aClass19_Sub3_33.method7021(5890, 768, 0);
@@ -821,14 +821,14 @@ public final class Ground_Sub2 extends Ground {
         if ((this.aByteArrayArray25[arg0][arg1] & 0x1) == 0) {
             return null;
         }
-        @Pc(22) int local22 = super.tileSize >> this.aClass19_Sub3_33.anInt7989;
-        @Pc(25) DoublyLinkedNode_Sub2_Sub9_ local25 = (DoublyLinkedNode_Sub2_Sub9_) arg2;
-        @Pc(43) DoublyLinkedNode_Sub2_Sub9_ local43;
+        @Pc(22) int local22 = super.tileSize >> this.aClass19_Sub3_33.shadowScaleShift;
+        @Pc(25) GlShadow local25 = (GlShadow) arg2;
+        @Pc(43) GlShadow local43;
         if (local25 != null && local25.method6545(local22, local22)) {
             local43 = local25;
             local25.method6546();
         } else {
-            local43 = new DoublyLinkedNode_Sub2_Sub9_(this.aClass19_Sub3_33, local22, local22);
+            local43 = new GlShadow(this.aClass19_Sub3_33, local22, local22);
         }
         local43.method6544(local22, 0, local22, 0);
         this.method6667(local43, arg0, arg1);

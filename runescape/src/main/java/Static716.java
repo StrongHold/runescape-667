@@ -33,6 +33,6 @@ public final class Static716 {
 
     @OriginalMember(owner = "client!wm", name = "a", descriptor = "(IILclient!cg;BIII)V")
     public static void method9350(@OriginalArg(2) PathingEntity arg0, @OriginalArg(4) int arg1, @OriginalArg(5) int arg2, @OriginalArg(6) int arg3) {
-        Static418.method7860(arg0.level, arg0.z, arg2, arg0.x, 0);
+        Static418.projectFromGround(arg0.level, arg0.z, arg2, arg0.x, 0);
     }
 }

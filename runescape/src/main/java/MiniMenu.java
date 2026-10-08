@@ -367,7 +367,7 @@ public final class MiniMenu {
             }
             @Pc(538) LinkedList local538 = local510.entities;
             for (@Pc(543) PickableEntity local543 = (PickableEntity) local538.first(); local543 != null; local543 = (PickableEntity) local538.next()) {
-                if ((ignorePlayerLevels || local543.aEntity_18.level == PlayerEntity.self.level) && local543.method6496(toolkit, local177, local148)) {
+                if ((ignorePlayerLevels || local543.aEntity_18.level == PlayerEntity.self.level) && local543.picked(toolkit, local177, local148)) {
                     @Pc(584) int local584;
                     if (local543.aEntity_18 instanceof PositionEntity) {
                         local186 = ((PositionEntity) local543.aEntity_18).x1;
@@ -390,12 +390,12 @@ public final class MiniMenu {
                                 @Pc(690) NPCEntityNode local690 = (NPCEntityNode) NPCList.local.get(NPCList.slots[local306]);
                                 if (local690 != null) {
                                     @Pc(695) NPCEntity local695 = local690.npc;
-                                    if (TimeUtils.clock != local695.anInt10743 && local695.visible) {
+                                    if (TimeUtils.clock != local695.menuClock && local695.visible) {
                                         local723 = local695.x - (local695.type.size - 1 << 8);
                                         local735 = local695.z - (local695.type.size - 1 << 8);
                                         if (local286 <= local723 && local695.type.size <= local610.getSize() - (local723 - local286 >> 9) && local735 >= local295 && local695.type.size <= local610.getSize() - (local735 - local295 >> 9)) {
                                             addNpcEntries(local543.aEntity_18.level != PlayerEntity.self.level, local695);
-                                            local695.anInt10743 = TimeUtils.clock;
+                                            local695.menuClock = TimeUtils.clock;
                                         }
                                     }
                                 }
@@ -404,21 +404,21 @@ public final class MiniMenu {
                             @Pc(820) int[] local820 = PlayerList.highResolutionSlots;
                             for (local723 = 0; local723 < local317; local723++) {
                                 @Pc(830) PlayerEntity local830 = PlayerList.highResolutionPlayers[local820[local723]];
-                                if (local830 != null && local830.anInt10743 != TimeUtils.clock && local830 != local610 && local830.visible) {
+                                if (local830 != null && local830.menuClock != TimeUtils.clock && local830 != local610 && local830.visible) {
                                     local864 = local830.x - (local830.getSize() - 1 << 8);
                                     @Pc(876) int local876 = local830.z - (local830.getSize() - 1 << 8);
                                     if (local864 >= local286 && local830.getSize() <= local610.getSize() - (local864 - local286 >> 9) && local876 >= local295 && local830.getSize() <= local610.getSize() - (local876 - local295 >> 9)) {
                                         addPlayerEntries(local543.aEntity_18.level != PlayerEntity.self.level, local830);
-                                        local830.anInt10743 = TimeUtils.clock;
+                                        local830.menuClock = TimeUtils.clock;
                                     }
                                 }
                             }
                         }
-                        if (TimeUtils.clock == local610.anInt10743) {
+                        if (TimeUtils.clock == local610.menuClock) {
                             continue;
                         }
                         addPlayerEntries(PlayerEntity.self.level != local543.aEntity_18.level, local610);
-                        local610.anInt10743 = TimeUtils.clock;
+                        local610.menuClock = TimeUtils.clock;
                     }
                     if (local543.aEntity_18 instanceof NPCEntity) {
                         @Pc(988) NPCEntity local988 = (NPCEntity) local543.aEntity_18;
@@ -430,12 +430,12 @@ public final class MiniMenu {
                                     @Pc(1081) NPCEntityNode local1081 = (NPCEntityNode) NPCList.local.get(NPCList.slots[local295]);
                                     if (local1081 != null) {
                                         @Pc(1086) NPCEntity local1086 = local1081.npc;
-                                        if (local1086.anInt10743 != TimeUtils.clock && local1086 != local988 && local1086.visible) {
+                                        if (local1086.menuClock != TimeUtils.clock && local1086 != local988 && local1086.visible) {
                                             local370 = local1086.x - (local1086.type.size - 1 << 8);
                                             local723 = local1086.z - (local1086.type.size - 1 << 8);
                                             if (local614 <= local370 && local988.type.size - (local370 - local614 >> 9) >= local1086.type.size && local723 >= local286 && local1086.type.size <= local988.type.size - (local723 - local286 >> 9)) {
                                                 addNpcEntries(PlayerEntity.self.level != local543.aEntity_18.level, local1086);
-                                                local1086.anInt10743 = TimeUtils.clock;
+                                                local1086.menuClock = TimeUtils.clock;
                                             }
                                         }
                                     }
@@ -444,21 +444,21 @@ public final class MiniMenu {
                                 @Pc(1216) int[] local1216 = PlayerList.highResolutionSlots;
                                 for (local370 = 0; local370 < local306; local370++) {
                                     @Pc(1226) PlayerEntity local1226 = PlayerList.highResolutionPlayers[local1216[local370]];
-                                    if (local1226 != null && local1226.anInt10743 != TimeUtils.clock && local1226.visible) {
+                                    if (local1226 != null && local1226.menuClock != TimeUtils.clock && local1226.visible) {
                                         local735 = local1226.x - (local1226.getSize() - 1 << 8);
                                         local864 = local1226.z - (local1226.getSize() - 1 << 8);
                                         if (local614 <= local735 && local1226.getSize() <= local988.type.size - (local735 - local614 >> 9) && local286 <= local864 && local1226.getSize() <= local988.type.size - (local864 - local286 >> 9)) {
                                             addPlayerEntries(PlayerEntity.self.level != local543.aEntity_18.level, local1226);
-                                            local1226.anInt10743 = TimeUtils.clock;
+                                            local1226.menuClock = TimeUtils.clock;
                                         }
                                     }
                                 }
                             }
-                            if (TimeUtils.clock == local988.anInt10743) {
+                            if (TimeUtils.clock == local988.menuClock) {
                                 continue;
                             }
                             addNpcEntries(PlayerEntity.self.level != local543.aEntity_18.level, local988);
-                            local988.anInt10743 = TimeUtils.clock;
+                            local988.menuClock = TimeUtils.clock;
                         }
                     }
                     if (local543.aEntity_18 instanceof ObjStackEntity) {

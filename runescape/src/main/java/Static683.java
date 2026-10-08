@@ -10,6 +10,6 @@ public final class Static683 {
 
     @OriginalMember(owner = "client!vl", name = "a", descriptor = "(I)V")
     public static void method8928() {
-        Static425.toolkit.method7993(Static151.aFloat218, Static133.aFloat63, Static57.aFloat29);
+        Static425.toolkit.setBloomParams(Static151.aFloat218, Static133.aFloat63, Static57.aFloat29);
     }
 }

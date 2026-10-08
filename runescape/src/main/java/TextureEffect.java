@@ -4,7 +4,7 @@ import org.openrs2.deob.annotation.OriginalMember;
 
 /**
  * A texture coordinate generation and texture environment strategy, chosen per texture by
- * {@code TextureMetrics.effectType} and driven by {@link Class98}.
+ * {@code TextureMetrics.effectType} and driven by {@link TextureEffectManager}.
  *
  * <p>The constants below are OpenGL enums that {@code jaggl.OpenGL} does not declare. That class is bound to a
  * prebuilt native library and cannot be extended, so they are declared here instead.

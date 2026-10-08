@@ -17,7 +17,7 @@ public final class Static696 {
         } else if ((Static280.tileFlags[level][x][z] & TileFlag.INVISIBLE) != 0) {
             return false;
         } else {
-            return Static705.method9198(z, x, level) == otherLevel;
+            return Static705.getMapLevel(z, x, level) == otherLevel;
         }
     }
 

@@ -11,7 +11,7 @@ public final class Static188 {
     public static final Class168 aClass168_1 = new Class168();
 
     @OriginalMember(owner = "client!fq", name = "l", descriptor = "I")
-    public static int anInt3103 = 0;
+    public static int cameraPitchFloor = 0;
 
     @OriginalMember(owner = "client!fq", name = "a", descriptor = "(BIIIIIIIII)V")
     public static void method2856(@OriginalArg(1) int arg0, @OriginalArg(2) int arg1, @OriginalArg(3) int arg2, @OriginalArg(4) int arg3, @OriginalArg(5) int arg4, @OriginalArg(6) int arg5, @OriginalArg(7) int arg6, @OriginalArg(8) int arg7, @OriginalArg(9) int arg8) {

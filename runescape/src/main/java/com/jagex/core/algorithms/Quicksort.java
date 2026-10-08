@@ -153,9 +153,9 @@ public final class Quicksort {
         entities[pivotIndex] = entities[end];
         entities[end] = pivotEntity;
 
-        @Pc(27) int mask = pivotEntity.anInt10697;
+        @Pc(27) int mask = pivotEntity.screenDepth;
         for (@Pc(29) int i = start; i < end; i++) {
-            if (mask + (i & 0x1) > entities[i].anInt10697) {
+            if (mask + (i & 0x1) > entities[i].screenDepth) {
                 @Pc(44) Entity tempEntity = entities[i];
                 entities[i] = entities[mid];
                 entities[mid++] = tempEntity;

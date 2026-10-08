@@ -34,7 +34,7 @@ public abstract class Wall extends Entity {
 
     @OriginalMember(owner = "client!kp", name = "a", descriptor = "([Lclient!lca;I)I")
     @Override
-    public final int method9288(@OriginalArg(0) PointLight[] lights) {
+    public final int findLights(@OriginalArg(0) PointLight[] lights) {
         @Pc(10) int localX = super.x >> EnvironmentLight.tileShift;
         @Pc(21) int localZ = super.z >> EnvironmentLight.tileShift;
         @Pc(23) int directionIndex = 0;
@@ -48,7 +48,7 @@ public abstract class Wall extends Entity {
         } else if (Static550.anInt8271 > localZ) {
             directionIndex += 6;
         }
-        @Pc(71) int facingSides = Static4.anIntArray15[directionIndex];
+        @Pc(71) int facingSides = Static4.FACING_SIDES[directionIndex];
         if ((this.sideMask & facingSides) != 0) {
             return this.findLightsAt(lights, localZ, localX);
         } else if (this.sideMask == 1 && localX > 0) {

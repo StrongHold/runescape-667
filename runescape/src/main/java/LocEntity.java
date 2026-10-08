@@ -257,7 +257,7 @@ public final class LocEntity {
                         this.aBooleanArray27 = new boolean[4];
                     }
                     this.shadow = model.ba(this.shadow);
-                    Static630.method8357(this.shadow, this.virtualLevel, this.entity.x, this.entity.z, this.aBooleanArray27);
+                    Static630.addShadow(this.shadow, this.virtualLevel, this.entity.x, this.entity.z, this.aBooleanArray27);
                     this.aBoolean662 = true;
                 }
                 this.minY = model.fa();
@@ -285,7 +285,7 @@ public final class LocEntity {
                 if (addShadow) {
                     this.shadow = modelAndShadow.shadow;
                     this.aBooleanArray27 = null;
-                    Static630.method8357(this.shadow, this.virtualLevel, this.entity.x, this.entity.z, null);
+                    Static630.addShadow(this.shadow, this.virtualLevel, this.entity.x, this.entity.z, null);
                     this.aBoolean662 = true;
                 }
                 this.minY = model.fa();

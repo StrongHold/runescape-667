@@ -165,7 +165,7 @@ public final class HitmarkType {
     }
 
     @OriginalMember(owner = "client!pb", name = "a", descriptor = "(IZ)Ljava/lang/String;")
-    public String method6457(@OriginalArg(0) int arg0) {
+    public String getAmountText(@OriginalArg(0) int arg0) {
         @Pc(8) String local8 = this.amountString;
         while (true) {
             @Pc(14) int local14 = local8.indexOf("%1");

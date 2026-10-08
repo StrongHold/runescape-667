@@ -157,7 +157,7 @@ public final class StaticGroundDecor extends GroundDecor implements Location {
         }
 
         if (shadow != null) {
-            Static630.method8357(shadow, super.virtualLevel, super.x, super.z, null);
+            Static630.addShadow(shadow, super.virtualLevel, super.x, super.z, null);
         }
     }
 

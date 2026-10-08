@@ -480,7 +480,7 @@ public final class ModelToGltf {
 
     /**
      * How strongly the sun lights one corner of a face, out of 1: the length of the normal the GL
-     * toolkit hands the hardware, which it never normalises ({@code Model_Sub2}, its vertex buffer).
+     * toolkit hands the hardware, which it never normalises ({@code GlModel}, its vertex buffer).
      * A smooth corner's normal is the sum of the normals of the faces at the vertex, each 256
      * long, times 3 over the model's contrast and the count of faces summed, so faces that face
      * away from each other, as the two sides of a blade of grass do, cancel and leave the vertex

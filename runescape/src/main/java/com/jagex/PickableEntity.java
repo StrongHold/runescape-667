@@ -22,7 +22,7 @@ public final class PickableEntity extends Node {
     public PickingCylinder[] pickingCylinders;
 
     @OriginalMember(owner = "client!pea", name = "a", descriptor = "(Lclient!ha;BII)Z")
-    public boolean method6496(@OriginalArg(0) Toolkit arg0, @OriginalArg(2) int arg1, @OriginalArg(3) int arg2) {
+    public boolean picked(@OriginalArg(0) Toolkit arg0, @OriginalArg(2) int arg1, @OriginalArg(3) int arg2) {
         @Pc(10) int local10 = this.aEntity_18.getPickSizeShift();
         if (this.pickingCylinders != null) {
             for (@Pc(15) int local15 = 0; local15 < this.pickingCylinders.length; local15++) {

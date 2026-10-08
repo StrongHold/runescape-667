@@ -160,7 +160,7 @@ public final class UnderwaterEffect extends TextureEffect {
             @Pc(46) float fadeStart = -((float) (farClip - nearClip) * FADE_START_FRACTION) + (float) farClip;
             OpenGL.glProgramLocalParameter4fARB(OpenGL.GL_VERTEX_PROGRAM_ARB, FOG_PARAM, fadeStart, distortStart, 1.0F / (float) super.toolkit.anInt8013, (float) super.toolkit.anInt8029 / BIAS_SCALE);
             super.toolkit.method7014(1);
-            super.toolkit.method6985(super.toolkit.anInt8026);
+            super.toolkit.setTextureEnvColour(super.toolkit.anInt8026);
             super.toolkit.method7014(0);
         }
     }

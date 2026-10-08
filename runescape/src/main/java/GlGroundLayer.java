@@ -9,7 +9,7 @@ import org.openrs2.deob.annotation.OriginalMember;
 import org.openrs2.deob.annotation.Pc;
 
 @OriginalClass("client!nm")
-public final class Node_Sub39 extends Node {
+public final class GlGroundLayer extends Node {
 
     @OriginalMember(owner = "client!nm", name = "u", descriptor = "Lclient!ed;")
     public Class94 aClass94_10;
@@ -21,7 +21,7 @@ public final class Node_Sub39 extends Node {
     public Stream aStream5;
 
     @OriginalMember(owner = "client!nm", name = "z", descriptor = "Lclient!pn;")
-    public final Ground_Sub2 aClass178_Sub2_3;
+    public final GlGround aClass178_Sub2_3;
 
     @OriginalMember(owner = "client!nm", name = "n", descriptor = "Lclient!qha;")
     public final GlToolkit aClass19_Sub3_31;
@@ -48,7 +48,7 @@ public final class Node_Sub39 extends Node {
     public final Class134_Sub2 aClass134_Sub2_1;
 
     @OriginalMember(owner = "client!nm", name = "<init>", descriptor = "(Lclient!pn;IIIII)V")
-    public Node_Sub39(@OriginalArg(0) Ground_Sub2 arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5) {
+    public GlGroundLayer(@OriginalArg(0) GlGround arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) int arg5) {
         this.aClass178_Sub2_3 = arg0;
         this.aClass19_Sub3_31 = this.aClass178_Sub2_3.aClass19_Sub3_33;
         this.anInt6595 = arg4;
@@ -137,7 +137,7 @@ public final class Node_Sub39 extends Node {
     }
 
     @OriginalMember(owner = "client!nm", name = "a", descriptor = "(IIFII)V")
-    public void method5863(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) float arg2, @OriginalArg(3) int arg3) {
+    public void setVertexColour(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) float arg2, @OriginalArg(3) int arg3) {
         @Pc(24) int local24;
         @Pc(49) int local49;
         if (this.anInt6592 != -1) {

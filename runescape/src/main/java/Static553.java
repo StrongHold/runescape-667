@@ -25,7 +25,7 @@ public final class Static553 {
             }
             Static159.changes.addLast(local7);
         }
-        local7.aBoolean310 = true;
+        local7.pendingApply = true;
         local7.rotation = rotation;
         local7.shape = shape;
         local7.pendingRemoval = false;

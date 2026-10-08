@@ -83,7 +83,7 @@ public final class GlToolkit extends Toolkit {
     public int anInt7956;
 
     @OriginalMember(owner = "client!qha", name = "Gf", descriptor = "I")
-    public int anInt7987;
+    public int lastTickTime;
 
     @OriginalMember(owner = "client!qha", name = "lb", descriptor = "Lclient!jaclib/memory/heap/NativeHeap;")
     public NativeHeap lb;
@@ -236,7 +236,7 @@ public final class GlToolkit extends Toolkit {
     public boolean aBoolean611;
 
     @OriginalMember(owner = "client!qha", name = "Z", descriptor = "I")
-    public int anInt8023;
+    public int sunSlopeZ;
 
     @OriginalMember(owner = "client!qha", name = "Ud", descriptor = "Z")
     public boolean aBoolean612;
@@ -263,7 +263,7 @@ public final class GlToolkit extends Toolkit {
     public Interface12 anInterface12_7;
 
     @OriginalMember(owner = "client!qha", name = "Zc", descriptor = "I")
-    public int anInt8027;
+    public int sunSlopeX;
 
     @OriginalMember(owner = "client!qha", name = "Rg", descriptor = "Z")
     public boolean aBoolean617;
@@ -308,10 +308,10 @@ public final class GlToolkit extends Toolkit {
     public boolean aBoolean589 = false;
 
     @OriginalMember(owner = "client!qha", name = "db", descriptor = "I")
-    public int anInt7988 = 8;
+    public int shadowScale = 8;
 
     @OriginalMember(owner = "client!qha", name = "fe", descriptor = "I")
-    public int anInt7989 = 3;
+    public int shadowScaleShift = 3;
 
     @OriginalMember(owner = "client!qha", name = "sf", descriptor = "Lclient!sia;")
     public final Deque aDeque_46 = new Deque();
@@ -407,7 +407,7 @@ public final class GlToolkit extends Toolkit {
     public int anInt8010;
 
     @OriginalMember(owner = "client!qha", name = "te", descriptor = "[Lclient!kla;")
-    public final Model_Sub2[] aClass114_Sub2Array1;
+    public final GlModel[] aClass114_Sub2Array1;
 
     @OriginalMember(owner = "client!qha", name = "If", descriptor = "F")
     public float aFloat143;
@@ -476,7 +476,7 @@ public final class GlToolkit extends Toolkit {
     public final float[] aFloatArray51;
 
     @OriginalMember(owner = "client!qha", name = "Uc", descriptor = "[Lclient!kla;")
-    public final Model_Sub2[] aClass114_Sub2Array2;
+    public final GlModel[] aClass114_Sub2Array2;
 
     @OriginalMember(owner = "client!qha", name = "yf", descriptor = "I")
     public int anInt8025;
@@ -563,10 +563,10 @@ public final class GlToolkit extends Toolkit {
     public final Class276 aClass276_1;
 
     @OriginalMember(owner = "client!qha", name = "ub", descriptor = "Lclient!kca;")
-    public Node_Sub31_Sub1 aClass2_Sub31_Sub1_1;
+    public GlBloomFilter aClass2_Sub31_Sub1_1;
 
     @OriginalMember(owner = "client!qha", name = "vf", descriptor = "Lclient!eg;")
-    public final Class98 aClass98_1;
+    public final TextureEffectManager aClass98_1;
 
     @OriginalMember(owner = "client!qha", name = "<init>", descriptor = "(Ljava/awt/Canvas;Lclient!d;I)V")
     public GlToolkit(@OriginalArg(0) Canvas arg0, @OriginalArg(1) TextureSource arg1, @OriginalArg(2) int arg2) {
@@ -597,7 +597,7 @@ public final class GlToolkit extends Toolkit {
         this.anInt8015 = 8448;
         this.anInt8008 = -1;
         this.anInt8010 = 50;
-        this.aClass114_Sub2Array1 = new Model_Sub2[7];
+        this.aClass114_Sub2Array1 = new GlModel[7];
         this.aFloat143 = 1.0F;
         this.aFloat137 = 1.0F;
         this.aFloat130 = -1.0F;
@@ -620,7 +620,7 @@ public final class GlToolkit extends Toolkit {
         this.aFloat147 = 0.0F;
         this.aBoolean596 = true;
         this.aFloatArray51 = new float[4];
-        this.aClass114_Sub2Array2 = new Model_Sub2[7];
+        this.aClass114_Sub2Array2 = new GlModel[7];
         this.anInt8025 = 512;
         this.anInt8009 = 0;
         this.anInt8032 = 0;
@@ -711,13 +711,13 @@ public final class GlToolkit extends Toolkit {
                 this.aClass202_1 = new Class202(this);
                 this.aClass276_1 = new Class276(this);
                 if (this.aClass276_1.method6248()) {
-                    this.aClass2_Sub31_Sub1_1 = new Node_Sub31_Sub1(this);
+                    this.aClass2_Sub31_Sub1_1 = new GlBloomFilter(this);
                     if (!this.aClass2_Sub31_Sub1_1.method4623()) {
                         this.aClass2_Sub31_Sub1_1.method4608();
                         this.aClass2_Sub31_Sub1_1 = null;
                     }
                 }
-                this.aClass98_1 = new Class98(this);
+                this.aClass98_1 = new TextureEffectManager(this);
                 this.method6984();
                 this.method7013();
                 this.method7969();
@@ -757,7 +757,7 @@ public final class GlToolkit extends Toolkit {
     }
 
     @OriginalMember(owner = "client!qha", name = "n", descriptor = "(I)V")
-    public void method6966() {
+    public void updateSunDiffuse() {
         Static476.aFloatArray46[1] = this.aFloat129 * this.aFloat143;
         Static476.aFloatArray46[2] = this.aFloat137 * this.aFloat129;
         Static476.aFloatArray46[3] = 1.0F;
@@ -809,7 +809,7 @@ public final class GlToolkit extends Toolkit {
     }
 
     @OriginalMember(owner = "client!qha", name = "v", descriptor = "(I)V")
-    public void method6969() {
+    public void updateFog() {
         this.aFloat134 = (float) (this.anInt8018 - this.anInt8009) - this.aFloat147;
         this.aFloat132 = this.aFloat134 - this.aFloat139 * (float) this.anInt8008;
         if (this.aFloat132 < (float) this.anInt8010) {
@@ -944,7 +944,7 @@ public final class GlToolkit extends Toolkit {
     public void xa(@OriginalArg(0) float globalAmbient) {
         if (this.aFloat149 != globalAmbient) {
             this.aFloat149 = globalAmbient;
-            this.method7025();
+            this.updateAmbient();
         }
     }
 
@@ -1239,7 +1239,7 @@ public final class GlToolkit extends Toolkit {
     }
 
     @OriginalMember(owner = "client!qha", name = "f", descriptor = "(B)V")
-    public void method6980() {
+    public void updatePointLights() {
         @Pc(7) int local7;
         for (local7 = 0; local7 < this.anInt8031; local7++) {
             @Pc(14) PointLight local14 = this.aClass2_Sub7Array5[local7];
@@ -1331,7 +1331,7 @@ public final class GlToolkit extends Toolkit {
     @OriginalMember(owner = "client!qha", name = "a", descriptor = "(Lclient!dv;IIII)Lclient!ka;")
     @Override
     public Model createModel(@OriginalArg(0) Mesh mesh, @OriginalArg(1) int functionMask, @OriginalArg(2) int featureMask, @OriginalArg(3) int ambient, @OriginalArg(4) int contrast) {
-        return new Model_Sub2(this, mesh, functionMask, ambient, contrast, featureMask);
+        return new GlModel(this, mesh, functionMask, ambient, contrast, featureMask);
     }
 
     @OriginalMember(owner = "client!qha", name = "e", descriptor = "()I")
@@ -1393,7 +1393,7 @@ public final class GlToolkit extends Toolkit {
     }
 
     @OriginalMember(owner = "client!qha", name = "a", descriptor = "(IB)V")
-    public void method6985(@OriginalArg(0) int arg0) {
+    public void setTextureEnvColour(@OriginalArg(0) int arg0) {
         Static476.aFloatArray46[1] = (float) (arg0 & 0xFF00) / 65280.0F;
         Static476.aFloatArray46[0] = (float) (arg0 & 0xFF0000) / 1.671168E7F;
         Static476.aFloatArray46[3] = (float) (arg0 >>> 24) / 255.0F;
@@ -1521,7 +1521,7 @@ public final class GlToolkit extends Toolkit {
 
     @OriginalMember(owner = "client!qha", name = "a", descriptor = "(FFF)V")
     @Override
-    public void method7993(@OriginalArg(0) float arg0, @OriginalArg(1) float arg1, @OriginalArg(2) float arg2) {
+    public void setBloomParams(@OriginalArg(0) float arg0, @OriginalArg(1) float arg1, @OriginalArg(2) float arg2) {
         Static228.aFloat72 = arg0;
         Static656.aFloat127 = arg2;
         Static626.aFloat199 = arg1;
@@ -1542,7 +1542,7 @@ public final class GlToolkit extends Toolkit {
     }
 
     @OriginalMember(owner = "client!qha", name = "p", descriptor = "(I)V")
-    public void method6990() {
+    public void updateProjectionMatrix() {
         @Pc(6) float[] local6 = this.aFloatArray53;
         @Pc(18) float local18 = (float) (this.anInt8010 * -this.anInt8021) / (float) this.anInt8001;
         @Pc(33) float local33 = (float) (this.anInt8010 * (this.anInt7869 - this.anInt8021)) / (float) this.anInt8001;
@@ -1615,8 +1615,8 @@ public final class GlToolkit extends Toolkit {
         new Class93_Sub2(this, 3553, 6408, 1, 1);
         new Class93_Sub2(this, 3553, 6408, 1, 1);
         for (@Pc(42) int local42 = 0; local42 < 7; local42++) {
-            this.aClass114_Sub2Array2[local42] = new Model_Sub2(this);
-            this.aClass114_Sub2Array1[local42] = new Model_Sub2(this);
+            this.aClass114_Sub2Array2[local42] = new GlModel(this);
+            this.aClass114_Sub2Array1[local42] = new GlModel(this);
         }
         if (this.aBoolean613) {
             this.aClass406_7 = new Class406(this);
@@ -1650,10 +1650,10 @@ public final class GlToolkit extends Toolkit {
     }
 
     @OriginalMember(owner = "client!qha", name = "a", descriptor = "(BFF)V")
-    public void method6995(@OriginalArg(1) float arg0, @OriginalArg(2) float arg1) {
+    public void adjustFog(@OriginalArg(1) float arg0, @OriginalArg(2) float arg1) {
         this.aFloat147 = arg1;
         this.aFloat139 = arg0;
-        this.method6969();
+        this.updateFog();
     }
 
     @OriginalMember(owner = "client!qha", name = "D", descriptor = "(I)V")
@@ -1767,7 +1767,7 @@ public final class GlToolkit extends Toolkit {
         this.anInt8021 = x;
         this.anInt8025 = height;
         this.anInt8016 = y;
-        this.method6990();
+        this.updateProjectionMatrix();
         this.method7037();
         if (this.anInt8005 == 3) {
             this.method6976();
@@ -2151,7 +2151,7 @@ public final class GlToolkit extends Toolkit {
                 } else {
                     @Pc(93) int local93 = local69.small ? 64 : 128;
                     @Pc(97) int local97 = local93 * 50;
-                    this.method6970(0.0F, (float) (local69.speedV * (this.anInt7987 % local97)) / (float) local97, (float) (this.anInt7987 % local97 * local69.speedU) / (float) local97);
+                    this.method6970(0.0F, (float) (local69.speedV * (this.lastTickTime % local97)) / (float) local97, (float) (this.lastTickTime % local97 * local69.speedU) / (float) local97);
                 }
                 if (!this.aBoolean605) {
                     local47 = local69.effectType;
@@ -2255,9 +2255,9 @@ public final class GlToolkit extends Toolkit {
                 this.aFloat137 = (float) (this.anInt8011 & 0xFF) / 255.0F;
                 this.aFloat143 = (float) (this.anInt8011 & 0xFF00) / 65280.0F;
                 this.aFloat148 = (float) (this.anInt8011 & 0xFF0000) / 1.671168E7F;
-                this.method7025();
+                this.updateAmbient();
             }
-            this.method6966();
+            this.updateSunDiffuse();
         }
         if (this.aFloatArray52[0] == x && this.aFloatArray52[1] == y && this.aFloatArray52[2] == z) {
             return;
@@ -2276,8 +2276,8 @@ public final class GlToolkit extends Toolkit {
         this.aFloatArray54[1] = -this.aFloatArray51[1];
         this.aFloatArray54[2] = -this.aFloatArray51[2];
         this.method6987();
-        this.anInt8023 = (int) (z * 256.0F / y);
-        this.anInt8027 = (int) (x * 256.0F / y);
+        this.sunSlopeZ = (int) (z * 256.0F / y);
+        this.sunSlopeX = (int) (x * 256.0F / y);
     }
 
     @OriginalMember(owner = "client!qha", name = "h", descriptor = "(II)V")
@@ -2374,7 +2374,7 @@ public final class GlToolkit extends Toolkit {
     @OriginalMember(owner = "client!qha", name = "a", descriptor = "(II[[I[[IIII)Lclient!s;")
     @Override
     public Ground createGround(@OriginalArg(0) int arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int[][] arg2, @OriginalArg(3) int[][] arg3, @OriginalArg(5) int arg4, @OriginalArg(6) int arg5) {
-        return new Ground_Sub2(this, arg4, arg5, arg0, arg1, arg2, arg3, 512);
+        return new GlGround(this, arg4, arg5, arg0, arg1, arg2, arg3, 512);
     }
 
     @OriginalMember(owner = "client!qha", name = "B", descriptor = "(I)V")
@@ -2405,7 +2405,7 @@ public final class GlToolkit extends Toolkit {
             this.aClass98_1.aClass101_Sub6_1.method5797();
         }
         this.method6987();
-        this.method6980();
+        this.updatePointLights();
     }
 
     @OriginalMember(owner = "client!qha", name = "a", descriptor = "(Lclient!qr;I)V")
@@ -2422,8 +2422,8 @@ public final class GlToolkit extends Toolkit {
         }
         this.anInt8010 = near;
         this.anInt8018 = far;
-        this.method6990();
-        this.method6969();
+        this.updateProjectionMatrix();
+        this.updateFog();
         if (this.anInt8005 == 3) {
             this.method6976();
         } else if (this.anInt8005 == 2) {
@@ -2532,12 +2532,12 @@ public final class GlToolkit extends Toolkit {
     @OriginalMember(owner = "client!qha", name = "X", descriptor = "(I)V")
     @Override
     public void X(@OriginalArg(0) int arg0) {
-        this.anInt7989 = 0;
+        this.shadowScaleShift = 0;
         while (arg0 > 1) {
             arg0 >>= 0x1;
-            this.anInt7989++;
+            this.shadowScaleShift++;
         }
-        this.anInt7988 = 0x1 << this.anInt7989;
+        this.shadowScale = 0x1 << this.shadowScaleShift;
     }
 
     @OriginalMember(owner = "client!qha", name = "b", descriptor = "(IIIB)V")
@@ -2570,7 +2570,7 @@ public final class GlToolkit extends Toolkit {
         this.anInt8008 = range;
         this.anInt8009 = offset;
         this.anInt8002 = colour;
-        this.method6969();
+        this.updateFog();
         this.method7044();
     }
 
@@ -2657,7 +2657,7 @@ public final class GlToolkit extends Toolkit {
     }
 
     @OriginalMember(owner = "client!qha", name = "C", descriptor = "(I)V")
-    public void method7025() {
+    public void updateAmbient() {
         Static476.aFloatArray46[0] = this.aFloat148 * this.aFloat149;
         Static476.aFloatArray46[2] = this.aFloat149 * this.aFloat137;
         Static476.aFloatArray46[1] = this.aFloat143 * this.aFloat149;
@@ -2673,7 +2673,7 @@ public final class GlToolkit extends Toolkit {
         }
         this.anInt8031 = arg0;
         if (this.anInt8005 != 1) {
-            this.method6980();
+            this.updatePointLights();
         }
     }
 
@@ -2755,7 +2755,7 @@ public final class GlToolkit extends Toolkit {
             System.gc();
             this.aLong248 = SystemTimer.safetime();
         }
-        this.anInt7987 = local9;
+        this.lastTickTime = local9;
     }
 
     @OriginalMember(owner = "client!qha", name = "i", descriptor = "(B)V")
@@ -3144,7 +3144,7 @@ public final class GlToolkit extends Toolkit {
         this.method7001(this.aClass93_Sub2_Sub1_4);
         this.setBlendMode(mode);
         OpenGL.glColor4ub((byte) (overlayColour >> 16), (byte) (overlayColour >> 8), (byte) overlayColour, (byte) (overlayColour >> 24));
-        this.method6985(underlayColour);
+        this.setTextureEnvColour(underlayColour);
         this.method7031(34165, 34165);
         this.method7021(34166, 768, 0);
         this.method7021(5890, 770, 2);

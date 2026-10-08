@@ -82,7 +82,7 @@ public final class Static397 {
             local27 = Toolkit.active.createSprite(local34[0], true);
             Sprites.mobilisingArmiesCache.put(local27, local7);
         }
-        Static418.method7860(arg1.level, arg1.z, 0, arg1.x, arg1.getSize() * 256);
+        Static418.projectFromGround(arg1.level, arg1.z, 0, arg1.x, arg1.getSize() * 256);
         @Pc(75) int local75 = arg0 + OverlayManager.hitmarkpos[0] - 18;
         @Pc(83) int local83 = local75 + arg6 / 4 * 18;
         @Pc(94) int local94 = arg5 + OverlayManager.hitmarkpos[1] - 54 - 16;

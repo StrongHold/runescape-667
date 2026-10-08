@@ -23,7 +23,7 @@ public final class Static369 {
     public static byte[] aByteArray43;
 
     @OriginalMember(owner = "client!lla", name = "a", descriptor = "(I)V")
-    public static void method3847() {
+    public static void spawnMapSquareNpcs() {
         @Pc(11) int zoneCount = Static363.aByteArrayArray22.length;
         for (@Pc(13) int zone = 0; zone < zoneCount; zone++) {
             if (Static363.aByteArrayArray22[zone] != null) {

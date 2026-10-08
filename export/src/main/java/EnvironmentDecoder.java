@@ -67,7 +67,7 @@ public final class EnvironmentDecoder {
      *     as a 16 by 16 grid of one value for each four tiles square, in steps of 32 of the
      *     client's units, or null for a level the file gives none, which the client takes as 0.
      *     The client reads it in {@code MapRegion.decodeStaticEnvironment} and its camera keeps
-     *     its pitch above what stands around its focus by it ({@code Static723.method9451}).
+     *     its pitch above what stands around its focus by it ({@code Static723.clampPlayerCamera}).
      */
     public record Environment(int[] sun, int sunColour, float sunIntensity, float reverseSunIntensity, float ambient,
                               int fogColour, int fogRange, Bloom bloom, Optional<SkyBox> skyBox, Optional<int[]> cubeMap,
@@ -75,8 +75,8 @@ public final class EnvironmentDecoder {
     }
 
     /**
-     * How the GL toolkit makes the bright parts of the scene glow, as {@code Toolkit.method7993}
-     * hands it to its bloom pass ({@code Node_Sub31_Sub1}).
+     * How the GL toolkit makes the bright parts of the scene glow, as {@code Toolkit.setBloomParams}
+     * hands it to its bloom pass ({@code GlBloomFilter}).
      *
      * @param whitePoint the luminance the tone map takes to white: the combining shader scales a
      *     pixel by {@code l * (1 + l / whitePoint) / (l + 1)} over its luminance {@code l}.

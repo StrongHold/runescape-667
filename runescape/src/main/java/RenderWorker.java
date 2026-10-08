@@ -93,7 +93,7 @@ public final class RenderWorker implements Runnable {
                         Static658.method8591(entity, this.pointLights);
 
                         if (Fonts.debug != null) {
-                            Fonts.debug.render(this.queue.name, entity.anInt10692, entity.anInt10698, 0xFF000000, 0xFFFFFF00);
+                            Fonts.debug.render(this.queue.name, entity.screenX, entity.screenY, 0xFF000000, 0xFFFFFF00);
                         }
                     }
                 } else {

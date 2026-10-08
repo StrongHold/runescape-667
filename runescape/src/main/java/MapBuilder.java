@@ -176,7 +176,7 @@ public final class MapBuilder {
             Static693.decodeDynamicArea(Static319.aByteArrayArray16, MapRegion.active);
         }
         Static92.method1757(Static720.mapWidth >> 4, Static501.mapLength >> 4);
-        Static159.method2575();
+        Static159.refreshEnvironment();
 
         if (underwater) {
             Static379.method5355(true);
@@ -198,7 +198,7 @@ public final class MapBuilder {
             Static314.noTimeout(true);
             Static338.loadStaticLocations(Static118.aByteArrayArray3, MapRegion.active);
             if (Static363.aByteArrayArray22 != null) {
-                Static369.method3847();
+                Static369.spawnMapSquareNpcs();
             }
         } else {
             Static314.noTimeout(true);
@@ -249,9 +249,9 @@ public final class MapBuilder {
         }
         Static77.method1561();
         Static557.updatePcmPlayers();
-        Static197.method2949();
+        Static197.requeueLocChanges();
         client.cacheReset();
-        Static442.method5969();
+        Static442.updateFog();
         @Pc(920) ClientMessage message;
         if (GameShell.frame != null && ServerConnection.GAME.connection != null && MainLogicManager.step == 12) {
             message = ClientMessage.create(ClientProt.DETECT_MODIFIED_CLIENT, ServerConnection.GAME.isaac);

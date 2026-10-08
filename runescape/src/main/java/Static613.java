@@ -7,7 +7,7 @@ public final class Static613 {
 
     @OriginalMember(owner = "client!tga", name = "a", descriptor = "(Lclient!ha;III)V")
     public static void method8239(@OriginalArg(0) Toolkit arg0, @OriginalArg(2) int arg1, @OriginalArg(3) int arg2) {
-        Static665.aEnvironmentArrayArray1 = new Environment[arg2][arg1];
+        Static665.zoneEnvironments = new Environment[arg2][arg1];
         Static425.toolkit = arg0;
         if (MapDefaults.skyboxes != null) {
             Static226.aClass67_9 = Environment.cubeMap(MapDefaults.skyboxes[4], MapDefaults.skyboxes[1], MapDefaults.skyboxes[2], MapDefaults.skyboxes[3], MapDefaults.skyboxes[5], MapDefaults.skyboxes[0]);

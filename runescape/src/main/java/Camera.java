@@ -224,15 +224,15 @@ public final class Camera {
         }
 
         @Pc(28) int local28 = (int) playerCameraPitch;
-        if (Static188.anInt3103 >> 8 > local28) {
-            local28 = Static188.anInt3103 >> 8;
+        if (Static188.cameraPitchFloor >> 8 > local28) {
+            local28 = Static188.cameraPitchFloor >> 8;
         }
         if (Shake.enabled[4] && local28 < Shake.amplitude[4] + 128) {
             local28 = Shake.amplitude[4] + 128;
         }
 
         @Pc(63) int local63 = (int) playerCameraYaw + Static288.anInt4621 & 0x3FFF;
-        method4606(local28, (local28 >> 3) * 3 + 600 << 2, arg0, Static494.anInt7409, local63, Static38.anInt920, Static102.averageHeight(renderingLevel, PlayerEntity.self.x, PlayerEntity.self.z) - 200);
+        orbit(local28, (local28 >> 3) * 3 + 600 << 2, arg0, Static494.anInt7409, local63, Static38.anInt920, Static102.averageHeight(renderingLevel, PlayerEntity.self.x, PlayerEntity.self.z) - 200);
 
         @Pc(107) float local107 = 1.0F - (float) ((100 - deltaTime) * (-deltaTime + 100) * (100 - deltaTime)) / 1000000.0F;
         x = (int) ((float) (x - lastX) * local107 + (float) lastX);
@@ -252,7 +252,7 @@ public final class Camera {
     }
 
     @OriginalMember(owner = "client!jea", name = "b", descriptor = "(IIIIIIII)V")
-    public static void method4606(@OriginalArg(0) int pitch, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(4) int x, @OriginalArg(5) int yaw, @OriginalArg(6) int z, @OriginalArg(7) int y) {
+    public static void orbit(@OriginalArg(0) int pitch, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(4) int x, @OriginalArg(5) int yaw, @OriginalArg(6) int z, @OriginalArg(7) int y) {
         @Pc(7) int local7 = arg2 - 334;
         if (local7 < 0) {
             local7 = 0;
@@ -466,7 +466,7 @@ public final class Camera {
         }
         playerCameraPitch = (float) shiftedPitch;
         playerCameraYaw = (float) shiftedYaw;
-        Static723.method9451();
+        Static723.clampPlayerCamera();
         angleUpdated = true;
     }
 

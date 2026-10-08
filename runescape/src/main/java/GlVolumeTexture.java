@@ -4,7 +4,7 @@ import org.openrs2.deob.annotation.OriginalClass;
 import org.openrs2.deob.annotation.OriginalMember;
 
 @OriginalClass("client!vv")
-public final class Class93_Sub3 extends Class93 {
+public final class GlVolumeTexture extends Class93 {
 
     @OriginalMember(owner = "client!vv", name = "C", descriptor = "I")
     public int anInt10404 = -1;
@@ -22,7 +22,7 @@ public final class Class93_Sub3 extends Class93 {
     public final int anInt10410;
 
     @OriginalMember(owner = "client!vv", name = "<init>", descriptor = "(Lclient!qha;IIII)V")
-    public Class93_Sub3(@OriginalArg(0) GlToolkit arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4) {
+    public GlVolumeTexture(@OriginalArg(0) GlToolkit arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4) {
         super(arg0, 32879, arg1, arg4 * arg3 * arg2, false);
         this.anInt10401 = arg3;
         this.anInt10403 = arg4;
@@ -33,7 +33,7 @@ public final class Class93_Sub3 extends Class93 {
     }
 
     @OriginalMember(owner = "client!vv", name = "<init>", descriptor = "(Lclient!qha;IIII[BI)V")
-    public Class93_Sub3(@OriginalArg(0) GlToolkit arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) byte[] arg5, @OriginalArg(6) int arg6) {
+    public GlVolumeTexture(@OriginalArg(0) GlToolkit arg0, @OriginalArg(1) int arg1, @OriginalArg(2) int arg2, @OriginalArg(3) int arg3, @OriginalArg(4) int arg4, @OriginalArg(5) byte[] arg5, @OriginalArg(6) int arg6) {
         super(arg0, 32879, arg1, arg2 * arg3 * arg4, false);
         this.anInt10401 = arg3;
         this.anInt10403 = arg4;

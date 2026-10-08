@@ -25,6 +25,6 @@ public final class Static143 {
 
     @OriginalMember(owner = "client!eia", name = "a", descriptor = "(IIIIIIIII)V")
     public static void method3573(@OriginalArg(0) int arg0, @OriginalArg(2) int arg1, @OriginalArg(4) int arg2, @OriginalArg(6) int arg3, @OriginalArg(7) int arg4, @OriginalArg(8) int arg5) {
-        Static418.method7860(arg4, arg3, arg0, arg1, 0);
+        Static418.projectFromGround(arg4, arg3, arg0, arg1, 0);
     }
 }

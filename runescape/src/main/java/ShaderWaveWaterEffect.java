@@ -30,13 +30,13 @@ public final class ShaderWaveWaterEffect extends TextureEffect {
     public boolean active = false;
 
     @OriginalMember(owner = "client!td", name = "e", descriptor = "Lclient!sa;")
-    public final Class329 textures;
+    public final GlWaterNoiseTextureSet textures;
 
     @OriginalMember(owner = "client!td", name = "g", descriptor = "Lclient!iha;")
     public Class179 program;
 
     @OriginalMember(owner = "client!td", name = "<init>", descriptor = "(Lclient!qha;Lclient!sa;)V")
-    public ShaderWaveWaterEffect(@OriginalArg(0) GlToolkit toolkit, @OriginalArg(1) Class329 textures) {
+    public ShaderWaveWaterEffect(@OriginalArg(0) GlToolkit toolkit, @OriginalArg(1) GlWaterNoiseTextureSet textures) {
         super(toolkit);
         this.textures = textures;
         if (this.textures.aClass93_Sub3_3 != null && super.toolkit.bf && super.toolkit.aBoolean619) {
@@ -74,7 +74,7 @@ public final class ShaderWaveWaterEffect extends TextureEffect {
             @Pc(50) float waveIntensityX = (float) (effectParam2 >> 23 & 0xF) / WAVE_INTENSITY_DIVISOR;
             @Pc(56) int waveExponent = effectParam2 >> 27 & 0xF;
             @Pc(60) long handle = this.program.aLong136;
-            OpenGL.glUniform1fARB(OpenGL.glGetUniformLocationARB(handle, "time"), (float) (super.toolkit.anInt7987 * timeScale % ANIMATION_PERIOD) / (float) ANIMATION_PERIOD);
+            OpenGL.glUniform1fARB(OpenGL.glGetUniformLocationARB(handle, "time"), (float) (super.toolkit.lastTickTime * timeScale % ANIMATION_PERIOD) / (float) ANIMATION_PERIOD);
             OpenGL.glUniform1fARB(OpenGL.glGetUniformLocationARB(handle, "scale"), scale);
             OpenGL.glUniform1fARB(OpenGL.glGetUniformLocationARB(handle, "breakWaterDepth"), (float) breakWaterDepth);
             OpenGL.glUniform1fARB(OpenGL.glGetUniformLocationARB(handle, "breakWaterOffset"), breakWaterOffset);

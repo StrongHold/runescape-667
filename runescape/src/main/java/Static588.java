@@ -11,7 +11,7 @@ public final class Static588 {
     }
 
     @OriginalMember(owner = "client!sj", name = "a", descriptor = "(I)V")
-    public static void method7713() {
+    public static void applyEnvironmentLighting() {
         Static425.toolkit.xa(((float) ClientOptions.instance.brightness.getValue() * 0.1F + 0.7F) * Static318.aFloat210);
         Static425.toolkit.ZA(Static448.anInt6801, Static688.aFloat216, Static683.aFloat215, (float) (Static344.anInt5617 << 2), (float) (Static417.anInt6400 << 2), (float) (Static331.anInt5441 << 2));
         Static425.toolkit.method7973(Static425.aClass67_6);

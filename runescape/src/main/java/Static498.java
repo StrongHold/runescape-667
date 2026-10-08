@@ -81,9 +81,9 @@ public final class Static498 {
         @Pc(14) Entity pivot = entities[pivotIndex];
         entities[pivotIndex] = entities[to];
         entities[to] = pivot;
-        @Pc(27) int pivotKey = pivot.anInt10697;
+        @Pc(27) int pivotKey = pivot.screenDepth;
         for (@Pc(29) int i = from; i < to; i++) {
-            if (entities[i].anInt10697 > pivotKey + (i & 0x1)) {
+            if (entities[i].screenDepth > pivotKey + (i & 0x1)) {
                 @Pc(44) Entity entity = entities[i];
                 entities[i] = entities[boundary];
                 entities[boundary++] = entity;

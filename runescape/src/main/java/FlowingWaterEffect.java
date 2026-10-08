@@ -29,13 +29,13 @@ public final class FlowingWaterEffect extends TextureEffect {
     private static final int FLOW_ALONG_X_FLAG = 0x80;
 
     @OriginalMember(owner = "client!ma", name = "j", descriptor = "Lclient!sa;")
-    public final Class329 textures;
+    public final GlWaterNoiseTextureSet textures;
 
     @OriginalMember(owner = "client!ma", name = "k", descriptor = "Lclient!bea;")
     public final Class36 displayList;
 
     @OriginalMember(owner = "client!ma", name = "<init>", descriptor = "(Lclient!qha;Lclient!sa;)V")
-    public FlowingWaterEffect(@OriginalArg(0) GlToolkit toolkit, @OriginalArg(1) Class329 textures) {
+    public FlowingWaterEffect(@OriginalArg(0) GlToolkit toolkit, @OriginalArg(1) GlWaterNoiseTextureSet textures) {
         super(toolkit);
         this.textures = textures;
         this.displayList = new Class36(toolkit, DISPLAY_LIST_COUNT);
@@ -123,16 +123,16 @@ public final class FlowingWaterEffect extends TextureEffect {
         Static617.aFloatArray69[2] = 0.0F;
         Static617.aFloatArray69[1] = textureScale;
         Static617.aFloatArray69[0] = 0.0F;
-        Static617.aFloatArray69[3] = (float) super.toolkit.anInt7987 * flowSpeed % 1.0F;
+        Static617.aFloatArray69[3] = (float) super.toolkit.lastTickTime * flowSpeed % 1.0F;
         OpenGL.glTexGenfv(OpenGL.GL_T, OpenGL.GL_EYE_PLANE, Static617.aFloatArray69, 0);
         if (this.textures.aBoolean655) {
-            Static617.aFloatArray69[3] = (float) super.toolkit.anInt7987 * animationSpeed % 1.0F;
+            Static617.aFloatArray69[3] = (float) super.toolkit.lastTickTime * animationSpeed % 1.0F;
             Static617.aFloatArray69[0] = 0.0F;
             Static617.aFloatArray69[1] = 0.0F;
             Static617.aFloatArray69[2] = 0.0F;
             OpenGL.glTexGenfv(OpenGL.GL_R, OpenGL.GL_OBJECT_PLANE, Static617.aFloatArray69, 0);
         } else {
-            @Pc(148) int frame = (int) ((float) super.toolkit.anInt7987 * animationSpeed * (float) FRAME_COUNT);
+            @Pc(148) int frame = (int) ((float) super.toolkit.lastTickTime * animationSpeed * (float) FRAME_COUNT);
             super.toolkit.method7001(this.textures.aClass93_Sub2Array4[frame % FRAME_COUNT]);
         }
         super.toolkit.method7014(0);

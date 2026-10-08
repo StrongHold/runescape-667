@@ -140,7 +140,7 @@ public final class StaticWallDecor extends WallDecor implements Location {
             this.shadow = null;
         }
         if (shadow != null) {
-            Static630.method8357(shadow, super.virtualLevel, super.x, super.z, null);
+            Static630.addShadow(shadow, super.virtualLevel, super.x, super.z, null);
         }
     }
 

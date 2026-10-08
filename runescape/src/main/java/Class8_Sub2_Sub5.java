@@ -46,7 +46,7 @@ public abstract class Class8_Sub2_Sub5 extends Entity {
 
     @OriginalMember(owner = "client!nda", name = "a", descriptor = "([Lclient!lca;I)I")
     @Override
-    public final int method9288(@OriginalArg(0) PointLight[] arg0) {
+    public final int findLights(@OriginalArg(0) PointLight[] arg0) {
         return this.findLightsAt(arg0, super.z >> EnvironmentLight.tileShift, super.x >> EnvironmentLight.tileShift);
     }
 

@@ -11,7 +11,7 @@ import java.util.Map;
  * turn, how far it is pulled towards the camera, its half width and half height in the client's
  * units, its texture, how it blends (1 by its alpha, 2 added, 128 multiplied in), the face's
  * colour as the palette gives it, and its alpha out of 255. These are what the GL toolkit draws
- * with ({@code Model_Sub2.method4984}); the face itself is left out of the mesh where the type
+ * with ({@code GlModel.renderBillboards}); the face itself is left out of the mesh where the type
  * hides it.
  */
 public final class BillboardSources {

@@ -37,7 +37,7 @@ public final class Static296 {
         }
         local15.pendingRemoval = false;
         local15.customisation = arg0;
-        local15.aBoolean310 = true;
+        local15.pendingApply = true;
     }
 
     @OriginalMember(owner = "client!jh", name = "b", descriptor = "(I)V")

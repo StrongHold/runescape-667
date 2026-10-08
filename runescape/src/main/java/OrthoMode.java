@@ -274,7 +274,7 @@ public final class OrthoMode {
         }
 
         if (Toolkit.active != null) {
-            Static209.method3110();
+            Static209.updateRenderDistance();
         }
 
         enabled = ClientOptions.instance.orthographic.getValue() != 0;

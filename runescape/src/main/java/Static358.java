@@ -59,13 +59,13 @@ public final class Static358 {
                     for (@Pc(125) int local125 = local100; local125 <= local108; local125++) {
                         @Pc(128) byte local128 = 1;
                         @Pc(144) PositionEntity local144 = Static578.getEntity(local16, local125, local78, positionEntityClass == null ? (positionEntityClass = getClass("PositionEntity")) : positionEntityClass);
-                        if (local144 != null && local144.aByte145 != 0) {
+                        if (local144 != null && local144.diagonalAxis != 0) {
                             @Pc(169) boolean local169;
                             @Pc(179) boolean local179;
                             @Pc(195) short local195;
                             @Pc(201) int local201;
                             @Pc(207) int local207;
-                            if (local144.aByte145 == 1) {
+                            if (local144.diagonalAxis == 1) {
                                 local169 = local125 - 1 >= local100;
                                 local179 = local125 + 1 <= local108;
                                 if (!local169 && local78 + 1 <= local61) {

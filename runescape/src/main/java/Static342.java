@@ -21,7 +21,7 @@ public final class Static342 {
         }
 
         Static720.mapWidth = Static501.mapLength = Static238.BUILD_AREAS[buildArea];
-        Static209.method3110();
+        Static209.updateRenderDistance();
         Static623.zonePointers = new int[4][Static720.mapWidth >> 3][Static501.mapLength >> 3];
         Static148.anIntArrayArray64 = new int[Static720.mapWidth][Static501.mapLength];
         Static341.entityDrawPriorities = new int[Static720.mapWidth][Static501.mapLength];

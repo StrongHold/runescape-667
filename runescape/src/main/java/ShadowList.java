@@ -98,7 +98,7 @@ public final class ShadowList {
             local68 = local68.copy((byte) 3, local12, true);
             local68.O(local459 - local456 >> 1, 128, local465 - local462 >> 1);
             local68.H(local459 + local456 >> 1, 0, local462 + local465 >> 1);
-            animator.method9105(local68);
+            animator.animateShadow(local68);
         }
         if (arg9 != 0) {
             local68.FA(arg9);

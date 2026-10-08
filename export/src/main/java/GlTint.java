@@ -7,14 +7,14 @@ import com.jagex.math.ColourUtils;
  *
  * <p>An untextured vertex is its HSL colour with the lightness scaled by the light on it, 128
  * being full, held between 2 and 126, and taken through the palette, whose gamma comes after the
- * scaling ({@code Static468.shadeHsl}, {@code Model_Sub2.method4985}, and the same arithmetic in
- * {@code Ground_Sub2}). A model's light is its ambient; the ground's is 74 less the shadow on the
+ * scaling ({@code Static468.shadeHsl}, {@code GlModel.shadeRgba}, and the same arithmetic in
+ * {@code GlGround}). A model's light is its ambient; the ground's is 74 less the shadow on the
  * corner.
  *
  * <p>A textured vertex starts from that and is pulled towards a grey of the light alone by the
  * texture's alpha, out of 256, so that most textures show their own colour, and is then
- * brightened by the texture's brightness, out of 256 over one ({@code Node_Sub39.method5863},
- * {@code Model_Sub2.method4985}).
+ * brightened by the texture's brightness, out of 256 over one ({@code GlGroundLayer.setVertexColour},
+ * {@code GlModel.shadeRgba}).
  */
 public final class GlTint {
 

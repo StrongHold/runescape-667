@@ -6,7 +6,7 @@ import org.openrs2.deob.annotation.OriginalMember;
 import org.openrs2.deob.annotation.Pc;
 
 @OriginalClass("client!kca")
-public final class Node_Sub31_Sub1 extends Node_Sub31 {
+public final class GlBloomFilter extends GlPostProcessFilter {
 
     @OriginalMember(owner = "client!kca", name = "N", descriptor = "Lclient!iha;")
     public Class179 aClass179_2;
@@ -48,7 +48,7 @@ public final class Node_Sub31_Sub1 extends Node_Sub31 {
     public Class93_Sub2 aClass93_Sub2_2;
 
     @OriginalMember(owner = "client!kca", name = "<init>", descriptor = "(Lclient!qha;)V")
-    public Node_Sub31_Sub1(@OriginalArg(0) GlToolkit arg0) {
+    public GlBloomFilter(@OriginalArg(0) GlToolkit arg0) {
         super(arg0);
     }
 

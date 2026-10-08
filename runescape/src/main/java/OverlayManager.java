@@ -534,11 +534,11 @@ public final class OverlayManager {
                                 @Pc(1658) String soakAmountText = null;
                                 @Pc(1662) int soakAmountWidth = 0;
 
-                                @Pc(1670) String damageTypeText = damageType.method6457(entity.hitAmounts[j]);
+                                @Pc(1670) String damageTypeText = damageType.getAmountText(entity.hitAmounts[j]);
                                 @Pc(1675) int damageAmountWidth = hitFontMetrics.stringWidth(damageTypeText);
 
                                 if (soakType != null) {
-                                    soakAmountText = soakType.method6457(entity.soakAmounts[j]);
+                                    soakAmountText = soakType.getAmountText(entity.soakAmounts[j]);
                                     soakAmountWidth = soakFontMetrics.stringWidth(soakAmountText);
                                 }
 

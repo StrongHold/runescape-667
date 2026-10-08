@@ -16,7 +16,7 @@ public final class Static658 {
     public static void method8591(@OriginalArg(0) Entity arg0, @OriginalArg(1) PointLight[] arg1) {
         @Pc(6) int local6;
         if (Static442.aBoolean500) {
-            local6 = arg0.method9288(arg1);
+            local6 = arg0.findLights(arg1);
             Static665.aToolkit_15.method8009(local6, arg1);
         }
         if (Static693.underwaterGround == Static246.ground) {

@@ -4,7 +4,7 @@ import org.openrs2.deob.annotation.OriginalClass;
 import org.openrs2.deob.annotation.OriginalMember;
 
 @OriginalClass("client!jea")
-public abstract class Node_Sub31 extends Node {
+public abstract class GlPostProcessFilter extends Node {
 
     @OriginalMember(owner = "client!jea", name = "p", descriptor = "Z")
     public boolean aBoolean387;
@@ -13,7 +13,7 @@ public abstract class Node_Sub31 extends Node {
     protected final GlToolkit aClass19_Sub3_22;
 
     @OriginalMember(owner = "client!jea", name = "<init>", descriptor = "(Lclient!qha;)V")
-    public Node_Sub31(@OriginalArg(0) GlToolkit arg0) {
+    public GlPostProcessFilter(@OriginalArg(0) GlToolkit arg0) {
         this.aClass19_Sub3_22 = arg0;
     }
 

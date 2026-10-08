@@ -35,7 +35,7 @@ public final class Static517 {
             for (entity = Static576.opaqueStationaryEntities[ground]; entity != null; entity = entity.nextEntity) {
                 if (!Static208.cullEntity(entity, underwater, roofStamps, levels, roofStamp)) {
                     projectToScreen(entity);
-                    if (entity.anInt10697 != -1) {
+                    if (entity.screenDepth != -1) {
                         Static48.aEntityArray3[Static546.onscreenOpaqueEntityCount++] = entity;
                     }
                 }
@@ -46,7 +46,7 @@ public final class Static517 {
             for (entity = Static398.transparentStationaryEntities[ground]; entity != null; entity = entity.nextEntity) {
                 if (!Static208.cullEntity(entity, underwater, roofStamps, levels, roofStamp)) {
                     projectToScreen(entity);
-                    if (entity.anInt10697 != -1) {
+                    if (entity.screenDepth != -1) {
                         Static395.aEntityArray11[Static645.onscreenTransparentEntityCount++] = entity;
                     }
                 }
@@ -55,12 +55,12 @@ public final class Static517 {
                 if (!Static208.cullEntity(dynamic, underwater, roofStamps, levels, roofStamp)) {
                     if (dynamic.isTransparent(0)) {
                         projectToScreen(dynamic);
-                        if (dynamic.anInt10697 != -1) {
+                        if (dynamic.screenDepth != -1) {
                             Static395.aEntityArray11[Static645.onscreenTransparentEntityCount++] = dynamic;
                         }
                     } else {
                         projectToScreen(dynamic);
-                        if (dynamic.anInt10697 != -1) {
+                        if (dynamic.screenDepth != -1) {
                             Static48.aEntityArray3[Static546.onscreenOpaqueEntityCount++] = dynamic;
                         }
                     }
@@ -70,7 +70,7 @@ public final class Static517 {
                 for (local157 = 0; local157 < Static125.dynamicEntityCount; local157++) {
                     if (!Static208.cullEntity(Static679.aPositionEntity[local157], underwater, roofStamps, levels, roofStamp)) {
                         projectToScreen(Static679.aPositionEntity[local157]);
-                        if (Static679.aPositionEntity[local157].anInt10697 != -1) {
+                        if (Static679.aPositionEntity[local157].screenDepth != -1) {
                             if (Static679.aPositionEntity[local157].isTransparent(0)) {
                                 Static395.aEntityArray11[Static645.onscreenTransparentEntityCount++] = Static679.aPositionEntity[local157];
                             } else {
@@ -199,8 +199,8 @@ public final class Static517 {
     @OriginalMember(owner = "client!qea", name = "a", descriptor = "(Lclient!eo;)V")
     public static void projectToScreen(@OriginalArg(0) Entity entity) {
         Static665.aToolkit_15.H(entity.x, entity.y + (entity.getMinY(2) >> 1), entity.z, Static486.anIntArray591);
-        entity.anInt10692 = Static486.anIntArray591[0];
-        entity.anInt10698 = Static486.anIntArray591[1];
-        entity.anInt10697 = Static486.anIntArray591[2];
+        entity.screenX = Static486.anIntArray591[0];
+        entity.screenY = Static486.anIntArray591[1];
+        entity.screenDepth = Static486.anIntArray591[2];
     }
 }

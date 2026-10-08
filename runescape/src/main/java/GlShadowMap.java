@@ -6,16 +6,16 @@ import org.openrs2.deob.annotation.OriginalMember;
 import org.openrs2.deob.annotation.Pc;
 
 @OriginalClass("client!hn")
-public final class Class170 {
+public final class GlShadowMap {
 
     @OriginalMember(owner = "client!hn", name = "d", descriptor = "[[Lclient!uga;")
-    public Class373[][] aClass373ArrayArray1;
+    public GlShadowMapBlock[][] aClass373ArrayArray1;
 
     @OriginalMember(owner = "client!hn", name = "k", descriptor = "Lclient!qha;")
     public final GlToolkit aClass19_Sub3_18;
 
     @OriginalMember(owner = "client!hn", name = "p", descriptor = "Lclient!pn;")
-    public final Ground_Sub2 aClass178_Sub2_1;
+    public final GlGround aClass178_Sub2_1;
 
     @OriginalMember(owner = "client!hn", name = "g", descriptor = "I")
     public final int anInt4022;
@@ -36,12 +36,12 @@ public final class Class170 {
     public final int anInt4023;
 
     @OriginalMember(owner = "client!hn", name = "<init>", descriptor = "(Lclient!qha;Lclient!pn;)V")
-    public Class170(@OriginalArg(0) GlToolkit arg0, @OriginalArg(1) Ground_Sub2 arg1) {
+    public GlShadowMap(@OriginalArg(0) GlToolkit arg0, @OriginalArg(1) GlGround arg1) {
         this.aClass19_Sub3_18 = arg0;
         this.aClass178_Sub2_1 = arg1;
-        this.anInt4022 = (this.aClass178_Sub2_1.sizeX * this.aClass178_Sub2_1.tileSize >> this.aClass19_Sub3_18.anInt7989) + 2;
-        this.anInt4026 = (this.aClass178_Sub2_1.sizeZ * this.aClass178_Sub2_1.tileSize >> this.aClass19_Sub3_18.anInt7989) + 2;
-        this.anInt4025 = this.aClass19_Sub3_18.anInt7989 + 7 - this.aClass178_Sub2_1.tileSizeShift;
+        this.anInt4022 = (this.aClass178_Sub2_1.sizeX * this.aClass178_Sub2_1.tileSize >> this.aClass19_Sub3_18.shadowScaleShift) + 2;
+        this.anInt4026 = (this.aClass178_Sub2_1.sizeZ * this.aClass178_Sub2_1.tileSize >> this.aClass19_Sub3_18.shadowScaleShift) + 2;
+        this.anInt4025 = this.aClass19_Sub3_18.shadowScaleShift + 7 - this.aClass178_Sub2_1.tileSizeShift;
         this.aByteArray41 = new byte[this.anInt4026 * this.anInt4022];
         this.anInt4020 = this.aClass178_Sub2_1.sizeX >> this.anInt4025;
         this.anInt4023 = this.aClass178_Sub2_1.sizeZ >> this.anInt4025;
@@ -49,17 +49,17 @@ public final class Class170 {
 
     @OriginalMember(owner = "client!hn", name = "a", descriptor = "(B)V")
     public void method3540() {
-        this.aClass373ArrayArray1 = new Class373[this.anInt4020][this.anInt4023];
+        this.aClass373ArrayArray1 = new GlShadowMapBlock[this.anInt4020][this.anInt4023];
         for (@Pc(18) int local18 = 0; local18 < this.anInt4023; local18++) {
             for (@Pc(22) int local22 = 0; local22 < this.anInt4020; local22++) {
-                this.aClass373ArrayArray1[local22][local18] = new Class373(this.aClass19_Sub3_18, this, this.aClass178_Sub2_1, local22, local18, this.anInt4025, local22 * 128 + 1, local18 * 128 + 1);
+                this.aClass373ArrayArray1[local22][local18] = new GlShadowMapBlock(this.aClass19_Sub3_18, this, this.aClass178_Sub2_1, local22, local18, this.anInt4025, local22 * 128 + 1, local18 * 128 + 1);
             }
         }
     }
 
     @OriginalMember(owner = "client!hn", name = "a", descriptor = "(BIILclient!r;)V")
-    public void method3541(@OriginalArg(1) int arg0, @OriginalArg(2) int arg1, @OriginalArg(3) Shadow arg2) {
-        @Pc(6) DoublyLinkedNode_Sub2_Sub9_ local6 = (DoublyLinkedNode_Sub2_Sub9_) arg2;
+    public void addShadow(@OriginalArg(1) int arg0, @OriginalArg(2) int arg1, @OriginalArg(3) Shadow arg2) {
+        @Pc(6) GlShadow local6 = (GlShadow) arg2;
         arg0 += local6.anInt7350 + 1;
         arg1 += local6.anInt7353 + 1;
         @Pc(27) int local27 = arg1 * this.anInt4022 + arg0;
@@ -108,7 +108,7 @@ public final class Class170 {
         this.aClass19_Sub3_18.method7046(-2);
         this.aClass19_Sub3_18.method6991(1);
         this.aClass19_Sub3_18.setBlendMode(1);
-        @Pc(50) float local50 = 1.0F / (float) (this.aClass19_Sub3_18.anInt7988 * 128);
+        @Pc(50) float local50 = 1.0F / (float) (this.aClass19_Sub3_18.shadowScale * 128);
         @Pc(54) int local54;
         @Pc(61) int local61;
         @Pc(68) int local68;
@@ -194,7 +194,7 @@ public final class Class170 {
 
     @OriginalMember(owner = "client!hn", name = "a", descriptor = "(IILclient!r;I)Z")
     public boolean method3543(@OriginalArg(1) int arg0, @OriginalArg(2) Shadow arg1, @OriginalArg(3) int arg2) {
-        @Pc(6) DoublyLinkedNode_Sub2_Sub9_ local6 = (DoublyLinkedNode_Sub2_Sub9_) arg1;
+        @Pc(6) GlShadow local6 = (GlShadow) arg1;
         arg2 += local6.anInt7353 + 1;
         arg0 += local6.anInt7350 + 1;
         @Pc(27) int local27 = arg2 * this.anInt4022 + arg0;
@@ -234,7 +234,7 @@ public final class Class170 {
 
     @OriginalMember(owner = "client!hn", name = "a", descriptor = "(ILclient!r;IB)V")
     public void method3544(@OriginalArg(0) int arg0, @OriginalArg(1) Shadow arg1, @OriginalArg(2) int arg2) {
-        @Pc(6) DoublyLinkedNode_Sub2_Sub9_ local6 = (DoublyLinkedNode_Sub2_Sub9_) arg1;
+        @Pc(6) GlShadow local6 = (GlShadow) arg1;
         arg0 += local6.anInt7353 + 1;
         arg2 += local6.anInt7350 + 1;
         @Pc(27) int local27 = this.anInt4022 * arg0 + arg2;
@@ -286,7 +286,7 @@ public final class Class170 {
         @Pc(32) int local32 = arg0 - 1 >> 7;
         @Pc(42) int local42 = arg0 + arg1 - 1 - 1 >> 7;
         for (@Pc(44) int local44 = local16; local44 <= local26; local44++) {
-            @Pc(51) Class373[] local51 = this.aClass373ArrayArray1[local44];
+            @Pc(51) GlShadowMapBlock[] local51 = this.aClass373ArrayArray1[local44];
             for (@Pc(53) int local53 = local32; local53 <= local42; local53++) {
                 local51[local53].aBoolean738 = true;
             }

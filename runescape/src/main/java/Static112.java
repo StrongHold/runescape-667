@@ -61,7 +61,7 @@ public final class Static112 {
             }
         }
 
-        return entity.method9303();
+        return entity.rotationTick();
     }
 
     @OriginalMember(owner = "client!dj", name = "a", descriptor = "(BLclient!ge;)Lclient!jt;")

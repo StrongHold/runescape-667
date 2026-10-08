@@ -64,10 +64,10 @@ public final class MapSquareDecoder {
         counts.put("tile bytes", packet.pos);
         counts.putAll(tileSums(tiles));
 
-        Static665.aEnvironmentArrayArray1 = new Environment[ZONES_ACROSS][ZONES_ACROSS];
+        Static665.zoneEnvironments = new Environment[ZONES_ACROSS][ZONES_ACROSS];
         var environment = new MapRegion(LEVELS, TILES_ACROSS, TILES_ACROSS, false);
         environment.decodeStaticEnvironment(0, packet, 0, toolkit);
-        counts.put("environment", Static665.aEnvironmentArrayArray1[0][0] == null ? 0 : 1);
+        counts.put("environment", Static665.zoneEnvironments[0][0] == null ? 0 : 1);
         counts.put("camera height levels", cameraHeightLevels(environment));
         return counts;
     }

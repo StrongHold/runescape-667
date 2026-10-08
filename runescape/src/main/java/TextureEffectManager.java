@@ -7,7 +7,7 @@ import org.openrs2.deob.annotation.Pc;
  * Owns one {@link TextureEffect} per {@code TextureMetrics.effectType} and switches between them as textures change.
  */
 @OriginalClass("client!eg")
-public final class Class98 {
+public final class TextureEffectManager {
 
     private static final int EFFECT_NONE = 0;
 
@@ -51,7 +51,7 @@ public final class Class98 {
     public final GlToolkit toolkit;
 
     @OriginalMember(owner = "client!eg", name = "f", descriptor = "Lclient!sa;")
-    public final Class329 textures;
+    public final GlWaterNoiseTextureSet textures;
 
     @OriginalMember(owner = "client!eg", name = "l", descriptor = "[Lclient!ua;")
     public final TextureEffect[] effects;
@@ -60,9 +60,9 @@ public final class Class98 {
     public final UnderwaterEffect aClass101_Sub6_1;
 
     @OriginalMember(owner = "client!eg", name = "<init>", descriptor = "(Lclient!qha;)V")
-    public Class98(@OriginalArg(0) GlToolkit toolkit) {
+    public TextureEffectManager(@OriginalArg(0) GlToolkit toolkit) {
         this.toolkit = toolkit;
-        this.textures = new Class329(toolkit);
+        this.textures = new GlWaterNoiseTextureSet(toolkit);
         this.effects = new TextureEffect[EFFECT_COUNT];
         this.effects[EFFECT_NORMAL_MAP_SPECULAR] = new NormalMapSpecularEffect(toolkit);
         this.effects[EFFECT_TURBULENT_WATER] = new TurbulentWaterEffect(toolkit, this.textures);
