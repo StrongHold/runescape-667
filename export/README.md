@@ -40,7 +40,7 @@ face's colour is the colour the GL toolkit gives its vertices before its lights 
 (`GlModel.shadeRgba`): the face's HSL colour with its lightness scaled by the model's ambient,
 64 plus the type's own, out of 128, and then taken through the client's palette, whose gamma of
 0.7 comes after the scaling, so the result is not the palette colour dimmed. It is written as a
-vertex colour in linear light. A textured face is tinted as the GL toolkit tints it: that colour
+vertex colour in linear light, with the face's opacity, 255 less its alpha out of 255, as the GL toolkit writes it for every face; the toolkit multiplies a texture's own alpha by it. A textured face is tinted as the GL toolkit tints it: that colour
 pulled towards a grey of the ambient alone by the texture's `alpha`, out of 256, and brightened
 by its `brightness`, which the material's `extras` carry with its `effectType`, `effectParam1` and
 `effectParam2`, for an engine that lights a texture itself or draws the texture's effect. Most textures have an alpha of 0 and keep the face's colour. A

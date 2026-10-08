@@ -192,10 +192,9 @@ public final class LibraryModelToGltf {
 
     private void addFace(int face, Primitive primitive) {
         var texture = drawableTexture(face);
-        var metrics = texture == -1 ? null : source.getMetrics(texture);
         var hsl = model.faceColour[face] & 0xFFFF;
         var rgb = rgb(face, texture, hsl);
-        var opacity = primitive == hidden ? 0.0F : opacity(metrics, alpha(face));
+        var opacity = primitive == hidden ? 0.0F : opacity(alpha(face));
         var us = primitive.textured ? drawnCoordinates(model.texCoordU[face]) : null;
         var vs = primitive.textured ? drawnCoordinates(model.texCoordV[face]) : null;
         var corners = new int[] {model.faceA[face], model.faceB[face], model.faceC[face]};
@@ -323,12 +322,13 @@ public final class LibraryModelToGltf {
         }
     }
 
-    private static float opacity(TextureMetrics metrics, int alpha) {
-        if (metrics != null && metrics.alphaBlendMode != 0) {
-            return 1.0F;
-        } else {
-            return (HIDDEN_ALPHA - alpha) / (float) HIDDEN_ALPHA;
-        }
+    /**
+     * How opaque a face is: its alpha taken from whole, for every face, textured or not, as the GL
+     * toolkit writes it into the vertex colour (GlModel) and multiplies the texture's own alpha by
+     * it (GlToolkit.setColourOp, GL_MODULATE).
+     */
+    private static float opacity(int alpha) {
+        return (HIDDEN_ALPHA - alpha) / (float) HIDDEN_ALPHA;
     }
 
     private GltfMaterials.AlphaMode alphaMode(int face, TextureMetrics metrics) {

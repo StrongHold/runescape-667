@@ -247,7 +247,7 @@ public final class ModelToGltf {
 
         var rgb = rgb(face, texture, colour(face));
         var plainRgb = primitive.textured ? untexturedRgb(face, colour(face)) : rgb;
-        var opacity = opacity(drawable ? metrics : null, alpha(face));
+        var opacity = opacity(alpha(face));
 
         var us = primitive.textured ? drawnCoordinates(model.texCoordU[face]) : null;
         var vs = primitive.textured ? drawnCoordinates(model.texCoordV[face]) : null;
@@ -312,7 +312,7 @@ public final class ModelToGltf {
             for (var target = 0; target < poses.size(); target++) {
                 var pose = poses.get(target);
                 var posedRgb = rgb(face, texture, pose.colour()[face] & 0xFFFF);
-                var posedOpacity = opacity(metrics, pose.alpha()[face] & 0xFF);
+                var posedOpacity = opacity(pose.alpha()[face] & 0xFF);
                 addColourChange(primitive.colourTargets.get(target), rgb, opacity, posedRgb, posedOpacity);
             }
         }
@@ -370,12 +370,13 @@ public final class ModelToGltf {
      * 255 is invisible. A texture that blends or cuts out by its own alpha takes the place of the
      * face's.
      */
-    private static float opacity(TextureMetrics metrics, int alpha) {
-        if (metrics != null && metrics.alphaBlendMode != 0) {
-            return 1.0F;
-        } else {
-            return (255 - alpha) / 255.0F;
-        }
+    /**
+     * How opaque a face is: 255 less its alpha, out of 255, for every face, textured or not, as the
+     * GL toolkit writes it into the vertex colour (GlModel) and multiplies the texture's own alpha
+     * by it (GlToolkit.setColourOp, GL_MODULATE).
+     */
+    private static float opacity(int alpha) {
+        return (255 - alpha) / 255.0F;
     }
 
     /**
