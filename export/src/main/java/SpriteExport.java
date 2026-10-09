@@ -15,6 +15,7 @@ import javax.imageio.ImageIO;
 
 /**
  * Writes every sprite out of the cache as one PNG for each frame, each frame on its whole canvas,
+ * the PNG of a sprite of one frame named by the sprite alone and each of several by its number too,
  * with the names the client asks for sprites by, and checks each frame against the client.
  */
 public final class SpriteExport {
@@ -47,6 +48,11 @@ public final class SpriteExport {
 
     private static final String NAMES = "names.json";
 
+    private static final String PNG = ".png";
+
+    /** What comes between a sprite's name and the number of a frame, where it has several. */
+    private static final String FRAME_SEPARATOR = "_";
+
     public static void main(String[] arguments) throws Exception {
         var parsed = CommandLine.parse("exportSprites", new Args(), arguments);
 
@@ -71,7 +77,7 @@ public final class SpriteExport {
                 empty++;
             } else {
                 var sprite = read.get();
-                var written = write(args.out.resolve(Integer.toString(id)), sprite);
+                var written = write(args.out, Integer.toString(id), sprite);
                 check.compare(id, written);
                 sprite.name().ifPresent(name -> names.put(name, id));
                 sprites++;
@@ -92,18 +98,55 @@ public final class SpriteExport {
     }
 
     /**
-     * Writes each frame of a sprite to `<n>.png` in its directory, and reads each back as it was
-     * written, for the check.
+     * Writes a sprite of one frame to `<name>.png` and a sprite of several to `<name>_<n>.png` for
+     * each frame, after it removes what an earlier export left for the same sprite, and reads each
+     * frame back as it was written, for the check.
      */
-    private static List<BufferedImage> write(Path directory, SpriteArchive sprite) throws IOException {
-        Files.createDirectories(directory);
+    private static List<BufferedImage> write(Path out, String name, SpriteArchive sprite) throws IOException {
+        removeEarlier(out, name);
+        var frames = sprite.frames();
         var written = new ArrayList<BufferedImage>();
-        for (var index = 0; index < sprite.frames().size(); index++) {
-            var file = directory.resolve(index + ".png");
-            ImageIO.write(image(sprite.frames().get(index)), "png", file.toFile());
+        for (var index = 0; index < frames.size(); index++) {
+            var file = out.resolve(frames.size() == 1 ? name + PNG : name + FRAME_SEPARATOR + index + PNG);
+            ImageIO.write(image(frames.get(index)), "png", file.toFile());
             written.add(ImageIO.read(file.toFile()));
         }
         return written;
+    }
+
+    /**
+     * Removes the files of a sprite that an earlier export wrote into the same directory: its one
+     * file, the files of its frames, and `<name>/<n>.png`, the older layout of the export's sprites.
+     * The sprite can have a different number of frames in another cache, so each form is removed.
+     */
+    private static void removeEarlier(Path out, String name) throws IOException {
+        Files.deleteIfExists(out.resolve(name + PNG));
+        try (var files = Files.newDirectoryStream(out, name + FRAME_SEPARATOR + "*" + PNG)) {
+            for (var file : files) {
+                if (isFrameOf(name, file.getFileName().toString())) {
+                    Files.delete(file);
+                }
+            }
+        }
+
+        var directory = out.resolve(name);
+        if (Files.isDirectory(directory)) {
+            try (var files = Files.newDirectoryStream(directory, "*" + PNG)) {
+                for (var file : files) {
+                    Files.delete(file);
+                }
+            }
+            Files.delete(directory);
+        }
+    }
+
+    /**
+     * Whether a file is a frame of the sprite of a name, `<name>_<n>.png`, and not the file of
+     * another sprite whose name starts the same way.
+     */
+    private static boolean isFrameOf(String name, String file) {
+        var index = file.substring(name.length() + FRAME_SEPARATOR.length(), file.length() - PNG.length());
+        return !index.isEmpty() && index.chars().allMatch(Character::isDigit);
     }
 
     /**

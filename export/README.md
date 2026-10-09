@@ -677,8 +677,14 @@ draws its interfaces, icons, cursors, map furniture and fonts with. Without `--o
 is written to `export/build/sprites`, and `--cache` works as it does for a model. `--sprite`
 writes only the sprites it names, and can be given more than once.
 
-Each frame of a sprite is written as `<id>/<n>.png`, where `n` is its place in the sprite from
-0, which is the index the client uses. The PNG is the frame on its whole canvas, so it holds
+A sprite of one frame is written as `<id>.png`. Each frame of a sprite of several frames is
+written as `<id>_<n>.png`, where `n` is its place in the sprite from 0, which is the index the
+client uses. Most sprites have one frame: in this cache 7,867 of the 7,912 sprites have one, and
+the other 45 have 7,037 frames between them. An id is only digits, so a file name that ends in `_`
+and digits is always a frame of a sprite of several frames. All the files are in one directory
+with `names.json`. Before the tool writes a sprite, it removes the files of that sprite that an
+earlier run left in the directory, in either form and in the older form `<id>/<n>.png`, so that
+the frames on disk are always those of the cache it read. The PNG is the frame on its whole canvas, so it holds
 everything the client needs to draw it, and no other file describes it. The client stores only
 the rectangle of a frame that it draws, with its left and top margins on a canvas that all the
 frames of a sprite share (`IndexedImage.load`), and draws a frame at a point by putting the
