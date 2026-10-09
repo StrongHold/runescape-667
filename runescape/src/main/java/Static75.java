@@ -24,7 +24,7 @@ public final class Static75 {
     }
 
     @OriginalMember(owner = "client!ch", name = "b", descriptor = "(B)V")
-    public static void method6239() {
+    public static void applyLowDetailPreset() {
         ClientOptions.instance.update(1, ClientOptions.instance.animateBackgroundDefault);
         ClientOptions.instance.update(1, ClientOptions.instance.animateBackground);
         ClientOptions.instance.update(1, ClientOptions.instance.removeRoofs);

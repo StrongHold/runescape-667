@@ -78,7 +78,7 @@ public final class Static519 {
         glScore = (int) ((float) glScore * 1.1F);
         d3dScore = (int) ((float) d3dScore * 1.1F);
         if (sseScore > d3dScore && sseScore > glScore) {
-            return Static611.method8228(sseScore);
+            return Static611.applyPresetForScore(sseScore);
         } else if (d3dScore > glScore) {
             return Static399.autosetupHardware(ToolkitType.D3D, d3dScore);
         } else {

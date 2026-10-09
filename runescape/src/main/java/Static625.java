@@ -16,20 +16,20 @@ public final class Static625 {
         @Pc(10) byte local10;
         if (GameShell.maxmemory < 96) {
             local10 = 1;
-            Static468.method7643();
+            Static468.applyMinDetailPreset();
         } else {
             @Pc(17) int local17 = Static65.profileCpu();
             if (local17 <= 100) {
-                Static395.method9162();
+                Static395.applyHighDetailPreset();
                 local10 = 4;
             } else if (local17 <= 500) {
                 local10 = 3;
-                Static133.method2316();
+                Static133.applyMediumDetailPreset();
             } else if (local17 > 1000) {
-                Static468.method7643();
+                Static468.applyMinDetailPreset();
                 local10 = 1;
             } else {
-                Static75.method6239();
+                Static75.applyLowDetailPreset();
                 local10 = 2;
             }
         }

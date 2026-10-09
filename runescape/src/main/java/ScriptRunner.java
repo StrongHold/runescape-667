@@ -7633,7 +7633,7 @@ public final class ScriptRunner {
                 }
 
                 if (opcode == AUTOSETUP_SETHIGH) {
-                    Static395.method9162();
+                    Static395.applyHighDetailPreset();
                     MainLogicManager.mapBuild();
                     ClientOptions.save();
                     Static503.sentPreferences = false;
@@ -7641,7 +7641,7 @@ public final class ScriptRunner {
                 }
 
                 if (opcode == AUTOSETUP_SETMEDIUM) {
-                    Static133.method2316();
+                    Static133.applyMediumDetailPreset();
                     MainLogicManager.mapBuild();
                     ClientOptions.save();
                     Static503.sentPreferences = false;
@@ -7649,7 +7649,7 @@ public final class ScriptRunner {
                 }
 
                 if (opcode == AUTOSETUP_SETLOW) {
-                    Static75.method6239();
+                    Static75.applyLowDetailPreset();
                     MainLogicManager.mapBuild();
                     ClientOptions.save();
                     Static503.sentPreferences = false;
@@ -7657,7 +7657,7 @@ public final class ScriptRunner {
                 }
 
                 if (opcode == AUTOSETUP_SETMIN) {
-                    Static468.method7643();
+                    Static468.applyMinDetailPreset();
                     MainLogicManager.mapBuild();
                     ClientOptions.save();
                     Static503.sentPreferences = false;

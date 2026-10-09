@@ -14,7 +14,7 @@ public final class Static395 {
     public static final int[] statUpdates = new int[32];
 
     @OriginalMember(owner = "client!mha", name = "c", descriptor = "(I)V")
-    public static void method9162() {
+    public static void applyHighDetailPreset() {
         ClientOptions.instance.update(1, ClientOptions.instance.animateBackgroundDefault);
         ClientOptions.instance.update(1, ClientOptions.instance.animateBackground);
         ClientOptions.instance.update(2, ClientOptions.instance.removeRoofs);

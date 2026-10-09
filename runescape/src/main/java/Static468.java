@@ -83,7 +83,7 @@ public final class Static468 {
     }
 
     @OriginalMember(owner = "client!op", name = "a", descriptor = "(ZZ)V")
-    public static void method7643() {
+    public static void applyMinDetailPreset() {
         ClientOptions.instance.update(0, ClientOptions.instance.animateBackgroundDefault);
         ClientOptions.instance.update(0, ClientOptions.instance.animateBackground);
         ClientOptions.instance.update(1, ClientOptions.instance.removeRoofs);

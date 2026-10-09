@@ -12,16 +12,16 @@ public final class Static399 {
         @Pc(27) byte local27;
         if (score > 20000) {
             local27 = 4;
-            Static395.method9162();
+            Static395.applyHighDetailPreset();
         } else if (score > 10000) {
-            Static133.method2316();
+            Static133.applyMediumDetailPreset();
             local27 = 3;
         } else if (score <= 5000) {
             local27 = 1;
-            Static468.method7643();
+            Static468.applyMinDetailPreset();
         } else {
             local27 = 2;
-            Static75.method6239();
+            Static75.applyLowDetailPreset();
         }
         if (toolkit != ClientOptions.instance.toolkit.getValue()) {
             ClientOptions.instance.update(toolkit, ClientOptions.instance.toolkitDefault);

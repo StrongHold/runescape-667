@@ -11,7 +11,7 @@ public final class Static133 {
     public static int publicChatFilter = 0;
 
     @OriginalMember(owner = "client!ed", name = "a", descriptor = "(I)V")
-    public static void method2316() {
+    public static void applyMediumDetailPreset() {
         ClientOptions.instance.update(1, ClientOptions.instance.animateBackgroundDefault);
         ClientOptions.instance.update(1, ClientOptions.instance.animateBackground);
         ClientOptions.instance.update(2, ClientOptions.instance.removeRoofs);
