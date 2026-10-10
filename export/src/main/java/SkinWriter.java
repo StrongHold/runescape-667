@@ -146,7 +146,9 @@ public final class SkinWriter {
     /**
      * Adds an animation that moves every joint through the frames of a clip, each frame from the
      * moment the client moves on to it. A channel whose value never changes through the clip is
-     * left out, as the node already stands at it.
+     * left out, as the node already stands at it, and an animation left with no channel is not
+     * written at all, as it moves nothing (water wheel 36869 plays sequence 1729, which turns label
+     * 0, on a model with no labelled vertex) and glTF holds no animation without a channel.
      *
      * @param framePoses the transform of each label in each target, in the order the targets are
      *     numbered.
@@ -194,6 +196,9 @@ public final class SkinWriter {
             }
         }
 
+        if (channels.isEmpty()) {
+            return;
+        }
         gltf.animation(name, samplers, channels, AnimationWriter.sequenceExtras(clip, frameExtras(clip, frames, extras)));
     }
 
