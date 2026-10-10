@@ -24,7 +24,7 @@ import java.util.Set;
 /**
  * The NPC types ({@code NPCTypeList}): every field of the type under the name the client gives it,
  * as the decoder leaves it, with the colour and texture swaps as pairs, the tint as one list, the
- * base animation set as {@code bas} and the type's own id as {@code npc}.
+ * base animation set as {@code bas}. The type's own id is left out, as the file's name gives it.
  *
  * <p>The type list's {@code postDecode} gives a type that names no models an empty list, which the
  * file holds anyway, and {@code lowPriorityAttackOps} a default where the entry leaves it -1: 1 in
@@ -103,11 +103,11 @@ public final class NpcKind implements ConfigKind<NPCType> {
         .code(249, "params");
 
     private static final Map<String, String> UNWRITTEN = Map.of(
-        "typeList", "The type list the NPC belongs to."
+        "typeList", "The type list the NPC belongs to.",
+        "id", "The NPC's own id, which the file's name gives."
     );
 
     private static final Map<String, String> WRITTEN_AS = Map.ofEntries(
-        Map.entry("id", "npc"),
         Map.entry("op", "ops"),
         Map.entry("basId", "bas"),
         Map.entry("recol_s", "recolours"),
@@ -182,7 +182,6 @@ public final class NpcKind implements ConfigKind<NPCType> {
     public Map<String, Object> json(Decoded<NPCType> decoded) {
         var type = decoded.decoded();
         var data = new LinkedHashMap<String, Object>();
-        data.put("npc", type.id);
         data.put("name", type.name);
         data.put("size", type.size);
         data.put("bas", type.basId);

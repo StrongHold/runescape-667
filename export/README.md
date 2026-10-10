@@ -10,6 +10,27 @@ Blender, three.js and most other tools read it as it is. Only the vertex data an
 interfaces with are written as one PNG for each frame, its fonts as BDF text files, and the mini
 menu's style and the hit splats as JSON, all described below.
 
+## The layout
+
+Every file of the export has a fixed place under `export/build`, which is the same for every
+file of its kind:
+
+- `textures/<id>.png`, with `metrics.json`, `water/`, `particle/` and `light/` beside them;
+- `models/<id>.gltf` and `sequences/<id>.gltf`, the model and sequence libraries, each with its
+  `.bin`, and `sequences/<id>.json`, each sequence's type;
+- `locs/<id>.json`, `npcs/<id>.json` and `bas/<id>.json`, and a directory of the same kind for
+  every other config type (see "Writing every config type");
+- `mapsquares/<x>_<z>.gltf`, the ground, with `<x>_<z>.json`, the description, beside it;
+- `sprites/`, `fonts/`, `hashes/`, and `skins.json`, `minimenu.json`, `hitmarks.json`,
+  `combatstyles.json` and `skyboxes.json`.
+
+A reader knows this layout, so a JSON file names no file and no directory. A reference in the
+data is the id of the thing it refers to, such as a location's `models`, and the layout says
+where that thing is. A JSON file also holds nothing that its name or the format gives: an entry's
+own id is its file's name, or its place in a list, and a map square's coordinates are its file's
+name. Only glTF names files, by a URI relative to the file, as glTF finds its buffers and images
+in that way: the `.bin` beside it, and each texture as `../textures/<id>.png`.
+
     ./gradlew :export:exportModel --args="--model 32421"
     ./gradlew :export:exportModel --args="--model 8 --out /tmp/hood.gltf"
     ./gradlew :export:exportModel --args="--model 8 --cache /path/to/another/cache"
@@ -98,7 +119,8 @@ effector types, each list indexed by the type's id with null where the cache has
 public field of the client's `ParticleEmitterType` and `ParticleEffectorType` by its name, with
 the values the client derives after decoding, such as the colour ranges, fade steps and
 durations, so an engine can run the client's own emitter and particle arithmetic
-(`ParticleEmitter`, `MovingParticle`) without reading the cache.
+(`ParticleEmitter`, `MovingParticle`) without reading the cache. An effector's own `id` is left
+out, as its place in the list gives it.
 
 Under `light/`, `flicker.json` holds the 2048 values of noise the client's lights flicker by
 (`EnvironmentLight.generateNoise` at a persistence of 0.4), out of 4096. A light whose flicker
@@ -115,9 +137,9 @@ model library reads from it how each texture blends, how it tints its faces and 
 them, for a texture a type retextures a face to as for any other. Every export writes it where the
 library lacks it.
 
-Every file written here refers to its textures by a relative path, such as `../textures/128.png`,
-and carries no copy of them. The textures live in one directory, `export/build/textures` unless
-`--textures` names another, as one PNG for each texture id. An engine then loads each texture
+A glTF file written here gives each texture as an image by a URI relative to the file, such as
+`../textures/128.png`, and carries no copy of it. The textures live in one directory,
+`export/build/textures` unless `--textures` names another, as one PNG for each texture id. An engine then loads each texture
 once, however many models, NPCs and map squares use it, and a texture can be replaced by a better one
 by replacing one file.
 
@@ -219,7 +241,6 @@ animation that carries the extension `RS_client_frames`:
     }
   ],
   "loopOffset": 8,
-  "sequence": 3511,
   "tweened": true,
   "version": 1
 }
@@ -241,8 +262,8 @@ knows nothing of the extension. A frame turns and scales a label about the centr
 it names in the posed model, so no node's transform is right for every model: the channels are
 worked out on the model the sequence is first written for, and are exact for that model alone. A
 sequence that moves no vertex has one channel that holds its first node still, as glTF asks every
-animation for a channel. A map square's description names both libraries by `models` and
-`sequences`, relative to it, as it names `locs`.
+animation for a channel. A location's type names its models and sequences by id, and a reader
+finds them in the libraries by the layout.
 
 
 ## Writing an NPC
@@ -265,7 +286,8 @@ than one, recoloured, retextured and tinted, lit under the type's `ambient` plus
 plus 850, posed by the set's sequences, and scaled by `scaleH` across and `scaleV` up once posed.
 
 The JSON file holds every field of the type under the name the client gives it, so that nothing
-the client decodes is lost: its `npc` id, `name`, `size` in tiles and base animation set `bas`;
+the client decodes is lost: its `name`, `size` in tiles and base animation set `bas` (its own id
+is the file's name);
 whether the mouse can pick it, `interactive`; its five `ops`, the options its data sets on the
 mini menu in the client's order, with null for an empty slot (the client's type list adds a sixth,
 Examine, to every type, and the data cannot change it, so it is not written); and how the client
@@ -529,7 +551,7 @@ the client builds that is the same wherever the location stands: the shape's mes
 where the type says so, and recoloured and retextured. The client turns, scales, moves and bends
 the model after that, and all of it depends on the placement, so none of it is in the mesh. The
 type's data in the JSON file carries what that needs, along with the
-type's `loc` id, its `name` and its `shapes`: the type's `resize`, `offset`, `translate`, `hillchange` and
+type's `name` and its `shapes`: the type's `resize`, `offset`, `translate`, `hillchange` and
 `hillskew`, whether the mesh is `mirrored`, and the `sequences` the location plays, their weights
 and whether the client starts at a random frame. They also carry the type's `sizeTiles`, its size in tiles as
 width and length before any turn, and whether it casts a `shadow`: when the client builds a map
@@ -594,8 +616,11 @@ flicker, with its level and flicker in the node's `extras`.
 
 ### The description
 
-The description names the ground file and the library, and lists every placement in the client's
-units: 512 to a tile, x east, y down and z north, which the glTF frame takes as (x, -y, -z) over
+The description names none of its files: its ground is the glTF file of the same name beside it,
+and the libraries of locations, models, sequences and textures are where the layout puts them. Nor
+does it hold what its name or the format gives: the map square's coordinates, which its name
+gives (map square x_z starts at tile 64x, 64z), its 64 tiles across, and the 512 units to a tile.
+It lists every placement in the client's units: 512 to a tile, x east, y down and z north, which the glTF frame takes as (x, -y, -z) over
 512. Each placement names its `loc`, the `shape` the client builds its model as, its `rotation`,
 its `level`, the `virtualLevel` whose ground it is bent against, whether it is `underwater`, where
 it stands as `x`, `y` and `z` from the map square's south west corner, and what the client keeps
@@ -633,7 +658,8 @@ level below.
 
 The description also holds `heights`: the height of every tile corner of each level, and of the
 bed under the water where there is one, from eight tiles before the map square to eight tiles
-after, which is what a location is bent against. A large location on the edge of the map square
+after, which is what a location is bent against: 81 corners by 81, `[x][z]`, the first eight tiles
+south and west of the map square's corner. A large location on the edge of the map square
 reaches well into the neighbour.
 
 An importer places a location by these steps, in order, in the client's units:

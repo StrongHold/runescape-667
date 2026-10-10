@@ -187,7 +187,6 @@ public final class SequenceLibrary {
 
         var described = new LinkedHashMap<String, Object>();
         described.put("version", VERSION);
-        described.put("sequence", sequence.id);
         described.put("tweened", sequence.tweened);
         described.put("loopOffset", sequence.loopOffset);
         var groups = new LinkedHashMap<String, Object>();

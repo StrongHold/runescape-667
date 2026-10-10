@@ -139,11 +139,11 @@ public final class LocKind implements ConfigKind<LocType> {
         .code(249, "params");
 
     private static final Map<String, String> UNWRITTEN = Map.of(
-        "typeList", "The type list the location belongs to."
+        "typeList", "The type list the location belongs to.",
+        "id", "The location's own id, which the file's name gives."
     );
 
     private static final Map<String, String> WRITTEN_AS = Map.ofEntries(
-        Map.entry("id", "loc"),
         Map.entry("mirror", "mirrored"),
         Map.entry("resizex", "resize"),
         Map.entry("resizey", "resize"),
@@ -268,7 +268,6 @@ public final class LocKind implements ConfigKind<LocType> {
         var type = decoded.decoded();
         var captured = decoded.captured();
         var extras = new LinkedHashMap<String, Object>();
-        extras.put("loc", type.id);
         extras.put("name", type.name);
         extras.put("shapes", shapes(type));
         extras.put("mirrored", type.mirror);

@@ -15,9 +15,12 @@ import java.util.List;
  * Writes the client's particle emitter and effector types beside the textures, each as the
  * client holds it after decoding: every public field of {@code ParticleEmitterType} and
  * {@code ParticleEffectorType} by its name, with the values {@code postDecode} derives, in a
- * list indexed by the type's id, null where the cache has no type of that id.
+ * list indexed by the type's id, null where the cache has no type of that id. An effector's own
+ * {@code id} is left out, as its place in the list gives it.
  */
 public final class ParticleTypes {
+
+    private static final String OWN_ID_FIELD = "id";
 
     private static final int EMITTER_GROUP = 0;
     private static final int EFFECTOR_GROUP = 1;
@@ -35,7 +38,9 @@ public final class ParticleTypes {
         var effectors = new ArrayList<Object>();
         for (var id : ids(particles, EFFECTOR_GROUP)) {
             pad(effectors, id);
-            effectors.add(PublicFields.of(ParticleEffectorTypeList.get(id)));
+            var fields = PublicFields.of(ParticleEffectorTypeList.get(id));
+            fields.remove(OWN_ID_FIELD);
+            effectors.add(fields);
         }
         Files.writeString(directory.resolve("emitters.json"), Json.write(emitters));
         Files.writeString(directory.resolve("effectors.json"), Json.write(effectors));

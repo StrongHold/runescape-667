@@ -123,12 +123,10 @@ public final class MapSquareExport {
         var root = new LinkedHashMap<String, Object>();
         root.put("name", "mapsquare " + name);
         root.put("children", children);
-        root.put("extras", Map.of("mapSquareX", args.x, "mapSquareZ", args.z,
-            "tileX", args.x * ClientMapSquareReader.TILES_ACROSS, "tileZ", args.z * ClientMapSquareReader.TILES_ACROSS));
         GltfFile.write(out, gltf.document(List.of(gltf.node(root))), gltf.bin());
         System.out.println("wrote " + out.toAbsolutePath().normalize());
 
-        var description = describe(args, square, out, assets);
+        var description = describe(args, square, assets);
         var descriptionFile = out.resolveSibling(name + ".json");
         Files.writeString(descriptionFile, Json.write(description), StandardCharsets.UTF_8);
         System.out.println("wrote " + descriptionFile.toAbsolutePath().normalize());
@@ -196,12 +194,12 @@ public final class MapSquareExport {
     }
 
     /**
-     * The description of the map square: where its files are, the heights its locations are bent
-     * against, and every placement. Every location named is written to the library first, so the
-     * description never names one the library lacks.
+     * The description of the map square: the heights its locations are bent against, and every
+     * placement. Every location named is written to the library first, so the description never
+     * names one the library lacks. It names none of its files: its ground has its name, and the
+     * libraries stand beside the map squares.
      */
-    private static Map<String, Object> describe(Args args, ClientMapSquareReader.MapSquare square, Path ground,
-                                                LocAssets assets) {
+    private static Map<String, Object> describe(Args args, ClientMapSquareReader.MapSquare square, LocAssets assets) {
         var placements = new ArrayList<Map<String, Object>>();
         var parts = new TreeMap<String, Integer>();
         var written = new TreeSet<Integer>();
@@ -225,24 +223,12 @@ public final class MapSquareExport {
         }
 
         var heights = new LinkedHashMap<String, Object>();
-        heights.put("firstTile", -ClientMapSquareReader.HEIGHT_MARGIN_TILES);
         heights.put("levels", nested(square.heights()));
         if (square.underwater() instanceof ClientMapSquareReader.Underwater.Bed bed) {
             heights.put("underwater", nested(bed.heights()));
         }
 
         var description = new LinkedHashMap<String, Object>();
-        description.put("mapSquareX", args.x);
-        description.put("mapSquareZ", args.z);
-        description.put("tileX", args.x * ClientMapSquareReader.TILES_ACROSS);
-        description.put("tileZ", args.z * ClientMapSquareReader.TILES_ACROSS);
-        description.put("tilesAcross", ClientMapSquareReader.TILES_ACROSS);
-        description.put("unitsPerTile", 512);
-        description.put("ground", ground.getFileName().toString());
-        description.put("locs", TextureLibrary.relativeUri(ground, assets.directory()));
-        description.put("models", TextureLibrary.relativeUri(ground, assets.modelDirectory()));
-        description.put("sequences", TextureLibrary.relativeUri(ground, assets.sequenceDirectory()));
-        description.put("textures", TextureLibrary.relativeUri(ground, args.textures.library(null).directory()));
         description.put("heights", heights);
         description.put("flags", nested(square.flags()));
         description.put("floorShadows", nested(square.floorShadows()));

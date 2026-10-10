@@ -65,10 +65,12 @@ public final class LocAssets {
     public Optional<Path> file(int id) {
         var file = directory.resolve(id + ".json");
         var type = reader.type(id);
-        if (Files.exists(file)) {
+        if (!buildable(type)) {
+            return Optional.empty();
+        } else if (Files.exists(file)) {
             writeShared(type);
             return Optional.of(file);
-        } else if (buildable(type)) {
+        } else {
             try {
                 Files.createDirectories(directory);
                 Files.writeString(file, Json.write(reader.typeFile(id)), StandardCharsets.UTF_8);
@@ -77,8 +79,6 @@ public final class LocAssets {
             }
             writeShared(type);
             return Optional.of(file);
-        } else {
-            return Optional.empty();
         }
     }
 
@@ -122,20 +122,6 @@ public final class LocAssets {
                 }
             }
         }
-    }
-
-    /**
-     * The directory of the models the locations name.
-     */
-    public Path modelDirectory() {
-        return directory.resolveSibling("models");
-    }
-
-    /**
-     * The directory of the sequences the locations play.
-     */
-    public Path sequenceDirectory() {
-        return directory.resolveSibling("sequences");
     }
 
     /**
