@@ -16,7 +16,8 @@ import javax.imageio.ImageIO;
 /**
  * Writes every sprite out of the cache as one PNG for each frame, each frame on its whole canvas,
  * the PNG of a sprite of one frame named by the sprite alone and each of several by its number too,
- * with the names the client asks for sprites by, and checks each frame against the client.
+ * with the names the client asks for sprites by and the hash of every sprite's name, and checks
+ * each frame against the client.
  */
 public final class SpriteExport {
 
@@ -48,6 +49,8 @@ public final class SpriteExport {
 
     private static final String NAMES = "names.json";
 
+    private static final String HASHES = "hashes.json";
+
     private static final String PNG = ".png";
 
     /** What comes between a sprite's name and the number of a frame, where it has several. */
@@ -68,6 +71,8 @@ public final class SpriteExport {
         Files.createDirectories(args.out);
 
         var names = new TreeMap<String, Object>();
+        var hashes = new TreeMap<String, Object>();
+        var nameHashes = reader.nameHashes(args.where.cache());
         var sprites = 0;
         var frames = 0;
         var empty = 0;
@@ -80,6 +85,9 @@ public final class SpriteExport {
                 var written = write(args.out, Integer.toString(id), sprite);
                 check.compare(id, written);
                 sprite.name().ifPresent(name -> names.put(name, id));
+                if (nameHashes != null) {
+                    hashes.put(Integer.toString(id), nameHashes[id]);
+                }
                 sprites++;
                 frames += sprite.frames().size();
             }
@@ -87,6 +95,7 @@ public final class SpriteExport {
 
         if (args.sprites.isEmpty()) {
             Files.writeString(args.out.resolve(NAMES), Json.write(names), StandardCharsets.UTF_8);
+            Files.writeString(args.out.resolve(HASHES), Json.write(hashes), StandardCharsets.UTF_8);
         }
 
         System.out.println("wrote " + sprites + " sprites of " + frames + " frames to " + args.out.toAbsolutePath().normalize()

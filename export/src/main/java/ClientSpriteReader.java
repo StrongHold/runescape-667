@@ -78,6 +78,16 @@ public final class ClientSpriteReader {
         return Cache.groupsOf(Cache.index(cache, Js5Archive.SPRITES));
     }
 
+    /**
+     * The hash of each group's name that the archive's index keeps, by group id, or null where the
+     * index keeps no names. The client asks for a group by the hash of its lower case name in
+     * Windows-1252 ({@code js5.getgroupid}, {@code StringTools.intHashCp1252}), which for a name in
+     * ASCII is Java's {@code String.hashCode}.
+     */
+    public int[] nameHashes(File cache) throws Exception {
+        return Cache.index(cache, Js5Archive.SPRITES).groupNames;
+    }
+
     /** The name the client asks for a sprite by, where it asks by name. */
     public Optional<String> name(int id) {
         return Optional.ofNullable(names.get(id));

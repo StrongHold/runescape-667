@@ -682,7 +682,7 @@ written as `<id>_<n>.png`, where `n` is its place in the sprite from 0, which is
 client uses. Most sprites have one frame: in this cache 7,867 of the 7,912 sprites have one, and
 the other 45 have 7,037 frames between them. An id is only digits, so a file name that ends in `_`
 and digits is always a frame of a sprite of several frames. All the files are in one directory
-with `names.json`. Before the tool writes a sprite, it removes the files of that sprite that an
+with `names.json` and `hashes.json`. Before the tool writes a sprite, it removes the files of that sprite that an
 earlier run left in the directory, in either form and in the older form `<id>/<n>.png`, so that
 the frames on disk are always those of the cache it read. The PNG is the frame on its whole canvas, so it holds
 everything the client needs to draw it, and no other file describes it. The client stores only
@@ -707,6 +707,14 @@ from each name to the sprite's id, and each is written only where the hash finds
 `p11_full`, `p12_full` and `b12_full`, among others. The names of the other fonts that `FontNames`
 finds by their hashes, such as `q8_full` and the lobby's `verdana_13pt_regular`, are there as well. Every other sprite the client finds by an id
 that a config type or an interface holds. A run with `--sprite` writes no names.
+
+The index keeps a hash of a name for every group, not only for those the client asks for by name,
+and `hashes.json` holds them all: an object from each sprite's id to the hash of its name, a
+signed 32-bit integer. The client hashes the lower case name in Windows-1252
+(`StringTools.intHashCp1252`), which for a name in ASCII is Java's `String.hashCode`. A name is
+not kept in the cache, only its hash, so a name from another source, such as a list of the names
+of another build, can be checked against it: the name is right where its hash is the group's. A
+group whose name is empty has the hash 0. A run with `--sprite` writes no hashes either.
 
 Every frame is checked against the client as it is written. The PNG is read back and must match
 pixel for pixel the canvas the client lays out from the same image (`IndexedImage.toArgb`).
