@@ -536,8 +536,9 @@ places the model's vertices, through the same merge, mirror, scale and turn. The
 texture library, under `particle/`. Each billboard, a sprite the client draws on a face, is resolved
 from its type: the `centre` of its face in the same frame, the `distance` it is pulled towards the
 camera in the client's units, its `halfWidth` and `halfHeight` in those units, its `texture`, its
-`blendMode` (1 by alpha, 2 added, 128 multiplied in), the face's `colour` from the palette, and its
-`alpha` out of 255. The GL toolkit draws each as a square facing the camera at that size, in that
+`blendMode` (1 by alpha, 2 added, 128 multiplied in), the face's `colour` from the palette, its
+`alpha` out of 255, and its `group`, the label by which the frames of a sequence scale, turn and move
+it (transforms 10, 9 and 8, `Mesh.getBillboardGroups`), -1 for none. The GL toolkit draws each as a square facing the camera at that size, in that
 colour, unlit, blended that way (`GlModel.renderBillboards`); the face under a billboard whose type
 hides it is never drawn.
 

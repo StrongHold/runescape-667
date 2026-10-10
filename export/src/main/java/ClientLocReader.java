@@ -38,9 +38,10 @@ public final class ClientLocReader {
     /**
      * Every transform the client may ask of a location's model, so that a copy of the asset can
      * be turned, scaled, moved and bent as the client does, plus the functions that keep it
-     * unlit for the export to read.
+     * unlit for the export to read, and the groups of its billboards (0x400), which the export
+     * writes.
      */
-    public static final int EVERY_FUNCTION = 0x1F01F | 0x4000 | 0x8000 | 0x80000 | 0x800 | 0x10000;
+    public static final int EVERY_FUNCTION = 0x1F01F | 0x4000 | 0x8000 | 0x80000 | 0x800 | 0x10000 | 0x400;
 
     private static final int FIRST_FULL_SCALE_VERSION = 13;
     private static final int AMBIENT_BASE = 64;

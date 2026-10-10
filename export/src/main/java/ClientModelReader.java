@@ -37,10 +37,10 @@ public final class ClientModelReader {
     private static final int PLANAR_SPACE = 0;
 
     /**
-     * Asks the toolkit to keep the labels of the vertices (0x20) and of the faces (0x180), which
-     * the frames of a sequence move and recolour by.
+     * Asks the toolkit to keep the labels of the vertices (0x20), of the faces (0x180) and of the
+     * billboards (0x400), which the frames of a sequence move, recolour, and scale, turn and move by.
      */
-    private static final int LABELS = 0x20 | 0x180;
+    private static final int LABELS = 0x20 | 0x180 | 0x400;
 
     /**
      * Leaves textures on. Feature 0x40 is the low detail setting that drops every texture the
