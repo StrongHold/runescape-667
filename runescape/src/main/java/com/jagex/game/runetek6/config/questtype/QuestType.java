@@ -21,7 +21,7 @@ public final class QuestType {
     public int[] anIntArray429;
 
     @OriginalMember(owner = "client!la", name = "h", descriptor = "[[I")
-    public int[][] anIntArrayArray137;
+    public int[][] progressVarbits;
 
     @OriginalMember(owner = "client!la", name = "j", descriptor = "Lclient!av;")
     public IterableHashTable params;
@@ -48,16 +48,16 @@ public final class QuestType {
     public int[] anIntArray434;
 
     @OriginalMember(owner = "client!la", name = "s", descriptor = "[I")
-    public int[] anIntArray435;
+    public int[] requiredQuests;
 
     @OriginalMember(owner = "client!la", name = "r", descriptor = "[[I")
-    public int[][] anIntArrayArray138;
+    public int[][] progressVarps;
 
     @OriginalMember(owner = "client!la", name = "b", descriptor = "[I")
     public int[] anIntArray436;
 
     @OriginalMember(owner = "client!la", name = "q", descriptor = "[[I")
-    public int[][] anIntArrayArray139;
+    public int[][] requiredStats;
 
     @OriginalMember(owner = "client!la", name = "n", descriptor = "Ljava/lang/String;")
     public String name;
@@ -80,19 +80,19 @@ public final class QuestType {
             this.sortedName = packet.gjstr2();
         } else if (code == 3) {
             @Pc(29) int local29 = packet.g1();
-            this.anIntArrayArray138 = new int[local29][3];
+            this.progressVarps = new int[local29][3];
             for (@Pc(36) int local36 = 0; local36 < local29; local36++) {
-                this.anIntArrayArray138[local36][0] = packet.g2();
-                this.anIntArrayArray138[local36][1] = packet.g4();
-                this.anIntArrayArray138[local36][2] = packet.g4();
+                this.progressVarps[local36][0] = packet.g2();
+                this.progressVarps[local36][1] = packet.g4();
+                this.progressVarps[local36][2] = packet.g4();
             }
         } else if (code == 4) {
             @Pc(29) int local29 = packet.g1();
-            this.anIntArrayArray137 = new int[local29][3];
+            this.progressVarbits = new int[local29][3];
             for (@Pc(36) int local36 = 0; local36 < local29; local36++) {
-                this.anIntArrayArray137[local36][0] = packet.g2();
-                this.anIntArrayArray137[local36][1] = packet.g4();
-                this.anIntArrayArray137[local36][2] = packet.g4();
+                this.progressVarbits[local36][0] = packet.g2();
+                this.progressVarbits[local36][1] = packet.g4();
+                this.progressVarbits[local36][2] = packet.g4();
             }
         } else if (code == 5) {
             packet.g2();
@@ -114,16 +114,16 @@ public final class QuestType {
             packet.g4();
         } else if (code == 13) {
             @Pc(29) int local29 = packet.g1();
-            this.anIntArray435 = new int[local29];
+            this.requiredQuests = new int[local29];
             for (@Pc(36) int local36 = 0; local36 < local29; local36++) {
-                this.anIntArray435[local36] = packet.g2();
+                this.requiredQuests[local36] = packet.g2();
             }
         } else if (code == 14) {
             @Pc(29) int local29 = packet.g1();
-            this.anIntArrayArray139 = new int[local29][2];
+            this.requiredStats = new int[local29][2];
             for (@Pc(36) int local36 = 0; local36 < local29; local36++) {
-                this.anIntArrayArray139[local36][0] = packet.g1();
-                this.anIntArrayArray139[local36][1] = packet.g1();
+                this.requiredStats[local36][0] = packet.g1();
+                this.requiredStats[local36][1] = packet.g1();
             }
         } else if (code == 15) {
             packet.g2();

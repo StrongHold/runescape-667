@@ -1,7 +1,8 @@
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
-import com.jagex.game.runetek6.config.bastype.BASType;
 import com.jagex.game.runetek6.config.npctype.NPCType;
+import type.entity.BasKind;
+import type.entity.NpcKind;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -24,12 +25,6 @@ import java.util.Map;
  * is checked against.
  */
 public final class NpcExport {
-
-    /**
-     * How many of the options on the mini menu a type's data can set (`NPCType.decode`, opcodes 30
-     * to 34 and 150 to 154).
-     */
-    private static final int OPTION_SLOTS = 5;
 
     private static final String SHADOW_NODE = "spot shadow";
 
@@ -102,14 +97,17 @@ public final class NpcExport {
     private static void write(Args args, ClientNpcReader reader, NPCType type) throws Exception {
         var typeFile = args.npcs.resolve(type.id + ".json");
         Files.createDirectories(args.npcs);
-        Files.writeString(typeFile, Json.write(typeData(type)), StandardCharsets.UTF_8);
+        var archives = new CacheArchives(args.where.cache());
+        Files.writeString(typeFile, Json.write(TypeFiles.of(args.where.cache(), new NpcKind(archives), type.id)),
+            StandardCharsets.UTF_8);
         System.out.println("wrote " + typeFile.toAbsolutePath().normalize());
         var bas = reader.bas(type);
         if (bas.isPresent()) {
             var basFile = args.npcs.resolveSibling("bas").resolve(type.basId + ".json");
             if (!Files.exists(basFile)) {
                 Files.createDirectories(basFile.getParent());
-                Files.writeString(basFile, Json.write(basData(bas.get())), StandardCharsets.UTF_8);
+                Files.writeString(basFile, Json.write(TypeFiles.of(args.where.cache(), new BasKind(archives), type.basId)),
+                    StandardCharsets.UTF_8);
                 System.out.println("wrote " + basFile.toAbsolutePath().normalize());
             }
         }
@@ -253,147 +251,6 @@ public final class NpcExport {
         GltfFile.write(file, gltf.document(name), gltf.bin());
         System.out.println("wrote " + file.toAbsolutePath().normalize());
         System.out.println("  " + name + ", " + head.vertexCount + " vertices, " + result.faces() + " faces");
-    }
-
-    /**
-     * Every field of the NPC type, under the name the client gives it: the models it names, the
-     * colour and texture swaps, the translations, the scales, the lighting and the tint its model is
-     * built with, and its base animation set by id, {@code bas}, which the set library holds.
-     */
-    private static Map<String, Object> typeData(NPCType type) {
-        var data = new LinkedHashMap<String, Object>();
-        data.put("npc", type.id);
-        data.put("name", type.name);
-        data.put("size", type.size);
-        if (type.basId != -1) {
-            data.put("bas", type.basId);
-        }
-        data.put("interactive", type.interactive);
-        data.put("ops", TypeJson.options(type.op, OPTION_SLOTS));
-        data.put("pickSizeShift", type.pickSizeShift);
-        data.put("quickPick", type.quickPick);
-        data.put("models", TypeJson.ints(type.models));
-        data.put("headModels", TypeJson.ints(type.headModels));
-        data.put("recolours", TypeJson.swaps(type.recol_s, type.recol_d));
-        data.put("recolourPalette", TypeJson.bytes(type.recol_d_palette));
-        data.put("retextures", TypeJson.swaps(type.retex_s, type.retex_d));
-        data.put("translations", translations(type));
-        data.put("scaleH", type.scaleH);
-        data.put("scaleV", type.scaleV);
-        data.put("ambient", type.ambient);
-        data.put("diffusion", type.diffusion);
-        data.put("tint", List.of((int) type.colourHue, (int) type.colourSaturation, (int) type.colourLightness,
-            type.colourScale & 0xFF));
-        data.put("hasShadow", type.hasShadow);
-        data.put("shadowInnerColour", type.shadowInnerColour & 0xFFFF);
-        data.put("shadowOuterColour", type.shadowOuterColour & 0xFFFF);
-        data.put("shadowInnerAlpha", (int) type.shadowInnerAlpha);
-        data.put("shadowOuterAlpha", (int) type.shadowOuterAlpha);
-        data.put("height", type.height);
-        data.put("spawnDirection", (int) type.spawnDirection);
-        data.put("yawSpeed", type.yawSpeed);
-        data.put("crawl", type.crawl);
-        data.put("movementCapabilities", (int) type.movementCapabilities);
-        data.put("combatLevel", type.combatLevel);
-        data.put("displayOnMiniMap", type.displayOnMiniMap);
-        data.put("mapElement", type.mapElement);
-        data.put("headIcon", type.headIcon);
-        data.put("healthBarSprite", type.healthBarSprite);
-        data.put("timerbarSprite", type.timerbarSprite);
-        data.put("mobilisingArmiesIcon", type.mobilisingArmiesIcon);
-        data.put("renderHighPriority", type.renderHighPriority);
-        data.put("renderLowPriority", type.renderLowPriority);
-        data.put("lowPriorityAttackOps", (int) type.lowPriorityAttackOps);
-        data.put("isFollower", type.isFollower);
-        data.put("cursor1Op", type.cursor1Op);
-        data.put("cursor1", type.cursor1);
-        data.put("cursor2Op", type.cursor2Op);
-        data.put("cursor2", type.cursor2);
-        data.put("attackCursor", type.attackCursor);
-        data.put("readySound", type.readySound);
-        data.put("crawlSound", type.crawlSound);
-        data.put("walkSound", type.walkSound);
-        data.put("runSound", type.runSound);
-        data.put("soundRangeMin", type.soundRangeMin);
-        data.put("soundRangeMax", type.soundRangeMax);
-        data.put("soundVolume", type.soundVolume);
-        data.put("soundRateMin", type.soundRateMin);
-        data.put("soundRateMax", type.soundRateMax);
-        data.put("vorbis", type.vorbis);
-        data.put("multinpcVarbit", type.multinpcVarbit);
-        data.put("multinpcVarp", type.multinpcVarp);
-        data.put("multinpcs", TypeJson.ints(type.multinpcs));
-        data.put("quests", TypeJson.ints(type.quests));
-        data.put("params", TypeJson.params(type.params));
-        return data;
-    }
-
-    /**
-     * Every field of a base animation set, under the name the client gives it, as the set library
-     * holds it, one file for each set however many NPCs share it: the sequences it names, which are
-     * in the sequence library, and {@code animateShadow}, whether the client draws the shadow under
-     * the NPC at all.
-     */
-    private static Map<String, Object> basData(BASType set) {
-        var data = new LinkedHashMap<String, Object>();
-        data.put("ready", set.ready);
-        data.put("readyTurnCw", set.readyTurnCw);
-        data.put("readyTurnCcw", set.readyTurnCcw);
-        data.put("readyAnimations", TypeJson.ints(set.readyAnimations));
-        data.put("readyAnimationWeights", TypeJson.ints(set.readyAnimationWeights));
-        data.put("walk", set.walk);
-        data.put("walkTurnCw", set.walkTurnCw);
-        data.put("walkTurnCcw", set.walkTurnCcw);
-        data.put("walkFollowTurn180", set.walkFollowTurn180);
-        data.put("walkFollowTurnCw", set.walkFollowTurnCw);
-        data.put("walkFollowTurnCcw", set.walkFollowTurnCcw);
-        data.put("run", set.run);
-        data.put("runTurnCw", set.runTurnCw);
-        data.put("runTurnCcw", set.runTurnCcw);
-        data.put("runFollowTurn180", set.runFollowTurn180);
-        data.put("runFollowTurnCw", set.runFollowTurnCw);
-        data.put("runFollowTurnCcw", set.runFollowTurnCcw);
-        data.put("crawl", set.crawl);
-        data.put("crawlTurnCw", set.crawlTurnCw);
-        data.put("crawlTurnCcw", set.crawlTurnCcw);
-        data.put("crawlFollowTurn180", set.crawlFollowTurn180);
-        data.put("crawlFollowTurnCw", set.crawlFollowTurnCw);
-        data.put("crawlFollowTurnCcw", set.crawlFollowTurnCcw);
-        data.put("animateShadow", set.animateShadow);
-        data.put("hillWidth", set.hillWidth);
-        data.put("hillHeight", set.hillHeight);
-        data.put("hillMaxAngleX", set.hillMaxAngleX);
-        data.put("hillMaxAngleY", set.hillMaxAngleY);
-        data.put("yawAcceleration", set.yawAcceleration);
-        data.put("yawMaxSpeed", set.yawMaxSpeed);
-        data.put("rollAcceleration", set.rollAcceleration);
-        data.put("rollMaxSpeed", set.rollMaxSpeed);
-        data.put("rollTargetAngle", set.rollTargetAngle);
-        data.put("pitchAcceleration", set.pitchAcceleration);
-        data.put("pitchMaxSpeed", set.pitchMaxSpeed);
-        data.put("pitchTargetAngle", set.pitchTargetAngle);
-        data.put("movementAcceleration", set.movementAcceleration);
-        data.put("characterHeight", set.characterHeight);
-        data.put("hitbarSprite", set.hitbarSprite);
-        data.put("timerbarSprite", set.timerbarSprite);
-        data.put("wornTransformations", TypeJson.slots(set.wornTransformations));
-        data.put("maxWornRotation", TypeJson.ints(set.maxWornRotation));
-        data.put("graphicOffsets", TypeJson.slots(set.graphicOffsets));
-        data.put("invObjSlots", TypeJson.ints(set.invObjSlots));
-        return data;
-    }
-
-    /**
-     * How far the type moves each of its models before it merges them, one `[x, y, z]` for each
-     * model, `[0, 0, 0]` for a model it leaves in place.
-     */
-    private static List<List<Integer>> translations(NPCType type) {
-        var list = new ArrayList<List<Integer>>();
-        for (var model = 0; model < type.models.length; model++) {
-            var moved = type.translations == null ? null : type.translations[model];
-            list.add(moved == null ? List.of(0, 0, 0) : TypeJson.ints(moved));
-        }
-        return list;
     }
 
     private NpcExport() {

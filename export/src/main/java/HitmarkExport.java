@@ -6,6 +6,7 @@ import com.jagex.game.runetek6.config.defaults.GraphicsDefaults;
 import com.jagex.game.runetek6.config.hitmarktype.HitmarkType;
 import com.jagex.game.runetek6.config.hitmarktype.HitmarkTypeList;
 import com.jagex.js5.Js5Archive;
+import type.Lists;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -141,8 +142,8 @@ public final class HitmarkExport {
     private static Map<String, Object> defaults(GraphicsDefaults defaults) {
         var fields = new LinkedHashMap<String, Object>();
         fields.put("maxhitmarks", defaults.maxhitmarks);
-        fields.put("hitmarkpos_x", TypeJson.ints(defaults.hitmarkpos_x));
-        fields.put("hitmarkpos_y", TypeJson.ints(defaults.hitmarkpos_y));
+        fields.put("hitmarkpos_x", Lists.ints(defaults.hitmarkpos_x));
+        fields.put("hitmarkpos_y", Lists.ints(defaults.hitmarkpos_y));
         fields.put("npcShouldDisplayChat", defaults.npcShouldDisplayChat);
         fields.put("npcChatTimeout", defaults.npcChatTimeout);
         fields.put("playerShouldDisplayChat", defaults.playerShouldDisplayChat);

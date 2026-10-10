@@ -85,3 +85,9 @@ tasks.register<JavaExec>("exportNameHashes") {
     mainClass = "NameHashExport"
     classpath = sourceSets["main"].runtimeClasspath
 }
+
+tasks.register<JavaExec>("exportTypes") {
+    description = "Writes every entry of every config type the client decodes as a JSON file, with every field its decoder reads under the client's name for it."
+    mainClass = "TypeExport"
+    classpath = sourceSets["main"].runtimeClasspath
+}

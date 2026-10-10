@@ -1,7 +1,8 @@
 # export
 
-Writes models, NPCs, map squares, sprites, fonts, the mini menu's style and the hit splats out of the game's cache
-in a form that other engines can import. Every file is a standard text format where one exists, so that it can be read
+Writes models, NPCs, map squares, sprites, fonts, the mini menu's style, the hit splats and every
+entry of every config type the client decodes out of the game's cache in a form that other engines
+can import. Every file is a standard text format where one exists, so that it can be read
 and compared as text. A model, an NPC or a map square is written as glTF, a `.gltf` JSON file with
 its vertex data in a `.bin` file beside it, which the JSON names by a relative path. Godot 4,
 Blender, three.js and most other tools read it as it is. Only the vertex data and the images
@@ -278,6 +279,12 @@ value it becomes, `recolourPalette`, `translations`, `scaleH`, `scaleV`, `ambien
 `tint` (hue, saturation, lightness and scale) are what the model is built from. The type names its base animation set by id, `bas`, and the set's
 file holds every field of the set under the names the client gives them.
 
+The file holds each field as the decoder leaves it (see "Writing every config type"). `bas` is -1
+for a type with no base animation set. `lowPriorityAttackOps` is -1 where the entry leaves it unset,
+and the client then gives it 1. `membersOps` says which of the five options only a members' world
+offers (codes 150 to 154), and `ignored128` holds the byte that the decoder reads for code 128 and
+drops, or null.
+
 `--baked` also writes the NPC's model as the client builds it into a glTF file of its own, with its
 head beside it as `<file>.head.gltf`, the reference an engine's own building is checked against.
 What follows describes what the client builds, which that file holds and an engine builds.
@@ -545,6 +552,15 @@ pairs of texture ids), `ambient`, `contrast` and `tint` that the meshes are buil
 such as how the location blocks movement and sight, its sounds, its map icon and its `params`, for
 an engine that needs them.
 
+The file holds each field as the decoder leaves it (see "Writing every config type"). `active` is
+the entry's own value, -1 where it is unset, and `interactive` is what the client makes of it.
+`raiseobject` and `dynamic` are the entry's own values, which `postDecode` can change.
+`blockwalk` and `blockrange` are the entry's values: the type list makes both 0 and false for a type
+whose `breakroutefinding` is true. `anim` holds every sequence of the type, -1 included, and
+`animWeights` holds the weights of code 106 as the entry gives them, or null. `membersOps`,
+`animateBackgroundModelShapes` and `animateBackgroundModels` hold what the decoder keeps outside the
+type or skips.
+
 
 ### The environment
 
@@ -730,13 +746,137 @@ blue channels fails 7,820.
     ./gradlew :export:exportNameHashes
 
 The index of an archive keeps a hash of the name of each group, not the name. The tool writes the
-hashes of two archives, the interfaces and the client scripts, to `export/build/hashes/`, unless
-`--out` names another directory: `interfaces.json` and `scripts.json`, each an object from each
+hashes of four archives, the interfaces, the client scripts, the songs and the jingles, to
+`export/build/hashes/`, unless `--out` names another directory: `interfaces.json`,
+`scripts.json`, `songs.json` and `jingles.json`, each an object from each
 group's id to the hash of its name, a signed 32-bit integer, as `sprites/hashes.json` holds the
 sprites' (`StringTools.intHashCp1252`). A name from another source, such as a list of the names of
 another build, is right for a group where its hash is the group's. In this cache the index of the
-client scripts keeps a name for each of its 5,377 groups, and the index of the interfaces keeps
-none, so `interfaces.json` is empty.
+client scripts keeps a name for each of its 5,377 groups, the index of the songs keeps one for each
+of its 1,010 groups, and the indexes of the interfaces and the jingles keep none, so
+`interfaces.json` and `jingles.json` are empty.
+
+
+## Writing every config type
+
+    ./gradlew :export:exportTypes
+    ./gradlew :export:exportTypes --args="--kind objs --kind enums"
+
+The tool writes every entry of every config type that the client decodes, one JSON file for each
+entry, named by its id, in a directory for each type under `export/build/`, unless `--out` names
+another directory. `--kind` writes the named directories only. Each type is read with the client's
+own decoder, one code at a time, as the type's own loop reads it (`type.TypeReader`).
+
+The tool stops in these cases, so that no data of the cache is lost without a report:
+
+- An entry holds a code that the type's kind does not list (`type.Codes`).
+- The decoder leaves bytes of an entry unread.
+- A file leaves out a field of the type, or a field that a code fills. The kind must name each
+  field that no file holds, with the reason (`type.TypeFile`).
+- A field has a name that the deobfuscation did not give, such as `anIntArray436`, and the kind
+  does not give it a key of its own.
+- The type list's `postDecode` changes a field that the kind does not list as worked out or as
+  settled.
+- The config archive holds a group that no kind reads and that is not in the list of the groups
+  that the client does not decode.
+
+The directories and their entries in this cache:
+
+| Directory | Type list | Entries |
+|---|---|---|
+| `npcs` | `NPCTypeList` | 14,377 |
+| `locs` | `LocTypeList` | 62,349 |
+| `objs` | `ObjTypeList` | 22,323 |
+| `sequences` | `SeqTypeList`, beside the glTF files of the sequence library | 15,173 |
+| `spotanims` | `SpotAnimationTypeList` | 2,844 |
+| `bas` | `BASTypeList` | 2,202 |
+| `idks` | `IDKTypeList` | 652 |
+| `flooroverlays` | `FloorOverlayTypeList` | 245 |
+| `floorunderlays` | `FloorUnderlayTypeList` | 166 |
+| `lights` | `LightTypeList` | 15 |
+| `mapelements` | `MapElementTypeList` | 1,107 |
+| `msis` | `MSITypeList` | 100 |
+| `billboards` | `BillboardTypeList` | 182 |
+| `cursors` | `CursorTypeList` | 182 |
+| `quickchatcats` | `QuickChatCatTypeList`, from 32,768 for the global archive | 233 |
+| `quickchatphrases` | `QuickChatPhraseTypeList`, from 32,768 for the global archive | 1,177 |
+| `invs` | `InvTypeList` | 620 |
+| `params` | `ParamTypeList` | 2,091 |
+| `structs` | `StructTypeList` | 2,748 |
+| `enums` | `EnumTypeList` | 5,202 |
+| `quests` | `QuestTypeList` | 195 |
+| `varps` | `VarPlayerTypeListClient` | 2,385 |
+| `varbits` | `VarBitTypeListClient` | 9,930 |
+| `varcs` | `VarcTypeList` | 1,660 |
+| `varclans` | `VarClanTypeList` | 309 |
+| `varclansettings` | `VarClanSettingTypeList` | 2,833 |
+| `defaults` | the map, audio and worn slot groups of the defaults archive | 3 |
+
+The tool also reads the hit splat types, the sky boxes and their spheres, and the particle
+emitters and effectors, to check them, as other exports write them into one file each:
+`hitmarks.json`, `skyboxes.json` and `textures/particle/`. The graphics defaults are in
+`hitmarks.json`.
+
+A file holds every field of the type under the name the client gives it, as the decoder leaves
+it. The rules are these:
+
+- A number is written as the client holds it: a short or a byte is signed, and an id that names
+  nothing is -1. A character, such as a type of a script value, is a string of one character.
+- A table of the client, such as a type's `params`, is an object keyed by its keys as text. Where
+  a table holds a key twice, the client finds the first node, so the object holds that one, and
+  `<field>Shadowed` lists the others as pairs of key and value.
+- Where the type list's `postDecode` works out a field, such as the colour channels of an emitter
+  or the bounds of a map element, the file holds the worked out value. Where `postDecode` gives a
+  default to a field that the entry leaves unset, the file holds the entry's own value, and a
+  reader gives the default as the client does. Each kind's Javadoc names these fields.
+- Where the decoder reads a value and drops it, the file holds the value as `ignored<code>`, for
+  example `ignored128` of an NPC, null where the entry does not hold the code. For a code that gives
+  no value, `ignored<code>` is true where the entry holds the code. The client gives these values
+  no use, so they have no other name.
+- Where the decoder keeps a value outside the type or changes it so that the type cannot give it
+  back, the file holds the value as the entry gives it, as the kind's Javadoc says. Codes 150 to
+  154 of an NPC or a location set an option as 30 to 34 do, but only in a members' world:
+  `membersOps` holds a flag for each of the five options. Code 5 of a location gives a second list
+  of models, for a client that animates backgrounds: `animateBackgroundModelShapes` and
+  `animateBackgroundModels`. Code 106 of a location gives weights that the decoder scales to a share
+  of 65,535: `animWeights` holds them as given. A floor overlay's colours are RGB in the entry and
+  HSL in the type: `colourRgb` and `blendColourRgb` hold them as given, and `dflt` says that the
+  overlay is the list's default.
+- The type list builds certificates, lent objects and bought objects from their templates after it
+  decodes an object, and it clears `blockwalk` and `blockrange` of a location that breaks route
+  finding. A file holds the entry as it is, without those changes.
+
+Every file writes an empty list for an array that the type leaves unset. The tool stops at an
+entry that gives an empty array, as a file could not tell it from no array, and no entry of this
+cache gives one. The files of the NPCs, the locations and the base animation sets keep the form
+that the sections on them describe, which is older than the other kinds, with the colour swaps as
+pairs. The other kinds write the client's own arrays, such as `recol_s` and `recol_d`.
+
+A sequence's `soundInfo` holds, for each frame, null or the sound that the frame plays: `sounds`,
+the sound and the others that the client picks from at random, `loops`, and `range`, the range in
+tiles at which another player hears it, 0 for the player alone (`SoundManager`). A sequence's
+`frames` and `secondaryFrames` are frames of the animation archive, each the group in the high 16
+bits and the file in the low bits. The sequence library holds them baked into the glTF file.
+
+The client gives no use to some fields of a quest, and the export names them from the data. Codes 3
+and 4 give `progressVarps` and `progressVarbits`, each the variable, its value once the quest is
+started, and its value once it is complete: Cook's Assistant gives variable 29, 1 and 2. Code 13 gives
+`requiredQuests`: Love Story names Swan Song and Recipe for Disaster: Freeing Sir Amik Varze. Code 14
+gives `requiredStats`, each a skill and a level: Gunnar's Ground names Crafting and 5. The values of
+codes 10, 18 and 19 are not clear, so the file holds them by their code: `code10`, `code18` and
+`code19`. One quest of this cache holds code 10, and none holds code 18 or 19.
+
+The defaults archive keeps one entry for each group. `defaults/map.json` holds the six textures of
+the default sky box (`skyboxes`) and the enums of the titles of a male and a female player.
+`defaults/audio.json` holds the song that the client plays first (`themeMusic`).
+`defaults/wearpos.json` holds the slots that each worn slot hides, the slots of the two hands, and
+the slots that a sequence that shows an object in a hand hides. The client does not decode the
+microtransaction and error groups.
+
+The config archive also holds groups that no type list of the client reads: 2, 7, 18, 20 to 25,
+37 to 45, 48, 50, 51 and 53, with about 7,000 entries together, and group 15, the client's string
+variables, which the client counts but does not decode. The client has no decoder for them, so the
+tool does not write them, and it says how many entries each holds.
 
 
 ## Writing the mini menu's style

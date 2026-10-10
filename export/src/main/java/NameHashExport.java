@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Writes the hash of the name of every group of the interfaces archive and of the client scripts
- * archive, which the archives' indexes keep in place of the names, so that a name from another
+ * Writes the hash of the name of every group of the interfaces, client scripts, songs and jingles
+ * archives, which the archives' indexes keep in place of the names, so that a name from another
  * source can be checked against a group.
  */
 public final class NameHashExport {
@@ -38,7 +38,9 @@ public final class NameHashExport {
     /** The archives whose names are written, by the file each is written to. */
     private static final Map<String, Integer> ARCHIVES = Map.of(
         "interfaces.json", Js5Archive.INTERFACES,
-        "scripts.json", Js5Archive.CLIENTSCRIPTS
+        "scripts.json", Js5Archive.CLIENTSCRIPTS,
+        "songs.json", Js5Archive.MIDI_SONGS,
+        "jingles.json", Js5Archive.MIDI_JINGLES
     );
 
     public static void main(String[] arguments) throws Exception {

@@ -13,9 +13,12 @@ import com.jagex.graphics.Mesh;
 import com.jagex.js5.Js5Archive;
 import com.jagex.js5.js5;
 
+import type.loc.LocKind;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Builds the model of a location type, for one of its shapes, as the location's own asset: the
@@ -45,8 +48,12 @@ public final class ClientLocReader {
 
     private final ClientModelReader models;
     private final js5 meshes;
+    private final File cache;
+    private final LocKind kind;
 
     public ClientLocReader(File cache) {
+        this.cache = cache;
+        this.kind = new LocKind(new CacheArchives(cache));
         this.models = new ClientModelReader(cache);
         this.meshes = Cache.js5(cache, Js5Archive.MODELS);
 
@@ -77,6 +84,13 @@ public final class ClientLocReader {
 
     public LocType type(int id) {
         return LocTypeList.instance.list(id);
+    }
+
+    /**
+     * The file of a location type, every field of it as the decoder reads it ({@link LocKind}).
+     */
+    public Map<String, Object> typeFile(int id) {
+        return TypeFiles.of(cache, kind, id);
     }
 
     /**
