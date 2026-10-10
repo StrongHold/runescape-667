@@ -54,7 +54,10 @@ public final class SpriteExport {
     private static final String PNG = ".png";
 
     /** What comes between a sprite's name and the number of a frame, where it has several. */
-    private static final String FRAME_SEPARATOR = "_";
+    private static final String FRAME_SEPARATOR = "@";
+
+    /** What came between a sprite's name and the number of a frame in an older layout. */
+    private static final String OLDER_FRAME_SEPARATOR = "_";
 
     public static void main(String[] arguments) throws Exception {
         var parsed = CommandLine.parse("exportSprites", new Args(), arguments);
@@ -107,7 +110,7 @@ public final class SpriteExport {
     }
 
     /**
-     * Writes a sprite of one frame to `<name>.png` and a sprite of several to `<name>_<n>.png` for
+     * Writes a sprite of one frame to `<name>.png` and a sprite of several to `<name>@<n>.png` for
      * each frame, after it removes what an earlier export left for the same sprite, and reads each
      * frame back as it was written, for the check.
      */
@@ -125,18 +128,14 @@ public final class SpriteExport {
 
     /**
      * Removes the files of a sprite that an earlier export wrote into the same directory: its one
-     * file, the files of its frames, and `<name>/<n>.png`, the older layout of the export's sprites.
-     * The sprite can have a different number of frames in another cache, so each form is removed.
+     * file, the files of its frames, and the frames of the older layouts of the export's sprites,
+     * `<name>_<n>.png` and `<name>/<n>.png`. The sprite can have a different number of frames in
+     * another cache, so each form is removed.
      */
     private static void removeEarlier(Path out, String name) throws IOException {
         Files.deleteIfExists(out.resolve(name + PNG));
-        try (var files = Files.newDirectoryStream(out, name + FRAME_SEPARATOR + "*" + PNG)) {
-            for (var file : files) {
-                if (isFrameOf(name, file.getFileName().toString())) {
-                    Files.delete(file);
-                }
-            }
-        }
+        removeFrames(out, name, FRAME_SEPARATOR);
+        removeFrames(out, name, OLDER_FRAME_SEPARATOR);
 
         var directory = out.resolve(name);
         if (Files.isDirectory(directory)) {
@@ -150,11 +149,24 @@ public final class SpriteExport {
     }
 
     /**
-     * Whether a file is a frame of the sprite of a name, `<name>_<n>.png`, and not the file of
-     * another sprite whose name starts the same way.
+     * Removes the files of the frames of the sprite of a name, `<name><separator><n>.png`.
      */
-    private static boolean isFrameOf(String name, String file) {
-        var index = file.substring(name.length() + FRAME_SEPARATOR.length(), file.length() - PNG.length());
+    private static void removeFrames(Path out, String name, String separator) throws IOException {
+        try (var files = Files.newDirectoryStream(out, name + separator + "*" + PNG)) {
+            for (var file : files) {
+                if (isFrameOf(name, separator, file.getFileName().toString())) {
+                    Files.delete(file);
+                }
+            }
+        }
+    }
+
+    /**
+     * Whether a file is a frame of the sprite of a name, `<name><separator><n>.png`, and not the
+     * file of another sprite whose name starts the same way.
+     */
+    private static boolean isFrameOf(String name, String separator, String file) {
+        var index = file.substring(name.length() + separator.length(), file.length() - PNG.length());
         return !index.isEmpty() && index.chars().allMatch(Character::isDigit);
     }
 

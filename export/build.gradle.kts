@@ -79,3 +79,9 @@ tasks.register<JavaExec>("exportSkins") {
     mainClass = "SkinExport"
     classpath = sourceSets["main"].runtimeClasspath
 }
+
+tasks.register<JavaExec>("exportNameHashes") {
+    description = "Writes the hash of the name of every group of the interfaces and client scripts archives, which their indexes keep in place of the names."
+    mainClass = "NameHashExport"
+    classpath = sourceSets["main"].runtimeClasspath
+}

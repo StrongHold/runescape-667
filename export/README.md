@@ -678,12 +678,13 @@ is written to `export/build/sprites`, and `--cache` works as it does for a model
 writes only the sprites it names, and can be given more than once.
 
 A sprite of one frame is written as `<id>.png`. Each frame of a sprite of several frames is
-written as `<id>_<n>.png`, where `n` is its place in the sprite from 0, which is the index the
+written as `<id>@<n>.png`, where `n` is its place in the sprite from 0, which is the index the
 client uses. Most sprites have one frame: in this cache 7,867 of the 7,912 sprites have one, and
-the other 45 have 7,037 frames between them. An id is only digits, so a file name that ends in `_`
-and digits is always a frame of a sprite of several frames. All the files are in one directory
-with `names.json` and `hashes.json`. Before the tool writes a sprite, it removes the files of that sprite that an
-earlier run left in the directory, in either form and in the older form `<id>/<n>.png`, so that
+the other 45 have 7,037 frames between them. A file name that ends in `@` and digits is always a
+frame of a sprite of several frames, as `@` is in no name of a sprite. All the files are in one
+directory with `names.json` and `hashes.json`. Before the tool writes a sprite, it removes the
+files of that sprite that an earlier run left in the directory, in either form and in the older
+forms `<id>_<n>.png` and `<id>/<n>.png`, so that
 the frames on disk are always those of the cache it read. The PNG is the frame on its whole canvas, so it holds
 everything the client needs to draw it, and no other file describes it. The client stores only
 the rectangle of a frame that it draws, with its left and top margins on a canvas that all the
@@ -722,6 +723,20 @@ The sprite the software toolkit builds from the image, laid on a clear canvas of
 size at the toolkit's margins, must match it too. A sprite that differs fails the export. A
 planted dropped left margin fails 4,053 of the 14,904 frames, and a planted swap of the red and
 blue channels fails 7,820.
+
+
+## Writing the hashes of names
+
+    ./gradlew :export:exportNameHashes
+
+The index of an archive keeps a hash of the name of each group, not the name. The tool writes the
+hashes of two archives, the interfaces and the client scripts, to `export/build/hashes/`, unless
+`--out` names another directory: `interfaces.json` and `scripts.json`, each an object from each
+group's id to the hash of its name, a signed 32-bit integer, as `sprites/hashes.json` holds the
+sprites' (`StringTools.intHashCp1252`). A name from another source, such as a list of the names of
+another build, is right for a group where its hash is the group's. In this cache the index of the
+client scripts keeps a name for each of its 5,377 groups, and the index of the interfaces keeps
+none, so `interfaces.json` is empty.
 
 
 ## Writing the mini menu's style
