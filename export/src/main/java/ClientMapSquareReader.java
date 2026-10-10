@@ -99,6 +99,24 @@ public final class ClientMapSquareReader {
     private static final int POSED_TOLERANCE_FINE = 1;
 
     /**
+     * How far a still vertex may be from the client's, in the client's units, where the asset of an
+     * animated location is scaled already and the placement turns it. The client turns before it
+     * scales ({@code LocType.model}: {@code k}, then {@code O}), and the asset is scaled before an
+     * importer turns it, so that a pose moves the scaled parts as the client's does. The scale
+     * rounds down, and rounding down a negative coordinate is not negating a positive one rounded
+     * down: wheat 15508, scaled by 100/128, has a vertex at x -165, which the client turns to 165 and
+     * scales to 128, where the asset scales it to -129 and turns it to 129. A turn of 0 rounds the
+     * same, so it allows nothing. A posed vertex adds it to the pose's own rounding
+     * ({@link #POSED_TOLERANCE_FINE}), as rock 5605, scaled by 70/128, needs.
+     */
+    private static final int SCALED_TURN_TOLERANCE_FINE = 1;
+
+    /**
+     * A type's scale along an axis that leaves it as large as its model, out of 128.
+     */
+    private static final int FULL_SCALE = 128;
+
+    /**
      * The asset of each location and shape placed so far, which every placement of it is
      * checked against.
      */
@@ -698,7 +716,7 @@ public final class ClientMapSquareReader {
         var ceiling = LocGround.ceiling(underwater, virtualLevel);
         var scaled = ClientLocReader.scaledInAsset(type);
         var placed = LocPlacing.place(asset.get(), type, shape, rotation, floor, ceiling, x, y, z, turned, scaled);
-        if (!LocPlacing.sameVertices(placed, built, 0)) {
+        if (!LocPlacing.sameVertices(placed, built, stillTolerance(type, rotation, scaled))) {
             return Check.DIFFERS;
         }
 
@@ -712,12 +730,22 @@ public final class ClientMapSquareReader {
                 var assetPosed = locs.poser(type, shape, turned).posed(animator);
                 var placedPosed = LocPlacing.place(assetPosed, type, shape, rotation, floor, ceiling, x, y, z, turned,
                     scaled);
-                if (clientPosed == null || !LocPlacing.sameVertices(placedPosed, clientPosed, POSED_TOLERANCE_FINE)) {
+                var posedTolerance = POSED_TOLERANCE_FINE + stillTolerance(type, rotation, scaled);
+                if (clientPosed == null || !LocPlacing.sameVertices(placedPosed, clientPosed, posedTolerance)) {
                     return Check.DIFFERS_POSED;
                 }
             }
         }
         return Check.MATCHES;
+    }
+
+    /**
+     * How far a still vertex may be from the client's: one unit where the asset is scaled already
+     * and the placement turns it ({@link #SCALED_TURN_TOLERANCE_FINE}), and none otherwise.
+     */
+    private static int stillTolerance(LocType type, int rotation, boolean scaled) {
+        var resized = type.resizex != FULL_SCALE || type.resizey != FULL_SCALE || type.resizez != FULL_SCALE;
+        return scaled && resized && (rotation & 3) != 0 ? SCALED_TURN_TOLERANCE_FINE : 0;
     }
 
     /**
