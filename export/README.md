@@ -347,9 +347,10 @@ through a sequence gets no channel for it.
 The frames are also written as the client reads them, for an engine that would rather follow the
 client's transforms itself, as it must to tween them. The skin's `extras` hold, for each joint,
 the `labels` it carries (-1 for the joint of no label), where the label's vertices are centred in
-the still model before any scale (`labelCentres`, in the client's units and frame), how many
+the still model that the frames move (`labelCentres`, in the client's units and frame), how many
 there are (`labelCounts`), which a pivot over several labels is weighed by, and the `poseScale`
-the client applies after posing. Each animation's `extras` hold `frames`, one list per key of the
+the client applies after posing: an NPC's scale, and 1 for a location, which is scaled before it is
+posed. Each animation's `extras` hold `frames`, one list per key of the
 frame's transforms in order, six numbers each: the group, its x, y and z values, the pivot group
 the client applies first or -1, and the tween bits, where 1 means the client does not tween into
 the transform and 2 that it does not tween out of it; `groupTypes` and `groupLabels` are the

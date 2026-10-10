@@ -125,19 +125,6 @@ public final class ClientLocReader {
             public JavaModel posed(SequenceAnimator animator) {
                 return build(type, shape, animator, turned, scaledInAsset(type));
             }
-
-            @Override
-            public JavaModel unscaledStill() {
-                return build(type, shape, null, turned, false);
-            }
-
-            @Override
-            public double[] scale() {
-                return scaledInAsset(type)
-                    ? new double[] {type.resizex / (double) FULL_SCALE, type.resizey / (double) FULL_SCALE,
-                        type.resizez / (double) FULL_SCALE}
-                    : new double[] {1, 1, 1};
-            }
         };
     }
 
