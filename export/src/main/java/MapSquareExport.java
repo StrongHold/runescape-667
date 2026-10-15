@@ -236,6 +236,7 @@ public final class MapSquareExport {
         description.put("environment", environment(square.environment()));
         description.put("lights", square.environment().lights().stream().map(MapSquareExport::light).toList());
         description.put("placements", placements);
+        description.put("staticElements", new StaticElements(args.where.cache()).of(square.x(), square.z()));
 
         System.out.println("  " + describe(square.environment()));
         System.out.println("  " + placements.size() + " locations placed, of " + written.size() + " kinds in "

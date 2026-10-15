@@ -676,6 +676,15 @@ its camera height over the ground at the point, across the nine by nine tiles ab
 level the file leaves out counts as 0 everywhere, and a level the file says to copy takes the
 level below.
 
+The description holds `staticElements`: the map elements the world map places by itself in the
+map square, apart from the locations (a dungeon's entrance, a guild), each its `level`, its tile
+`x` and `z` from the map square's corner, its `element` and whether it is for `members` alone. The
+client keeps them by world map area (`<file>_staticelements` of the world map's data) and its
+minimap shows those of the area the player is in, each on the player's level at the middle of its
+tile (`Minimap.drawLevel`). An element is given here where its area is the one the client finds
+for its own tile (`WorldMap.getMap`); the client finds its area by the middle of the region it has
+built, so the two differ only by an area's edge.
+
 The description also holds `heights`: the height of every tile corner of each level, and of the
 bed under the water where there is one, from eight tiles before the map square to eight tiles
 after, which is what a location is bent against: 81 corners by 81, `[x][z]`, the first eight tiles
