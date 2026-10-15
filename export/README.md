@@ -15,7 +15,8 @@ menu's style and the hit splats as JSON, all described below.
 Every file of the export has a fixed place under `export/build`, which is the same for every
 file of its kind:
 
-- `textures/<id>.png`, with `metrics.json`, `water/`, `particle/` and `light/` beside them;
+- `textures/<id>.png`, with `<id>.hdr.png` for a texture of the `hdr` metric, `metrics.json`, `water/`,
+  `particle/` and `light/` beside them;
 - `models/<id>.gltf` and `sequences/<id>.gltf`, the model and sequence libraries, each with its
   `.bin`, and `sequences/<id>.json`, each sequence's type;
 - `locs/<id>.json`, `npcs/<id>.json` and `bas/<id>.json`, and a directory of the same kind for
@@ -136,6 +137,13 @@ texture source can draw the texture, as `available`. An engine that builds a typ
 model library reads from it how each texture blends, how it tints its faces and whether it skips
 them, for a texture a type retextures a face to as for any other. Every export writes it where the
 library lacks it.
+
+A texture whose metrics have `hdr` set has its high dynamic range scales beside it as
+`<id>.hdr.png`: a grey PNG of its size, laid out texel for texel as its own PNG, each texel the
+value of the texture's high dynamic range op out of 4096 written as a byte out of 255. Where bloom
+is on, the client draws such a texture in floating point, each texel brightened by
+`1 + 31 * value / 4096`, from 1 to 32 times (`Texture.floatArgbOutput`); a texture of no `hdr` has
+no such file.
 
 A glTF file written here gives each texture as an image by a URI relative to the file, such as
 `../textures/128.png`, and carries no copy of it. The textures live in one directory,
