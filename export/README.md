@@ -1093,6 +1093,15 @@ name a Vorbis sound where the type's `vorbis` (a sequence's `vorbisSound`) is se
 synthesised sound where not.
 
 
+The start of a song as the client's own synthesiser plays it is the reference another synthesiser
+of these songs and instruments is compared with:
+
+    ./gradlew :export:exportRenderedSong --args="--song 0 --seconds 20"
+
+It writes `rendered-songs/<id>.wav`, sixteen bit stereo PCM at 22050 samples a second, the mix of
+`MixBuss` at its whole volume, each sample less its lowest eight bits and held to sixteen bits, as
+the client writes it to the sound card (`PcmPlayer_Sub1`).
+
 ## Writing the fonts
 
     ./gradlew :export:exportFonts

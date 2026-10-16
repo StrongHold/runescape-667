@@ -92,6 +92,12 @@ tasks.register<JavaExec>("exportSounds") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
+tasks.register<JavaExec>("exportRenderedSong") {
+    description = "Writes the start of one song as the client's own synthesiser plays it, as a WAV file, the reference another synthesiser of the exported songs is compared with."
+    mainClass = "RenderedSongExport"
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
 tasks.register<JavaExec>("exportTypes") {
     description = "Writes every entry of every config type the client decodes as a JSON file, with every field its decoder reads under the client's name for it."
     mainClass = "TypeExport"
