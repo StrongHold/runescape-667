@@ -1,6 +1,6 @@
 # export
 
-Writes models, NPCs, map squares, sprites, fonts, the mini menu's style, the hit splats and every
+Writes models, NPCs, map squares, sprites, fonts, sounds, music, the mini menu's style, the hit splats and every
 entry of every config type the client decodes out of the game's cache in a form that other engines
 can import. Every file is a standard text format where one exists, so that it can be read
 and compared as text. A model, an NPC or a map square is written as glTF, a `.gltf` JSON file with
@@ -22,6 +22,8 @@ file of its kind:
 - `locs/<id>.json`, `npcs/<id>.json` and `bas/<id>.json`, and a directory of the same kind for
   every other config type (see "Writing every config type");
 - `mapsquares/<x>_<z>.gltf`, the ground, with `<x>_<z>.json`, the description, beside it;
+- `synths/<id>.wav`, `vorbis/<id>.wav`, `songs/<id>.mid`, `jingles/<id>.mid` and
+  `patches/<id>.json`, the sounds and the music (see "Writing the sounds");
 - `sprites/`, `fonts/`, `hashes/`, and `skins.json`, `minimenu.json`, `hitmarks.json`,
   `combatstyles.json` and `skyboxes.json`.
 
@@ -1049,6 +1051,47 @@ Every sprite and font a type names must be in the cache, or the task names each 
 writes nothing. A planted check that looks for each sprite under an id 100,000 higher fails on all
 97 of the sprites the types name. In this cache there are 28 types, which draw with the fonts 307
 (`tutorial_font`) and 591 (`menu_font_small`), and an entity shows 6 splats at once.
+
+## Writing the sounds
+
+    ./gradlew :export:exportSounds
+    ./gradlew :export:exportSounds --args="--out /path/to/export"
+
+Every sound and every piece of music the cache holds is written under `export/build` (or the
+directory `--out` names), and `--cache` works as it does for a model:
+
+- `synths/<id>.wav`, each group of the synthesised sounds archive, and `vorbis/<id>.wav`, each
+  group of the Vorbis archive but group 0, which holds the setup every Vorbis sound shares. A
+  sound is the samples the client plays: a WAV file of unsigned eight bit PCM, mono, at the
+  sound's own rate (22050 samples a second for every synthesised sound). The client's own code
+  makes them: `SynthSound.sample` renders a synthesised sound, and `VorbisSound.method8502`
+  decodes every packet of a Vorbis sound to a signed byte a sample, as the client keeps it. Where
+  a sound loops, the file's sample chunk (`smpl`) holds the loop, from its first sample to its
+  last, forwards, or forwards and back where the client plays it so (a Vorbis sound whose loop
+  end is negative). A synthesised sound keeps the silence before its first instrument starts,
+  which the client moves into the delay it plays the sound after (`SynthSound.delay`).
+- `songs/<id>.mid` and `jingles/<id>.mid`, each group of the songs and the jingles archives, as
+  the standard MIDI file (format 1) the client builds from its own packed form
+  (`MidiSong.midiData`), which any MIDI tool reads.
+- `patches/<id>.json`, each group of the instruments archive (archive 15), one for each bank and
+  program a song selects, as `MixBuss.readPatch` looks them up: the bank select's most significant
+  byte times 16384, its least significant byte times 128, and the program, channel 10 starting at
+  128 (`MidiSong.computePrograms`). No standard format holds an instrument as the client
+  plays it, so it is written as the fields `MusicPatch` decodes: `volume`, and `keys`, one for
+  each of the 128 keys a note can strike, `null` where the key plays nothing, else the `sound` it
+  plays by id, whether that is a Vorbis or a synthesised sound (`vorbis`), its `pitchOffset`
+  (negative where the sound loops), its `volume`, `pan` and `exclusiveGroup` as the client keeps
+  them, and its `envelope`, the place in `envelopes` of the envelope it shares with other keys.
+  Each envelope is the client's `MusicPatchEnvelope`: its `envelope` and `release` points as
+  signed bytes in pairs (`null` where it has none), its `decay`, `decayKeyScale`,
+  `envelopeKeyScale` and `releaseKeyScale`, and its `vibratoRate`, `vibratoDepth` and
+  `vibratoDelay`.
+
+A sound is referred to by its id, which is its group, as the config types refer to it: a
+location's `sound` and `randomSoundIds`, an NPC's movement sounds and a sequence's `soundInfo`
+name a Vorbis sound where the type's `vorbis` (a sequence's `vorbisSound`) is set, and a
+synthesised sound where not.
+
 
 ## Writing the fonts
 

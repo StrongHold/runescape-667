@@ -86,6 +86,12 @@ tasks.register<JavaExec>("exportNameHashes") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
+tasks.register<JavaExec>("exportSounds") {
+    description = "Writes every synthesised and Vorbis sound as a WAV file of the samples the client plays, every song and jingle as a standard MIDI file, and every instrument of the music as JSON."
+    mainClass = "SoundExport"
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
 tasks.register<JavaExec>("exportTypes") {
     description = "Writes every entry of every config type the client decodes as a JSON file, with every field its decoder reads under the client's name for it."
     mainClass = "TypeExport"
