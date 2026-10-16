@@ -157,10 +157,23 @@ public final class ClientMapSquareReader {
      *     the client draws it.
      * @param locations whether the map square's locations on land were placed.
      * @param environment how the map square is lit, its fog and sky, and the lights on it.
+     * @param tiles the floor of every tile of each level, as the terrain decoded it, from which it
+     *     built the ground.
      */
     public record MapSquare(int x, int z, List<JavaGround> grounds, List<RecordingGround> colours, int[][][] heights,
                             int[][][] flags, int[][][] floorShadows, List<Placement> placements,
-                            Placing locations, Underwater underwater, EnvironmentDecoder.Environment environment) {
+                            Placing locations, Underwater underwater, EnvironmentDecoder.Environment environment,
+                            List<TileFloors> tiles) {
+    }
+
+    /**
+     * The floor of every tile of one level, as the terrain decoded it from the map square's file
+     * ({@code Terrain.decodeTile}) and built its ground from ({@code Terrain.load}), from
+     * {@link #HEIGHT_MARGIN_TILES} tiles before the map square to as many after it, as [x][z]: the
+     * underlay and the overlay, each its floor type's id and one more, or 0 for none, and the
+     * overlay's shape and the quarter turns it is turned by.
+     */
+    public record TileFloors(int[][] underlays, int[][] overlays, int[][] shapes, int[][] directions) {
     }
 
     /**
@@ -194,8 +207,10 @@ public final class ClientMapSquareReader {
          *     draw it.
          * @param heights the height of every tile corner of the bed, as the land's are read.
          * @param locations whether the locations on the map square's bed were placed.
+         * @param tiles the floor of every tile of the bed, as the land's are read.
          */
-        record Bed(JavaGround ground, RecordingGround colours, int[][] heights, Placing locations) implements Underwater {
+        record Bed(JavaGround ground, RecordingGround colours, int[][] heights, Placing locations,
+                   TileFloors tiles) implements Underwater {
         }
     }
 
@@ -296,6 +311,10 @@ public final class ClientMapSquareReader {
             unlit((JavaGround) Static693.underwaterGround[0]);
         }
         var colours = recordColours(Static706.floor);
+        var tiles = new ArrayList<TileFloors>();
+        for (var level = 0; level < LEVELS; level++) {
+            tiles.add(tileFloors(region, level));
+        }
         region.load(toolkit, bed == null ? null : Static693.underwaterGround[0], null);
         restoreGrounds(Static706.floor, colours);
 
@@ -309,6 +328,7 @@ public final class ClientMapSquareReader {
             switchScene(true);
             var bedLocations = withLocations ? placeBedLocations(bed, mapSquareX, mapSquareZ) : new Placing.NotPlaced(NOT_ASKED);
             var bedColours = recordColours(Static693.underwaterGround);
+            var bedTiles = tileFloors(bed, 0);
             bed.load(toolkit, null, Static706.floor[0]);
             restoreGrounds(Static693.underwaterGround, bedColours);
             switchScene(false);
@@ -317,7 +337,7 @@ public final class ClientMapSquareReader {
                 placements.addAll(placements(toolkit, Static420.underwaterTiles, true));
             }
             underwaterWorld = new Underwater.Bed((JavaGround) Static693.underwaterGround[0], bedColours.getFirst(),
-                heights(Static693.underwaterGround[0]), bedLocations);
+                heights(Static693.underwaterGround[0]), bedLocations, bedTiles);
         }
 
         var grounds = new ArrayList<JavaGround>();
@@ -331,7 +351,30 @@ public final class ClientMapSquareReader {
             floorShadows[level] = floorShadows(colours.get(level));
         }
         return new MapSquare(mapSquareX, mapSquareZ, List.copyOf(grounds), colours, heights, flags, floorShadows,
-            List.copyOf(placements), locations, underwaterWorld, environment);
+            List.copyOf(placements), locations, underwaterWorld, environment, List.copyOf(tiles));
+    }
+
+    /**
+     * The floor of every tile of one level of a region, around the map square in its middle, read
+     * before the terrain builds the ground from it and lets it go.
+     */
+    private static TileFloors tileFloors(MapRegion region, int level) {
+        var across = TILES_ACROSS + 2 * HEIGHT_MARGIN_TILES;
+        var underlays = new int[across][across];
+        var overlays = new int[across][across];
+        var shapes = new int[across][across];
+        var directions = new int[across][across];
+        for (var x = 0; x < across; x++) {
+            for (var z = 0; z < across; z++) {
+                var regionX = ORIGIN_TILES - HEIGHT_MARGIN_TILES + x;
+                var regionZ = ORIGIN_TILES - HEIGHT_MARGIN_TILES + z;
+                underlays[x][z] = region.underlay[level][regionX][regionZ] & 0xFF;
+                overlays[x][z] = region.overlay[level][regionX][regionZ] & 0xFF;
+                shapes[x][z] = region.tileShapes[level][regionX][regionZ];
+                directions[x][z] = region.tileDirections[level][regionX][regionZ];
+            }
+        }
+        return new TileFloors(underlays, overlays, shapes, directions);
     }
 
     /**

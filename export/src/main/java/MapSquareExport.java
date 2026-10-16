@@ -236,6 +236,7 @@ public final class MapSquareExport {
         description.put("environment", environment(square.environment()));
         description.put("lights", square.environment().lights().stream().map(MapSquareExport::light).toList());
         description.put("placements", placements);
+        description.put("tiles", tiles(square));
         description.put("staticElements", new StaticElements(args.where.cache()).of(square.x(), square.z()));
 
         System.out.println("  " + describe(square.environment()));
@@ -247,6 +248,75 @@ public final class MapSquareExport {
                 + "placements are left out: " + missing);
         }
         return description;
+    }
+
+    /**
+     * The floor of every tile of each level, and of the bed under the water where there is one,
+     * from {@link ClientMapSquareReader#HEIGHT_MARGIN_TILES} tiles before the map square to as many
+     * after it, as the heights are: the floor types the map square uses, each by id, the underlays'
+     * and the overlays' apart, and for each level the underlay and the overlay of each tile as
+     * [x][z], each the place of its type in its list and one more, or 0 for none, with the
+     * overlay's shape and the quarter turns it is turned by.
+     */
+    private static Map<String, Object> tiles(ClientMapSquareReader.MapSquare square) {
+        var all = new ArrayList<>(square.tiles());
+        if (square.underwater() instanceof ClientMapSquareReader.Underwater.Bed bed) {
+            all.add(bed.tiles());
+        }
+        var underlayTypes = typesOf(all.stream().map(ClientMapSquareReader.TileFloors::underlays).toList());
+        var overlayTypes = typesOf(all.stream().map(ClientMapSquareReader.TileFloors::overlays).toList());
+
+        var tiles = new LinkedHashMap<String, Object>();
+        tiles.put("underlayTypes", underlayTypes);
+        tiles.put("overlayTypes", overlayTypes);
+        tiles.put("levels", square.tiles().stream().map(level -> tileLevel(level, underlayTypes, overlayTypes)).toList());
+        if (square.underwater() instanceof ClientMapSquareReader.Underwater.Bed bed) {
+            tiles.put("underwater", tileLevel(bed.tiles(), underlayTypes, overlayTypes));
+        }
+        return tiles;
+    }
+
+    /**
+     * The ids of the floor types the grids name, in order, each grid naming a type by its id and
+     * one more, or none by 0.
+     */
+    private static List<Integer> typesOf(List<int[][]> grids) {
+        var ids = new TreeSet<Integer>();
+        for (var grid : grids) {
+            for (var column : grid) {
+                for (var floor : column) {
+                    if (floor > 0) {
+                        ids.add(floor - 1);
+                    }
+                }
+            }
+        }
+        return List.copyOf(ids);
+    }
+
+    private static Map<String, Object> tileLevel(ClientMapSquareReader.TileFloors floors, List<Integer> underlayTypes,
+                                                 List<Integer> overlayTypes) {
+        var level = new LinkedHashMap<String, Object>();
+        level.put("underlays", nested(placed(floors.underlays(), underlayTypes)));
+        level.put("overlays", nested(placed(floors.overlays(), overlayTypes)));
+        level.put("shapes", nested(floors.shapes()));
+        level.put("directions", nested(floors.directions()));
+        return level;
+    }
+
+    /**
+     * A grid of floor types, each its id and one more, as the place of the type in the list given
+     * and one more, 0 staying 0.
+     */
+    private static int[][] placed(int[][] grid, List<Integer> types) {
+        var placed = new int[grid.length][];
+        for (var x = 0; x < grid.length; x++) {
+            placed[x] = new int[grid[x].length];
+            for (var z = 0; z < grid[x].length; z++) {
+                placed[x][z] = grid[x][z] == 0 ? 0 : types.indexOf(grid[x][z] - 1) + 1;
+            }
+        }
+        return placed;
     }
 
     /** For each level, the camera heights as a 16 by 16 grid of ints, or an empty list where the file gives none. */

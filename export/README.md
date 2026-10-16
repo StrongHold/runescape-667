@@ -693,6 +693,16 @@ after, which is what a location is bent against: 81 corners by 81, `[x][z]`, the
 south and west of the map square's corner. A large location on the edge of the map square
 reaches well into the neighbour.
 
+The description holds `tiles`: the floor of every tile of each level, and of the bed under the
+water where there is one (`underwater`), over the same tiles as `heights`, 80 by 80 from eight tiles
+before the map square, which is everything the terrain builds the ground of the map square from
+(`Terrain.load`), its blending reaching five tiles beyond a tile. `underlayTypes` and
+`overlayTypes` list the floor types the map square uses, by id, in order. For each level,
+`underlays` and `overlays` give each tile's underlay and overlay as `[x][z]`, each the place of its
+type in its list and one more, or 0 for none; `shapes` gives the overlay's shape, 0 to 11, and
+`directions` the quarter turns it is turned by, as the terrain decoded them from the map square's
+file (`Terrain.decodeTile`).
+
 An importer places a location by these steps, in order, in the client's units:
 
 1. It takes the mesh of the placement's shape, or the turned one for a wall decoration that
