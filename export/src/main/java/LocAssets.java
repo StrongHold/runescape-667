@@ -84,12 +84,24 @@ public final class LocAssets {
 
     /**
      * Whether the client builds a model for every shape of a type, as it builds none for a type
-     * that names a mesh the cache does not hold, and draws a face of one of them.
+     * that names a mesh the cache does not hold, and one of them shows something: a face it draws,
+     * or particles it emits or moves, as a type that stands snow over the ground draws no face.
      */
     private boolean buildable(LocType type) {
         var shapes = ClientLocReader.shapes(type);
         var stills = shapes.stream().map(shape -> reader.poser(type, shape, false).still()).toList();
-        return !shapes.isEmpty() && stills.stream().allMatch(Objects::nonNull) && stills.stream().anyMatch(this::draws);
+        return !shapes.isEmpty() && stills.stream().allMatch(Objects::nonNull) && stills.stream().anyMatch(this::shows);
+    }
+
+    /**
+     * Whether a model shows anything: a face the client draws, or particles it emits or moves.
+     */
+    private boolean shows(JavaModel model) {
+        return draws(model) || hasParts(model.emitters) || hasParts(model.effectors);
+    }
+
+    private static boolean hasParts(Object[] parts) {
+        return parts != null && parts.length > 0;
     }
 
     /**
