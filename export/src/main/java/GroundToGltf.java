@@ -153,17 +153,18 @@ public final class GroundToGltf {
     }
 
     /**
-     * Writes the faces of a tile built with ground blending off, each in its one colour: the
-     * floor's colour, or where it has none, its blend colour, as the software ground keeps a face
-     * that has either. A face with neither is left out, as the ground leaves it out.
+     * Writes the faces of a tile built with ground blending off, each in the floor's colour. A face
+     * whose floor has no colour of its own is left out, though it has one to blend towards, as the
+     * GL ground gives a corner of no colour no layer and draws a face only in the layer of one of
+     * its corners ({@code GlGround.U}). Such a floor marks a hole that a location fills, as a pit of
+     * lava cut into the ground.
      */
     private int addUnblendedTile(int x, int z, RecordingGround.UnblendedTile tile) {
         var written = 0;
         for (var face = 0; face < tile.colours().length; face++) {
-            var hsl = tile.colours()[face] >= 0 ? tile.colours()[face]
-                : tile.blendedColours() == null ? -1 : tile.blendedColours()[face];
+            var hsl = tile.colours()[face];
             if (hsl < 0) {
-                skipped.merge("no colour of its own or to blend", 1, Integer::sum);
+                skipped.merge("no colour of its own", 1, Integer::sum);
             } else {
                 addUnblendedFace(x, z, tile, face, hsl);
                 written++;

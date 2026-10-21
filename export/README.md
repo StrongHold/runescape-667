@@ -496,7 +496,9 @@ hands the tiles over. With it on, as above, each corner of a tile takes its colo
 around it, so colours and textures fade from tile to tile (`Terrain.loadBlended`). With it off,
 each face of a tile is in one colour, the tile's own smoothed underlay colour or its overlay's
 colour, and its texture stops at the tile's edge (`Terrain.loadUnblended`), which gives the hard
-edged tiles of the original look. The map square is read a second time with the option off, and
+edged tiles of the original look. A face whose floor has no colour of its own is left out, though
+it has one to blend towards, as the GL ground leaves it out (`GlGround.U`): such a floor marks a
+hole that a location fills. The map square is read a second time with the option off, and
 that ground is written beside the blended one, in nodes named as the blended ones with
 ` unblended` after the name, whose `extras` have `blended` false. An engine draws the blended
 nodes or the unblended ones, never both. Every vertex of an unblended face has the face's HSL as
