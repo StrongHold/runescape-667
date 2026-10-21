@@ -28,6 +28,14 @@ import java.util.stream.IntStream;
  * leaves out the part of a tile that nothing covers. A textured face is tinted by its vertex
  * colours, as the rasteriser tints it.
  *
+ * <p>The minimap. The GL ground keeps every face of a tile for its minimap, a face of no colour of
+ * its own too, and draws each vertex there in the colour it holds in its vertex buffer, with no
+ * texture ({@code GlGround.drawMinimap}). That colour is the one the vertex's overlay blends
+ * towards, where it differs from the vertex's own ({@code GlGround}). So each vertex also has that
+ * colour as {@code _MINIMAP_HSL}, in a primitive where some vertex's differs from its {@code _HSL},
+ * and the faces of the land the scene leaves out for want of a colour are written apart, to be drawn
+ * on the minimap alone.
+ *
  * <p>Texture coordinates. The client works out a ground texture's coordinates from where each
  * vertex is in the world, divided by the size the floor type gives the texture, so a texture runs
  * on unbroken from tile to tile. They are worked out the same way here, measured from a multiple
@@ -69,6 +77,7 @@ public final class GroundToGltf {
     private final GltfBuilder gltf;
     private final GltfMaterials materials;
     private final Map<PrimitiveKey, Primitive> primitives = new LinkedHashMap<>();
+    private final Primitive minimapOnly = new Primitive(false);
     private final Map<String, Integer> skipped = new TreeMap<>();
     private final Map<String, Integer> approximated = new TreeMap<>();
     private final Map<Integer, Integer> layered = new TreeMap<>();
@@ -93,9 +102,16 @@ public final class GroundToGltf {
      *     written as.
      * @param approximated how many faces are written other than as the client draws them, and why.
      * @param layered how many faces are written as layers, by how many layers.
+     * @param minimapOnly the faces of the land the scene leaves out and the minimap draws, which
+     *     {@link #writeMinimapOnlyInto} writes into a mesh of their own.
      */
     public record Result(int tiles, int faces, int primitives, Map<String, Integer> skipped,
-                         Map<String, Integer> approximated, Map<Integer, Integer> layered) {
+                         Map<String, Integer> approximated, Map<Integer, Integer> layered, Primitive minimapOnly) {
+
+        /** How many faces are drawn on the minimap alone. */
+        public int minimapOnlyFaces() {
+            return minimapOnly.indices.size() / 3;
+        }
     }
 
     /**
@@ -108,6 +124,16 @@ public final class GroundToGltf {
     public static Result convertInto(GltfBuilder gltf, GltfMaterials materials, JavaGround ground,
                                      RecordingGround colours, boolean underwater, int originTiles, int worldXTiles, int worldZTiles) {
         return new GroundToGltf(ground, colours, underwater, originTiles, worldXTiles, worldZTiles, gltf, materials).convert();
+    }
+
+    /**
+     * Adds the faces a level's result holds for the minimap alone, as one untextured primitive, to
+     * the mesh a document is building, where it has any. The caller closes the mesh.
+     */
+    public static void writeMinimapOnlyInto(GltfBuilder gltf, GltfMaterials materials, Result result) {
+        if (result.minimapOnlyFaces() > 0) {
+            writePrimitive(gltf, materials, MINIMAP_ONLY_KEY, result.minimapOnly());
+        }
     }
 
     private Result convert() {
@@ -130,10 +156,10 @@ public final class GroundToGltf {
         }
 
         for (var entry : primitives.entrySet()) {
-            writePrimitive(entry.getKey(), entry.getValue());
+            writePrimitive(gltf, materials, entry.getKey(), entry.getValue());
         }
         return new Result(tiles, faces, primitives.size(), Collections.unmodifiableMap(skipped),
-            Collections.unmodifiableMap(approximated), Collections.unmodifiableMap(layered));
+            Collections.unmodifiableMap(approximated), Collections.unmodifiableMap(layered), minimapOnly);
     }
 
     private int addTile(int x, int z, JavaGenericBlendedTile tile) {
@@ -141,8 +167,10 @@ public final class GroundToGltf {
 
         for (var face = 0; face < tile.faceCount; face++) {
             var a = face * 3;
-            if ((tile.vertexColours[a] & 0xFFFFFF) == 0) {
+            if ((tile.vertexColours[a] & 0xFFFFFF) == 0 && underwater) {
                 skipped.merge("no colour at its first corner", 1, Integer::sum);
+            } else if ((tile.vertexColours[a] & 0xFFFFFF) == 0) {
+                addMinimapOnlyFace(x, z, tile, a);
             } else {
                 addFace(x, z, tile, a);
                 written++;
@@ -154,23 +182,66 @@ public final class GroundToGltf {
 
     /**
      * Writes the faces of a tile built with ground blending off, each in the floor's colour. A face
-     * whose floor has no colour of its own is left out, though it has one to blend towards, as the
-     * GL ground gives a corner of no colour no layer and draws a face only in the layer of one of
-     * its corners ({@code GlGround.U}). Such a floor marks a hole that a location fills, as a pit of
-     * lava cut into the ground.
+     * whose floor has no colour of its own is left out of the scene, though it has one to blend
+     * towards, as the GL ground gives a corner of no colour no layer and draws a face only in the
+     * layer of one of its corners ({@code GlGround.U}). Such a floor marks a hole that a location
+     * fills, as a pit of lava cut into the ground. The GL minimap still draws it, in the colour
+     * blended towards, so on the land it is written for the minimap alone.
      */
     private int addUnblendedTile(int x, int z, RecordingGround.UnblendedTile tile) {
         var written = 0;
         for (var face = 0; face < tile.colours().length; face++) {
             var hsl = tile.colours()[face];
-            if (hsl < 0) {
+            if (hsl < 0 && underwater) {
                 skipped.merge("no colour of its own", 1, Integer::sum);
+            } else if (hsl < 0) {
+                addUnblendedMinimapOnlyFace(x, z, tile, face);
             } else {
                 addUnblendedFace(x, z, tile, face, hsl);
                 written++;
             }
         }
         return written;
+    }
+
+    /**
+     * The colour the GL ground gives each corner of an unblended face in its vertex buffer, which
+     * its minimap draws: the colour the face blends towards where the tile has such colours, else
+     * the face's own ({@code GlGround.addTile}).
+     */
+    private static int unblendedMinimapHsl(RecordingGround.UnblendedTile tile, int face) {
+        return tile.blendedColours() == null ? tile.colours()[face] : tile.blendedColours()[face];
+    }
+
+    /**
+     * Writes one face of an unblended tile that has no colour of its own for the minimap alone:
+     * untextured, opaque, and of no colour but the one it blends towards.
+     */
+    private void addUnblendedMinimapOnlyFace(int x, int z, RecordingGround.UnblendedTile tile, int face) {
+        var minimapHsl = unblendedMinimapHsl(tile, face);
+        for (var vertex : new int[] {tile.faceA()[face], tile.faceB()[face], tile.faceC()[face]}) {
+            var place = unblendedPlace(x, z, tile, vertex);
+            var normal = normal(x, z, tile.offsetX()[vertex], tile.offsetY()[vertex]);
+            addCorner(minimapOnly, new Corner(place.localX(), place.height(), place.localZ(), normal[0], normal[1],
+                normal[2], 0, tile.colours()[face] & 0xFFFF, minimapHsl & 0xFFFF, place.depth(), 1.0F, 0.0F, 0.0F));
+        }
+    }
+
+    /**
+     * Where a vertex of an unblended tile lies: east and north of the square's corner, its height
+     * with its lift, and how deep under the water.
+     */
+    private UnblendedPlace unblendedPlace(int x, int z, RecordingGround.UnblendedTile tile, int vertex) {
+        var withinX = tile.offsetX()[vertex];
+        var withinZ = tile.offsetY()[vertex];
+        var lift = tile.offsetLevel() == null ? 0 : tile.offsetLevel()[vertex];
+        var height = ground.averageHeight((x << ground.tileSizeShift) + withinX, (z << ground.tileSizeShift) + withinZ) + lift;
+        var depth = tile.depths() == null ? 0 : tile.depths()[vertex];
+        return new UnblendedPlace((x - originTiles) * FINE_PER_TILE + withinX, (z - originTiles) * FINE_PER_TILE + withinZ,
+            height, depth);
+    }
+
+    private record UnblendedPlace(int localX, int localZ, int height, int depth) {
     }
 
     /**
@@ -191,22 +262,17 @@ public final class GroundToGltf {
         var primitive = primitives.computeIfAbsent(new PrimitiveKey(texture, mode, water), ignored -> new Primitive(texture != -1));
         var opacity = opacity(metrics, mode, alpha);
         var paletteRgb = ColourUtils.HSV_TO_RGB[ColourUtils.hslToHsv(hsl) & 0xFFFF];
+        var minimapHsl = unblendedMinimapHsl(tile, face);
 
         for (var vertex : new int[] {tile.faceA()[face], tile.faceB()[face], tile.faceC()[face]}) {
-            var withinX = tile.offsetX()[vertex];
-            var withinZ = tile.offsetY()[vertex];
-            var localX = (x - originTiles) * FINE_PER_TILE + withinX;
-            var localZ = (z - originTiles) * FINE_PER_TILE + withinZ;
-            var lift = tile.offsetLevel() == null ? 0 : tile.offsetLevel()[vertex];
-            var height = ground.averageHeight((x << ground.tileSizeShift) + withinX, (z << ground.tileSizeShift) + withinZ) + lift;
-            var depth = tile.depths() == null ? 0 : tile.depths()[vertex];
-            var towardsWater = tile.water().depth() == 0 ? 0 : Math.clamp(depth * 255L / tile.water().depth(), 0, 255);
+            var place = unblendedPlace(x, z, tile, vertex);
+            var towardsWater = tile.water().depth() == 0 ? 0 : Math.clamp(place.depth() * 255L / tile.water().depth(), 0, 255);
             var rgb = Static572.lerpRgb(tile.water().colour(), Static732.scaleRgb(paletteRgb, ClientMapSquareReader.FULL_LIGHT), towardsWater);
-            var normal = normal(x, z, withinX, withinZ);
-            var u = texture == -1 ? 0.0F : textureCoordinate(worldXTiles, localX, size);
-            var v = texture == -1 ? 0.0F : textureCoordinate(worldZTiles, localZ, size);
-            addCorner(primitive, new Corner(localX, height, localZ, normal[0], normal[1], normal[2], rgb & 0xFFFFFF,
-                hsl & 0xFFFF, depth, opacity, u, v));
+            var normal = normal(x, z, tile.offsetX()[vertex], tile.offsetY()[vertex]);
+            var u = texture == -1 ? 0.0F : textureCoordinate(worldXTiles, place.localX(), size);
+            var v = texture == -1 ? 0.0F : textureCoordinate(worldZTiles, place.localZ(), size);
+            addCorner(primitive, new Corner(place.localX(), place.height(), place.localZ(), normal[0], normal[1], normal[2],
+                rgb & 0xFFFFFF, hsl & 0xFFFF, minimapHsl & 0xFFFF, place.depth(), opacity, u, v));
         }
     }
 
@@ -311,11 +377,8 @@ public final class GroundToGltf {
         var primitive = primitives.computeIfAbsent(key, ignored -> new Primitive(texture != -1));
         var opacity = opacity(metrics(texture), mode, alpha);
         var depths = colours.waterDepths(x, z);
-        var hsls = colours.hsl(x, z);
-        if (hsls == null || hsls.length != tile.vertexCount) {
-            throw new IllegalStateException("Tile " + x + "," + z + " has no HSL colour for each of its " + tile.vertexCount
-                + " vertices.");
-        }
+        var hsls = hsls(x, z, tile);
+        var minimapHsls = colours.minimapHsl(x, z);
 
         for (var corner = 0; corner < weights.length; corner++) {
             var vertex = a + corner;
@@ -327,8 +390,37 @@ public final class GroundToGltf {
 
             var depth = depths == null ? 0 : depths[vertex];
             var described = new Corner(localX, tile.verticesY[vertex], localZ, normal[0], normal[1], normal[2],
-                tile.vertexColours[vertex] & 0xFFFFFF, hsls[vertex] & 0xFFFF, depth, opacity * weights[corner], u, v);
+                tile.vertexColours[vertex] & 0xFFFFFF, hsls[vertex] & 0xFFFF, minimapHsls[vertex] & 0xFFFF, depth,
+                opacity * weights[corner], u, v);
             addCorner(primitive, described);
+        }
+    }
+
+    private int[] hsls(int x, int z, JavaGenericBlendedTile tile) {
+        var hsls = colours.hsl(x, z);
+        if (hsls == null || hsls.length != tile.vertexCount) {
+            throw new IllegalStateException("Tile " + x + "," + z + " has no HSL colour for each of its " + tile.vertexCount
+                + " vertices.");
+        }
+        return hsls;
+    }
+
+    /**
+     * Writes one face of a blended tile whose first corner has no colour, which the scene leaves
+     * out, for the minimap alone: untextured, opaque, each corner in the colours it holds.
+     */
+    private void addMinimapOnlyFace(int x, int z, JavaGenericBlendedTile tile, int a) {
+        var depths = colours.waterDepths(x, z);
+        var hsls = hsls(x, z, tile);
+        var minimapHsls = colours.minimapHsl(x, z);
+        for (var vertex = a; vertex < a + 3; vertex++) {
+            var localX = (x - originTiles) * FINE_PER_TILE + tile.verticesX[vertex];
+            var localZ = (z - originTiles) * FINE_PER_TILE + tile.verticesZ[vertex];
+            var normal = normal(x, z, tile.verticesX[vertex], tile.verticesZ[vertex]);
+            var depth = depths == null ? 0 : depths[vertex];
+            addCorner(minimapOnly, new Corner(localX, tile.verticesY[vertex], localZ, normal[0], normal[1], normal[2],
+                tile.vertexColours[vertex] & 0xFFFFFF, hsls[vertex] & 0xFFFF, minimapHsls[vertex] & 0xFFFF, depth, 1.0F,
+                0.0F, 0.0F));
         }
     }
 
@@ -428,12 +520,16 @@ public final class GroundToGltf {
         return new float[] {vector[0] / length, vector[1] / length, vector[2] / length};
     }
 
-    private void writePrimitive(PrimitiveKey key, Primitive primitive) {
+    private static void writePrimitive(GltfBuilder gltf, GltfMaterials materials, PrimitiveKey key, Primitive primitive) {
         var attributes = new LinkedHashMap<String, Integer>();
         attributes.put("POSITION", gltf.attribute(primitive.positions.toArray(), 3, "VEC3", true));
         attributes.put("NORMAL", gltf.attribute(primitive.normals.toArray(), 3, "VEC3", false));
         attributes.put("COLOR_0", gltf.attribute(primitive.colours.toArray(), 4, "VEC4", false));
         attributes.put("_HSL", gltf.wholeAttribute(primitive.hsls.stream().mapToInt(Integer::intValue).toArray(), 4, "VEC4"));
+        if (!primitive.minimapHsls.equals(primitive.hsls)) {
+            attributes.put("_MINIMAP_HSL", gltf.wholeAttribute(
+                primitive.minimapHsls.stream().mapToInt(Integer::intValue).toArray(), 4, "VEC4"));
+        }
         attributes.put("_WATER_DEPTH", gltf.attribute(primitive.waterDepths.toArray(), 1, "SCALAR", false));
         if (primitive.textured) {
             attributes.put("TEXCOORD_0", gltf.attribute(primitive.uvs.toArray(), 2, "VEC2", false));
@@ -446,6 +542,12 @@ public final class GroundToGltf {
 
     private record PrimitiveKey(int texture, GltfMaterials.AlphaMode mode, RecordingGround.Water water) {
     }
+
+    /**
+     * The material of the faces drawn on the minimap alone, which is the ground's untextured one.
+     */
+    private static final PrimitiveKey MINIMAP_ONLY_KEY =
+        new PrimitiveKey(-1, GltfMaterials.AlphaMode.OPAQUE, RecordingGround.Water.NONE);
 
     /**
      * What a corner of a face is made of: a texture, and the size the floor type gives it.
@@ -463,10 +565,13 @@ public final class GroundToGltf {
      * surface.
      */
     private record Corner(int x, int y, int z, float normalX, float normalY, float normalZ, int rgb, int hsl,
-                          int waterDepth, float opacity, float u, float v) {
+                          int minimapHsl, int waterDepth, float opacity, float u, float v) {
     }
 
-    private static final class Primitive {
+    /**
+     * The faces of a level that share a material, as they are gathered.
+     */
+    static final class Primitive {
 
         private final boolean textured;
         private final FloatList positions = new FloatList();
@@ -474,6 +579,7 @@ public final class GroundToGltf {
         private final FloatList colours = new FloatList();
         private final FloatList uvs = new FloatList();
         private final List<Integer> hsls = new ArrayList<>();
+        private final List<Integer> minimapHsls = new ArrayList<>();
         private final FloatList waterDepths = new FloatList();
         private final Map<Corner, Integer> numbers = new HashMap<>();
         private final List<Integer> indices = new ArrayList<>();
@@ -498,6 +604,10 @@ public final class GroundToGltf {
             hsls.add(corner.hsl() >> 7 & 0x7);
             hsls.add(corner.hsl() & 0x7F);
             hsls.add(0);
+            minimapHsls.add(corner.minimapHsl() >> 10 & 0x3F);
+            minimapHsls.add(corner.minimapHsl() >> 7 & 0x7);
+            minimapHsls.add(corner.minimapHsl() & 0x7F);
+            minimapHsls.add(0);
             waterDepths.add(corner.waterDepth());
 
             colours.add(Srgb.toLinear(corner.rgb() >> 16 & 0xFF));

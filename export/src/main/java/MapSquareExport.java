@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -147,50 +146,65 @@ public final class MapSquareExport {
     }
 
     /**
-     * The nodes of a map square's ground as it was built, blended or not: one a level, and the
-     * bed under its water where it has one. The unblended ground's nodes are named for it.
+     * The nodes of a map square's ground as it was built, blended or not: one a level, each
+     * followed by the faces of the level the minimap alone draws where it has any, and the bed
+     * under its water where it has one. The unblended ground's nodes are named for it.
      */
     private static List<Integer> grounds(GltfBuilder gltf, GltfMaterials materials,
                                          ClientMapSquareReader.MapSquare square, boolean blended) {
         var suffix = blended ? "" : " unblended";
         var nodes = new ArrayList<Integer>();
         for (var level = 0; level < ClientMapSquareReader.LEVELS; level++) {
-            terrain(gltf, materials, square, square.grounds().get(level), square.colours().get(level),
-                "terrain level " + level + suffix, level, false, blended).ifPresent(nodes::add);
+            nodes.addAll(terrain(gltf, materials, square, square.grounds().get(level), square.colours().get(level),
+                "terrain level " + level + suffix, level, false, blended));
         }
         if (square.underwater() instanceof ClientMapSquareReader.Underwater.Bed bed) {
-            terrain(gltf, materials, square, bed.ground(), bed.colours(), "underwater bed" + suffix, 0, true, blended)
-                .ifPresent(nodes::add);
+            nodes.addAll(terrain(gltf, materials, square, bed.ground(), bed.colours(), "underwater bed" + suffix, 0, true,
+                blended));
         }
         return List.copyOf(nodes);
     }
 
     /**
-     * One node wearing the ground of one level, or nothing where the map square has no tile on it,
-     * marked as blended or not, so that a reader draws one or the other.
+     * The nodes wearing the ground of one level, none where the map square has no tile on it,
+     * marked as blended or not, so that a reader draws one or the other: the level's own, and a
+     * node named for the minimap where the level has faces the minimap alone draws, whose
+     * {@code extras} say {@code minimapOnly}, so that a reader draws it on the minimap and nowhere
+     * else.
      */
-    private static Optional<Integer> terrain(GltfBuilder gltf, GltfMaterials materials,
-                                             ClientMapSquareReader.MapSquare square, JavaGround ground,
-                                             RecordingGround colours, String name, int level, boolean underwater,
-                                             boolean blended) {
+    private static List<Integer> terrain(GltfBuilder gltf, GltfMaterials materials,
+                                         ClientMapSquareReader.MapSquare square, JavaGround ground,
+                                         RecordingGround colours, String name, int level, boolean underwater,
+                                         boolean blended) {
         var result = GroundToGltf.convertInto(gltf, materials, ground, colours, underwater, ClientMapSquareReader.ORIGIN_TILES,
             square.x() * ClientMapSquareReader.TILES_ACROSS, square.z() * ClientMapSquareReader.TILES_ACROSS);
-        if (gltf.empty()) {
-            return Optional.empty();
+        var nodes = new ArrayList<Integer>();
+        if (!gltf.empty()) {
+            var node = new LinkedHashMap<String, Object>();
+            node.put("name", name);
+            node.put("mesh", gltf.mesh(name));
+            node.put("extras", Map.of("level", level, "tiles", result.tiles(), "underwater", underwater, "blended", blended));
+            nodes.add(gltf.node(node));
+
+            System.out.println("  " + name + ": " + result.tiles() + " tiles, " + result.faces() + " faces in "
+                + result.primitives() + " primitives");
+            result.layered().forEach((layers, count) -> System.out.println("    " + count + " faces of " + layers
+                + " textures written as " + layers + " layers"));
+            result.skipped().forEach((reason, count) -> System.out.println("    " + count + " faces left out, " + reason));
+            result.approximated().forEach((reason, count) -> System.out.println("    " + count + " faces approximated, " + reason));
         }
 
-        var node = new LinkedHashMap<String, Object>();
-        node.put("name", name);
-        node.put("mesh", gltf.mesh(name));
-        node.put("extras", Map.of("level", level, "tiles", result.tiles(), "underwater", underwater, "blended", blended));
-
-        System.out.println("  " + name + ": " + result.tiles() + " tiles, " + result.faces() + " faces in "
-            + result.primitives() + " primitives");
-        result.layered().forEach((layers, count) -> System.out.println("    " + count + " faces of " + layers
-            + " textures written as " + layers + " layers"));
-        result.skipped().forEach((reason, count) -> System.out.println("    " + count + " faces left out, " + reason));
-        result.approximated().forEach((reason, count) -> System.out.println("    " + count + " faces approximated, " + reason));
-        return Optional.of(gltf.node(node));
+        GroundToGltf.writeMinimapOnlyInto(gltf, materials, result);
+        if (!gltf.empty()) {
+            var minimapName = name + " minimap";
+            var node = new LinkedHashMap<String, Object>();
+            node.put("name", minimapName);
+            node.put("mesh", gltf.mesh(minimapName));
+            node.put("extras", Map.of("level", level, "blended", blended, "minimapOnly", true));
+            nodes.add(gltf.node(node));
+            System.out.println("  " + minimapName + ": " + result.minimapOnlyFaces() + " faces drawn on the minimap alone");
+        }
+        return List.copyOf(nodes);
     }
 
     /**

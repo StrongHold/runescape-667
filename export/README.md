@@ -466,7 +466,8 @@ point within a tile blends the normals of its corners as the client blends their
 texture coordinates are the client's too: where a corner is in the world over the size the floor
 type gives its texture, so a texture runs on from tile to tile, and from one map square to the next.
 
-A face the rasteriser skips because its first corner has no colour is left out. Where the corners
+A face the rasteriser skips because its first corner has no colour is left out of the level's
+node, as the scene never draws it. Where the corners
 of a face name different textures, the rasteriser blends them across the face, each weighted by
 how near its corner a pixel is. glTF has no way to say that, so such a face is written as layers:
 the first corner's texture, and over it each other texture, blended in by an alpha that is 1 at
@@ -489,6 +490,26 @@ builds it beneath the land, against the land's heights. Its ground is written as
 Each ground node's `extras` give its `level`, how many `tiles` it holds, whether it is
 `underwater`, and whether it is `blended`.
 
+### The ground on the minimap
+
+The GL ground draws its minimap from the vertex buffer it builds for the scene, every face of
+every tile, with no texture (`GlGround.drawMinimap`). Each vertex there has the colour its overlay
+blends towards (`Static718.blendColour`: the overlay's blend colour, else its texture's average
+colour, else its colour) where the terrain hands such colours over and that differs from the
+vertex's own colour, and else its own (`GlGround`). So the minimap of a floor of no colour of its
+own, which hides the ground under a location, shows the colour it blends towards: the blue of the
+pools of an oasis, for one. The scene never draws such a face.
+
+Each vertex of a primitive where any vertex's minimap colour differs from its own has that colour
+as `_MINIMAP_HSL`, four unsigned bytes as `_HSL`; a primitive with none of them has no
+`_MINIMAP_HSL`, and its minimap colour is its `_HSL`. The faces of the land that the scene leaves
+out for want of a colour, blended or not, are written after their level's node in a node of their
+own, named as it with ` minimap` after the name, whose `extras` give the `level`, whether it is
+`blended`, and `minimapOnly` true. Its one primitive is untextured and opaque, each corner with the
+colours it holds, `COLOR_0` black and `_HSL` of no colour where it has none, and its
+`_MINIMAP_HSL`. An engine draws such a node on its minimap alone. The bed under the water has
+none, as the minimap never draws it.
+
 ### The ground with ground blending off
 
 The player's ground blending option (`ClientOptions.groundBlending`) decides how `Terrain.load`
@@ -496,9 +517,10 @@ hands the tiles over. With it on, as above, each corner of a tile takes its colo
 around it, so colours and textures fade from tile to tile (`Terrain.loadBlended`). With it off,
 each face of a tile is in one colour, the tile's own smoothed underlay colour or its overlay's
 colour, and its texture stops at the tile's edge (`Terrain.loadUnblended`), which gives the hard
-edged tiles of the original look. A face whose floor has no colour of its own is left out, though
-it has one to blend towards, as the GL ground leaves it out (`GlGround.U`): such a floor marks a
-hole that a location fills. The map square is read a second time with the option off, and
+edged tiles of the original look. A face whose floor has no colour of its own is left out of the
+level's node, though it has one to blend towards, as the GL ground leaves it out of the scene
+(`GlGround.U`): such a floor marks a hole that a location fills. The minimap draws it, as above,
+and the unblended ground's faces have their minimap colours as the blended ground's do. The map square is read a second time with the option off, and
 that ground is written beside the blended one, in nodes named as the blended ones with
 ` unblended` after the name, whose `extras` have `blended` false. An engine draws the blended
 nodes or the unblended ones, never both. Every vertex of an unblended face has the face's HSL as

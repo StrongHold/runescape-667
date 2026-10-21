@@ -20,6 +20,7 @@ public final class RecordingGround extends Ground {
 
     private final Ground real;
     private final Map<Long, int[]> hslByTile = new HashMap<>();
+    private final Map<Long, int[]> minimapHslByTile = new HashMap<>();
     private final Map<Long, int[]> depthsByTile = new HashMap<>();
     private final Map<Long, Water> waterByTile = new HashMap<>();
     private final Map<Long, UnblendedTile> unblendedByTile = new HashMap<>();
@@ -64,6 +65,18 @@ public final class RecordingGround extends Ground {
     }
 
     /**
+     * The HSL colour the GL ground gives each vertex of a tile in its vertex buffer, which its
+     * minimap draws ({@code GlGround.drawMinimap}): the colour the vertex's overlay blends towards
+     * where the terrain hands such colours over, else its own. Where the two differ the GL ground
+     * fills the buffer from the colour blended towards ({@code GlGround}), and a vertex of no colour
+     * of its own has one there. In the ground's order, or nothing for a tile the terrain never
+     * handed over.
+     */
+    public int[] minimapHsl(int x, int z) {
+        return minimapHslByTile.get(key(x, z));
+    }
+
+    /**
      * How far under the water's surface each vertex of a tile lies, in the client's units, in the
      * ground's order, or nothing for a tile the terrain gave no depths.
      */
@@ -98,6 +111,7 @@ public final class RecordingGround extends Ground {
                   int[] blendedColours, int[] overlayBlendColours, int[] blendedTextures, int[] blendedSizes,
                   int waterColour, int waterDepth, int waterBias, boolean allowShadow) {
         hslByTile.put(key(x, z), blendedColours.clone());
+        minimapHslByTile.put(key(x, z), overlayBlendColours == null ? blendedColours.clone() : overlayBlendColours.clone());
         if (waterDepths != null) {
             depthsByTile.put(key(x, z), waterDepths.clone());
         }
